@@ -82,9 +82,9 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
               ),
             ),
             const SizedBox(width: 12),
-            const Text(
-              'Advertisement Management',
-              style: TextStyle(
+            Text(
+              'admin_ad_management_title'.tr(),
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
@@ -193,10 +193,10 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
 
   Widget _buildFilterTabs() {
     final filters = [
-      'All',
-      'Pending Review',
-      'Flagged',
-      'Reports',
+      'admin_ad_filter_all'.tr(),
+      'admin_ad_filter_pending_review'.tr(),
+      'admin_ad_filter_flagged'.tr(),
+      'admin_ad_filter_reports'.tr(),
     ];
 
     return SingleChildScrollView(
@@ -251,10 +251,10 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
         .toList();
 
     if (pendingAds.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
-          'No ads pending review',
-          style: TextStyle(color: Colors.grey),
+          'admin_ad_empty_pending'.tr(),
+          style: const TextStyle(color: Colors.grey),
         ),
       );
     }
@@ -273,10 +273,10 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
         .toList();
 
     if (flaggedAds.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
-          'No flagged ads',
-          style: TextStyle(color: Colors.grey),
+          'admin_ad_empty_flagged'.tr(),
+          style: const TextStyle(color: Colors.grey),
         ),
       );
     }
@@ -293,8 +293,8 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
     if (_pendingReports.isEmpty) {
       return const Center(
         child: Text(
-          'No pending reports',
-          style: TextStyle(color: Colors.grey),
+          'admin_ad_empty_reports'.tr(),
+          style: const TextStyle(color: Colors.grey),
         ),
       );
     }
@@ -421,7 +421,7 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
               IconButton(
                 onPressed: () => _viewAdDetails(ad),
                 icon: const Icon(Icons.visibility, color: Colors.blue),
-                tooltip: 'View Details',
+                tooltip: 'admin_ad_tooltip_view_details'.tr(),
               ),
             ],
           ),
@@ -486,7 +486,7 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
                 child: OutlinedButton(
                   onPressed: () =>
                       _reviewReport(report, AdReportStatus.dismissed),
-                  child: const Text('Dismiss'),
+                  child: Text('admin_ad_button_dismiss'.tr()),
                 ),
               ),
               const SizedBox(width: 8),
@@ -497,9 +497,9 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red,
                   ),
-                  child: const Text(
-                    'Take Action',
-                    style: TextStyle(color: Colors.white),
+                  child: Text(
+                    'admin_ad_button_take_action'.tr(),
+                    style: const TextStyle(color: Colors.white),
                   ),
                 ),
               ),
@@ -580,7 +580,7 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
       // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Ad "${ad.title}" approved successfully'),
+          content: Text('admin_ad_success_approved'.tr(namedArgs: {'title': ad.title})),
           backgroundColor: Colors.green,
         ),
       );
@@ -588,7 +588,7 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
       // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to approve ad: $e'),
+          content: Text('admin_ad_error_approve'.tr(namedArgs: {'error': e.toString()})),
           backgroundColor: Colors.red,
         ),
       );
@@ -614,7 +614,7 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
         // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Ad "${ad.title}" rejected'),
+            content: Text('admin_ad_success_rejected'.tr(namedArgs: {'title': ad.title})),
             backgroundColor: Colors.red,
           ),
         );
@@ -622,7 +622,7 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
         // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to reject ad: $e'),
+            content: Text('admin_ad_error_reject'.tr(namedArgs: {'error': e.toString()})),
             backgroundColor: Colors.red,
           ),
         );
@@ -638,8 +638,8 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
         newStatus: status,
         adminId: 'admin', // This should be the current admin's ID
         adminNotes: status == AdReportStatus.actionTaken
-            ? 'Action taken by admin'
-            : 'Report dismissed by admin',
+            ? 'admin_ad_report_action_taken'.tr()
+            : 'admin_ad_report_dismissed'.tr(),
       );
 
       _loadData(); // Refresh data
@@ -647,7 +647,7 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
       // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Report ${status.displayName.toLowerCase()}'),
+          content: Text('admin_ad_report_reviewed'.tr(namedArgs: {'status': status.displayName.toLowerCase()})),
           backgroundColor:
               status == AdReportStatus.actionTaken ? Colors.red : Colors.green,
         ),
@@ -656,7 +656,7 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
       // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to review report: $e'),
+          content: Text('admin_ad_error_review_report'.tr(namedArgs: {'error': e.toString()})),
           backgroundColor: Colors.red,
         ),
       );
@@ -716,7 +716,7 @@ class _RejectAdDialogState extends State<_RejectAdDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text('admin_ad_button_cancel'.tr()),
         ),
         ElevatedButton(
           onPressed: () {
@@ -725,7 +725,7 @@ class _RejectAdDialogState extends State<_RejectAdDialog> {
             }
           },
           style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-          child: const Text('Reject', style: TextStyle(color: Colors.white)),
+          child: Text('admin_ad_button_reject'.tr(), style: TextStyle(color: Colors.white)),
         ),
       ],
     );

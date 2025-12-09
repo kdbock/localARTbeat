@@ -66,7 +66,7 @@ class AdminDrawer extends StatelessWidget {
                         SizedBox(height: isCompact ? 4 : 8),
                         // Title
                         Text(
-                          'Admin Panel',
+                          'admin_drawer_title_panel'.tr(),
                           style: TextStyle(
                             color: _iconTextColor,
                             fontFamily: 'Limelight',
@@ -78,7 +78,7 @@ class AdminDrawer extends StatelessWidget {
                         if (!isCompact) ...[
                           const SizedBox(height: 2),
                           Text(
-                            'Management Console',
+                            'admin_drawer_title_console'.tr(),
                             style: TextStyle(
                               color: _iconTextColor.withValues(alpha: 0.8),
                               fontSize: 10,
@@ -102,144 +102,144 @@ class AdminDrawer extends StatelessWidget {
                     _buildDrawerItem(
                       context,
                       icon: Icons.home,
-                      title: 'Artbeat Home',
+                      title: 'admin_drawer_menu_home'.tr(),
                       route: '/dashboard',
-                      subtitle: 'Return to main app',
+                      subtitle: 'admin_drawer_menu_home_subtitle'.tr(),
                     ),
 
                     const Divider(height: 16),
 
                     // Main Admin Dashboard - All-in-One Interface
-                    _buildSectionHeader('Admin Dashboard'),
+                    _buildSectionHeader('admin_drawer_section_dashboard'.tr()),
                     _buildDrawerItem(
                       context,
                       icon: Icons.dashboard,
-                      title: 'Unified Dashboard',
+                      title: 'admin_drawer_menu_unified_dashboard'.tr(),
                       route: '/admin/dashboard',
-                      subtitle: 'All admin functions in one place',
+                      subtitle: 'admin_drawer_menu_unified_dashboard_subtitle'.tr(),
                     ),
 
                     const Divider(height: 16),
 
                     // Business Management Section
-                    _buildSectionHeader('Business Management'),
+                    _buildSectionHeader('admin_drawer_section_business'.tr()),
                     _buildDrawerItem(
                       context,
                       icon: Icons.local_offer,
-                      title: 'Coupon Management',
+                      title: 'admin_drawer_menu_coupons'.tr(),
                       route: '/admin/coupons',
-                      subtitle: 'Create and manage discount coupons',
+                      subtitle: 'admin_drawer_menu_coupons_subtitle'.tr(),
                     ),
                     _buildDrawerItem(
                       context,
                       icon: Icons.payment,
-                      title: 'Payment Management',
+                      title: 'admin_drawer_menu_payments'.tr(),
                       route: '/admin/payments',
-                      subtitle: 'Transaction & refund management',
+                      subtitle: 'admin_drawer_menu_payments_subtitle'.tr(),
                     ),
 
                     const Divider(height: 16),
 
                     // Content Management Section
-                    _buildSectionHeader('Content Management'),
+                    _buildSectionHeader('admin_drawer_section_content'.tr()),
                     _buildDrawerItem(
                       context,
                       icon: Icons.content_paste,
-                      title: 'Content Moderation',
+                      title: 'admin_drawer_menu_content_moderation'.tr(),
                       route:
                           '/admin/dashboard', // Unified dashboard handles content moderation
-                      subtitle: 'Review and moderate user content',
+                      subtitle: 'admin_drawer_menu_content_moderation_subtitle'.tr(),
                     ),
                     _buildDrawerItem(
                       context,
                       icon: Icons.photo_library,
-                      title: 'Capture Moderation',
+                      title: 'admin_drawer_menu_capture_moderation'.tr(),
                       route: '/capture/admin/moderation',
-                      subtitle: 'Moderate captures and manage reports',
+                      subtitle: 'admin_drawer_menu_capture_moderation_subtitle'.tr(),
                     ),
                     _buildDrawerItem(
                       context,
                       icon: Icons.route,
-                      title: 'Art Walk Moderation',
+                      title: 'admin_drawer_menu_artwalk_moderation'.tr(),
                       route: '/artwalk/admin/moderation',
-                      subtitle: 'Moderate art walks and manage reports',
+                      subtitle: 'admin_drawer_menu_artwalk_moderation_subtitle'.tr(),
                     ),
                     _buildDrawerItem(
                       context,
                       icon: Icons.people,
-                      title: 'User Management',
+                      title: 'admin_drawer_menu_user_management'.tr(),
                       route:
                           '/admin/dashboard', // Unified dashboard handles user management
-                      subtitle: 'Manage user accounts and profiles',
+                      subtitle: 'admin_drawer_menu_user_management_subtitle'.tr(),
                     ),
 
                     const Divider(height: 16),
 
                     // System Management Section
-                    _buildSectionHeader('System Management'),
+                    _buildSectionHeader('admin_drawer_section_system'.tr()),
                     _buildDrawerItem(
                       context,
                       icon: Icons.settings,
-                      title: 'Admin Settings',
+                      title: 'admin_drawer_menu_admin_settings'.tr(),
                       route: '/admin/settings',
-                      subtitle: 'System configuration',
+                      subtitle: 'admin_drawer_menu_admin_settings_subtitle'.tr(),
                     ),
                     _buildDrawerItem(
                       context,
                       icon: Icons.security,
-                      title: 'Security Center',
+                      title: 'admin_drawer_menu_security_center'.tr(),
                       route: '/admin/security',
-                      subtitle: 'Security monitoring and controls',
+                      subtitle: 'admin_drawer_menu_security_center_subtitle'.tr(),
                     ),
                     _buildDrawerItem(
                       context,
                       icon: Icons.monitor,
-                      title: 'System Monitoring',
+                      title: 'admin_drawer_menu_system_monitoring'.tr(),
                       route: '/admin/monitoring',
-                      subtitle: 'Real-time system metrics',
+                      subtitle: 'admin_drawer_menu_system_monitoring_subtitle'.tr(),
                     ),
                     _buildDrawerItem(
                       context,
                       icon: Icons.sync_alt,
-                      title: 'Data Migration',
+                      title: 'admin_drawer_menu_data_migration'.tr(),
                       route: '/admin/migration',
-                      subtitle: 'Run database migrations',
+                      subtitle: 'admin_drawer_menu_data_migration_subtitle'.tr(),
                     ),
 
                     const Divider(height: 16),
 
                     // Developer Tools Section
-                    _buildSectionHeader('Developer Tools'),
+                    _buildSectionHeader('admin_drawer_section_developer'.tr()),
                     _buildDrawerItem(
                       context,
                       icon: Icons.upload_file,
-                      title: 'Data Upload Tools',
+                      title: 'admin_drawer_menu_data_upload_tools'.tr(),
                       route: '/dev',
-                      subtitle: 'Bulk upload content and data',
+                      subtitle: 'admin_drawer_menu_data_upload_tools_subtitle'.tr(),
                     ),
                     _buildDrawerItem(
                       context,
                       icon: Icons.feedback,
-                      title: 'Developer Feedback',
+                      title: 'admin_drawer_menu_developer_feedback'.tr(),
                       route: '/developer-feedback-admin',
-                      subtitle: 'View developer feedback and reports',
+                      subtitle: 'admin_drawer_menu_developer_feedback_subtitle'.tr(),
                     ),
                     _buildDrawerItem(
                       context,
                       icon: Icons.admin_panel_settings,
-                      title: 'Admin Upload Tools',
+                      title: 'admin_drawer_menu_admin_upload_tools'.tr(),
                       route: '/dev', // Developer menu has admin upload tools
-                      subtitle: 'Upload users, content, and data',
+                      subtitle: 'admin_drawer_menu_admin_upload_tools_subtitle'.tr(),
                     ),
 
                     const Divider(height: 16),
 
                     // Support & Account Section
-                    _buildSectionHeader('Support & Account'),
+                    _buildSectionHeader('admin_drawer_section_support'.tr()),
                     _buildDrawerItem(
                       context,
                       icon: Icons.logout,
-                      title: 'Logout',
+                      title: 'admin_drawer_menu_logout'.tr(),
                       onTap: () => _handleLogout(context),
                       isDestructive: true,
                     ),
@@ -324,13 +324,13 @@ class AdminDrawer extends StatelessWidget {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Logout'),
+        title: Text('admin_drawer_logout_dialog_title'.tr()),
         content:
-            const Text('Are you sure you want to logout from the admin panel?'),
+            Text('admin_drawer_logout_dialog_content'.tr()),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text('admin_drawer_logout_dialog_cancel'.tr()),
           ),
           TextButton(
             onPressed: () async {
@@ -353,7 +353,7 @@ class AdminDrawer extends StatelessWidget {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Logout failed: $e'),
+                      content: Text('admin_drawer_logout_error'.tr(namedArgs: {'error': e.toString()})),
                       backgroundColor: Colors.red,
                     ),
                   );
@@ -363,7 +363,7 @@ class AdminDrawer extends StatelessWidget {
             style: TextButton.styleFrom(
               foregroundColor: Colors.red,
             ),
-            child: const Text('Logout'),
+            child: Text('admin_drawer_logout_dialog_confirm'.tr()),
           ),
         ],
       ),

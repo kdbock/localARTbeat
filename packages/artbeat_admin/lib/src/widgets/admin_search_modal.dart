@@ -120,8 +120,8 @@ class _AdminSearchModalState extends State<AdminSearchModal>
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                const Text(
-                  'Admin Search',
+                Text(
+                  'admin_search_modal_title'.tr(),
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -142,7 +142,7 @@ class _AdminSearchModalState extends State<AdminSearchModal>
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: 'Search users, content, transactions...',
+                hintText: 'admin_search_modal_hint'.tr(),
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
@@ -203,7 +203,7 @@ class _AdminSearchModalState extends State<AdminSearchModal>
             Icon(Icons.people_outline, size: 64, color: Colors.grey),
             SizedBox(height: 16),
             Text(
-              'No users found',
+              'admin_search_modal_no_users'.tr(),
               style: TextStyle(fontSize: 16, color: Colors.grey),
             ),
           ],
@@ -267,7 +267,7 @@ class _AdminSearchModalState extends State<AdminSearchModal>
             Icon(Icons.content_copy_outlined, size: 64, color: Colors.grey),
             SizedBox(height: 16),
             Text(
-              'No content found',
+              'admin_search_modal_no_content'.tr(),
               style: TextStyle(fontSize: 16, color: Colors.grey),
             ),
           ],
@@ -321,7 +321,7 @@ class _AdminSearchModalState extends State<AdminSearchModal>
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Selected content: ${content.title}'),
+                  content: Text('admin_search_selected_content'.tr(namedArgs: {'title': content.title})),
                 ),
               );
             },
@@ -340,7 +340,7 @@ class _AdminSearchModalState extends State<AdminSearchModal>
             Icon(Icons.receipt_outlined, size: 64, color: Colors.grey),
             SizedBox(height: 16),
             Text(
-              'No transactions found',
+              'admin_search_modal_no_transactions'.tr(),
               style: TextStyle(fontSize: 16, color: Colors.grey),
             ),
           ],
@@ -377,7 +377,7 @@ class _AdminSearchModalState extends State<AdminSearchModal>
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Amount: \$${transaction.amount.toStringAsFixed(2)}'),
+                Text('admin_search_amount'.tr(namedArgs: {'amount': transaction.amount.toStringAsFixed(2)})),
                 Text(
                   'User: ${transaction.userName}',
                   style: const TextStyle(fontSize: 12),
@@ -390,7 +390,7 @@ class _AdminSearchModalState extends State<AdminSearchModal>
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Selected transaction: ${transaction.id}'),
+                  content: Text('admin_search_selected_transaction'.tr(namedArgs: {'id': transaction.id})),
                 ),
               );
             },

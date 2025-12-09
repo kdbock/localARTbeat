@@ -36,7 +36,7 @@ class _CreateCouponDialogState extends State<CreateCouponDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Create New Coupon'),
+      title: Text('admin_coupon_dialog_title_create'.tr()),
       content: SingleChildScrollView(
         child: Form(
           key: _formKey,
@@ -187,7 +187,7 @@ class _CreateCouponDialogState extends State<CreateCouponDialog> {
                           _expiresAt = null;
                         });
                       },
-                      child: const Text('Clear'),
+                      child: Text('admin_coupon_button_clear').tr()),
                     ),
                 ],
               ),
@@ -198,7 +198,7 @@ class _CreateCouponDialogState extends State<CreateCouponDialog> {
       actions: [
         TextButton(
           onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text('admin_coupon_button_cancel'.tr()),
         ),
         ElevatedButton(
           onPressed: _isLoading ? null : _createCoupon,
@@ -208,7 +208,7 @@ class _CreateCouponDialogState extends State<CreateCouponDialog> {
                   height: 20,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Text('Create'),
+              : Text('admin_coupon_button_create'.tr()),
         ),
       ],
     );
@@ -259,13 +259,13 @@ class _CreateCouponDialogState extends State<CreateCouponDialog> {
       if (mounted) {
         Navigator.of(context).pop(true);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Coupon created successfully')),
+          SnackBar(content: Text('admin_coupon_success_created'.tr())),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to create coupon: $e')),
+          SnackBar(content: Text('admin_coupon_error_create'.tr(namedArgs: {'error': e.toString()}))),
         );
       }
     } finally {
@@ -348,7 +348,7 @@ class _EditCouponDialogState extends State<EditCouponDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Edit Coupon'),
+      title: Text('admin_coupon_dialog_title_edit'.tr()),
       content: SingleChildScrollView(
         child: Form(
           key: _formKey,
@@ -456,7 +456,7 @@ class _EditCouponDialogState extends State<EditCouponDialog> {
                           _expiresAt = null;
                         });
                       },
-                      child: const Text('Clear'),
+                      child: Text('admin_coupon_button_clear').tr()),
                     ),
                 ],
               ),
@@ -467,7 +467,7 @@ class _EditCouponDialogState extends State<EditCouponDialog> {
       actions: [
         TextButton(
           onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text('admin_coupon_button_cancel'.tr()),
         ),
         ElevatedButton(
           onPressed: _isLoading ? null : _updateCoupon,
@@ -477,7 +477,7 @@ class _EditCouponDialogState extends State<EditCouponDialog> {
                   height: 20,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Text('Update'),
+              : Text('admin_coupon_button_update'.tr()),
         ),
       ],
     );
@@ -529,13 +529,13 @@ class _EditCouponDialogState extends State<EditCouponDialog> {
       if (mounted) {
         Navigator.of(context).pop(true);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Coupon updated successfully')),
+          SnackBar(content: Text('admin_coupon_success_updated'.tr())),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update coupon: $e')),
+          SnackBar(content: Text('admin_coupon_error_update'.tr(namedArgs: {'error': e.toString()}))),
         );
       }
     } finally {

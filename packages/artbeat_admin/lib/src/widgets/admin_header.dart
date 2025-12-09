@@ -228,7 +228,7 @@ class _AdminHeaderState extends State<AdminHeader> {
             // Menu items for admin package
             ListTile(
               leading: const Icon(Icons.dashboard, color: _headerColor),
-              title: const Text('Admin Dashboard'),
+              title: Text('admin_header_menu_dashboard'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/admin/dashboard');
@@ -236,7 +236,7 @@ class _AdminHeaderState extends State<AdminHeader> {
             ),
             ListTile(
               leading: const Icon(Icons.people, color: _headerColor),
-              title: const Text('User Management'),
+              title: Text('admin_header_menu_user_management'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/admin/user-management');
@@ -244,7 +244,7 @@ class _AdminHeaderState extends State<AdminHeader> {
             ),
             ListTile(
               leading: const Icon(Icons.report, color: _headerColor),
-              title: const Text('Content Review'),
+              title: Text('admin_header_menu_content_review'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/admin/content-management-suite');
@@ -252,7 +252,7 @@ class _AdminHeaderState extends State<AdminHeader> {
             ),
             ListTile(
               leading: const Icon(Icons.analytics, color: _headerColor),
-              title: const Text('Analytics'),
+              title: Text('admin_header_menu_analytics'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/admin/analytics');
