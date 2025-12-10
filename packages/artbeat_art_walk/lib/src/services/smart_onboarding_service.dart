@@ -350,12 +350,12 @@ class _TutorialOverlayState extends State<TutorialOverlay>
                         children: [
                           TextButton(
                             onPressed: _handleDismiss,
-                            child: const Text('Skip'),
+                            child: Text('art_walk_smart_onboarding_service_button_skip'.tr()),
                           ),
                           const SizedBox(width: 8),
                           ElevatedButton(
                             onPressed: _handleComplete,
-                            child: const Text('Got it!'),
+                            child: Text('art_walk_smart_onboarding_service_button_got_it'.tr()),
                           ),
                         ],
                       ),

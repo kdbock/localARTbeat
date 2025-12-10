@@ -72,7 +72,7 @@ class UadminModuleApp extends StatelessWidget {
         // Add module-specific providers here
       ],
       child: MaterialApp(
-        title: 'ARTbeat Uadmin Module',
+        title: 'admin_main_title'.tr(),
         theme: ThemeData(
           primarySwatch: Colors.blue,
           visualDensity: VisualDensity.adaptivePlatformDensity,
@@ -91,27 +91,27 @@ class UadminModuleHome extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('ARTbeat Uadmin Module'),
+        title: Text('admin_main_title'.tr()),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('Uadmin Module Demo',
+            Text('admin_main_demo_title'.tr(),
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
             const SizedBox(height: 20),
-            const Text('Standalone development environment',
+            Text('admin_main_demo_subtitle'.tr(),
                 style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic)),
             const SizedBox(height: 30),
             // Add navigation buttons to module screens here
-            const Text(
-                'Edit this file to add navigation buttons to module screens',
+            Text(
+                'admin_main_demo_description'.tr(),
                 style: TextStyle(color: Colors.grey)),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {},
-              child: const Text('Example Button'),
+              child: Text('admin_main_example_button'.tr()),
             ),
           ],
         ),

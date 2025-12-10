@@ -91,12 +91,12 @@ class _ArtWalkInfoCardState extends State<ArtWalkInfoCard> {
               children: [
                 TextButton(
                   onPressed: _dismissForever,
-                  child: const Text("Don't show again"),
+                  child: Text('art_walk_art_walk_info_card_text_dont_show_again'.tr()),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton(
                   onPressed: widget.onDismiss,
-                  child: const Text('Got it'),
+                  child: Text('art_walk_art_walk_info_card_button_got_it'.tr()),
                 ),
               ],
             ),

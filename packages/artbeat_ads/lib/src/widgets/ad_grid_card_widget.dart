@@ -169,7 +169,7 @@ class _AdGridCardWidgetState extends State<AdGridCardWidget> {
                     const SizedBox(width: 4),
                     // Ad label
                     Chip(
-                      label: const Text('Ad'),
+                      label: Text('ads_ad_grid_text_ad'.tr()),
                       backgroundColor: Colors.black.withValues(alpha: 0.5),
                       labelStyle: const TextStyle(
                         color: Colors.white,

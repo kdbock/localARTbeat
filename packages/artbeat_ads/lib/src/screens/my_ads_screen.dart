@@ -41,7 +41,7 @@ class _MyAdsScreenState extends State<MyAdsScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: Text('ads_my_ads_text_delete'.tr(), style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -118,12 +118,12 @@ class _MyAdsScreenState extends State<MyAdsScreen> {
                   Icon(Icons.ads_click, size: 64, color: Colors.grey[400]),
                   const SizedBox(height: 16),
                   Text(
-                    'No ads yet',
+                    'ads_my_ads_text_no_ads_yet'.tr(),
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Post your first ad to get started',
+                    'ads_my_ads_text_post_first_ad'.tr(),
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ],
@@ -137,7 +137,7 @@ class _MyAdsScreenState extends State<MyAdsScreen> {
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Text(
-                    'Active Ads (${activeAds.length})',
+                    'ads_my_ads_text_active_ads'.tr().replaceAll('{count}', '${activeAds.length}'),
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                 ),
@@ -149,7 +149,7 @@ class _MyAdsScreenState extends State<MyAdsScreen> {
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Text(
-                    'Expired Ads (${expiredAds.length})',
+                    'ads_my_ads_text_expired_ads'.tr().replaceAll('{count}', '${expiredAds.length}'),
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                 ),

@@ -41,7 +41,7 @@ class _LocalArtWalkPreviewWidgetState extends State<LocalArtWalkPreviewWidget> {
               ),
               TextButton(
                 onPressed: widget.onSeeAllPressed,
-                child: const Text('See All'),
+                child: Text('art_walk_local_art_walk_preview_widget_text_see_all'.tr()),
               ),
             ],
           ),

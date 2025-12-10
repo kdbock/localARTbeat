@@ -75,7 +75,7 @@ class _TurnByTurnNavigationWidgetState extends State<TurnByTurnNavigationWidget>
               elevation: 8,
               child: Container(
                 padding: const EdgeInsets.all(16),
-                child: Text('Navigation Error: ${snapshot.error}'),
+                child: Text('art_walk_turn_by_turn_navigation_widget_error_navigation_error'.tr().replaceAll('{error}', snapshot.error.toString())),
               ),
             ),
           );
@@ -93,7 +93,7 @@ class _TurnByTurnNavigationWidgetState extends State<TurnByTurnNavigationWidget>
                   children: [
                     CircularProgressIndicator(),
                     SizedBox(width: 16),
-                    Text('Loading navigation...'),
+                    Text('art_walk_turn_by_turn_navigation_widget_text_loading_navigation'.tr()),
                   ],
                 ),
               ),
@@ -450,7 +450,7 @@ class _TurnByTurnNavigationWidgetState extends State<TurnByTurnNavigationWidget>
                               }
                             : null,
                         icon: const Icon(Icons.skip_previous),
-                        label: const Text('Previous'),
+                        label: Text('art_walk_turn_by_turn_navigation_widget_button_previous'.tr()),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: _isRouteCompleted(update)
                               ? Colors.grey[100]

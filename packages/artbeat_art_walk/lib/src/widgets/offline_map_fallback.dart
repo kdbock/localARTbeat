@@ -101,7 +101,7 @@ class OfflineMapFallback extends StatelessWidget {
                   Navigator.pushNamed(context, '/art-walk/list');
                 },
                 icon: const Icon(Icons.list_alt),
-                label: const Text('View Art Walk List'),
+                label: Text('art_walk_offline_map_fallback_text_view_art_walk_list'.tr()),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 24,
@@ -114,7 +114,7 @@ class OfflineMapFallback extends StatelessWidget {
             OutlinedButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh),
-              label: const Text('Try Again'),
+              label: Text('art_walk_button_try_again'.tr()),
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,

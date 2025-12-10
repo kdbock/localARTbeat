@@ -208,7 +208,7 @@ class _AdCarouselWidgetState extends State<AdCarouselWidget> {
           top: 8,
           right: 8,
           child: Chip(
-            label: const Text('Ad'),
+            label: Text('ads_ad_carousel_text_ad'.tr()),
             backgroundColor: Colors.black.withValues(alpha: 0.5),
             labelStyle: const TextStyle(color: Colors.white, fontSize: 10),
           ),

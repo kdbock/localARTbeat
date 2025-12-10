@@ -158,7 +158,7 @@ class _ArtWalkSearchFilterState extends State<ArtWalkSearchFilter> {
                 TextButton.icon(
                   onPressed: _clearAllFilters,
                   icon: const Icon(Icons.clear, size: 16),
-                  label: const Text('Clear All'),
+                  label: Text('art_walk_button_clear_all'.tr()),
                   style: TextButton.styleFrom(
                     foregroundColor: theme.colorScheme.error,
                     padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -248,16 +248,16 @@ class _ArtWalkSearchFilterState extends State<ArtWalkSearchFilter> {
             child: Column(
               children: [
                 CheckboxListTile(
-                  title: const Text('Accessible'),
-                  subtitle: const Text('Wheelchair accessible walks'),
+                  title: Text('art_walk_art_walk_search_filter_text_accessible'.tr()),
+                  subtitle: Text('art_walk_art_walk_search_filter_text_wheelchair_accessible_walks'.tr()),
                   value: _criteria.isAccessible ?? false,
                   onChanged: (value) => _updateCriteria(isAccessible: value),
                   controlAffinity: ListTileControlAffinity.leading,
                   contentPadding: EdgeInsets.zero,
                 ),
                 CheckboxListTile(
-                  title: const Text('Public Walks Only'),
-                  subtitle: const Text('Show only public art walks'),
+                  title: Text('art_walk_art_walk_search_filter_text_public_walks_only'.tr()),
+                  subtitle: Text('art_walk_art_walk_search_filter_text_show_only_public_art_walks'.tr()),
                   value: _criteria.isPublic ?? false,
                   onChanged: (value) => _updateCriteria(isPublic: value),
                   controlAffinity: ListTileControlAffinity.leading,
@@ -368,19 +368,19 @@ class _ArtWalkSearchFilterState extends State<ArtWalkSearchFilter> {
 
                 Row(
                   children: [
-                    const Text('Order: '),
+                    Text('art_walk_text_order'.tr()),
                     const SizedBox(width: 8),
                     Expanded(
                       child: SegmentedButton<bool>(
                         segments: const [
                           ButtonSegment<bool>(
                             value: false,
-                            label: Text('Ascending'),
+                            label: Text('art_walk_text_ascending'.tr()),
                             icon: Icon(Icons.arrow_upward, size: 16),
                           ),
                           ButtonSegment<bool>(
                             value: true,
-                            label: Text('Descending'),
+                            label: Text('art_walk_text_descending'.tr()),
                             icon: Icon(Icons.arrow_downward, size: 16),
                           ),
                         ],

@@ -4,7 +4,7 @@ import '../services/migration_service.dart';
 
 /// Screen for managing data migration to standardized moderation status
 class MigrationScreen extends StatefulWidget {
-  const MigrationScreen({super.key});
+  MigrationScreen({super.key});
 
   @override
   State<MigrationScreen> createState() => _MigrationScreenState();
@@ -39,7 +39,7 @@ class _MigrationScreenState extends State<MigrationScreen> {
       });
     } catch (e) {
       setState(() {
-        _errorMessage = 'Failed to check migration status: $e';
+        _errorMessage = 'admin_migration_error_check_status_failed'.tr(namedArgs: {'error': e.toString()});
         _isLoading = false;
       });
     }
@@ -47,8 +47,8 @@ class _MigrationScreenState extends State<MigrationScreen> {
 
   Future<void> _runMigration() async {
     final confirmed = await _showConfirmationDialog(
-      'Run Migration',
-      'This will add standardized moderation status fields to all content collections. This operation cannot be undone easily. Continue?',
+      'admin_migration_dialog_run_migration_title'.tr(),
+      'admin_migration_dialog_run_migration_message'.tr(),
     );
 
     if (!confirmed) return;
@@ -62,7 +62,7 @@ class _MigrationScreenState extends State<MigrationScreen> {
     try {
       await _migrationService.migrateAllCollections();
       setState(() {
-        _successMessage = 'Migration completed successfully!';
+        _successMessage = 'admin_migration_success_completed'.tr();
         _isMigrating = false;
       });
 
@@ -70,7 +70,7 @@ class _MigrationScreenState extends State<MigrationScreen> {
       await _checkMigrationStatus();
     } catch (e) {
       setState(() {
-        _errorMessage = 'Migration failed: $e';
+        _errorMessage = 'admin_migration_error_failed'.tr(namedArgs: {'error': e.toString()});
         _isMigrating = false;
       });
     }
@@ -78,8 +78,8 @@ class _MigrationScreenState extends State<MigrationScreen> {
 
   Future<void> _rollbackMigration() async {
     final confirmed = await _showConfirmationDialog(
-      'Rollback Migration',
-      'This will remove the new moderation status fields from all collections. This action cannot be undone. Continue?',
+      'admin_migration_dialog_rollback_title'.tr(),
+      'admin_migration_dialog_rollback_message'.tr(),
     );
 
     if (!confirmed) return;
@@ -93,7 +93,7 @@ class _MigrationScreenState extends State<MigrationScreen> {
     try {
       await _migrationService.rollbackMigration();
       setState(() {
-        _successMessage = 'Rollback completed successfully!';
+        _successMessage = 'admin_migration_success_rollback_completed'.tr();
         _isMigrating = false;
       });
 
@@ -101,7 +101,7 @@ class _MigrationScreenState extends State<MigrationScreen> {
       await _checkMigrationStatus();
     } catch (e) {
       setState(() {
-        _errorMessage = 'Rollback failed: $e';
+        _errorMessage = 'admin_migration_error_rollback_failed'.tr(namedArgs: {'error': e.toString()});
         _isMigrating = false;
       });
     }
@@ -109,9 +109,8 @@ class _MigrationScreenState extends State<MigrationScreen> {
 
   Future<void> _migrateGeoFields() async {
     final confirmed = await _showConfirmationDialog(
-      'Migrate Geo Fields',
-      'This will add geo fields (geohash and geopoint) to all captures with locations. '
-          'This is required for instant discovery to show user captures. Continue?',
+      'admin_migration_dialog_geo_title'.tr(),
+      'admin_migration_dialog_geo_message'.tr(),
     );
 
     if (!confirmed) return;
@@ -125,12 +124,12 @@ class _MigrationScreenState extends State<MigrationScreen> {
     try {
       await _migrationService.migrateCapturesGeoField();
       setState(() {
-        _successMessage = 'Geo field migration completed successfully!';
+        _successMessage = 'admin_migration_success_geo_completed'.tr();
         _isMigrating = false;
       });
     } catch (e) {
       setState(() {
-        _errorMessage = 'Geo field migration failed: $e';
+        _errorMessage = 'admin_migration_error_geo_failed'.tr(namedArgs: {'error': e.toString()});
         _isMigrating = false;
       });
     }
@@ -173,7 +172,7 @@ class _MigrationScreenState extends State<MigrationScreen> {
             onPressed:
                 _isLoading || _isMigrating ? null : _checkMigrationStatus,
             icon: const Icon(Icons.refresh),
-            tooltip: 'Refresh Status',
+            tooltip: 'admin_migration_tooltip_refresh'.tr(),
           ),
         ],
       ),
@@ -185,16 +184,16 @@ class _MigrationScreenState extends State<MigrationScreen> {
             // Header
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Moderation Status Migration',
+                      'admin_migration_section_title'.tr(),
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                     const SizedBox(height: 8),
-                    const Text(
+                    Text(
                       'This migration adds standardized moderation status fields to all content collections (posts, comments, artwork, captures, ads). '
                       'Existing content will be marked as "approved" by default.',
                     ),
@@ -210,7 +209,7 @@ class _MigrationScreenState extends State<MigrationScreen> {
               Card(
                 color: Colors.red[50],
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: EdgeInsets.all(16.0),
                   child: Row(
                     children: [
                       Icon(Icons.error, color: Colors.red[700]),
@@ -230,7 +229,7 @@ class _MigrationScreenState extends State<MigrationScreen> {
               Card(
                 color: Colors.green[50],
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: EdgeInsets.all(16.0),
                   child: Row(
                     children: [
                       Icon(Icons.check_circle, color: Colors.green[700]),
@@ -246,7 +245,7 @@ class _MigrationScreenState extends State<MigrationScreen> {
                 ),
               ),
 
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
 
             // Migration Status
             Expanded(
@@ -267,12 +266,12 @@ class _MigrationScreenState extends State<MigrationScreen> {
                     onPressed:
                         _isMigrating || _isLoading ? null : _runMigration,
                     icon: _isMigrating
-                        ? const SizedBox(
+                        ? SizedBox(
                             width: 16,
                             height: 16,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Icon(Icons.play_arrow),
+                        : Icon(Icons.play_arrow),
                     label:
                         Text(_isMigrating ? 'Migrating...' : 'Run Migration'),
                     style: ElevatedButton.styleFrom(
@@ -287,7 +286,7 @@ class _MigrationScreenState extends State<MigrationScreen> {
                   child: ElevatedButton.icon(
                     onPressed:
                         _isMigrating || _isLoading ? null : _rollbackMigration,
-                    icon: const Icon(Icons.undo),
+                    icon: Icon(Icons.undo),
                     label: Text('admin_migration_text_rollback'.tr()),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,

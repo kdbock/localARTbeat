@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_artwork/artbeat_artwork.dart' as artwork_pkg;
 import '../services/admin_artwork_management_service.dart';
 
 class AdminArtworkManagementScreen extends StatefulWidget {
-  const AdminArtworkManagementScreen({super.key});
+  AdminArtworkManagementScreen({super.key});
 
   @override
   State<AdminArtworkManagementScreen> createState() =>
@@ -49,7 +50,7 @@ class _AdminArtworkManagementScreenState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading artwork: $e')),
+          SnackBar(content: Text('admin_admin_artwork_management_error_error_loading_artwork'.tr())),
         );
       }
     } finally {
@@ -69,7 +70,7 @@ class _AdminArtworkManagementScreenState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading details: $e')),
+          SnackBar(content: Text('admin_admin_artwork_management_error_error_loading_details'.tr())),
         );
       }
     }
@@ -86,7 +87,7 @@ class _AdminArtworkManagementScreenState
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Artwork status updated to $newStatus')),
+          SnackBar(content: Text('admin_admin_artwork_management_success_artwork_status_updated'.tr())),
         );
         await _loadArtwork();
         setState(() => _selectedArtworkDetails = null);
@@ -94,7 +95,7 @@ class _AdminArtworkManagementScreenState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text('admin_admin_artwork_management_error_error_e'.tr())),
         );
       }
     }
@@ -107,7 +108,7 @@ class _AdminArtworkManagementScreenState
       await _service.deleteArtwork(_selectedArtwork!.id, reason: reason);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Artwork deleted')),
+          SnackBar(content: Text('admin_admin_artwork_management_text_artwork_deleted'.tr())),
         );
         await _loadArtwork();
         setState(() => _selectedArtworkDetails = null);
@@ -115,7 +116,7 @@ class _AdminArtworkManagementScreenState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text('admin_admin_artwork_management_error_error_e'.tr())),
         );
       }
     }
@@ -129,13 +130,13 @@ class _AdminArtworkManagementScreenState
       await _loadArtworkDetails(_selectedArtwork!);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Comment deleted')),
+          SnackBar(content: Text('admin_admin_artwork_management_text_comment_deleted'.tr())),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text('admin_admin_artwork_management_error_error_e'.tr())),
         );
       }
     }
@@ -145,7 +146,7 @@ class _AdminArtworkManagementScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Artwork Management'),
+        title: Text('admin_admin_artwork_management_text_artwork_management'.tr()),
         elevation: 0,
       ),
       body: Row(
@@ -212,7 +213,7 @@ class _AdminArtworkManagementScreenState
           child: _isLoading
               ? const Center(child: CircularProgressIndicator())
               : _artworks.isEmpty
-                  ? const Center(child: Text('No artwork found'))
+                  ? Center(child: Text('admin_admin_artwork_management_text_no_artwork_found'.tr()))
                   : ListView.builder(
                       itemCount: _artworks.length,
                       itemBuilder: (context, index) {
@@ -263,7 +264,7 @@ class _AdminArtworkManagementScreenState
 
   Widget _buildDetailPanel() {
     if (_selectedArtwork == null || _selectedArtworkDetails == null) {
-      return const Center(child: Text('Select artwork to view details'));
+      return Center(child: Text('admin_admin_artwork_management_text_select_artwork_to'.tr()));
     }
 
     final artwork = _selectedArtwork!;
@@ -278,7 +279,7 @@ class _AdminArtworkManagementScreenState
         children: [
           _buildDetailHeader(artwork),
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -323,7 +324,7 @@ class _AdminArtworkManagementScreenState
               children: [
                 Text(
                   artwork.title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -335,7 +336,7 @@ class _AdminArtworkManagementScreenState
                 ),
                 const SizedBox(height: 4),
                 Container(
-                  padding: const EdgeInsets.symmetric(
+                  padding: EdgeInsets.symmetric(
                     horizontal: 12,
                     vertical: 4,
                   ),
@@ -345,7 +346,7 @@ class _AdminArtworkManagementScreenState
                   ),
                   child: Text(
                     artwork.moderationStatus.displayName,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Colors.white,
                       fontSize: 12,
                     ),
@@ -362,11 +363,11 @@ class _AdminArtworkManagementScreenState
   Widget _buildAnalyticsSection(Map<String, dynamic> analytics) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Analytics',
               style: TextStyle(
                 fontSize: 16,
@@ -412,7 +413,7 @@ class _AdminArtworkManagementScreenState
         const SizedBox(height: 4),
         Text(
           value,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
@@ -426,7 +427,7 @@ class _AdminArtworkManagementScreenState
     if (reports.isEmpty) {
       return Card(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(16),
           child: Text(
             'No reports',
             style: TextStyle(color: Colors.grey[600]),
@@ -437,14 +438,14 @@ class _AdminArtworkManagementScreenState
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Reports',
                   style: TextStyle(
                     fontSize: 16,
@@ -461,7 +462,7 @@ class _AdminArtworkManagementScreenState
             ...reports.asMap().entries.map((entry) {
               final report = entry.value as Map<String, dynamic>;
               return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
+                padding: EdgeInsets.only(bottom: 12),
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
@@ -494,11 +495,11 @@ class _AdminArtworkManagementScreenState
   Widget _buildContentEditor(artwork_pkg.ArtworkModel artwork) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Edit Content',
               style: TextStyle(
                 fontSize: 16,
@@ -508,8 +509,8 @@ class _AdminArtworkManagementScreenState
             const SizedBox(height: 12),
             TextField(
               controller: _titleController,
-              decoration: const InputDecoration(
-                label: Text('Title'),
+              decoration: InputDecoration(
+                label: Text('admin_admin_artwork_management_title_title'.tr()),
                 border: OutlineInputBorder(),
               ),
               readOnly: true,
@@ -517,8 +518,8 @@ class _AdminArtworkManagementScreenState
             const SizedBox(height: 12),
             TextField(
               controller: _descriptionController,
-              decoration: const InputDecoration(
-                label: Text('Description'),
+              decoration: InputDecoration(
+                label: Text('admin_admin_artwork_management_message_description'.tr()),
                 border: OutlineInputBorder(),
               ),
               maxLines: 3,
@@ -539,7 +540,7 @@ class _AdminArtworkManagementScreenState
     if (comments.isEmpty) {
       return Card(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(16),
           child: Text(
             'No comments',
             style: TextStyle(color: Colors.grey[600]),
@@ -550,14 +551,14 @@ class _AdminArtworkManagementScreenState
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Comments',
                   style: TextStyle(
                     fontSize: 16,
@@ -573,8 +574,8 @@ class _AdminArtworkManagementScreenState
             const SizedBox(height: 12),
             ...comments.map((comment) {
               return Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.all(12),
+                margin: EdgeInsets.only(bottom: 12),
+                padding: EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey[300]!),
                   borderRadius: BorderRadius.circular(4),
@@ -587,13 +588,13 @@ class _AdminArtworkManagementScreenState
                       children: [
                         Text(
                           comment.userName,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                          style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                         PopupMenuButton<String>(
                           itemBuilder: (context) => [
                             PopupMenuItem<String>(
                               value: 'delete',
-                              child: const Text('Delete'),
+                              child: Text('admin_admin_artwork_management_text_delete'.tr()),
                               onTap: () => _showDeleteCommentDialog(comment.id),
                             ),
                           ],
@@ -623,11 +624,11 @@ class _AdminArtworkManagementScreenState
   Widget _buildActionButtons(artwork_pkg.ArtworkModel artwork) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Actions',
               style: TextStyle(
                 fontSize: 16,
@@ -640,7 +641,7 @@ class _AdminArtworkManagementScreenState
                 Expanded(
                   child: ElevatedButton.icon(
                     icon: const Icon(Icons.check),
-                    label: const Text('Approve'),
+                    label: Text('admin_admin_artwork_management_text_approve'.tr()),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
                     ),
@@ -652,7 +653,7 @@ class _AdminArtworkManagementScreenState
                 Expanded(
                   child: ElevatedButton.icon(
                     icon: const Icon(Icons.block),
-                    label: const Text('Reject'),
+                    label: Text('admin_admin_artwork_management_text_reject'.tr()),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.orange,
                     ),
@@ -667,7 +668,7 @@ class _AdminArtworkManagementScreenState
                 Expanded(
                   child: ElevatedButton.icon(
                     icon: const Icon(Icons.flag),
-                    label: const Text('Flag'),
+                    label: Text('admin_admin_artwork_management_text_flag'.tr()),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.amber,
                     ),
@@ -679,7 +680,7 @@ class _AdminArtworkManagementScreenState
                 Expanded(
                   child: ElevatedButton.icon(
                     icon: const Icon(Icons.delete),
-                    label: const Text('Delete'),
+                    label: Text('admin_admin_artwork_management_text_delete'.tr()),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
                     ),
@@ -699,7 +700,7 @@ class _AdminArtworkManagementScreenState
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Reject Artwork'),
+        title: Text('admin_admin_artwork_management_text_reject_artwork'.tr()),
         content: TextField(
           controller: reasonController,
           decoration: const InputDecoration(hintText: 'Reason for rejection'),
@@ -708,14 +709,14 @@ class _AdminArtworkManagementScreenState
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text('admin_admin_artwork_management_text_cancel'.tr()),
           ),
           ElevatedButton(
             onPressed: () {
               _updateArtworkStatus('rejected', reason: reasonController.text);
               Navigator.pop(context);
             },
-            child: const Text('Reject'),
+            child: Text('admin_admin_artwork_management_text_reject'.tr()),
           ),
         ],
       ),
@@ -727,7 +728,7 @@ class _AdminArtworkManagementScreenState
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Artwork'),
+        title: Text('admin_admin_artwork_management_text_delete_artwork'.tr()),
         content: TextField(
           controller: reasonController,
           decoration: const InputDecoration(hintText: 'Reason for deletion'),
@@ -736,7 +737,7 @@ class _AdminArtworkManagementScreenState
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text('admin_admin_artwork_management_text_cancel'.tr()),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
@@ -744,7 +745,7 @@ class _AdminArtworkManagementScreenState
               _deleteArtwork(reasonController.text);
               Navigator.pop(context);
             },
-            child: const Text('Delete'),
+            child: Text('admin_admin_artwork_management_text_delete'.tr()),
           ),
         ],
       ),
@@ -756,7 +757,7 @@ class _AdminArtworkManagementScreenState
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Comment'),
+        title: Text('admin_admin_artwork_management_text_delete_comment'.tr()),
         content: TextField(
           controller: reasonController,
           decoration: const InputDecoration(hintText: 'Reason for deletion'),
@@ -765,7 +766,7 @@ class _AdminArtworkManagementScreenState
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text('admin_admin_artwork_management_text_cancel'.tr()),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
@@ -773,7 +774,7 @@ class _AdminArtworkManagementScreenState
               _deleteComment(commentId, reasonController.text);
               Navigator.pop(context);
             },
-            child: const Text('Delete'),
+            child: Text('admin_admin_artwork_management_text_delete'.tr()),
           ),
         ],
       ),

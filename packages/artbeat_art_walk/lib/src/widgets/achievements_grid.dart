@@ -55,7 +55,7 @@ class AchievementsGrid extends StatelessWidget {
                   Navigator.of(context).pushNamed('/achievements/info');
                 },
                 icon: const Icon(Icons.info_outline, size: 18),
-                label: const Text('Learn More'),
+                label: Text('art_walk_achievements_grid_button_learn_more'.tr()),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.grey[200],
                   foregroundColor: Colors.grey[700],

@@ -97,7 +97,7 @@ class _AdBadgeWidgetState extends State<AdBadgeWidget> {
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
-                      'Featured',
+                      'ads_ad_badge_text_featured'.tr(),
                       style: TextStyle(
                         color: Colors.orange[700],
                         fontSize: 10,

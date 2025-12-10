@@ -117,7 +117,7 @@ class AdCard extends StatelessWidget {
                     if (onDelete != null)
                       OutlinedButton.icon(
                         icon: const Icon(Icons.delete, size: 16),
-                        label: const Text('Delete'),
+                        label: Text('ads_ad_card_text_delete'.tr()),
                         onPressed: onDelete,
                       ),
                   ],

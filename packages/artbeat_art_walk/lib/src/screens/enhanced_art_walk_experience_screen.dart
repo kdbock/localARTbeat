@@ -702,7 +702,7 @@ class _EnhancedArtWalkExperienceScreenState
       // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${art.title} marked as visited! +10 XP'),
+          content: Text('art_walk_enhanced_art_walk_experience_text_marked_as_visited'.tr().replaceAll('{title}', art.title)),
           backgroundColor: Colors.green,
           duration: const Duration(seconds: 2),
         ),

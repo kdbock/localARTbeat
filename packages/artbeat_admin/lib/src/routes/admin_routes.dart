@@ -122,7 +122,7 @@ class AdminRoutes {
     return MaterialPageRoute<void>(
       builder: (_) => Scaffold(
         appBar: AppBar(
-          title: const Text('Error'),
+          title: Text('admin_routes_error_title'.tr()),
         ),
         body: Center(
           child: Column(
@@ -135,7 +135,7 @@ class AdminRoutes {
               ),
               const SizedBox(height: 16),
               const Text(
-                'Navigation Error',
+                'admin_routes_navigation_error'.tr(),
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -150,7 +150,7 @@ class AdminRoutes {
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () => Navigator.of(_).pop(),
-                child: const Text('Go Back'),
+                child: Text('admin_routes_go_back'.tr()),
               ),
             ],
           ),

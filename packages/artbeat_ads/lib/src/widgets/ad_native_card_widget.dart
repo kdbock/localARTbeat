@@ -122,7 +122,7 @@ class _AdNativeCardWidgetState extends State<AdNativeCardWidget> {
                   top: 8,
                   right: 8,
                   child: Chip(
-                    label: const Text('Sponsored'),
+                    label: Text('ads_ad_native_text_sponsored'.tr()),
                     backgroundColor: Colors.black.withValues(alpha: 0.6),
                     labelStyle: const TextStyle(
                       color: Colors.white,

@@ -14,10 +14,10 @@ class AdminSecurityCenterScreen extends StatefulWidget {
 
 class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
   final List<String> _tabs = [
-    'Security Overview',
-    'Threat Detection',
-    'Access Control',
-    'Audit Logs'
+    'admin_security_tab_overview'.tr(),
+    'admin_security_tab_threat_detection'.tr(),
+    'admin_security_tab_access_control'.tr(),
+    'admin_security_tab_audit_logs'.tr()
   ];
 
   @override
@@ -26,8 +26,8 @@ class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
       length: _tabs.length,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text(
-            'Security Center',
+          title: Text(
+            'admin_security_title_center'.tr(),
             style: TextStyle(
               fontFamily: 'Limelight',
               color: Color(0xFF8C52FF),
@@ -64,7 +64,7 @@ class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
             children: [
               Expanded(
                 child: _buildStatusCard(
-                  'Security Score',
+                  'admin_security_metric_score'.tr(),
                   '94/100',
                   Icons.security,
                   Colors.green,
@@ -73,7 +73,7 @@ class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
               const SizedBox(width: 16),
               Expanded(
                 child: _buildStatusCard(
-                  'Active Threats',
+                  'admin_security_metric_active_threats'.tr(),
                   '2',
                   Icons.warning,
                   Colors.orange,
@@ -81,12 +81,12 @@ class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           Row(
             children: [
               Expanded(
                 child: _buildStatusCard(
-                  'Failed Logins',
+                  'admin_security_metric_failed_logins'.tr(),
                   '15',
                   Icons.login,
                   Colors.red,
@@ -95,7 +95,7 @@ class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
               const SizedBox(width: 16),
               Expanded(
                 child: _buildStatusCard(
-                  'Blocked IPs',
+                  'admin_security_metric_blocked_ips'.tr(),
                   '8',
                   Icons.block,
                   Colors.blue,
@@ -103,11 +103,11 @@ class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
 
           // Recent Security Events
-          const Text(
-            'Recent Security Events',
+          Text(
+            'admin_security_section_recent_events'.tr(),
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -123,35 +123,35 @@ class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
 
   Widget _buildThreatDetectionTab() {
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       children: [
         // Active Threats
-        const Text(
-          'Active Threats',
+        Text(
+          'admin_security_section_active_threats'.tr(),
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
             color: Color(0xFF8C52FF),
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
         _buildThreatCard(
-          'Suspicious Login Activity',
-          'Multiple failed login attempts from IP 192.168.1.100',
+          'admin_security_threat_suspicious_login'.tr(),
+          'admin_security_threat_suspicious_login_desc'.tr(),
           'High',
           Colors.red,
         ),
         _buildThreatCard(
-          'Unusual Data Access Pattern',
-          'User accessing large amounts of user data',
+          'admin_security_threat_unusual_access'.tr(),
+          'admin_security_threat_unusual_access_desc'.tr(),
           'Medium',
           Colors.orange,
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: 24),
 
         // Threat Detection Settings
-        const Text(
-          'Detection Settings',
+        Text(
+          'admin_security_section_detection_settings'.tr(),
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -209,7 +209,7 @@ class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
       padding: const EdgeInsets.all(16),
       children: [
         // Admin Permissions
-        const Text(
+        Text(
           'Admin Access Control',
           style: TextStyle(
             fontSize: 20,
@@ -223,7 +223,7 @@ class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
         const SizedBox(height: 24),
 
         // IP Whitelist
-        const Text(
+        Text(
           'IP Whitelist',
           style: TextStyle(
             fontSize: 20,
@@ -271,12 +271,12 @@ class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
       children: [
         // Filter Controls
         Padding(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(16),
           child: Row(
             children: [
               Expanded(
                 child: TextField(
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     hintText: 'Search logs...',
                     prefixIcon: Icon(Icons.search),
                     border: OutlineInputBorder(),
@@ -284,7 +284,7 @@ class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
                   onChanged: (value) {},
                 ),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: 16),
               DropdownButton<String>(
                 value: 'All',
                 items: ['All', 'Login', 'Data Access', 'Settings Change']
@@ -311,11 +311,11 @@ class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
       String title, String value, IconData icon, Color color) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16),
         child: Column(
           children: [
             Icon(icon, size: 32, color: color),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             Text(
               value,
               style: TextStyle(
@@ -326,7 +326,7 @@ class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
             ),
             Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 color: Colors.grey,
               ),
@@ -339,21 +339,21 @@ class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
 
   Widget _buildSecurityEventCard(int index) {
     final events = [
-      'Failed login attempt blocked',
-      'New admin user added',
-      'Suspicious data access detected',
-      'Password policy updated',
-      'Security scan completed',
+      'admin_security_event_failed_login'.tr(),
+      'admin_security_event_new_admin'.tr(),
+      'admin_security_event_suspicious_access'.tr(),
+      'admin_security_event_password_policy'.tr(),
+      'admin_security_event_security_scan'.tr(),
     ];
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: EdgeInsets.only(bottom: 8),
       child: ListTile(
-        leading: const Icon(Icons.security, color: Color(0xFF8C52FF)),
+        leading: Icon(Icons.security, color: Color(0xFF8C52FF)),
         title: Text(events[index % events.length]),
         subtitle: Text(
             '2024-12-${(index + 1).toString().padLeft(2, '0')} 10:${(index * 5).toString().padLeft(2, '0')} AM'),
-        trailing: const Icon(Icons.chevron_right),
+        trailing: Icon(Icons.chevron_right),
         onTap: () {},
       ),
     );
@@ -362,7 +362,7 @@ class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
   Widget _buildThreatCard(
       String title, String description, String severity, Color color) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: EdgeInsets.only(bottom: 8),
       child: ListTile(
         leading: Icon(Icons.warning, color: color),
         title: Text(title),
@@ -381,10 +381,10 @@ class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
     final users = ['John Admin', 'Sarah Security', 'Mike Manager'];
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: EdgeInsets.only(bottom: 8),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: const Color(0xFF8C52FF),
+          backgroundColor: Color(0xFF8C52FF),
           child: Text(users[index][0]),
         ),
         title: Text(users[index]),
@@ -427,7 +427,7 @@ class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
     ];
 
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: ListTile(
         dense: true,
         title: Text(actions[index % actions.length]),
@@ -450,9 +450,9 @@ class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('admin_admin_security_center_text_severity_severity'.tr()),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             Text(description),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             Text('admin_admin_security_center_text_recommended_actions'.tr()),
             Text('admin_admin_security_center_text_monitor_the_ip'.tr()),
             Text('admin_admin_security_center_text_review_access_logs'.tr()),
@@ -486,7 +486,7 @@ class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text('admin_admin_security_center_text_add_ip_range'.tr()),
-        content: const Column(
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(

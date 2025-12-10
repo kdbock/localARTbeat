@@ -214,7 +214,7 @@ class _ArtWalkHeaderState extends State<ArtWalkHeader> {
             // Menu items for art walk package
             ListTile(
               leading: const Icon(Icons.map, color: _headerColor),
-              title: const Text('Explore Art Walks'),
+              title: Text('art_walk_header_text_explore_art_walks'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/art-walk/explore');
@@ -222,7 +222,7 @@ class _ArtWalkHeaderState extends State<ArtWalkHeader> {
             ),
             ListTile(
               leading: const Icon(Icons.directions_walk, color: _headerColor),
-              title: const Text('Start Walking'),
+              title: Text('art_walk_header_text_start_walking'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/art-walk/start');
@@ -230,7 +230,7 @@ class _ArtWalkHeaderState extends State<ArtWalkHeader> {
             ),
             ListTile(
               leading: const Icon(Icons.location_on, color: _headerColor),
-              title: const Text('Nearby Art'),
+              title: Text('art_walk_header_text_nearby_art'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/art-walk/nearby');
@@ -256,19 +256,19 @@ class _ArtWalkHeaderState extends State<ArtWalkHeader> {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Art Walk Developer Tools'),
+        title: Text('art_walk_header_text_art_walk_developer_tools'.tr()),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              title: const Text('Test GPS Navigation'),
+              title: Text('art_walk_header_text_test_gps_navigation'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 // Implement GPS navigation testing
               },
             ),
             ListTile(
-              title: const Text('Clear Location Cache'),
+              title: Text('art_walk_header_text_clear_location_cache'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 // Implement location cache clearing
@@ -279,7 +279,7 @@ class _ArtWalkHeaderState extends State<ArtWalkHeader> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text('art_walk_button_close'.tr()),
           ),
         ],
       ),

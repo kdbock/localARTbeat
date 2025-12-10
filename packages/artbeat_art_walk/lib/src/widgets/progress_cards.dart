@@ -184,7 +184,7 @@ class InProgressWalkCard extends StatelessWidget {
                   OutlinedButton.icon(
                     onPressed: onAbandon,
                     icon: const Icon(Icons.delete_outline),
-                    label: const Text('Abandon'),
+                    label: Text('art_walk_progress_cards_button_abandon'.tr()),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Theme.of(context).colorScheme.error,
                     ),
@@ -435,7 +435,7 @@ class CompletedWalkCard extends StatelessWidget {
                     child: OutlinedButton.icon(
                       onPressed: onShare,
                       icon: const Icon(Icons.share),
-                      label: const Text('Share'),
+                      label: Text('art_walk_progress_cards_button_share'.tr()),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -443,7 +443,7 @@ class CompletedWalkCard extends StatelessWidget {
                     child: ElevatedButton.icon(
                       onPressed: onReview,
                       icon: const Icon(Icons.rate_review),
-                      label: const Text('Review'),
+                      label: Text('art_walk_progress_cards_button_review'.tr()),
                     ),
                   ),
                 ],
@@ -579,7 +579,7 @@ class CreatedWalkCard extends StatelessWidget {
                           children: [
                             Icon(Icons.edit),
                             SizedBox(width: 8),
-                            Text('Edit'),
+                            Text('art_walk_progress_cards_text_edit'.tr()),
                           ],
                         ),
                       ),
@@ -589,7 +589,7 @@ class CreatedWalkCard extends StatelessWidget {
                           children: [
                             Icon(Icons.share),
                             SizedBox(width: 8),
-                            Text('Share'),
+                            Text('art_walk_progress_cards_button_share'.tr()),
                           ],
                         ),
                       ),
@@ -826,7 +826,7 @@ class SavedWalkCard extends StatelessWidget {
                 child: ElevatedButton.icon(
                   onPressed: onStart,
                   icon: const Icon(Icons.play_arrow),
-                  label: const Text('Start Walk'),
+                  label: Text('art_walk_progress_cards_button_start_walk'.tr()),
                 ),
               ),
             ],

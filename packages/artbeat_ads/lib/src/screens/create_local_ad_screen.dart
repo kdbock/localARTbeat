@@ -221,7 +221,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Promote Your Art',
+              'ads_create_local_ad_text_promote_your_art'.tr(),
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: ArtbeatColors.primaryPurple,
@@ -229,7 +229,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Reach art lovers in high-traffic areas',
+              'ads_create_local_ad_text_reach_art_lovers'.tr(),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Colors.grey[600],
                   ),
@@ -246,7 +246,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Ad Content',
+          'ads_create_local_ad_text_ad_content'.tr(),
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 color: ArtbeatColors.primaryPurple,
                 fontWeight: FontWeight.bold,
@@ -301,7 +301,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Image (Optional)',
+          'ads_create_local_ad_text_image_optional'.tr(),
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
@@ -330,7 +330,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Tap to select image',
+                      'ads_create_local_ad_text_tap_to_select_image'.tr(),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: Colors.grey[600],
                           ),
@@ -374,7 +374,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Where to Display',
+          'ads_create_local_ad_text_where_to_display'.tr(),
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 color: ArtbeatColors.primaryPurple,
                 fontWeight: FontWeight.bold,
@@ -382,7 +382,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
         ),
         const SizedBox(height: 16),
         Text(
-          'Select Zone',
+          'ads_create_local_ad_text_select_zone'.tr(),
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
@@ -425,7 +425,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Size & Duration',
+          'ads_create_local_ad_text_size_and_duration'.tr(),
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 color: ArtbeatColors.primaryPurple,
                 fontWeight: FontWeight.bold,
@@ -433,7 +433,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
         ),
         const SizedBox(height: 16),
         Text(
-          'Select Size',
+          'ads_create_local_ad_text_select_size'.tr(),
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
@@ -492,7 +492,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
         ),
         const SizedBox(height: 24),
         Text(
-          'Select Duration',
+          'ads_create_local_ad_text_select_duration'.tr(),
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
@@ -578,7 +578,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
                 ),
               )
             : Text(
-                'Post Ad for \$${price.toStringAsFixed(2)}',
+                'ads_create_local_ad_text_post_ad_for_price'.tr().replaceAll('{price}', '\$${price.toStringAsFixed(2)}'),
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 16,

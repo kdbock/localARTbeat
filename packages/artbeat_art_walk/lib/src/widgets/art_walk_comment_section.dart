@@ -74,7 +74,7 @@ class _ArtWalkCommentSectionState extends State<ArtWalkCommentSection> {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Error loading comments: ${e.toString()}'),
+                content: Text('art_walk_art_walk_comment_section_error_error_loading_comments'.tr().replaceAll('{error}', e.toString())),
               ),
             );
           }
@@ -89,7 +89,7 @@ class _ArtWalkCommentSectionState extends State<ArtWalkCommentSection> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('You must be logged in to comment')),
+        SnackBar(content: Text('art_walk_art_walk_comment_section_text_you_must_be_logged_in_to_comment'.tr())),
       );
       return;
     }
@@ -121,7 +121,7 @@ class _ArtWalkCommentSectionState extends State<ArtWalkCommentSection> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error posting comment: ${e.toString()}')),
+          SnackBar(content: Text('art_walk_art_walk_comment_section_error_error_posting_comment'.tr().replaceAll('{error}', e.toString()))),
         );
       }
     } finally {
@@ -154,12 +154,12 @@ class _ArtWalkCommentSectionState extends State<ArtWalkCommentSection> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Comment'),
-        content: const Text('Are you sure you want to delete this comment?'),
+        title: Text('art_walk_art_walk_comment_section_text_delete_comment'.tr()),
+        content: Text('art_walk_art_walk_comment_section_text_are_you_sure_you_want_to_delete_this_comment'.tr()),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text('art_walk_button_cancel'.tr()),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
@@ -182,7 +182,7 @@ class _ArtWalkCommentSectionState extends State<ArtWalkCommentSection> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error deleting comment: ${e.toString()}')),
+          SnackBar(content: Text('art_walk_art_walk_comment_section_error_error_deleting_comment'.tr().replaceAll('{error}', e.toString()))),
         );
       }
     } finally {
@@ -197,8 +197,8 @@ class _ArtWalkCommentSectionState extends State<ArtWalkCommentSection> {
     if (user == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('You must be logged in to like comments'),
+          SnackBar(
+            content: Text('art_walk_art_walk_comment_section_text_you_must_be_logged_in_to_like_comments'.tr()),
           ),
         );
       }
@@ -214,7 +214,7 @@ class _ArtWalkCommentSectionState extends State<ArtWalkCommentSection> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error liking comment: ${e.toString()}')),
+          SnackBar(content: Text('art_walk_art_walk_comment_section_error_error_liking_comment'.tr().replaceAll('{error}', e.toString()))),
         );
       }
     }

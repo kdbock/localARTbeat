@@ -415,9 +415,9 @@ class _ArtWalkListScreenState extends State<ArtWalkListScreen> {
             ),
             child: Row(
               children: [
-                const Text(
-                  'Advanced Filters',
-                  style: TextStyle(
+                Text(
+                  'art_walk_filter_text_advanced_filters'.tr(),
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,

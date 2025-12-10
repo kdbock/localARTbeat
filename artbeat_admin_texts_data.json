@@ -1,0 +1,2638 @@
+{
+  "metadata": {
+    "generated_at": "2025-12-09T17:24:41.954411",
+    "total_files": 12,
+    "files_with_text": 10,
+    "total_texts": 377
+  },
+  "files": {
+    "lib/src/screens/admin_artwork_management_screen.dart": [
+      {
+        "text": "Created: ${artwork.createdAt.toString().split(",
+        "line": 333,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "const SizedBox(height: 8),                 Text(                   'Created: ${artwork.createdAt.toString().split('.')[0]}',                   style: TextStyle(color"
+      },
+      {
+        "text": "Analytics",
+        "line": 370,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "lignment.start,           children: [             Text(               'Analytics',               style: TextStyle("
+      },
+      {
+        "text": "No reports",
+        "line": 431,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "padding: EdgeInsets.all(16),           child: Text(             'No reports',             style: TextStyle(color: Colors.grey["
+      },
+      {
+        "text": "Reports",
+        "line": 448,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "etween,               children: [                 Text(                   'Reports',                   style: TextStyle("
+      },
+      {
+        "text": "${reports.length} total",
+        "line": 455,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "),                 ),                 Text(                   '${reports.length} total',                   style: TextStyle(color: Colors"
+      },
+      {
+        "text": "Reported by: ${(report[",
+        "line": 480,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "const SizedBox(height: 4),                       Text(                         'Reported by: ${(report['reportedBy'] as String?) ?? \"Unknown\"}',"
+      },
+      {
+        "text": "Edit Content",
+        "line": 502,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "lignment.start,           children: [             Text(               'Edit Content',               style: TextStyle("
+      },
+      {
+        "text": "Tags: ${artwork.tags?.join(",
+        "line": 529,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "const SizedBox(height: 12),             Text(               'Tags: ${artwork.tags?.join(\", \") ?? \"None\"}',               style: TextStyle(c"
+      },
+      {
+        "text": "No comments",
+        "line": 544,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "padding: EdgeInsets.all(16),           child: Text(             'No comments',             style: TextStyle(color: Colors.grey["
+      },
+      {
+        "text": "Comments",
+        "line": 561,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "etween,               children: [                 Text(                   'Comments',                   style: TextStyle("
+      },
+      {
+        "text": "${comments.length} total",
+        "line": 568,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "),                 ),                 Text(                   '${comments.length} total',                   style: TextStyle(color: Colors"
+      },
+      {
+        "text": "Actions",
+        "line": 631,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "lignment.start,           children: [             Text(               'Actions',               style: TextStyle("
+      },
+      {
+        "text": "Search artwork...",
+        "line": 179,
+        "pattern": "hintText:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "decoration: InputDecoration(                   hintText: 'Search artwork...',                   prefixIcon: const Icon(Icons.s"
+      },
+      {
+        "text": "Reason for rejection",
+        "line": 706,
+        "pattern": "hintText:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "ller,           decoration: const InputDecoration(hintText: 'Reason for rejection'),           maxLines: 3,         ),         actio"
+      },
+      {
+        "text": "Reason for deletion",
+        "line": 734,
+        "pattern": "hintText:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "ller,           decoration: const InputDecoration(hintText: 'Reason for deletion'),           maxLines: 3,         ),         actio"
+      },
+      {
+        "text": "No reason provided",
+        "line": 476,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "(report['reason'] as String?) ?? 'No reason provided',                         style: const TextStyle(f"
+      },
+      {
+        "text": "Approved by admin",
+        "line": 649,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "_updateArtworkStatus('approved', reason: 'Approved by admin'),                   ),                 ),"
+      },
+      {
+        "text": "Flagged by admin",
+        "line": 676,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "_updateArtworkStatus('flagged', reason: 'Flagged by admin'),                   ),                 ),"
+      },
+      {
+        "text": "${artwork.description.substring(0, 50)}...",
+        "line": 225,
+        "pattern": "(?:title|Title).*?['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "withValues(alpha: 0.1),                           title: Text(artwork.title),                           subtitle: Text(                             artwork.description.length > 50                                 ? '${artwork.description.substring(0, 50)}...'                                 : artwork.descrip"
+      }
+    ],
+    "lib/src/screens/admin_login_screen.dart": [
+      {
+        "text": "Email",
+        "line": 97,
+        "pattern": "labelText:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "decoration: InputDecoration(                     labelText: 'Email',                     prefixIcon: Icon(Icons.email"
+      },
+      {
+        "text": "Password",
+        "line": 116,
+        "pattern": "labelText:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "decoration: InputDecoration(                     labelText: 'Password',                     prefixIcon: Icon(Icons.lock)"
+      },
+      {
+        "text": "Unknown error",
+        "line": 63,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "th_failed'.tr(namedArgs: {'message': e.message ?? 'Unknown error'}),         };         _isLoading = false;       }"
+      },
+      {
+        "text": "/admin/dashboard",
+        "line": 20,
+        "pattern": "(?:error|Error).*?['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "ntroller();   bool _isLoading = false;   String? _error;    Future<void> _handleLogin() async {     if (!_formKey.currentState!.validate()) return;      setState(() {       _isLoading = true;       _error = null;     });      try {       // Attempt to sign in       await FirebaseAuth.instance.signInWithEmailAndPassword(         email: _emailController.text.trim(),         password: _passwordController.text.trim(),       );        if (!mounted) return;        // Check if the user has admin privileges       final adminService = context.read<AdminService>();       final hasAdminAccess = await adminService.hasAdminPrivileges();        if (!mounted) return;        if (hasAdminAccess) {         Navigator.of(context).pushReplacementNamed('/admin/dashboard');       } else {         // Sign out if not an ad"
+      },
+      {
+        "text": "user-not-found",
+        "line": 58,
+        "pattern": "(?:error|Error).*?['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "xception catch (e) {       setState(() {         _error = switch (e.code) {           'user-not-found' => 'admin_login_error_user_not_found'.tr(),"
+      },
+      {
+        "text": ".tr(namedArgs: {",
+        "line": 63,
+        "pattern": "(?:error|Error).*?['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "_invalid_email'.tr(),           _ => 'admin_login_error_auth_failed'.tr(namedArgs: {'message': e.message ?? 'Unknown error'}),"
+      },
+      {
+        "text": "}),\n        };\n        _isLoading = false;\n      });\n    } catch (e) {\n      setState(() {\n        _error =",
+        "line": 63,
+        "pattern": "(?:error|Error).*?['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "'.tr(namedArgs: {'message': e.message ?? 'Unknown error'}),         };         _isLoading = false;       });     } catch (e) {       setState(() {         _error = 'admin_login_error_unexpected'.tr(namedArgs: {'erro"
+      },
+      {
+        "text": ": e.toString()});\n        _isLoading = false;\n      });\n    }\n  }\n\n  @override\n  Widget build(BuildContext context) {\n    return MainLayout(\n      currentIndex: 0,\n      child: Center(\n        child: SingleChildScrollView(\n          padding: const EdgeInsets.all(24.0),\n          child: Form(\n            key: _formKey,\n            child: Column(\n              mainAxisAlignment: MainAxisAlignment.center,\n              crossAxisAlignment: CrossAxisAlignment.stretch,\n              children: [\n                Icon(\n                  Icons.admin_panel_settings,\n                  size: 80,\n                  color: Colors.blue,\n                ),\n                SizedBox(height: 48),\n                TextFormField(\n                  controller: _emailController,\n                  decoration: InputDecoration(\n                    labelText:",
+        "line": 69,
+        "pattern": "(?:error|Error).*?['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "= 'admin_login_error_unexpected'.tr(namedArgs: {'error': e.toString()});         _isLoading = false;       });     }   }    @override   Widget build(BuildContext context) {     return MainLayout(       currentIndex: 0,       child: Center(         child: SingleChildScrollView(           padding: const EdgeInsets.all(24.0),           child: Form(             key: _formKey,             child: Column(               mainAxisAlignment: MainAxisAlignment.center,               crossAxisAlignment: CrossAxisAlignment.stretch,               children: [                 Icon(                   Icons.admin_panel_settings,                   size: 80,                   color: Colors.blue,                 ),                 SizedBox(height: 48),                 TextFormField(                   controller: _emailController,                   decoration: InputDecoration(                     labelText: 'Email',                     prefixIcon: Icon(Icons"
+      }
+    ],
+    "lib/src/screens/admin_payment_screen.dart": [
+      {
+        "text": "${selectedTransactions.length} transactions selected",
+        "line": 286,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "lignment.start,           children: [             Text('${selectedTransactions.length} transactions selected'),             Text(                 'Total amount"
+      },
+      {
+        "text": "Total amount: \\$${selectedTransactions.fold(0.0, (sum, t) => sum + t.amount).toStringAsFixed(2)}",
+        "line": 287,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "ions.length} transactions selected'),             Text(                 'Total amount: \\$${selectedTransactions.fold(0.0, (sum, t) => sum + t.amount).toStringAsFixed(2)}'),             const SizedBox(height: 16),"
+      },
+      {
+        "text": "Are you sure you want to process refunds for all selected transactions?",
+        "line": 290,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "const SizedBox(height: 16),             Text(                 'Are you sure you want to process refunds for all selected transactions?'),           ],         ),         actions: ["
+      },
+      {
+        "text": "${_selectedTransactionIds.length} selected",
+        "line": 757,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "SizedBox(width: 16),                 Text('${_selectedTransactionIds.length} selected'),                 Spacer(),                 if (_"
+      },
+      {
+        "text": "${transaction.userName} • ${transaction.displayType}",
+        "line": 838,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "t: FontWeight.bold),         ),         subtitle: Text('${transaction.userName} • ${transaction.displayType}'),         trailing: Chip(           label: Text(t"
+      },
+      {
+        "text": "Date: ${intl.DateFormat(",
+        "line": 851,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "nsaction_id_transactionid'.tr()),                 Text(                     'Date: ${intl.DateFormat('MMM dd, yyyy HH:mm').format(transaction.transactio"
+      },
+      {
+        "text": "Process Refund",
+        "line": 868,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "olor: Colors.red),                         label: Text('Process Refund',                             style: TextStyle(col"
+      },
+      {
+        "text": "Revenue Breakdown",
+        "line": 893,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "xisAlignment.start,         children: [           Text(             'Revenue Breakdown',             style: TextStyle(fontSize: 20, fontW"
+      },
+      {
+        "text": "Payment Methods",
+        "line": 904,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": ")),           SizedBox(height: 32),           Text(             'Payment Methods',             style: TextStyle(fontSize: 20, fontW"
+      },
+      {
+        "text": "\\$${totalAmount.toStringAsFixed(2)}",
+        "line": 977,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "const Spacer(),                   Text(                     '\\$${totalAmount.toStringAsFixed(2)}',                     style: TextStyle("
+      },
+      {
+        "text": "${refundTransactions.length} Refunds",
+        "line": 1091,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": ",               SizedBox(width: 8),               Text(                 '${refundTransactions.length} Refunds',                 style:                     const"
+      },
+      {
+        "text": "Total: \\$${refundTransactions.fold(0.0, (sum, t) => sum + t.amount).toStringAsFixed(2)}",
+        "line": 1097,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "),               Spacer(),               Text(                 'Total: \\$${refundTransactions.fold(0.0, (sum, t) => sum + t.amount).toStringAsFixed(2)}',                 style: const TextStyle(fontSize:"
+      },
+      {
+        "text": "Advanced Search & Filters",
+        "line": 1122,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "xisAlignment.start,         children: [           Text(             'Advanced Search & Filters',             style: TextStyle(fontSize: 20, fontW"
+      },
+      {
+        "text": "Amount Range",
+        "line": 1151,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "t Range           SizedBox(height: 16),           Text('Amount Range',               style: TextStyle(fontWeight: FontW"
+      },
+      {
+        "text": "$label:",
+        "line": 1262,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "edBox(             width: 120,             child: Text(               '$label:',               style: TextStyle(fontWeight: FontW"
+      },
+      {
+        "text": "Search transactions...",
+        "line": 719,
+        "pattern": "hintText:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "decoration: InputDecoration(                     hintText: 'Search transactions...',                     prefixIcon: Icon(Icons.searc"
+      },
+      {
+        "text": "Transaction Type",
+        "line": 1173,
+        "pattern": "labelText:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "ctedType,             decoration: InputDecoration(labelText: 'Transaction Type'),             items: [               'All',"
+      },
+      {
+        "text": "Refresh Data",
+        "line": 603,
+        "pattern": "tooltip:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "h),             onPressed: _loadData,             tooltip: 'Refresh Data',           ),           IconButton(             i"
+      },
+      {
+        "text": "Error loading payment data: $e",
+        "line": 126,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "lse;       });     } catch (e) {       debugPrint('Error loading payment data: $e');       setState(() => _isLoading = false);"
+      },
+      {
+        "text": "Failed to load payment data",
+        "line": 128,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "=> _isLoading = false);       _showErrorSnackBar('Failed to load payment data');     }   }    void _filterTransactions() {     s"
+      },
+      {
+        "text": "Admin processed refund",
+        "line": 218,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "amount: transaction.amount,             reason: 'Admin processed refund',           );         } else {           // Fallb"
+      },
+      {
+        "text": "No paymentIntentId found for transaction ${transaction.id}.",
+        "line": 223,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "ntent ID           AppLogger.warning(             'No paymentIntentId found for transaction ${transaction.id}. '             'Recording refund in database only.',"
+      },
+      {
+        "text": "Recording refund in database only.",
+        "line": 224,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "for transaction ${transaction.id}. '             'Recording refund in database only.',           );         }          // Record refund"
+      },
+      {
+        "text": "Refund processed successfully",
+        "line": 253,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "UserId,         });          _showSuccessSnackBar('Refund processed successfully');         _loadData(); // Refresh data       } ca"
+      },
+      {
+        "text": "Error processing refund: $e",
+        "line": 256,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "data       } catch (e) {         AppLogger.error('Error processing refund: $e');         _showErrorSnackBar('Failed to process r"
+      },
+      {
+        "text": "Failed to process refund: ${e.toString()}",
+        "line": 257,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "ocessing refund: $e');         _showErrorSnackBar('Failed to process refund: ${e.toString()}');       }     }   }    Future<void> _processBulkR"
+      },
+      {
+        "text": "No transactions selected",
+        "line": 264,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "ransactionIds.isEmpty) {       _showErrorSnackBar('No transactions selected');       return;     }      final selectedTransact"
+      },
+      {
+        "text": "No eligible transactions for refund",
+        "line": 274,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "dTransactions.isEmpty) {       _showErrorSnackBar('No eligible transactions for refund');       return;     }      final result = await s"
+      },
+      {
+        "text": "Admin authentication required",
+        "line": 315,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "rentAdmin == null) {           _showErrorSnackBar('Admin authentication required');           return;         }          int succes"
+      },
+      {
+        "text": "Bulk admin refund",
+        "line": 329,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "e': transaction.userName,               'reason': 'Bulk admin refund',               'processedBy': currentAdmin.id,"
+      },
+      {
+        "text": "Part of bulk refund operation",
+        "line": 352,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "userId: transaction.userId,               notes: 'Part of bulk refund operation',             );              successCount++;"
+      },
+      {
+        "text": "Failed to refund transaction ${transaction.id}: $e",
+        "line": 357,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "+;           } catch (e) {             debugPrint('Failed to refund transaction ${transaction.id}: $e');           }         }          _showSuccessSnac"
+      },
+      {
+        "text": "Successfully processed $successCount refunds",
+        "line": 361,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "}         }          _showSuccessSnackBar('Successfully processed $successCount refunds');         _clearSelection();         _loadData();"
+      },
+      {
+        "text": "Error processing bulk refund: $e",
+        "line": 365,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "fresh data       } catch (e) {         debugPrint('Error processing bulk refund: $e');         _showErrorSnackBar('Failed to process b"
+      },
+      {
+        "text": "Failed to process bulk refunds",
+        "line": 366,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "ing bulk refund: $e');         _showErrorSnackBar('Failed to process bulk refunds');       }     }   }    Future<void> _exportSelect"
+      },
+      {
+        "text": "Export completed successfully (${selectedTransactions.length} records)",
+        "line": 412,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": ",       );        _showSuccessSnackBar(           'Export completed successfully (${selectedTransactions.length} records)');       _clearSelection();     } catch (e) {"
+      },
+      {
+        "text": "Error exporting transactions: $e",
+        "line": 415,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "arSelection();     } catch (e) {       debugPrint('Error exporting transactions: $e');       _showErrorSnackBar('Failed to export tran"
+      },
+      {
+        "text": "Failed to export transactions",
+        "line": 416,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "ting transactions: $e');       _showErrorSnackBar('Failed to export transactions');     }   }    Future<void> _exportTransactions()"
+      },
+      {
+        "text": "Export completed successfully (${_filteredTransactions.length} records)",
+        "line": 464,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": ",       );        _showSuccessSnackBar(           'Export completed successfully (${_filteredTransactions.length} records)');     } catch (e) {       debugPrint('Error expor"
+      },
+      {
+        "text": "STATUS_UPDATE",
+        "line": 500,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "adminEmail: currentAdmin.email,           action: 'STATUS_UPDATE',           transactionId: transactionId,"
+      },
+      {
+        "text": "Successfully updated ${_selectedTransactionIds.length} transactions",
+        "line": 513,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "h.commit();       _showSuccessSnackBar(           'Successfully updated ${_selectedTransactionIds.length} transactions');       _clearSelection();       _loadData(); //"
+      },
+      {
+        "text": "Error updating transaction statuses: $e",
+        "line": 517,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "/ Refresh data     } catch (e) {       debugPrint('Error updating transaction statuses: $e');       _showErrorSnackBar('Failed to update tran"
+      },
+      {
+        "text": "Failed to update transaction statuses",
+        "line": 518,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "nsaction statuses: $e');       _showErrorSnackBar('Failed to update transaction statuses');     }   }    void _toggleSelectionMode() {"
+      },
+      {
+        "text": "Payment Management",
+        "line": 589,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "oldKey,       appBar: AdminHeader(         title: 'Payment Management',         actions: [           IconButton("
+      },
+      {
+        "text": "Exit Selection Mode",
+        "line": 597,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "tooltip: _isSelectionMode                 ? 'Exit Selection Mode'                 : 'Enter Selection Mode',"
+      },
+      {
+        "text": "Enter Selection Mode",
+        "line": 598,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "? 'Exit Selection Mode'                 : 'Enter Selection Mode',           ),           IconButton(             i"
+      },
+      {
+        "text": "Export Selected",
+        "line": 611,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "lectedTransactionIds.isNotEmpty                 ? 'Export Selected'                 : 'Export All',           ),"
+      },
+      {
+        "text": "Transactions",
+        "line": 630,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "tabs: const [                       Tab(text: 'Transactions', icon: Icon(Icons.receipt)),"
+      },
+      {
+        "text": "Total Revenue",
+        "line": 665,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "child: AdminMetricsCard(               title: 'Total Revenue',               value: '\\$${_totalRevenue.toString"
+      },
+      {
+        "text": "Total Transactions",
+        "line": 675,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "child: AdminMetricsCard(               title: 'Total Transactions',               value: _totalTransactions.toString"
+      },
+      {
+        "text": "Avg Transaction",
+        "line": 685,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "child: AdminMetricsCard(               title: 'Avg Transaction',               value: '\\$${_averageTransactionVal"
+      },
+      {
+        "text": "Total Refunds",
+        "line": 695,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "child: AdminMetricsCard(               title: 'Total Refunds',               value: '\\$${_totalRefunds.toString"
+      },
+      {
+        "text": "Success Rate",
+        "line": 995,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "child: _buildStatItem(                         'Success Rate', '${successRate.toStringAsFixed(1)}%'),"
+      },
+      {
+        "text": "Payment Method",
+        "line": 1232,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "tus.toUpperCase()),               _buildDetailRow('Payment Method', transaction.paymentMethod),               _build"
+      },
+      {
+        "text": "MMM dd, yyyy HH:mm",
+        "line": 1235,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "'Date',                   intl.DateFormat('MMM dd, yyyy HH:mm')                       .format(transaction.transa"
+      },
+      {
+        "text": "Description",
+        "line": 1240,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "cription != null)                 _buildDetailRow('Description', transaction.description!),             ],"
+      },
+      {
+        "text": "Transaction ID,User ID,User Name,Type,Amount,Currency,Status,Payment Method,Transaction Date,Description,Item Title",
+        "line": 1309,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": ");      // CSV Header     buffer.writeln(         'Transaction ID,User ID,User Name,Type,Amount,Currency,Status,Payment Method,Transaction Date,Description,Item Title');      // CSV Data rows     for (final transactio"
+      },
+      {
+        "text": "Exported transaction data",
+        "line": 1388,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "e.share(           ShareParams(             text: 'Exported transaction data',             subject: 'Transaction Export',"
+      },
+      {
+        "text": "Transaction Export",
+        "line": 1389,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "'Exported transaction data',             subject: 'Transaction Export',           ),         );       }     } catch (e)"
+      },
+      {
+        "text": "Error downloading CSV file: $e",
+        "line": 1394,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": ");       }     } catch (e) {       debugPrint('Error downloading CSV file: $e');       throw Exception('Failed to download CSV f"
+      },
+      {
+        "text": "Failed to download CSV file",
+        "line": 1395,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "downloading CSV file: $e');       throw Exception('Failed to download CSV file');     }   } }"
+      },
+      {
+        "text": ");\n      setState(() => _isLoading = false);\n      _showErrorSnackBar(",
+        "line": 126,
+        "pattern": "(?:error|Error).*?['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "se;       });     } catch (e) {       debugPrint('Error loading payment data: $e');       setState(() => _isLoading = false);       _showErrorSnackBar('Failed to load payment data');     }   }    void _"
+      },
+      {
+        "text": ");\n        _showErrorSnackBar(",
+        "line": 365,
+        "pattern": "(?:error|Error).*?['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "resh data       } catch (e) {         debugPrint('Error processing bulk refund: $e');         _showErrorSnackBar('Failed to process bulk refunds');       }     }"
+      },
+      {
+        "text": ");\n      _showErrorSnackBar(",
+        "line": 415,
+        "pattern": "(?:error|Error).*?['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "rSelection();     } catch (e) {       debugPrint('Error exporting transactions: $e');       _showErrorSnackBar('Failed to export transactions');     }   }    Futu"
+      },
+      {
+        "text": ");\n      throw Exception(",
+        "line": 1394,
+        "pattern": "(?:error|Error).*?['\\\"]([^'\\\"]+)['\\\"]",
+        "context": ");       }     } catch (e) {       debugPrint('Error downloading CSV file: $e');       throw Exception('Failed to download CSV file');     }   } }"
+      },
+      {
+        "text": "All",
+        "line": 140,
+        "pattern": "(?:title|Title).*?['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "tains(searchTerm) ||             (transaction.itemTitle?.toLowerCase().contains(searchTerm) ??                 false);          // Status filter         final matchesStatus =             _selectedStatus == 'All' || transaction.status == _selectedStatus;"
+      },
+      {
+        "text": "All dates",
+        "line": 1131,
+        "pattern": "(?:title|Title).*?['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "in_payment_text_date_range'.tr()),             subtitle: Text(_dateRange == null                 ? 'All dates'                 : '${intl.DateFormat('MMM dd').fo"
+      },
+      {
+        "text": "Item",
+        "line": 1237,
+        "pattern": "(?:title|Title).*?['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "nsactionDate)),               if (transaction.itemTitle != null)                 _buildDetailRow('Item', transaction.itemTitle!),               if (trans"
+      },
+      {
+        "text": ");\n\n    // CSV Data rows\n    for (final transaction in transactions) {\n      final description =\n          transaction.description?.replaceAll(",
+        "line": 1309,
+        "pattern": "(?:title|Title).*?['\\\"]([^'\\\"]+)['\\\"]",
+        "context": ",Payment Method,Transaction Date,Description,Item Title');      // CSV Data rows     for (final transaction in transactions) {       final description =           transaction.description?.replaceAll(',', ';') ?? ''; // Escape commas       final itemT"
+      },
+      {
+        "text": ",\n      );\n    }\n\n    return buffer.toString();\n  }\n\n  /// Download CSV file (web) or save to device\n  Future<void> _downloadCsvFile(String csvContent, String fileName) async {\n    try {\n      if (kIsWeb) {\n        // Web implementation using data URL for download\n        final bytes = utf8.encode(csvContent);\n        final base64Data = base64Encode(bytes);\n        final dataUrl =",
+        "line": 1320,
+        "pattern": "(?:title|Title).*?['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "ntMethod},\"$transactionDate\",\"$description\",\"$itemTitle\"',       );     }      return buffer.toString();   }    /// Download CSV file (web) or save to device   Future<void> _downloadCsvFile(String csvContent, String fileName) async {     try {       if (kIsWeb) {         // Web implementation using data URL for download         final bytes = utf8.encode(csvContent);         final base64Data = base64Encode(bytes);         final dataUrl = 'data:text/csv;charset=utf-8;base64,$base64Data';"
+      },
+      {
+        "text": "Analytics",
+        "line": 631,
+        "pattern": "Tab\\s*\\([^)]*text:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "icon: Icon(Icons.receipt)),                       Tab(text: 'Analytics', icon: Icon(Icons.analytics)),"
+      },
+      {
+        "text": "Refunds",
+        "line": 632,
+        "pattern": "Tab\\s*\\([^)]*text:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "on: Icon(Icons.analytics)),                       Tab(text: 'Refunds', icon: Icon(Icons.undo)),                       T"
+      },
+      {
+        "text": "Search",
+        "line": 633,
+        "pattern": "Tab\\s*\\([^)]*text:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "', icon: Icon(Icons.undo)),                       Tab(text: 'Search', icon: Icon(Icons.search)),                     ]"
+      }
+    ],
+    "lib/src/screens/admin_security_center_screen.dart": [
+      {
+        "text": "Admin Access Control",
+        "line": 212,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "children: [         // Admin Permissions         Text(           'Admin Access Control',           style: TextStyle(             fontSize"
+      },
+      {
+        "text": "IP Whitelist",
+        "line": 226,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "Box(height: 24),          // IP Whitelist         Text(           'IP Whitelist',           style: TextStyle(             fontSize"
+      },
+      {
+        "text": "2024-12-${(index + 1).toString().padLeft(2,",
+        "line": 354,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "events[index % events.length]),         subtitle: Text(             '2024-12-${(index + 1).toString().padLeft(2, '0')} 10:${(index * 5).toString().padLeft(2, '0')}"
+      },
+      {
+        "text": "User: ${users[index % users.length]} | IP: 192.168.1.${100 + index}",
+        "line": 434,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "tions[index % actions.length]),         subtitle: Text(             'User: ${users[index % users.length]} | IP: 192.168.1.${100 + index}'),         trailing:             Text('${10 + inde"
+      },
+      {
+        "text": "${10 + index}:${(index * 3).toString().padLeft(2,",
+        "line": 437,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "1.${100 + index}'),         trailing:             Text('${10 + index}:${(index * 3).toString().padLeft(2, '0')}'),         onTap: () => _showLogDetails(index"
+      },
+      {
+        "text": "Timestamp: 2024-12-24 ${10 + index}:${(index * 3).toString().padLeft(2,",
+        "line": 559,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "ty_center_text_log_id_log1000'.tr()),             Text(                 'Timestamp: 2024-12-24 ${10 + index}:${(index * 3).toString().padLeft(2, '0')}:00'),             Text('admin_admin_security_"
+      },
+      {
+        "text": "Search logs...",
+        "line": 280,
+        "pattern": "hintText:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "decoration: InputDecoration(                     hintText: 'Search logs...',                     prefixIcon: Icon(Icons.searc"
+      },
+      {
+        "text": "Office Network",
+        "line": 501,
+        "pattern": "hintText:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "labelText: 'Description',                 hintText: 'Office Network',               ),             ),           ],"
+      },
+      {
+        "text": "IP Address/Range",
+        "line": 494,
+        "pattern": "labelText:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "decoration: InputDecoration(                 labelText: 'IP Address/Range',                 hintText: '192.168.1.0/24',"
+      },
+      {
+        "text": "Description",
+        "line": 500,
+        "pattern": "labelText:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "decoration: InputDecoration(                 labelText: 'Description',                 hintText: 'Office Network',"
+      },
+      {
+        "text": "Data Access",
+        "line": 290,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "e: 'All',                 items: ['All', 'Login', 'Data Access', 'Settings Change']                     .map((e)"
+      },
+      {
+        "text": "Settings Change",
+        "line": 290,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "items: ['All', 'Login', 'Data Access', 'Settings Change']                     .map((e) => DropdownMenuItem"
+      },
+      {
+        "text": "Sarah Security",
+        "line": 381,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "ard(int index) {     final users = ['John Admin', 'Sarah Security', 'Mike Manager'];      return Card(       margin:"
+      },
+      {
+        "text": "Mike Manager",
+        "line": 381,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "final users = ['John Admin', 'Sarah Security', 'Mike Manager'];      return Card(       margin: EdgeInsets.only"
+      },
+      {
+        "text": "Data Export",
+        "line": 416,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "{     final actions = [       'User Login',       'Data Export',       'Settings Change',       'User Created',"
+      },
+      {
+        "text": "User Created",
+        "line": 418,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "'Data Export',       'Settings Change',       'User Created',       'Content Deleted'     ];     final users ="
+      },
+      {
+        "text": "Content Deleted",
+        "line": 419,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "'Settings Change',       'User Created',       'Content Deleted'     ];     final users = [       'john.admin',"
+      },
+      {
+        "text": "Edit permissions for $user",
+        "line": 532,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "ch (value) {       case 'edit':         message = 'Edit permissions for $user';         break;       case 'disable':         mes"
+      },
+      {
+        "text": "Disabled account for $user",
+        "line": 535,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "break;       case 'disable':         message = 'Disabled account for $user';         break;       case 'remove':         mess"
+      },
+      {
+        "text": "Removed admin privileges for $user",
+        "line": 538,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "break;       case 'remove':         message = 'Removed admin privileges for $user';         break;       default:         message ="
+      },
+      {
+        "text": "Unknown action",
+        "line": 541,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": ";         break;       default:         message = 'Unknown action';     }      ScaffoldMessenger.of(context).showSna"
+      },
+      {
+        "text": "John Admin",
+        "line": 363,
+        "pattern": "(?:title|Title).*?['\\\"]([^'\\\"]+)['\\\"]",
+        "context": ");   }    Widget _buildThreatCard(       String title, String description, String severity, Color color) {     return Card(       margin: EdgeInsets.only(bottom: 8),       child: ListTile(         leading: Icon(Icons.warning, color: color),         title: Text(title),         subtitle: Text(description),         trailing: Chip(           label: Text(severity),           backgroundColor: color.withValues(alpha: 0.1),           labelStyle: TextStyle(color: color),         ),         onTap: () => _showThreatDetails(title, description, severity),       ),     );   }    Widget _buildAdminUserCard(int index) {     final users = ['John Admin', 'Sarah Security', 'Mike Manager'];      return C"
+      }
+    ],
+    "lib/src/screens/admin_settings_screen.dart": [
+      {
+        "text": "Save",
+        "line": 119,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "onPressed: _saveSettings,               child: Text(                 'Save',                 style: TextStyle(color: Color(0x"
+      },
+      {
+        "text": "Error loading settings",
+        "line": 160,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "),           SizedBox(height: 16),           Text(             'Error loading settings',             style: Theme.of(context).textTheme.t"
+      },
+      {
+        "text": "Are you sure you want to create a backup of the database?",
+        "line": 554,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "ngs_text_backup_database'.tr()),         content: Text(             'Are you sure you want to create a backup of the database?'),         actions: [           TextButton("
+      },
+      {
+        "text": "Are you sure you want to reset all settings to default values?",
+        "line": 607,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "ings_text_reset_settings'.tr()),         content: Text(             'Are you sure you want to reset all settings to default values?'),         actions: [           TextButton("
+      },
+      {
+        "text": "Admin Settings",
+        "line": 110,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "appBar: EnhancedUniversalHeader(         title: 'Admin Settings',         showBackButton: true,         showSearch"
+      },
+      {
+        "text": "General Settings",
+        "line": 213,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "{     return _buildSettingsSection(       title: 'General Settings',       children: [         _buildTextSetting("
+      },
+      {
+        "text": "App Description",
+        "line": 222,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": ",         ),         _buildTextSetting(           'App Description',           _settings!.appDescription,           ("
+      },
+      {
+        "text": "Maintenance Mode",
+        "line": 228,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "),         _buildSwitchSetting(           'Maintenance Mode',           _settings!.maintenanceMode,"
+      },
+      {
+        "text": "Enable Registration",
+        "line": 234,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "),         _buildSwitchSetting(           'Enable Registration',           _settings!.registrationEnabled,"
+      },
+      {
+        "text": "User Settings",
+        "line": 245,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "{     return _buildSettingsSection(       title: 'User Settings',       children: [         _buildNumberSetting("
+      },
+      {
+        "text": "Max Upload Size (MB)",
+        "line": 248,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "hildren: [         _buildNumberSetting(           'Max Upload Size (MB)',           _settings!.maxUploadSizeMB.toDouble(),"
+      },
+      {
+        "text": "Max Artworks per User",
+        "line": 254,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "),         _buildNumberSetting(           'Max Artworks per User',           _settings!.maxArtworksPerUser.toDouble"
+      },
+      {
+        "text": "Require Email Verification",
+        "line": 260,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "),         _buildSwitchSetting(           'Require Email Verification',           _settings!.requireEmailVerification,"
+      },
+      {
+        "text": "Auto-approve Content",
+        "line": 266,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "),         _buildSwitchSetting(           'Auto-approve Content',           _settings!.autoApproveContent,"
+      },
+      {
+        "text": "Content Settings",
+        "line": 277,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "{     return _buildSettingsSection(       title: 'Content Settings',       children: [         _buildSwitchSetting("
+      },
+      {
+        "text": "Enable Comments",
+        "line": 280,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "hildren: [         _buildSwitchSetting(           'Enable Comments',           _settings!.commentsEnabled,"
+      },
+      {
+        "text": "Enable Artwork Ratings",
+        "line": 286,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "),         _buildSwitchSetting(           'Enable Artwork Ratings',           _settings!.ratingsEnabled,           ("
+      },
+      {
+        "text": "Enable Content Reporting",
+        "line": 292,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "),         _buildSwitchSetting(           'Enable Content Reporting',           _settings!.reportingEnabled,"
+      },
+      {
+        "text": "Banned Words (comma-separated)",
+        "line": 298,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": ",         ),         _buildTextSetting(           'Banned Words (comma-separated)',           _settings!.bannedWords.join(', '),"
+      },
+      {
+        "text": "Security Settings",
+        "line": 316,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "{     return _buildSettingsSection(       title: 'Security Settings',       children: [         _buildNumberSetting("
+      },
+      {
+        "text": "Max Login Attempts",
+        "line": 319,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "hildren: [         _buildNumberSetting(           'Max Login Attempts',           _settings!.maxLoginAttempts.toDouble()"
+      },
+      {
+        "text": "Login Attempt Window (minutes)",
+        "line": 325,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "),         _buildNumberSetting(           'Login Attempt Window (minutes)',           _settings!.loginAttemptWindow.toDouble"
+      },
+      {
+        "text": "Enable Two-Factor Authentication",
+        "line": 331,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "),         _buildSwitchSetting(           'Enable Two-Factor Authentication',           _settings!.twoFactorEnabled,"
+      },
+      {
+        "text": "Enable IP Blocking",
+        "line": 337,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "),         _buildSwitchSetting(           'Enable IP Blocking',           _settings!.ipBlockingEnabled,"
+      },
+      {
+        "text": "System Settings",
+        "line": 348,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "{     return _buildSettingsSection(       title: 'System Settings',       children: [         _buildSwitchSetting("
+      },
+      {
+        "text": "Enable Analytics",
+        "line": 351,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "hildren: [         _buildSwitchSetting(           'Enable Analytics',           _settings!.analyticsEnabled,"
+      },
+      {
+        "text": "Enable Error Logging",
+        "line": 357,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "),         _buildSwitchSetting(           'Enable Error Logging',           _settings!.errorLoggingEnabled,"
+      },
+      {
+        "text": "Enable Performance Monitoring",
+        "line": 363,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "),         _buildSwitchSetting(           'Enable Performance Monitoring',           _settings!.performanceMonitoringEnable"
+      },
+      {
+        "text": "Cache Duration (hours)",
+        "line": 371,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "),         _buildNumberSetting(           'Cache Duration (hours)',           _settings!.cacheDurationHours.toDouble"
+      },
+      {
+        "text": "Notification Settings",
+        "line": 382,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "{     return _buildSettingsSection(       title: 'Notification Settings',       children: [         _buildSwitchSetting("
+      },
+      {
+        "text": "Enable Push Notifications",
+        "line": 385,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "hildren: [         _buildSwitchSetting(           'Enable Push Notifications',           _settings!.pushNotificationsEnabled,"
+      },
+      {
+        "text": "Enable Email Notifications",
+        "line": 391,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "),         _buildSwitchSetting(           'Enable Email Notifications',           _settings!.emailNotificationsEnabled,"
+      },
+      {
+        "text": "Enable Admin Alerts",
+        "line": 397,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "),         _buildSwitchSetting(           'Enable Admin Alerts',           _settings!.adminAlertsEnabled,"
+      },
+      {
+        "text": "Maintenance Settings",
+        "line": 408,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "{     return _buildSettingsSection(       title: 'Maintenance Settings',       children: [         _buildTextSetting("
+      },
+      {
+        "text": "Maintenance Message",
+        "line": 411,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "children: [         _buildTextSetting(           'Maintenance Message',           _settings!.maintenanceMessage,"
+      },
+      {
+        "text": "Danger Zone",
+        "line": 438,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "{     return _buildSettingsSection(       title: 'Danger Zone',       color: Colors.red.shade50,       children:"
+      },
+      {
+        "text": ",\n          _settings!.errorLoggingEnabled,\n          (value) => _updateSetting(value, (s) => s.errorLoggingEnabled,\n              (s, v) => s.copyWith(errorLoggingEnabled: v)),\n        ),\n        _buildSwitchSetting(",
+        "line": 357,
+        "pattern": "(?:error|Error).*?['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "),         _buildSwitchSetting(           'Enable Error Logging',           _settings!.errorLoggingEnabled,           (value) => _updateSetting(value, (s) => s.errorLoggingEnabled,               (s, v) => s.copyWith(errorLoggingEnabled: v)),         ),         _buildSwitchSetting(           'Enable Performance Monitoring',           _setting"
+      }
+    ],
+    "lib/src/screens/admin_system_monitoring_screen.dart": [
+      {
+        "text": "System Status: ${_systemMetrics[",
+        "line": 211,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "rt,                 children: [                   Text(                     'System Status: ${_systemMetrics['systemHealth']?.toString().toUpperCase() ?? 'UNKNO"
+      },
+      {
+        "text": "Last updated: ${DateTime.now().toString().substring(0, 19)}",
+        "line": 217,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "),                   ),                   Text(                     'Last updated: ${DateTime.now().toString().substring(0, 19)}',                     style: Theme.of(context).tex"
+      },
+      {
+        "text": "Server Status",
+        "line": 310,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "rt,                 children: [                   Text(                     'Server Status',                     style: Theme.of(context).tex"
+      },
+      {
+        "text": "Recent Alerts",
+        "line": 335,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "children: [                       Text(                         'Recent Alerts',                         style: Theme.of(context)"
+      },
+      {
+        "text": "Real-time Performance",
+        "line": 381,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "rt,                 children: [                   Text(                     'Real-time Performance',                     style: Theme.of(context).tex"
+      },
+      {
+        "text": "Performance Metrics",
+        "line": 405,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "rt,                 children: [                   Text(                     'Performance Metrics',                     style: Theme.of(context).tex"
+      },
+      {
+        "text": "System Alerts",
+        "line": 479,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "rt,                 children: [                   Text(                     'System Alerts',                     style: Theme.of(context).tex"
+      },
+      {
+        "text": "Active Users",
+        "line": 550,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "rt,                 children: [                   Text(                     'Active Users',                     style: Theme.of(context).tex"
+      },
+      {
+        "text": "${server[",
+        "line": 605,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "tWeight.bold),                 ),                 Text(                   '${server['location'] ?? 'Unknown'} • Load: ${server['load']"
+      },
+      {
+        "text": "Performance Chart\\n(Real-time data visualization)",
+        "line": 750,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "),       child: const Center(         child: Text(           'Performance Chart\\n(Real-time data visualization)',           textAlign: TextAlign.center,"
+      },
+      {
+        "text": "Refresh Data",
+        "line": 159,
+        "pattern": "tooltip:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "onPressed: _loadSystemData,             tooltip: 'Refresh Data',           ),         ],         bottom: TabBar("
+      },
+      {
+        "text": "Pause Real-time",
+        "line": 154,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "},             tooltip: _isRealTimeEnabled ? 'Pause Real-time' : 'Start Real-time',           ),           IconB"
+      },
+      {
+        "text": "Start Real-time",
+        "line": 154,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "tooltip: _isRealTimeEnabled ? 'Pause Real-time' : 'Start Real-time',           ),           IconButton(             i"
+      },
+      {
+        "text": "Performance",
+        "line": 169,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "on: Icon(Icons.dashboard)),             Tab(text: 'Performance', icon: Icon(Icons.speed)),             Tab(text:"
+      },
+      {
+        "text": "Memory Usage",
+        "line": 275,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "AdminMetricsCard(                 title: 'Memory Usage',                 value:                     '${(_"
+      },
+      {
+        "text": "Response Time",
+        "line": 291,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "AdminMetricsCard(                 title: 'Response Time',                 value:                     '${(_"
+      },
+      {
+        "text": "Critical Alerts",
+        "line": 451,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "child: AdminMetricsCard(                   title: 'Critical Alerts',                   value:                       '"
+      },
+      {
+        "text": "Warning Alerts",
+        "line": 461,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "child: AdminMetricsCard(                   title: 'Warning Alerts',                   value:                       '"
+      },
+      {
+        "text": "Online Users",
+        "line": 521,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "AdminMetricsCard(                 title: 'Online Users',                 value: '${_systemMetrics['online"
+      },
+      {
+        "text": "Avg Session",
+        "line": 533,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "AdminMetricsCard(                 title: 'Avg Session',                 value:                     '${(_"
+      },
+      {
+        "text": "Session Time",
+        "line": 562,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "'Location',                       'Session Time',                       'Actions',"
+      },
+      {
+        "text": "Unknown Server",
+        "line": 602,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "t(                   server['name'] as String? ?? 'Unknown Server',                   style: const TextStyle(fontWei"
+      },
+      {
+        "text": "Unknown alert",
+        "line": 657,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "alert['message'] as String? ?? 'Unknown alert',                   style: const TextStyle(fontWei"
+      },
+      {
+        "text": "Unknown time",
+        "line": 661,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "alert['timestamp'] as String? ?? 'Unknown time',                   style: TextStyle("
+      },
+      {
+        "text": "No details available",
+        "line": 684,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "subtitle: Text(alert['details'] as String? ?? 'No details available'),         trailing: Column(           mainAxisAli"
+      },
+      {
+        "text": ":\n        color = Colors.red;\n        break;\n      default:\n        color = Colors.grey;\n    }\n\n    return Container(\n      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),\n      decoration: BoxDecoration(\n        color: color.withValues(alpha: 0.1),\n        borderRadius: BorderRadius.circular(12),\n        border: Border.all(color: color.withValues(alpha: 0.3)),\n      ),\n      child: Text(\n        status.toUpperCase(),\n        style: TextStyle(\n          color: color,\n          fontSize: 10,\n          fontWeight: FontWeight.bold,\n        ),\n      ),\n    );\n  }\n\n  Widget _buildPerformanceChart() {\n    // Simplified chart representation\n    return Container(\n      decoration: BoxDecoration(\n        border: Border.all(color: Colors.grey[300]!),\n        borderRadius: BorderRadius.circular(8),\n      ),\n      child: const Center(\n        child: Text(",
+        "line": 717,
+        "pattern": "(?:error|Error).*?['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "ase 'critical':       case 'offline':       case 'error':         color = Colors.red;         break;       default:         color = Colors.grey;     }      return Container(       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),       decoration: BoxDecoration(         color: color.withValues(alpha: 0.1),         borderRadius: BorderRadius.circular(12),         border: Border.all(color: color.withValues(alpha: 0.3)),       ),       child: Text(         status.toUpperCase(),         style: TextStyle(           color: color,           fontSize: 10,           fontWeight: FontWeight.bold,         ),       ),     );   }    Widget _buildPerformanceChart() {     // Simplified chart representation     return Container(       decoration: BoxDecoration(         border: Border.all(color: Colors.grey[300]!),         borderRadius: BorderRadius.circular(8),       ),       child: const Center(         child: Text(           'Performance Chart\\n(Real-time data visualization)'"
+      },
+      {
+        "text": "CPU Usage",
+        "line": 267,
+        "pattern": "(?:title|Title).*?['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "[               AdminMetricsCard(                 title: 'CPU Usage',                 value:                     '${(_"
+      },
+      {
+        "text": "Metric",
+        "line": 407,
+        "pattern": "(?:title|Title).*?['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "style: Theme.of(context).textTheme.titleLarge?.copyWith(                           fontWeight: FontWeight.bold,                         ),                   ),                   const SizedBox(height: 16),                   AdminDataTable(                     columns: const [                       'Metric',                       'Current',"
+      },
+      {
+        "text": "Peak Today",
+        "line": 527,
+        "pattern": "(?:title|Title).*?['\\\"]([^'\\\"]+)['\\\"]",
+        "context": ",               AdminMetricsCard(                 title: 'Peak Today',                 value: '${_systemMetrics['peakUs"
+      },
+      {
+        "text": "User",
+        "line": 552,
+        "pattern": "(?:title|Title).*?['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "style: Theme.of(context).textTheme.titleLarge?.copyWith(                           fontWeight: FontWeight.bold,                         ),                   ),                   const SizedBox(height: 16),                   AdminDataTable(                     columns: const [                       'User',                       'Status',"
+      },
+      {
+        "text": "Overview",
+        "line": 168,
+        "pattern": "Tab\\s*\\([^)]*text:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "Colors.white,           tabs: const [             Tab(text: 'Overview', icon: Icon(Icons.dashboard)),             Tab(te"
+      },
+      {
+        "text": "Alerts",
+        "line": 170,
+        "pattern": "Tab\\s*\\([^)]*text:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "rformance', icon: Icon(Icons.speed)),             Tab(text: 'Alerts', icon: Icon(Icons.warning)),             Tab(text"
+      },
+      {
+        "text": "Users",
+        "line": 171,
+        "pattern": "Tab\\s*\\([^)]*text:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "'Alerts', icon: Icon(Icons.warning)),             Tab(text: 'Users', icon: Icon(Icons.people)),           ],"
+      }
+    ],
+    "lib/src/screens/admin_user_detail_screen.dart": [
+      {
+        "text": "Recent Activity",
+        "line": 319,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "xisAlignment.start,         children: [           Text(             'Recent Activity',             style: Theme.of(context).textTheme.h"
+      },
+      {
+        "text": "Activity Summary",
+        "line": 335,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "rt,                 children: [                   Text(                     'Activity Summary',                     style: TextStyle(fontWeight:"
+      },
+      {
+        "text": "Admin Information",
+        "line": 388,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "xisAlignment.start,         children: [           Text(             'Admin Information',             style: TextStyle(fontWeight: FontWei"
+      },
+      {
+        "text": "User Suspended",
+        "line": 405,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "SizedBox(width: 8),                         Text(                           'User Suspended',                           style: TextStyle("
+      },
+      {
+        "text": "Suspended: ${_formatDateTime(_currentUser.suspendedAt!)}",
+        "line": 421,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "const SizedBox(height: 4),                       Text(                           'Suspended: ${_formatDateTime(_currentUser.suspendedAt!)}'),                     ],                     if ("
+      },
+      {
+        "text": "Admin Actions",
+        "line": 440,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "rt,                 children: [                   Text(                     'Admin Actions',                     style: TextStyle(fontWeight:"
+      },
+      {
+        "text": "Admin Notes",
+        "line": 485,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "children: [                     Text(                       'Admin Notes',                       style:"
+      },
+      {
+        "text": "By: ${noteData[",
+        "line": 508,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "SizedBox(height: 4),                             Text(                               'By: ${noteData['addedBy'] ?? 'Unknown'} • ${noteData['addedAt'] !="
+      },
+      {
+        "text": "Admin Flags",
+        "line": 528,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "children: [                     Text(                       'Admin Flags',                       style:"
+      },
+      {
+        "text": "User Management",
+        "line": 559,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "rt,                 children: [                   Text(                     'User Management',                     style: TextStyle(fontWeight:"
+      },
+      {
+        "text": "Image Management",
+        "line": 632,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "// Image Management                   Text('Image Management',                       style: TextStyle(fontWeigh"
+      },
+      {
+        "text": "User Type",
+        "line": 649,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "SizedBox(height: 16),                   Text('User Type',                       style: TextStyle(fontWeigh"
+      },
+      {
+        "text": "Status Management",
+        "line": 679,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "erification and Featured Status                   Text('Status Management',                       style: TextStyle(fontWeigh"
+      },
+      {
+        "text": "Are you sure you want to remove this user\\",
+        "line": 965,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "ext_remove_profile_image'.tr()),         content: Text(             'Are you sure you want to remove this user\\'s profile image?'),         actions: [           T"
+      },
+      {
+        "text": "User ${newFeaturedStatus ?",
+        "line": 1024,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "ckBar(           SnackBar(               content: Text(                   'User ${newFeaturedStatus ? 'marked as featured' : 'unfeatured'} successfully')"
+      },
+      {
+        "text": "User ${!_currentUser.isVerified ?",
+        "line": 1085,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "ckBar(           SnackBar(               content: Text(                   'User ${!_currentUser.isVerified ? 'verified' : 'unverified'} successfully')),"
+      },
+      {
+        "text": "Full Name",
+        "line": 571,
+        "pattern": "labelText:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "decoration: const InputDecoration(labelText: 'Full Name'),                     ),                     Size"
+      },
+      {
+        "text": "Username",
+        "line": 576,
+        "pattern": "labelText:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "decoration: const InputDecoration(labelText: 'Username'),                     ),                     Size"
+      },
+      {
+        "text": "Email",
+        "line": 581,
+        "pattern": "labelText:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "decoration: InputDecoration(labelText: 'Email'),                     ),                     Size"
+      },
+      {
+        "text": "Bio",
+        "line": 586,
+        "pattern": "labelText:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "decoration: InputDecoration(labelText: 'Bio'),                       maxLines: 3,"
+      },
+      {
+        "text": "Location",
+        "line": 592,
+        "pattern": "labelText:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "decoration: InputDecoration(labelText: 'Location'),                     ),                     Size"
+      },
+      {
+        "text": "Zip Code",
+        "line": 597,
+        "pattern": "labelText:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "decoration: InputDecoration(labelText: 'Zip Code'),                     ),                     Size"
+      },
+      {
+        "text": "User Details",
+        "line": 73,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "appBar: EnhancedUniversalHeader(         title: 'User Details',         showBackButton: true,         showSearch"
+      },
+      {
+        "text": "Personal Information",
+        "line": 251,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "children: [           _buildDetailSection('Personal Information', [             _buildDetailRow('Full Name', _curr"
+      },
+      {
+        "text": "Account Information",
+        "line": 267,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "zedBox(height: 24),           _buildDetailSection('Account Information', [             _buildDetailRow(                 '"
+      },
+      {
+        "text": "Last Active",
+        "line": 282,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "_buildDetailRow(                   'Last Active', _formatDateTime(_currentUser.lastActiveAt!)),"
+      },
+      {
+        "text": "Achievements",
+        "line": 295,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "dBox(height: 24),             _buildDetailSection('Achievements', [               Wrap(                 spacing: 8"
+      },
+      {
+        "text": "Account Created",
+        "line": 355,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "_buildActivityItem(                     'Account Created',                     _formatDateTime(_currentUser"
+      },
+      {
+        "text": "Profile Updated",
+        "line": 362,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "_buildActivityItem(                       'Profile Updated',                       _formatDateTime(_currentUs"
+      },
+      {
+        "text": "Active User",
+        "line": 368,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "_buildActivityItem(                     'Active User',                     _currentUser.isActiveUser ?"
+      },
+      {
+        "text": "Report Count",
+        "line": 446,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "_buildAdminActionTile(                     'Report Count',                     '${_currentUser.reportCount}"
+      },
+      {
+        "text": "Email Verified",
+        "line": 458,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "_buildAdminActionTile(                     'Email Verified',                     _currentUser.emailVerifiedAt"
+      },
+      {
+        "text": "Password Reset Required",
+        "line": 466,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "_buildAdminActionTile(                     'Password Reset Required',                     _currentUser.requiresPasswor"
+      },
+      {
+        "text": "Unknown time",
+        "line": 509,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "me((noteData['addedAt'] as Timestamp).toDate()) : 'Unknown time'}',                             ),"
+      },
+      {
+        "text": "Overview",
+        "line": 90,
+        "pattern": "Tab\\s*\\([^)]*text:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "F63),               tabs: const [                 Tab(text: 'Overview', icon: Icon(Icons.person)),                 Tab(t"
+      },
+      {
+        "text": "Details",
+        "line": 91,
+        "pattern": "Tab\\s*\\([^)]*text:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "view', icon: Icon(Icons.person)),                 Tab(text: 'Details', icon: Icon(Icons.info)),                 Tab(tex"
+      },
+      {
+        "text": "Activity",
+        "line": 92,
+        "pattern": "Tab\\s*\\([^)]*text:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "etails', icon: Icon(Icons.info)),                 Tab(text: 'Activity', icon: Icon(Icons.history)),                 Tab("
+      },
+      {
+        "text": "Admin",
+        "line": 93,
+        "pattern": "Tab\\s*\\([^)]*text:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "ity', icon: Icon(Icons.history)),                 Tab(text: 'Admin', icon: Icon(Icons.admin_panel_settings)),"
+      }
+    ],
+    "lib/src/screens/migration_screen.dart": [
+      {
+        "text": "This migration adds standardized moderation status fields to all content collections (posts, comments, artwork, captures, ads).",
+        "line": 196,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "const SizedBox(height: 8),                     Text(                       'This migration adds standardized moderation status fields to all content collections (posts, comments, artwork, captures, ads). '                       'Existing content will be m"
+      },
+      {
+        "text": "${status.migratedDocuments}/${status.totalDocuments} documents migrated",
+        "line": 351,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": ".start,               children: [                 Text(                   '${status.migratedDocuments}/${status.totalDocuments} documents migrated',                 ),                 const SizedBo"
+      },
+      {
+        "text": "${(status.migrationProgress * 100).toStringAsFixed(1)}%",
+        "line": 364,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "],             ),             trailing: Text(               '${(status.migrationProgress * 100).toStringAsFixed(1)}%',               style: TextStyle("
+      },
+      {
+        "text": "Existing content will be marked as",
+        "line": 198,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "artwork, captures, ads). '                       'Existing content will be marked as \"approved\" by default.',                     ),"
+      },
+      {
+        "text": "Migrating...",
+        "line": 276,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "abel:                         Text(_isMigrating ? 'Migrating...' : 'Run Migration'),                     style: El"
+      },
+      {
+        "text": "Run Migration",
+        "line": 276,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "Text(_isMigrating ? 'Migrating...' : 'Run Migration'),                     style: ElevatedButton.style"
+      },
+      {
+        "text": ": e.toString()});\n        _isLoading = false;\n      });\n    }\n  }\n\n  Future<void> _runMigration() async {\n    final confirmed = await _showConfirmationDialog(",
+        "line": 42,
+        "pattern": "(?:error|Error).*?['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "ration_error_check_status_failed'.tr(namedArgs: {'error': e.toString()});         _isLoading = false;       });     }   }    Future<void> _runMigration() async {     final confirmed = await _showConfirmationDialog(       'admin_migration_dialog_run_migration_title'.tr(),"
+      },
+      {
+        "text": ": e.toString()});\n        _isMigrating = false;\n      });\n    }\n  }\n\n  Future<void> _rollbackMigration() async {\n    final confirmed = await _showConfirmationDialog(",
+        "line": 73,
+        "pattern": "(?:error|Error).*?['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "= 'admin_migration_error_failed'.tr(namedArgs: {'error': e.toString()});         _isMigrating = false;       });     }   }    Future<void> _rollbackMigration() async {     final confirmed = await _showConfirmationDialog(       'admin_migration_dialog_rollback_title'.tr(),"
+      },
+      {
+        "text": ": e.toString()});\n        _isMigrating = false;\n      });\n    }\n  }\n\n  Future<void> _migrateGeoFields() async {\n    final confirmed = await _showConfirmationDialog(",
+        "line": 104,
+        "pattern": "(?:error|Error).*?['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "_migration_error_rollback_failed'.tr(namedArgs: {'error': e.toString()});         _isMigrating = false;       });     }   }    Future<void> _migrateGeoFields() async {     final confirmed = await _showConfirmationDialog(       'admin_migration_dialog_geo_title'.tr(),       'adm"
+      },
+      {
+        "text": ": e.toString()});\n        _isMigrating = false;\n      });\n    }\n  }\n\n  Future<bool> _showConfirmationDialog(String title, String message) async {\n    return await showDialog<bool>(\n          context: context,\n          builder: (context) => AlertDialog(\n            title: Text(title),\n            content: Text(message),\n            actions: [\n              TextButton(\n                onPressed: () => Navigator.of(context).pop(false),\n                child: Text(",
+        "line": 132,
+        "pattern": "(?:error|Error).*?['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "admin_migration_error_geo_failed'.tr(namedArgs: {'error': e.toString()});         _isMigrating = false;       });     }   }    Future<bool> _showConfirmationDialog(String title, String message) async {     return await showDialog<bool>(           context: context,           builder: (context) => AlertDialog(             title: Text(title),             content: Text(message),             actions: [               TextButton(                 onPressed: () => Navigator.of(context).pop(false),                 child: Text('admin_admin_payment_text_cancel'.tr()),"
+      }
+    ],
+    "lib/src/screens/modern_unified_admin_dashboard.dart": [
+      {
+        "text": "Loading admin data...",
+        "line": 352,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": ",           const SizedBox(height: 20),           Text(             'Loading admin data...',             style: TextStyle(               colo"
+      },
+      {
+        "text": "Oops! Something went wrong",
+        "line": 391,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "const SizedBox(height: 16),             const Text(               'Oops! Something went wrong',               style: TextStyle("
+      },
+      {
+        "text": "Performance Overview",
+        "line": 474,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "const Expanded(                 child: Text(                   'Performance Overview',                   style: TextStyle("
+      },
+      {
+        "text": "Quick Actions",
+        "line": 647,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "const Expanded(                 child: Text(                   'Quick Actions',                   style: TextStyle("
+      },
+      {
+        "text": "Recent Activity",
+        "line": 823,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "const Expanded(                 child: Text(                   'Recent Activity',                   style: TextStyle("
+      },
+      {
+        "text": "No recent activity",
+        "line": 846,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "const SizedBox(height: 8),                   Text(                     'No recent activity',                     style: TextStyle("
+      },
+      {
+        "text": "System Health",
+        "line": 951,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "const Expanded(                 child: Text(                   'System Health',                   style: TextStyle("
+      },
+      {
+        "text": "User Management",
+        "line": 1074,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "SizedBox(width: 12),                       const Text(                         'User Management',                         style: TextStyle("
+      },
+      {
+        "text": "$label ($count)",
+        "line": 1270,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "te.withValues(alpha: 0.2)),       ),       child: Text(         '$label ($count)',         style: const TextStyle(           color:"
+      },
+      {
+        "text": "Joined ${_formatDate(user.createdAt)}",
+        "line": 1408,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "Expanded(                       child: Text(                         'Joined ${_formatDate(user.createdAt)}',                         style: TextStyle("
+      },
+      {
+        "text": "Content Moderation",
+        "line": 1518,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "SizedBox(width: 12),                       const Text(                         'Content Moderation',                         style: TextStyle("
+      },
+      {
+        "text": "Pending Reviews",
+        "line": 1670,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "children: [                     const Text(                       'Pending Reviews',                       style: TextStyle("
+      },
+      {
+        "text": "Recent Content",
+        "line": 1701,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "children: [                   const Text(                     'Recent Content',                     style: TextStyle("
+      },
+      {
+        "text": "By ${review.authorName}",
+        "line": 1893,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "),           const SizedBox(height: 8),           Text(             'By ${review.authorName}',             style: TextStyle(               colo"
+      },
+      {
+        "text": "By ${content.authorName}",
+        "line": 2009,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "Expanded(                       child: Text(                         'By ${content.authorName}',                         style: TextStyle("
+      },
+      {
+        "text": "View Details",
+        "line": 2054,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "view',                 child:                     Text('View Details', style: TextStyle(color: Colors.white)),"
+      },
+      {
+        "text": "Edit Content",
+        "line": 2059,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "edit',                 child:                     Text('Edit Content', style: TextStyle(color: Colors.white)),"
+      },
+      {
+        "text": "Delete Content",
+        "line": 2063,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "value: 'delete',                 child: Text('Delete Content',                     style: TextStyle(color: Colo"
+      },
+      {
+        "text": "Media",
+        "line": 2332,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "true)) ...[                         const Text(                           'Media',                           style: TextStyle("
+      },
+      {
+        "text": "Description",
+        "line": 2403,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "cription.isNotEmpty) ...[                         Text(                           'Description',                           style: TextStyle("
+      },
+      {
+        "text": "Tags",
+        "line": 2447,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "nst SizedBox(height: 24),                         Text(                           'Tags',                           style: TextStyle("
+      },
+      {
+        "text": "Review cleared successfully",
+        "line": 2501,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "content: Text(                                             'Review cleared successfully'),                                         backgro"
+      },
+      {
+        "text": "$label: $value",
+        "line": 2646,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "te.withValues(alpha: 0.2)),       ),       child: Text(         '$label: $value',         style: const TextStyle(           color:"
+      },
+      {
+        "text": "Title",
+        "line": 2709,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "[                 // Title field                 Text(                   'Title',                   style: TextStyle("
+      },
+      {
+        "text": "Status",
+        "line": 2786,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "// Status dropdown                 Text(                   'Status',                   style: TextStyle("
+      },
+      {
+        "text": "Cancel",
+        "line": 2840,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": ") => Navigator.pop(context),               child: Text(                 'Cancel',                 style: TextStyle(color: Colors.w"
+      },
+      {
+        "text": "Are you sure you want to delete this ${content.type}?",
+        "line": 2899,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "lignment.start,           children: [             Text(               'Are you sure you want to delete this ${content.type}?',               style: TextStyle("
+      },
+      {
+        "text": "by ${content.authorName}",
+        "line": 2924,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "const SizedBox(height: 4),                   Text(                     'by ${content.authorName}',                     style: TextStyle("
+      },
+      {
+        "text": "This action cannot be undone.",
+        "line": 2935,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "const SizedBox(height: 16),             Text(               'This action cannot be undone.',               style: TextStyle("
+      },
+      {
+        "text": "Financial Analytics",
+        "line": 3143,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "SizedBox(width: 12),                       const Text(                         'Financial Analytics',                         style: TextStyle("
+      },
+      {
+        "text": "Revenue Breakdown",
+        "line": 3240,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "children: [                   const Text(                     'Revenue Breakdown',                     style: TextStyle("
+      },
+      {
+        "text": "Recent Transactions",
+        "line": 3290,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "children: [                   const Text(                     'Recent Transactions',                     style: TextStyle("
+      },
+      {
+        "text": "Financial Insights",
+        "line": 3312,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "children: [                   const Text(                     'Financial Insights',                     style: TextStyle("
+      },
+      {
+        "text": "Revenue Chart",
+        "line": 3460,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": ",           const SizedBox(height: 16),           Text(             'Revenue Chart',             style: TextStyle(               colo"
+      },
+      {
+        "text": "Chart visualization will be implemented\\nwith real Firebase data using fl_chart",
+        "line": 3469,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "),           const SizedBox(height: 8),           Text(             'Chart visualization will be implemented\\nwith real Firebase data using fl_chart',             style: TextStyle(               colo"
+      },
+      {
+        "text": "$percentage%",
+        "line": 3492,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "child: Column(         children: [           Text(             '$percentage%',             style: TextStyle(               colo"
+      },
+      {
+        "text": "No Recent Transactions",
+        "line": 3527,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "const SizedBox(height: 16),             Text(               'No Recent Transactions',               style: TextStyle("
+      },
+      {
+        "text": "Transaction data will appear here once payments are processed.",
+        "line": 3536,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "const SizedBox(height: 8),             Text(               'Transaction data will appear here once payments are processed.',               style: TextStyle("
+      },
+      {
+        "text": "Search users by name, email, or username...",
+        "line": 1143,
+        "pattern": "hintText:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "ecoration: InputDecoration(                       hintText: 'Search users by name, email, or username...',                       hintStyle:"
+      },
+      {
+        "text": "Search content by title, author, or description...",
+        "line": 1601,
+        "pattern": "hintText:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "ecoration: InputDecoration(                       hintText:                           'Search content by title, author, or description...',                       hintStyle:"
+      },
+      {
+        "text": "Enter title",
+        "line": 2721,
+        "pattern": "hintText:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "decoration: InputDecoration(                     hintText: 'Enter title',                     hintStyle: TextStyle("
+      },
+      {
+        "text": "Enter description",
+        "line": 2760,
+        "pattern": "hintText:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "decoration: InputDecoration(                     hintText: 'Enter description',                     hintStyle: TextStyle("
+      },
+      {
+        "text": "Refresh Data",
+        "line": 252,
+        "pattern": "tooltip:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "onPressed: _loadAllData,             tooltip: 'Refresh Data',           ),         ),       ],     );   }    B"
+      },
+      {
+        "text": "Failed to load admin data: $e",
+        "line": 114,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "catch (e) {       setState(() {         _error = 'Failed to load admin data: $e';       });     } finally {       setState(() {"
+      },
+      {
+        "text": "Failed to load dashboard data: $e",
+        "line": 146,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "catch (e) {       setState(() {         _error = 'Failed to load dashboard data: $e';         _isLoading = false;       });     }   }"
+      },
+      {
+        "text": "Admin Command Center",
+        "line": 234,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "return EnhancedUniversalHeader(       title: 'Admin Command Center',       showBackButton: false,       showSearch: t"
+      },
+      {
+        "text": "Unknown error occurred",
+        "line": 401,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "ht: 8),             Text(               _error ?? 'Unknown error occurred',               style: TextStyle("
+      },
+      {
+        "text": "Total Users",
+        "line": 499,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "_buildModernKPICard(                     'Total Users',                     _users.length.toString(),"
+      },
+      {
+        "text": "Total Content",
+        "line": 515,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "_buildModernKPICard(                     'Total Content',                     _allContent.length.toString("
+      },
+      {
+        "text": "Review Content",
+        "line": 665,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "_buildModernActionCard(                 'Review Content',                 'Moderate pending submissions',"
+      },
+      {
+        "text": "Moderate pending submissions",
+        "line": 666,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "'Review Content',                 'Moderate pending submissions',                 Icons.rate_review_rounded,"
+      },
+      {
+        "text": "Manage Users",
+        "line": 675,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "_buildModernActionCard(                 'Manage Users',                 'User administration tools',"
+      },
+      {
+        "text": "User administration tools",
+        "line": 676,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "(                 'Manage Users',                 'User administration tools',                 Icons.people_rounded,"
+      },
+      {
+        "text": "Financial Reports",
+        "line": 682,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "_buildModernActionCard(                 'Financial Reports',                 'Revenue and analytics',"
+      },
+      {
+        "text": "Revenue and analytics",
+        "line": 683,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "'Financial Reports',                 'Revenue and analytics',                 Icons.analytics_rounded,"
+      },
+      {
+        "text": "System Settings",
+        "line": 689,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "_buildModernActionCard(                 'System Settings',                 'Configure platform settings',"
+      },
+      {
+        "text": "Configure platform settings",
+        "line": 690,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "'System Settings',                 'Configure platform settings',                 Icons.settings_rounded,"
+      },
+      {
+        "text": "API Services",
+        "line": 970,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "_buildModernHealthIndicator(                   'API Services', true, Icons.api_rounded),               const Si"
+      },
+      {
+        "text": "File Storage",
+        "line": 973,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "_buildModernHealthIndicator(                   'File Storage', true, Icons.cloud_rounded),             ],"
+      },
+      {
+        "text": "Verified Users",
+        "line": 1103,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "_buildUserStatCard(                             'Verified Users',                             _users.where((u) =>"
+      },
+      {
+        "text": "Featured Users",
+        "line": 1109,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "_buildUserStatCard(                             'Featured Users',                             _users.where((u) =>"
+      },
+      {
+        "text": "Suspended Users",
+        "line": 1115,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "_buildUserStatCard(                             'Suspended Users',                             _users"
+      },
+      {
+        "text": "Failed to trigger capture approval rewards: $e",
+        "line": 2162,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "}       }     } catch (e) {       AppLogger.error('Failed to trigger capture approval rewards: $e');       // Don't throw - approval should still su"
+      },
+      {
+        "text": "Rejected by admin",
+        "line": 2179,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "rejectContent(review.contentId,           reason: 'Rejected by admin');        // Refresh the content data       await"
+      },
+      {
+        "text": "Total Revenue",
+        "line": 3166,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "uildFinancialKPICard(                             'Total Revenue',                             _analytics?.financia"
+      },
+      {
+        "text": "Monthly Recurring",
+        "line": 3182,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "uildFinancialKPICard(                             'Monthly Recurring',                             _analytics?.financia"
+      },
+      {
+        "text": "Total Transactions",
+        "line": 3199,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "uildFinancialKPICard(                             'Total Transactions',                             _analytics?.financia"
+      },
+      {
+        "text": "Avg Transaction",
+        "line": 3212,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "uildFinancialKPICard(                             'Avg Transaction',                             _analytics?.financia"
+      },
+      {
+        "text": "Per transaction",
+        "line": 3220,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "Metrics != null                                 ? 'Per transaction'                                 : '--',"
+      },
+      {
+        "text": "Advertisements",
+        "line": 3255,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "buildRevenueSourceCard(                           'Advertisements',                           _revenueBreakdown['Adv"
+      },
+      {
+        "text": "Subscriptions",
+        "line": 3263,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "buildRevenueSourceCard(                           'Subscriptions',                           _revenueBreakdown['Sub"
+      },
+      {
+        "text": "Artwork Sales",
+        "line": 3271,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "buildRevenueSourceCard(                           'Artwork Sales',                           _revenueBreakdown['Art"
+      },
+      {
+        "text": "Revenue Growth",
+        "line": 3322,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "_buildFinancialInsightCard(                     'Revenue Growth',                     _analytics?.financialMetrics"
+      },
+      {
+        "text": "Revenue ${_analytics!.financialMetrics.revenueGrowth >= 0 ?",
+        "line": 3324,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "inancialMetrics != null                         ? 'Revenue ${_analytics!.financialMetrics.revenueGrowth >= 0 ? 'increased' : 'decreased'} by ${_analytics!.financi"
+      },
+      {
+        "text": "Revenue growth data will appear here",
+        "line": 3325,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "ompared to last period'                         : 'Revenue growth data will appear here',                     Icons.trending_up_rounded,"
+      },
+      {
+        "text": "Transaction Volume",
+        "line": 3334,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "_buildFinancialInsightCard(                     'Transaction Volume',                     _analytics?.financialMetrics"
+      },
+      {
+        "text": "Transaction data will appear here",
+        "line": 3337,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "transactions processed'                         : 'Transaction data will appear here',                     Icons.receipt_long_rounded,"
+      },
+      {
+        "text": "Average Revenue",
+        "line": 3343,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "_buildFinancialInsightCard(                     'Average Revenue',                     _analytics?.financialMetrics"
+      },
+      {
+        "text": "Average revenue per transaction: ${_formatCurrency(_analytics!.financialMetrics.averageRevenuePerUser)}",
+        "line": 3345,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "inancialMetrics != null                         ? 'Average revenue per transaction: ${_formatCurrency(_analytics!.financialMetrics.averageRevenuePerUser)}'                         : 'Average revenue data w"
+      },
+      {
+        "text": "Average revenue data will appear here",
+        "line": 3346,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "verageRevenuePerUser)}'                         : 'Average revenue data will appear here',                     Icons.analytics_rounded,"
+      },
+      {
+        "text": "All",
+        "line": 66,
+        "pattern": "(?:error|Error).*?['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "// State   bool _isLoading = true;   String? _error;    // Search controllers for future use   final TextEditingController _userSearchController = TextEditingController();   final TextEditingController _contentSearchController =       TextEditingController();    // Content filter state   String _selectedContentFilter = 'All';    @override   void initState() {     super.init"
+      },
+      {
+        "text": ",\n                style: TextStyle(\n                  color: color,\n                  fontSize: 11,\n                  fontWeight: FontWeight.w600,\n                ),\n                overflow: TextOverflow.ellipsis,\n                textAlign: TextAlign.center,\n              ),\n            ),\n          ),\n        ],\n      ),\n    );\n  }\n\n  // ==================== PLACEHOLDER TABS ====================\n  Widget _buildModernUserManagementTab() {\n    return RefreshIndicator(\n      onRefresh: _loadUserData,\n      color: Colors.white,\n      backgroundColor: const Color(0xFF8C52FF),\n      child: SingleChildScrollView(\n        padding: const EdgeInsets.all(16),\n        physics: const AlwaysScrollableScrollPhysics(),\n        child: Column(\n          crossAxisAlignment: CrossAxisAlignment.start,\n          children: [\n            // User Statistics Overview\n            Container(\n              decoration: _buildGlassDecoration(),\n              padding: const EdgeInsets.all(24),\n              child: Column(\n                crossAxisAlignment: CrossAxisAlignment.start,\n                children: [\n                  Row(\n                    children: [\n                      Container(\n                        padding: const EdgeInsets.all(8),\n                        decoration: BoxDecoration(\n                          color: Colors.white.withValues(alpha: 0.2),\n                          borderRadius: BorderRadius.circular(12),\n                        ),\n                        child: const Icon(\n                          Icons.people_rounded,\n                          color: Colors.white,\n                          size: 24,\n                        ),\n                      ),\n                      const SizedBox(width: 12),\n                      const Text(",
+        "line": 1024,
+        "pattern": "(?:error|Error).*?['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "d: Text(                 isHealthy ? 'Healthy' : 'Error',                 style: TextStyle(                   color: color,                   fontSize: 11,                   fontWeight: FontWeight.w600,                 ),                 overflow: TextOverflow.ellipsis,                 textAlign: TextAlign.center,               ),             ),           ),         ],       ),     );   }    // ==================== PLACEHOLDER TABS ====================   Widget _buildModernUserManagementTab() {     return RefreshIndicator(       onRefresh: _loadUserData,       color: Colors.white,       backgroundColor: const Color(0xFF8C52FF),       child: SingleChildScrollView(         padding: const EdgeInsets.all(16),         physics: const AlwaysScrollableScrollPhysics(),         child: Column(           crossAxisAlignment: CrossAxisAlignment.start,           children: [             // User Statistics Overview             Container(               decoration: _buildGlassDecoration(),               padding: const EdgeInsets.all(24),               child: Column(                 crossAxisAlignment: CrossAxisAlignment.start,                 children: [                   Row(                     children: [                       Container(                         padding: const EdgeInsets.all(8),                         decoration: BoxDecoration(                           color: Colors.white.withValues(alpha: 0.2),                           borderRadius: BorderRadius.circular(12),                         ),                         child: const Icon(                           Icons.people_rounded,                           color: Colors.white,                           size: 24,                         ),                       ),                       const SizedBox(width: 12),                       const Text(                         'User Management',                         style: T"
+      },
+      {
+        "text": ",\n                      hintStyle:\n                          TextStyle(color: Colors.white.withValues(alpha: 0.6)),\n                      prefixIcon: Icon(Icons.search_rounded,\n                          color: Colors.white.withValues(alpha: 0.6)),\n                      filled: true,\n                      fillColor: Colors.white.withValues(alpha: 0.1),\n                      border: OutlineInputBorder(\n                        borderRadius: BorderRadius.circular(12),\n                        borderSide: BorderSide.none,\n                      ),\n                      enabledBorder: OutlineInputBorder(\n                        borderRadius: BorderRadius.circular(12),\n                        borderSide: BorderSide(\n                            color: Colors.white.withValues(alpha: 0.2)),\n                      ),\n                      focusedBorder: OutlineInputBorder(\n                        borderRadius: BorderRadius.circular(12),\n                        borderSide:\n                            const BorderSide(color: Colors.white, width: 2),\n                      ),\n                    ),\n                    onChanged: (value) => setState(() {}),\n                  ),\n                  const SizedBox(height: 16),\n                  SingleChildScrollView(\n                    scrollDirection: Axis.horizontal,\n                    child: Row(\n                      children: [\n                        _buildContentFilterChip(",
+        "line": 1602,
+        "pattern": "(?:title|Title).*?['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "ext:                           'Search content by title, author, or description...',                       hintStyle:                           TextStyle(color: Colors.white.withValues(alpha: 0.6)),                       prefixIcon: Icon(Icons.search_rounded,                           color: Colors.white.withValues(alpha: 0.6)),                       filled: true,                       fillColor: Colors.white.withValues(alpha: 0.1),                       border: OutlineInputBorder(                         borderRadius: BorderRadius.circular(12),                         borderSide: BorderSide.none,                       ),                       enabledBorder: OutlineInputBorder(                         borderRadius: BorderRadius.circular(12),                         borderSide: BorderSide(                             color: Colors.white.withValues(alpha: 0.2)),                       ),                       focusedBorder: OutlineInputBorder(                         borderRadius: BorderRadius.circular(12),                         borderSide:                             const BorderSide(color: Colors.white, width: 2),                       ),                     ),                     onChanged: (value) => setState(() {}),                   ),                   const SizedBox(height: 16),                   SingleChildScrollView(                     scrollDirection: Axis.horizontal,                     child: Row(                       children: [                         _buildContentFilterChip(                             'All', _getFilteredContent().length),"
+      }
+    ],
+    "lib/src/screens/unified_admin_dashboard.dart": [
+      {
+        "text": "Key Performance Indicators",
+        "line": 278,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "nt.start,           children: [             const Text(               'Key Performance Indicators',               style: TextStyle(fontSize: 18, fon"
+      },
+      {
+        "text": "Quick Actions",
+        "line": 367,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "lignment.start,           children: [             Text(               'Quick Actions',               style: TextStyle(fontSize: 18, fon"
+      },
+      {
+        "text": "Recent Activity",
+        "line": 424,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "lignment.start,           children: [             Text(               'Recent Activity',               style: TextStyle(fontSize: 18, fon"
+      },
+      {
+        "text": "System Health",
+        "line": 463,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "lignment.start,           children: [             Text(               'System Health',               style: TextStyle(fontSize: 18, fon"
+      },
+      {
+        "text": "${_selectedUserIds.length} users selected",
+        "line": 586,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "...[             SizedBox(height: 8),             Text(               '${_selectedUserIds.length} users selected',               style: const TextStyle(fontWeight:"
+      },
+      {
+        "text": "Role: ${user.userType ??",
+        "line": 644,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "Text(user.email),                   Text(                     'Role: ${user.userType ?? 'User'} • Status: ${user.statusText}',"
+      },
+      {
+        "text": "REPORTED CONTENT",
+        "line": 866,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "if (isReported)                         Text(                           'REPORTED CONTENT',                           style: TextStyle("
+      },
+      {
+        "text": "Ad Management",
+        "line": 985,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "xisAlignment.start,         children: [           Text(             'Ad Management',             style: TextStyle(fontSize: 20, fontW"
+      },
+      {
+        "text": "Payout Management",
+        "line": 1006,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "xisAlignment.start,         children: [           Text(             'Payout Management',             style: TextStyle(fontSize: 20, fontW"
+      },
+      {
+        "text": "Recent Ad Activity",
+        "line": 1042,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "lignment.start,           children: [             Text(               'Recent Ad Activity',               style: TextStyle(fontSize: 16, fon"
+      },
+      {
+        "text": "Payout Summary",
+        "line": 1082,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "lignment.start,           children: [             Text(               'Payout Summary',               style: TextStyle(fontSize: 16, fon"
+      },
+      {
+        "text": "Recent Payouts",
+        "line": 1120,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "lignment.start,           children: [             Text(               'Recent Payouts',               style: TextStyle(fontSize: 16, fon"
+      },
+      {
+        "text": "Processed on ${DateTime.now().subtract(Duration(days: index)).toString().split(",
+        "line": 1132,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "ayout_index_1'.tr()),                   subtitle: Text('Processed on ${DateTime.now().subtract(Duration(days: index)).toString().split(' ')[0]}'),                   trailing: Text("
+      },
+      {
+        "text": "\\$${(100 + (index * 50)).toStringAsFixed(2)}",
+        "line": 1133,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "g().split(' ')[0]}'),                   trailing: Text(                     '\\$${(100 + (index * 50)).toStringAsFixed(2)}',                     style: const TextStyle(fontW"
+      },
+      {
+        "text": "Financial Overview",
+        "line": 1193,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "lignment.start,           children: [             Text(               'Financial Overview',               style: TextStyle(fontSize: 18, fon"
+      },
+      {
+        "text": "Revenue Trend",
+        "line": 1254,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "lignment.start,           children: [             Text(               'Revenue Trend',               style: TextStyle(fontSize: 18, fon"
+      },
+      {
+        "text": "User ${user.statusText ==",
+        "line": 1318,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "nackBar(           SnackBar(             content: Text(                 'User ${user.statusText == 'Active' ? 'banned' : 'unbanned'} successfully'),"
+      },
+      {
+        "text": "${_selectedContentIds.length} items approved successfully",
+        "line": 1392,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "ckBar(           SnackBar(               content: Text(                   '${_selectedContentIds.length} items approved successfully')),         );       }     } catch (e) {       if"
+      },
+      {
+        "text": "${_selectedContentIds.length} items rejected successfully",
+        "line": 1418,
+        "pattern": "Text\\s*\\(\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "ckBar(           SnackBar(               content: Text(                   '${_selectedContentIds.length} items rejected successfully')),         );       }     } catch (e) {       if"
+      },
+      {
+        "text": "Search users...",
+        "line": 532,
+        "pattern": "hintText:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "decoration: InputDecoration(               hintText: 'Search users...',               prefixIcon: const Icon(Icons.searc"
+      },
+      {
+        "text": "Search content...",
+        "line": 777,
+        "pattern": "hintText:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "r,         decoration: InputDecoration(           hintText: 'Search content...',           prefixIcon: const Icon(Icons.search),"
+      },
+      {
+        "text": "Refresh Data",
+        "line": 158,
+        "pattern": "tooltip:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "onPressed: _loadAllData,             tooltip: 'Refresh Data',           ),         ],       ),       drawer: c"
+      },
+      {
+        "text": "Approve Selected",
+        "line": 543,
+        "pattern": "tooltip:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": ": null,                           tooltip: 'Approve Selected',                         ),"
+      },
+      {
+        "text": "Ban Selected",
+        "line": 550,
+        "pattern": "tooltip:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": ": null,                           tooltip: 'Ban Selected',                         ),"
+      },
+      {
+        "text": "Exit Selection Mode",
+        "line": 560,
+        "pattern": "tooltip:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "},                           tooltip: 'Exit Selection Mode',                         ),"
+      },
+      {
+        "text": "Enter Selection Mode",
+        "line": 571,
+        "pattern": "tooltip:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": ");                       },                       tooltip: 'Enter Selection Mode',                     ),               border: Out"
+      },
+      {
+        "text": "Reject Selected",
+        "line": 795,
+        "pattern": "tooltip:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": ": null,                       tooltip: 'Reject Selected',                     ),                     IconB"
+      },
+      {
+        "text": "Failed to load admin data: $e",
+        "line": 100,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "catch (e) {       setState(() {         _error = 'Failed to load admin data: $e';       });     } finally {       setState(() {"
+      },
+      {
+        "text": "Admin Dashboard",
+        "line": 149,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "appBar: EnhancedUniversalHeader(         title: 'Admin Dashboard',         showBackButton: false,         showSearc"
+      },
+      {
+        "text": "Total Users",
+        "line": 295,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "_buildKPICard(                       'Total Users',                       _users.length.toString(),"
+      },
+      {
+        "text": "Pending Reviews",
+        "line": 301,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "_buildKPICard(                       'Pending Reviews',                       _pendingReviews.length.toS"
+      },
+      {
+        "text": "Total Content",
+        "line": 307,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "_buildKPICard(                       'Total Content',                       _allContent.length.toStrin"
+      },
+      {
+        "text": "Review Content",
+        "line": 377,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "_buildQuickActionButton(                   'Review Content',                   Icons.rate_review,"
+      },
+      {
+        "text": "Manage Users",
+        "line": 382,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "_buildQuickActionButton(                   'Manage Users',                   Icons.people,"
+      },
+      {
+        "text": "Financial Reports",
+        "line": 387,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "_buildQuickActionButton(                   'Financial Reports',                   Icons.analytics,"
+      },
+      {
+        "text": "System Settings",
+        "line": 392,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "_buildQuickActionButton(                   'System Settings',                   Icons.settings,"
+      },
+      {
+        "text": "Pending Review",
+        "line": 698,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "2FF),             tabs: [               Tab(text: 'Pending Review'),               Tab(text: 'All Content'),"
+      },
+      {
+        "text": "All Content",
+        "line": 699,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "(text: 'Pending Review'),               Tab(text: 'All Content'),               Tab(text: 'Reported'),"
+      },
+      {
+        "text": "Total Events",
+        "line": 1028,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "eViews ?? 0, Colors.blue),         _buildStatCard('Total Events', _analytics?.totalEvents ?? 0, Colors.green),"
+      },
+      {
+        "text": "Bounce Rate",
+        "line": 1029,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "vents ?? 0, Colors.green),         _buildStatCard('Bounce Rate', '${(_analytics?.bounceRate ?? 0.0).toStringAsFix"
+      },
+      {
+        "text": "Total Paid Out",
+        "line": 1091,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "child: _buildFinancialMetric(                     'Total Paid Out',                     financial != null ? _formatC"
+      },
+      {
+        "text": "Pending Payouts",
+        "line": 1099,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "child: _buildFinancialMetric(                     'Pending Payouts',                     financial != null ? _formatC"
+      },
+      {
+        "text": "Total Revenue",
+        "line": 1202,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "child: _buildFinancialMetric(                     'Total Revenue',                     financial != null"
+      },
+      {
+        "text": "Monthly Revenue",
+        "line": 1212,
+        "pattern": "(?<!import\\s)['\\\"]([A-Z][^'\\\"]{10,})['\\\"]",
+        "context": "child: _buildFinancialMetric(                     'Monthly Revenue',                     financial != null"
+      },
+      {
+        "text": "Dashboard",
+        "line": 181,
+        "pattern": "(?:error|Error).*?['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "rcularProgressIndicator())                     : _error != null                         ? _buildErrorWidget()                         : TabBarView(                             controller: _mainTabController,                             children: [                               _buildDashboardTab(),                               _buildUserManagementTab(),                               _buildContentModerationTab(),                               _buildFinancialTab(),                             ],                           ),               ),             ],           ),         ),       ),     );   }    Widget _buildMainTabBar() {     return Container(       color: Colors.white,       child: TabBar(         controller: _mainTabController,         labelColor: const Color(0xFF8C52FF),         unselectedLabelColor: Colors.grey,         indicatorColor: const Color(0xFF8C52FF),         tabs: const [           Tab(             text: 'Dashboard',             icon: Icon(Icons.dashboard, size: 20"
+      },
+      {
+        "text": "Healthy",
+        "line": 491,
+        "pattern": "(?:error|Error).*?['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "isHealthy ? Icons.check_circle : Icons.error,           color: isHealthy ? Colors.green : Colors.red,           size: 32,         ),         SizedBox(height: 4),         Text(           service,           style: const TextStyle(fontSize: 12),         ),         Text(           isHealthy ? 'Healthy' : 'Error',           style: TextStyle("
+      },
+      {
+        "text": ",\n          style: TextStyle(\n            fontSize: 10,\n            color: isHealthy ? Colors.green : Colors.red,\n          ),\n        ),\n      ],\n    );\n  }\n\n  // ==================== USER MANAGEMENT TAB ====================\n  Widget _buildUserManagementTab() {\n    return Column(\n      children: [\n        _buildUserSearchAndFilters(),\n        Expanded(\n          child: _buildUserList(),\n        ),\n      ],\n    );\n  }\n\n  Widget _buildUserSearchAndFilters() {\n    return Container(\n      padding: const EdgeInsets.all(16),\n      color: Colors.grey.shade50,\n      child: Column(\n        children: [\n          TextField(\n            controller: _userSearchController,\n            decoration: InputDecoration(\n              hintText:",
+        "line": 501,
+        "pattern": "(?:error|Error).*?['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "Text(           isHealthy ? 'Healthy' : 'Error',           style: TextStyle(             fontSize: 10,             color: isHealthy ? Colors.green : Colors.red,           ),         ),       ],     );   }    // ==================== USER MANAGEMENT TAB ====================   Widget _buildUserManagementTab() {     return Column(       children: [         _buildUserSearchAndFilters(),         Expanded(           child: _buildUserList(),         ),       ],     );   }    Widget _buildUserSearchAndFilters() {     return Container(       padding: const EdgeInsets.all(16),       color: Colors.grey.shade50,       child: Column(         children: [           TextField(             controller: _userSearchController,             decoration: InputDecoration(               hintText: 'Search users...',               prefixIcon: const"
+      },
+      {
+        "text": "Users",
+        "line": 213,
+        "pattern": "Tab\\s*\\([^)]*text:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "cons.dashboard, size: 20),           ),           Tab(             text: 'Users',             icon: Icon(Icons.people, size: 20),"
+      },
+      {
+        "text": "Content",
+        "line": 217,
+        "pattern": "Tab\\s*\\([^)]*text:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "n(Icons.people, size: 20),           ),           Tab(             text: 'Content',             icon: Icon(Icons.content_copy, size:"
+      },
+      {
+        "text": "Financial",
+        "line": 221,
+        "pattern": "Tab\\s*\\([^)]*text:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "s.content_copy, size: 20),           ),           Tab(             text: 'Financial',             icon: Icon(Icons.attach_money, size:"
+      },
+      {
+        "text": "Reported",
+        "line": 700,
+        "pattern": "Tab\\s*\\([^)]*text:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "Tab(text: 'All Content'),               Tab(text: 'Reported'),             ],           ),           Expanded("
+      },
+      {
+        "text": "Revenue",
+        "line": 947,
+        "pattern": "Tab\\s*\\([^)]*text:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "or(0xFF8C52FF),             tabs: [               Tab(text: 'Revenue'),               Tab(text: 'Ads'),               T"
+      },
+      {
+        "text": "Ads",
+        "line": 948,
+        "pattern": "Tab\\s*\\([^)]*text:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "Tab(text: 'Revenue'),               Tab(text: 'Ads'),               Tab(text: 'Payouts'),"
+      },
+      {
+        "text": "Payouts",
+        "line": 949,
+        "pattern": "Tab\\s*\\([^)]*text:\\s*['\\\"]([^'\\\"]+)['\\\"]",
+        "context": "'),               Tab(text: 'Ads'),               Tab(text: 'Payouts'),             ],           ),           Expanded("
+      }
+    ]
+  },
+  "all_unique_texts": [
+    "$label ($count)",
+    "$label:",
+    "$label: $value",
+    "$percentage%",
+    "${(status.migrationProgress * 100).toStringAsFixed(1)}%",
+    "${10 + index}:${(index * 3).toString().padLeft(2,",
+    "${_selectedContentIds.length} items approved successfully",
+    "${_selectedContentIds.length} items rejected successfully",
+    "${_selectedTransactionIds.length} selected",
+    "${_selectedUserIds.length} users selected",
+    "${artwork.description.substring(0, 50)}...",
+    "${comments.length} total",
+    "${refundTransactions.length} Refunds",
+    "${reports.length} total",
+    "${selectedTransactions.length} transactions selected",
+    "${server[",
+    "${status.migratedDocuments}/${status.totalDocuments} documents migrated",
+    "${transaction.userName} • ${transaction.displayType}",
+    ");\n\n    // CSV Data rows\n    for (final transaction in transactions) {\n      final description =\n          transaction.description?.replaceAll(",
+    ");\n        _showErrorSnackBar(",
+    ");\n      _showErrorSnackBar(",
+    ");\n      setState(() => _isLoading = false);\n      _showErrorSnackBar(",
+    ");\n      throw Exception(",
+    ",\n                      hintStyle:\n                          TextStyle(color: Colors.white.withValues(alpha: 0.6)),\n                      prefixIcon: Icon(Icons.search_rounded,\n                          color: Colors.white.withValues(alpha: 0.6)),\n                      filled: true,\n                      fillColor: Colors.white.withValues(alpha: 0.1),\n                      border: OutlineInputBorder(\n                        borderRadius: BorderRadius.circular(12),\n                        borderSide: BorderSide.none,\n                      ),\n                      enabledBorder: OutlineInputBorder(\n                        borderRadius: BorderRadius.circular(12),\n                        borderSide: BorderSide(\n                            color: Colors.white.withValues(alpha: 0.2)),\n                      ),\n                      focusedBorder: OutlineInputBorder(\n                        borderRadius: BorderRadius.circular(12),\n                        borderSide:\n                            const BorderSide(color: Colors.white, width: 2),\n                      ),\n                    ),\n                    onChanged: (value) => setState(() {}),\n                  ),\n                  const SizedBox(height: 16),\n                  SingleChildScrollView(\n                    scrollDirection: Axis.horizontal,\n                    child: Row(\n                      children: [\n                        _buildContentFilterChip(",
+    ",\n                style: TextStyle(\n                  color: color,\n                  fontSize: 11,\n                  fontWeight: FontWeight.w600,\n                ),\n                overflow: TextOverflow.ellipsis,\n                textAlign: TextAlign.center,\n              ),\n            ),\n          ),\n        ],\n      ),\n    );\n  }\n\n  // ==================== PLACEHOLDER TABS ====================\n  Widget _buildModernUserManagementTab() {\n    return RefreshIndicator(\n      onRefresh: _loadUserData,\n      color: Colors.white,\n      backgroundColor: const Color(0xFF8C52FF),\n      child: SingleChildScrollView(\n        padding: const EdgeInsets.all(16),\n        physics: const AlwaysScrollableScrollPhysics(),\n        child: Column(\n          crossAxisAlignment: CrossAxisAlignment.start,\n          children: [\n            // User Statistics Overview\n            Container(\n              decoration: _buildGlassDecoration(),\n              padding: const EdgeInsets.all(24),\n              child: Column(\n                crossAxisAlignment: CrossAxisAlignment.start,\n                children: [\n                  Row(\n                    children: [\n                      Container(\n                        padding: const EdgeInsets.all(8),\n                        decoration: BoxDecoration(\n                          color: Colors.white.withValues(alpha: 0.2),\n                          borderRadius: BorderRadius.circular(12),\n                        ),\n                        child: const Icon(\n                          Icons.people_rounded,\n                          color: Colors.white,\n                          size: 24,\n                        ),\n                      ),\n                      const SizedBox(width: 12),\n                      const Text(",
+    ",\n          _settings!.errorLoggingEnabled,\n          (value) => _updateSetting(value, (s) => s.errorLoggingEnabled,\n              (s, v) => s.copyWith(errorLoggingEnabled: v)),\n        ),\n        _buildSwitchSetting(",
+    ",\n          style: TextStyle(\n            fontSize: 10,\n            color: isHealthy ? Colors.green : Colors.red,\n          ),\n        ),\n      ],\n    );\n  }\n\n  // ==================== USER MANAGEMENT TAB ====================\n  Widget _buildUserManagementTab() {\n    return Column(\n      children: [\n        _buildUserSearchAndFilters(),\n        Expanded(\n          child: _buildUserList(),\n        ),\n      ],\n    );\n  }\n\n  Widget _buildUserSearchAndFilters() {\n    return Container(\n      padding: const EdgeInsets.all(16),\n      color: Colors.grey.shade50,\n      child: Column(\n        children: [\n          TextField(\n            controller: _userSearchController,\n            decoration: InputDecoration(\n              hintText:",
+    ",\n      );\n    }\n\n    return buffer.toString();\n  }\n\n  /// Download CSV file (web) or save to device\n  Future<void> _downloadCsvFile(String csvContent, String fileName) async {\n    try {\n      if (kIsWeb) {\n        // Web implementation using data URL for download\n        final bytes = utf8.encode(csvContent);\n        final base64Data = base64Encode(bytes);\n        final dataUrl =",
+    ".tr(namedArgs: {",
+    "/admin/dashboard",
+    "2024-12-${(index + 1).toString().padLeft(2,",
+    ":\n        color = Colors.red;\n        break;\n      default:\n        color = Colors.grey;\n    }\n\n    return Container(\n      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),\n      decoration: BoxDecoration(\n        color: color.withValues(alpha: 0.1),\n        borderRadius: BorderRadius.circular(12),\n        border: Border.all(color: color.withValues(alpha: 0.3)),\n      ),\n      child: Text(\n        status.toUpperCase(),\n        style: TextStyle(\n          color: color,\n          fontSize: 10,\n          fontWeight: FontWeight.bold,\n        ),\n      ),\n    );\n  }\n\n  Widget _buildPerformanceChart() {\n    // Simplified chart representation\n    return Container(\n      decoration: BoxDecoration(\n        border: Border.all(color: Colors.grey[300]!),\n        borderRadius: BorderRadius.circular(8),\n      ),\n      child: const Center(\n        child: Text(",
+    ": e.toString()});\n        _isLoading = false;\n      });\n    }\n  }\n\n  @override\n  Widget build(BuildContext context) {\n    return MainLayout(\n      currentIndex: 0,\n      child: Center(\n        child: SingleChildScrollView(\n          padding: const EdgeInsets.all(24.0),\n          child: Form(\n            key: _formKey,\n            child: Column(\n              mainAxisAlignment: MainAxisAlignment.center,\n              crossAxisAlignment: CrossAxisAlignment.stretch,\n              children: [\n                Icon(\n                  Icons.admin_panel_settings,\n                  size: 80,\n                  color: Colors.blue,\n                ),\n                SizedBox(height: 48),\n                TextFormField(\n                  controller: _emailController,\n                  decoration: InputDecoration(\n                    labelText:",
+    ": e.toString()});\n        _isLoading = false;\n      });\n    }\n  }\n\n  Future<void> _runMigration() async {\n    final confirmed = await _showConfirmationDialog(",
+    ": e.toString()});\n        _isMigrating = false;\n      });\n    }\n  }\n\n  Future<bool> _showConfirmationDialog(String title, String message) async {\n    return await showDialog<bool>(\n          context: context,\n          builder: (context) => AlertDialog(\n            title: Text(title),\n            content: Text(message),\n            actions: [\n              TextButton(\n                onPressed: () => Navigator.of(context).pop(false),\n                child: Text(",
+    ": e.toString()});\n        _isMigrating = false;\n      });\n    }\n  }\n\n  Future<void> _migrateGeoFields() async {\n    final confirmed = await _showConfirmationDialog(",
+    ": e.toString()});\n        _isMigrating = false;\n      });\n    }\n  }\n\n  Future<void> _rollbackMigration() async {\n    final confirmed = await _showConfirmationDialog(",
+    "API Services",
+    "Account Created",
+    "Account Information",
+    "Achievements",
+    "Actions",
+    "Active User",
+    "Active Users",
+    "Activity",
+    "Activity Summary",
+    "Ad Management",
+    "Admin",
+    "Admin Access Control",
+    "Admin Actions",
+    "Admin Command Center",
+    "Admin Dashboard",
+    "Admin Flags",
+    "Admin Information",
+    "Admin Notes",
+    "Admin Settings",
+    "Admin authentication required",
+    "Admin processed refund",
+    "Ads",
+    "Advanced Search & Filters",
+    "Advertisements",
+    "Alerts",
+    "All",
+    "All Content",
+    "All dates",
+    "Amount Range",
+    "Analytics",
+    "App Description",
+    "Approve Selected",
+    "Approved by admin",
+    "Are you sure you want to create a backup of the database?",
+    "Are you sure you want to delete this ${content.type}?",
+    "Are you sure you want to process refunds for all selected transactions?",
+    "Are you sure you want to remove this user\\",
+    "Are you sure you want to reset all settings to default values?",
+    "Artwork Sales",
+    "Auto-approve Content",
+    "Average Revenue",
+    "Average revenue data will appear here",
+    "Average revenue per transaction: ${_formatCurrency(_analytics!.financialMetrics.averageRevenuePerUser)}",
+    "Avg Session",
+    "Avg Transaction",
+    "Ban Selected",
+    "Banned Words (comma-separated)",
+    "Bio",
+    "Bounce Rate",
+    "Bulk admin refund",
+    "By ${content.authorName}",
+    "By ${review.authorName}",
+    "By: ${noteData[",
+    "CPU Usage",
+    "Cache Duration (hours)",
+    "Cancel",
+    "Chart visualization will be implemented\\nwith real Firebase data using fl_chart",
+    "Comments",
+    "Configure platform settings",
+    "Content",
+    "Content Deleted",
+    "Content Moderation",
+    "Content Settings",
+    "Created: ${artwork.createdAt.toString().split(",
+    "Critical Alerts",
+    "Danger Zone",
+    "Dashboard",
+    "Data Access",
+    "Data Export",
+    "Date: ${intl.DateFormat(",
+    "Delete Content",
+    "Description",
+    "Details",
+    "Disabled account for $user",
+    "Edit Content",
+    "Edit permissions for $user",
+    "Email",
+    "Email Verified",
+    "Enable Admin Alerts",
+    "Enable Analytics",
+    "Enable Artwork Ratings",
+    "Enable Comments",
+    "Enable Content Reporting",
+    "Enable Email Notifications",
+    "Enable Error Logging",
+    "Enable IP Blocking",
+    "Enable Performance Monitoring",
+    "Enable Push Notifications",
+    "Enable Registration",
+    "Enable Two-Factor Authentication",
+    "Enter Selection Mode",
+    "Enter description",
+    "Enter title",
+    "Error downloading CSV file: $e",
+    "Error exporting transactions: $e",
+    "Error loading payment data: $e",
+    "Error loading settings",
+    "Error processing bulk refund: $e",
+    "Error processing refund: $e",
+    "Error updating transaction statuses: $e",
+    "Existing content will be marked as",
+    "Exit Selection Mode",
+    "Export Selected",
+    "Export completed successfully (${_filteredTransactions.length} records)",
+    "Export completed successfully (${selectedTransactions.length} records)",
+    "Exported transaction data",
+    "Failed to download CSV file",
+    "Failed to export transactions",
+    "Failed to load admin data: $e",
+    "Failed to load dashboard data: $e",
+    "Failed to load payment data",
+    "Failed to process bulk refunds",
+    "Failed to process refund: ${e.toString()}",
+    "Failed to refund transaction ${transaction.id}: $e",
+    "Failed to trigger capture approval rewards: $e",
+    "Failed to update transaction statuses",
+    "Featured Users",
+    "File Storage",
+    "Financial",
+    "Financial Analytics",
+    "Financial Insights",
+    "Financial Overview",
+    "Financial Reports",
+    "Flagged by admin",
+    "Full Name",
+    "General Settings",
+    "Healthy",
+    "IP Address/Range",
+    "IP Whitelist",
+    "Image Management",
+    "Item",
+    "John Admin",
+    "Joined ${_formatDate(user.createdAt)}",
+    "Key Performance Indicators",
+    "Last Active",
+    "Last updated: ${DateTime.now().toString().substring(0, 19)}",
+    "Loading admin data...",
+    "Location",
+    "Login Attempt Window (minutes)",
+    "MMM dd, yyyy HH:mm",
+    "Maintenance Message",
+    "Maintenance Mode",
+    "Maintenance Settings",
+    "Manage Users",
+    "Max Artworks per User",
+    "Max Login Attempts",
+    "Max Upload Size (MB)",
+    "Media",
+    "Memory Usage",
+    "Metric",
+    "Migrating...",
+    "Mike Manager",
+    "Moderate pending submissions",
+    "Monthly Recurring",
+    "Monthly Revenue",
+    "No Recent Transactions",
+    "No comments",
+    "No details available",
+    "No eligible transactions for refund",
+    "No paymentIntentId found for transaction ${transaction.id}.",
+    "No reason provided",
+    "No recent activity",
+    "No reports",
+    "No transactions selected",
+    "Notification Settings",
+    "Office Network",
+    "Online Users",
+    "Oops! Something went wrong",
+    "Overview",
+    "Part of bulk refund operation",
+    "Password",
+    "Password Reset Required",
+    "Pause Real-time",
+    "Payment Management",
+    "Payment Method",
+    "Payment Methods",
+    "Payout Management",
+    "Payout Summary",
+    "Payouts",
+    "Peak Today",
+    "Pending Payouts",
+    "Pending Review",
+    "Pending Reviews",
+    "Per transaction",
+    "Performance",
+    "Performance Chart\\n(Real-time data visualization)",
+    "Performance Metrics",
+    "Performance Overview",
+    "Personal Information",
+    "Process Refund",
+    "Processed on ${DateTime.now().subtract(Duration(days: index)).toString().split(",
+    "Profile Updated",
+    "Quick Actions",
+    "REPORTED CONTENT",
+    "Real-time Performance",
+    "Reason for deletion",
+    "Reason for rejection",
+    "Recent Activity",
+    "Recent Ad Activity",
+    "Recent Alerts",
+    "Recent Content",
+    "Recent Payouts",
+    "Recent Transactions",
+    "Recording refund in database only.",
+    "Refresh Data",
+    "Refund processed successfully",
+    "Refunds",
+    "Reject Selected",
+    "Rejected by admin",
+    "Removed admin privileges for $user",
+    "Report Count",
+    "Reported",
+    "Reported by: ${(report[",
+    "Reports",
+    "Require Email Verification",
+    "Response Time",
+    "Revenue",
+    "Revenue ${_analytics!.financialMetrics.revenueGrowth >= 0 ?",
+    "Revenue Breakdown",
+    "Revenue Chart",
+    "Revenue Growth",
+    "Revenue Trend",
+    "Revenue and analytics",
+    "Revenue growth data will appear here",
+    "Review Content",
+    "Review cleared successfully",
+    "Role: ${user.userType ??",
+    "Run Migration",
+    "STATUS_UPDATE",
+    "Sarah Security",
+    "Save",
+    "Search",
+    "Search artwork...",
+    "Search content by title, author, or description...",
+    "Search content...",
+    "Search logs...",
+    "Search transactions...",
+    "Search users by name, email, or username...",
+    "Search users...",
+    "Security Settings",
+    "Server Status",
+    "Session Time",
+    "Settings Change",
+    "Start Real-time",
+    "Status",
+    "Status Management",
+    "Subscriptions",
+    "Success Rate",
+    "Successfully processed $successCount refunds",
+    "Successfully updated ${_selectedTransactionIds.length} transactions",
+    "Suspended Users",
+    "Suspended: ${_formatDateTime(_currentUser.suspendedAt!)}",
+    "System Alerts",
+    "System Health",
+    "System Settings",
+    "System Status: ${_systemMetrics[",
+    "Tags",
+    "Tags: ${artwork.tags?.join(",
+    "This action cannot be undone.",
+    "This migration adds standardized moderation status fields to all content collections (posts, comments, artwork, captures, ads).",
+    "Timestamp: 2024-12-24 ${10 + index}:${(index * 3).toString().padLeft(2,",
+    "Title",
+    "Total Content",
+    "Total Events",
+    "Total Paid Out",
+    "Total Refunds",
+    "Total Revenue",
+    "Total Transactions",
+    "Total Users",
+    "Total amount: \\$${selectedTransactions.fold(0.0, (sum, t) => sum + t.amount).toStringAsFixed(2)}",
+    "Total: \\$${refundTransactions.fold(0.0, (sum, t) => sum + t.amount).toStringAsFixed(2)}",
+    "Transaction Export",
+    "Transaction ID,User ID,User Name,Type,Amount,Currency,Status,Payment Method,Transaction Date,Description,Item Title",
+    "Transaction Type",
+    "Transaction Volume",
+    "Transaction data will appear here",
+    "Transaction data will appear here once payments are processed.",
+    "Transactions",
+    "Unknown Server",
+    "Unknown action",
+    "Unknown alert",
+    "Unknown error",
+    "Unknown error occurred",
+    "Unknown time",
+    "User",
+    "User ${!_currentUser.isVerified ?",
+    "User ${newFeaturedStatus ?",
+    "User ${user.statusText ==",
+    "User Created",
+    "User Details",
+    "User Management",
+    "User Settings",
+    "User Suspended",
+    "User Type",
+    "User administration tools",
+    "User: ${users[index % users.length]} | IP: 192.168.1.${100 + index}",
+    "Username",
+    "Users",
+    "Verified Users",
+    "View Details",
+    "Warning Alerts",
+    "Zip Code",
+    "\\$${(100 + (index * 50)).toStringAsFixed(2)}",
+    "\\$${totalAmount.toStringAsFixed(2)}",
+    "by ${content.authorName}",
+    "user-not-found",
+    "}),\n        };\n        _isLoading = false;\n      });\n    } catch (e) {\n      setState(() {\n        _error ="
+  ]
+}

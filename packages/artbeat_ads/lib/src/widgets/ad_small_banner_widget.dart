@@ -112,9 +112,9 @@ class _AdSmallBannerWidgetState extends State<AdSmallBannerWidget> {
                         color: Colors.blue,
                         borderRadius: BorderRadius.circular(6),
                       ),
-                      child: const Text(
-                        'Learn',
-                        style: TextStyle(
+                      child: Text(
+                        'ads_ad_small_banner_text_learn'.tr(),
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 12,
                           fontWeight: FontWeight.bold,

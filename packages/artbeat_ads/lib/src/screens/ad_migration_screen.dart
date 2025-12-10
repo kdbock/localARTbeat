@@ -68,7 +68,7 @@ class _AdMigrationScreenState extends State<AdMigrationScreen> {
   }
 
   void _showResult(MigrationResult result, bool dryRun) {
-    final title = dryRun ? 'Dry Run Results' : 'Migration Results';
+    final title = dryRun ? 'ads_ad_migration_text_dry_run_results'.tr() : 'ads_ad_migration_text_migration_results'.tr();
     final content =
         '''
 ${dryRun ? 'Dry run completed' : 'Migration completed'}!
@@ -135,25 +135,25 @@ ${result.hasErrors ? '\n⚠️ Errors:\n${result.errors.take(5).join('\n')}${res
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Migration Statistics',
+                            'ads_ad_migration_text_migration_statistics'.tr(),
                             style: Theme.of(context).textTheme.headlineSmall,
                           ),
                           const SizedBox(height: 16),
                           if (_stats != null) ...[
                             _buildStatRow(
-                              'Old Collection (${_stats!.oldCollectionName})',
+                              'ads_ad_migration_text_old_collection'.tr() + ' (${_stats!.oldCollectionName})',
                               '${_stats!.oldCollectionCount} ads',
                               Colors.orange,
                             ),
                             const SizedBox(height: 8),
                             _buildStatRow(
-                              'New Collection (${_stats!.newCollectionName})',
+                              'ads_ad_migration_text_new_collection'.tr() + ' (${_stats!.newCollectionName})',
                               '${_stats!.newCollectionCount} ads',
                               Colors.green,
                             ),
                             const SizedBox(height: 8),
                             _buildStatRow(
-                              'Remaining to Migrate',
+                              'ads_ad_migration_text_remaining_to_migrate'.tr(),
                               '${_stats!.oldCollectionCount - _stats!.newCollectionCount} ads',
                               Colors.blue,
                             ),
@@ -179,20 +179,15 @@ ${result.hasErrors ? '\n⚠️ Errors:\n${result.errors.take(5).join('\n')}${res
                               Icon(Icons.info, color: Colors.blue.shade700),
                               const SizedBox(width: 8),
                               Text(
-                                'About Migration',
+                                'ads_ad_migration_text_about_migration'.tr(),
                                 style: Theme.of(context).textTheme.titleMedium
                                     ?.copyWith(color: Colors.blue.shade700),
                               ),
                             ],
                           ),
                           const SizedBox(height: 8),
-                          const Text(
-                            'This tool migrates ads from the old "ads" collection to the new "localAds" collection with proper field mapping:\n\n'
-                            '• Converts old AdLocation/AdZone to LocalAdZone\n'
-                            '• Maps old AdStatus to LocalAdStatus\n'
-                            '• Adds new reporting fields (reportCount = 0)\n'
-                            '• Preserves all ad content and metadata\n'
-                            '• Skips ads that already exist (unless overwrite is enabled)',
+                          Text(
+                            'ads_ad_migration_text_migration_description'.tr(),
                           ),
                         ],
                       ),
@@ -203,7 +198,7 @@ ${result.hasErrors ? '\n⚠️ Errors:\n${result.errors.take(5).join('\n')}${res
 
                   // Action Buttons
                   Text(
-                    'Migration Actions',
+                    'ads_ad_migration_text_migration_actions'.tr(),
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: 16),
@@ -284,34 +279,34 @@ ${result.hasErrors ? '\n⚠️ Errors:\n${result.errors.take(5).join('\n')}${res
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Last Migration Result',
+                              'ads_ad_migration_text_last_migration_result'.tr(),
                               style: Theme.of(context).textTheme.titleMedium,
                             ),
                             const SizedBox(height: 8),
                             _buildStatRow(
-                              'Total Found',
+                              'ads_ad_migration_text_total_found'.tr(),
                               '${_lastResult!.totalFound}',
                               Colors.grey,
                             ),
                             _buildStatRow(
-                              'Migrated',
+                              'ads_ad_migration_text_migrated'.tr(),
                               '${_lastResult!.migrated}',
                               Colors.green,
                             ),
                             _buildStatRow(
-                              'Skipped',
+                              'ads_ad_migration_text_skipped'.tr(),
                               '${_lastResult!.skipped}',
                               Colors.orange,
                             ),
                             _buildStatRow(
-                              'Failed',
+                              'ads_ad_migration_text_failed'.tr(),
                               '${_lastResult!.failed}',
                               Colors.red,
                             ),
                             if (_lastResult!.hasErrors) ...[
                               const SizedBox(height: 8),
                               Text(
-                                'Errors (${_lastResult!.errors.length}):',
+                                'ads_ad_migration_text_errors'.tr() + ' (${_lastResult!.errors.length}):',
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: Colors.red,
@@ -327,7 +322,7 @@ ${result.hasErrors ? '\n⚠️ Errors:\n${result.errors.take(5).join('\n')}${res
                                   )),
                               if (_lastResult!.errors.length > 3)
                                 Text(
-                                  '... and ${_lastResult!.errors.length - 3} more errors',
+                                  'ads_ad_migration_text_more_errors'.tr().replaceAll('{count}', '${_lastResult!.errors.length - 3}'),
                                 ),
                             ],
                           ],
@@ -370,9 +365,8 @@ ${result.hasErrors ? '\n⚠️ Errors:\n${result.errors.take(5).join('\n')}${res
       context: context,
       builder: (context) => AlertDialog(
         title: Text('ads_ad_migration_text_overwrite_warning'.tr()),
-        content: const Text(
-          'This will OVERWRITE any existing ads in the localAds collection that have the same ID as ads in the old collection.\n\n'
-          'This action cannot be undone. Are you sure you want to continue?',
+        content: Text(
+          'ads_ad_migration_text_overwrite_warning'.tr(),
         ),
         actions: [
           TextButton(
@@ -385,9 +379,9 @@ ${result.hasErrors ? '\n⚠️ Errors:\n${result.errors.take(5).join('\n')}${res
               _runMigration(overwrite: true);
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text(
-              'Overwrite',
-              style: TextStyle(color: Colors.white),
+            child: Text(
+              'ads_ad_migration_text_overwrite'.tr(),
+              style: const TextStyle(color: Colors.white),
             ),
           ),
         ],

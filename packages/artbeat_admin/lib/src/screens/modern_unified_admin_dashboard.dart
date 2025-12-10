@@ -1740,7 +1740,7 @@ class _ModernUnifiedAdminDashboardState
           ),
         ],
       ),
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
@@ -1750,7 +1750,7 @@ class _ModernUnifiedAdminDashboardState
           Flexible(
             child: Text(
               value,
-              style: const TextStyle(
+              style: TextStyle(
                 color: Colors.white,
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
@@ -1864,7 +1864,7 @@ class _ModernUnifiedAdminDashboardState
               Expanded(
                 child: Text(
                   review.title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.white,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -1873,12 +1873,12 @@ class _ModernUnifiedAdminDashboardState
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: const Color(0xFFFFB74D).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Text(
+                child: Text(
                   'PENDING',
                   style: TextStyle(
                     color: Color(0xFFFFB74D),
@@ -1903,7 +1903,7 @@ class _ModernUnifiedAdminDashboardState
               Expanded(
                 child: ElevatedButton.icon(
                   onPressed: () => _approveContent(review),
-                  icon: const Icon(Icons.check_rounded, size: 16),
+                  icon: Icon(Icons.check_rounded, size: 16),
                   label: Text(
                       'admin_modern_unified_admin_dashboard_text_approve'.tr()),
                   style: ElevatedButton.styleFrom(
@@ -1919,7 +1919,7 @@ class _ModernUnifiedAdminDashboardState
               Expanded(
                 child: ElevatedButton.icon(
                   onPressed: () => _rejectContent(review),
-                  icon: const Icon(Icons.close_rounded, size: 16),
+                  icon: Icon(Icons.close_rounded, size: 16),
                   label: Text(
                       'admin_modern_unified_admin_dashboard_text_reject'.tr()),
                   style: ElevatedButton.styleFrom(
@@ -1940,8 +1940,8 @@ class _ModernUnifiedAdminDashboardState
 
   Widget _buildContentListItem(ContentModel content) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
+      margin: EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
@@ -1963,14 +1963,14 @@ class _ModernUnifiedAdminDashboardState
                     child: Image.network(
                       content.imageUrl!,
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => const Icon(
+                      errorBuilder: (context, error, stackTrace) => Icon(
                         Icons.image_rounded,
                         color: Colors.white,
                         size: 30,
                       ),
                     ),
                   )
-                : const Icon(
+                : Icon(
                     Icons.image_rounded,
                     color: Colors.white,
                     size: 30,
@@ -1985,14 +1985,14 @@ class _ModernUnifiedAdminDashboardState
               children: [
                 Text(
                   content.title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.white,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: 4),
                 Text(
                   content.description,
                   style: TextStyle(
@@ -2002,7 +2002,7 @@ class _ModernUnifiedAdminDashboardState
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 Row(
                   children: [
                     Expanded(
@@ -2017,7 +2017,7 @@ class _ModernUnifiedAdminDashboardState
                     ),
                     const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(
+                      padding: EdgeInsets.symmetric(
                           horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
                         color: _getContentStatusColor(content.status)
@@ -2041,24 +2041,24 @@ class _ModernUnifiedAdminDashboardState
 
           // Action Menu
           PopupMenuButton<String>(
-            icon: const Icon(
+            icon: Icon(
               Icons.more_vert_rounded,
               color: Colors.white,
             ),
             color: const Color(0xFF8C52FF),
             onSelected: (value) => _handleContentAction(content, value),
             itemBuilder: (context) => [
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'view',
                 child:
                     Text('View Details', style: TextStyle(color: Colors.white)),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'edit',
                 child:
                     Text('Edit Content', style: TextStyle(color: Colors.white)),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'delete',
                 child: Text('Delete Content',
                     style: TextStyle(color: Colors.white)),
@@ -2073,15 +2073,15 @@ class _ModernUnifiedAdminDashboardState
   Color _getContentStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'approved':
-        return const Color(0xFF81C784);
+        return Color(0xFF81C784);
       case 'rejected':
-        return const Color(0xFFEF5350);
+        return Color(0xFFEF5350);
       case 'flagged':
-        return const Color(0xFFEF5350); // Red for flagged
+        return Color(0xFFEF5350); // Red for flagged
       case 'pending':
-        return const Color(0xFFFFB74D);
+        return Color(0xFFFFB74D);
       default: // active
-        return const Color(0xFF4FC3F7); // Blue for active
+        return Color(0xFF4FC3F7); // Blue for active
     }
   }
 
@@ -2370,7 +2370,7 @@ class _ModernUnifiedAdminDashboardState
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 12),
+                              SizedBox(height: 12),
                             ],
                         ],
                         // Video
@@ -2385,7 +2385,7 @@ class _ModernUnifiedAdminDashboardState
                               color: Colors.black.withValues(alpha: 0.3),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Center(
+                            child: Center(
                               child: Icon(
                                 Icons.play_circle_fill,
                                 color: Colors.white,
@@ -2393,14 +2393,14 @@ class _ModernUnifiedAdminDashboardState
                               ),
                             ),
                           ),
-                          const SizedBox(height: 12),
+                          SizedBox(height: 12),
                         ],
-                        const SizedBox(height: 12),
+                        SizedBox(height: 12),
                       ],
 
                       // Description
                       if (content.description.isNotEmpty) ...[
-                        const Text(
+                        Text(
                           'Description',
                           style: TextStyle(
                             fontSize: 16,
@@ -2408,7 +2408,7 @@ class _ModernUnifiedAdminDashboardState
                             color: Colors.white,
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        SizedBox(height: 8),
                         Text(
                           content.description,
                           style: TextStyle(
@@ -2417,7 +2417,7 @@ class _ModernUnifiedAdminDashboardState
                             height: 1.5,
                           ),
                         ),
-                        const SizedBox(height: 24),
+                        SizedBox(height: 24),
                       ],
 
                       // Author info
@@ -2429,7 +2429,7 @@ class _ModernUnifiedAdminDashboardState
                             'Updated', _formatDate(content.updatedAt!)),
 
                       // Stats
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16),
                       Row(
                         children: [
                           _buildStatChip('Views', content.viewCount.toString()),
@@ -2444,7 +2444,7 @@ class _ModernUnifiedAdminDashboardState
                       // Tags
                       if (content.tags.isNotEmpty) ...[
                         const SizedBox(height: 24),
-                        const Text(
+                        Text(
                           'Tags',
                           style: TextStyle(
                             fontSize: 16,
@@ -2458,7 +2458,7 @@ class _ModernUnifiedAdminDashboardState
                           runSpacing: 8,
                           children: content.tags
                               .map((tag) => Container(
-                                    padding: const EdgeInsets.symmetric(
+                                    padding: EdgeInsets.symmetric(
                                       horizontal: 12,
                                       vertical: 6,
                                     ),
@@ -2469,7 +2469,7 @@ class _ModernUnifiedAdminDashboardState
                                     ),
                                     child: Text(
                                       tag,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         color: Colors.white,
                                         fontSize: 12,
                                       ),
@@ -2498,7 +2498,7 @@ class _ModernUnifiedAdminDashboardState
                                     // ignore: use_build_context_synchronously
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        content: const Text(
+                                        content: Text(
                                             'Review cleared successfully'),
                                         backgroundColor: Colors.green,
                                         behavior: SnackBarBehavior.floating,
@@ -2691,7 +2691,7 @@ class _ModernUnifiedAdminDashboardState
                 size: 24,
               ),
               const SizedBox(width: 12),
-              const Text(
+              Text(
                 'Edit Content',
                 style: TextStyle(
                   color: Colors.white,
@@ -2706,14 +2706,14 @@ class _ModernUnifiedAdminDashboardState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Title field
-                const Text(
+                Text(
                   'Title',
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 TextField(
                   controller: titleController,
                   style: const TextStyle(color: Colors.white),
@@ -2741,17 +2741,17 @@ class _ModernUnifiedAdminDashboardState
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
 
                 // Description field
-                const Text(
+                Text(
                   'Description',
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 TextField(
                   controller: descriptionController,
                   maxLines: 3,
@@ -2780,17 +2780,17 @@ class _ModernUnifiedAdminDashboardState
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
 
                 // Status dropdown
-                const Text(
+                Text(
                   'Status',
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 DropdownButtonFormField<String>(
                   initialValue: selectedStatus,
                   style: const TextStyle(color: Colors.white),
@@ -2811,7 +2811,7 @@ class _ModernUnifiedAdminDashboardState
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide:
-                          const BorderSide(color: Colors.white, width: 2),
+                          BorderSide(color: Colors.white, width: 2),
                     ),
                   ),
                   items: ['active', 'pending', 'rejected', 'archived']
@@ -2837,7 +2837,7 @@ class _ModernUnifiedAdminDashboardState
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text(
+              child: Text(
                 'Cancel',
                 style: TextStyle(color: Colors.white),
               ),
@@ -2871,11 +2871,11 @@ class _ModernUnifiedAdminDashboardState
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF8C52FF),
+        backgroundColor: Color(0xFF8C52FF),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-        title: const Row(
+        title: Row(
           children: [
             Icon(
               Icons.warning_rounded,
@@ -2898,14 +2898,14 @@ class _ModernUnifiedAdminDashboardState
           children: [
             Text(
               'Are you sure you want to delete this ${content.type}?',
-              style: const TextStyle(
+              style: TextStyle(
                 color: Colors.white,
                 fontSize: 16,
               ),
             ),
             const SizedBox(height: 12),
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
@@ -2915,7 +2915,7 @@ class _ModernUnifiedAdminDashboardState
                 children: [
                   Text(
                     content.title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w600,
                     ),
@@ -2932,7 +2932,7 @@ class _ModernUnifiedAdminDashboardState
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'This action cannot be undone.',
               style: TextStyle(
                 color: Colors.red,
@@ -2944,7 +2944,7 @@ class _ModernUnifiedAdminDashboardState
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
+            child: Text(
               'Cancel',
               style: TextStyle(color: Colors.white),
             ),

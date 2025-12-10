@@ -312,7 +312,7 @@ class ArtDetailBottomSheet extends StatelessWidget {
                       child: ElevatedButton.icon(
                         onPressed: () => _createArtWalk(context),
                         icon: const Icon(Icons.route),
-                        label: const Text('Create Art Walk'),
+                        label: Text('art_walk_art_detail_bottom_sheet_button_create_art_walk'.tr()),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.purple,
                           foregroundColor: Colors.white,

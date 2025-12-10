@@ -129,12 +129,12 @@ class _LocalAdsListScreenState extends State<LocalAdsListScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'No ads in ${_selectedZone.displayName}',
+                  'ads_local_ads_list_text_no_ads_in_zone'.tr().replaceAll('{zone}', _selectedZone.displayName),
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Be the first to post!',
+                  'ads_local_ads_list_text_be_first_to_post'.tr(),
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
               ],

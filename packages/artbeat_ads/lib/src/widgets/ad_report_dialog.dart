@@ -58,8 +58,8 @@ class _AdReportDialogState extends State<AdReportDialog> {
                 const SizedBox(width: 12),
                 const Expanded(
                   child: Text(
-                    'Report Advertisement',
-                    style: TextStyle(
+                    'ads_ad_report_text_report_advertisement'.tr(),
+                    style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
@@ -85,7 +85,7 @@ class _AdReportDialogState extends State<AdReportDialog> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Ad: ${widget.adTitle}',
+                    'ads_ad_report_text_ad_prefix'.tr() + widget.adTitle,
                     style: const TextStyle(
                       fontWeight: FontWeight.w600,
                       color: Colors.white,
@@ -104,9 +104,9 @@ class _AdReportDialogState extends State<AdReportDialog> {
             const SizedBox(height: 24),
 
             // Report Reason
-            const Text(
-              'What\'s wrong with this ad?',
-              style: TextStyle(
+            Text(
+              'ads_ad_report_text_whats_wrong'.tr(),
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: Colors.white,
@@ -228,9 +228,9 @@ class _AdReportDialogState extends State<AdReportDialog> {
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
-                    child: const Text(
-                      'Cancel',
-                      style: TextStyle(color: Colors.grey),
+                    child: Text(
+                      'ads_ad_report_text_cancel'.tr(),
+                      style: const TextStyle(color: Colors.grey),
                     ),
                   ),
                 ),
@@ -253,9 +253,9 @@ class _AdReportDialogState extends State<AdReportDialog> {
                               color: Colors.white,
                             ),
                           )
-                        : const Text(
-                            'Submit Report',
-                            style: TextStyle(
+                        : Text(
+                            'ads_ad_report_text_submit_report'.tr(),
+                            style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.w600,
                             ),
@@ -269,7 +269,7 @@ class _AdReportDialogState extends State<AdReportDialog> {
 
             // Disclaimer
             Text(
-              'Reports are reviewed by our moderation team. False reports may result in account restrictions.',
+              'ads_ad_report_text_disclaimer'.tr(),
               style: TextStyle(color: Colors.grey[500], fontSize: 12),
               textAlign: TextAlign.center,
             ),
@@ -305,7 +305,7 @@ class _AdReportDialogState extends State<AdReportDialog> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to submit report: $e'),
+            content: Text('ads_ad_report_text_failed_to_submit'.tr() + ': $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -344,9 +344,9 @@ class AdReportButton extends StatelessWidget {
         ? TextButton.icon(
             onPressed: () => _showReportDialog(context),
             icon: const Icon(Icons.flag_outlined, size: 16, color: Colors.grey),
-            label: const Text(
-              'Report',
-              style: TextStyle(color: Colors.grey, fontSize: 12),
+            label: Text(
+              'ads_ad_report_text_report'.tr(),
+              style: const TextStyle(color: Colors.grey, fontSize: 12),
             ),
           )
         : IconButton(
@@ -370,7 +370,7 @@ class AdReportButton extends StatelessWidget {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text(
-                    'Report submitted successfully. Thank you for helping keep our community safe.',
+                    'ads_ad_report_text_report_submitted'.tr(),
                   ),
                   backgroundColor: Colors.green,
                 ),
@@ -380,7 +380,7 @@ class AdReportButton extends StatelessWidget {
             if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Failed to submit report: $e'),
+                  content: Text('ads_ad_report_text_failed_to_submit'.tr() + ': $e'),
                   backgroundColor: Colors.red,
                 ),
               );

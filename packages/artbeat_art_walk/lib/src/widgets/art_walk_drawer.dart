@@ -436,17 +436,17 @@ class _ArtWalkDrawerState extends State<ArtWalkDrawer> {
         final confirm = await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('Sign Out'),
-            content: const Text('Are you sure you want to sign out?'),
+            title: Text('art_walk_button_sign_out'.tr()),
+            content: Text('art_walk_art_walk_drawer_text_are_you_sure_you_want_to_sign_out'.tr()),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: const Text('Cancel'),
+                child: Text('art_walk_button_cancel'.tr()),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
                 style: TextButton.styleFrom(foregroundColor: Colors.red),
-                child: const Text('Sign Out'),
+                child: Text('art_walk_button_sign_out'.tr()),
               ),
             ],
           ),

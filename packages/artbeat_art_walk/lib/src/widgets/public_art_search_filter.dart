@@ -179,7 +179,7 @@ class _PublicArtSearchFilterState extends State<PublicArtSearchFilter> {
                 TextButton.icon(
                   onPressed: _clearAllFilters,
                   icon: const Icon(Icons.clear, size: 16),
-                  label: const Text('Clear All'),
+                  label: Text('art_walk_button_clear_all'.tr()),
                   style: TextButton.styleFrom(
                     foregroundColor: theme.colorScheme.error,
                     padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -305,8 +305,8 @@ class _PublicArtSearchFilterState extends State<PublicArtSearchFilter> {
             child: Column(
               children: [
                 CheckboxListTile(
-                  title: const Text('Verified Only'),
-                  subtitle: const Text('Show only verified artwork'),
+                  title: Text('art_walk_public_art_search_filter_text_verified_only'.tr()),
+                  subtitle: Text('art_walk_public_art_search_filter_text_show_only_verified_artwork'.tr()),
                   value: _criteria.isVerified ?? false,
                   onChanged: (value) => _updateCriteria(isVerified: value),
                   controlAffinity: ListTileControlAffinity.leading,
@@ -412,19 +412,19 @@ class _PublicArtSearchFilterState extends State<PublicArtSearchFilter> {
 
                 Row(
                   children: [
-                    const Text('Order: '),
+                    Text('art_walk_text_order'.tr()),
                     const SizedBox(width: 8),
                     Expanded(
                       child: SegmentedButton<bool>(
                         segments: const [
                           ButtonSegment<bool>(
                             value: false,
-                            label: Text('Ascending'),
+                            label: Text('art_walk_text_ascending'.tr()),
                             icon: Icon(Icons.arrow_upward, size: 16),
                           ),
                           ButtonSegment<bool>(
                             value: true,
-                            label: Text('Descending'),
+                            label: Text('art_walk_text_descending'.tr()),
                             icon: Icon(Icons.arrow_downward, size: 16),
                           ),
                         ],

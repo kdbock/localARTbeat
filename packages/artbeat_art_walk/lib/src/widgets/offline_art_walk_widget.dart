@@ -59,14 +59,14 @@ class OfflineArtWalkWidget extends StatelessWidget {
         ElevatedButton.icon(
           onPressed: onRetry,
           icon: const Icon(Icons.refresh),
-          label: const Text('Try Again'),
+          label: Text('art_walk_button_try_again'.tr()),
         ),
         const SizedBox(height: 16),
         TextButton(
           onPressed: () {
             Navigator.pushNamed(context, '/art-walk/list');
           },
-          child: const Text('View Art Walks List'),
+          child: Text('art_walk_offline_art_walk_widget_text_view_art_walks_list'.tr()),
         ),
       ],
     );

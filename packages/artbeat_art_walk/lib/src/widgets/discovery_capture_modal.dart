@@ -138,7 +138,7 @@ class _DiscoveryCaptureModalState extends State<DiscoveryCaptureModal> {
         setState(() => _isCapturing = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error capturing discovery: $e'),
+            content: Text('art_walk_discovery_capture_modal_error_error_capturing_discovery'.tr().replaceAll('{error}', e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -191,7 +191,7 @@ class _DiscoveryCaptureModalState extends State<DiscoveryCaptureModal> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error opening discussion: $e'),
+            content: Text('art_walk_discovery_capture_modal_error_error_opening_discussion'.tr().replaceAll('{error}', e.toString())),
             backgroundColor: Colors.red,
           ),
         );

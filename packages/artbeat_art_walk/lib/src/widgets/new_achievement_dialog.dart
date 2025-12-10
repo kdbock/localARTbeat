@@ -330,7 +330,7 @@ class _BadgeItem extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Close'),
+            child: Text('art_walk_button_close'.tr()),
           ),
         ],
       ),

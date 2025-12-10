@@ -132,7 +132,7 @@ class _AdCtaCardWidgetState extends State<AdCtaCardWidget> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: Text(widget.ctaText ?? 'Learn More'),
+                  child: Text(widget.ctaText ?? 'ads_ad_cta_text_learn_more'.tr()),
                 ),
               ),
           ],

@@ -6,7 +6,7 @@ import 'package:artbeat_core/artbeat_core.dart';
 import '../services/admin_service.dart';
 
 class AdminLoginScreen extends StatefulWidget {
-  const AdminLoginScreen({Key? key}) : super(key: key);
+  AdminLoginScreen({Key? key}) : super(key: key);
 
   @override
   State<AdminLoginScreen> createState() => _AdminLoginScreenState();
@@ -49,24 +49,24 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
         await FirebaseAuth.instance.signOut();
         if (!mounted) return;
         setState(() {
-          _error = 'Access denied. Admin privileges required.';
+          _error = 'admin_login_error_access_denied'.tr();
           _isLoading = false;
         });
       }
     } on FirebaseAuthException catch (e) {
       setState(() {
         _error = switch (e.code) {
-          'user-not-found' => 'No user found with this email.',
-          'wrong-password' => 'Invalid password.',
-          'user-disabled' => 'This account has been disabled.',
-          'invalid-email' => 'Invalid email address.',
-          _ => 'Authentication failed: ${e.message}',
+          'user-not-found' => 'admin_login_error_user_not_found'.tr(),
+          'wrong-password' => 'admin_login_error_wrong_password'.tr(),
+          'user-disabled' => 'admin_login_error_user_disabled'.tr(),
+          'invalid-email' => 'admin_login_error_invalid_email'.tr(),
+          _ => 'admin_login_error_auth_failed'.tr(namedArgs: {'message': e.message ?? 'Unknown error'}),
         };
         _isLoading = false;
       });
     } catch (e) {
       setState(() {
-        _error = 'An unexpected error occurred: $e';
+        _error = 'admin_login_error_unexpected'.tr(namedArgs: {'error': e.toString()});
         _isLoading = false;
       });
     }
@@ -85,15 +85,15 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Icon(
+                Icon(
                   Icons.admin_panel_settings,
                   size: 80,
                   color: Colors.blue,
                 ),
-                const SizedBox(height: 48),
+                SizedBox(height: 48),
                 TextFormField(
                   controller: _emailController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Email',
                     prefixIcon: Icon(Icons.email),
                     border: OutlineInputBorder(),
@@ -101,18 +101,18 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
+                      return 'admin_login_validation_enter_email'.tr();
                     }
                     if (!value.contains('@')) {
-                      return 'Please enter a valid email';
+                      return 'admin_login_validation_enter_valid_email'.tr();
                     }
                     return null;
                   },
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
                 TextFormField(
                   controller: _passwordController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Password',
                     prefixIcon: Icon(Icons.lock),
                     border: OutlineInputBorder(),
@@ -120,10 +120,10 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                   obscureText: true,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your password';
+                      return 'admin_login_validation_enter_password'.tr();
                     }
                     if (value.length < 6) {
-                      return 'Password must be at least 6 characters';
+                      return 'admin_login_validation_password_min_length'.tr();
                     }
                     return null;
                   },
@@ -131,7 +131,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                 const SizedBox(height: 24),
                 if (_error != null)
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
+                    padding: EdgeInsets.only(bottom: 16),
                     child: Text(
                       _error!,
                       style: const TextStyle(color: Colors.red),
@@ -144,7 +144,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                   child: _isLoading
-                      ? const SizedBox(
+                      ? SizedBox(
                           height: 20,
                           width: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
