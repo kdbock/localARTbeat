@@ -214,9 +214,9 @@ class _CaptureDetailScreenState extends State<CaptureDetailScreen> {
               // Art type dropdown
               DropdownButtonFormField<String>(
                 initialValue: _selectedArtType,
-                decoration: const InputDecoration(
-                  labelText: 'Art Type',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: 'capture_edit_art_type'.tr(),
+                  border: const OutlineInputBorder(),
                 ),
                 items: _artTypes.map((type) {
                   return DropdownMenuItem(
@@ -234,9 +234,9 @@ class _CaptureDetailScreenState extends State<CaptureDetailScreen> {
               // Art medium dropdown
               DropdownButtonFormField<String>(
                 initialValue: _selectedArtMedium,
-                decoration: const InputDecoration(
-                  labelText: 'Art Medium',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: 'capture_edit_medium'.tr(),
+                  border: const OutlineInputBorder(),
                 ),
                 items: _artMediums.map((medium) {
                   return DropdownMenuItem(

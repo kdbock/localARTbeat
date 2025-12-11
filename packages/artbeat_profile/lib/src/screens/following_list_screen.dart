@@ -43,7 +43,7 @@ class _FollowingListScreenState extends State<FollowingListScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading following: ${e.toString()}')),
+          SnackBar(content: Text('profile_following_list_screen_error_error_loading_following'.tr().replaceAll('{error}', e.toString()))),
         );
         setState(() {
           _isLoading = false;
@@ -60,12 +60,12 @@ class _FollowingListScreenState extends State<FollowingListScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Unfollow ${followedUser.username}?'),
+          title: Text('profile_following_list_screen_text_unfollow_user'.tr().replaceAll('{followedUserUsername}', followedUser.username)),
           content: Text('profile_following_confirm_unfollow'.tr()),
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('CANCEL'),
+              child: Text('profile_following_list_screen_text_cancel'.tr()),
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(true),
@@ -88,7 +88,7 @@ class _FollowingListScreenState extends State<FollowingListScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('You unfollowed ${followedUser.fullName}'),
+              content: Text('profile_following_list_screen_success_you_unfollowed_user'.tr().replaceAll('{followedUserFullName}', followedUser.fullName)),
               duration: const Duration(seconds: 2),
             ),
           );
@@ -97,7 +97,7 @@ class _FollowingListScreenState extends State<FollowingListScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Error unfollowing user: ${e.toString()}'),
+              content: Text('profile_following_list_screen_error_error_unfollowing_user'.tr().replaceAll('{error}', e.toString())),
               backgroundColor: Colors.red,
             ),
           );

@@ -33,7 +33,7 @@ class LocalArtworkRowWidget extends StatelessWidget {
               ),
               TextButton(
                 onPressed: onSeeAllPressed,
-                child: const Text('See All'),
+                child: Text('art_walk_see_all'.tr()),
               ),
             ],
           ),

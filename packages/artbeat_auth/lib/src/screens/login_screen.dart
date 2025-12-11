@@ -75,7 +75,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(e.message ?? 'Login failed')));
+      ).showSnackBar(SnackBar(content: Text(e.message ?? 'auth_login_failed'.tr())));
     } finally {
       if (mounted) {
         setState(() {
@@ -99,7 +99,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Google Sign-In failed: ${e.toString()}'),
+            content: Text('auth_google_signin_failed'.tr().replaceAll('{error}', e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -134,14 +134,14 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) {
         String errorMessage = e.toString();
         if (errorMessage.contains('User cancelled')) {
-          errorMessage = 'Apple Sign-In was cancelled.';
+          errorMessage = 'auth_apple_signin_cancelled'.tr();
         } else if (errorMessage.contains('not available')) {
-          errorMessage = 'Apple Sign-In is not available on this device.';
+          errorMessage = 'auth_apple_signin_not_available'.tr();
         }
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Apple Sign-In failed: $errorMessage'),
+            content: Text('auth_apple_signin_failed'.tr().replaceAll('{error}', errorMessage)),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 5),
           ),

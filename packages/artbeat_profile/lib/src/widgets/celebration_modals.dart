@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:confetti/confetti.dart';
 
@@ -204,7 +205,7 @@ class _BadgeEarnedModalState extends State<BadgeEarnedModal>
                               vertical: 12,
                             ),
                           ),
-                          child: const Text('Awesome!'),
+                          child: Text('profile_celebration_modals_text_awesome'.tr()),
                         ),
                       ],
                     ),
@@ -384,7 +385,7 @@ class _LevelUpModalState extends State<LevelUpModal>
                           vertical: 12,
                         ),
                       ),
-                      child: const Text('Continue'),
+                      child: Text('profile_celebration_modals_text_continue'.tr()),
                     ),
                   ],
                 ),
@@ -539,7 +540,7 @@ class _StreakMilestoneModalState extends State<StreakMilestoneModal>
                         vertical: 12,
                       ),
                     ),
-                    child: const Text('Let\'s Go!'),
+                    child: Text('profile_celebration_modals_text_lets_go'.tr()),
                   ),
                 ],
               ),

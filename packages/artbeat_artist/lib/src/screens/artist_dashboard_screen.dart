@@ -295,8 +295,7 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Artist Marketing',
+        Text('art_walk_artist_marketing'.tr(),
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -338,8 +337,7 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Promote Your Art',
+                        Text('art_walk_promote_your_art'.tr(),
                           style:
                               Theme.of(context).textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.bold,
@@ -347,8 +345,7 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
                                   ),
                         ),
                         const SizedBox(height: 4),
-                        Text(
-                          'Create ads featuring your artwork to reach more art lovers',
+                        Text('art_walk_create_ads_featuring_your_artwork_to_reach_more_art_lovers'.tr(),
                           style:
                               Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     color: Colors.blue.shade700,
@@ -438,8 +435,7 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
               color: Colors.red.shade300,
             ),
             const SizedBox(height: 16),
-            Text(
-              'Error loading dashboard',
+            Text('art_walk_error_loading_dashboard'.tr(),
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
@@ -483,8 +479,7 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
                   // Stats Overview Section
-                  Text(
-                    'Overview',
+                  Text('art_walk_overview'.tr(),
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -555,8 +550,7 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
                   const SizedBox(height: 24),
 
                   // Local Artists Section
-                  Text(
-                    'Local Artists',
+                  Text('art_walk_local_artists'.tr(),
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -571,8 +565,7 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
                   const SizedBox(height: 24),
 
                   // Local Galleries Section
-                  Text(
-                    'Local Galleries & Museums',
+                  Text('art_walk_local_galleries___museums'.tr(),
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -587,8 +580,7 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
                   const SizedBox(height: 24),
 
                   // Upcoming Events Section
-                  Text(
-                    'Upcoming Events',
+                  Text('art_walk_upcoming_events'.tr(),
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -608,8 +600,7 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
 
                   // Recent Activity Section
                   if (_recentActivities.isNotEmpty) ...[
-                    Text(
-                      'Recent Activity',
+                    Text('art_walk_recent_activity'.tr(),
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -665,8 +656,7 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Quick Actions',
+        Text('art_walk_quick_actions'.tr(),
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -819,16 +809,14 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Create Post',
+                          Text('art_walk_create_post'.tr(),
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                               color: Colors.black87,
                             ),
                           ),
-                          Text(
-                            'Share updates with your community',
+                          Text('art_walk_share_updates_with_your_community'.tr(),
                             style: TextStyle(
                               fontSize: 14,
                               color: Colors.grey,

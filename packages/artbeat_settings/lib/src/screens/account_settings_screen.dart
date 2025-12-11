@@ -420,7 +420,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
         TextButton.icon(
           onPressed: _isUploadingImage ? null : _changeProfilePicture,
           icon: const Icon(Icons.camera_alt),
-          label: Text(_isUploadingImage ? 'Uploading...' : 'Change Photo'),
+          label: Text(_isUploadingImage ? 'artbeat_settings_uploading'.tr() : 'artbeat_settings_change_photo'.tr()),
         ),
       ],
     );
@@ -442,18 +442,18 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
     final source = await showDialog<ImageSource>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Choose Image Source'),
+        title: Text('artbeat_settings_choose_image_source'.tr()),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
               leading: const Icon(Icons.photo_library),
-              title: const Text('Gallery'),
+              title: Text('artbeat_settings_gallery'.tr()),
               onTap: () => Navigator.of(context).pop(ImageSource.gallery),
             ),
             ListTile(
               leading: const Icon(Icons.camera_alt),
-              title: const Text('Camera'),
+              title: Text('artbeat_settings_camera'.tr()),
               onTap: () => Navigator.of(context).pop(ImageSource.camera),
             ),
           ],
@@ -522,12 +522,12 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Change Password'),
-        content: const Text('Password change functionality coming soon'),
+        title: Text('artbeat_settings_change_password'.tr()),
+        content: Text('artbeat_settings_password_change_coming_soon'.tr()),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
+            child: Text('artbeat_settings_ok'.tr()),
           ),
         ],
       ),
@@ -669,12 +669,12 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: const Text('Enter Verification Code'),
+        title: Text('artbeat_settings_enter_verification_code'.tr()),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('A verification code has been sent to $phoneNumber'),
+            Text('artbeat_settings_verification_code_sent'.tr().replaceAll('{phoneNumber}', phoneNumber)),
             const SizedBox(height: 16),
             TextField(
               controller: codeController,
@@ -692,15 +692,15 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text('common_cancel'.tr()),
           ),
           ElevatedButton(
             onPressed: () async {
               final code = codeController.text.trim();
               if (code.isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Please enter the verification code'),
+                  SnackBar(
+                    content: Text('artbeat_settings_verification_please_enter_code'.tr()),
                     backgroundColor: Colors.red,
                   ),
                 );
@@ -737,18 +737,18 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
                   Navigator.of(context).pop(true);
                 }
               } on FirebaseAuthException catch (e) {
-                String errorMessage = 'Verification failed';
+                String errorMessage = 'artbeat_settings_verification_failed'.tr();
                 switch (e.code) {
                   case 'invalid-verification-code':
                     errorMessage =
-                        'Invalid verification code. Please try again.';
+                        'artbeat_settings_invalid_verification_code_try_again'.tr();
                     break;
                   case 'session-expired':
                     errorMessage =
-                        'Verification code expired. Please request a new one.';
+                        'artbeat_settings_verification_code_expired_request_new_one'.tr();
                     break;
                   default:
-                    errorMessage = 'Verification failed: ${e.message}';
+                    errorMessage = 'artbeat_settings_verification_failed_with_error'.tr().replaceAll('{error}', e.message ?? '');
                 }
                 if (mounted) {
                   // ignore: use_build_context_synchronously
@@ -764,14 +764,14 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
                   // ignore: use_build_context_synchronously
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Verification failed: $e'),
+                      content: Text('artbeat_settings_verification_failed_with_error'.tr().replaceAll('{error}', '$e')),
                       backgroundColor: Colors.red,
                     ),
                   );
                 }
               }
             },
-            child: const Text('Verify'),
+            child: Text('artbeat_settings_verify'.tr()),
           ),
         ],
       ),
@@ -786,7 +786,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
           phoneVerified: true,
         );
       });
-      _showSuccessMessage('Phone number verified successfully');
+      _showSuccessMessage('artbeat_settings_phone_verified_successfully'.tr());
     }
   }
 }

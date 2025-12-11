@@ -132,8 +132,7 @@ class _ArtistEarningsDashboardState extends State<ArtistEarningsDashboard>
             children: [
               Icon(Icons.error_outline, size: 64, color: Colors.grey[400]),
               const SizedBox(height: 16),
-              Text(
-                'Failed to load earnings data',
+              Text('art_walk_failed_to_load_earnings_data'.tr(),
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
               const SizedBox(height: 8),
@@ -147,7 +146,7 @@ class _ArtistEarningsDashboardState extends State<ArtistEarningsDashboard>
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: _loadEarningsData,
-                child: const Text('Retry'),
+                child: const Text('art_walk_retry'.tr()),
               ),
             ],
           ),
@@ -186,8 +185,7 @@ class _ArtistEarningsDashboardState extends State<ArtistEarningsDashboard>
                   color: Colors.white, size: 28),
               const SizedBox(width: 12),
               Expanded(
-                child: Text(
-                  'Total Earnings',
+                child: Text('art_walk_total_earnings'.tr(),
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -312,8 +310,7 @@ class _ArtistEarningsDashboardState extends State<ArtistEarningsDashboard>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Earnings Breakdown',
+            Text('art_walk_earnings_breakdown'.tr(),
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -360,8 +357,7 @@ class _ArtistEarningsDashboardState extends State<ArtistEarningsDashboard>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Quick Actions',
+            Text('art_walk_quick_actions'.tr(),
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -376,7 +372,7 @@ class _ArtistEarningsDashboardState extends State<ArtistEarningsDashboard>
                         ? () => _navigateToPayoutRequest()
                         : null,
                     icon: const Icon(Icons.account_balance),
-                    label: const Text('Request Payout'),
+                    label: const Text('art_walk_request_payout'.tr()),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
@@ -387,7 +383,7 @@ class _ArtistEarningsDashboardState extends State<ArtistEarningsDashboard>
                   child: OutlinedButton.icon(
                     onPressed: () => _navigateToPayoutAccounts(),
                     icon: const Icon(Icons.settings),
-                    label: const Text('Manage Accounts'),
+                    label: const Text('art_walk_manage_accounts'.tr()),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
@@ -411,8 +407,7 @@ class _ArtistEarningsDashboardState extends State<ArtistEarningsDashboard>
             Row(
               children: [
                 Expanded(
-                  child: Text(
-                    'Recent Activity',
+                  child: Text('art_walk_recent_activity'.tr(),
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -420,7 +415,7 @@ class _ArtistEarningsDashboardState extends State<ArtistEarningsDashboard>
                 ),
                 TextButton(
                   onPressed: () => _tabController.animateTo(1),
-                  child: const Text('View All'),
+                  child: const Text('art_walk_view_all'.tr()),
                 ),
               ],
             ),
@@ -429,7 +424,7 @@ class _ArtistEarningsDashboardState extends State<ArtistEarningsDashboard>
               const Center(
                 child: Padding(
                   padding: EdgeInsets.all(24),
-                  child: Text('No recent transactions'),
+                  child: Text('art_walk_no_recent_transactions'.tr()),
                 ),
               )
             else
@@ -547,7 +542,7 @@ class _ArtistEarningsDashboardState extends State<ArtistEarningsDashboard>
           backgroundColor: statusColor.withValues(alpha: 0.1),
           child: Icon(statusIcon, color: statusColor),
         ),
-        title: const Text('Payout Request'),
+        title: const Text('art_walk_payout_request'.tr()),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

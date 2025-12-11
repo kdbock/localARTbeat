@@ -1377,7 +1377,7 @@ class _AudioContentUploadScreenState extends State<AudioContentUploadScreen> {
                   Text('Format: $_audioFormat'),
                   Text('Size: ${_formatFileSize(_fileSize)}'),
                 ] else ...[
-                  const Text('No audio file selected'),
+                  Text('art_walk_no_audio_file_selected'.tr()),
                 ],
               ],
             ),

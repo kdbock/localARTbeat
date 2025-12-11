@@ -196,7 +196,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                         const Divider(),
                         ListTile(
                           title: Text('messaging_chat_info_text_participants'.tr()),
-                          subtitle: Text('${_participants.length} members'),
+                          subtitle: Text('messaging_participants_count'.tr().replaceAll('{count}', _participants.length.toString())),
                         ),
                         ...(_participants.map(
                           (user) => ListTile(

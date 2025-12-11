@@ -545,8 +545,7 @@ class _GalleryAnalyticsDashboardScreenState
                 const SizedBox(height: 24),
 
                 // Overview metrics
-                const Text(
-                  'Performance Overview',
+                const Text('art_walk_performance_overview'.tr(),
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -580,8 +579,7 @@ class _GalleryAnalyticsDashboardScreenState
                 const SizedBox(height: 32),
 
                 // Revenue chart
-                const Text(
-                  'Revenue Trend',
+                const Text('art_walk_revenue_trend'.tr(),
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -596,8 +594,7 @@ class _GalleryAnalyticsDashboardScreenState
                 const SizedBox(height: 32),
 
                 // Artist performance
-                const Text(
-                  'Artist Performance',
+                const Text('art_walk_artist_performance'.tr(),
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -615,8 +612,7 @@ class _GalleryAnalyticsDashboardScreenState
                 const SizedBox(height: 32),
 
                 // Commission summary
-                const Text(
-                  'Commission Summary',
+                const Text('art_walk_commission_summary'.tr(),
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -682,8 +678,7 @@ class _GalleryAnalyticsDashboardScreenState
                     onPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text(
-                              'Generating report PDF. Check your downloads folder.'),
+                          content: Text('art_walk_generating_report_pdf__check_your_downloads_folder'.tr()),
                         ),
                       );
                     },

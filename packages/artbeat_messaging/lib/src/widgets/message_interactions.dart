@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../models/message_model.dart';
 import '../models/chat_model.dart';
@@ -128,7 +129,7 @@ class MessageActionsSheet extends StatelessWidget {
           const SizedBox(height: 8),
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: const Text('messaging_button_cancel'.tr()),
           ),
         ],
       ),
@@ -138,7 +139,7 @@ class MessageActionsSheet extends StatelessWidget {
   void _copyToClipboard(BuildContext context, String text) {
     // Implementation would copy text to clipboard
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Message copied to clipboard')),
+      const SnackBar(content: Text('messaging_message_copied'.tr())),
     );
   }
 }
@@ -274,7 +275,7 @@ class _MessageEditWidgetState extends State<MessageEditWidget> {
             children: [
               TextButton(
                 onPressed: _isSaving ? null : widget.onCancel,
-                child: const Text('Cancel'),
+                child: const Text('messaging_button_cancel'.tr()),
               ),
               const SizedBox(width: 8),
               ElevatedButton(
@@ -287,7 +288,7 @@ class _MessageEditWidgetState extends State<MessageEditWidget> {
                         height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('Save'),
+                    : const Text('messaging_button_save'.tr()),
               ),
             ],
           ),
@@ -307,7 +308,7 @@ class _MessageEditWidgetState extends State<MessageEditWidget> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error saving message: $e')));
+        ).showSnackBar(SnackBar(content: Text('messaging_error_saving_message'.tr().replaceAll('{error}', e.toString()))));
       }
     }
 
@@ -354,7 +355,7 @@ class _ForwardMessageSheetState extends State<ForwardMessageSheet> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error loading chats: $e')));
+        ).showSnackBar(SnackBar(content: Text('messaging_error_loading_chats'.tr().replaceAll('{error}', e.toString()))));
       }
     }
   }
@@ -417,7 +418,7 @@ class _ForwardMessageSheetState extends State<ForwardMessageSheet> {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _allChats.isEmpty
-                ? const Center(child: Text('No conversations available'))
+                ? const Center(child: Text('messaging_no_conversations'.tr()))
                 : ListView.builder(
                     itemCount: _allChats.length,
                     itemBuilder: (context, index) {
@@ -465,7 +466,7 @@ class _ForwardMessageSheetState extends State<ForwardMessageSheet> {
             children: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
+                child: const Text('messaging_button_cancel'.tr()),
               ),
               const SizedBox(width: 8),
               ElevatedButton(
@@ -654,14 +655,14 @@ class InteractiveMessageBubble extends StatelessWidget {
             if (context.mounted) {
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Message edited successfully')),
+                const SnackBar(content: Text('messaging_message_edited'.tr())),
               );
             }
           } catch (e) {
             if (context.mounted) {
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Error editing message: $e')),
+                SnackBar(content: Text('messaging_error_editing_message'.tr().replaceAll('{error}', e.toString()))),
               );
             }
           }
@@ -698,7 +699,7 @@ class InteractiveMessageBubble extends StatelessWidget {
           } catch (e) {
             if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Error forwarding message: $e')),
+                SnackBar(content: Text('messaging_error_forwarding_message'.tr().replaceAll('{error}', e.toString()))),
               );
             }
           }
@@ -723,7 +724,7 @@ class InteractiveMessageBubble extends StatelessWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+        ).showSnackBar(SnackBar(content: Text('messaging_error_generic'.tr().replaceAll('{error}', e.toString()))));
       }
     }
   }
@@ -732,16 +733,16 @@ class InteractiveMessageBubble extends StatelessWidget {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Message'),
-        content: const Text('Are you sure you want to delete this message?'),
+        title: const Text('messaging_delete_message_title'.tr()),
+        content: const Text('messaging_delete_message_confirm'.tr()),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: const Text('messaging_button_cancel'.tr()),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete'),
+            child: const Text('messaging_button_delete'.tr()),
           ),
         ],
       ),
@@ -753,13 +754,13 @@ class InteractiveMessageBubble extends StatelessWidget {
         if (context.mounted) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(const SnackBar(content: Text('Message deleted')));
+          ).showSnackBar(const SnackBar(content: Text('messaging_message_deleted'.tr())));
         }
       } catch (e) {
         if (context.mounted) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(SnackBar(content: Text('Error deleting message: $e')));
+          ).showSnackBar(SnackBar(content: Text('messaging_error_deleting_message'.tr().replaceAll('{error}', e.toString()))));
         }
       }
     }

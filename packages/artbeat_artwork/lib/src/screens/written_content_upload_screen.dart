@@ -1303,7 +1303,7 @@ class _WrittenContentUploadScreenState
                     ),
                   ),
                 ] else ...[
-                  const Text('No content provided'),
+                  Text('art_walk_no_content_provided'.tr()),
                 ],
               ],
             ),

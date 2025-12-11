@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 void main() {
   runApp(const MainApp());
@@ -10,7 +11,7 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: Scaffold(body: Center(child: Text('Hello World!'))),
+      home: Scaffold(body: Center(child: Text('profile_main_text_hello_world'.tr()))),
     );
   }
 }

@@ -114,8 +114,7 @@ class _FeaturedArtistScreenState extends State<FeaturedArtistScreen> {
                           onPressed: () => Navigator.of(context).pop(),
                         ),
                         const Expanded(
-                          child: Text(
-                            'Featured Artists',
+                          child: Text('art_walk_featured_artists'.tr(),
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 28,
@@ -128,8 +127,7 @@ class _FeaturedArtistScreenState extends State<FeaturedArtistScreen> {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    const Text(
-                      'Discover exceptional artists making waves in the community',
+                    const Text('art_walk_discover_exceptional_artists_making_waves_in_the_community'.tr(),
                       style: TextStyle(
                         color: Colors.white70,
                         fontSize: 16,
@@ -165,8 +163,7 @@ class _FeaturedArtistScreenState extends State<FeaturedArtistScreen> {
         children: [
           Icon(Icons.star_outline, size: 80, color: Colors.white54),
           SizedBox(height: 16),
-          Text(
-            'No Featured Artists Yet',
+          Text('art_walk_no_featured_artists_yet'.tr(),
             style: TextStyle(
               color: Colors.white,
               fontSize: 24,
@@ -174,8 +171,7 @@ class _FeaturedArtistScreenState extends State<FeaturedArtistScreen> {
             ),
           ),
           SizedBox(height: 8),
-          Text(
-            'Check back soon for amazing featured artists',
+          Text('art_walk_check_back_soon_for_amazing_featured_artists'.tr(),
             style: TextStyle(
               color: Colors.white70,
               fontSize: 16,
@@ -209,8 +205,7 @@ class _FeaturedArtistScreenState extends State<FeaturedArtistScreen> {
             child: Column(
               children: [
                 const SizedBox(height: 20),
-                const Text(
-                  'More Featured Artists',
+                const Text('art_walk_more_featured_artists'.tr(),
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,

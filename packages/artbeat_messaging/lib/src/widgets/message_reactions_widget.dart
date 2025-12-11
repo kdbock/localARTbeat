@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:provider/provider.dart';
 import '../models/message_reaction_model.dart';
 import '../services/message_reaction_service.dart';
@@ -170,7 +171,7 @@ class _MessageReactionsWidgetState extends State<MessageReactionsWidget> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to toggle reaction: $e')),
+          SnackBar(content: Text('messaging_error_toggle_reaction'.tr().replaceAll('{error}', e.toString()))),
         );
       }
     }
@@ -300,7 +301,7 @@ class _ReactionPickerBottomSheet extends StatelessWidget {
                 children: [
                   Icon(Icons.emoji_emotions_outlined),
                   SizedBox(width: 8),
-                  Text('More emojis'),
+                  Text('messaging_reactions_more_emojis'.tr()),
                 ],
               ),
             ),
@@ -385,7 +386,7 @@ class _ReactionDetailsBottomSheet extends StatelessWidget {
 
           // Users list
           if (reactions.isEmpty)
-            const Text('No reactions yet')
+            const Text('messaging_reactions_no_reactions_yet'.tr())
           else
             ...reactions.map(
               (reaction) => Padding(

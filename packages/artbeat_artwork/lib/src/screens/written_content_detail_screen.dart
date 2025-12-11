@@ -135,7 +135,7 @@ class _WrittenContentDetailScreenState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading content: $e')),
+          SnackBar(content: Text('art_walk_error_loading_content'.tr().replaceAll('{error}', e.toString()))),
         );
       }
     } finally {
@@ -515,7 +515,7 @@ class _WrittenContentDetailScreenState
   Future<void> _purchaseContent() async {
     // TODO: Implement purchase flow
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Purchase functionality coming soon!')),
+      SnackBar(content: Text('art_walk_purchase_functionality_coming_soon'.tr())),
     );
   }
 
@@ -529,8 +529,8 @@ class _WrittenContentDetailScreenState
 
     if (_artwork == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Content Not Found')),
-        body: const Center(child: Text('Content not found')),
+        appBar: AppBar(title: Text('art_walk_content_not_found'.tr())),
+        body: Center(child: Text('art_walk_content_not_found'.tr())),
       );
     }
 

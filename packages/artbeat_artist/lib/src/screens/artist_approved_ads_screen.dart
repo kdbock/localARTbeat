@@ -25,8 +25,7 @@ class _ArtistApprovedAdsScreenState extends State<ArtistApprovedAdsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Artist Approved Ads',
+                  Text('art_walk_artist_approved_ads'.tr(),
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -43,14 +42,12 @@ class _ArtistApprovedAdsScreenState extends State<ArtistApprovedAdsScreen> {
                             color: Theme.of(context).colorScheme.primary,
                           ),
                           const SizedBox(height: 16),
-                          Text(
-                            'Ad Management Coming Soon',
+                          Text('art_walk_ad_management_coming_soon'.tr(),
                             style: Theme.of(context).textTheme.titleLarge,
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 8),
-                          Text(
-                            'Manage your approved advertisements and promotional content here. This feature is currently under development.',
+                          Text('art_walk_manage_your_approved_advertisements_and_promotional_content_here__this_feature_is_currently_under_development'.tr(),
                             style: Theme.of(context).textTheme.bodyMedium,
                             textAlign: TextAlign.center,
                           ),
@@ -59,8 +56,7 @@ class _ArtistApprovedAdsScreenState extends State<ArtistApprovedAdsScreen> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  Text(
-                    'Features Coming Soon:',
+                  Text('art_walk_features_coming_soon'.tr(),
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),

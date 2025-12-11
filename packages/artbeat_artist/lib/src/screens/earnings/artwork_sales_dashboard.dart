@@ -138,8 +138,7 @@ class _ArtworkSalesDashboardState extends State<ArtworkSalesDashboard>
             children: [
               Icon(Icons.error_outline, size: 64, color: Colors.grey[400]),
               const SizedBox(height: 16),
-              Text(
-                'Failed to load sales data',
+              Text('art_walk_failed_to_load_sales_data'.tr(),
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
               const SizedBox(height: 8),
@@ -153,7 +152,7 @@ class _ArtworkSalesDashboardState extends State<ArtworkSalesDashboard>
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: _loadSalesData,
-                child: const Text('Retry'),
+                child: const Text('art_walk_retry'.tr()),
               ),
             ],
           ),
@@ -197,8 +196,7 @@ class _ArtworkSalesDashboardState extends State<ArtworkSalesDashboard>
                   color: Colors.white, size: 28),
               const SizedBox(width: 12),
               Expanded(
-                child: Text(
-                  'Artwork Sales Revenue',
+                child: Text('art_walk_artwork_sales_revenue'.tr(),
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -301,13 +299,11 @@ class _ArtworkSalesDashboardState extends State<ArtworkSalesDashboard>
               Icon(Icons.image_not_supported,
                   size: 48, color: Colors.grey[300]),
               const SizedBox(height: 16),
-              Text(
-                'No sales yet',
+              Text('art_walk_no_sales_yet'.tr(),
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
               const SizedBox(height: 8),
-              Text(
-                'Start by uploading and listing your artwork',
+              Text('art_walk_start_by_uploading_and_listing_your_artwork'.tr(),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Colors.grey[600],
                     ),
@@ -325,8 +321,7 @@ class _ArtworkSalesDashboardState extends State<ArtworkSalesDashboard>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Sales Summary',
+        Text('art_walk_sales_summary'.tr(),
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -438,16 +433,14 @@ class _ArtworkSalesDashboardState extends State<ArtworkSalesDashboard>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Top Collectors',
+            Text('art_walk_top_collectors'.tr(),
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
             ),
             const SizedBox(height: 16),
             if (topBuyers.isEmpty)
-              Text(
-                'No collectors yet',
+              Text('art_walk_no_collectors_yet'.tr(),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Colors.grey[600],
                     ),
@@ -504,8 +497,7 @@ class _ArtworkSalesDashboardState extends State<ArtworkSalesDashboard>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Quick Actions',
+            Text('art_walk_quick_actions'.tr(),
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -517,12 +509,12 @@ class _ArtworkSalesDashboardState extends State<ArtworkSalesDashboard>
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Navigating to upload artwork...'),
+                      content: Text('art_walk_navigating_to_upload_artwork'.tr()),
                     ),
                   );
                 },
                 icon: const Icon(Icons.add_photo_alternate),
-                label: const Text('Upload New Artwork'),
+                label: const Text('art_walk_upload_new_artwork'.tr()),
               ),
             ),
             const SizedBox(height: 12),
@@ -532,12 +524,12 @@ class _ArtworkSalesDashboardState extends State<ArtworkSalesDashboard>
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Navigating to manage listings...'),
+                      content: Text('art_walk_navigating_to_manage_listings'.tr()),
                     ),
                   );
                 },
                 icon: const Icon(Icons.manage_search),
-                label: const Text('Manage Listings'),
+                label: const Text('art_walk_manage_listings'.tr()),
               ),
             ),
           ],
@@ -552,8 +544,7 @@ class _ArtworkSalesDashboardState extends State<ArtworkSalesDashboard>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Recent Sales',
+          Text('art_walk_recent_sales'.tr(),
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -564,8 +555,7 @@ class _ArtworkSalesDashboardState extends State<ArtworkSalesDashboard>
               child: Padding(
                 padding: const EdgeInsets.all(32),
                 child: Center(
-                  child: Text(
-                    'No sales transactions yet',
+                  child: Text('art_walk_no_sales_transactions_yet'.tr(),
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Colors.grey[600],
                         ),
@@ -694,8 +684,7 @@ class _ArtworkSalesDashboardState extends State<ArtworkSalesDashboard>
                       Icon(Icons.check_circle,
                           size: 14, color: Colors.green[600]),
                       const SizedBox(width: 6),
-                      Text(
-                        'Completed',
+                      Text('art_walk_completed'.tr(),
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
                               color: Colors.green[600],
                             ),

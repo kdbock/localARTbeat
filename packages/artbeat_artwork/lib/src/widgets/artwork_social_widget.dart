@@ -103,8 +103,8 @@ class _ArtworkSocialWidgetState extends State<ArtworkSocialWidget>
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to submit rating. Please try again.'),
+          SnackBar(
+            content: Text('art_walk_failed_to_submit_rating'.tr()),
             backgroundColor: Colors.red,
           ),
         );
@@ -136,8 +136,8 @@ class _ArtworkSocialWidgetState extends State<ArtworkSocialWidget>
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Comment posted successfully!'),
+          SnackBar(
+            content: Text('art_walk_comment_posted_successfully'.tr()),
             backgroundColor: Colors.green,
           ),
         );
@@ -145,8 +145,8 @@ class _ArtworkSocialWidgetState extends State<ArtworkSocialWidget>
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to post comment. Please try again.'),
+          SnackBar(
+            content: Text('art_walk_failed_to_post_comment'.tr()),
             backgroundColor: Colors.red,
           ),
         );
@@ -309,7 +309,7 @@ class _ArtworkSocialWidgetState extends State<ArtworkSocialWidget>
                             height: 16,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text('Post Comment'),
+                        : Text('art_walk_post_comment'.tr()),
                   ),
                 ],
               ),
@@ -329,8 +329,8 @@ class _ArtworkSocialWidgetState extends State<ArtworkSocialWidget>
                 }
 
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(
-                    child: Text('No comments yet. Be the first to comment!'),
+                  return Center(
+                    child: Text('art_walk_no_comments_yet'.tr()),
                   );
                 }
 
@@ -387,7 +387,7 @@ class _ArtworkSocialWidgetState extends State<ArtworkSocialWidget>
                                           size: 18,
                                         ),
                                         SizedBox(width: 8),
-                                        Text('Block user'),
+                                        Text('art_walk_block_user'.tr()),
                                       ],
                                     ),
                                   ),
@@ -401,7 +401,7 @@ class _ArtworkSocialWidgetState extends State<ArtworkSocialWidget>
                                           size: 18,
                                         ),
                                         SizedBox(width: 8),
-                                        Text('Report comment'),
+                                        Text('art_walk_report_comment'.tr()),
                                       ],
                                     ),
                                   ),
@@ -426,7 +426,7 @@ class _ArtworkSocialWidgetState extends State<ArtworkSocialWidget>
       final currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('You must be logged in to report')),
+          SnackBar(content: Text('art_walk_must_be_logged_in_to_report'.tr())),
         );
         return;
       }
@@ -440,8 +440,8 @@ class _ArtworkSocialWidgetState extends State<ArtworkSocialWidget>
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Thank you for reporting. Our team will review it.'),
+          SnackBar(
+            content: Text('art_walk_thank_you_for_reporting'.tr()),
             backgroundColor: Colors.green,
             duration: Duration(seconds: 2),
           ),
@@ -451,7 +451,7 @@ class _ArtworkSocialWidgetState extends State<ArtworkSocialWidget>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error reporting comment: $e'),
+            content: Text('art_walk_error_reporting_comment'.tr().replaceAll('{error}', e.toString())),
             backgroundColor: Colors.red,
           ),
         );

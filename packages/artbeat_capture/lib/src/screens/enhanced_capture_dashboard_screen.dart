@@ -160,7 +160,7 @@ class _EnhancedCaptureDashboardScreenState
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Search Captures',
+                            'capture_dashboard_search_captures'.tr(),
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -168,7 +168,7 @@ class _EnhancedCaptureDashboardScreenState
                             ),
                           ),
                           Text(
-                            'Find art captures and locations',
+                            'capture_dashboard_find_art'.tr(),
                             style: TextStyle(
                               fontSize: 14,
                               color: ArtbeatColors.textSecondary,
@@ -189,8 +189,8 @@ class _EnhancedCaptureDashboardScreenState
                   children: [
                     _buildSearchOption(
                       icon: Icons.camera_alt,
-                      title: 'Search Captures',
-                      subtitle: 'Find art captures by location or type',
+                      title: 'capture_dashboard_search_captures'.tr(),
+                      subtitle: 'capture_dashboard_search_captures_subtitle'.tr(),
                       color: ArtbeatColors.primaryGreen,
                       onTap: () {
                         Navigator.pop(context);
@@ -199,8 +199,8 @@ class _EnhancedCaptureDashboardScreenState
                     ),
                     _buildSearchOption(
                       icon: Icons.location_on,
-                      title: 'Nearby Art',
-                      subtitle: 'Discover art captures near you',
+                      title: 'capture_dashboard_nearby_art'.tr(),
+                      subtitle: 'capture_dashboard_nearby_art_subtitle'.tr(),
                       color: ArtbeatColors.primaryPurple,
                       onTap: () {
                         Navigator.pop(context);
@@ -209,8 +209,8 @@ class _EnhancedCaptureDashboardScreenState
                     ),
                     _buildSearchOption(
                       icon: Icons.trending_up,
-                      title: 'Popular Captures',
-                      subtitle: 'See trending art discoveries',
+                      title: 'capture_dashboard_popular_captures'.tr(),
+                      subtitle: 'capture_dashboard_popular_captures_subtitle'.tr(),
                       color: ArtbeatColors.secondaryTeal,
                       onTap: () {
                         Navigator.pop(context);
@@ -219,8 +219,8 @@ class _EnhancedCaptureDashboardScreenState
                     ),
                     _buildSearchOption(
                       icon: Icons.person_search,
-                      title: 'Find Artists',
-                      subtitle: 'Search for artists and their captures',
+                      title: 'capture_dashboard_find_artists'.tr(),
+                      subtitle: 'capture_dashboard_find_artists_subtitle'.tr(),
                       color: ArtbeatColors.accentYellow,
                       onTap: () {
                         Navigator.pop(context);
@@ -397,7 +397,7 @@ class _EnhancedCaptureDashboardScreenState
                                     ),
                                     const SizedBox(height: 16),
                                     Text(
-                                      'Ready to Capture Art?',
+                                      'capture_dashboard_ready_capture'.tr(),
                                       style: Theme.of(context)
                                           .textTheme
                                           .headlineSmall
@@ -409,7 +409,7 @@ class _EnhancedCaptureDashboardScreenState
                                     ),
                                     const SizedBox(height: 8),
                                     Text(
-                                      'Discover and document public art to help build our community map',
+                                      'capture_dashboard_discover_document'.tr(),
                                       style: Theme.of(context)
                                           .textTheme
                                           .bodyLarge
@@ -444,8 +444,8 @@ class _EnhancedCaptureDashboardScreenState
                                     Icons.assignment_turned_in,
                                     size: 24,
                                   ),
-                                  label: const Text(
-                                    'Start Capture',
+                                  label: Text(
+                                    'capture_dashboard_start_capture'.tr(),
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.w600,
@@ -459,7 +459,7 @@ class _EnhancedCaptureDashboardScreenState
                               // Stats section
                               if (_currentUser != null) ...[
                                 Text(
-                                  'Your Impact',
+                                  'capture_dashboard_your_impact'.tr(),
                                   style: Theme.of(context).textTheme.titleLarge
                                       ?.copyWith(
                                         fontWeight: FontWeight.bold,
@@ -471,7 +471,7 @@ class _EnhancedCaptureDashboardScreenState
                                   children: [
                                     Expanded(
                                       child: _buildStatCard(
-                                        title: 'Captures',
+                                        title: 'capture_dashboard_stat_captures'.tr(),
                                         value: _totalUserCaptures.toString(),
                                         icon: Icons.camera_alt,
                                         color: ArtbeatColors.primaryGreen,
@@ -480,7 +480,7 @@ class _EnhancedCaptureDashboardScreenState
                                     const SizedBox(width: 16),
                                     Expanded(
                                       child: _buildStatCard(
-                                        title: 'Community Views',
+                                        title: 'capture_dashboard_stat_community_views'.tr(),
                                         value: _totalCommunityViews.toString(),
                                         icon: Icons.visibility,
                                         color: ArtbeatColors.primaryPurple,
@@ -506,7 +506,7 @@ class _EnhancedCaptureDashboardScreenState
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Your Recent Captures',
+                                  'capture_dashboard_recent_captures'.tr(),
                                   style: Theme.of(context).textTheme.titleLarge
                                       ?.copyWith(
                                         fontWeight: FontWeight.bold,
@@ -553,7 +553,7 @@ class _EnhancedCaptureDashboardScreenState
                               children: [
                                 const SizedBox(height: 16),
                                 Text(
-                                  'Community Inspiration',
+                                  'capture_dashboard_community_inspiration'.tr(),
                                   style: Theme.of(context).textTheme.titleLarge
                                       ?.copyWith(
                                         fontWeight: FontWeight.bold,
@@ -562,7 +562,7 @@ class _EnhancedCaptureDashboardScreenState
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  'See what others are discovering in your area',
+                                  'capture_dashboard_see_others'.tr(),
                                   style: Theme.of(context).textTheme.bodyMedium
                                       ?.copyWith(
                                         color: ArtbeatColors.textSecondary,
@@ -789,7 +789,7 @@ class _EnhancedCaptureDashboardScreenState
               left: 8,
               right: 8,
               child: Text(
-                capture.title ?? 'Community Capture',
+                capture.title ?? 'capture_dashboard_community_capture'.tr(),
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 12,

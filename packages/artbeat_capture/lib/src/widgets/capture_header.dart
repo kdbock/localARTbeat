@@ -212,7 +212,7 @@ class _CaptureHeaderState extends State<CaptureHeader> {
             // Menu items for capture package
             ListTile(
               leading: const Icon(Icons.camera_alt, color: _headerColor),
-              title: const Text('Take Photo'),
+              title: Text('capture_menu_take_photo'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/capture/camera');
@@ -220,7 +220,7 @@ class _CaptureHeaderState extends State<CaptureHeader> {
             ),
             ListTile(
               leading: const Icon(Icons.photo_library, color: _headerColor),
-              title: const Text('Photo Gallery'),
+              title: Text('capture_menu_photo_gallery'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/capture/gallery');
@@ -228,7 +228,7 @@ class _CaptureHeaderState extends State<CaptureHeader> {
             ),
             ListTile(
               leading: const Icon(Icons.edit, color: _headerColor),
-              title: const Text('Edit Photos'),
+              title: Text('capture_menu_edit_photos'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/capture/edit');
@@ -254,19 +254,19 @@ class _CaptureHeaderState extends State<CaptureHeader> {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Capture Developer Tools'),
+        title: Text('capture_developer_tools_title'.tr()),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              title: const Text('Test Camera Access'),
+              title: Text('capture_developer_tools_test_camera'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 // Implement camera access testing
               },
             ),
             ListTile(
-              title: const Text('Clear Image Cache'),
+              title: Text('capture_developer_tools_clear_cache'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 // Implement image cache clearing
@@ -277,7 +277,7 @@ class _CaptureHeaderState extends State<CaptureHeader> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text('capture_developer_tools_close'.tr()),
           ),
         ],
       ),

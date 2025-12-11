@@ -248,19 +248,16 @@ class _SubscriptionAnalyticsScreenState
                 children: [
                   const Icon(Icons.analytics, size: 80, color: Colors.grey),
                   const SizedBox(height: 16),
-                  const Text(
-                    'Subscription Analytics',
+                  const Text('art_walk_subscription_analytics'.tr(),
                     style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    'Get detailed insights about your subscription performance',
+                  const Text('art_walk_get_detailed_insights_about_your_subscription_performance'.tr(),
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 16),
                   ),
                   const SizedBox(height: 24),
-                  const Text(
-                    'Available with Artist Pro Plan',
+                  const Text('art_walk_available_with_artist_pro_plan'.tr(),
                     style: TextStyle(fontSize: 18, color: Colors.deepPurple),
                   ),
                   const SizedBox(height: 32),
@@ -399,8 +396,7 @@ class _SubscriptionAnalyticsScreenState
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Start Date',
+                    const Text('art_walk_start_date'.tr(),
                       style: TextStyle(
                         color: Colors.grey,
                         fontSize: 12,
@@ -415,8 +411,7 @@ class _SubscriptionAnalyticsScreenState
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    const Text(
-                      'Next Billing Date',
+                    const Text('art_walk_next_billing_date'.tr(),
                       style: TextStyle(
                         color: Colors.grey,
                         fontSize: 12,
@@ -600,8 +595,7 @@ class _SubscriptionAnalyticsScreenState
         ),
         child: Column(
           children: [
-            Text(
-              'Profile Views Over Time',
+            Text('art_walk_profile_views_over_time'.tr(),
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 32),
@@ -631,8 +625,7 @@ class _SubscriptionAnalyticsScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Profile Views Over Time',
+          Text('art_walk_profile_views_over_time'.tr(),
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 24),
@@ -658,7 +651,7 @@ class _SubscriptionAnalyticsScreenState
                     sideTitles: SideTitles(
                       showTitles: true,
                       getTitlesWidget: (value, meta) {
-                        return const Text('');
+                        return const Text('art_walk_'.tr());
                       },
                       reservedSize: 30,
                     ),
@@ -726,8 +719,7 @@ class _SubscriptionAnalyticsScreenState
         ),
         child: Column(
           children: [
-            Text(
-              'New Followers Over Time',
+            Text('art_walk_new_followers_over_time'.tr(),
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 32),
@@ -757,8 +749,7 @@ class _SubscriptionAnalyticsScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'New Followers Over Time',
+          Text('art_walk_new_followers_over_time'.tr(),
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 24),
@@ -786,8 +777,7 @@ class _SubscriptionAnalyticsScreenState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Recent Payments',
+        Text('art_walk_recent_payments'.tr(),
           style: Theme.of(context).textTheme.titleLarge,
         ),
         const SizedBox(height: 16),
@@ -822,8 +812,7 @@ class _SubscriptionAnalyticsScreenState
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Payment Completed',
+                      const Text('art_walk_payment_completed'.tr(),
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                         ),

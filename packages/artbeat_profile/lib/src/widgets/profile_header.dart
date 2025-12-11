@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Profile Package Specific Header
 ///
@@ -212,7 +213,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
             // Menu items for profile package
             ListTile(
               leading: const Icon(Icons.person, color: _headerColor),
-              title: const Text('My Profile'),
+              title: Text('profile_header_text_my_profile'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/profile');
@@ -220,7 +221,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
             ),
             ListTile(
               leading: const Icon(Icons.edit, color: _headerColor),
-              title: const Text('Edit Profile'),
+              title: Text('profile_header_text_edit_profile'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/profile/edit');
@@ -228,7 +229,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
             ),
             ListTile(
               leading: const Icon(Icons.settings, color: _headerColor),
-              title: const Text('Profile Settings'),
+              title: Text('profile_header_text_profile_settings'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/profile/settings');
@@ -254,19 +255,19 @@ class _ProfileHeaderState extends State<ProfileHeader> {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Profile Developer Tools'),
+        title: Text('profile_header_text_profile_developer_tools'.tr()),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              title: const Text('Clear Profile Cache'),
+              title: Text('profile_header_text_clear_profile_cache'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 // Implement profile cache clearing
               },
             ),
             ListTile(
-              title: const Text('Test Profile Updates'),
+              title: Text('profile_header_text_test_profile_updates'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 // Implement profile update testing
@@ -277,7 +278,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text('profile_header_text_close'.tr()),
           ),
         ],
       ),

@@ -1,0 +1,17 @@
+{
+  "art_walk_account_bankname_____bank_________account_accountnumber_length____4___account_accountnumber_substring_account_accountnumber_length___4____account_accountnumber": "{account.bankName ?? 'Bank'} •••• {account.accountNumber.length >= 4 ? account.accountNumber.substring(account.accountNumber.length - 4) : account.accountNumber}",
+  "art_walk_artist__commission___as_double__tostringasfixed_2": "\\${(artist['commission'] as double).toStringAsFixed(2)}",
+  "art_walk_artist__revenue___as_double__tostringasfixed_2": "\\${(artist['revenue'] as double).toStringAsFixed(2)}",
+  "art_walk_artwork_price__tostringasfixed_2______for_sale": "\\${artwork.price?.toStringAsFixed(2) ?? 'For Sale'}",
+  "art_walk_card__last4": "•••• •••• •••• {card?.last4 ?? ''}",
+  "art_walk_error___snapshot_error": "Error: {snapshot.error}",
+  "art_walk_error_loading_galleries___snapshot_error": "Error loading galleries: {snapshot.error}",
+  "art_walk_featured": "FEATURED",
+  "art_walk_follower_engagementscore__pts": "{follower.engagementScore} pts",
+  "art_walk_index___1": "#{index + 1}",
+  "art_walk_payout_amount_tostringasfixed_2": "\\${payout.amount.toStringAsFixed(2)}",
+  "art_walk_processed____formatdate_payout_processedat": "Processed: {_formatDate(payout.processedAt!)}",
+  "art_walk_reason___payout_failurereason": "Reason: {payout.failureReason}",
+  "art_walk_subscribe_now_____getpricestring_widget_tier": "Subscribe Now - {_getPriceString(widget.tier)}",
+  "art_walk_transaction_amount_tostringasfixed_2": "\\${transaction.amount.toStringAsFixed(2)}"
+}

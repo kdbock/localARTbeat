@@ -63,7 +63,7 @@ class _CommentsSectionWidgetState extends State<CommentsSectionWidget> {
         if (mounted) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(const SnackBar(content: Text('Comment added')));
+          ).showSnackBar(SnackBar(content: Text('capture_comments_added_success'.tr())));
         }
       }
     } catch (e) {
@@ -71,7 +71,7 @@ class _CommentsSectionWidgetState extends State<CommentsSectionWidget> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
+        ).showSnackBar(SnackBar(content: Text('capture_comments_error_generic'.tr().replaceAll('{error}', e.toString()))));
       }
     } finally {
       if (mounted) {
@@ -92,10 +92,10 @@ class _CommentsSectionWidgetState extends State<CommentsSectionWidget> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Comments header
-        const Padding(
+        Padding(
           padding: EdgeInsets.fromLTRB(16, 24, 16, 12),
           child: Text(
-            'Comments',
+            'capture_comments_section_title'.tr(),
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
         ),
@@ -114,7 +114,7 @@ class _CommentsSectionWidgetState extends State<CommentsSectionWidget> {
             if (snapshot.hasError) {
               return Padding(
                 padding: const EdgeInsets.all(16),
-                child: Text('Error loading comments: ${snapshot.error}'),
+                child: Text('capture_comments_error_loading'.tr().replaceAll('{error}', snapshot.error.toString())),
               );
             }
 
@@ -123,7 +123,7 @@ class _CommentsSectionWidgetState extends State<CommentsSectionWidget> {
             if (comments.isEmpty) {
               return const Padding(
                 padding: EdgeInsets.all(16),
-                child: Text('No comments yet. Be the first to comment!'),
+                child: Text('capture_comments_no_comments'.tr()),
               );
             }
 

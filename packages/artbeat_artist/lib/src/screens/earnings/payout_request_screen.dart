@@ -131,8 +131,7 @@ class _PayoutRequestScreenState extends State<PayoutRequestScreen> {
               children: [
                 Icon(Icons.account_balance_wallet, color: Colors.green[700]),
                 const SizedBox(width: 12),
-                Text(
-                  'Available Balance',
+                Text('art_walk_available_balance'.tr(),
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -148,8 +147,7 @@ class _PayoutRequestScreenState extends State<PayoutRequestScreen> {
                   ),
             ),
             const SizedBox(height: 8),
-            Text(
-              'This is the amount available for payout after processing fees.',
+            Text('art_walk_this_is_the_amount_available_for_payout_after_processing_fees'.tr(),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Colors.grey[600],
                   ),
@@ -167,8 +165,7 @@ class _PayoutRequestScreenState extends State<PayoutRequestScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Payout Amount',
+            Text('art_walk_payout_amount'.tr(),
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -218,7 +215,7 @@ class _PayoutRequestScreenState extends State<PayoutRequestScreen> {
                       _amountController.text =
                           (widget.availableBalance * 0.25).toStringAsFixed(2);
                     },
-                    child: const Text('25%'),
+                    child: const Text('art_walk_25'.tr()),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -228,7 +225,7 @@ class _PayoutRequestScreenState extends State<PayoutRequestScreen> {
                       _amountController.text =
                           (widget.availableBalance * 0.5).toStringAsFixed(2);
                     },
-                    child: const Text('50%'),
+                    child: const Text('art_walk_50'.tr()),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -238,7 +235,7 @@ class _PayoutRequestScreenState extends State<PayoutRequestScreen> {
                       _amountController.text =
                           (widget.availableBalance * 0.75).toStringAsFixed(2);
                     },
-                    child: const Text('75%'),
+                    child: const Text('art_walk_75'.tr()),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -248,7 +245,7 @@ class _PayoutRequestScreenState extends State<PayoutRequestScreen> {
                       _amountController.text =
                           widget.availableBalance.toStringAsFixed(2);
                     },
-                    child: const Text('All'),
+                    child: const Text('art_walk_all'.tr()),
                   ),
                 ),
               ],
@@ -269,8 +266,7 @@ class _PayoutRequestScreenState extends State<PayoutRequestScreen> {
             Row(
               children: [
                 Expanded(
-                  child: Text(
-                    'Payout Account',
+                  child: Text('art_walk_payout_account'.tr(),
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -282,7 +278,7 @@ class _PayoutRequestScreenState extends State<PayoutRequestScreen> {
                     Navigator.pushNamed(context, '/artist/payout-accounts');
                   },
                   icon: const Icon(Icons.add),
-                  label: const Text('Add Account'),
+                  label: const Text('art_walk_add_account'.tr()),
                 ),
               ],
             ),
@@ -300,16 +296,14 @@ class _PayoutRequestScreenState extends State<PayoutRequestScreen> {
                     Icon(Icons.account_balance,
                         color: Colors.orange[700], size: 48),
                     const SizedBox(height: 12),
-                    Text(
-                      'No Payout Accounts',
+                    Text('art_walk_no_payout_accounts'.tr(),
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: Colors.orange[700],
                           ),
                     ),
                     const SizedBox(height: 8),
-                    Text(
-                      'You need to add a payout account before requesting a payout.',
+                    Text('art_walk_you_need_to_add_a_payout_account_before_requesting_a_payout'.tr(),
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.orange[700]),
                     ),
@@ -319,7 +313,7 @@ class _PayoutRequestScreenState extends State<PayoutRequestScreen> {
                         Navigator.pushNamed(context, '/artist/payout-accounts');
                       },
                       icon: const Icon(Icons.add),
-                      label: const Text('Add Payout Account'),
+                      label: const Text('art_walk_add_payout_account'.tr()),
                     ),
                   ],
                 ),
@@ -381,8 +375,7 @@ class _PayoutRequestScreenState extends State<PayoutRequestScreen> {
               children: [
                 Icon(Icons.info_outline, color: Colors.blue[700]),
                 const SizedBox(width: 12),
-                Text(
-                  'Payout Information',
+                Text('art_walk_payout_information'.tr(),
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -401,8 +394,7 @@ class _PayoutRequestScreenState extends State<PayoutRequestScreen> {
                 color: Colors.blue[50],
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Text(
-                'Payouts are processed securely through our payment partner. You will receive an email confirmation once the payout is initiated.',
+              child: Text('art_walk_payouts_are_processed_securely_through_our_payment_partner__you_will_receive_an_email_confirmation_once_the_payout_is_initiated'.tr(),
                 style: TextStyle(
                   fontSize: 12,
                   color: Colors.blue[700],
@@ -481,8 +473,7 @@ class _PayoutRequestScreenState extends State<PayoutRequestScreen> {
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                 ),
               )
-            : const Text(
-                'Request Payout',
+            : const Text('art_walk_request_payout'.tr(),
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,

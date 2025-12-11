@@ -197,7 +197,7 @@ class _ArtworkDiscoveryScreenState extends State<ArtworkDiscoveryScreen>
               // Navigate to sign in screen
               Navigator.of(context).pushNamed('/auth/login');
             },
-            child: const Text('Sign In'),
+            child: Text('art_walk_sign_in'.tr()),
           ),
         ],
       ),

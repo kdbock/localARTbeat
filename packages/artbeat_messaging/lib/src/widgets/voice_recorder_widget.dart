@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import '../services/voice_recording_service.dart';
@@ -381,22 +382,21 @@ class _VoiceRecorderWidgetState extends State<VoiceRecorderWidget>
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Microphone Permission Required'),
+          title: const Text('messaging_voice_permission_required'.tr()),
           content: const Text(
-            'ARTbeat needs microphone access to record voice messages. '
-            'Please go to Settings > ARTbeat > Microphone and enable access.',
+            'messaging_voice_permission_message'.tr(),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
+              child: const Text('messaging_button_cancel'.tr()),
             ),
             TextButton(
               onPressed: () async {
                 Navigator.of(context).pop();
                 await openAppSettings();
               },
-              child: const Text('Open Settings'),
+              child: const Text('messaging_button_open_settings'.tr()),
             ),
           ],
         );
@@ -437,7 +437,7 @@ class _VoiceRecorderWidgetState extends State<VoiceRecorderWidget>
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
+              child: const Text('messaging_button_cancel'.tr()),
             ),
             if (showSettingsButton)
               TextButton(
@@ -445,7 +445,7 @@ class _VoiceRecorderWidgetState extends State<VoiceRecorderWidget>
                   Navigator.of(context).pop();
                   await openAppSettings();
                 },
-                child: const Text('Open Settings'),
+                child: const Text('messaging_button_open_settings'.tr()),
               ),
           ],
         );
@@ -458,14 +458,14 @@ class _VoiceRecorderWidgetState extends State<VoiceRecorderWidget>
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Recording Error'),
+          title: const Text('messaging_voice_recording_error'.tr()),
           content: const Text(
-            'Unable to start recording. Please check your microphone settings and try again.',
+            'messaging_voice_recording_error_message'.tr(),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK'),
+              child: const Text('messaging_button_ok'.tr()),
             ),
           ],
         );

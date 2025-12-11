@@ -42,8 +42,7 @@ class ArtistSubscriptionCTAWidget extends StatelessWidget {
                     size: 28,
                   ),
                   SizedBox(width: 12),
-                  Text(
-                    'Are you an artist?',
+                  Text('art_walk_are_you_an_artist'.tr(),
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 20,
@@ -53,8 +52,7 @@ class ArtistSubscriptionCTAWidget extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 12),
-              Text(
-                'Showcase your work to local art lovers, get discovered, and grow your career.',
+              Text('art_walk_showcase_your_work_to_local_art_lovers__get_discovered__and_grow_your_career'.tr(),
                 style: TextStyle(
                   color: Colors.white.withAlpha(230),
                   fontSize: 14,
@@ -100,8 +98,7 @@ class ArtistSubscriptionCTAWidget extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8.0),
                   ),
                 ),
-                child: const Text(
-                  'Start Your Artist Journey',
+                child: const Text('art_walk_start_your_artist_journey'.tr(),
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,

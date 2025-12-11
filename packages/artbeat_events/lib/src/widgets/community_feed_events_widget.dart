@@ -90,7 +90,7 @@ class _CommunityFeedEventsWidgetState extends State<CommunityFeedEventsWidget> {
           if (widget.onViewAllPressed != null)
             TextButton(
               onPressed: widget.onViewAllPressed,
-              child: const Text('View All'),
+              child: const Text('events_view_all'.tr()),
             ),
         ],
       ),
@@ -131,7 +131,7 @@ class _CommunityFeedEventsWidgetState extends State<CommunityFeedEventsWidget> {
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: _loadEvents,
-                child: const Text('Retry'),
+                child: const Text('events_retry'.tr()),
               ),
             ],
           ),

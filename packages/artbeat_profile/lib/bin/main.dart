@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_profile/artbeat_profile.dart' as profile;
 
 // You can replace this with actual Firebase options for development
@@ -72,13 +73,13 @@ class ProfileModuleHome extends StatelessWidget {
     final String demoUserId = userService.currentUserId ?? 'demo_user_id';
 
     return Scaffold(
-      appBar: AppBar(title: const Text('ARTbeat Profile Module')),
+      appBar: AppBar(title: Text('profile_bin_main_text_artbeat_profile_module'.tr())),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              'Profile Module Demo',
+            Text(
+              'profile_bin_main_text_profile_module_demo'.tr(),
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
@@ -93,7 +94,7 @@ class ProfileModuleHome extends StatelessWidget {
                   ),
                 ),
               ),
-              child: const Text('View Profile'),
+              child: Text('profile_bin_main_text_view_profile'.tr()),
             ),
             const SizedBox(height: 10),
             ElevatedButton(
@@ -103,7 +104,7 @@ class ProfileModuleHome extends StatelessWidget {
                   builder: (_) => profile.EditProfileScreen(userId: demoUserId),
                 ),
               ),
-              child: const Text('Edit Profile'),
+              child: Text('profile_bin_main_text_edit_profile'.tr()),
             ),
             const SizedBox(height: 10),
             ElevatedButton(
@@ -114,7 +115,7 @@ class ProfileModuleHome extends StatelessWidget {
                       profile.FollowersListScreen(userId: demoUserId),
                 ),
               ),
-              child: const Text('Followers'),
+              child: Text('profile_bin_main_text_followers'.tr()),
             ),
             const SizedBox(height: 10),
             ElevatedButton(
@@ -125,7 +126,7 @@ class ProfileModuleHome extends StatelessWidget {
                       profile.FollowingListScreen(userId: demoUserId),
                 ),
               ),
-              child: const Text('Following'),
+              child: Text('profile_bin_main_text_following'.tr()),
             ),
             const SizedBox(height: 10),
             ElevatedButton(
@@ -135,7 +136,7 @@ class ProfileModuleHome extends StatelessWidget {
                   builder: (_) => profile.FavoritesScreen(userId: demoUserId),
                 ),
               ),
-              child: const Text('Favorites'),
+              child: Text('profile_bin_main_text_favorites'.tr()),
             ),
           ],
         ),

@@ -228,8 +228,7 @@ class _MyArtworkScreenState extends State<MyArtworkScreen> {
               color: core.ArtbeatColors.error,
             ),
             const SizedBox(height: 16),
-            Text(
-              'Error',
+            Text('art_walk_error'.tr(),
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 8),
@@ -267,8 +266,7 @@ class _MyArtworkScreenState extends State<MyArtworkScreen> {
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Upload your first artwork to get started!',
+            const Text('art_walk_upload_your_first_artwork_to_get_started'.tr(),
               style: TextStyle(color: core.ArtbeatColors.textSecondary),
             ),
             const SizedBox(height: 16),
@@ -461,7 +459,7 @@ class _MyArtworkScreenState extends State<MyArtworkScreen> {
                       children: [
                         Icon(Icons.delete, size: 18, color: Colors.red),
                         SizedBox(width: 8),
-                        Text('Delete', style: TextStyle(color: Colors.red)),
+                        Text('art_walk_delete'.tr(), style: TextStyle(color: Colors.red)),
                       ],
                     ),
                   ),

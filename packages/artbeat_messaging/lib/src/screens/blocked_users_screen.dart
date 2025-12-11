@@ -202,7 +202,7 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${user.displayName} has been unblocked'),
+            content: Text('messaging_user_unblocked'.tr().replaceAll('{user}', user.displayName)),
             backgroundColor: Colors.green,
           ),
         );

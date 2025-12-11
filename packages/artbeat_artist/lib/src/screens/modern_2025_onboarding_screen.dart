@@ -89,8 +89,7 @@ class _Modern2025OnboardingScreenState extends State<Modern2025OnboardingScreen>
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text(
-              'Skip',
+            child: Text('art_walk_skip'.tr(),
               style: TextStyle(
                 color: Colors.grey.shade600,
                 fontSize: 16,
@@ -208,8 +207,7 @@ class _Modern2025OnboardingScreenState extends State<Modern2025OnboardingScreen>
                   const SizedBox(height: 40),
 
                   // Modern typography
-                  const Text(
-                    'Welcome to\nARTbeat',
+                  const Text('art_walk_welcome_to_nartbeat'.tr(),
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 36,
@@ -220,8 +218,7 @@ class _Modern2025OnboardingScreenState extends State<Modern2025OnboardingScreen>
                   ),
                   const SizedBox(height: 16),
 
-                  Text(
-                    'The modern platform where artists thrive.\nPersonalized for your creative journey.',
+                  Text('art_walk_the_modern_platform_where_artists_thrive__npersonalized_for_your_creative_journey'.tr(),
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 18,
@@ -293,16 +290,14 @@ class _Modern2025OnboardingScreenState extends State<Modern2025OnboardingScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'What\'s your artistic focus?',
+                  const Text('art_walk_what__s_your_artistic_focus'.tr(),
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    'Select all that apply to personalize your experience',
+                  Text('art_walk_select_all_that_apply_to_personalize_your_experience'.tr(),
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.grey.shade600,
@@ -394,16 +389,14 @@ class _Modern2025OnboardingScreenState extends State<Modern2025OnboardingScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'What describes you best?',
+                  const Text('art_walk_what_describes_you_best'.tr(),
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    'This helps us recommend the right plan for you',
+                  Text('art_walk_this_helps_us_recommend_the_right_plan_for_you'.tr(),
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.grey.shade600,
@@ -512,8 +505,7 @@ class _Modern2025OnboardingScreenState extends State<Modern2025OnboardingScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Perfect plan for you',
+                  const Text('art_walk_perfect_plan_for_you'.tr(),
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
@@ -558,8 +550,7 @@ class _Modern2025OnboardingScreenState extends State<Modern2025OnboardingScreen>
                               color: Theme.of(context).primaryColor,
                             ),
                             const SizedBox(width: 8),
-                            Text(
-                              'AI Recommended',
+                            Text('art_walk_ai_recommended'.tr(),
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
@@ -599,8 +590,7 @@ class _Modern2025OnboardingScreenState extends State<Modern2025OnboardingScreen>
 
                   const SizedBox(height: 24),
                   // Feature preview
-                  const Text(
-                    'What you\'ll get:',
+                  const Text('art_walk_what_you__ll_get'.tr(),
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
@@ -609,8 +599,7 @@ class _Modern2025OnboardingScreenState extends State<Modern2025OnboardingScreen>
                   const SizedBox(height: 16),
 
                   // Plan selection
-                  const Text(
-                    'Choose a plan',
+                  const Text('art_walk_choose_a_plan'.tr(),
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 12),

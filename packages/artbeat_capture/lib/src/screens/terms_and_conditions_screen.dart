@@ -75,7 +75,7 @@ class _TermsAndConditionsScreenState extends State<TermsAndConditionsScreen> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'Before You Capture',
+                        'capture_terms_before_you_capture'.tr(),
                         style: Theme.of(context).textTheme.headlineSmall
                             ?.copyWith(
                               fontWeight: FontWeight.bold,
@@ -85,7 +85,7 @@ class _TermsAndConditionsScreenState extends State<TermsAndConditionsScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Please read and accept our guidelines to ensure safe and legal art capturing',
+                        'capture_terms_read_and_accept'.tr(),
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           color: ArtbeatColors.textSecondary,
                         ),
@@ -117,7 +117,7 @@ class _TermsAndConditionsScreenState extends State<TermsAndConditionsScreen> {
                           ),
                           const SizedBox(width: 12),
                           Text(
-                            'Safety Guidelines',
+                            'capture_terms_safety_guidelines'.tr(),
                             style: TextStyle(
                               color: Colors.red.shade800,
                               fontWeight: FontWeight.bold,
@@ -128,12 +128,7 @@ class _TermsAndConditionsScreenState extends State<TermsAndConditionsScreen> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        '• Always be aware of your surroundings\n'
-                        '• Do not trespass on private property\n'
-                        '• Stay on public sidewalks and paths\n'
-                        '• Be respectful of other people and property\n'
-                        '• Use caution when crossing streets or navigating traffic\n'
-                        '• Follow local laws and regulations',
+                        'capture_terms_safety_bullets'.tr(),
                         style: TextStyle(
                           color: Colors.red.shade700,
                           fontSize: 14,
@@ -166,7 +161,7 @@ class _TermsAndConditionsScreenState extends State<TermsAndConditionsScreen> {
                           ),
                           const SizedBox(width: 12),
                           Text(
-                            'Legal Guidelines',
+                            'capture_terms_legal_guidelines'.tr(),
                             style: TextStyle(
                               color: Colors.blue.shade800,
                               fontWeight: FontWeight.bold,
@@ -177,12 +172,7 @@ class _TermsAndConditionsScreenState extends State<TermsAndConditionsScreen> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        '• Only capture art in public spaces\n'
-                        '• No nudity or inappropriate content\n'
-                        '• No derogatory or offensive images\n'
-                        '• Respect artist copyrights and permissions\n'
-                        '• All captures are subject to moderation\n'
-                        '• Follow community guidelines and standards',
+                        'capture_terms_legal_bullets'.tr(),
                         style: TextStyle(
                           color: Colors.blue.shade700,
                           fontSize: 14,
@@ -217,7 +207,7 @@ class _TermsAndConditionsScreenState extends State<TermsAndConditionsScreen> {
                           ),
                           SizedBox(width: 12),
                           Text(
-                            'Community Contribution',
+                            'capture_terms_community_contribution'.tr(),
                             style: TextStyle(
                               color: ArtbeatColors.primaryGreen,
                               fontWeight: FontWeight.bold,
@@ -228,9 +218,7 @@ class _TermsAndConditionsScreenState extends State<TermsAndConditionsScreen> {
                       ),
                       SizedBox(height: 16),
                       Text(
-                        'Your captures help build Art Walks for the community! '
-                        'Each approved capture becomes part of curated routes that guide other users to discover '
-                        'public art. Your contribution helps create a rich map of artistic discoveries.',
+                        'capture_terms_community_description'.tr(),
                         style: TextStyle(
                           color: ArtbeatColors.primaryGreen,
                           fontSize: 14,
@@ -265,7 +253,7 @@ class _TermsAndConditionsScreenState extends State<TermsAndConditionsScreen> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          'I have read and agree to all the safety guidelines, legal guidelines, and community standards listed above.',
+                          'capture_terms_agreement_text'.tr(),
                           style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(fontWeight: FontWeight.w500),
                         ),

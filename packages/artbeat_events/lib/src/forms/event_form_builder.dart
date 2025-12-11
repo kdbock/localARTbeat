@@ -169,7 +169,7 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
             )
           : AppBar(
               title: Text(
-                widget.initialEvent == null ? 'Create Event' : 'Edit Event',
+                widget.initialEvent == null ? 'events_create_event'.tr() : 'events_edit_event'.tr(),
               ),
             ),
       body: Container(
@@ -240,8 +240,8 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
                           )
                         : Text(
                             widget.initialEvent == null
-                                ? 'Create Event'
-                                : 'Update Event',
+                                ? 'events_create_event'.tr()
+                                : 'events_update_event'.tr(),
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -277,7 +277,7 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Basic Information',
+            'events_basic_information'.tr(),
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -288,8 +288,8 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
           TextFormField(
             controller: _titleController,
             decoration: const InputDecoration(
-              labelText: 'Event Title *',
-              hintText: 'Enter event title',
+              labelText: 'events_event_title'.tr(),
+              hintText: 'events_enter_event_title'.tr(),
             ),
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
@@ -302,8 +302,8 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
           TextFormField(
             controller: _descriptionController,
             decoration: const InputDecoration(
-              labelText: 'Event Description *',
-              hintText: 'Describe your event in detail',
+              labelText: 'events_event_description'.tr(),
+              hintText: 'events_describe_event'.tr(),
             ),
             maxLines: 4,
             validator: (value) {
@@ -326,14 +326,14 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Event Images *',
+              'events_event_images'.tr(),
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
 
             // Artist Headshot
             _buildImageUploadSection(
-              title: 'Artist Headshot *',
+              title: 'events_artist_headshot'.tr(),
               image: _artistHeadshot,
               onImageSelected: (file) => setState(() => _artistHeadshot = file),
             ),
@@ -341,14 +341,14 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
 
             // Event Banner
             _buildImageUploadSection(
-              title: 'Event Banner *',
+              title: 'events_event_banner'.tr(),
               image: _eventBanner,
               onImageSelected: (file) => setState(() => _eventBanner = file),
             ),
             const SizedBox(height: 16),
 
             // Additional Event Images
-            const Text('Additional Event Images'),
+            const Text('events_additional_images'.tr()),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -414,7 +414,7 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
                         size: 48,
                         color: Colors.grey,
                       ),
-                      Text('Tap to select image'),
+                      Text('events_tap_to_select_image'.tr()),
                     ],
                   ),
           ),
@@ -463,7 +463,7 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.add, color: Colors.grey),
-            Text('Add', style: TextStyle(color: Colors.grey)),
+            Text('events_add'.tr(), style: TextStyle(color: Colors.grey)),
           ],
         ),
       ),
@@ -670,7 +670,7 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
                 ElevatedButton.icon(
                   onPressed: _addTicketType,
                   icon: const Icon(Icons.add),
-                  label: const Text('Add Ticket'),
+                  label: const Text('events_add_ticket'.tr()),
                 ),
               ],
             ),
@@ -789,15 +789,15 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
             ),
             const SizedBox(height: 16),
             SwitchListTile(
-              title: const Text('Public Event'),
-              subtitle: const Text('Show event in community feed'),
+              title: const Text('events_public_event'.tr()),
+              subtitle: const Text('events_show_in_feed'.tr()),
               value: _isPublic,
               onChanged: (value) => setState(() => _isPublic = value),
               contentPadding: EdgeInsets.zero,
             ),
             SwitchListTile(
-              title: const Text('Enable Reminders'),
-              subtitle: const Text('Send reminder notifications to attendees'),
+              title: const Text('events_enable_reminders'.tr()),
+              subtitle: const Text('events_send_reminders'.tr()),
               value: _reminderEnabled,
               onChanged: (value) => setState(() => _reminderEnabled = value),
               contentPadding: EdgeInsets.zero,
@@ -821,8 +821,8 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
             ),
             const SizedBox(height: 16),
             SwitchListTile(
-              title: const Text('Repeat Event'),
-              subtitle: const Text('Create a recurring event'),
+              title: const Text('events_repeat_event'.tr()),
+              subtitle: const Text('events_create_recurring'.tr()),
               value: _isRecurring,
               onChanged: (value) => setState(() => _isRecurring = value),
               contentPadding: EdgeInsets.zero,
@@ -907,7 +907,7 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
               const SizedBox(height: 16),
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('End Date'),
+                title: const Text('events_end_date'.tr()),
                 subtitle: Text(
                   _recurrenceEndDate != null
                       ? '${_recurrenceEndDate!.month}/${_recurrenceEndDate!.day}/${_recurrenceEndDate!.year}'
@@ -1162,35 +1162,35 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all required fields')),
+        const SnackBar(content: Text('events_fill_required'.tr())),
       );
       return;
     }
 
     if (_selectedDateTime == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select event date and time')),
+        const SnackBar(content: Text('events_select_date'.tr())),
       );
       return;
     }
 
     if (_artistHeadshot == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select artist headshot')),
+        const SnackBar(content: Text('events_select_headshot'.tr())),
       );
       return;
     }
 
     if (_eventBanner == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select event banner')),
+        const SnackBar(content: Text('events_select_banner'.tr())),
       );
       return;
     }
 
     if (_ticketTypes.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please add at least one ticket type')),
+        const SnackBar(content: Text('events_add_ticket_type'.tr())),
       );
       return;
     }
@@ -1201,7 +1201,7 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
     if (userId == null) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('User not logged in.')));
+      ).showSnackBar(const SnackBar(content: Text('events_not_logged_in'.tr())));
       return;
     }
     final eventId =
@@ -1232,7 +1232,7 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Failed to upload images: $e')));
+        ).showSnackBar(SnackBar(content: Text('events_upload_failed'.tr().replaceAll('{error}', e.toString()))));
       }
       return;
     }
@@ -1297,7 +1297,7 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
     // Placeholder for search functionality
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Search functionality not available in create event'),
+        content: Text('events_search_unavailable'.tr()),
       ),
     );
   }
@@ -1306,7 +1306,7 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
     // Placeholder for profile menu
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Profile menu not available in create event'),
+        content: Text('events_profile_unavailable'.tr()),
       ),
     );
   }
@@ -1462,7 +1462,7 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Form Debug Info'),
+        title: const Text('events_form_debug'.tr()),
         content: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1496,7 +1496,7 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
     Navigator.pop(context); // Close developer tools
     // This would show a preview of the event data structure
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Event data preview - feature coming soon')),
+      const SnackBar(content: Text('events_preview_coming'.tr())),
     );
   }
 
@@ -1504,7 +1504,7 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
     Navigator.pop(context); // Close developer tools
     // This would show Firebase Storage path information
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Storage info - feature coming soon')),
+      const SnackBar(content: Text('events_storage_coming'.tr())),
     );
   }
 }

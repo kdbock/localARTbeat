@@ -82,14 +82,12 @@ class _EventsScreenState extends State<EventsScreen> {
                             const Icon(Icons.event_busy,
                                 size: 64, color: Colors.grey),
                             const SizedBox(height: 16),
-                            const Text(
-                              'No events found',
+                            const Text('art_walk_no_events_found'.tr(),
                               style: TextStyle(
                                   fontSize: 18, fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 8),
-                            Text(
-                              'Create your first event by tapping the + button',
+                            Text('art_walk_create_your_first_event_by_tapping_the___button'.tr(),
                               style: TextStyle(color: Colors.grey[600]),
                               textAlign: TextAlign.center,
                             ),

@@ -227,7 +227,7 @@ class _ArtworkHeaderState extends State<ArtworkHeader> {
             // Menu items for artwork package
             ListTile(
               leading: const Icon(Icons.image, color: _headerColor),
-              title: const Text('Browse Artwork'),
+              title: Text('art_walk_browse_artwork'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/artwork/featured');
@@ -235,7 +235,7 @@ class _ArtworkHeaderState extends State<ArtworkHeader> {
             ),
             ListTile(
               leading: const Icon(Icons.upload, color: _headerColor),
-              title: const Text('Upload Artwork'),
+              title: Text('art_walk_upload_artwork'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/artwork/upload');
@@ -243,7 +243,7 @@ class _ArtworkHeaderState extends State<ArtworkHeader> {
             ),
             ListTile(
               leading: const Icon(Icons.favorite, color: _headerColor),
-              title: const Text('My Favorites'),
+              title: Text('art_walk_my_favorites'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/artwork/favorites');
@@ -269,19 +269,19 @@ class _ArtworkHeaderState extends State<ArtworkHeader> {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Artwork Developer Tools'),
+        title: Text('art_walk_artwork_developer_tools'.tr()),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              title: const Text('Test Image Upload'),
+              title: Text('art_walk_test_image_upload'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 // Implement image upload testing
               },
             ),
             ListTile(
-              title: const Text('Clear Artwork Cache'),
+              title: Text('art_walk_clear_artwork_cache'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 // Implement artwork cache clearing
@@ -292,7 +292,7 @@ class _ArtworkHeaderState extends State<ArtworkHeader> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text('art_walk_close'.tr()),
           ),
         ],
       ),

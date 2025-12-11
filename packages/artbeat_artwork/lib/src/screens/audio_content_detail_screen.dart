@@ -138,7 +138,7 @@ class _AudioContentDetailScreenState extends State<AudioContentDetailScreen> {
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading audio content: $e')),
+          SnackBar(content: Text('art_walk_error_loading_audio_content'.tr().replaceAll('{error}', e.toString()))),
         );
       }
     }
@@ -180,7 +180,7 @@ class _AudioContentDetailScreenState extends State<AudioContentDetailScreen> {
       return const MainLayout(
         currentIndex: 1,
         child: Center(
-          child: Text('Audio content not found'),
+        child: Text('art_walk_audio_content_not_found'.tr()),
         ),
       );
     }
@@ -511,7 +511,7 @@ class _AudioContentDetailScreenState extends State<AudioContentDetailScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to share artwork')),
+          SnackBar(content: Text('art_walk_failed_to_share_artwork'.tr())),
         );
       }
     }

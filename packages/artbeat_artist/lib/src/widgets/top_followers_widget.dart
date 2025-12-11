@@ -63,8 +63,7 @@ class _TopFollowersWidgetState extends State<TopFollowersWidget> {
                 children: [
                   const Icon(Icons.star, color: Colors.amber, size: 20),
                   const SizedBox(width: 8),
-                  const Text(
-                    'Top Fans',
+                  const Text('art_walk_top_fans'.tr(),
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -238,8 +237,7 @@ class _TopFollowersWidgetState extends State<TopFollowersWidget> {
             children: [
               Icon(Icons.star, color: Colors.amber, size: 20),
               SizedBox(width: 8),
-              Text(
-                'Top Fans',
+              Text('art_walk_top_fans'.tr(),
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -293,8 +291,7 @@ class _TopFollowersWidgetState extends State<TopFollowersWidget> {
             children: [
               Icon(Icons.star, color: Colors.amber, size: 20),
               SizedBox(width: 8),
-              Text(
-                'Top Fans',
+              Text('art_walk_top_fans'.tr(),
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -309,8 +306,7 @@ class _TopFollowersWidgetState extends State<TopFollowersWidget> {
               color: Colors.red.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Text(
-              'Error loading top fans',
+            child: const Text('art_walk_error_loading_top_fans'.tr(),
               style: TextStyle(color: Colors.red),
             ),
           ),
@@ -329,8 +325,7 @@ class _TopFollowersWidgetState extends State<TopFollowersWidget> {
             children: [
               Icon(Icons.star, color: Colors.amber, size: 20),
               SizedBox(width: 8),
-              Text(
-                'Top Fans',
+              Text('art_walk_top_fans'.tr(),
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -345,8 +340,7 @@ class _TopFollowersWidgetState extends State<TopFollowersWidget> {
               color: Colors.grey.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Text(
-              'No engaged followers yet',
+            child: Text('art_walk_no_engaged_followers_yet'.tr(),
               style: TextStyle(color: Colors.grey[600]),
             ),
           ),

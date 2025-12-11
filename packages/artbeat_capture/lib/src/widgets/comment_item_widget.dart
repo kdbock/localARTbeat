@@ -42,17 +42,17 @@ class _CommentItemWidgetState extends State<CommentItemWidget> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Comment?'),
-        content: const Text('Are you sure you want to delete this comment?'),
+        title: Text('capture_comment_delete_title'.tr()),
+        content: Text('capture_comment_delete_confirmation'.tr()),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text('capture_comment_delete_cancel'.tr()),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+            child: Text('capture_comment_delete_confirm'.tr()),
           ),
         ],
       ),
@@ -73,7 +73,7 @@ class _CommentItemWidgetState extends State<CommentItemWidget> {
         if (mounted) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(const SnackBar(content: Text('Comment deleted')));
+          ).showSnackBar(SnackBar(content: Text('capture_comment_deleted_success'.tr())));
         }
       }
     } catch (e) {
@@ -81,7 +81,7 @@ class _CommentItemWidgetState extends State<CommentItemWidget> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
+        ).showSnackBar(SnackBar(content: Text('capture_comment_error_generic'.tr().replaceAll('{error}', e.toString()))));
       }
     } finally {
       if (mounted) {
@@ -111,7 +111,7 @@ class _CommentItemWidgetState extends State<CommentItemWidget> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
+        ).showSnackBar(SnackBar(content: Text('capture_comment_error_generic'.tr().replaceAll('{error}', e.toString()))));
       }
     }
   }

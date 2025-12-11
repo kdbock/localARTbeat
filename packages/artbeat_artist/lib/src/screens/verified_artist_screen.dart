@@ -167,8 +167,7 @@ class _VerifiedArtistScreenState extends State<VerifiedArtistScreen> {
                   const SizedBox(height: 16),
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 24),
-                    child: Text(
-                      'Explore artists who have been verified for authenticity and quality',
+                    child: Text('art_walk_explore_artists_who_have_been_verified_for_authenticity_and_quality'.tr(),
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 16,
@@ -243,8 +242,7 @@ class _VerifiedArtistScreenState extends State<VerifiedArtistScreen> {
                               Icon(Icons.verified_user,
                                   size: 64, color: Colors.grey),
                               SizedBox(height: 16),
-                              Text(
-                                'No verified artists found',
+                              Text('art_walk_no_verified_artists_found'.tr(),
                                 style:
                                     TextStyle(fontSize: 18, color: Colors.grey),
                               ),
@@ -361,8 +359,7 @@ class _VerifiedArtistScreenState extends State<VerifiedArtistScreen> {
                           color: Colors.white,
                         ),
                         SizedBox(width: 4),
-                        Text(
-                          'Verified',
+                        Text('art_walk_verified'.tr(),
                           style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -508,7 +505,7 @@ class _VerifiedArtistScreenState extends State<VerifiedArtistScreen> {
                   }).toList(),
                 ),
                 const SizedBox(height: 16),
-                const Text('Style',
+                const Text('art_walk_style'.tr(),
                     style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 Wrap(

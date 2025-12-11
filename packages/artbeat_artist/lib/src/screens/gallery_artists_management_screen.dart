@@ -441,16 +441,14 @@ class _GalleryArtistsManagementScreenState
               color: Colors.grey,
             ),
             SizedBox(height: 16),
-            Text(
-              'No pending invitations',
+            Text('art_walk_no_pending_invitations'.tr(),
               style: TextStyle(
                 fontSize: 18,
                 color: Colors.grey,
               ),
             ),
             SizedBox(height: 8),
-            Text(
-              'Use the + button to invite artists to your gallery',
+            Text('art_walk_use_the___button_to_invite_artists_to_your_gallery'.tr(),
               style: TextStyle(
                 fontSize: 14,
                 color: Colors.grey,
@@ -690,8 +688,7 @@ class _ArtistSearchDialogState extends State<_ArtistSearchDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              'Find Artists',
+            const Text('art_walk_find_artists'.tr(),
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,

@@ -45,7 +45,7 @@ class _FollowedArtistsScreenState extends State<FollowedArtistsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error loading followed artists: ${e.toString()}'),
+            content: Text('profile_followed_artists_screen_error_error_loading_followed_artists'.tr().replaceAll('{error}', e.toString())),
           ),
         );
         setState(() {
@@ -63,12 +63,12 @@ class _FollowedArtistsScreenState extends State<FollowedArtistsScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Unfollow ${artist.displayName}?'),
+          title: Text('profile_followed_artists_screen_text_unfollow_artist'.tr().replaceAll('{artistDisplayName}', artist.displayName)),
           content: Text('profile_followers_confirm_unfollow'.tr()),
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('CANCEL'),
+              child: Text('profile_followed_artists_screen_text_cancel'.tr()),
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(true),
@@ -104,7 +104,7 @@ class _FollowedArtistsScreenState extends State<FollowedArtistsScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('You unfollowed ${artist.displayName}'),
+              content: Text('profile_followed_artists_screen_success_you_unfollowed_artist'.tr().replaceAll('{artistDisplayName}', artist.displayName)),
               duration: const Duration(seconds: 2),
             ),
           );
@@ -113,7 +113,7 @@ class _FollowedArtistsScreenState extends State<FollowedArtistsScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Error unfollowing artist: ${e.toString()}'),
+              content: Text('profile_followed_artists_screen_error_error_unfollowing_artist'.tr().replaceAll('{error}', e.toString())),
               backgroundColor: Colors.red,
             ),
           );

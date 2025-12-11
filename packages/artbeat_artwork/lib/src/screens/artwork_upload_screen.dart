@@ -205,7 +205,7 @@ class _ArtworkUploadScreenState extends State<ArtworkUploadScreen> {
       if (!doc.exists) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Artwork not found')),
+            SnackBar(content: Text('art_walk_artwork_not_found'.tr())),
           );
           Navigator.pop(context);
         }
@@ -239,7 +239,7 @@ class _ArtworkUploadScreenState extends State<ArtworkUploadScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading artwork: $e')),
+          SnackBar(content: Text('art_walk_error_loading_artwork'.tr().replaceAll('{error}', e.toString()))),
         );
       }
     } finally {
@@ -459,7 +459,7 @@ class _ArtworkUploadScreenState extends State<ArtworkUploadScreen> {
                         vertical: 16,
                       ),
                     ),
-                    child: const Text('Upgrade Now'),
+                    child: Text('art_walk_upgrade_now'.tr()),
                   ),
                 ],
               ),
@@ -511,7 +511,7 @@ class _ArtworkUploadScreenState extends State<ArtworkUploadScreen> {
                                 children: [
                                   Icon(Icons.add_photo_alternate, size: 64),
                                   SizedBox(height: 8),
-                                  Text('Select Image'),
+                                  Text('art_walk_select_image'.tr()),
                                 ],
                               )
                             : null,
@@ -655,7 +655,7 @@ class _ArtworkUploadScreenState extends State<ArtworkUploadScreen> {
 
                   // For Sale switch
                   SwitchListTile(
-                    title: const Text('Available for sale'),
+                    title: Text('art_walk_available_for_sale'.tr()),
                     value: _isForSale,
                     onChanged: (value) {
                       setState(() {

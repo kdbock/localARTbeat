@@ -555,7 +555,7 @@ class _TicketPurchaseSheetState extends State<TicketPurchaseSheet> {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: const Text('✅ Tickets Purchased!'),
+        title: const Text('events_tickets_purchased'.tr()),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -564,7 +564,7 @@ class _TicketPurchaseSheetState extends State<TicketPurchaseSheet> {
               'You have successfully purchased $_quantity ticket${_quantity > 1 ? 's' : ''} for ${widget.event.title}.',
             ),
             const SizedBox(height: 16),
-            Text('Confirmation ID: $purchaseId'),
+            Text('events_confirmation_id'.tr().replaceAll('{id}', purchaseId)),
             const SizedBox(height: 16),
             const Text(
               'A confirmation email has been sent to your email address.',
@@ -577,7 +577,7 @@ class _TicketPurchaseSheetState extends State<TicketPurchaseSheet> {
               Navigator.pop(context); // Close dialog
               widget.onPurchaseComplete();
             },
-            child: const Text('Done'),
+            child: const Text('events_done'.tr()),
           ),
         ],
       ),
@@ -588,12 +588,12 @@ class _TicketPurchaseSheetState extends State<TicketPurchaseSheet> {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('❌ Purchase Failed'),
-        content: Text('Failed to purchase tickets: $error'),
+        title: const Text('events_purchase_failed'.tr()),
+        content: Text('events_purchase_error'.tr().replaceAll('{error}', error)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+            child: const Text('events_ok'.tr()),
           ),
         ],
       ),

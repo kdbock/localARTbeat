@@ -219,7 +219,7 @@ class _EventModerationDashboardScreenState
               'No pending events',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            Text('All events have been reviewed.'),
+            Text('events_all_reviewed'.tr()),
           ],
         ),
       );
@@ -285,7 +285,7 @@ class _EventModerationDashboardScreenState
                 ElevatedButton.icon(
                   onPressed: () => _reviewEvent(event.id, true),
                   icon: const Icon(Icons.check),
-                  label: const Text('Approve'),
+                  label: const Text('events_approve'.tr()),
                 ),
               ],
             ),
@@ -297,7 +297,7 @@ class _EventModerationDashboardScreenState
 
   Widget _buildAnalyticsTab() {
     if (_analytics == null) {
-      return const Center(child: Text('Analytics data not available'));
+      return const Center(child: Text('events_analytics_not_available'.tr()));
     }
 
     final flags = _analytics!['flags'] as Map<String, dynamic>;
@@ -419,7 +419,7 @@ class _EventModerationDashboardScreenState
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-            Text('$current / $total (${(percentage * 100).toInt()}%)'),
+            Text('events_progress'.tr().replaceAll('{current}', current.toString()).replaceAll('{total}', total.toString()).replaceAll('{percentage}', '${(percentage * 100).toInt()}')),
           ],
         ),
         const SizedBox(height: 8),
@@ -502,7 +502,7 @@ class _EventModerationDashboardScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: ${e.toString()}'),
+            content: Text('events_error'.tr().replaceAll('{error}', e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -520,7 +520,7 @@ class _EventModerationDashboardScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Flag dismissed successfully'),
+            content: Text('events_flag_dismissed'.tr()),
             backgroundColor: Colors.green,
           ),
         );
@@ -531,7 +531,7 @@ class _EventModerationDashboardScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error dismissing flag: ${e.toString()}'),
+            content: Text('events_dismiss_flag_error'.tr().replaceAll('{error}', e.toString())),
             backgroundColor: Colors.red,
           ),
         );

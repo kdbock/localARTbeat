@@ -152,8 +152,7 @@ class _ArtistOnboardingScreenState extends State<ArtistOnboardingScreen> {
                               ),
                             ),
                             const SizedBox(height: 16),
-                            Text(
-                              'Welcome to ARTbeat for Artists',
+                            Text('art_walk_welcome_to_artbeat_for_artists'.tr(),
                               style: Theme.of(context)
                                   .textTheme
                                   .headlineSmall
@@ -164,8 +163,7 @@ class _ArtistOnboardingScreenState extends State<ArtistOnboardingScreen> {
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 8),
-                            Text(
-                              'Showcase your talent and join a vibrant community of creators!',
+                            Text('art_walk_showcase_your_talent_and_join_a_vibrant_community_of_creators'.tr(),
                               style: Theme.of(context)
                                   .textTheme
                                   .bodyLarge
@@ -181,8 +179,7 @@ class _ArtistOnboardingScreenState extends State<ArtistOnboardingScreen> {
                       const Divider(
                           color: core.ArtbeatColors.divider, thickness: 1.2),
                       const SizedBox(height: 18),
-                      Text(
-                        'About You',
+                      Text('art_walk_about_you'.tr(),
                         style:
                             Theme.of(context).textTheme.titleMedium?.copyWith(
                                   color: core.ArtbeatColors.primaryPurple,
@@ -218,8 +215,7 @@ class _ArtistOnboardingScreenState extends State<ArtistOnboardingScreen> {
                       const Divider(
                           color: core.ArtbeatColors.divider, thickness: 1.2),
                       const SizedBox(height: 18),
-                      Text(
-                        'Art Mediums',
+                      Text('art_walk_art_mediums'.tr(),
                         style:
                             Theme.of(context).textTheme.titleMedium?.copyWith(
                                   color: core.ArtbeatColors.primaryGreen,
@@ -227,8 +223,7 @@ class _ArtistOnboardingScreenState extends State<ArtistOnboardingScreen> {
                                 ),
                       ),
                       const SizedBox(height: 8),
-                      Text(
-                        'Select all that apply. What materials or techniques do you use most?',
+                      Text('art_walk_select_all_that_apply__what_materials_or_techniques_do_you_use_most'.tr(),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: core.ArtbeatColors.textSecondary,
                             ),
@@ -277,8 +272,7 @@ class _ArtistOnboardingScreenState extends State<ArtistOnboardingScreen> {
                       if (_selectedMediums.isEmpty)
                         const Padding(
                           padding: EdgeInsets.only(top: 8),
-                          child: Text(
-                            'Please select at least one medium',
+                          child: Text('art_walk_please_select_at_least_one_medium'.tr(),
                             style: TextStyle(color: core.ArtbeatColors.error),
                           ),
                         ),
@@ -286,8 +280,7 @@ class _ArtistOnboardingScreenState extends State<ArtistOnboardingScreen> {
                       const Divider(
                           color: core.ArtbeatColors.divider, thickness: 1.2),
                       const SizedBox(height: 18),
-                      Text(
-                        'Art Styles',
+                      Text('art_walk_art_styles'.tr(),
                         style:
                             Theme.of(context).textTheme.titleMedium?.copyWith(
                                   color: core.ArtbeatColors.accent1,
@@ -295,8 +288,7 @@ class _ArtistOnboardingScreenState extends State<ArtistOnboardingScreen> {
                                 ),
                       ),
                       const SizedBox(height: 8),
-                      Text(
-                        'What styles best describe your work? Select as many as you like.',
+                      Text('art_walk_what_styles_best_describe_your_work__select_as_many_as_you_like'.tr(),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: core.ArtbeatColors.textSecondary,
                             ),
@@ -345,8 +337,7 @@ class _ArtistOnboardingScreenState extends State<ArtistOnboardingScreen> {
                       if (_selectedStyles.isEmpty)
                         const Padding(
                           padding: EdgeInsets.only(top: 8),
-                          child: Text(
-                            'Please select at least one style',
+                          child: Text('art_walk_please_select_at_least_one_style'.tr(),
                             style: TextStyle(color: core.ArtbeatColors.error),
                           ),
                         ),
@@ -377,8 +368,7 @@ class _ArtistOnboardingScreenState extends State<ArtistOnboardingScreen> {
                                         core.ArtbeatColors.white),
                                   ),
                                 )
-                              : const Text(
-                                  'Create Artist Profile',
+                              : const Text('art_walk_create_artist_profile'.tr(),
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
@@ -389,8 +379,7 @@ class _ArtistOnboardingScreenState extends State<ArtistOnboardingScreen> {
                       ),
                       const SizedBox(height: 8),
                       Center(
-                        child: Text(
-                          'You can edit your profile and add more details later.',
+                        child: Text('art_walk_you_can_edit_your_profile_and_add_more_details_later'.tr(),
                           style:
                               Theme.of(context).textTheme.bodySmall?.copyWith(
                                     color: core.ArtbeatColors.textDisabled,

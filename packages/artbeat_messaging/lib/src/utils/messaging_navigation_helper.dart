@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:provider/provider.dart';
 import '../models/chat_model.dart';
 import '../services/chat_service.dart';
@@ -22,7 +23,7 @@ class MessagingNavigationHelper {
       } else if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Chat not found'),
+            content: Text('messaging_error_chat_not_found'.tr()),
             backgroundColor: Colors.red,
           ),
         );
@@ -31,7 +32,7 @@ class MessagingNavigationHelper {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error opening chat: $e'),
+            content: Text('messaging_error_opening_chat'.tr().replaceAll('{error}', e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -59,7 +60,7 @@ class MessagingNavigationHelper {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error creating chat: $e'),
+            content: Text('messaging_error_creating_chat'.tr().replaceAll('{error}', e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -85,7 +86,7 @@ class MessagingNavigationHelper {
       } else if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('User not found'),
+            content: Text('messaging_error_user_not_found'.tr()),
             backgroundColor: Colors.red,
           ),
         );
@@ -94,7 +95,7 @@ class MessagingNavigationHelper {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error loading user: $e'),
+            content: Text('messaging_error_loading_user'.tr().replaceAll('{error}', e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -189,7 +190,7 @@ class MessagingNavigationHelper {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Unknown messaging deep link'),
+              content: Text('messaging_error_unknown_deep_link'.tr()),
               backgroundColor: Colors.orange,
             ),
           );

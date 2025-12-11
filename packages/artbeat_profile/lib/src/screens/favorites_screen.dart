@@ -48,7 +48,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error loading liked content: ${e.toString()}'),
+            content: Text('profile_favorites_screen_error_error_loading_liked_content'.tr().replaceAll('{error}', e.toString())),
           ),
         );
         setState(() {
@@ -235,7 +235,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                       // Fallback: try to open as generic content
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('Cannot open ${contentType} content'),
+                          content: Text('profile_favorites_screen_error_cannot_open_content'.tr().replaceAll('{contentType}', contentType)),
                         ),
                       );
                   }
@@ -271,16 +271,16 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     final result = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Remove Like'),
+        title: Text('profile_favorites_screen_text_remove_like'.tr()),
         content: Text('profile_favorite_confirm_unlike'.tr()),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('CANCEL'),
+            child: Text('profile_favorites_screen_text_cancel'.tr()),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('UNLIKE'),
+            child: Text('profile_favorites_screen_text_unlike'.tr()),
           ),
         ],
       ),
@@ -296,14 +296,14 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Removed from liked content')),
+            SnackBar(content: Text('profile_favorites_screen_success_removed_from_liked_content'.tr())),
           );
           _loadFavorites(); // Refresh the list
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error unliking content: ${e.toString()}')),
+            SnackBar(content: Text('profile_favorites_screen_error_error_unliking_content'.tr().replaceAll('{error}', e.toString()))),
           );
         }
       }

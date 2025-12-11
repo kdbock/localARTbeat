@@ -172,9 +172,9 @@ class _CaptureUploadScreenState extends State<CaptureUploadScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Location permissions are permanently denied, we cannot request permissions.',
+            'capture_upload_location_permissions_denied'.tr(),
           ),
-        ),
+        );
       );
       return;
     }
@@ -227,7 +227,7 @@ class _CaptureUploadScreenState extends State<CaptureUploadScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'Your art has been successfully captured and added to the community.',
+                'capture_upload_success_message'.tr(),
                 style: TextStyle(fontSize: 16),
               ),
               const SizedBox(height: 16),
@@ -262,7 +262,7 @@ class _CaptureUploadScreenState extends State<CaptureUploadScreen> {
                     ),
                     const SizedBox(height: 8),
                     const Text(
-                      'Ready to Create an Art Walk?',
+                      'capture_upload_ready_create_art_walk'.tr(),
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -271,7 +271,7 @@ class _CaptureUploadScreenState extends State<CaptureUploadScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Turn your captures into an amazing art walk experience!',
+                      'capture_upload_turn_captures_into_walk'.tr(),
                       style: TextStyle(
                         color: Colors.grey.shade600,
                         fontSize: 14,
@@ -413,11 +413,11 @@ class _CaptureUploadScreenState extends State<CaptureUploadScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
-              'Capture uploaded successfully! Rewards are being processed.',
+              'capture_upload_upload_success'.tr(),
             ),
             backgroundColor: Colors.green,
             duration: Duration(seconds: 2),
-          ),
+          );
         );
 
         // Show success dialog with Create Art Walk option
@@ -507,7 +507,7 @@ class _CaptureUploadScreenState extends State<CaptureUploadScreen> {
                         const SizedBox(width: 8),
                         Text(
                           _uploadStatus.isEmpty
-                              ? 'Uploading...'
+                              ? 'capture_upload_uploading'.tr()
                               : _uploadStatus,
                         ),
                       ],
@@ -611,8 +611,8 @@ class _CaptureUploadScreenState extends State<CaptureUploadScreen> {
                           ),
                           label: Text(
                             _locationPermissionGranted
-                                ? 'Located'
-                                : 'Get Location',
+                                ? 'capture_upload_located'.tr()
+                                : 'capture_upload_get_location'.tr(),
                           ),
                         ),
                       ],
@@ -653,8 +653,8 @@ class _CaptureUploadScreenState extends State<CaptureUploadScreen> {
                           _selectedArtType = value;
                         });
                       },
-                      hint: const Text(
-                        'Select art type',
+                      hint: Text(
+                        'capture_upload_select_art_type'.tr(),
                         style: TextStyle(color: core.ArtbeatColors.textPrimary),
                       ),
                     ),
@@ -694,8 +694,8 @@ class _CaptureUploadScreenState extends State<CaptureUploadScreen> {
                           _selectedArtMedium = value;
                         });
                       },
-                      hint: const Text(
-                        'Select art medium',
+                      hint: Text(
+                        'capture_upload_select_art_medium'.tr(),
                         style: TextStyle(color: core.ArtbeatColors.textPrimary),
                       ),
                     ),

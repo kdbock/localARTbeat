@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Messaging Package Specific Header
 ///
@@ -210,7 +211,7 @@ class _MessagingHeaderState extends State<MessagingHeader> {
             // Menu items for messaging package
             ListTile(
               leading: const Icon(Icons.inbox, color: _headerColor),
-              title: const Text('Inbox'),
+              title: const Text('messaging_inbox'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/messaging/inbox');
@@ -218,7 +219,7 @@ class _MessagingHeaderState extends State<MessagingHeader> {
             ),
             ListTile(
               leading: const Icon(Icons.send, color: _headerColor),
-              title: const Text('New Message'),
+              title: const Text('messaging_new_message'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/messaging/compose');
@@ -226,7 +227,7 @@ class _MessagingHeaderState extends State<MessagingHeader> {
             ),
             ListTile(
               leading: const Icon(Icons.archive, color: _headerColor),
-              title: const Text('Archived'),
+              title: const Text('messaging_archived'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/messaging/archived');
@@ -252,19 +253,19 @@ class _MessagingHeaderState extends State<MessagingHeader> {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Messaging Developer Tools'),
+        title: const Text('messaging_developer_tools'.tr()),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              title: const Text('Test Message Delivery'),
+              title: const Text('messaging_test_delivery'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 // Implement message delivery testing
               },
             ),
             ListTile(
-              title: const Text('Clear Message Cache'),
+              title: const Text('messaging_clear_cache'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 // Implement message cache clearing
@@ -275,7 +276,7 @@ class _MessagingHeaderState extends State<MessagingHeader> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: const Text('messaging_button_close'.tr()),
           ),
         ],
       ),

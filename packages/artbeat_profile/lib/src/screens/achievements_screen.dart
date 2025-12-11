@@ -102,7 +102,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
       setState(() => _isLoading = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading achievements: $e')),
+          SnackBar(content: Text('profile_achievements_screen_error_error_loading_achievements'.tr().replaceAll('{error}', e.toString()))),
         );
       }
     }

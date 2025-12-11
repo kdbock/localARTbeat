@@ -117,8 +117,7 @@ class _ArtistJourneyScreenState extends State<ArtistJourneyScreen> {
             ),
           ),
           const SizedBox(height: 32),
-          const Text(
-            'Welcome to the Artist Community!',
+          const Text('art_walk_welcome_to_the_artist_community'.tr(),
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,
@@ -126,8 +125,7 @@ class _ArtistJourneyScreenState extends State<ArtistJourneyScreen> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
-          Text(
-            'Transform your ARTbeat experience and unlock powerful tools designed specifically for artists and creators.',
+          Text('art_walk_transform_your_artbeat_experience_and_unlock_powerful_tools_designed_specifically_for_artists_and_creators'.tr(),
             style: TextStyle(
               fontSize: 16,
               color: Colors.grey.shade600,
@@ -148,8 +146,7 @@ class _ArtistJourneyScreenState extends State<ArtistJourneyScreen> {
                 Icon(Icons.info_outline, color: Colors.blue.shade700),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Text(
-                    'This will upgrade your account to unlock artist features and opportunities.',
+                  child: Text('art_walk_this_will_upgrade_your_account_to_unlock_artist_features_and_opportunities'.tr(),
                     style: TextStyle(
                       color: Colors.blue.shade700,
                       fontWeight: FontWeight.w500,
@@ -206,8 +203,7 @@ class _ArtistJourneyScreenState extends State<ArtistJourneyScreen> {
       padding: const EdgeInsets.all(24.0),
       child: Column(
         children: [
-          const Text(
-            'What You\'ll Get as an Artist',
+          const Text('art_walk_what_you__ll_get_as_an_artist'.tr(),
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -215,8 +211,7 @@ class _ArtistJourneyScreenState extends State<ArtistJourneyScreen> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
-          Text(
-            'Unlock powerful tools and opportunities designed for creators',
+          Text('art_walk_unlock_powerful_tools_and_opportunities_designed_for_creators'.tr(),
             style: TextStyle(
               fontSize: 16,
               color: Colors.grey.shade600,
@@ -301,8 +296,7 @@ class _ArtistJourneyScreenState extends State<ArtistJourneyScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'What Changes in Your Account',
+            const Text('art_walk_what_changes_in_your_account'.tr(),
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -310,8 +304,7 @@ class _ArtistJourneyScreenState extends State<ArtistJourneyScreen> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
-            Text(
-              'Here\'s what happens when you become an artist',
+            Text('art_walk_here__s_what_happens_when_you_become_an_artist'.tr(),
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.grey.shade600,
@@ -363,8 +356,7 @@ class _ArtistJourneyScreenState extends State<ArtistJourneyScreen> {
                   Icon(Icons.check_circle, color: Colors.green.shade700),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: Text(
-                      'Don\'t worry! You can always switch back to a regular user account if needed.',
+                    child: Text('art_walk_don__t_worry__you_can_always_switch_back_to_a_regular_user_account_if_needed'.tr(),
                       style: TextStyle(
                         color: Colors.green.shade700,
                         fontWeight: FontWeight.w500,
@@ -430,8 +422,7 @@ class _ArtistJourneyScreenState extends State<ArtistJourneyScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Before',
+                          Text('art_walk_before'.tr(),
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.grey.shade500,
@@ -454,8 +445,7 @@ class _ArtistJourneyScreenState extends State<ArtistJourneyScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'After',
+                          Text('art_walk_after'.tr(),
                             style: TextStyle(
                               fontSize: 12,
                               color: color,
@@ -488,8 +478,7 @@ class _ArtistJourneyScreenState extends State<ArtistJourneyScreen> {
       padding: const EdgeInsets.all(24.0),
       child: Column(
         children: [
-          const Text(
-            'Choose Your Artist Plan',
+          const Text('art_walk_choose_your_artist_plan'.tr(),
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -497,8 +486,7 @@ class _ArtistJourneyScreenState extends State<ArtistJourneyScreen> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
-          Text(
-            'Start free and upgrade anytime — plans built for creators in 2025',
+          Text('art_walk_start_free_and_upgrade_anytime___plans_built_for_creators_in_2025'.tr(),
             style: TextStyle(
               fontSize: 16,
               color: Colors.grey.shade600,
@@ -592,8 +580,7 @@ class _ArtistJourneyScreenState extends State<ArtistJourneyScreen> {
                       Icon(Icons.info_outline, color: Colors.blue.shade700),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: Text(
-                          'If you\'re unsure which plan fits, complete the modern onboarding for a personalized recommendation.',
+                        child: Text('art_walk_if_you__re_unsure_which_plan_fits__complete_the_modern_onboarding_for_a_personalized_recommendation'.tr(),
                           style: TextStyle(
                             color: Colors.blue.shade700,
                             fontWeight: FontWeight.w500,
@@ -675,8 +662,7 @@ class _ArtistJourneyScreenState extends State<ArtistJourneyScreen> {
                                   color: Theme.of(context).primaryColor,
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: const Text(
-                                  'RECOMMENDED',
+                                child: const Text('art_walk_recommended'.tr(),
                                   style: TextStyle(
                                     fontSize: 10,
                                     fontWeight: FontWeight.bold,

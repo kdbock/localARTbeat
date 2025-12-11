@@ -11,7 +11,7 @@ class CaptureViewScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(capture.title ?? 'Capture Details'),
+        title: Text(capture.title ?? 'capture_detail_viewer_default_title'.tr()),
         backgroundColor: core.ArtbeatColors.primaryPurple,
         foregroundColor: Colors.white,
       ),
@@ -36,7 +36,7 @@ class CaptureViewScreen extends StatelessWidget {
 
             // Title
             Text(
-              capture.title ?? 'Untitled',
+              capture.title ?? 'capture_detail_viewer_untitled'.tr(),
               style: Theme.of(
                 context,
               ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -46,7 +46,7 @@ class CaptureViewScreen extends StatelessWidget {
             if (capture.artistName != null) ...[
               const SizedBox(height: 8),
               Text(
-                'by ${capture.artistName}',
+                'capture_detail_viewer_by_artist'.tr().replaceAll('{artist}', capture.artistName!),
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontStyle: FontStyle.italic,
                   color: Colors.grey[600],
@@ -87,7 +87,7 @@ class CaptureViewScreen extends StatelessWidget {
                 capture.description!.isNotEmpty) ...[
               const SizedBox(height: 16),
               Text(
-                'Description',
+                'capture_detail_viewer_description'.tr(),
                 style: Theme.of(
                   context,
                 ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),

@@ -23,8 +23,7 @@ class LocalArtistsRowWidget extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Local Artists',
+              const Text('art_walk_local_artists'.tr(),
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -32,7 +31,7 @@ class LocalArtistsRowWidget extends StatelessWidget {
               ),
               TextButton(
                 onPressed: onSeeAllPressed,
-                child: const Text('See All'),
+                child: const Text('art_walk_see_all'.tr()),
               ),
             ],
           ),
@@ -68,8 +67,7 @@ class LocalArtistsRowWidget extends StatelessWidget {
                           size: 36,
                         ),
                         SizedBox(height: 8),
-                        Text(
-                          'Error loading artists',
+                        Text('art_walk_error_loading_artists'.tr(),
                           style: TextStyle(color: Colors.red),
                         ),
                       ],

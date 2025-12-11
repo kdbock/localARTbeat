@@ -138,7 +138,7 @@ class _CaptureDetailViewerScreenState extends State<CaptureDetailViewerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_capture?.title ?? 'Capture Details'),
+        title: Text(_capture?.title ?? 'capture_detail_viewer_default_title'.tr()),
         backgroundColor: core.ArtbeatColors.primaryPurple,
         foregroundColor: Colors.white,
         actions: [
@@ -193,7 +193,7 @@ class _CaptureDetailViewerScreenState extends State<CaptureDetailViewerScreen> {
 
                   // Title
                   Text(
-                    _capture!.title ?? 'Untitled',
+                    _capture!.title ?? 'capture_detail_viewer_untitled'.tr(),
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -203,7 +203,7 @@ class _CaptureDetailViewerScreenState extends State<CaptureDetailViewerScreen> {
                   if (_capture!.artistName != null) ...[
                     const SizedBox(height: 8),
                     Text(
-                      'by ${_capture!.artistName}',
+                      'capture_detail_viewer_by_artist'.tr().replaceAll('{artist}', _capture!.artistName!),
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontStyle: FontStyle.italic,
                         color: Colors.grey[600],
@@ -247,7 +247,7 @@ class _CaptureDetailViewerScreenState extends State<CaptureDetailViewerScreen> {
                       _capture!.description!.isNotEmpty) ...[
                     const SizedBox(height: 16),
                     Text(
-                      'Description',
+                      'capture_detail_viewer_description'.tr(),
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),

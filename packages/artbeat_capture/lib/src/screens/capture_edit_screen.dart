@@ -137,7 +137,7 @@ class _CaptureEditScreenState extends State<CaptureEditScreen> {
             children: [
               // Title
               Text(
-                'Title',
+                'capture_edit_title'.tr(),
                 style: Theme.of(
                   context,
                 ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -163,7 +163,7 @@ class _CaptureEditScreenState extends State<CaptureEditScreen> {
 
               // Description
               Text(
-                'Description',
+                'capture_edit_description'.tr(),
                 style: Theme.of(
                   context,
                 ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -185,7 +185,7 @@ class _CaptureEditScreenState extends State<CaptureEditScreen> {
 
               // Location
               Text(
-                'Location',
+                'capture_edit_location'.tr(),
                 style: Theme.of(
                   context,
                 ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -205,7 +205,7 @@ class _CaptureEditScreenState extends State<CaptureEditScreen> {
 
               // Art Type dropdown
               Text(
-                'Art Type',
+                'capture_edit_art_type'.tr(),
                 style: Theme.of(
                   context,
                 ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -232,7 +232,7 @@ class _CaptureEditScreenState extends State<CaptureEditScreen> {
 
               // Medium dropdown
               Text(
-                'Medium',
+                'capture_edit_medium'.tr(),
                 style: Theme.of(
                   context,
                 ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -278,7 +278,7 @@ class _CaptureEditScreenState extends State<CaptureEditScreen> {
                         ),
                         const SizedBox(width: 12),
                         Text(
-                          _isPublic ? 'Public' : 'Private',
+                          _isPublic ? 'capture_edit_public'.tr() : 'capture_edit_private'.tr(),
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                       ],
@@ -318,7 +318,7 @@ class _CaptureEditScreenState extends State<CaptureEditScreen> {
                           ),
                         )
                       : const Text(
-                          'Save Changes',
+                          'capture_edit_save_changes'.tr(),
                           style: TextStyle(fontSize: 16),
                         ),
                 ),

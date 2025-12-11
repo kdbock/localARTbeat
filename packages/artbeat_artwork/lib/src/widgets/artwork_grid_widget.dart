@@ -125,7 +125,7 @@ class ArtworkGridWidget extends StatelessWidget {
                         children: [
                           Icon(Icons.edit, size: 18),
                           SizedBox(width: 8),
-                          Text('Edit'),
+                          Text('art_walk_edit'.tr()),
                         ],
                       ),
                     ),
@@ -135,7 +135,7 @@ class ArtworkGridWidget extends StatelessWidget {
                         children: [
                           Icon(Icons.delete, size: 18, color: Colors.red),
                           SizedBox(width: 8),
-                          Text('Delete', style: TextStyle(color: Colors.red)),
+                          Text('art_walk_delete'.tr(), style: TextStyle(color: Colors.red)),
                         ],
                       ),
                     ),
@@ -203,8 +203,8 @@ class ArtworkGridWidget extends StatelessWidget {
                     ),
               )
             else
-              const Text(
-                'Not for sale',
+              Text(
+                'art_walk_not_for_sale'.tr(),
                 style: TextStyle(
                   color: core.ArtbeatColors.textSecondary,
                   fontSize: 10,
@@ -256,21 +256,21 @@ class ArtworkGridWidget extends StatelessWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Artwork'),
+        title: Text('art_walk_delete_artwork'.tr()),
         content: Text(
-          'Are you sure you want to delete "${artwork.title}"? This action cannot be undone.',
+          'art_walk_delete_confirmation_message'.tr().replaceAll('{title}', artwork.title),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text('art_walk_cancel'.tr()),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: TextButton.styleFrom(
               foregroundColor: Colors.red,
             ),
-            child: const Text('Delete'),
+            child: Text('art_walk_delete'.tr()),
           ),
         ],
       ),

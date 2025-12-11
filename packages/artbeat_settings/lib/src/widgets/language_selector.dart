@@ -12,12 +12,12 @@ class LanguageSelector extends StatefulWidget {
 
 class _LanguageSelectorState extends State<LanguageSelector> {
   final List<Map<String, String>> languages = [
-    {'code': 'en', 'name': 'English', 'flag': '🇺🇸'},
-    {'code': 'es', 'name': 'Español', 'flag': '🇪🇸'},
-    {'code': 'fr', 'name': 'Français', 'flag': '🇫🇷'},
-    {'code': 'de', 'name': 'Deutsch', 'flag': '🇩🇪'},
-    {'code': 'pt', 'name': 'Português', 'flag': '🇵🇹'},
-    {'code': 'zh', 'name': '中文', 'flag': '🇨🇳'},
+    {'code': 'en', 'nameKey': 'artbeat_settings_language_english'},
+    {'code': 'es', 'nameKey': 'artbeat_settings_language_spanish'},
+    {'code': 'fr', 'nameKey': 'artbeat_settings_language_french'},
+    {'code': 'de', 'nameKey': 'artbeat_settings_language_german'},
+    {'code': 'pt', 'nameKey': 'artbeat_settings_language_portuguese'},
+    {'code': 'zh', 'nameKey': 'artbeat_settings_language_chinese'},
   ];
 
   late String _selectedLanguage;
@@ -85,7 +85,7 @@ class _LanguageSelectorState extends State<LanguageSelector> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          lang['name']!,
+                          lang['nameKey']!.tr(),
                           style: TextStyle(
                             color: isSelected
                                 ? const Color(0xFF8B5CF6)
@@ -119,7 +119,7 @@ class _LanguageSelectorState extends State<LanguageSelector> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Language changed to ${languages.firstWhere((l) => l['code'] == languageCode)['name']}',
+            'artbeat_settings_language_changed'.tr().replaceAll('{language}', languages.firstWhere((l) => l['code'] == languageCode)['nameKey']!.tr()),
             style: const TextStyle(color: Colors.white),
           ),
           backgroundColor: const Color(0xFF8B5CF6),

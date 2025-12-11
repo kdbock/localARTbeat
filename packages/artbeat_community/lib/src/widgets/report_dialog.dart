@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../services/moderation_service.dart';
 
 /// Dialog for reporting content or users
@@ -37,7 +38,7 @@ class _ReportDialogState extends State<ReportDialog> {
   Future<void> _submitReport() async {
     if (_selectedReason == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a reason')),
+        SnackBar(content: Text('art_walk_report_dialog_select_reason'.tr())),
       );
       return;
     }
@@ -58,7 +59,7 @@ class _ReportDialogState extends State<ReportDialog> {
         if (success) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Report submitted. Thank you for helping keep our community safe.'),
+              content: Text('art_walk_report_dialog_submitted'.tr()),
               backgroundColor: Colors.green,
             ),
           );
@@ -67,7 +68,7 @@ class _ReportDialogState extends State<ReportDialog> {
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Failed to submit report. Please try again.'),
+              content: Text('art_walk_report_dialog_failed'.tr()),
               backgroundColor: Colors.red,
             ),
           );
@@ -77,7 +78,7 @@ class _ReportDialogState extends State<ReportDialog> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: ${e.toString()}'),
+            content: Text('art_walk_report_dialog_error'.tr().replaceAll('{error}', e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -92,21 +93,21 @@ class _ReportDialogState extends State<ReportDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Report Content'),
+      title: Text('art_walk_report_dialog_title'.tr()),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Please tell us why you\'re reporting this content:',
+              'art_walk_report_dialog_description'.tr(),
               style: TextStyle(fontSize: 14),
             ),
             const SizedBox(height: 16),
             DropdownButton<ReportReason>(
               isExpanded: true,
               value: _selectedReason,
-              hint: const Text('Select a reason'),
+              hint: Text('art_walk_report_dialog_select_reason_hint'.tr()),
               items: ReportReason.values.map((reason) {
                 return DropdownMenuItem(
                   value: reason,
@@ -122,7 +123,7 @@ class _ReportDialogState extends State<ReportDialog> {
               controller: _descriptionController,
               maxLines: 4,
               decoration: InputDecoration(
-                hintText: 'Additional details (optional)',
+                hintText: 'art_walk_report_dialog_hint'.tr(),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -134,7 +135,7 @@ class _ReportDialogState extends State<ReportDialog> {
       actions: [
         TextButton(
           onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text('art_walk_report_dialog_cancel'.tr()),
         ),
         ElevatedButton(
           onPressed: _isSubmitting ? null : _submitReport,
@@ -144,7 +145,7 @@ class _ReportDialogState extends State<ReportDialog> {
                   width: 20,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Text('Report'),
+              : Text('art_walk_report_dialog_report'.tr()),
         ),
       ],
     );

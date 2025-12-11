@@ -113,8 +113,7 @@ class _PayoutAccountsScreenState extends State<PayoutAccountsScreen> {
           children: [
             Icon(Icons.error_outline, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
-            Text(
-              'Failed to load payout accounts',
+            Text('art_walk_failed_to_load_payout_accounts'.tr(),
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 8),
@@ -128,7 +127,7 @@ class _PayoutAccountsScreenState extends State<PayoutAccountsScreen> {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _loadAccounts,
-              child: const Text('Retry'),
+              child: const Text('art_walk_retry'.tr()),
             ),
           ],
         ),
@@ -149,15 +148,13 @@ class _PayoutAccountsScreenState extends State<PayoutAccountsScreen> {
               color: Colors.grey[400],
             ),
             const SizedBox(height: 24),
-            Text(
-              'No Payout Accounts',
+            Text('art_walk_no_payout_accounts'.tr(),
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
             ),
             const SizedBox(height: 16),
-            Text(
-              'Add a bank account or PayPal account to receive your earnings.',
+            Text('art_walk_add_a_bank_account_or_paypal_account_to_receive_your_earnings'.tr(),
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: Colors.grey[600],
                   ),
@@ -167,7 +164,7 @@ class _PayoutAccountsScreenState extends State<PayoutAccountsScreen> {
             ElevatedButton.icon(
               onPressed: () => _showAddAccountDialog(),
               icon: const Icon(Icons.add),
-              label: const Text('Add Payout Account'),
+              label: const Text('art_walk_add_payout_account'.tr()),
               style: ElevatedButton.styleFrom(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -235,7 +232,7 @@ class _PayoutAccountsScreenState extends State<PayoutAccountsScreen> {
                         children: [
                           Icon(Icons.edit),
                           SizedBox(width: 8),
-                          Text('Edit'),
+                          Text('art_walk_edit'.tr()),
                         ],
                       ),
                     ),
@@ -245,7 +242,7 @@ class _PayoutAccountsScreenState extends State<PayoutAccountsScreen> {
                         children: [
                           Icon(Icons.delete, color: Colors.red),
                           SizedBox(width: 8),
-                          Text('Delete', style: TextStyle(color: Colors.red)),
+                          Text('art_walk_delete'.tr(), style: TextStyle(color: Colors.red)),
                         ],
                       ),
                     ),
@@ -281,8 +278,7 @@ class _PayoutAccountsScreenState extends State<PayoutAccountsScreen> {
                     Icon(Icons.warning, color: Colors.orange[700], size: 20),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: Text(
-                        'Account verification is pending. You cannot receive payouts until verification is complete.',
+                      child: Text('art_walk_account_verification_is_pending__you_cannot_receive_payouts_until_verification_is_complete'.tr(),
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.orange[700],
@@ -352,14 +348,13 @@ class _PayoutAccountsScreenState extends State<PayoutAccountsScreen> {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Account'),
-        content: const Text(
-          'Are you sure you want to delete this payout account? This action cannot be undone.',
+        title: const Text('art_walk_delete_account'.tr()),
+        content: const Text('art_walk_are_you_sure_you_want_to_delete_this_payout_account__this_action_cannot_be_undone'.tr(),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: const Text('art_walk_cancel'.tr()),
           ),
           TextButton(
             onPressed: () {
@@ -367,7 +362,7 @@ class _PayoutAccountsScreenState extends State<PayoutAccountsScreen> {
               _deleteAccount(account);
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+            child: const Text('art_walk_delete'.tr()),
           ),
         ],
       ),
@@ -378,7 +373,7 @@ class _PayoutAccountsScreenState extends State<PayoutAccountsScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Account'),
+        title: const Text('art_walk_delete_account'.tr()),
         content: Text(
           'Are you sure you want to delete the account "${account.displayName}"? '
           'This action cannot be undone.',
@@ -386,12 +381,12 @@ class _PayoutAccountsScreenState extends State<PayoutAccountsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: const Text('art_walk_cancel'.tr()),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+            child: const Text('art_walk_delete'.tr()),
           ),
         ],
       ),
@@ -406,7 +401,7 @@ class _PayoutAccountsScreenState extends State<PayoutAccountsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Account deleted successfully'),
+            content: Text('art_walk_account_deleted_successfully'.tr()),
             backgroundColor: Colors.green,
           ),
         );
@@ -472,8 +467,7 @@ class _AddAccountDialogState extends State<_AddAccountDialog> {
                   Icon(Icons.account_balance, color: Colors.green[700]),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: Text(
-                      'Add Payout Account',
+                    child: Text('art_walk_add_payout_account'.tr(),
                       style:
                           Theme.of(context).textTheme.headlineSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
@@ -496,11 +490,11 @@ class _AddAccountDialogState extends State<_AddAccountDialog> {
                 items: const [
                   DropdownMenuItem(
                     value: 'bank_account',
-                    child: Text('Bank Account'),
+                    child: Text('art_walk_bank_account'.tr()),
                   ),
                   DropdownMenuItem(
                     value: 'paypal',
-                    child: Text('PayPal'),
+                    child: Text('art_walk_paypal'.tr()),
                   ),
                 ],
                 onChanged: (value) {
@@ -591,7 +585,7 @@ class _AddAccountDialogState extends State<_AddAccountDialog> {
                     child: OutlinedButton(
                       onPressed:
                           _isLoading ? null : () => Navigator.pop(context),
-                      child: const Text('Cancel'),
+                      child: const Text('art_walk_cancel'.tr()),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -604,7 +598,7 @@ class _AddAccountDialogState extends State<_AddAccountDialog> {
                               height: 16,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Text('Add Account'),
+                          : const Text('art_walk_add_account'.tr()),
                     ),
                   ),
                 ],
@@ -641,7 +635,7 @@ class _AddAccountDialogState extends State<_AddAccountDialog> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Payout account added successfully!'),
+            content: Text('art_walk_payout_account_added_successfully'.tr()),
             backgroundColor: Colors.green,
           ),
         );
@@ -675,12 +669,12 @@ class _EditAccountDialogState extends State<_EditAccountDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Edit Account'),
-      content: const Text('Account editing functionality coming soon.'),
+      title: const Text('art_walk_edit_account'.tr()),
+      content: const Text('art_walk_account_editing_functionality_coming_soon'.tr()),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Close'),
+          child: const Text('art_walk_close'.tr()),
         ),
       ],
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_art_walk/artbeat_art_walk.dart';
 
@@ -455,7 +456,7 @@ class _DynamicAchievementsTabState extends State<DynamicAchievementsTab> {
                   backgroundColor: categoryColor,
                   foregroundColor: Colors.white,
                 ),
-                child: const Text('Close'),
+                child: Text('profile_dynamic_achievements_tab_text_close'.tr()),
               ),
             ],
           ),

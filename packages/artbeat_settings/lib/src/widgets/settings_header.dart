@@ -91,7 +91,7 @@ class _SettingsHeaderState extends State<SettingsHeader> {
   Widget _buildTitleSection() {
     return Center(
       child: Text(
-        widget.title ?? 'Settings',
+        widget.title ?? 'artbeat_settings_title'.tr(),
         style: const TextStyle(
           color: _iconTextColor,
           fontFamily: 'Limelight',
@@ -199,9 +199,9 @@ class _SettingsHeaderState extends State<SettingsHeader> {
             // Header
             Container(
               padding: const EdgeInsets.all(20),
-              child: const Text(
-                'Settings Menu',
-                style: TextStyle(
+              child: Text(
+                'artbeat_settings_menu'.tr(),
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'Limelight',
@@ -212,7 +212,7 @@ class _SettingsHeaderState extends State<SettingsHeader> {
             // Menu items for settings package
             ListTile(
               leading: const Icon(Icons.settings, color: _headerColor),
-              title: const Text('App Settings'),
+              title: Text('artbeat_settings_app_settings'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/settings/app');
@@ -220,7 +220,7 @@ class _SettingsHeaderState extends State<SettingsHeader> {
             ),
             ListTile(
               leading: const Icon(Icons.account_circle, color: _headerColor),
-              title: const Text('Account Settings'),
+              title: Text('artbeat_settings_account_settings'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/settings/account');
@@ -228,7 +228,7 @@ class _SettingsHeaderState extends State<SettingsHeader> {
             ),
             ListTile(
               leading: const Icon(Icons.privacy_tip, color: _headerColor),
-              title: const Text('Privacy'),
+              title: Text('artbeat_settings_privacy'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/settings/privacy');
@@ -254,19 +254,19 @@ class _SettingsHeaderState extends State<SettingsHeader> {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Settings Developer Tools'),
+        title: Text('artbeat_settings_developer_tools'.tr()),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              title: const Text('Reset All Settings'),
+              title: Text('artbeat_settings_reset_all_settings'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 // Implement settings reset
               },
             ),
             ListTile(
-              title: const Text('Export Settings'),
+              title: Text('artbeat_settings_export_settings'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 // Implement settings export
@@ -277,7 +277,7 @@ class _SettingsHeaderState extends State<SettingsHeader> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text('artbeat_settings_close'.tr()),
           ),
         ],
       ),

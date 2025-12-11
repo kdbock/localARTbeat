@@ -78,7 +78,7 @@ class _AuthHeaderState extends State<AuthHeader> {
               icon: const Icon(Icons.arrow_back, color: _iconTextColor),
               onPressed:
                   widget.onBackPressed ?? () => Navigator.maybePop(context),
-              tooltip: 'Back',
+              tooltip: 'auth_header_back',
             )
           : IconButton(
               icon: const Icon(Icons.menu, color: _iconTextColor),
@@ -91,7 +91,7 @@ class _AuthHeaderState extends State<AuthHeader> {
   Widget _buildTitleSection() {
     return Center(
       child: Text(
-        widget.title ?? 'Authentication',
+        widget.title ?? 'auth_header_title_default',
         style: const TextStyle(
           color: _iconTextColor,
           fontFamily: 'Limelight',
@@ -199,9 +199,9 @@ class _AuthHeaderState extends State<AuthHeader> {
             // Header
             Container(
               padding: const EdgeInsets.all(20),
-              child: const Text(
-                'Authentication Menu',
-                style: TextStyle(
+              child: Text(
+                'auth_header_menu_title'.tr(),
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'Limelight',
@@ -212,7 +212,7 @@ class _AuthHeaderState extends State<AuthHeader> {
             // Menu items for auth package
             ListTile(
               leading: const Icon(Icons.login, color: _headerColor),
-              title: const Text('Login'),
+              title: Text('auth_header_menu_login'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/auth/login');
@@ -220,7 +220,7 @@ class _AuthHeaderState extends State<AuthHeader> {
             ),
             ListTile(
               leading: const Icon(Icons.person_add, color: _headerColor),
-              title: const Text('Register'),
+              title: Text('auth_header_menu_register'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/auth/register');
@@ -228,7 +228,7 @@ class _AuthHeaderState extends State<AuthHeader> {
             ),
             ListTile(
               leading: const Icon(Icons.lock_reset, color: _headerColor),
-              title: const Text('Forgot Password'),
+              title: Text('auth_header_menu_forgot_password'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/auth/forgot-password');
@@ -254,19 +254,19 @@ class _AuthHeaderState extends State<AuthHeader> {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Auth Developer Tools'),
+        title: Text('auth_header_dev_tools_title'.tr()),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              title: const Text('Clear Auth Cache'),
+              title: Text('auth_header_dev_tools_clear_cache'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 // Implement auth cache clearing
               },
             ),
             ListTile(
-              title: const Text('Test Auth Flow'),
+              title: Text('auth_header_dev_tools_test_flow'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 // Implement auth flow testing
@@ -277,7 +277,7 @@ class _AuthHeaderState extends State<AuthHeader> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text('auth_header_dev_tools_close'.tr()),
           ),
         ],
       ),

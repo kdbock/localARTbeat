@@ -99,7 +99,7 @@ class _CapturesGridState extends State<CapturesGrid> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Could not load images',
+                  'capture_grid_error_loading_images'.tr(),
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
                 TextButton(
@@ -108,7 +108,7 @@ class _CapturesGridState extends State<CapturesGrid> {
                       _setupCapturesStream();
                     });
                   },
-                  child: const Text('Try Again'),
+                  child: Text('capture_grid_try_again'.tr()),
                 ),
               ],
             ),
@@ -133,7 +133,7 @@ class _CapturesGridState extends State<CapturesGrid> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'No captures yet',
+                  'capture_grid_no_captures_yet'.tr(),
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ],

@@ -710,20 +710,20 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text('settings_trusted_devices'.tr()),
-        content: const Column(
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: Icon(Icons.smartphone),
-              title: Text('iPhone 15'),
-              subtitle: Text('Last used: Today'),
-              trailing: Icon(Icons.check_circle, color: Colors.green),
+              leading: const Icon(Icons.smartphone),
+              title: Text('artbeat_settings_trusted_device_iphone_15'.tr()),
+              subtitle: Text('artbeat_settings_last_used_today'.tr()),
+              trailing: const Icon(Icons.check_circle, color: Colors.green),
             ),
             ListTile(
-              leading: Icon(Icons.laptop_mac),
-              title: Text('MacBook Pro'),
-              subtitle: Text('Last used: Yesterday'),
-              trailing: Icon(Icons.check_circle, color: Colors.green),
+              leading: const Icon(Icons.laptop_mac),
+              title: Text('artbeat_settings_trusted_device_macbook_pro'.tr()),
+              subtitle: Text('artbeat_settings_last_used_yesterday'.tr()),
+              trailing: const Icon(Icons.check_circle, color: Colors.green),
             ),
           ],
         ),
@@ -742,18 +742,18 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text('settings_login_history'.tr()),
-        content: const Column(
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: Icon(Icons.smartphone, color: Colors.green),
-              title: Text('iPhone 15'),
-              subtitle: Text('Today, 9:30 AM\nNew York, NY'),
+              leading: const Icon(Icons.smartphone, color: Colors.green),
+              title: Text('artbeat_settings_trusted_device_iphone_15'.tr()),
+              subtitle: Text('artbeat_settings_login_history_today_sample'.tr()),
             ),
             ListTile(
-              leading: Icon(Icons.laptop_mac, color: Colors.green),
-              title: Text('MacBook Pro'),
-              subtitle: Text('Yesterday, 2:15 PM\nNew York, NY'),
+              leading: const Icon(Icons.laptop_mac, color: Colors.green),
+              title: Text('artbeat_settings_trusted_device_macbook_pro'.tr()),
+              subtitle: Text('artbeat_settings_login_history_yesterday_sample'.tr()),
             ),
           ],
         ),
@@ -778,27 +778,27 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen> {
           children: [
             Text('settings_security_status'.tr()),
             const SizedBox(height: 12),
-            const Row(
+            Row(
               children: [
-                Icon(Icons.check_circle, color: Colors.green),
-                SizedBox(width: 8),
-                Text('2FA Enabled'),
+                const Icon(Icons.check_circle, color: Colors.green),
+                const SizedBox(width: 8),
+                Text('artbeat_settings_2fa_enabled'.tr()),
               ],
             ),
             const SizedBox(height: 8),
-            const Row(
+            Row(
               children: [
-                Icon(Icons.check_circle, color: Colors.green),
-                SizedBox(width: 8),
-                Text('Strong Password'),
+                const Icon(Icons.check_circle, color: Colors.green),
+                const SizedBox(width: 8),
+                Text('artbeat_settings_strong_password'.tr()),
               ],
             ),
             const SizedBox(height: 8),
-            const Row(
+            Row(
               children: [
-                Icon(Icons.warning, color: Colors.orange),
-                SizedBox(width: 8),
-                Text('Password is 6 months old'),
+                const Icon(Icons.warning, color: Colors.orange),
+                const SizedBox(width: 8),
+                Text('artbeat_settings_password_age_six_months'.tr()),
               ],
             ),
           ],

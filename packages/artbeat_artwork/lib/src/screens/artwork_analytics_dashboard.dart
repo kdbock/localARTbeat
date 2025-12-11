@@ -655,7 +655,7 @@ class _ArtworkAnalyticsDashboardState extends State<ArtworkAnalyticsDashboard> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text('art_walk_close'.tr()),
           ),
         ],
       ),

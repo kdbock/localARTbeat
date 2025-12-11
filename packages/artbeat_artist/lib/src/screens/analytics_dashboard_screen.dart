@@ -228,8 +228,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        const Text(
-          'Overview',
+        const Text('art_walk_overview'.tr(),
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
@@ -417,8 +416,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        const Text(
-          'Top Performing Artwork',
+        const Text('art_walk_top_performing_artwork'.tr(),
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
@@ -613,16 +611,14 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            const Text(
-              'Upgrade to PRO for Advanced Analytics',
+            const Text('art_walk_upgrade_to_pro_for_advanced_analytics'.tr(),
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Get access to location breakdown, top artwork performance, referral sources, and more detailed insights.',
+            const Text('art_walk_get_access_to_location_breakdown__top_artwork_performance__referral_sources__and_more_detailed_insights'.tr(),
             ),
             const SizedBox(height: 16),
             ElevatedButton(

@@ -491,7 +491,7 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
                   }).toList(),
                 ),
                 const SizedBox(height: 16),
-                const Text('Style',
+                const Text('art_walk_style'.tr(),
                     style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 Wrap(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import '../services/moderation_service.dart';
@@ -61,7 +62,7 @@ class _UserActionMenuState extends State<UserActionMenu> {
     if (currentUser == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please sign in to block users'),
+          content: Text('art_walk_user_action_sign_in_required'.tr()),
           backgroundColor: Colors.orange,
         ),
       );
@@ -71,8 +72,8 @@ class _UserActionMenuState extends State<UserActionMenu> {
     // Prevent users from blocking themselves
     if (currentUser!.uid == widget.userId) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('You cannot block yourself'),
+        SnackBar(
+          content: Text('art_walk_user_action_cannot_block_self'.tr()),
           backgroundColor: Colors.orange,
         ),
       );
@@ -83,20 +84,20 @@ class _UserActionMenuState extends State<UserActionMenu> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text(_isBlocked ? 'Unblock User' : 'Block User'),
+        title: Text(_isBlocked ? 'art_walk_user_action_unblock_title'.tr() : 'art_walk_user_action_block_title'.tr()),
         content: Text(
           _isBlocked
-              ? 'Are you sure you want to unblock ${widget.userName ?? 'this user'}?'
-              : 'Are you sure you want to block ${widget.userName ?? 'this user'}?',
+              ? 'art_walk_user_action_unblock_confirmation'.tr().replaceAll('{userName}', widget.userName ?? 'this user')
+              : 'art_walk_user_action_block_confirmation'.tr().replaceAll('{userName}', widget.userName ?? 'this user'),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Cancel'),
+            child: Text('art_walk_report_dialog_cancel'.tr()),
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(_isBlocked ? 'Unblock' : 'Block'),
+            child: Text(_isBlocked ? 'art_walk_user_action_unblock'.tr() : 'art_walk_user_action_block'.tr()),
           ),
         ],
       ),
@@ -121,7 +122,7 @@ class _UserActionMenuState extends State<UserActionMenu> {
               children: [
                 CircularProgressIndicator(),
                 SizedBox(height: 16),
-                Text('Processing...'),
+                Text('art_walk_user_action_processing'.tr()),
               ],
             ),
           ),
@@ -169,8 +170,8 @@ class _UserActionMenuState extends State<UserActionMenu> {
                 SnackBar(
                   content: Text(
                     wasBlocked
-                        ? 'User unblocked successfully'
-                        : 'User blocked successfully',
+                        ? 'art_walk_user_action_unblock_success'.tr()
+                        : 'art_walk_user_action_block_success'.tr(),
                   ),
                   backgroundColor: Colors.green,
                   duration: const Duration(seconds: 2),
@@ -182,9 +183,9 @@ class _UserActionMenuState extends State<UserActionMenu> {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
+                SnackBar(
                   content: Text(
-                    'Failed to update block status. Please try again.',
+                    'art_walk_user_action_block_failed'.tr(),
                   ),
                   backgroundColor: Colors.red,
                   duration: Duration(seconds: 3),
@@ -206,7 +207,7 @@ class _UserActionMenuState extends State<UserActionMenu> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Error: ${e.toString()}'),
+              content: Text('art_walk_user_action_error'.tr().replaceAll('{error}', e.toString())),
               backgroundColor: Colors.red,
               duration: const Duration(seconds: 4),
             ),
@@ -245,7 +246,7 @@ class _UserActionMenuState extends State<UserActionMenu> {
           value: 'report',
           child: ListTile(
             leading: Icon(Icons.flag),
-            title: Text('Report'),
+            title: Text('art_walk_user_action_report'.tr()),
           ),
         ),
         PopupMenuItem<String>(

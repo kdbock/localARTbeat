@@ -70,10 +70,10 @@ class _ArtworkDiscoveryWidgetState extends State<ArtworkDiscoveryWidget> {
             children: [
               const Icon(Icons.error_outline, color: Colors.red),
               const SizedBox(height: 8),
-              Text('Failed to load recommendations: $_error'),
+              Text('art_walk_failed_to_load_recommendations'.tr().replaceAll('{error}', _error)),
               TextButton(
                 onPressed: _loadRecommendations,
-                child: const Text('Retry'),
+                child: Text('art_walk_retry'.tr()),
               ),
             ],
           ),
@@ -90,7 +90,7 @@ class _ArtworkDiscoveryWidgetState extends State<ArtworkDiscoveryWidget> {
             children: [
               Icon(Icons.palette_outlined, color: Colors.grey),
               SizedBox(height: 8),
-              Text('No recommendations available'),
+              Text('art_walk_no_recommendations_available'.tr()),
             ],
           ),
         ),
@@ -115,7 +115,7 @@ class _ArtworkDiscoveryWidgetState extends State<ArtworkDiscoveryWidget> {
               if (widget.onSeeAllPressed != null)
                 TextButton(
                   onPressed: widget.onSeeAllPressed,
-                  child: const Text('See All'),
+                  child: Text('art_walk_see_all'.tr()),
                 ),
             ],
           ),

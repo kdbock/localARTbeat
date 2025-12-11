@@ -277,13 +277,13 @@ class _CaptureDrawerState extends State<CaptureDrawer> {
                 Icon(Icons.camera_alt, color: Colors.white, size: 16),
                 SizedBox(width: 6),
                 Text(
-                  'Art Capture',
-                  style: TextStyle(
+                  'capture_drawer_art_capture'.tr(),
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
-                ),
+                )
               ],
             ),
           ),
@@ -348,9 +348,9 @@ class _CaptureDrawerState extends State<CaptureDrawer> {
         ),
         child: const Icon(Icons.logout, color: Colors.red, size: 20),
       ),
-      title: const Text(
-        'Sign Out',
-        style: TextStyle(
+      title: Text(
+        'capture_drawer_sign_out'.tr(),
+        style: const TextStyle(
           color: Colors.red,
           fontSize: 14,
           fontWeight: FontWeight.w500,
@@ -386,7 +386,7 @@ class _CaptureDrawerState extends State<CaptureDrawer> {
         // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error signing out: $e'),
+            content: Text('capture_drawer_error_signing_out'.tr().replaceAll('{error}', e.toString())),
             backgroundColor: Colors.red,
           ),
         );

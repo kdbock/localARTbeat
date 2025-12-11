@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:artbeat_core/artbeat_core.dart' show ArtbeatColors;
@@ -46,7 +47,7 @@ class ChatListTile extends StatelessWidget {
               Icon(Icons.archive_outlined, color: Colors.white, size: 28),
               SizedBox(height: 4),
               Text(
-                'Archive',
+                'messaging_button_archive'.tr(),
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 12,
@@ -96,16 +97,16 @@ class ChatListTile extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          title: const Text('Archive Chat'),
+          title: const Text('messaging_archive_chat_title'.tr()),
           content: Text(
             chat.isGroup
-                ? 'Are you sure you want to archive "${chat.groupName ?? 'this group'}"? You can find it in archived chats later.'
-                : 'Are you sure you want to archive this chat? You can find it in archived chats later.',
+                ? 'messaging_archive_group_confirm'.tr().replaceAll('{groupName}', chat.groupName ?? 'this group')
+                : 'messaging_archive_chat_confirm'.tr(),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel'),
+              child: const Text('messaging_button_cancel'.tr()),
             ),
             ElevatedButton(
               onPressed: () => Navigator.of(context).pop(true),
@@ -113,7 +114,7 @@ class ChatListTile extends StatelessWidget {
                 backgroundColor: ArtbeatColors.error,
                 foregroundColor: Colors.white,
               ),
-              child: const Text('Archive'),
+              child: const Text('messaging_button_archive'.tr()),
             ),
           ],
         );

@@ -128,8 +128,7 @@ class _RefundRequestScreenState extends State<RefundRequestScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Refund Information',
+                        const Text('art_walk_refund_information'.tr(),
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -159,9 +158,7 @@ class _RefundRequestScreenState extends State<RefundRequestScreen> {
                           ],
                         ),
                         const SizedBox(height: 16),
-                        const Text(
-                          'Note: Refunds are processed within 5-7 business days, '
-                          'depending on your payment method and financial institution.',
+                        const Text('art_walk_note__refunds_are_processed_within_5_7_business_days_______________________________depending_on_your_payment_method_and_financial_institution'.tr(),
                           style: TextStyle(
                             fontStyle: FontStyle.italic,
                             fontSize: 12,
@@ -176,8 +173,7 @@ class _RefundRequestScreenState extends State<RefundRequestScreen> {
                 const SizedBox(height: 24),
 
                 // Refund reason dropdown
-                const Text(
-                  'Reason for Refund',
+                const Text('art_walk_reason_for_refund'.tr(),
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -211,8 +207,7 @@ class _RefundRequestScreenState extends State<RefundRequestScreen> {
                 const SizedBox(height: 24),
 
                 // Additional details
-                const Text(
-                  'Additional Details',
+                const Text('art_walk_additional_details'.tr(),
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -280,10 +275,7 @@ class _RefundRequestScreenState extends State<RefundRequestScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  'Refund requests are reviewed on a case-by-case basis. '
-                  'Pro-rated refunds may be issued for unused subscription time. '
-                  'Please allow 5-7 business days for your refund to process after approval.',
+                Text('art_walk_refund_requests_are_reviewed_on_a_case_by_case_basis_______________________pro_rated_refunds_may_be_issued_for_unused_subscription_time_______________________please_allow_5_7_business_days_for_your_refund_to_process_after_approval'.tr(),
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey.shade700,

@@ -288,8 +288,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Add a credit card or other payment method to manage your subscription',
+            const Text('art_walk_add_a_credit_card_or_other_payment_method_to_manage_your_subscription'.tr(),
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.grey),
             ),
@@ -333,8 +332,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
           style: Theme.of(context).textTheme.headlineSmall,
         ),
         const SizedBox(height: 8),
-        const Text(
-          'You can add, remove, or set a default payment method for your subscriptions.',
+        const Text('art_walk_you_can_add__remove__or_set_a_default_payment_method_for_your_subscriptions'.tr(),
           style: TextStyle(color: Colors.grey),
         ),
         const SizedBox(height: 24),
@@ -389,8 +387,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
                             .withAlpha(26), // Alpha 26 is approx 0.1 opacity
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: Text(
-                        'Default',
+                      child: Text('art_walk_default'.tr(),
                         style: TextStyle(
                           color: Theme.of(context).primaryColor,
                           fontWeight: FontWeight.bold,

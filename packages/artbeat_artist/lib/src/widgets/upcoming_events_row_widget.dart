@@ -27,8 +27,7 @@ class UpcomingEventsRowWidget extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Upcoming Events',
+              const Text('art_walk_upcoming_events'.tr(),
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -36,7 +35,7 @@ class UpcomingEventsRowWidget extends StatelessWidget {
               ),
               TextButton(
                 onPressed: onSeeAllPressed,
-                child: const Text('See All'),
+                child: const Text('art_walk_see_all'.tr()),
               ),
             ],
           ),
@@ -64,8 +63,7 @@ class UpcomingEventsRowWidget extends StatelessWidget {
               if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                 return const Padding(
                   padding: EdgeInsets.all(16.0),
-                  child: Text(
-                    'No upcoming events in your area',
+                  child: Text('art_walk_no_upcoming_events_in_your_area'.tr(),
                     textAlign: TextAlign.center,
                   ),
                 );
@@ -81,8 +79,7 @@ class UpcomingEventsRowWidget extends StatelessWidget {
               if (events.isEmpty) {
                 return const Padding(
                   padding: EdgeInsets.all(16.0),
-                  child: Text(
-                    'No upcoming events in your area',
+                  child: Text('art_walk_no_upcoming_events_in_your_area'.tr(),
                     textAlign: TextAlign.center,
                   ),
                 );

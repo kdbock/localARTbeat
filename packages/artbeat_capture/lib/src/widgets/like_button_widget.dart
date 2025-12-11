@@ -87,7 +87,7 @@ class _LikeButtonWidgetState extends State<LikeButtonWidget> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
+        ).showSnackBar(SnackBar(content: Text('capture_like_error_generic'.tr().replaceAll('{error}', e.toString()))));
       }
     } finally {
       if (mounted) {

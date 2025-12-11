@@ -417,7 +417,7 @@ class _AdvancedArtworkSearchScreenState
               const SizedBox(height: 16),
 
               // Price range
-              const Text('Price Range',
+              Text('art_walk_price_range'.tr(),
                   style: TextStyle(fontWeight: FontWeight.w500)),
               const SizedBox(height: 8),
               Row(
@@ -451,7 +451,7 @@ class _AdvancedArtworkSearchScreenState
               const SizedBox(height: 16),
 
               // Date range
-              const Text('Date Range',
+              Text('art_walk_date_range'.tr(),
                   style: TextStyle(fontWeight: FontWeight.w500)),
               const SizedBox(height: 8),
               Row(
@@ -499,13 +499,13 @@ class _AdvancedArtworkSearchScreenState
                 spacing: 8,
                 children: [
                   FilterChip(
-                    label: const Text('For Sale'),
+                    label: Text('art_walk_for_sale'.tr()),
                     selected: _isForSale == true,
                     onSelected: (selected) =>
                         setState(() => _isForSale = selected ? true : null),
                   ),
                   FilterChip(
-                    label: const Text('Featured'),
+                    label: Text('art_walk_featured'.tr()),
                     selected: _isFeatured == true,
                     onSelected: (selected) =>
                         setState(() => _isFeatured = selected ? true : null),
@@ -521,8 +521,8 @@ class _AdvancedArtworkSearchScreenState
 
   Widget _buildSearchResults() {
     if (_searchResults.isEmpty) {
-      return const Center(
-          child: Text('No artwork found matching your criteria'));
+      return Center(
+          child: Text('art_walk_no_artwork_found_matching_criteria'.tr()));
     }
 
     return GridView.builder(

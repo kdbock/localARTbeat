@@ -469,8 +469,7 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
                   // Specialties
                   const Padding(
                     padding: EdgeInsets.only(top: 16.0),
-                    child: Text(
-                      'Specialties',
+                    child: Text('art_walk_specialties'.tr(),
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
@@ -505,8 +504,7 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
                   // Social media and website links
                   const Padding(
                     padding: EdgeInsets.only(top: 16.0),
-                    child: Text(
-                      'Connect',
+                    child: Text('art_walk_connect'.tr(),
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
@@ -571,8 +569,7 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Artwork',
+                  const Text('art_walk_artwork'.tr(),
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 18,

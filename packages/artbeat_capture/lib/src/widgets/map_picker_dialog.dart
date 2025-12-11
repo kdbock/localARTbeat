@@ -45,7 +45,7 @@ class _MapPickerDialogState extends State<MapPickerDialog> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to get current location')),
+          SnackBar(content: Text('capture_map_picker_error_location'.tr())),
         );
       }
     } finally {
@@ -90,7 +90,7 @@ class _MapPickerDialogState extends State<MapPickerDialog> {
     return Dialog.fullscreen(
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Select Location'),
+          title: Text('capture_map_picker_title'.tr()),
           leading: IconButton(
             icon: const Icon(Icons.close),
             onPressed: () => Navigator.of(context).pop(),
@@ -105,7 +105,7 @@ class _MapPickerDialogState extends State<MapPickerDialog> {
                   ),
                   'address': _selectedAddress,
                 }),
-                child: const Text('Select'),
+                child: Text('capture_map_picker_select_button'.tr()),
               ),
           ],
         ),
@@ -179,7 +179,7 @@ class _MapPickerDialogState extends State<MapPickerDialog> {
             Icon(Icons.map_outlined, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
             Text(
-              'Location Picker',
+              'capture_map_picker_fallback_title'.tr(),
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -188,7 +188,7 @@ class _MapPickerDialogState extends State<MapPickerDialog> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Interactive map location selection is optimized for mobile devices.\nPlease use the manual address entry or current location button.',
+              'capture_map_picker_fallback_description'.tr(),
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 14, color: Colors.grey[500]),
             ),

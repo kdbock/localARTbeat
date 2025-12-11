@@ -39,7 +39,7 @@ class _ArtistSearchDialogState extends State<ArtistSearchDialog> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error searching artists: $e')));
+        ).showSnackBar(SnackBar(content: Text('capture_artist_search_error_searching'.tr().replaceAll('{error}', e.toString()))));
       }
     } finally {
       if (mounted) {
@@ -63,7 +63,7 @@ class _ArtistSearchDialogState extends State<ArtistSearchDialog> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error creating artist: $e')));
+        ).showSnackBar(SnackBar(content: Text('capture_artist_search_error_creating'.tr().replaceAll('{error}', e.toString()))));
       }
     } finally {
       if (mounted) {
@@ -84,8 +84,8 @@ class _ArtistSearchDialogState extends State<ArtistSearchDialog> {
           children: [
             Row(
               children: [
-                const Text(
-                  'Select Artist',
+                Text(
+                  'capture_artist_search_title'.tr(),
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
@@ -120,7 +120,7 @@ class _ArtistSearchDialogState extends State<ArtistSearchDialog> {
                 child: Padding(
                   padding: EdgeInsets.all(16.0),
                   child: Text(
-                    'No artists found',
+                    'capture_artist_search_no_results'.tr(),
                     style: TextStyle(fontSize: 16, color: Colors.grey),
                   ),
                 ),
@@ -166,7 +166,7 @@ class _ArtistSearchDialogState extends State<ArtistSearchDialog> {
                                       color: Theme.of(context).primaryColor,
                                     ),
                                     const SizedBox(width: 4),
-                                    const Text('Verified Artist'),
+                                    const Text('capture_artist_search_verified_label'.tr()),
                                   ],
                                 )
                               : null,
@@ -185,10 +185,10 @@ class _ArtistSearchDialogState extends State<ArtistSearchDialog> {
                             child: const Icon(Icons.add, color: Colors.white),
                           ),
                           title: Text(
-                            'Add "${_searchController.text}"',
+                            'capture_artist_search_add_new'.tr().replaceAll('{artistName}', _searchController.text),
                             style: const TextStyle(fontWeight: FontWeight.w500),
                           ),
-                          subtitle: const Text('Create new artist profile'),
+                          subtitle: Text('capture_artist_search_create_profile'.tr()),
                           onTap: () => _addNewArtist(_searchController.text),
                         ),
                       ),

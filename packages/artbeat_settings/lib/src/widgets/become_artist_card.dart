@@ -23,12 +23,12 @@ class BecomeArtistCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Join ARTbeat as an Artist',
+              'artbeat_settings_join_as_artist'.tr(),
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 8),
             Text(
-              'Share your artwork with the world, connect with galleries, and grow your artistic career.',
+              'artbeat_settings_artist_description'.tr(),
               style: Theme.of(context).textTheme.bodyMedium,
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
@@ -44,7 +44,7 @@ class BecomeArtistCard extends StatelessWidget {
                     arguments: user,
                   );
                 },
-                child: const Text('Become an Artist'),
+                child: Text('artbeat_settings_become_artist_button'.tr()),
               ),
             ),
           ],

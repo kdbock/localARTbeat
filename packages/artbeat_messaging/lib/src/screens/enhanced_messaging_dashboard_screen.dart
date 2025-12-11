@@ -628,7 +628,7 @@ class _MessagingDashboardScreenState extends State<MessagingDashboardScreen>
           action,
           style: const TextStyle(fontWeight: FontWeight.w500),
         ),
-        subtitle: Text('$user • $timestamp'),
+        subtitle: Text('messaging_user_timestamp'.tr().replaceAll('{user}', user).replaceAll('{timestamp}', timestamp)),
         trailing: _buildSeverityBadge(severity),
       ),
     );
@@ -793,7 +793,7 @@ class _MessagingDashboardScreenState extends State<MessagingDashboardScreen>
             ),
           ],
         ),
-        subtitle: Text('$status • Last seen: $lastSeen'),
+        subtitle: Text('messaging_status_last_seen'.tr().replaceAll('{status}', status).replaceAll('{lastSeen}', lastSeen)),
         trailing: PopupMenuButton(
           icon: const Icon(Icons.more_vert),
           itemBuilder: (context) => [

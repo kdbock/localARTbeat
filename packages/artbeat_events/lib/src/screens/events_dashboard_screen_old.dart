@@ -1344,7 +1344,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen> {
                 backgroundColor: ArtbeatColors.primaryPurple,
                 foregroundColor: Colors.white,
               ),
-              child: const Text('Retry'),
+              child: const Text('events_retry'.tr()),
             ),
           ],
         ),
@@ -1385,7 +1385,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen> {
                   });
                   _applyFilters();
                 },
-                child: const Text('Clear Filters'),
+                child: const Text('events_clear_filters'.tr()),
               ),
             ],
           ],
@@ -1840,10 +1840,10 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen> {
                 const Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('• Purchase event tickets'),
-                    Text('• Create and manage your own events'),
-                    Text('• View your ticket history'),
-                    Text('• Get event reminders'),
+                    Text('events_feature_purchase_tickets'.tr()),
+                    Text('events_feature_manage_events'.tr()),
+                    Text('events_feature_view_history'.tr()),
+                    Text('events_feature_reminders'.tr()),
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -1851,7 +1851,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen> {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () => Navigator.pushNamed(context, '/login'),
-                    child: const Text('Sign In Now'),
+                    child: const Text('events_sign_in_now'.tr()),
                   ),
                 ),
               ],

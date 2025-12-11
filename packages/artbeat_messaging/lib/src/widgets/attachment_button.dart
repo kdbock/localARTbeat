@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -32,7 +33,7 @@ class AttachmentButton extends StatelessWidget {
           children: [
             ListTile(
               leading: const Icon(Icons.photo),
-              title: const Text('Photo'),
+              title: const Text('messaging_attachment_photo'.tr()),
               onTap: () async {
                 Navigator.pop(context);
                 final XFile? image = await picker.pickImage(
@@ -45,7 +46,7 @@ class AttachmentButton extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.videocam),
-              title: const Text('Video'),
+              title: const Text('messaging_attachment_video'.tr()),
               onTap: () async {
                 Navigator.pop(context);
                 final XFile? video = await picker.pickVideo(
@@ -58,7 +59,7 @@ class AttachmentButton extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.attach_file),
-              title: const Text('File'),
+              title: const Text('messaging_attachment_file'.tr()),
               onTap: () async {
                 Navigator.pop(context);
                 // Implement file picking logic
@@ -67,7 +68,7 @@ class AttachmentButton extends StatelessWidget {
             if (onVoiceRecorded != null)
               ListTile(
                 leading: const Icon(Icons.mic),
-                title: const Text('Voice Message'),
+                title: const Text('messaging_attachment_voice'.tr()),
                 onTap: () {
                   Navigator.pop(context);
                   _showVoiceRecorder(context);
@@ -169,22 +170,21 @@ class AttachmentButton extends StatelessWidget {
         context: context,
         builder: (BuildContext dialogContext) {
           return AlertDialog(
-            title: const Text('Microphone Permission Required'),
+            title: const Text('messaging_voice_permission_required'.tr()),
             content: const Text(
-              'ARTbeat needs microphone access to record voice messages. '
-              'Please go to Settings > ARTbeat > Microphone and enable access.',
+              'messaging_voice_permission_message'.tr(),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(dialogContext).pop(),
-                child: const Text('Cancel'),
+                child: const Text('messaging_button_cancel'.tr()),
               ),
               TextButton(
                 onPressed: () async {
                   Navigator.of(dialogContext).pop();
                   await openAppSettings();
                 },
-                child: const Text('Open Settings'),
+                child: const Text('messaging_button_open_settings'.tr()),
               ),
             ],
           );
@@ -201,14 +201,14 @@ class AttachmentButton extends StatelessWidget {
         context: context,
         builder: (BuildContext dialogContext) {
           return AlertDialog(
-            title: const Text('Voice Recording Unavailable'),
+            title: const Text('messaging_voice_unavailable'.tr()),
             content: const Text(
-              'Unable to initialize voice recording. Please check your device settings and try again.',
+              'messaging_voice_unavailable_message'.tr(),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(dialogContext).pop(),
-                child: const Text('OK'),
+                child: const Text('messaging_button_ok'.tr()),
               ),
             ],
           );

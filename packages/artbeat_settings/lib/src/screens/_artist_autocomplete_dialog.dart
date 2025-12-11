@@ -33,7 +33,7 @@ class _ArtistAutocompleteDialogState extends State<_ArtistAutocompleteDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Search for artist'),
+      title: Text('artbeat_settings_search_for_artist'.tr()),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -46,7 +46,7 @@ class _ArtistAutocompleteDialogState extends State<_ArtistAutocompleteDialog> {
           const SizedBox(height: 12),
           if (_isLoading) const CircularProgressIndicator(),
           if (!_isLoading && _results.isEmpty && _controller.text.isNotEmpty)
-            const Text('No artists found'),
+            Text('artbeat_settings_no_artists_found'.tr()),
           if (!_isLoading && _results.isNotEmpty)
             SizedBox(
               height: 200,
@@ -72,7 +72,7 @@ class _ArtistAutocompleteDialogState extends State<_ArtistAutocompleteDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text('common_cancel'.tr()),
         ),
       ],
     );

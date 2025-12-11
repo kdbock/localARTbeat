@@ -252,8 +252,8 @@ class _AdminContentModerationScreenState
           title: Text(
             'capture_admin_content_moderation_text_delete_capture'.tr(),
           ),
-          content: const Text(
-            'Are you sure you want to permanently delete this capture? This action cannot be undone.',
+          content: Text(
+            'capture_admin_content_moderation_delete_confirmation'.tr(),
           ),
           actions: [
             TextButton(
@@ -313,7 +313,7 @@ class _AdminContentModerationScreenState
             'art_walk_admin_art_walk_moderation_text_clear_reports'.tr(),
           ),
           content: Text(
-            'Are you sure you want to clear all ${capture.reportCount} report(s) from this capture?',
+            'capture_admin_content_moderation_clear_reports_confirmation'.tr().replaceAll('{count}', capture.reportCount.toString()),
           ),
           actions: [
             TextButton(

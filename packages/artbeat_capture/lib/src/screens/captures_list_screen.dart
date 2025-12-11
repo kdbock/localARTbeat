@@ -68,7 +68,7 @@ class _CapturesListScreenState extends State<CapturesListScreen> {
     } catch (e) {
       setState(() {
         _isLoading = false;
-        _error = 'Failed to load captures: $e';
+        _error = 'capture_list_error_loading'.tr().replaceAll('{error}', e.toString());
       });
     }
   }
@@ -113,7 +113,7 @@ class _CapturesListScreenState extends State<CapturesListScreen> {
       currentIndex: 2, // Art Walk/Capture tab
       drawer: const CaptureDrawer(),
       appBar: const core.EnhancedUniversalHeader(
-        title: 'Local Captures',
+        title: 'capture_list_title'.tr(),
         showLogo: false,
         showBackButton: true,
         backgroundGradient: LinearGradient(
@@ -174,7 +174,7 @@ class _CapturesListScreenState extends State<CapturesListScreen> {
                   ),
                   const SizedBox(height: 16),
                   const Text(
-                    'No captures found nearby',
+                    'capture_list_no_captures_nearby'.tr(),
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w500,
@@ -184,8 +184,8 @@ class _CapturesListScreenState extends State<CapturesListScreen> {
                   const SizedBox(height: 8),
                   Text(
                     _userPosition != null
-                        ? 'No public art captures within 15 miles'
-                        : 'Unable to determine your location',
+                        ? 'capture_list_no_captures_within_range'.tr()
+                        : 'capture_list_location_unknown'.tr(),
                     style: const TextStyle(
                       fontSize: 14,
                       color: ArtbeatColors.textSecondary,

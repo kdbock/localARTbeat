@@ -70,7 +70,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
       await _user!.sendEmailVerification();
 
       if (mounted) {
-        _showSuccessSnackBar('Verification email sent to ${_user!.email}');
+        _showSuccessSnackBar('auth_email_verification_sent_to'.tr().replaceAll('{email}', _user!.email ?? ''));
         _startResendCooldown();
       }
     } on FirebaseAuthException catch (e) {
@@ -80,7 +80,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
     } catch (e) {
       if (mounted) {
         _showErrorSnackBar(
-          'Failed to send verification email. Please try again.',
+          'auth_email_verification_send_failed'.tr(),
         );
       }
     } finally {

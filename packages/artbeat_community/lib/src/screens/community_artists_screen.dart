@@ -46,7 +46,7 @@ class _CommunityArtistsScreenState extends State<CommunityArtistsScreen> {
           child: artists.isEmpty
               ? Center(
                   child: Text(
-                    'No ${title.toLowerCase()} available',
+                    'art_walk_community_artists_no_artists_available'.tr().replaceAll('{title}', title.toLowerCase()),
                     style: const TextStyle(
                       fontSize: 16,
                       color: core.ArtbeatColors.textSecondary,
@@ -164,7 +164,7 @@ class _CommunityArtistsScreenState extends State<CommunityArtistsScreen> {
               ),
               const SizedBox(height: 12),
               Text(
-                artist['name']?.toString() ?? 'Unknown Artist',
+                artist['name']?.toString() ?? 'art_walk_community_artists_unknown_artist'.tr(),
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,

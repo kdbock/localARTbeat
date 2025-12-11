@@ -110,7 +110,7 @@ class _CaptureScreenState extends State<CaptureScreen> {
                   CircularProgressIndicator(color: Colors.white),
                   SizedBox(height: 16),
                   Text(
-                    'Opening camera...',
+                    'capture_screen_opening_camera'.tr(),
                     style: TextStyle(color: Colors.white, fontSize: 16),
                   ),
                 ],

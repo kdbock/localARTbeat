@@ -35,8 +35,7 @@ class CommissionBadge extends StatelessWidget {
             size: 16,
           ),
           const SizedBox(width: 6),
-          Text(
-            'Accepting Commissions',
+          Text('art_walk_accepting_commissions'.tr(),
             style: TextStyle(
               color: Colors.green.shade700,
               fontWeight: FontWeight.w600,
@@ -78,8 +77,7 @@ class CommissionInfoCard extends StatelessWidget {
             children: [
               Icon(Icons.art_track, color: Colors.blue.shade700, size: 18),
               const SizedBox(width: 8),
-              Text(
-                'Commission Details',
+              Text('art_walk_commission_details'.tr(),
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Colors.blue.shade900,
@@ -94,8 +92,7 @@ class CommissionInfoCard extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Base Price:',
+                  Text('art_walk_base_price'.tr(),
                     style: TextStyle(color: Colors.blue.shade700),
                   ),
                   Text(
@@ -114,8 +111,7 @@ class CommissionInfoCard extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Turnaround:',
+                  Text('art_walk_turnaround'.tr(),
                     style: TextStyle(color: Colors.blue.shade700),
                   ),
                   Text(

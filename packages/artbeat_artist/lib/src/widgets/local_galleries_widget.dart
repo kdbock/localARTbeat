@@ -24,8 +24,7 @@ class LocalGalleriesWidget extends StatelessWidget {
             children: [
               const Expanded(
                 // Wrap the Text widget with Expanded
-                child: Text(
-                  'Local Galleries & Museums',
+                child: Text('art_walk_local_galleries___museums'.tr(),
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -35,7 +34,7 @@ class LocalGalleriesWidget extends StatelessWidget {
               ),
               TextButton(
                 onPressed: onSeeAllPressed,
-                child: const Text('See All'),
+                child: const Text('art_walk_see_all'.tr()),
               ),
             ],
           ),
@@ -97,8 +96,7 @@ class LocalGalleriesWidget extends StatelessWidget {
                       color: Colors.grey.shade600,
                     ),
                     const SizedBox(height: 12),
-                    const Text(
-                      'No galleries or museums found in your area',
+                    const Text('art_walk_no_galleries_or_museums_found_in_your_area'.tr(),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.grey,
@@ -113,7 +111,7 @@ class LocalGalleriesWidget extends StatelessWidget {
                           onSeeAllPressed!();
                         }
                       },
-                      child: const Text('Browse All Galleries'),
+                      child: const Text('art_walk_browse_all_galleries'.tr()),
                     ),
                   ],
                 ),
@@ -202,8 +200,7 @@ class LocalGalleriesWidget extends StatelessWidget {
                                         Icon(Icons.star,
                                             size: 14, color: Colors.white),
                                         SizedBox(width: 2),
-                                        Text(
-                                          'Featured',
+                                        Text('art_walk_featured'.tr(),
                                           style: TextStyle(
                                             fontSize: 10,
                                             fontWeight: FontWeight.bold,
