@@ -279,7 +279,10 @@ class _GiftsScreenState extends State<GiftsScreen> {
               hintStyle: TextStyle(
                 color: ArtbeatColors.textSecondary.withValues(alpha: 0.6),
               ),
-              prefixIcon: const Icon(Icons.search, color: ArtbeatColors.primary),
+              prefixIcon: const Icon(
+                Icons.search,
+                color: ArtbeatColors.primary,
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide.none,
