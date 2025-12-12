@@ -66,7 +66,9 @@ class _ArtworkModerationScreenState extends State<ArtworkModerationScreen> {
     } catch (e) {
       // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('moderation_error_loading'.tr(namedArgs: {'error': e.toString()}))),
+        SnackBar(
+            content: Text('moderation_error_loading'
+                .tr(namedArgs: {'error': e.toString()}))),
       );
     } finally {
       setState(() => _isLoading = false);
@@ -90,12 +92,16 @@ class _ArtworkModerationScreenState extends State<ArtworkModerationScreen> {
 
       // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('moderation_success_status'.tr(namedArgs: {'status': status.displayName.toLowerCase()}))),
+        SnackBar(
+            content: Text('moderation_success_status'
+                .tr(namedArgs: {'status': status.displayName.toLowerCase()}))),
       );
     } catch (e) {
       // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('moderation_error_moderating'.tr(namedArgs: {'error': e.toString()}))),
+        SnackBar(
+            content: Text('moderation_error_moderating'
+                .tr(namedArgs: {'error': e.toString()}))),
       );
     }
   }
@@ -128,12 +134,17 @@ class _ArtworkModerationScreenState extends State<ArtworkModerationScreen> {
       // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: Text('moderation_success_bulk'.tr(namedArgs: {'count': selectedIds.length.toString(), 'status': status.displayName.toLowerCase()}))),
+            content: Text('moderation_success_bulk'.tr(namedArgs: {
+          'count': selectedIds.length.toString(),
+          'status': status.displayName.toLowerCase()
+        }))),
       );
     } catch (e) {
       // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('moderation_error_bulk'.tr(namedArgs: {'error': e.toString()}))),
+        SnackBar(
+            content: Text('moderation_error_bulk'
+                .tr(namedArgs: {'error': e.toString()}))),
       );
     } finally {
       setState(() => _isLoading = false);
@@ -146,7 +157,8 @@ class _ArtworkModerationScreenState extends State<ArtworkModerationScreen> {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('moderation_dialog_title'.tr(namedArgs: {'title': artwork.title})),
+        title: Text(
+            'moderation_dialog_title'.tr(namedArgs: {'title': artwork.title})),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -199,7 +211,8 @@ class _ArtworkModerationScreenState extends State<ArtworkModerationScreen> {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('moderation_bulk_dialog_title'.tr(namedArgs: {'count': selectedCount.toString()})),
+        title: Text('moderation_bulk_dialog_title'
+            .tr(namedArgs: {'count': selectedCount.toString()})),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -265,7 +278,8 @@ class _ArtworkModerationScreenState extends State<ArtworkModerationScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Chip(
-                label: Text('moderation_selected_count'.tr(namedArgs: {'count': selectedCount.toString()})),
+                label: Text('moderation_selected_count'
+                    .tr(namedArgs: {'count': selectedCount.toString()})),
                 backgroundColor:
                     Theme.of(context).primaryColor.withValues(alpha: 0.1),
               ),
@@ -376,8 +390,10 @@ class _ArtworkModerationScreenState extends State<ArtworkModerationScreen> {
                                     style: const TextStyle(
                                         fontWeight: FontWeight.bold),
                                   ),
-                                  subtitle:
-                                      Text('moderation_by_artist'.tr(namedArgs: {'artist': artwork.artistProfileId})),
+                                  subtitle: Text('moderation_by_artist'.tr(
+                                      namedArgs: {
+                                        'artist': artwork.artistProfileId
+                                      })),
                                 ),
 
                                 // Artwork image
@@ -428,7 +444,8 @@ class _ArtworkModerationScreenState extends State<ArtworkModerationScreen> {
                                             const Icon(Icons.flag,
                                                 color: Colors.orange, size: 16),
                                             const SizedBox(width: 4),
-                                            Text('moderation_flagged_badge'.tr()),
+                                            Text('moderation_flagged_badge'
+                                                .tr()),
                                           ],
                                         ),
                                       ],
@@ -451,19 +468,22 @@ class _ArtworkModerationScreenState extends State<ArtworkModerationScreen> {
                                     TextButton(
                                       onPressed: () =>
                                           _showModerationDialog(artwork),
-                                      child: Text('moderation_button_review'.tr()),
+                                      child:
+                                          Text('moderation_button_review'.tr()),
                                     ),
                                     TextButton(
                                       onPressed: () => _moderateArtwork(artwork,
                                           ArtworkModerationStatus.approved),
-                                      child: Text('moderation_button_approve'.tr()),
+                                      child: Text(
+                                          'moderation_button_approve'.tr()),
                                     ),
                                     TextButton(
                                       onPressed: () => _moderateArtwork(artwork,
                                           ArtworkModerationStatus.rejected),
                                       style: TextButton.styleFrom(
                                           foregroundColor: Colors.red),
-                                      child: Text('moderation_button_reject'.tr()),
+                                      child:
+                                          Text('moderation_button_reject'.tr()),
                                     ),
                                   ],
                                 ),

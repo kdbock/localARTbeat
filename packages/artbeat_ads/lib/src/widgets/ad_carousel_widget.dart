@@ -83,9 +83,7 @@ class _AdCarouselWidgetState extends State<AdCarouselWidget> {
     if (_isLoading) {
       return Container(
         height: widget.height,
-        decoration: BoxDecoration(
-          color: Colors.grey[200],
-        ),
+        decoration: BoxDecoration(color: Colors.grey[200]),
         child: const Center(child: CircularProgressIndicator()),
       );
     }
@@ -142,7 +140,10 @@ class _AdCarouselWidgetState extends State<AdCarouselWidget> {
   Widget _buildAdSlide(LocalAd ad) {
     return Stack(
       children: [
-        if (ad.imageUrl != null && ad.imageUrl!.isNotEmpty && (ad.imageUrl!.startsWith('http://') || ad.imageUrl!.startsWith('https://')))
+        if (ad.imageUrl != null &&
+            ad.imageUrl!.isNotEmpty &&
+            (ad.imageUrl!.startsWith('http://') ||
+                ad.imageUrl!.startsWith('https://')))
           CachedNetworkImage(
             imageUrl: ad.imageUrl!,
             width: double.infinity,
@@ -194,10 +195,7 @@ class _AdCarouselWidgetState extends State<AdCarouselWidget> {
                 const SizedBox(height: 8),
                 Text(
                   ad.description,
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 12,
-                  ),
+                  style: const TextStyle(color: Colors.white70, fontSize: 12),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -218,9 +216,7 @@ class _AdCarouselWidgetState extends State<AdCarouselWidget> {
           Positioned.fill(
             child: Material(
               color: Colors.transparent,
-              child: InkWell(
-                onTap: () => _launchUrl(ad.websiteUrl!),
-              ),
+              child: InkWell(onTap: () => _launchUrl(ad.websiteUrl!)),
             ),
           ),
       ],

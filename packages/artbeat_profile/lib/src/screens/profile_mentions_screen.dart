@@ -776,8 +776,8 @@ class _ProfileMentionsScreenState extends State<ProfileMentionsScreen>
         comment['isRead'] = true;
       }
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('profile_mentions_all_read'.tr())),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('profile_mentions_all_read'.tr())));
   }
 }

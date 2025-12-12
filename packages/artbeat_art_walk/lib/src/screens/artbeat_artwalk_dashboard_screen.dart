@@ -436,7 +436,9 @@ class _ArtbeatArtwalkDashboardScreenState
               );
             },
             icon: const Icon(Icons.history),
-            label: Text('art_walk_artbeat_artwalk_dashboard_text_view_quest_history'.tr()),
+            label: Text(
+              'art_walk_artbeat_artwalk_dashboard_text_view_quest_history'.tr(),
+            ),
             style: TextButton.styleFrom(
               foregroundColor: ArtWalkDashboardColors.primaryPurple,
             ),
@@ -1475,7 +1477,9 @@ class _ArtbeatArtwalkDashboardScreenState
     if (_currentPosition == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('art_walk_art_walk_dashboard_text_getting_your_location'.tr()),
+          content: Text(
+            'art_walk_art_walk_dashboard_text_getting_your_location'.tr(),
+          ),
           duration: const Duration(seconds: 2),
         ),
       );
@@ -1494,7 +1498,9 @@ class _ArtbeatArtwalkDashboardScreenState
       if (nearbyArt.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('art_walk_art_walk_dashboard_text_no_art_nearby'.tr()),
+            content: Text(
+              'art_walk_art_walk_dashboard_text_no_art_nearby'.tr(),
+            ),
             duration: const Duration(seconds: 3),
           ),
         );
@@ -1521,7 +1527,9 @@ class _ArtbeatArtwalkDashboardScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('art_walk_art_walk_dashboard_error_error_loading_nearby'.tr()),
+            content: Text(
+              'art_walk_art_walk_dashboard_error_error_loading_nearby'.tr(),
+            ),
             backgroundColor: Colors.red,
           ),
         );

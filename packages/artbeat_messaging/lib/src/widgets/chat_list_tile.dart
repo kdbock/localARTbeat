@@ -99,7 +99,10 @@ class ChatListTile extends StatelessWidget {
           title: Text('messaging_archive_chat_title'.tr()),
           content: Text(
             chat.isGroup
-                ? 'messaging_archive_group_confirm'.tr().replaceAll('{groupName}', chat.groupName ?? 'this group')
+                ? 'messaging_archive_group_confirm'.tr().replaceAll(
+                    '{groupName}',
+                    chat.groupName ?? 'this group',
+                  )
                 : 'messaging_archive_chat_confirm'.tr(),
           ),
           actions: [

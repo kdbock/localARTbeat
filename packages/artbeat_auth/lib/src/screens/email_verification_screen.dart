@@ -70,7 +70,12 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
       await _user!.sendEmailVerification();
 
       if (mounted) {
-        _showSuccessSnackBar('auth_email_verification_sent_to'.tr().replaceAll('{email}', _user!.email ?? ''));
+        _showSuccessSnackBar(
+          'auth_email_verification_sent_to'.tr().replaceAll(
+            '{email}',
+            _user!.email ?? '',
+          ),
+        );
         _startResendCooldown();
       }
     } on FirebaseAuthException catch (e) {
@@ -79,9 +84,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
       }
     } catch (e) {
       if (mounted) {
-        _showErrorSnackBar(
-          'auth_email_verification_send_failed'.tr(),
-        );
+        _showErrorSnackBar('auth_email_verification_send_failed'.tr());
       }
     } finally {
       if (mounted) {
@@ -191,7 +194,10 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AuthHeader(title: 'auth_email_verification_title'.tr(), showBackButton: false),
+      appBar: AuthHeader(
+        title: 'auth_email_verification_title'.tr(),
+        showBackButton: false,
+      ),
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -311,8 +317,15 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                                   )
                                 : Text(
                                     _canResendEmail
-                                        ? 'auth_email_verification_resend_button'.tr()
-                                        : 'auth_email_verification_resend_cooldown'.tr(namedArgs: {'seconds': _resendCooldown.toString()}),
+                                        ? 'auth_email_verification_resend_button'
+                                              .tr()
+                                        : 'auth_email_verification_resend_cooldown'
+                                              .tr(
+                                                namedArgs: {
+                                                  'seconds': _resendCooldown
+                                                      .toString(),
+                                                },
+                                              ),
                                     style: const TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w600,

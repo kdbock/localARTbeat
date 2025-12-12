@@ -48,7 +48,11 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('profile_favorites_screen_error_error_loading_liked_content'.tr().replaceAll('{error}', e.toString())),
+            content: Text(
+              'profile_favorites_screen_error_error_loading_liked_content'
+                  .tr()
+                  .replaceAll('{error}', e.toString()),
+            ),
           ),
         );
         setState(() {
@@ -235,7 +239,11 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                       // Fallback: try to open as generic content
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('profile_favorites_screen_error_cannot_open_content'.tr().replaceAll('{contentType}', contentType)),
+                          content: Text(
+                            'profile_favorites_screen_error_cannot_open_content'
+                                .tr()
+                                .replaceAll('{contentType}', contentType),
+                          ),
                         ),
                       );
                   }
@@ -296,14 +304,25 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('profile_favorites_screen_success_removed_from_liked_content'.tr())),
+            SnackBar(
+              content: Text(
+                'profile_favorites_screen_success_removed_from_liked_content'
+                    .tr(),
+              ),
+            ),
           );
           _loadFavorites(); // Refresh the list
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('profile_favorites_screen_error_error_unliking_content'.tr().replaceAll('{error}', e.toString()))),
+            SnackBar(
+              content: Text(
+                'profile_favorites_screen_error_error_unliking_content'
+                    .tr()
+                    .replaceAll('{error}', e.toString()),
+              ),
+            ),
           );
         }
       }

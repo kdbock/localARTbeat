@@ -168,7 +168,9 @@ class ChatListScreen extends StatelessWidget {
                       ElevatedButton.icon(
                         onPressed: () => _navigateToNewChat(context),
                         icon: const Icon(Icons.add),
-                        label: Text('messaging_chat_list_message_new_message'.tr()),
+                        label: Text(
+                          'messaging_chat_list_message_new_message'.tr(),
+                        ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: ArtbeatColors.primaryPurple,
                           foregroundColor: Colors.white,
@@ -268,7 +270,9 @@ class ChatListScreen extends StatelessWidget {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('messaging_chat_list_error_failed_to_restore'.tr()),
+                        content: Text(
+                          'messaging_chat_list_error_failed_to_restore'.tr(),
+                        ),
                         backgroundColor: ArtbeatColors.error,
                       ),
                     );

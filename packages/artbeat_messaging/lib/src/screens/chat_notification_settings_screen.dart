@@ -61,11 +61,19 @@ class _ChatNotificationSettingsScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('messaging_chat_notification_settings_text_notification_settings'.tr())),
+      appBar: AppBar(
+        title: Text(
+          'messaging_chat_notification_settings_text_notification_settings'
+              .tr(),
+        ),
+      ),
       body: ListView(
         children: [
           SwitchListTile(
-            title: Text('messaging_chat_notification_settings_text_mute_notifications'.tr()),
+            title: Text(
+              'messaging_chat_notification_settings_text_mute_notifications'
+                  .tr(),
+            ),
             value: _muted,
             onChanged: (val) async {
               setState(() => _muted = val);
@@ -73,7 +81,10 @@ class _ChatNotificationSettingsScreenState
             },
           ),
           SwitchListTile(
-            title: Text('messaging_chat_notification_settings_message_show_message_previews'.tr()),
+            title: Text(
+              'messaging_chat_notification_settings_message_show_message_previews'
+                  .tr(),
+            ),
             value: _showPreviews,
             onChanged: (val) async {
               setState(() => _showPreviews = val);

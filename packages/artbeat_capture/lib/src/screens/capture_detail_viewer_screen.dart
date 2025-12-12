@@ -72,7 +72,9 @@ class _CaptureDetailViewerScreenState extends State<CaptureDetailViewerScreen> {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('capture_admin_content_moderation_text_delete_capture'.tr()),
+        title: Text(
+          'capture_admin_content_moderation_text_delete_capture'.tr(),
+        ),
         content: Text('capture_capture_detail_viewer_text_are_you_sure'.tr()),
         actions: [
           TextButton(
@@ -85,7 +87,9 @@ class _CaptureDetailViewerScreenState extends State<CaptureDetailViewerScreen> {
               _deleteCapture();
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: Text('admin_modern_unified_admin_dashboard_text_delete'.tr()),
+            child: Text(
+              'admin_modern_unified_admin_dashboard_text_delete'.tr(),
+            ),
           ),
         ],
       ),
@@ -97,7 +101,12 @@ class _CaptureDetailViewerScreenState extends State<CaptureDetailViewerScreen> {
       await _captureService.deleteCapture(widget.captureId);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('capture_capture_detail_viewer_success_capture_deleted_successfully'.tr())),
+          SnackBar(
+            content: Text(
+              'capture_capture_detail_viewer_success_capture_deleted_successfully'
+                  .tr(),
+            ),
+          ),
         );
         Navigator.pop(context);
       }
@@ -106,7 +115,9 @@ class _CaptureDetailViewerScreenState extends State<CaptureDetailViewerScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('capture_capture_detail_viewer_error_failed_to_delete'.tr()),
+            content: Text(
+              'capture_capture_detail_viewer_error_failed_to_delete'.tr(),
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -138,7 +149,9 @@ class _CaptureDetailViewerScreenState extends State<CaptureDetailViewerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_capture?.title ?? 'capture_detail_viewer_default_title'.tr()),
+        title: Text(
+          _capture?.title ?? 'capture_detail_viewer_default_title'.tr(),
+        ),
         backgroundColor: core.ArtbeatColors.primaryPurple,
         foregroundColor: Colors.white,
         actions: [
@@ -173,7 +186,11 @@ class _CaptureDetailViewerScreenState extends State<CaptureDetailViewerScreen> {
               ),
             )
           : _capture == null
-          ? Center(child: Text('capture_capture_detail_viewer_text_no_capture_found'.tr()))
+          ? Center(
+              child: Text(
+                'capture_capture_detail_viewer_text_no_capture_found'.tr(),
+              ),
+            )
           : SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -203,7 +220,10 @@ class _CaptureDetailViewerScreenState extends State<CaptureDetailViewerScreen> {
                   if (_capture!.artistName != null) ...[
                     const SizedBox(height: 8),
                     Text(
-                      'capture_detail_viewer_by_artist'.tr().replaceAll('{artist}', _capture!.artistName!),
+                      'capture_detail_viewer_by_artist'.tr().replaceAll(
+                        '{artist}',
+                        _capture!.artistName!,
+                      ),
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontStyle: FontStyle.italic,
                         color: Colors.grey[600],

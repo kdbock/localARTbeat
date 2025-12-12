@@ -35,15 +35,17 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
       if (mounted) {
         setState(() => _isLoading = false);
         String errorMessage = 'settings_load_failed'.tr();
-        
+
         if (e.toString().contains('not authenticated')) {
           errorMessage = 'Please log in again to access privacy settings';
         } else if (e.toString().contains('Permission denied')) {
-          errorMessage = 'Unable to load privacy settings - permission denied. Please check your privacy settings in Firestore.';
+          errorMessage =
+              'Unable to load privacy settings - permission denied. Please check your privacy settings in Firestore.';
         } else if (e.toString().contains('Network')) {
-          errorMessage = 'Network error - please check your internet connection';
+          errorMessage =
+              'Network error - please check your internet connection';
         }
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMessage),
@@ -63,16 +65,16 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
           _privacySettings = settings;
           _isSaving = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('settings_updated'.tr())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('settings_updated'.tr())));
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isSaving = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('settings_update_failed'.tr())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('settings_update_failed'.tr())));
       }
     }
   }
@@ -204,9 +206,18 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
       ),
       initialValue: profile.visibility,
       items: [
-        DropdownMenuItem(value: 'public', child: Text('settings_visibility_public'.tr())),
-        DropdownMenuItem(value: 'friends', child: Text('settings_visibility_friends'.tr())),
-        DropdownMenuItem(value: 'private', child: Text('settings_visibility_private'.tr())),
+        DropdownMenuItem(
+          value: 'public',
+          child: Text('settings_visibility_public'.tr()),
+        ),
+        DropdownMenuItem(
+          value: 'friends',
+          child: Text('settings_visibility_friends'.tr()),
+        ),
+        DropdownMenuItem(
+          value: 'private',
+          child: Text('settings_visibility_private'.tr()),
+        ),
       ],
       onChanged: _isSaving
           ? null
@@ -479,9 +490,7 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
               ListTile(
                 leading: const Icon(Icons.delete_forever, color: Colors.red),
                 title: Text('settings_delete_data'.tr()),
-                subtitle: Text(
-                  'settings_delete_data_desc'.tr(),
-                ),
+                subtitle: Text('settings_delete_data_desc'.tr()),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => _showDataDeletionDialog(),
               ),
@@ -512,9 +521,7 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text('settings_download_data'.tr()),
-        content: Text(
-          'settings_download_data_dialog'.tr(),
-        ),
+        content: Text('settings_download_data_dialog'.tr()),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -537,9 +544,7 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text('settings_delete_data'.tr()),
-        content: Text(
-          'settings_delete_data_dialog'.tr(),
-        ),
+        content: Text('settings_delete_data_dialog'.tr()),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -564,9 +569,7 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              'settings_data_download_success'.tr(),
-            ),
+            content: Text('settings_data_download_success'.tr()),
             backgroundColor: Colors.green,
           ),
         );
@@ -589,9 +592,7 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              'settings_data_deletion_success'.tr(),
-            ),
+            content: Text('settings_data_deletion_success'.tr()),
             backgroundColor: Colors.green,
           ),
         );

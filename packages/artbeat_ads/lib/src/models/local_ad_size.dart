@@ -1,7 +1,4 @@
-enum LocalAdSize {
-  small,
-  big,
-}
+enum LocalAdSize { small, big }
 
 extension LocalAdSizeExtension on LocalAdSize {
   String get displayName {

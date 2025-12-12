@@ -138,9 +138,9 @@ class MessageActionsSheet extends StatelessWidget {
 
   void _copyToClipboard(BuildContext context, String text) {
     // Implementation would copy text to clipboard
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('messaging_message_copied'.tr())),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('messaging_message_copied'.tr())));
   }
 }
 
@@ -306,9 +306,16 @@ class _MessageEditWidgetState extends State<MessageEditWidget> {
       widget.onSave(_controller.text.trim());
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('messaging_error_saving_message'.tr().replaceAll('{error}', e.toString()))));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'messaging_error_saving_message'.tr().replaceAll(
+                '{error}',
+                e.toString(),
+              ),
+            ),
+          ),
+        );
       }
     }
 
@@ -353,9 +360,16 @@ class _ForwardMessageSheetState extends State<ForwardMessageSheet> {
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('messaging_error_loading_chats'.tr().replaceAll('{error}', e.toString()))));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'messaging_error_loading_chats'.tr().replaceAll(
+                '{error}',
+                e.toString(),
+              ),
+            ),
+          ),
+        );
       }
     }
   }
@@ -662,7 +676,14 @@ class InteractiveMessageBubble extends StatelessWidget {
             if (context.mounted) {
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('messaging_error_editing_message'.tr().replaceAll('{error}', e.toString()))),
+                SnackBar(
+                  content: Text(
+                    'messaging_error_editing_message'.tr().replaceAll(
+                      '{error}',
+                      e.toString(),
+                    ),
+                  ),
+                ),
               );
             }
           }
@@ -699,7 +720,14 @@ class InteractiveMessageBubble extends StatelessWidget {
           } catch (e) {
             if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('messaging_error_forwarding_message'.tr().replaceAll('{error}', e.toString()))),
+                SnackBar(
+                  content: Text(
+                    'messaging_error_forwarding_message'.tr().replaceAll(
+                      '{error}',
+                      e.toString(),
+                    ),
+                  ),
+                ),
               );
             }
           }
@@ -722,9 +750,16 @@ class InteractiveMessageBubble extends StatelessWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('messaging_error_generic'.tr().replaceAll('{error}', e.toString()))));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'messaging_error_generic'.tr().replaceAll(
+                '{error}',
+                e.toString(),
+              ),
+            ),
+          ),
+        );
       }
     }
   }
@@ -752,15 +787,22 @@ class InteractiveMessageBubble extends StatelessWidget {
       try {
         await chatService.deleteMessage(chat.id, message.id);
         if (context.mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('messaging_message_deleted'.tr())));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('messaging_message_deleted'.tr())),
+          );
         }
       } catch (e) {
         if (context.mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('messaging_error_deleting_message'.tr().replaceAll('{error}', e.toString()))));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'messaging_error_deleting_message'.tr().replaceAll(
+                  '{error}',
+                  e.toString(),
+                ),
+              ),
+            ),
+          );
         }
       }
     }

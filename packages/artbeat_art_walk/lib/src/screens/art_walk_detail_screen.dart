@@ -122,9 +122,11 @@ class _ArtWalkDetailScreenState extends State<ArtWalkDetailScreen> {
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('art_walk_art_walk_detail_error_error_etostring'.tr())));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('art_walk_art_walk_detail_error_error_etostring'.tr()),
+        ),
+      );
     } finally {
       if (mounted && !_disposed) {
         setState(() => _isLoading = false);
@@ -216,9 +218,13 @@ class _ArtWalkDetailScreenState extends State<ArtWalkDetailScreen> {
       _logger.i('Shared successfully');
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('art_walk_art_walk_detail_error_error_sharing_etostring'.tr())));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'art_walk_art_walk_detail_error_error_sharing_etostring'.tr(),
+          ),
+        ),
+      );
       _logger.e('Error sharing: ${e.toString()}');
     }
   }
@@ -336,9 +342,13 @@ class _ArtWalkDetailScreenState extends State<ArtWalkDetailScreen> {
 
       // Show success message
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('art_walk_art_walk_detail_text_art_walk_completed'.tr())));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'art_walk_art_walk_detail_text_art_walk_completed'.tr(),
+          ),
+        ),
+      );
 
       // If there are new achievements, show them
       if (unviewedAchievements.isNotEmpty) {
@@ -372,7 +382,11 @@ class _ArtWalkDetailScreenState extends State<ArtWalkDetailScreen> {
       }
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('art_walk_art_walk_detail_error_error_completing_art'.tr())),
+        SnackBar(
+          content: Text(
+            'art_walk_art_walk_detail_error_error_completing_art'.tr(),
+          ),
+        ),
       );
     }
   }
@@ -834,7 +848,10 @@ class _ArtWalkDetailScreenState extends State<ArtWalkDetailScreen> {
                                       ElevatedButton.icon(
                                         onPressed: _startDetailNavigation,
                                         icon: const Icon(Icons.navigation),
-                                        label: Text('art_walk_art_walk_detail_text_start_navigation'.tr()),
+                                        label: Text(
+                                          'art_walk_art_walk_detail_text_start_navigation'
+                                              .tr(),
+                                        ),
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: Colors.blue,
                                           foregroundColor: Colors.white,

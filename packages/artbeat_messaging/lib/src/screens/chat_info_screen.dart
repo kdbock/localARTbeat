@@ -76,7 +76,9 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('messaging_chat_info_error_error_loading_participants'.tr()),
+            content: Text(
+              'messaging_chat_info_error_error_loading_participants'.tr(),
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -110,13 +112,23 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                   ScaffoldMessenger.of(
                     // ignore: use_build_context_synchronously
                     context,
-                  ).showSnackBar(SnackBar(content: Text('messaging_chat_info_text_chat_deleted'.tr())));
+                  ).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'messaging_chat_info_text_chat_deleted'.tr(),
+                      ),
+                    ),
+                  );
                 }
               } catch (e) {
                 if (mounted) {
                   // ignore: use_build_context_synchronously
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('messaging_chat_info_error_failed_to_delete'.tr())),
+                    SnackBar(
+                      content: Text(
+                        'messaging_chat_info_error_failed_to_delete'.tr(),
+                      ),
+                    ),
                   );
                 }
               }
@@ -195,8 +207,15 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                       if (_isGroup) ...[
                         const Divider(),
                         ListTile(
-                          title: Text('messaging_chat_info_text_participants'.tr()),
-                          subtitle: Text('messaging_participants_count'.tr().replaceAll('{count}', _participants.length.toString())),
+                          title: Text(
+                            'messaging_chat_info_text_participants'.tr(),
+                          ),
+                          subtitle: Text(
+                            'messaging_participants_count'.tr().replaceAll(
+                              '{count}',
+                              _participants.length.toString(),
+                            ),
+                          ),
                         ),
                         ...(_participants.map(
                           (user) => ListTile(
@@ -220,7 +239,9 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                       const Divider(),
                       ListTile(
                         leading: const Icon(Icons.delete),
-                        title: Text('messaging_chat_info_text_delete_chat'.tr()),
+                        title: Text(
+                          'messaging_chat_info_text_delete_chat'.tr(),
+                        ),
                         onTap: _deleteChat,
                       ),
                     ],

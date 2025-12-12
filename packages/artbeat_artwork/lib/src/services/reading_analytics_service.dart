@@ -99,10 +99,7 @@ class ReadingAnalyticsService {
         note: note,
       );
 
-      await _firestore
-          .collection('reading_analytics')
-          .doc(sessionId)
-          .update({
+      await _firestore.collection('reading_analytics').doc(sessionId).update({
         'bookmarks': FieldValue.arrayUnion([bookmark.toJson()]),
       });
 
@@ -117,10 +114,8 @@ class ReadingAnalyticsService {
     required String chapterId,
   }) async {
     try {
-      final doc = await _firestore
-          .collection('reading_analytics')
-          .doc(sessionId)
-          .get();
+      final doc =
+          await _firestore.collection('reading_analytics').doc(sessionId).get();
 
       if (!doc.exists) return;
 
@@ -130,11 +125,9 @@ class ReadingAnalyticsService {
           .where((b) => b['chapterId'] != chapterId)
           .toList();
 
-      await _firestore
-          .collection('reading_analytics')
-          .doc(sessionId)
-          .update({
-        'bookmarks': bookmarks.map((b) => Bookmark.fromJson(b).toJson()).toList(),
+      await _firestore.collection('reading_analytics').doc(sessionId).update({
+        'bookmarks':
+            bookmarks.map((b) => Bookmark.fromJson(b).toJson()).toList(),
       });
 
       AppLogger.info('Bookmark removed from session: $sessionId');
@@ -145,10 +138,8 @@ class ReadingAnalyticsService {
 
   Future<ReadingAnalyticsModel?> getReadingSession(String sessionId) async {
     try {
-      final doc = await _firestore
-          .collection('reading_analytics')
-          .doc(sessionId)
-          .get();
+      final doc =
+          await _firestore.collection('reading_analytics').doc(sessionId).get();
 
       if (!doc.exists) return null;
       return ReadingAnalyticsModel.fromFirestore(doc);
@@ -179,7 +170,8 @@ class ReadingAnalyticsService {
     }
   }
 
-  Future<List<ReadingAnalyticsModel>> getArtworkReadingStats(String artworkId) async {
+  Future<List<ReadingAnalyticsModel>> getArtworkReadingStats(
+      String artworkId) async {
     try {
       final snapshot = await _firestore
           .collection('reading_analytics')
@@ -196,7 +188,8 @@ class ReadingAnalyticsService {
     }
   }
 
-  Future<Map<String, dynamic>> getArtworkEngagementMetrics(String artworkId) async {
+  Future<Map<String, dynamic>> getArtworkEngagementMetrics(
+      String artworkId) async {
     try {
       final stats = await getArtworkReadingStats(artworkId);
 
@@ -251,7 +244,8 @@ class ReadingAnalyticsService {
         'totalReads': totalReads,
         'completedReads': completedReads,
         'averageTimeSpentSeconds':
-            (totalTimeSpent / (totalReads > 0 ? totalReads : 1)).toStringAsFixed(0),
+            (totalTimeSpent / (totalReads > 0 ? totalReads : 1))
+                .toStringAsFixed(0),
         'averageCompletionPercentage': averageCompletion.toStringAsFixed(2),
       };
     } catch (e) {
@@ -278,9 +272,7 @@ class ReadingAnalyticsService {
 
       return snapshot.docs.fold<int>(
         0,
-        (sum, doc) =>
-            sum +
-            (doc.data()['timeSpentSeconds'] as int? ?? 0),
+        (sum, doc) => sum + (doc.data()['timeSpentSeconds'] as int? ?? 0),
       );
     } catch (e) {
       AppLogger.error('Error calculating total reading time: $e');

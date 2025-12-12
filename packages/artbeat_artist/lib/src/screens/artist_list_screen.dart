@@ -107,7 +107,8 @@ class _ArtistListScreenState extends State<ArtistListScreen> {
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 8),
-          Text(tr('art_walk_check_back_later_for_featured_artists'),
+          Text(
+            tr('art_walk_check_back_later_for_featured_artists'),
             style: const TextStyle(color: Colors.grey),
           ),
           const SizedBox(height: 16),

@@ -280,7 +280,8 @@ class ArtworkModel {
       flagged: (data['flagged'] as bool?) ?? false,
       flaggedAt: (data['flaggedAt'] as Timestamp?)?.toDate(),
       moderationNotes: data['moderationNotes'] as String?,
-      contentType: ArtworkContentType.fromString(data['contentType'] as String? ?? 'visual'),
+      contentType: ArtworkContentType.fromString(
+          data['contentType'] as String? ?? 'visual'),
       isSerializing: data['isSerializing'] as bool? ?? false,
       totalChapters: data['totalChapters'] as int?,
       releasedChapters: data['releasedChapters'] as int?,
@@ -329,7 +330,8 @@ class ArtworkModel {
       if (totalChapters != null) 'totalChapters': totalChapters,
       if (releasedChapters != null) 'releasedChapters': releasedChapters,
       if (readingMetadata != null) 'readingMetadata': readingMetadata,
-      if (serializationConfig != null) 'serializationConfig': serializationConfig,
+      if (serializationConfig != null)
+        'serializationConfig': serializationConfig,
     };
   }
 

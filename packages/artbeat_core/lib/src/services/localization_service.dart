@@ -26,7 +26,7 @@ class LocalizationService {
   Future<void> initialize() async {
     _prefs = await SharedPreferences.getInstance();
     final savedLanguage = _prefs.getString(_languageKey);
-    
+
     if (savedLanguage != null) {
       await setLanguage(savedLanguage);
     } else {
@@ -70,7 +70,9 @@ class LocalizationService {
 
   BuildContext _getContext() {
     if (_context == null) {
-      throw Exception('LocalizationService context not set. Call setContext() first.');
+      throw Exception(
+        'LocalizationService context not set. Call setContext() first.',
+      );
     }
     return _context!;
   }

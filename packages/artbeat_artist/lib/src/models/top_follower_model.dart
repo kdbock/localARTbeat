@@ -33,13 +33,11 @@ class TopFollowerModel {
       followerAvatarUrl: map['followerAvatarUrl'] != null
           ? map['followerAvatarUrl'].toString()
           : null,
-      engagementScore: map['engagementScore'] is int
-          ? map['engagementScore'] as int
-          : 0,
+      engagementScore:
+          map['engagementScore'] is int ? map['engagementScore'] as int : 0,
       giftCount: map['giftCount'] is int ? map['giftCount'] as int : 0,
       likeCount: map['likeCount'] is int ? map['likeCount'] as int : 0,
-      messageCount:
-          map['messageCount'] is int ? map['messageCount'] as int : 0,
+      messageCount: map['messageCount'] is int ? map['messageCount'] as int : 0,
       viewCount: map['viewCount'] is int ? map['viewCount'] as int : 0,
       lastEngagementAt: map['lastEngagementAt'] is Timestamp
           ? (map['lastEngagementAt'] as Timestamp).toDate()

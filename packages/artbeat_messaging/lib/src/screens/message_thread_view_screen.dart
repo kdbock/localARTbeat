@@ -98,7 +98,13 @@ class _MessageThreadViewScreenState extends State<MessageThreadViewScreen> {
       ScaffoldMessenger.of(
         // ignore: use_build_context_synchronously
         context,
-      ).showSnackBar(SnackBar(content: Text('messaging_message_thread_view_error_failed_to_send'.tr())));
+      ).showSnackBar(
+        SnackBar(
+          content: Text(
+            'messaging_message_thread_view_error_failed_to_send'.tr(),
+          ),
+        ),
+      );
     }
   }
 
@@ -139,7 +145,11 @@ class _MessageThreadViewScreenState extends State<MessageThreadViewScreen> {
 
   Widget _buildMessagesList() {
     if (_threadMessages.isEmpty) {
-      return Center(child: Text('messaging_message_thread_view_message_no_messages_in'.tr()));
+      return Center(
+        child: Text(
+          'messaging_message_thread_view_message_no_messages_in'.tr(),
+        ),
+      );
     }
 
     return ListView.builder(

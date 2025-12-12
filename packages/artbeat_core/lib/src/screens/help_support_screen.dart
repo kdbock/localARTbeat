@@ -412,9 +412,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('help_contact_email_error'.tr()),
-          ),
+          SnackBar(content: Text('help_contact_email_error'.tr())),
         );
       }
     }
@@ -466,9 +464,9 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('help_forum_error'.tr())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('help_forum_error'.tr())));
       }
     }
   }

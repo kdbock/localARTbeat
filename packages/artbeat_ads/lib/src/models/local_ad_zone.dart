@@ -1,10 +1,4 @@
-enum LocalAdZone {
-  home,
-  events,
-  artists,
-  community,
-  featured,
-}
+enum LocalAdZone { home, events, artists, community, featured }
 
 extension LocalAdZoneExtension on LocalAdZone {
   String get displayName {

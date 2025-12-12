@@ -73,9 +73,9 @@ class _LoginScreenState extends State<LoginScreen> {
       // debugPrint('FirebaseAuthException: [33m${e.message}[0m');
       if (!mounted) return;
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.message ?? 'auth_login_failed'.tr())));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message ?? 'auth_login_failed'.tr())),
+      );
     } finally {
       if (mounted) {
         setState(() {
@@ -99,7 +99,12 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('auth_google_signin_failed'.tr().replaceAll('{error}', e.toString())),
+            content: Text(
+              'auth_google_signin_failed'.tr().replaceAll(
+                '{error}',
+                e.toString(),
+              ),
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -141,7 +146,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('auth_apple_signin_failed'.tr().replaceAll('{error}', errorMessage)),
+            content: Text(
+              'auth_apple_signin_failed'.tr().replaceAll(
+                '{error}',
+                errorMessage,
+              ),
+            ),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 5),
           ),

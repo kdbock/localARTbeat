@@ -283,7 +283,8 @@ class _ArtistOnboardingScreenState extends State<ArtistOnboardingScreen> {
                           padding: const EdgeInsets.only(top: 8),
                           child: Text(
                             tr('art_walk_please_select_at_least_one_medium'),
-                            style: const TextStyle(color: core.ArtbeatColors.error),
+                            style: const TextStyle(
+                                color: core.ArtbeatColors.error),
                           ),
                         ),
                       const SizedBox(height: 24),
@@ -351,7 +352,8 @@ class _ArtistOnboardingScreenState extends State<ArtistOnboardingScreen> {
                           padding: const EdgeInsets.only(top: 8),
                           child: Text(
                             tr('art_walk_please_select_at_least_one_style'),
-                            style: const TextStyle(color: core.ArtbeatColors.error),
+                            style: const TextStyle(
+                                color: core.ArtbeatColors.error),
                           ),
                         ),
                       const SizedBox(height: 32),

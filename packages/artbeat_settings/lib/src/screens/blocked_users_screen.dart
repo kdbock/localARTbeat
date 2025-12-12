@@ -41,7 +41,11 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('settings_blocked_users_error_load'.tr(namedArgs: {'error': e.toString()})),
+            content: Text(
+              'settings_blocked_users_error_load'.tr(
+                namedArgs: {'error': e.toString()},
+              ),
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -154,9 +158,11 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
               ),
               const SizedBox(width: 8),
               Text(
-                _blockedUsers.length == 1 
-                  ? 'settings_blocked_users_count_one'.tr()
-                  : 'settings_blocked_users_count_multiple'.tr(namedArgs: {'count': _blockedUsers.length.toString()}),
+                _blockedUsers.length == 1
+                    ? 'settings_blocked_users_count_one'.tr()
+                    : 'settings_blocked_users_count_multiple'.tr(
+                        namedArgs: {'count': _blockedUsers.length.toString()},
+                      ),
                 style: const TextStyle(
                   fontWeight: FontWeight.w600,
                   color: ArtbeatColors.primaryPurple,
@@ -167,7 +173,11 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
           const SizedBox(height: 8),
           Text(
             'settings_blocked_users_cannot_message'.tr(),
-            style: const TextStyle(color: Colors.grey, fontSize: 13, height: 1.4),
+            style: const TextStyle(
+              color: Colors.grey,
+              fontSize: 13,
+              height: 1.4,
+            ),
           ),
         ],
       ),
@@ -206,11 +216,15 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
           children: [
             if (user.reason.isNotEmpty)
               Text(
-                'settings_blocked_users_reason'.tr(namedArgs: {'reason': user.reason}),
+                'settings_blocked_users_reason'.tr(
+                  namedArgs: {'reason': user.reason},
+                ),
                 style: const TextStyle(fontSize: 12, color: Colors.grey),
               ),
             Text(
-              'settings_blocked_users_blocked_date'.tr(namedArgs: {'date': _formatDate(user.blockedAt)}),
+              'settings_blocked_users_blocked_date'.tr(
+                namedArgs: {'date': _formatDate(user.blockedAt)},
+              ),
               style: const TextStyle(fontSize: 12, color: Colors.grey),
             ),
           ],
@@ -248,7 +262,9 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
       builder: (context) => AlertDialog(
         title: Text('settings_blocked_users_unblock_title'.tr()),
         content: Text(
-          'settings_blocked_users_unblock_confirm'.tr(namedArgs: {'name': user.blockedUserName}),
+          'settings_blocked_users_unblock_confirm'.tr(
+            namedArgs: {'name': user.blockedUserName},
+          ),
         ),
         actions: [
           TextButton(
@@ -283,7 +299,11 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('settings_blocked_users_unblocked_success'.tr(namedArgs: {'name': user.blockedUserName})),
+            content: Text(
+              'settings_blocked_users_unblocked_success'.tr(
+                namedArgs: {'name': user.blockedUserName},
+              ),
+            ),
             backgroundColor: Colors.green,
           ),
         );
@@ -292,7 +312,11 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('settings_blocked_users_error_unblock'.tr(namedArgs: {'error': e.toString()})),
+            content: Text(
+              'settings_blocked_users_error_unblock'.tr(
+                namedArgs: {'error': e.toString()},
+              ),
+            ),
             backgroundColor: Colors.red,
           ),
         );

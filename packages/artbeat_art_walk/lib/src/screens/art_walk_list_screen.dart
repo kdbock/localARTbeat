@@ -518,7 +518,9 @@ class _ArtWalkListScreenState extends State<ArtWalkListScreen> {
                       prefixIcon: Icon(Icons.terrain),
                     ),
                     initialValue: tempDifficulty,
-                    hint: Text('art_walk_art_walk_list_text_select_difficulty'.tr()),
+                    hint: Text(
+                      'art_walk_art_walk_list_text_select_difficulty'.tr(),
+                    ),
                     items: ['Easy', 'Medium', 'Hard']
                         .map(
                           (difficulty) => DropdownMenuItem(
@@ -562,7 +564,9 @@ class _ArtWalkListScreenState extends State<ArtWalkListScreen> {
                       prefixIcon: Icon(Icons.sort),
                     ),
                     initialValue: tempSortBy,
-                    hint: Text('art_walk_art_walk_list_text_select_sorting'.tr()),
+                    hint: Text(
+                      'art_walk_art_walk_list_text_select_sorting'.tr(),
+                    ),
                     items:
                         [
                               'Popularity',
@@ -589,7 +593,9 @@ class _ArtWalkListScreenState extends State<ArtWalkListScreen> {
                       Expanded(
                         child: OutlinedButton(
                           onPressed: onClearFilters,
-                          child: Text('art_walk_art_walk_list_text_clear_all'.tr()),
+                          child: Text(
+                            'art_walk_art_walk_list_text_clear_all'.tr(),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -599,7 +605,9 @@ class _ArtWalkListScreenState extends State<ArtWalkListScreen> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: ArtWalkColors.primaryTeal,
                           ),
-                          child: Text('art_walk_art_walk_list_text_apply_filters'.tr()),
+                          child: Text(
+                            'art_walk_art_walk_list_text_apply_filters'.tr(),
+                          ),
                         ),
                       ),
                     ],

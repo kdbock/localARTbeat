@@ -28,7 +28,8 @@ class _ProfileViewScreenState extends State<ProfileViewScreen>
   final UserService _userService = UserService();
   final CaptureService _captureService = CaptureService();
   final AchievementService _achievementService = AchievementService();
-  final ProfileConnectionService _connectionService = ProfileConnectionService();
+  final ProfileConnectionService _connectionService =
+      ProfileConnectionService();
   late TabController _tabController;
 
   bool _isLoading = true;
@@ -123,9 +124,9 @@ class _ProfileViewScreenState extends State<ProfileViewScreen>
       if (userModel == null) {
         // debugPrint('❌ ProfileViewScreen: Could not load user profile');
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('profile_not_found'.tr())),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('profile_not_found'.tr())));
         }
         return;
       }
@@ -136,8 +137,9 @@ class _ProfileViewScreenState extends State<ProfileViewScreen>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('profile_error_loading'
-                .tr(namedArgs: {'error': e.toString()})),
+            content: Text(
+              'profile_error_loading'.tr(namedArgs: {'error': e.toString()}),
+            ),
           ),
         );
 
@@ -210,8 +212,9 @@ class _ProfileViewScreenState extends State<ProfileViewScreen>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('profile_block_failed'
-                .tr(namedArgs: {'error': e.toString()})),
+            content: Text(
+              'profile_block_failed'.tr(namedArgs: {'error': e.toString()}),
+            ),
           ),
         );
       }
@@ -342,10 +345,15 @@ class _ProfileViewScreenState extends State<ProfileViewScreen>
 
               // Streak Display
               StreakDisplay(
-                loginStreak: _userModel?.preferences?['loginStreak'] as int? ?? 0,
-                challengeStreak: _userModel?.preferences?['challengeStreak'] as int? ?? 0,
-                categoryStreak: _userModel?.preferences?['categoryStreak'] as int? ?? 0,
-                categoryName: _userModel?.preferences?['categoryName'] as String? ?? 'Street Art',
+                loginStreak:
+                    _userModel?.preferences?['loginStreak'] as int? ?? 0,
+                challengeStreak:
+                    _userModel?.preferences?['challengeStreak'] as int? ?? 0,
+                categoryStreak:
+                    _userModel?.preferences?['categoryStreak'] as int? ?? 0,
+                categoryName:
+                    _userModel?.preferences?['categoryName'] as String? ??
+                    'Street Art',
               ),
 
               const SizedBox(height: 12),
@@ -473,7 +481,8 @@ class _ProfileViewScreenState extends State<ProfileViewScreen>
         name: achievement['title'] as String? ?? 'Achievement',
         description: achievement['description'] as String? ?? '',
         icon: _getAchievementIcon(achievement['type'] as String? ?? ''),
-        earnedAt: (achievement['earnedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+        earnedAt:
+            (achievement['earnedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
         category: _getAchievementCategory(achievement['type'] as String? ?? ''),
       );
     }).toList();

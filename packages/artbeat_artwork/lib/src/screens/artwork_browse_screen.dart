@@ -145,7 +145,8 @@ class _ArtworkBrowseScreenState extends State<ArtworkBrowseScreen> {
 
         if (snapshot.hasError) {
           return Center(
-            child: Text('artwork_error_prefix'.tr() + (snapshot.error?.toString() ?? '')),
+            child: Text('artwork_error_prefix'.tr() +
+                (snapshot.error?.toString() ?? '')),
           );
         }
 

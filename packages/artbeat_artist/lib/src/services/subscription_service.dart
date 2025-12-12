@@ -542,9 +542,7 @@ class SubscriptionService {
           .where('artistProfileId', isEqualTo: artistProfileId)
           .get();
 
-      return snapshot.docs
-          .map((doc) => doc['userId'] as String)
-          .toList();
+      return snapshot.docs.map((doc) => doc['userId'] as String).toList();
     } catch (e) {
       ArtistLogger.error('Error getting followers for artist: $e');
       return [];
@@ -601,9 +599,11 @@ class SubscriptionService {
     int limit = 8,
   }) async {
     try {
-      ArtistLogger.info('🔝 Fetching top $limit followers for artist: $artistProfileId');
+      ArtistLogger.info(
+          '🔝 Fetching top $limit followers for artist: $artistProfileId');
 
-      final followerIds = await getFollowersForArtist(artistProfileId: artistProfileId);
+      final followerIds =
+          await getFollowersForArtist(artistProfileId: artistProfileId);
 
       if (followerIds.isEmpty) {
         ArtistLogger.info('No followers found for artist');
@@ -620,7 +620,8 @@ class SubscriptionService {
           );
 
           if (engagementScore > 0) {
-            final userDoc = await _firestore.collection('users').doc(followerId).get();
+            final userDoc =
+                await _firestore.collection('users').doc(followerId).get();
 
             final followerName = userDoc['displayName'] as String? ?? 'User';
             final followerAvatarUrl = userDoc['profileImageUrl'] as String?;
@@ -643,7 +644,8 @@ class SubscriptionService {
         }
       }
 
-      topFollowers.sort((a, b) => b.engagementScore.compareTo(a.engagementScore));
+      topFollowers
+          .sort((a, b) => b.engagementScore.compareTo(a.engagementScore));
 
       final result = topFollowers.take(limit).toList();
       ArtistLogger.info('🔝 Found ${result.length} top followers');
@@ -660,7 +662,8 @@ class SubscriptionService {
     required String artistProfileId,
   }) async {
     try {
-      final followerIds = await getFollowersForArtist(artistProfileId: artistProfileId);
+      final followerIds =
+          await getFollowersForArtist(artistProfileId: artistProfileId);
       final totalFollowers = followerIds.length;
 
       int totalEngagement = 0;
@@ -672,7 +675,8 @@ class SubscriptionService {
         totalEngagement += score;
       }
 
-      final avgEngagement = totalFollowers > 0 ? totalEngagement ~/ totalFollowers : 0;
+      final avgEngagement =
+          totalFollowers > 0 ? totalEngagement ~/ totalFollowers : 0;
 
       return {
         'totalFollowers': totalFollowers,

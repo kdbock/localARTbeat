@@ -420,7 +420,11 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
         TextButton.icon(
           onPressed: _isUploadingImage ? null : _changeProfilePicture,
           icon: const Icon(Icons.camera_alt),
-          label: Text(_isUploadingImage ? 'artbeat_settings_uploading'.tr() : 'artbeat_settings_change_photo'.tr()),
+          label: Text(
+            _isUploadingImage
+                ? 'artbeat_settings_uploading'.tr()
+                : 'artbeat_settings_change_photo'.tr(),
+          ),
         ),
       ],
     );
@@ -674,7 +678,12 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('artbeat_settings_verification_code_sent'.tr().replaceAll('{phoneNumber}', phoneNumber)),
+            Text(
+              'artbeat_settings_verification_code_sent'.tr().replaceAll(
+                '{phoneNumber}',
+                phoneNumber,
+              ),
+            ),
             const SizedBox(height: 16),
             TextField(
               controller: codeController,
@@ -700,7 +709,9 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
               if (code.isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('artbeat_settings_verification_please_enter_code'.tr()),
+                    content: Text(
+                      'artbeat_settings_verification_please_enter_code'.tr(),
+                    ),
                     backgroundColor: Colors.red,
                   ),
                 );
@@ -737,18 +748,24 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
                   Navigator.of(context).pop(true);
                 }
               } on FirebaseAuthException catch (e) {
-                String errorMessage = 'artbeat_settings_verification_failed'.tr();
+                String errorMessage = 'artbeat_settings_verification_failed'
+                    .tr();
                 switch (e.code) {
                   case 'invalid-verification-code':
                     errorMessage =
-                        'artbeat_settings_invalid_verification_code_try_again'.tr();
+                        'artbeat_settings_invalid_verification_code_try_again'
+                            .tr();
                     break;
                   case 'session-expired':
                     errorMessage =
-                        'artbeat_settings_verification_code_expired_request_new_one'.tr();
+                        'artbeat_settings_verification_code_expired_request_new_one'
+                            .tr();
                     break;
                   default:
-                    errorMessage = 'artbeat_settings_verification_failed_with_error'.tr().replaceAll('{error}', e.message ?? '');
+                    errorMessage =
+                        'artbeat_settings_verification_failed_with_error'
+                            .tr()
+                            .replaceAll('{error}', e.message ?? '');
                 }
                 if (mounted) {
                   // ignore: use_build_context_synchronously
@@ -764,7 +781,11 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
                   // ignore: use_build_context_synchronously
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('artbeat_settings_verification_failed_with_error'.tr().replaceAll('{error}', '$e')),
+                      content: Text(
+                        'artbeat_settings_verification_failed_with_error'
+                            .tr()
+                            .replaceAll('{error}', '$e'),
+                      ),
                       backgroundColor: Colors.red,
                     ),
                   );

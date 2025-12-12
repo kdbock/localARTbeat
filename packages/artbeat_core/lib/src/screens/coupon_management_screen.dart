@@ -141,9 +141,7 @@ class _CouponManagementScreenState extends State<CouponManagementScreen> {
                 if (mounted) {
                   // ignore: use_build_context_synchronously
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('core_coupon_success_deleted'.tr()),
-                    ),
+                    SnackBar(content: Text('core_coupon_success_deleted'.tr())),
                   );
                 }
               } catch (e) {

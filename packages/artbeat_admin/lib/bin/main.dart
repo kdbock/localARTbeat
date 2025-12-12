@@ -100,14 +100,15 @@ class UadminModuleHome extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text('admin_main_demo_title'.tr(),
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                style:
+                    const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
             const SizedBox(height: 20),
             Text('admin_main_demo_subtitle'.tr(),
-                style: const TextStyle(fontSize: 16, fontStyle: FontStyle.italic)),
+                style:
+                    const TextStyle(fontSize: 16, fontStyle: FontStyle.italic)),
             const SizedBox(height: 30),
             // Add navigation buttons to module screens here
-            Text(
-                'admin_main_demo_description'.tr(),
+            Text('admin_main_demo_description'.tr(),
                 style: const TextStyle(color: Colors.grey)),
             const SizedBox(height: 20),
             ElevatedButton(

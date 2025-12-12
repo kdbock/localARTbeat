@@ -743,9 +743,13 @@ class _ArtWalkReviewScreenState extends State<ArtWalkReviewScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('art_walk_art_walk_review_error_error_capturing_selfie'.tr())));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'art_walk_art_walk_review_error_error_capturing_selfie'.tr(),
+            ),
+          ),
+        );
       }
     }
   }
@@ -762,9 +766,13 @@ class _ArtWalkReviewScreenState extends State<ArtWalkReviewScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('art_walk_art_walk_review_error_error_starting_art'.tr())));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'art_walk_art_walk_review_error_error_starting_art'.tr(),
+            ),
+          ),
+        );
       }
     }
   }

@@ -218,7 +218,10 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
             const Icon(Icons.feed, size: 64, color: Colors.grey),
             const SizedBox(height: 16),
             Text(
-              'art_walk_artist_feed_no_posts'.tr().replaceAll('{artistName}', widget.artist.displayName),
+              'art_walk_artist_feed_no_posts'.tr().replaceAll(
+                '{artistName}',
+                widget.artist.displayName,
+              ),
               style: const TextStyle(fontSize: 16, color: Colors.grey),
             ),
           ],
@@ -290,7 +293,10 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             subtitle: Text(
-              'art_walk_artist_feed_posted_artwork'.tr().replaceAll('{date}', DateFormat('MMM d').format(item['timestamp'] as DateTime)),
+              'art_walk_artist_feed_posted_artwork'.tr().replaceAll(
+                '{date}',
+                DateFormat('MMM d').format(item['timestamp'] as DateTime),
+              ),
             ),
           ),
 
@@ -362,7 +368,10 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             subtitle: Text(
-              'art_walk_artist_feed_created_event'.tr().replaceAll('{date}', DateFormat('MMM d').format(item['timestamp'] as DateTime)),
+              'art_walk_artist_feed_created_event'.tr().replaceAll(
+                '{date}',
+                DateFormat('MMM d').format(item['timestamp'] as DateTime),
+              ),
             ),
           ),
 
@@ -389,7 +398,12 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
                   children: [
                     const Icon(Icons.location_on, size: 16, color: Colors.grey),
                     const SizedBox(width: 4),
-                      Expanded(child: Text(item['location'] as String? ?? 'art_walk_artist_feed_tbd'.tr())),
+                    Expanded(
+                      child: Text(
+                        item['location'] as String? ??
+                            'art_walk_artist_feed_tbd'.tr(),
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 4),
@@ -434,7 +448,12 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             subtitle: Text(
-              'art_walk_artist_feed_posted_update'.tr().replaceAll('{date}', item['timestamp'] != null ? DateFormat('MMM d').format(item['timestamp'] as DateTime) : 'art_walk_artist_feed_recently'.tr()),
+              'art_walk_artist_feed_posted_update'.tr().replaceAll(
+                '{date}',
+                item['timestamp'] != null
+                    ? DateFormat('MMM d').format(item['timestamp'] as DateTime)
+                    : 'art_walk_artist_feed_recently'.tr(),
+              ),
             ),
           ),
 

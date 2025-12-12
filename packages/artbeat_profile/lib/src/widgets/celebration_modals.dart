@@ -205,7 +205,9 @@ class _BadgeEarnedModalState extends State<BadgeEarnedModal>
                               vertical: 12,
                             ),
                           ),
-                          child: Text('profile_celebration_modals_text_awesome'.tr()),
+                          child: Text(
+                            'profile_celebration_modals_text_awesome'.tr(),
+                          ),
                         ),
                       ],
                     ),
@@ -385,7 +387,9 @@ class _LevelUpModalState extends State<LevelUpModal>
                           vertical: 12,
                         ),
                       ),
-                      child: Text('profile_celebration_modals_text_continue'.tr()),
+                      child: Text(
+                        'profile_celebration_modals_text_continue'.tr(),
+                      ),
                     ),
                   ],
                 ),

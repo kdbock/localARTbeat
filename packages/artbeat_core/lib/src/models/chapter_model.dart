@@ -77,11 +77,12 @@ class ChapterModel {
     List<String>? contentWarnings,
     List<String>? tags,
     this.metadata,
-  })  : panelImages = List.unmodifiable(panelImages),
-        panelOrder = List.unmodifiable(panelOrder),
-        contentWarnings =
-            contentWarnings != null ? List.unmodifiable(contentWarnings) : null,
-        tags = tags != null ? List.unmodifiable(tags) : null;
+  }) : panelImages = List.unmodifiable(panelImages),
+       panelOrder = List.unmodifiable(panelOrder),
+       contentWarnings = contentWarnings != null
+           ? List.unmodifiable(contentWarnings)
+           : null,
+       tags = tags != null ? List.unmodifiable(tags) : null;
 
   factory ChapterModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>? ?? {};
@@ -95,7 +96,8 @@ class ChapterModel {
       content: data['content'] as String? ?? '',
       estimatedReadingTime: data['estimatedReadingTime'] as int? ?? 0,
       wordCount: data['wordCount'] as int? ?? 0,
-      releaseDate: (data['releaseDate'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      releaseDate:
+          (data['releaseDate'] as Timestamp?)?.toDate() ?? DateTime.now(),
       isReleased: data['isReleased'] as bool? ?? false,
       isPaid: data['isPaid'] as bool? ?? false,
       price: data['price'] != null ? (data['price'] as num).toDouble() : null,
@@ -104,12 +106,15 @@ class ChapterModel {
       thumbnailUrl: data['thumbnailUrl'] as String?,
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      moderationStatus:
-          ChapterModerationStatus.fromString(data['moderationStatus'] as String? ?? 'pending'),
+      moderationStatus: ChapterModerationStatus.fromString(
+        data['moderationStatus'] as String? ?? 'pending',
+      ),
       contentWarnings: data['contentWarnings'] != null
           ? (data['contentWarnings'] as List<dynamic>).cast<String>()
           : null,
-      tags: data['tags'] != null ? (data['tags'] as List<dynamic>).cast<String>() : null,
+      tags: data['tags'] != null
+          ? (data['tags'] as List<dynamic>).cast<String>()
+          : null,
       metadata: data['metadata'] as Map<String, dynamic>?,
     );
   }

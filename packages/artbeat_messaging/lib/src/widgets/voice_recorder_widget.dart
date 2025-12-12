@@ -383,9 +383,7 @@ class _VoiceRecorderWidgetState extends State<VoiceRecorderWidget>
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('messaging_voice_permission_required'.tr()),
-          content: Text(
-            'messaging_voice_permission_message'.tr(),
-          ),
+          content: Text('messaging_voice_permission_message'.tr()),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
@@ -459,9 +457,7 @@ class _VoiceRecorderWidgetState extends State<VoiceRecorderWidget>
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('messaging_voice_recording_error'.tr()),
-          content: Text(
-            'messaging_voice_recording_error_message'.tr(),
-          ),
+          content: Text('messaging_voice_recording_error_message'.tr()),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),

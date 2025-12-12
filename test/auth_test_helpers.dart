@@ -231,23 +231,23 @@ class _TestSplashScreenState extends State<TestSplashScreen>
         child: AnimatedBuilder(
           animation: _animation,
           builder: (context, child) => Opacity(
-              opacity: _animation.value,
-              child: const Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.palette, size: 100, color: Colors.white),
-                  SizedBox(height: 20),
-                  Text(
-                    'ArtBeat',
-                    style: TextStyle(
-                      fontSize: 32,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
+            opacity: _animation.value,
+            child: const Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.palette, size: 100, color: Colors.white),
+                SizedBox(height: 20),
+                Text(
+                  'ArtBeat',
+                  style: TextStyle(
+                    fontSize: 32,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
+          ),
         ),
       ),
     ),

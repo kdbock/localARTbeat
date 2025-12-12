@@ -34,7 +34,8 @@ class ScheduledRelease {
       id: doc.id,
       artworkId: data['artworkId'] as String? ?? '',
       chapterId: data['chapterId'] as String? ?? '',
-      releaseDateTime: (data['releaseDateTime'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      releaseDateTime:
+          (data['releaseDateTime'] as Timestamp?)?.toDate() ?? DateTime.now(),
       isScheduled: data['isScheduled'] as bool? ?? true,
       isReleased: data['isReleased'] as bool? ?? false,
       releasedAt: (data['releasedAt'] as Timestamp?)?.toDate(),
@@ -80,7 +81,8 @@ class ScheduleService {
           .doc(releaseId)
           .set(scheduledRelease.toFirestore());
 
-      AppLogger.info('Chapter scheduled for release: $chapterId at $releaseDateTime');
+      AppLogger.info(
+          'Chapter scheduled for release: $chapterId at $releaseDateTime');
       return scheduledRelease;
     } catch (e) {
       AppLogger.error('Error scheduling chapter release: $e');
@@ -114,7 +116,9 @@ class ScheduleService {
           .orderBy('releaseDateTime', descending: false)
           .get();
 
-      return snapshot.docs.map((doc) => ScheduledRelease.fromFirestore(doc)).toList();
+      return snapshot.docs
+          .map((doc) => ScheduledRelease.fromFirestore(doc))
+          .toList();
     } catch (e) {
       AppLogger.error('Error fetching scheduled releases: $e');
       return [];
@@ -128,13 +132,16 @@ class ScheduleService {
       final now = DateTime.now();
       final snapshot = await _firestore
           .collection('scheduled_releases')
-          .where('releaseDateTime', isGreaterThanOrEqualTo: Timestamp.fromDate(now))
+          .where('releaseDateTime',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(now))
           .where('isScheduled', isEqualTo: true)
           .orderBy('releaseDateTime', descending: false)
           .limit(limit)
           .get();
 
-      return snapshot.docs.map((doc) => ScheduledRelease.fromFirestore(doc)).toList();
+      return snapshot.docs
+          .map((doc) => ScheduledRelease.fromFirestore(doc))
+          .toList();
     } catch (e) {
       AppLogger.error('Error fetching upcoming releases: $e');
       return [];
@@ -146,12 +153,15 @@ class ScheduleService {
       final now = DateTime.now();
       final snapshot = await _firestore
           .collection('scheduled_releases')
-          .where('releaseDateTime', isLessThanOrEqualTo: Timestamp.fromDate(now))
+          .where('releaseDateTime',
+              isLessThanOrEqualTo: Timestamp.fromDate(now))
           .where('isReleased', isEqualTo: false)
           .orderBy('releaseDateTime', descending: false)
           .get();
 
-      return snapshot.docs.map((doc) => ScheduledRelease.fromFirestore(doc)).toList();
+      return snapshot.docs
+          .map((doc) => ScheduledRelease.fromFirestore(doc))
+          .toList();
     } catch (e) {
       AppLogger.error('Error fetching due releases: $e');
       return [];
@@ -215,8 +225,8 @@ class ScheduleService {
   }) async {
     try {
       DateTime currentDate = startDate;
-      final increment = daysBetweenReleases ??
-          _getDefaultDayIncrement(schedule);
+      final increment =
+          daysBetweenReleases ?? _getDefaultDayIncrement(schedule);
 
       for (int i = 0; i < chapterIds.length; i++) {
         await scheduleChapterRelease(
@@ -227,7 +237,7 @@ class ScheduleService {
         currentDate = currentDate.add(Duration(days: increment));
       }
 
-      AppLogger.info('Generated schedule for ${ chapterIds.length} chapters');
+      AppLogger.info('Generated schedule for ${chapterIds.length} chapters');
     } catch (e) {
       AppLogger.error('Error generating schedule: $e');
       throw Exception('Failed to generate schedule: $e');

@@ -38,39 +38,47 @@ class FreshAppleSignIn {
       AppLogger.info('🍎 Requesting Apple credential...');
       AuthorizationCredentialAppleID? appleCredential;
       try {
-        appleCredential = await SignInWithApple.getAppleIDCredential(
-          scopes: [
-            AppleIDAuthorizationScopes.email,
-            AppleIDAuthorizationScopes.fullName,
-          ],
-        ).timeout(
-          const Duration(seconds: 30),
-          onTimeout: () {
-            throw TimeoutException('Apple Sign-In request timed out');
-          },
-        );
+        appleCredential =
+            await SignInWithApple.getAppleIDCredential(
+              scopes: [
+                AppleIDAuthorizationScopes.email,
+                AppleIDAuthorizationScopes.fullName,
+              ],
+            ).timeout(
+              const Duration(seconds: 30),
+              onTimeout: () {
+                throw TimeoutException('Apple Sign-In request timed out');
+              },
+            );
       } on TimeoutException {
-        throw Exception('Apple Sign-In request timed out. Please check your internet connection.');
+        throw Exception(
+          'Apple Sign-In request timed out. Please check your internet connection.',
+        );
       } catch (e) {
         final errorString = e.toString();
         AppLogger.error('❌ Apple credential request error: $errorString');
-        
-        if (errorString.contains('canceled') || errorString.contains('cancelled')) {
+
+        if (errorString.contains('canceled') ||
+            errorString.contains('cancelled')) {
           throw Exception('User cancelled Apple Sign-In');
         }
-        
+
         if (errorString.contains('-7091')) {
-          throw Exception('Apple Sign-In configuration error. Please try again.');
+          throw Exception(
+            'Apple Sign-In configuration error. Please try again.',
+          );
         }
-        
+
         if (errorString.contains('-7090')) {
           throw Exception('Apple Sign-In is not enabled for this app.');
         }
-        
+
         if (errorString.contains('-7092') || errorString.contains('Network')) {
-          throw Exception('Network error. Please check your internet connection and try again.');
+          throw Exception(
+            'Network error. Please check your internet connection and try again.',
+          );
         }
-        
+
         throw Exception('Apple Sign-In failed: ${e.toString()}');
       }
 
@@ -92,10 +100,12 @@ class FreshAppleSignIn {
       }
 
       // Step 4: Create Firebase credential from Apple credential
-      AppLogger.info('🔐 Creating Firebase credential from Apple credential...');
-      
+      AppLogger.info(
+        '🔐 Creating Firebase credential from Apple credential...',
+      );
+
       final rawNonce = _generateNonce();
-      
+
       final oauthCredential = OAuthProvider("apple.com").credential(
         idToken: appleCredential.identityToken,
         accessToken: appleCredential.authorizationCode,
@@ -106,17 +116,21 @@ class FreshAppleSignIn {
       AppLogger.info('🔐 Signing in to Firebase with Apple credential...');
       UserCredential userCredential;
       try {
-        userCredential = await FirebaseAuth.instance.signInWithCredential(oauthCredential);
+        userCredential = await FirebaseAuth.instance.signInWithCredential(
+          oauthCredential,
+        );
       } catch (e) {
         AppLogger.error('Firebase sign-in failed: $e');
-        throw Exception('Failed to sign in to Firebase with Apple account: ${e.toString()}');
+        throw Exception(
+          'Failed to sign in to Firebase with Apple account: ${e.toString()}',
+        );
       }
-      
+
       final firebaseUser = userCredential.user;
       if (firebaseUser == null) {
         throw Exception('Firebase authentication failed: No user returned');
       }
-      
+
       AppLogger.auth('✅ Firebase sign-in successful: ${firebaseUser.uid}');
       AppLogger.info('🔐 Firebase user ready: ${firebaseUser.uid}');
 
@@ -270,11 +284,17 @@ class FreshAppleSignIn {
 
       return firebaseUser;
     } on FirebaseAuthException catch (e) {
-      AppLogger.error('❌ Firebase Auth error during Apple Sign-In: ${e.code} - ${e.message}');
+      AppLogger.error(
+        '❌ Firebase Auth error during Apple Sign-In: ${e.code} - ${e.message}',
+      );
       throw Exception('Authentication error: ${e.message ?? e.code}');
     } on FirebaseException catch (e) {
-      AppLogger.error('❌ Firebase error during Apple Sign-In: ${e.code} - ${e.message}');
-      throw Exception('Firebase error: ${e.message ?? e.code}. Please check your internet connection.');
+      AppLogger.error(
+        '❌ Firebase error during Apple Sign-In: ${e.code} - ${e.message}',
+      );
+      throw Exception(
+        'Firebase error: ${e.message ?? e.code}. Please check your internet connection.',
+      );
     } catch (e) {
       AppLogger.error('❌ Fresh Apple Sign-In failed: $e');
       rethrow;
@@ -350,7 +370,8 @@ class FreshAppleSignIn {
 
   /// Generate a cryptographic nonce for Apple Sign-In
   static String _generateNonce() {
-    const charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
+    const charset =
+        '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
     final random = DateTime.now().millisecondsSinceEpoch;
     return List<String>.generate(32, (index) {
       return charset[(random + index) % charset.length];

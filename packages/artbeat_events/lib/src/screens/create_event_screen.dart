@@ -139,7 +139,9 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: Text(isEdit ? 'events_updated_title'.tr() : 'events_created_title'.tr()),
+        title: Text(
+          isEdit ? 'events_updated_title'.tr() : 'events_created_title'.tr(),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,

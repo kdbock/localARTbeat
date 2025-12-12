@@ -406,7 +406,7 @@ class RewardsService {
 
     try {
       final userRef = _firestore.collection('users').doc(user.uid);
-      
+
       int newXP = 0;
       int oldLevel = 0;
       int newLevel = 0;
@@ -471,7 +471,7 @@ class RewardsService {
         // Check for action-specific achievements
         _checkActionAchievements(user.uid, action, userData);
       });
-      
+
       // Post social activity for level up
       if (newLevel > oldLevel) {
         try {
@@ -482,7 +482,11 @@ class RewardsService {
             userAvatar: user.photoURL,
             type: SocialActivityType.milestone,
             message: 'reached level $newLevel: ${getLevelTitle(newLevel)}',
-            metadata: {'newLevel': newLevel, 'oldLevel': oldLevel, 'artTitle': getLevelTitle(newLevel)},
+            metadata: {
+              'newLevel': newLevel,
+              'oldLevel': oldLevel,
+              'artTitle': getLevelTitle(newLevel),
+            },
           );
         } catch (e) {
           _logger.w('Failed to post social activity for level up: $e');
@@ -680,7 +684,7 @@ class RewardsService {
       }, SetOptions(merge: true));
 
       _logger.i('Awarded badge $badgeId to user $userId');
-      
+
       // Post social activity for badge earned
       try {
         final badgeInfo = badges[badgeId];
@@ -689,7 +693,7 @@ class RewardsService {
           final badge = badgeInfo;
           final badgeName = badge['name'] ?? 'Unknown Badge';
           final badgeIcon = badge['icon'] ?? '🏅';
-          
+
           final socialService = SocialService();
           await socialService.postActivity(
             userId: userId,
@@ -697,7 +701,11 @@ class RewardsService {
             userAvatar: user?.photoURL,
             type: SocialActivityType.achievement,
             message: 'earned badge: $badgeIcon $badgeName',
-            metadata: {'badgeId': badgeId, 'badgeName': badgeName, 'artTitle': '$badgeIcon $badgeName'},
+            metadata: {
+              'badgeId': badgeId,
+              'badgeName': badgeName,
+              'artTitle': '$badgeIcon $badgeName',
+            },
           );
         }
       } catch (e) {

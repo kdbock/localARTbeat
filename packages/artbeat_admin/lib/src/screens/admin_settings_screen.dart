@@ -74,13 +74,17 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('admin_admin_settings_success_settings_saved_successfully'.tr())),
+          SnackBar(
+              content: Text(
+                  'admin_admin_settings_success_settings_saved_successfully'
+                      .tr())),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('admin_admin_settings_error_failed_to_save'.tr())),
+          SnackBar(
+              content: Text('admin_admin_settings_error_failed_to_save'.tr())),
         );
       }
     }
@@ -179,7 +183,8 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
 
   Widget _buildSettingsContent() {
     if (_settings == null) {
-      return Center(child: Text('admin_admin_settings_text_no_settings_available'.tr()));
+      return Center(
+          child: Text('admin_admin_settings_text_no_settings_available'.tr()));
     }
 
     return SingleChildScrollView(
@@ -440,7 +445,8 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
       children: [
         ListTile(
           title: Text('admin_admin_settings_text_reset_all_settings'.tr()),
-          subtitle: Text('admin_admin_settings_text_reset_all_settings_29'.tr()),
+          subtitle:
+              Text('admin_admin_settings_text_reset_all_settings_29'.tr()),
           trailing: ElevatedButton(
             onPressed: () => _showResetDialog(),
             style: ElevatedButton.styleFrom(
@@ -563,7 +569,10 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
               Navigator.of(context).pop();
               // Implement backup logic
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('admin_admin_settings_success_backup_created_successfully'.tr())),
+                SnackBar(
+                    content: Text(
+                        'admin_admin_settings_success_backup_created_successfully'
+                            .tr())),
               );
             },
             child: Text('admin_admin_settings_text_backup'.tr()),
@@ -589,7 +598,10 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
               Navigator.of(context).pop();
               // Implement cache clearing logic
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('admin_admin_settings_success_cache_cleared_successfully'.tr())),
+                SnackBar(
+                    content: Text(
+                        'admin_admin_settings_success_cache_cleared_successfully'
+                            .tr())),
               );
             },
             child: Text('admin_admin_settings_text_clear'.tr()),
@@ -619,7 +631,10 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
               await _loadSettings();
               // ignore: use_build_context_synchronously
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('admin_admin_settings_success_settings_reset_successfully'.tr())),
+                SnackBar(
+                    content: Text(
+                        'admin_admin_settings_success_settings_reset_successfully'
+                            .tr())),
               );
             },
             style: ElevatedButton.styleFrom(
@@ -656,7 +671,10 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
               Navigator.of(context).pop();
               // Implement factory reset logic
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('admin_admin_settings_text_factory_reset_completed'.tr())),
+                SnackBar(
+                    content: Text(
+                        'admin_admin_settings_text_factory_reset_completed'
+                            .tr())),
               );
             },
             style: ElevatedButton.styleFrom(

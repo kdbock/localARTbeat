@@ -78,9 +78,13 @@ class _ArtWalkEditScreenState extends State<ArtWalkEditScreen> {
     } catch (e) {
       // debugPrint('Error loading art walk: $e');
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('art_walk_art_walk_edit_error_error_loading_art'.tr())));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'art_walk_art_walk_edit_error_error_loading_art'.tr(),
+            ),
+          ),
+        );
       }
     } finally {
       if (mounted) {
@@ -105,9 +109,13 @@ class _ArtWalkEditScreenState extends State<ArtWalkEditScreen> {
     } catch (e) {
       // debugPrint('Error picking image: $e');
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('art_walk_art_walk_edit_error_error_picking_image'.tr())));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'art_walk_art_walk_edit_error_error_picking_image'.tr(),
+            ),
+          ),
+        );
       }
     }
   }
@@ -145,9 +153,13 @@ class _ArtWalkEditScreenState extends State<ArtWalkEditScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('art_walk_art_walk_edit_error_error_updating_art'.tr())));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'art_walk_art_walk_edit_error_error_updating_art'.tr(),
+            ),
+          ),
+        );
       }
     } finally {
       if (mounted) {
@@ -163,7 +175,9 @@ class _ArtWalkEditScreenState extends State<ArtWalkEditScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('art_walk_admin_art_walk_moderation_text_delete_art_walk'.tr()),
+        title: Text(
+          'art_walk_admin_art_walk_moderation_text_delete_art_walk'.tr(),
+        ),
         content: const Text(
           'Are you sure you want to delete this art walk? This action cannot be undone.',
         ),
@@ -175,7 +189,9 @@ class _ArtWalkEditScreenState extends State<ArtWalkEditScreen> {
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: Text('admin_modern_unified_admin_dashboard_text_delete'.tr()),
+            child: Text(
+              'admin_modern_unified_admin_dashboard_text_delete'.tr(),
+            ),
           ),
         ],
       ),
@@ -191,7 +207,12 @@ class _ArtWalkEditScreenState extends State<ArtWalkEditScreen> {
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('art_walk_admin_art_walk_moderation_success_art_walk_deleted'.tr())),
+            SnackBar(
+              content: Text(
+                'art_walk_admin_art_walk_moderation_success_art_walk_deleted'
+                    .tr(),
+              ),
+            ),
           );
           Navigator.of(context).pop(true); // Return true to indicate deletion
         }
@@ -199,7 +220,12 @@ class _ArtWalkEditScreenState extends State<ArtWalkEditScreen> {
         // debugPrint('Error deleting art walk: $e');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('art_walk_admin_art_walk_moderation_error_error_deleting_art'.tr())),
+            SnackBar(
+              content: Text(
+                'art_walk_admin_art_walk_moderation_error_error_deleting_art'
+                    .tr(),
+              ),
+            ),
           );
         }
       } finally {
@@ -276,7 +302,9 @@ class _ArtWalkEditScreenState extends State<ArtWalkEditScreen> {
         body: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : _artWalk == null
-            ? Center(child: Text('art_walk_art_walk_detail_text_art_walk_not'.tr()))
+            ? Center(
+                child: Text('art_walk_art_walk_detail_text_art_walk_not'.tr()),
+              )
             : _buildEditForm(),
       ),
     );
@@ -580,7 +608,9 @@ class _ArtWalkEditScreenState extends State<ArtWalkEditScreen> {
               side: const BorderSide(color: Colors.red),
               padding: const EdgeInsets.symmetric(vertical: 16),
             ),
-            child: Text('art_walk_admin_art_walk_moderation_text_delete_art_walk'.tr()),
+            child: Text(
+              'art_walk_admin_art_walk_moderation_text_delete_art_walk'.tr(),
+            ),
           ),
         ),
       ],

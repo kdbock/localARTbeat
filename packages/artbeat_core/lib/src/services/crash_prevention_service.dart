@@ -354,7 +354,7 @@ class CrashPreventionService {
   /// These crashes occur when BacsMandateConfirmationActivity is launched without proper args
   static bool isBacsMandateCrash(String? errorMessage) {
     if (errorMessage == null || errorMessage.isEmpty) return false;
-    
+
     final lowerMsg = errorMessage.toLowerCase();
     return lowerMsg.contains('bacsmandateconfirmationactivity') ||
         lowerMsg.contains('cannot start bacs mandate') ||

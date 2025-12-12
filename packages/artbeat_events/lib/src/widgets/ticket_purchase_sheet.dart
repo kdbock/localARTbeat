@@ -590,7 +590,9 @@ class _TicketPurchaseSheetState extends State<TicketPurchaseSheet> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text('events_purchase_failed'.tr()),
-        content: Text('events_purchase_error'.tr().replaceAll('{error}', error)),
+        content: Text(
+          'events_purchase_error'.tr().replaceAll('{error}', error),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),

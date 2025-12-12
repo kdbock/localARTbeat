@@ -26,7 +26,9 @@ class LocalAdIapService {
 
   Future<List<ProductDetails>> fetchProducts() async {
     try {
-      final response = await _inAppPurchase.queryProductDetails(_productIds.toSet());
+      final response = await _inAppPurchase.queryProductDetails(
+        _productIds.toSet(),
+      );
       return response.productDetails;
     } catch (e) {
       throw Exception('Failed to fetch products: $e');

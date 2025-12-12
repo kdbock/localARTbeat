@@ -138,8 +138,10 @@ class _CommunityDrawerState extends State<CommunityDrawer> {
                       _buildDrawerItem(
                         icon: Icons.card_giftcard,
                         title: 'Gifts',
-                        onTap: () =>
-                            _navigateToScreen(context, const ViewReceivedGiftsScreen()),
+                        onTap: () => _navigateToScreen(
+                          context,
+                          const ViewReceivedGiftsScreen(),
+                        ),
                       ),
                       const Divider(),
                       _buildDrawerItem(

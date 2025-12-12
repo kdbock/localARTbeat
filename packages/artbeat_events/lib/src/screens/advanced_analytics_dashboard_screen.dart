@@ -191,7 +191,9 @@ class _AdvancedAnalyticsDashboardScreenState
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          widget.artistId != null ? 'event_analytics_my'.tr() : 'event_analytics_platform'.tr(),
+          widget.artistId != null
+              ? 'event_analytics_my'.tr()
+              : 'event_analytics_platform'.tr(),
         ),
         actions: [
           _buildPeriodSelector(),

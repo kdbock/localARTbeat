@@ -68,7 +68,9 @@ class _AdMigrationScreenState extends State<AdMigrationScreen> {
   }
 
   void _showResult(MigrationResult result, bool dryRun) {
-    final title = dryRun ? 'ads_ad_migration_text_dry_run_results'.tr() : 'ads_ad_migration_text_migration_results'.tr();
+    final title = dryRun
+        ? 'ads_ad_migration_text_dry_run_results'.tr()
+        : 'ads_ad_migration_text_migration_results'.tr();
     final content =
         '''
 ${dryRun ? 'Dry run completed' : 'Migration completed'}!
@@ -227,7 +229,9 @@ ${result.hasErrors ? '\n⚠️ Errors:\n${result.errors.take(5).join('\n')}${res
                     child: ElevatedButton.icon(
                       onPressed: _isMigrating ? null : () => _runMigration(),
                       icon: const Icon(Icons.upload),
-                      label: Text('ads_ad_migration_text_migrate_ads_skip'.tr()),
+                      label: Text(
+                        'ads_ad_migration_text_migrate_ads_skip'.tr(),
+                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
                         foregroundColor: Colors.white,
@@ -245,7 +249,9 @@ ${result.hasErrors ? '\n⚠️ Errors:\n${result.errors.take(5).join('\n')}${res
                           ? null
                           : () => _showOverwriteDialog(),
                       icon: const Icon(Icons.warning),
-                      label: Text('ads_ad_migration_text_migrate_ads_overwrite'.tr()),
+                      label: Text(
+                        'ads_ad_migration_text_migrate_ads_overwrite'.tr(),
+                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
                         foregroundColor: Colors.white,
@@ -262,7 +268,10 @@ ${result.hasErrors ? '\n⚠️ Errors:\n${result.errors.take(5).join('\n')}${res
                           children: [
                             const CircularProgressIndicator(),
                             const SizedBox(width: 16),
-                            Text('ads_ad_migration_text_migration_in_progress'.tr()),
+                            Text(
+                              'ads_ad_migration_text_migration_in_progress'
+                                  .tr(),
+                            ),
                           ],
                         ),
                       ),
@@ -279,7 +288,8 @@ ${result.hasErrors ? '\n⚠️ Errors:\n${result.errors.take(5).join('\n')}${res
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'ads_ad_migration_text_last_migration_result'.tr(),
+                              'ads_ad_migration_text_last_migration_result'
+                                  .tr(),
                               style: Theme.of(context).textTheme.titleMedium,
                             ),
                             const SizedBox(height: 8),
@@ -322,7 +332,12 @@ ${result.hasErrors ? '\n⚠️ Errors:\n${result.errors.take(5).join('\n')}${res
                                   )),
                               if (_lastResult!.errors.length > 3)
                                 Text(
-                                  'ads_ad_migration_text_more_errors'.tr().replaceAll('{count}', '${_lastResult!.errors.length - 3}'),
+                                  'ads_ad_migration_text_more_errors'
+                                      .tr()
+                                      .replaceAll(
+                                        '{count}',
+                                        '${_lastResult!.errors.length - 3}',
+                                      ),
                                 ),
                             ],
                           ],
@@ -365,9 +380,7 @@ ${result.hasErrors ? '\n⚠️ Errors:\n${result.errors.take(5).join('\n')}${res
       context: context,
       builder: (context) => AlertDialog(
         title: Text('ads_ad_migration_text_overwrite_warning'.tr()),
-        content: Text(
-          'ads_ad_migration_text_overwrite_warning'.tr(),
-        ),
+        content: Text('ads_ad_migration_text_overwrite_warning'.tr()),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),

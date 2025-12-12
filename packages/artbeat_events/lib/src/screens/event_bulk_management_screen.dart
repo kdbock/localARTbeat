@@ -94,7 +94,12 @@ class _EventBulkManagementScreenState extends State<EventBulkManagementScreen> {
           ? FloatingActionButton.extended(
               onPressed: _showBulkActionsMenu,
               icon: const Icon(Icons.settings),
-              label: Text('event_bulk_selected_label'.tr().replaceFirst('{{count}}', '${_selectedEventIds.length}')),
+              label: Text(
+                'event_bulk_selected_label'.tr().replaceFirst(
+                  '{{count}}',
+                  '${_selectedEventIds.length}',
+                ),
+              ),
             )
           : null,
     );
@@ -123,7 +128,9 @@ class _EventBulkManagementScreenState extends State<EventBulkManagementScreen> {
                     ),
                     initialValue: _selectedCategory,
                     items: [
-                      DropdownMenuItem(child: Text('event_bulk_all_categories'.tr())),
+                      DropdownMenuItem(
+                        child: Text('event_bulk_all_categories'.tr()),
+                      ),
                       DropdownMenuItem(
                         value: 'art-show',
                         child: Text('event_bulk_art_show'.tr()),
@@ -136,8 +143,14 @@ class _EventBulkManagementScreenState extends State<EventBulkManagementScreen> {
                         value: 'exhibition',
                         child: Text('event_bulk_exhibition'.tr()),
                       ),
-                      DropdownMenuItem(value: 'sale', child: Text('event_bulk_sale'.tr())),
-                      DropdownMenuItem(value: 'other', child: Text('event_bulk_other'.tr())),
+                      DropdownMenuItem(
+                        value: 'sale',
+                        child: Text('event_bulk_sale'.tr()),
+                      ),
+                      DropdownMenuItem(
+                        value: 'other',
+                        child: Text('event_bulk_other'.tr()),
+                      ),
                     ],
                     onChanged: (value) {
                       setState(() {
@@ -156,8 +169,13 @@ class _EventBulkManagementScreenState extends State<EventBulkManagementScreen> {
                     ),
                     initialValue: _selectedStatus,
                     items: [
-                      DropdownMenuItem(child: Text('event_bulk_all_statuses'.tr())),
-                      DropdownMenuItem(value: 'active', child: Text('event_bulk_active'.tr())),
+                      DropdownMenuItem(
+                        child: Text('event_bulk_all_statuses'.tr()),
+                      ),
+                      DropdownMenuItem(
+                        value: 'active',
+                        child: Text('event_bulk_active'.tr()),
+                      ),
                       DropdownMenuItem(
                         value: 'inactive',
                         child: Text('event_bulk_inactive'.tr()),
@@ -170,7 +188,10 @@ class _EventBulkManagementScreenState extends State<EventBulkManagementScreen> {
                         value: 'postponed',
                         child: Text('event_bulk_postponed'.tr()),
                       ),
-                      DropdownMenuItem(value: 'draft', child: Text('event_bulk_draft'.tr())),
+                      DropdownMenuItem(
+                        value: 'draft',
+                        child: Text('event_bulk_draft'.tr()),
+                      ),
                     ],
                     onChanged: (value) {
                       setState(() {
@@ -274,7 +295,10 @@ class _EventBulkManagementScreenState extends State<EventBulkManagementScreen> {
             style: TextStyle(color: Colors.grey[600]),
           ),
           const SizedBox(height: 24),
-          ElevatedButton(onPressed: _loadEvents, child: Text('event_bulk_retry'.tr())),
+          ElevatedButton(
+            onPressed: _loadEvents,
+            child: Text('event_bulk_retry'.tr()),
+          ),
         ],
       ),
     );
@@ -446,7 +470,10 @@ class _EventBulkManagementScreenState extends State<EventBulkManagementScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'event_bulk_bulk_actions'.tr().replaceFirst('{{count}}', '${_selectedEventIds.length}'),
+            'event_bulk_bulk_actions'.tr().replaceFirst(
+              '{{count}}',
+              '${_selectedEventIds.length}',
+            ),
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
@@ -536,18 +563,18 @@ class _EventBulkManagementScreenState extends State<EventBulkManagementScreen> {
           children: [
             Text('event_bulk_select_category'.tr()),
             const SizedBox(height: 16),
-            ...['art-show', 'workshop', 'exhibition', 'sale', 'other'].map(
-              (category) {
-                final keyName = category.replaceAll('-', '_');
-                return ListTile(
-                  title: Text('event_bulk_$keyName'.tr()),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _performBulkCategoryAssign(category);
-                  },
-                );
-              },
-            ),
+            ...['art-show', 'workshop', 'exhibition', 'sale', 'other'].map((
+              category,
+            ) {
+              final keyName = category.replaceAll('-', '_');
+              return ListTile(
+                title: Text('event_bulk_$keyName'.tr()),
+                onTap: () {
+                  Navigator.pop(context);
+                  _performBulkCategoryAssign(category);
+                },
+              );
+            }),
           ],
         ),
       ),
@@ -560,7 +587,10 @@ class _EventBulkManagementScreenState extends State<EventBulkManagementScreen> {
       builder: (context) => AlertDialog(
         title: Text('event_bulk_confirm_delete'.tr()),
         content: Text(
-          'event_bulk_confirm_delete_message'.tr().replaceFirst('{{count}}', '${_selectedEventIds.length}'),
+          'event_bulk_confirm_delete_message'.tr().replaceFirst(
+            '{{count}}',
+            '${_selectedEventIds.length}',
+          ),
         ),
         actions: [
           TextButton(
@@ -625,7 +655,12 @@ class _EventBulkManagementScreenState extends State<EventBulkManagementScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('event_bulk_success'.tr().replaceFirst('{{operation}}', operationName)),
+            content: Text(
+              'event_bulk_success'.tr().replaceFirst(
+                '{{operation}}',
+                operationName,
+              ),
+            ),
             backgroundColor: Colors.green,
           ),
         );
@@ -640,7 +675,12 @@ class _EventBulkManagementScreenState extends State<EventBulkManagementScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('event_bulk_error'.tr().replaceAll('{{operation}}', operationName).replaceFirst('{{error}}', e.toString())),
+            content: Text(
+              'event_bulk_error'
+                  .tr()
+                  .replaceAll('{{operation}}', operationName)
+                  .replaceFirst('{{error}}', e.toString()),
+            ),
             backgroundColor: Colors.red,
           ),
         );

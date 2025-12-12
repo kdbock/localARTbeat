@@ -85,9 +85,13 @@ class _EnhancedMyArtWalksScreenState extends State<EnhancedMyArtWalksScreen> {
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('art_walk_enhanced_my_art_walks_error_error_loading_data'.tr())));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'art_walk_enhanced_my_art_walks_error_error_loading_data'.tr(),
+            ),
+          ),
+        );
       }
     }
   }
@@ -399,7 +403,9 @@ class _EnhancedMyArtWalksScreenState extends State<EnhancedMyArtWalksScreen> {
 
   Widget _buildNotLoggedInView() {
     return Scaffold(
-      appBar: AppBar(title: Text('art_walk_enhanced_my_art_walks_text_my_art_walks'.tr())),
+      appBar: AppBar(
+        title: Text('art_walk_enhanced_my_art_walks_text_my_art_walks'.tr()),
+      ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -441,7 +447,14 @@ class _EnhancedMyArtWalksScreenState extends State<EnhancedMyArtWalksScreen> {
       ScaffoldMessenger.of(
         // ignore: use_build_context_synchronously
         context,
-      ).showSnackBar(SnackBar(content: Text('art_walk_enhanced_art_walk_experience_error_error_resuming_walk'.tr())));
+      ).showSnackBar(
+        SnackBar(
+          content: Text(
+            'art_walk_enhanced_art_walk_experience_error_error_resuming_walk'
+                .tr(),
+          ),
+        ),
+      );
     }
   }
 
@@ -453,7 +466,14 @@ class _EnhancedMyArtWalksScreenState extends State<EnhancedMyArtWalksScreen> {
       ScaffoldMessenger.of(
         // ignore: use_build_context_synchronously
         context,
-      ).showSnackBar(SnackBar(content: Text('art_walk_enhanced_art_walk_experience_error_error_pausing_walk'.tr())));
+      ).showSnackBar(
+        SnackBar(
+          content: Text(
+            'art_walk_enhanced_art_walk_experience_error_error_pausing_walk'
+                .tr(),
+          ),
+        ),
+      );
     }
   }
 
@@ -461,7 +481,9 @@ class _EnhancedMyArtWalksScreenState extends State<EnhancedMyArtWalksScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('art_walk_enhanced_art_walk_experience_text_abandon_walk_76'.tr()),
+        title: Text(
+          'art_walk_enhanced_art_walk_experience_text_abandon_walk_76'.tr(),
+        ),
         content: const Text(
           'Are you sure you want to abandon this walk? Your progress will be lost.',
         ),
@@ -472,7 +494,9 @@ class _EnhancedMyArtWalksScreenState extends State<EnhancedMyArtWalksScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text('art_walk_enhanced_art_walk_experience_text_abandon'.tr()),
+            child: Text(
+              'art_walk_enhanced_art_walk_experience_text_abandon'.tr(),
+            ),
           ),
         ],
       ),
@@ -486,7 +510,14 @@ class _EnhancedMyArtWalksScreenState extends State<EnhancedMyArtWalksScreen> {
         ScaffoldMessenger.of(
           // ignore: use_build_context_synchronously
           context,
-        ).showSnackBar(SnackBar(content: Text('art_walk_enhanced_art_walk_experience_error_error_abandoning_walk'.tr())));
+        ).showSnackBar(
+          SnackBar(
+            content: Text(
+              'art_walk_enhanced_art_walk_experience_error_error_abandoning_walk'
+                  .tr(),
+            ),
+          ),
+        );
       }
     }
   }
@@ -537,7 +568,9 @@ class _EnhancedMyArtWalksScreenState extends State<EnhancedMyArtWalksScreen> {
               // ignore: use_build_context_synchronously
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('art_walk_enhanced_my_art_walks_error_failed_to_save'.tr()),
+                  content: Text(
+                    'art_walk_enhanced_my_art_walks_error_failed_to_save'.tr(),
+                  ),
                   backgroundColor: Colors.red,
                 ),
               );
@@ -571,7 +604,9 @@ class _EnhancedMyArtWalksScreenState extends State<EnhancedMyArtWalksScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text('admin_modern_unified_admin_dashboard_text_delete'.tr()),
+            child: Text(
+              'admin_modern_unified_admin_dashboard_text_delete'.tr(),
+            ),
           ),
         ],
       ),
@@ -585,7 +620,13 @@ class _EnhancedMyArtWalksScreenState extends State<EnhancedMyArtWalksScreen> {
         ScaffoldMessenger.of(
           // ignore: use_build_context_synchronously
           context,
-        ).showSnackBar(SnackBar(content: Text('art_walk_enhanced_my_art_walks_error_error_deleting_walk'.tr())));
+        ).showSnackBar(
+          SnackBar(
+            content: Text(
+              'art_walk_enhanced_my_art_walks_error_error_deleting_walk'.tr(),
+            ),
+          ),
+        );
       }
     }
   }
@@ -602,7 +643,13 @@ class _EnhancedMyArtWalksScreenState extends State<EnhancedMyArtWalksScreen> {
       ScaffoldMessenger.of(
         // ignore: use_build_context_synchronously
         context,
-      ).showSnackBar(SnackBar(content: Text('art_walk_enhanced_my_art_walks_error_error_unsaving_walk'.tr())));
+      ).showSnackBar(
+        SnackBar(
+          content: Text(
+            'art_walk_enhanced_my_art_walks_error_error_unsaving_walk'.tr(),
+          ),
+        ),
+      );
     }
   }
 
@@ -715,12 +762,18 @@ class _WalkReviewDialogState extends State<WalkReviewDialog> {
                   Text(
                     '• ${widget.progress.visitedArt.length} art pieces visited',
                   ),
-                  Text('art_walk_enhanced_my_art_walks_text_widgetprogresstotalpointsearned_points_earned'.tr()),
+                  Text(
+                    'art_walk_enhanced_my_art_walks_text_widgetprogresstotalpointsearned_points_earned'
+                        .tr(),
+                  ),
                   Text(
                     '• Completed in ${_formatDuration(widget.progress.timeSpent)}',
                   ),
                   if (widget.progress.progressPercentage >= 1.0)
-                    Text('art_walk_enhanced_my_art_walks_text_perfect_walk_all'.tr()),
+                    Text(
+                      'art_walk_enhanced_my_art_walks_text_perfect_walk_all'
+                          .tr(),
+                    ),
                 ],
               ),
             ),
@@ -760,7 +813,10 @@ class _WalkReviewDialogState extends State<WalkReviewDialog> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('art_walk_enhanced_my_art_walks_error_error_submitting_review'.tr()),
+            content: Text(
+              'art_walk_enhanced_my_art_walks_error_error_submitting_review'
+                  .tr(),
+            ),
             backgroundColor: Colors.red,
           ),
         );

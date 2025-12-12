@@ -64,7 +64,8 @@ class ChapterService {
     }
   }
 
-  Future<ChapterModel?> getChapterById(String artworkId, String chapterId) async {
+  Future<ChapterModel?> getChapterById(
+      String artworkId, String chapterId) async {
     try {
       final doc = await _firestore
           .collection('artwork')
@@ -90,7 +91,9 @@ class ChapterService {
           .orderBy('chapterNumber', descending: false)
           .get();
 
-      return snapshot.docs.map((doc) => ChapterModel.fromFirestore(doc)).toList();
+      return snapshot.docs
+          .map((doc) => ChapterModel.fromFirestore(doc))
+          .toList();
     } catch (e) {
       AppLogger.error('Error fetching chapters: $e');
       return [];
@@ -107,7 +110,9 @@ class ChapterService {
           .orderBy('chapterNumber', descending: false)
           .get();
 
-      return snapshot.docs.map((doc) => ChapterModel.fromFirestore(doc)).toList();
+      return snapshot.docs
+          .map((doc) => ChapterModel.fromFirestore(doc))
+          .toList();
     } catch (e) {
       AppLogger.error('Error fetching released chapters: $e');
       return [];

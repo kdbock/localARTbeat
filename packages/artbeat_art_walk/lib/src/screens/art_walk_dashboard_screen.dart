@@ -1929,7 +1929,9 @@ class _ArtWalkDashboardScreenState extends State<ArtWalkDashboardScreen> {
     if (_currentPosition == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('art_walk_art_walk_dashboard_text_getting_your_location'.tr()),
+          content: Text(
+            'art_walk_art_walk_dashboard_text_getting_your_location'.tr(),
+          ),
           duration: const Duration(seconds: 2),
         ),
       );
@@ -1948,7 +1950,9 @@ class _ArtWalkDashboardScreenState extends State<ArtWalkDashboardScreen> {
       if (nearbyArt.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('art_walk_art_walk_dashboard_text_no_art_nearby'.tr()),
+            content: Text(
+              'art_walk_art_walk_dashboard_text_no_art_nearby'.tr(),
+            ),
             duration: const Duration(seconds: 3),
           ),
         );
@@ -1974,7 +1978,9 @@ class _ArtWalkDashboardScreenState extends State<ArtWalkDashboardScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('art_walk_art_walk_dashboard_error_error_loading_nearby'.tr()),
+            content: Text(
+              'art_walk_art_walk_dashboard_error_error_loading_nearby'.tr(),
+            ),
             backgroundColor: Colors.red,
           ),
         );

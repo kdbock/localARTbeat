@@ -171,7 +171,14 @@ class _MessageReactionsWidgetState extends State<MessageReactionsWidget> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('messaging_error_toggle_reaction'.tr().replaceAll('{error}', e.toString()))),
+          SnackBar(
+            content: Text(
+              'messaging_error_toggle_reaction'.tr().replaceAll(
+                '{error}',
+                e.toString(),
+              ),
+            ),
+          ),
         );
       }
     }

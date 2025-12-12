@@ -9,10 +9,7 @@ import 'create_local_ad_screen.dart';
 class LocalAdsListScreen extends StatefulWidget {
   final LocalAdZone? initialZone;
 
-  const LocalAdsListScreen({
-    Key? key,
-    this.initialZone,
-  }) : super(key: key);
+  const LocalAdsListScreen({Key? key, this.initialZone}) : super(key: key);
 
   @override
   State<LocalAdsListScreen> createState() => _LocalAdsListScreenState();
@@ -122,14 +119,13 @@ class _LocalAdsListScreenState extends State<LocalAdsListScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.ads_click,
-                  size: 64,
-                  color: Colors.grey[400],
-                ),
+                Icon(Icons.ads_click, size: 64, color: Colors.grey[400]),
                 const SizedBox(height: 16),
                 Text(
-                  'ads_local_ads_list_text_no_ads_in_zone'.tr().replaceAll('{zone}', _selectedZone.displayName),
+                  'ads_local_ads_list_text_no_ads_in_zone'.tr().replaceAll(
+                    '{zone}',
+                    _selectedZone.displayName,
+                  ),
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 8),

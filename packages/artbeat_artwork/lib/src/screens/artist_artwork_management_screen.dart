@@ -65,7 +65,8 @@ class _ArtistArtworkManagementScreenState
     } catch (e) {
       if (mounted) {
         setState(() {
-          _error = 'artist_artwork_management_error_message'.tr(namedArgs: {'error': e.toString()});
+          _error = 'artist_artwork_management_error_message'
+              .tr(namedArgs: {'error': e.toString()});
           _isLoading = false;
         });
       }
@@ -112,7 +113,8 @@ class _ArtistArtworkManagementScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('artist_artwork_management_delete_success'.tr(namedArgs: {'title': artwork.title})),
+            content: Text('artist_artwork_management_delete_success'
+                .tr(namedArgs: {'title': artwork.title})),
             backgroundColor: core.ArtbeatColors.primaryGreen,
           ),
         );
@@ -122,7 +124,8 @@ class _ArtistArtworkManagementScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('artist_artwork_management_delete_error'.tr(namedArgs: {'error': e.toString()})),
+            content: Text('artist_artwork_management_delete_error'
+                .tr(namedArgs: {'error': e.toString()})),
             backgroundColor: core.ArtbeatColors.error,
           ),
         );
@@ -133,8 +136,7 @@ class _ArtistArtworkManagementScreenState
   @override
   Widget build(BuildContext context) {
     return core.MainLayout(
-      currentIndex:
-          -1,
+      currentIndex: -1,
       appBar: core.EnhancedUniversalHeader(
         title: 'artist_artwork_management_title'.tr(),
         showBackButton: true,
@@ -225,9 +227,11 @@ class _ArtistArtworkManagementScreenState
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                _artworks.length == 1 
-                  ? 'artist_artwork_management_count_singular'.tr(namedArgs: {'count': _artworks.length.toString()})
-                  : 'artist_artwork_management_count_plural'.tr(namedArgs: {'count': _artworks.length.toString()}),
+                _artworks.length == 1
+                    ? 'artist_artwork_management_count_singular'
+                        .tr(namedArgs: {'count': _artworks.length.toString()})
+                    : 'artist_artwork_management_count_plural'
+                        .tr(namedArgs: {'count': _artworks.length.toString()}),
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),

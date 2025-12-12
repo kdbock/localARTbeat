@@ -117,7 +117,8 @@ class _ArtworkPurchaseScreenState extends State<ArtworkPurchaseScreen> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('artwork_purchase_success'.tr(namedArgs: {'id': transactionId})),
+            content: Text('artwork_purchase_success'
+                .tr(namedArgs: {'id': transactionId})),
             backgroundColor: Colors.green,
           ),
         );
@@ -137,7 +138,8 @@ class _ArtworkPurchaseScreenState extends State<ArtworkPurchaseScreen> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('artwork_purchase_failed'.tr(namedArgs: {'error': e.toString()})),
+            content: Text('artwork_purchase_failed'
+                .tr(namedArgs: {'error': e.toString()})),
             backgroundColor: Colors.red,
           ),
         );
@@ -271,7 +273,8 @@ class _ArtworkPurchaseScreenState extends State<ArtworkPurchaseScreen> {
             children: [
               Text(
                 '${'artwork_purchase_total'.tr()}:',
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                style:
+                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
               Text(
                 '\$${((_artwork!.price ?? 0) * 1.15).toStringAsFixed(2)}',
@@ -305,8 +308,9 @@ class _ArtworkPurchaseScreenState extends State<ArtworkPurchaseScreen> {
                     ),
                     prefixIcon: const Icon(Icons.person),
                   ),
-                  validator: (value) =>
-                      value?.isEmpty ?? true ? 'error_name_required'.tr() : null,
+                  validator: (value) => value?.isEmpty ?? true
+                      ? 'error_name_required'.tr()
+                      : null,
                   onChanged: (value) => _cardholderName = value,
                 ),
                 const SizedBox(height: 16),
@@ -321,8 +325,9 @@ class _ArtworkPurchaseScreenState extends State<ArtworkPurchaseScreen> {
                   ),
                   keyboardType: TextInputType.number,
                   maxLength: 19,
-                  validator: (value) =>
-                      value?.isEmpty ?? true ? 'error_card_number_required'.tr() : null,
+                  validator: (value) => value?.isEmpty ?? true
+                      ? 'error_card_number_required'.tr()
+                      : null,
                   onChanged: (value) => _cardNumber = value,
                 ),
                 const SizedBox(height: 16),
@@ -339,8 +344,9 @@ class _ArtworkPurchaseScreenState extends State<ArtworkPurchaseScreen> {
                         ),
                         keyboardType: TextInputType.number,
                         maxLength: 5,
-                        validator: (value) =>
-                            value?.isEmpty ?? true ? 'error_expiry_required'.tr() : null,
+                        validator: (value) => value?.isEmpty ?? true
+                            ? 'error_expiry_required'.tr()
+                            : null,
                         onChanged: (value) => _expiryDate = value,
                       ),
                     ),
@@ -357,8 +363,9 @@ class _ArtworkPurchaseScreenState extends State<ArtworkPurchaseScreen> {
                         keyboardType: TextInputType.number,
                         maxLength: 4,
                         obscureText: true,
-                        validator: (value) =>
-                            value?.isEmpty ?? true ? 'error_cvv_required'.tr() : null,
+                        validator: (value) => value?.isEmpty ?? true
+                            ? 'error_cvv_required'.tr()
+                            : null,
                         onChanged: (value) => _cvv = value,
                       ),
                     ),
@@ -384,7 +391,9 @@ class _ArtworkPurchaseScreenState extends State<ArtworkPurchaseScreen> {
                     )
                   : const Icon(Icons.shopping_cart),
               label: Text(
-                _isProcessing ? 'artwork_purchase_processing'.tr() : 'artwork_purchase_complete'.tr(),
+                _isProcessing
+                    ? 'artwork_purchase_processing'.tr()
+                    : 'artwork_purchase_complete'.tr(),
               ),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),

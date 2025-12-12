@@ -128,7 +128,11 @@ class _NotificationSettingsScreenState
               const Divider(),
               ListTile(
                 title: Text('settings_frequency'.tr()),
-                subtitle: Text('settings_currently'.tr(namedArgs: {'value': email.frequency})),
+                subtitle: Text(
+                  'settings_currently'.tr(
+                    namedArgs: {'value': email.frequency},
+                  ),
+                ),
                 trailing: DropdownButton<String>(
                   value: email.frequency,
                   items: [
@@ -144,7 +148,10 @@ class _NotificationSettingsScreenState
                       value: 'weekly',
                       child: Text('settings_frequency_weekly'.tr()),
                     ),
-                    DropdownMenuItem(value: 'never', child: Text('settings_never'.tr())),
+                    DropdownMenuItem(
+                      value: 'never',
+                      child: Text('settings_never'.tr()),
+                    ),
                   ],
                   onChanged: (value) {
                     if (value != null) {
@@ -295,9 +302,7 @@ class _NotificationSettingsScreenState
             const SizedBox(height: 16),
             SwitchListTile(
               title: Text('settings_enable_quiet_hours'.tr()),
-              subtitle: Text(
-                'settings_reduce_notifications_hours'.tr(),
-              ),
+              subtitle: Text('settings_reduce_notifications_hours'.tr()),
               value: quietHours.enabled,
               onChanged: (value) {
                 final updated = _notificationSettings!.copyWith(

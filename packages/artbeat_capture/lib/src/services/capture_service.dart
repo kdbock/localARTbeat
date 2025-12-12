@@ -111,7 +111,7 @@ class CaptureService implements CaptureServiceInterface {
         return captures;
       } catch (orderByError) {
         AppLogger.info('🔄 OrderBy query failed, trying without orderBy...');
-        
+
         final fallbackQuery = await _capturesRef.limit(limit).get();
 
         final captures = <CaptureModel>[];

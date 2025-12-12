@@ -59,7 +59,9 @@ class _GroupCreationScreenState extends State<GroupCreationScreen> {
                   // ignore: use_build_context_synchronously
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('messaging_group_creation_error_failed_to_create'.tr()),
+                      content: Text(
+                        'messaging_group_creation_error_failed_to_create'.tr(),
+                      ),
                       backgroundColor: theme.colorScheme.error,
                     ),
                   );

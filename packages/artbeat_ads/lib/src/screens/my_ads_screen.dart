@@ -41,7 +41,10 @@ class _MyAdsScreenState extends State<MyAdsScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text('ads_my_ads_text_delete'.tr(), style: const TextStyle(color: Colors.red)),
+            child: Text(
+              'ads_my_ads_text_delete'.tr(),
+              style: const TextStyle(color: Colors.red),
+            ),
           ),
         ],
       ),
@@ -137,7 +140,10 @@ class _MyAdsScreenState extends State<MyAdsScreen> {
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Text(
-                    'ads_my_ads_text_active_ads'.tr().replaceAll('{count}', '${activeAds.length}'),
+                    'ads_my_ads_text_active_ads'.tr().replaceAll(
+                      '{count}',
+                      '${activeAds.length}',
+                    ),
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                 ),
@@ -149,7 +155,10 @@ class _MyAdsScreenState extends State<MyAdsScreen> {
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Text(
-                    'ads_my_ads_text_expired_ads'.tr().replaceAll('{count}', '${expiredAds.length}'),
+                    'ads_my_ads_text_expired_ads'.tr().replaceAll(
+                      '{count}',
+                      '${expiredAds.length}',
+                    ),
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                 ),

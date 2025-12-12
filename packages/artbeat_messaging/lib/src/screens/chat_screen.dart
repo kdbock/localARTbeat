@@ -962,12 +962,11 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                                     final longitude = position.longitude;
 
                                     // Send location as a message (reuse sendMessage, but with type/location)
-                                    final chatService =
-                                        Provider.of<ChatService>(
-                                          // ignore: use_build_context_synchronously
-                                          context,
-                                          listen: false,
-                                        );
+                                    final chatService = Provider.of<ChatService>(
+                                      // ignore: use_build_context_synchronously
+                                      context,
+                                      listen: false,
+                                    );
                                     final message = MessageModel(
                                       id: DateTime.now().millisecondsSinceEpoch
                                           .toString(),

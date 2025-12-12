@@ -45,7 +45,11 @@ class _FollowedArtistsScreenState extends State<FollowedArtistsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('profile_followed_artists_screen_error_error_loading_followed_artists'.tr().replaceAll('{error}', e.toString())),
+            content: Text(
+              'profile_followed_artists_screen_error_error_loading_followed_artists'
+                  .tr()
+                  .replaceAll('{error}', e.toString()),
+            ),
           ),
         );
         setState(() {
@@ -63,7 +67,11 @@ class _FollowedArtistsScreenState extends State<FollowedArtistsScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('profile_followed_artists_screen_text_unfollow_artist'.tr().replaceAll('{artistDisplayName}', artist.displayName)),
+          title: Text(
+            'profile_followed_artists_screen_text_unfollow_artist'
+                .tr()
+                .replaceAll('{artistDisplayName}', artist.displayName),
+          ),
           content: Text('profile_followers_confirm_unfollow'.tr()),
           actions: <Widget>[
             TextButton(
@@ -104,7 +112,11 @@ class _FollowedArtistsScreenState extends State<FollowedArtistsScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('profile_followed_artists_screen_success_you_unfollowed_artist'.tr().replaceAll('{artistDisplayName}', artist.displayName)),
+              content: Text(
+                'profile_followed_artists_screen_success_you_unfollowed_artist'
+                    .tr()
+                    .replaceAll('{artistDisplayName}', artist.displayName),
+              ),
               duration: const Duration(seconds: 2),
             ),
           );
@@ -113,7 +125,11 @@ class _FollowedArtistsScreenState extends State<FollowedArtistsScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('profile_followed_artists_screen_error_error_unfollowing_artist'.tr().replaceAll('{error}', e.toString())),
+              content: Text(
+                'profile_followed_artists_screen_error_error_unfollowing_artist'
+                    .tr()
+                    .replaceAll('{error}', e.toString()),
+              ),
               backgroundColor: Colors.red,
             ),
           );

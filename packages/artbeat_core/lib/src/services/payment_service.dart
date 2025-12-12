@@ -221,7 +221,9 @@ class PaymentService {
     try {
       // Validate inputs are not null or empty
       if (customerId.isEmpty || setupIntentClientSecret.isEmpty) {
-        throw Exception('Customer ID and setup intent client secret are required');
+        throw Exception(
+          'Customer ID and setup intent client secret are required',
+        );
       }
 
       // Validate Stripe payment arguments before calling SDK
@@ -250,7 +252,9 @@ class PaymentService {
         throw Exception('Invalid BACS payment configuration');
       }
 
-      AppLogger.info('📱 Initializing Stripe payment sheet with customerId: $customerId');
+      AppLogger.info(
+        '📱 Initializing Stripe payment sheet with customerId: $customerId',
+      );
 
       // Initialize payment sheet with explicit error handling
       try {
@@ -270,7 +274,10 @@ class PaymentService {
         );
         rethrow;
       } catch (e) {
-        AppLogger.error('Unexpected error during Stripe initialization: $e', error: e);
+        AppLogger.error(
+          'Unexpected error during Stripe initialization: $e',
+          error: e,
+        );
         rethrow;
       }
     } catch (e) {
@@ -286,7 +293,7 @@ class PaymentService {
   }) async {
     try {
       AppLogger.info('🔄 Presenting Stripe payment sheet for: $operationName');
-      
+
       try {
         await Stripe.instance.presentPaymentSheet();
         AppLogger.info('✅ Payment confirmed with Stripe for: $operationName');
@@ -296,13 +303,13 @@ class PaymentService {
           AppLogger.info('ℹ️ Payment cancelled by user for: $operationName');
           throw Exception('Payment was cancelled by user');
         }
-        
+
         // Log the specific error for debugging native crashes
         AppLogger.error(
           'Stripe presentPaymentSheet failed for $operationName: ${e.error.code} - ${e.error.localizedMessage}',
           error: e,
         );
-        
+
         // Check for BACS mandate confirmation activity crashes (UK direct debit)
         final errorMsg = e.error.message ?? '';
         final errorLocalizedMsg = e.error.localizedMessage ?? '';
@@ -318,7 +325,7 @@ class PaymentService {
             'Bank transfer payment method is temporarily unavailable. Please try another payment method.',
           );
         }
-        
+
         // Check if this is a native activity crash (null args)
         if (errorMsg.contains('null') ||
             errorMsg.contains('Null') ||
@@ -329,11 +336,14 @@ class PaymentService {
             'NATIVE CRASH DETECTED: Stripe activity received null arguments for $operationName',
           );
         }
-        
+
         rethrow;
       }
     } catch (e) {
-      AppLogger.error('Error presenting payment sheet for $operationName: $e', error: e);
+      AppLogger.error(
+        'Error presenting payment sheet for $operationName: $e',
+        error: e,
+      );
       rethrow;
     }
   }
@@ -1960,7 +1970,7 @@ class PaymentService {
           if (e.error.code == FailureCode.Canceled) {
             throw Exception('Payment was cancelled by user');
           }
-          
+
           // Check for BACS mandate confirmation activity crashes
           final errorMsg = e.error.message ?? '';
           final errorLocalizedMsg = e.error.localizedMessage ?? '';
@@ -1976,7 +1986,7 @@ class PaymentService {
               'Bank transfer payment method is temporarily unavailable. Please try another payment method.',
             );
           }
-          
+
           AppLogger.error(
             'Stripe presentPaymentSheet failed for gift: ${e.error.code} - ${e.error.localizedMessage}',
           );
@@ -2178,7 +2188,7 @@ class PaymentService {
           if (e.error.code == FailureCode.Canceled) {
             throw Exception('Payment was cancelled by user');
           }
-          
+
           // Check for BACS mandate confirmation activity crashes
           final errorMsg = e.error.message ?? '';
           final errorLocalizedMsg = e.error.localizedMessage ?? '';
@@ -2194,7 +2204,7 @@ class PaymentService {
               'Bank transfer payment method is temporarily unavailable. Please try another payment method.',
             );
           }
-          
+
           AppLogger.error(
             'Stripe presentPaymentSheet failed for subscription: ${e.error.code} - ${e.error.localizedMessage}',
           );
@@ -2396,7 +2406,7 @@ class PaymentService {
           if (e.error.code == FailureCode.Canceled) {
             throw Exception('Payment was cancelled by user');
           }
-          
+
           // Check for BACS mandate confirmation activity crashes
           final errorMsg = e.error.message ?? '';
           final errorLocalizedMsg = e.error.localizedMessage ?? '';
@@ -2412,7 +2422,7 @@ class PaymentService {
               'Bank transfer payment method is temporarily unavailable. Please try another payment method.',
             );
           }
-          
+
           AppLogger.error(
             'Stripe presentPaymentSheet failed for ad: ${e.error.code} - ${e.error.localizedMessage}',
           );
@@ -2615,7 +2625,7 @@ class PaymentService {
           if (e.error.code == FailureCode.Canceled) {
             throw Exception('Payment was cancelled by user');
           }
-          
+
           // Check for BACS mandate confirmation activity crashes
           final errorMsg = e.error.message ?? '';
           final errorLocalizedMsg = e.error.localizedMessage ?? '';
@@ -2631,7 +2641,7 @@ class PaymentService {
               'Bank transfer payment method is temporarily unavailable. Please try another payment method.',
             );
           }
-          
+
           AppLogger.error(
             'Stripe presentPaymentSheet failed for sponsorship: ${e.error.code} - ${e.error.localizedMessage}',
           );
@@ -2835,7 +2845,7 @@ class PaymentService {
           if (e.error.code == FailureCode.Canceled) {
             throw Exception('Payment was cancelled by user');
           }
-          
+
           // Check for BACS mandate confirmation activity crashes
           final errorMsg = e.error.message ?? '';
           final errorLocalizedMsg = e.error.localizedMessage ?? '';
@@ -2851,7 +2861,7 @@ class PaymentService {
               'Bank transfer payment method is temporarily unavailable. Please try another payment method.',
             );
           }
-          
+
           AppLogger.error(
             'Stripe presentPaymentSheet failed for commission: ${e.error.code} - ${e.error.localizedMessage}',
           );

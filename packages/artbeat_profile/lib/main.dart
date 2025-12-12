@@ -11,7 +11,9 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(body: Center(child: Text('profile_main_text_hello_world'.tr()))),
+      home: Scaffold(
+        body: Center(child: Text('profile_main_text_hello_world'.tr())),
+      ),
     );
   }
 }

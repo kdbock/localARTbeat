@@ -983,7 +983,10 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
                       Expanded(
                         child: _nearbyCaptures.isEmpty
                             ? Center(
-                                child: Text('art_walk_art_walk_map_text_no_captures_found'.tr()),
+                                child: Text(
+                                  'art_walk_art_walk_map_text_no_captures_found'
+                                      .tr(),
+                                ),
                               )
                             : ListView.builder(
                                 scrollDirection: Axis.horizontal,

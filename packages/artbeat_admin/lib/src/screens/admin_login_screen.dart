@@ -60,13 +60,15 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
           'wrong-password' => 'admin_login_error_wrong_password'.tr(),
           'user-disabled' => 'admin_login_error_user_disabled'.tr(),
           'invalid-email' => 'admin_login_error_invalid_email'.tr(),
-          _ => 'admin_login_error_auth_failed'.tr(namedArgs: {'message': e.message ?? 'Unknown error'}),
+          _ => 'admin_login_error_auth_failed'
+              .tr(namedArgs: {'message': e.message ?? 'Unknown error'}),
         };
         _isLoading = false;
       });
     } catch (e) {
       setState(() {
-        _error = 'admin_login_error_unexpected'.tr(namedArgs: {'error': e.toString()});
+        _error = 'admin_login_error_unexpected'
+            .tr(namedArgs: {'error': e.toString()});
         _isLoading = false;
       });
     }

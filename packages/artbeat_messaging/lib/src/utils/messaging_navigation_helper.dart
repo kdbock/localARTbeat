@@ -32,7 +32,12 @@ class MessagingNavigationHelper {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('messaging_error_opening_chat'.tr().replaceAll('{error}', e.toString())),
+            content: Text(
+              'messaging_error_opening_chat'.tr().replaceAll(
+                '{error}',
+                e.toString(),
+              ),
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -60,7 +65,12 @@ class MessagingNavigationHelper {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('messaging_error_creating_chat'.tr().replaceAll('{error}', e.toString())),
+            content: Text(
+              'messaging_error_creating_chat'.tr().replaceAll(
+                '{error}',
+                e.toString(),
+              ),
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -95,7 +105,12 @@ class MessagingNavigationHelper {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('messaging_error_loading_user'.tr().replaceAll('{error}', e.toString())),
+            content: Text(
+              'messaging_error_loading_user'.tr().replaceAll(
+                '{error}',
+                e.toString(),
+              ),
+            ),
             backgroundColor: Colors.red,
           ),
         );

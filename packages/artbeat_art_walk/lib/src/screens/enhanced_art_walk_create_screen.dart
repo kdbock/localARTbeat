@@ -279,11 +279,14 @@ class _EnhancedArtWalkCreateScreenState
       // Sort by distance (closest first)
       artWithDistance.sort((a, b) => a.$2.compareTo(b.$2));
 
-      final List<PublicArtModel> finalCaptureArt =
-          artWithDistance.map((item) => item.$1).toList();
+      final List<PublicArtModel> finalCaptureArt = artWithDistance
+          .map((item) => item.$1)
+          .toList();
 
       debugPrint('Total captures fetched: ${captures.length}');
-      debugPrint('Filtered captures within 30 miles: ${finalCaptureArt.length}');
+      debugPrint(
+        'Filtered captures within 30 miles: ${finalCaptureArt.length}',
+      );
       debugPrint('Current location: $latitude, $longitude');
 
       setState(() {
@@ -292,9 +295,13 @@ class _EnhancedArtWalkCreateScreenState
       });
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('art_walk_enhanced_art_walk_create_error_error_loading_art'.tr())));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'art_walk_enhanced_art_walk_create_error_error_loading_art'.tr(),
+            ),
+          ),
+        );
       }
     } finally {
       if (mounted) {
@@ -422,7 +429,11 @@ class _EnhancedArtWalkCreateScreenState
 
     if (_selectedArtPieces.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('art_walk_enhanced_art_walk_create_text_please_select_at'.tr())),
+        SnackBar(
+          content: Text(
+            'art_walk_enhanced_art_walk_create_text_please_select_at'.tr(),
+          ),
+        ),
       );
       return;
     }
@@ -461,7 +472,12 @@ class _EnhancedArtWalkCreateScreenState
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('art_walk_enhanced_art_walk_create_success_art_walk_updated'.tr())),
+            SnackBar(
+              content: Text(
+                'art_walk_enhanced_art_walk_create_success_art_walk_updated'
+                    .tr(),
+              ),
+            ),
           );
           Navigator.of(context).pop();
         }
@@ -527,7 +543,12 @@ class _EnhancedArtWalkCreateScreenState
           );
 
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('art_walk_enhanced_art_walk_create_success_art_walk_created'.tr())),
+            SnackBar(
+              content: Text(
+                'art_walk_enhanced_art_walk_create_success_art_walk_created'
+                    .tr(),
+              ),
+            ),
           );
 
           // Navigate to review screen instead of just popping back
@@ -647,8 +668,12 @@ class _EnhancedArtWalkCreateScreenState
         final shouldPop = await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
-            title: Text('art_walk_enhanced_art_walk_create_text_leave_art_walk'.tr()),
-            content: Text('art_walk_enhanced_art_walk_create_text_your_progress_will'.tr()),
+            title: Text(
+              'art_walk_enhanced_art_walk_create_text_leave_art_walk'.tr(),
+            ),
+            content: Text(
+              'art_walk_enhanced_art_walk_create_text_your_progress_will'.tr(),
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
@@ -656,7 +681,9 @@ class _EnhancedArtWalkCreateScreenState
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
-                child: Text('art_walk_enhanced_art_walk_create_text_leave'.tr()),
+                child: Text(
+                  'art_walk_enhanced_art_walk_create_text_leave'.tr(),
+                ),
               ),
             ],
           ),
@@ -1006,7 +1033,11 @@ class _EnhancedArtWalkCreateScreenState
           const Center(child: CircularProgressIndicator())
         else
           _availableArtPieces.isEmpty
-              ? Center(child: Text('art_walk_enhanced_art_walk_create_text_no_art_pieces'.tr()))
+              ? Center(
+                  child: Text(
+                    'art_walk_enhanced_art_walk_create_text_no_art_pieces'.tr(),
+                  ),
+                )
               : SizedBox(
                   height: 300, // Fixed height for grid
                   child: GridView.builder(

@@ -95,7 +95,11 @@ class _StarredMessagesScreenState extends State<StarredMessagesScreen> {
     // In a real implementation, you'd need to find which chat contains this message
     // For now, we'll show a placeholder
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('messaging_starred_messages_message_navigate_to_message'.tr())),
+      SnackBar(
+        content: Text(
+          'messaging_starred_messages_message_navigate_to_message'.tr(),
+        ),
+      ),
     );
   }
 
@@ -105,13 +109,19 @@ class _StarredMessagesScreenState extends State<StarredMessagesScreen> {
       // or storing chatId in message metadata
       // await _chatService.toggleMessageStar(chatId, message.id);
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('messaging_starred_messages_message_message_unstarred'.tr())));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'messaging_starred_messages_message_message_unstarred'.tr(),
+          ),
+        ),
+      );
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('messaging_starred_messages_error_error_e'.tr())));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('messaging_starred_messages_error_error_e'.tr()),
+        ),
+      );
     }
   }
 }

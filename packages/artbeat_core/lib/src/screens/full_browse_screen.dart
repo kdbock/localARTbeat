@@ -87,9 +87,15 @@ class _FullBrowseScreenState extends State<FullBrowseScreen>
                     fontSize: 12,
                   ),
                   tabs: [
-                    _buildModernTab('browse_captures'.tr(), Icons.camera_alt_rounded),
+                    _buildModernTab(
+                      'browse_captures'.tr(),
+                      Icons.camera_alt_rounded,
+                    ),
                     _buildModernTab('browse_art_walks'.tr(), Icons.map_rounded),
-                    _buildModernTab('browse_artists'.tr(), Icons.people_rounded),
+                    _buildModernTab(
+                      'browse_artists'.tr(),
+                      Icons.people_rounded,
+                    ),
                     _buildModernTab('browse_artwork'.tr(), Icons.image_rounded),
                   ],
                 ),

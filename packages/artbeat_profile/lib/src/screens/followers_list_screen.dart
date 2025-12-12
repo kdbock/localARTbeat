@@ -46,8 +46,9 @@ class _FollowersListScreenState extends State<FollowersListScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('profile_error_followers'
-                .tr(namedArgs: {'error': e.toString()})),
+            content: Text(
+              'profile_error_followers'.tr(namedArgs: {'error': e.toString()}),
+            ),
           ),
         );
         setState(() {
@@ -83,10 +84,12 @@ class _FollowersListScreenState extends State<FollowersListScreen> {
           SnackBar(
             content: Text(
               isFollowing
-                  ? 'profile_unfollowed'
-                      .tr(namedArgs: {'fullName': follower.fullName})
-                  : 'profile_now_following'
-                      .tr(namedArgs: {'fullName': follower.fullName}),
+                  ? 'profile_unfollowed'.tr(
+                      namedArgs: {'fullName': follower.fullName},
+                    )
+                  : 'profile_now_following'.tr(
+                      namedArgs: {'fullName': follower.fullName},
+                    ),
             ),
             duration: const Duration(seconds: 2),
           ),
@@ -96,8 +99,9 @@ class _FollowersListScreenState extends State<FollowersListScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('profile_error_unfollow'
-                .tr(namedArgs: {'error': e.toString()})),
+            content: Text(
+              'profile_error_unfollow'.tr(namedArgs: {'error': e.toString()}),
+            ),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -123,8 +127,10 @@ class _FollowersListScreenState extends State<FollowersListScreen> {
             ? const Center(child: CircularProgressIndicator())
             : _followers.isEmpty
             ? Center(
-                child: Text('profile_no_followers'.tr(),
-                    style: const TextStyle(fontSize: 16)),
+                child: Text(
+                  'profile_no_followers'.tr(),
+                  style: const TextStyle(fontSize: 16),
+                ),
               )
             : ListView.builder(
                 itemCount: _followers.length,

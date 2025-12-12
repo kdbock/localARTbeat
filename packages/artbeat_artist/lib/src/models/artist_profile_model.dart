@@ -71,7 +71,8 @@ class ArtistProfileModel {
       isFeatured: map['isFeatured'] is bool ? map['isFeatured'] as bool : false,
       subscriptionTier:
           _tierFromString((map['subscriptionTier'] ?? 'starter').toString()),
-      followerCount: map['followerCount'] is int ? map['followerCount'] as int : 0,
+      followerCount:
+          map['followerCount'] is int ? map['followerCount'] as int : 0,
       createdAt: map['createdAt'] is Timestamp
           ? (map['createdAt'] as Timestamp).toDate()
           : DateTime.now(),

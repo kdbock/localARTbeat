@@ -18,14 +18,16 @@ class ZoneFilter extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       child: Row(
         children: LocalAdZone.values
-            .map((zone) => Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: FilterChip(
-                    label: Text(zone.displayName),
-                    selected: selectedZone == zone,
-                    onSelected: (_) => onZoneChanged(zone),
-                  ),
-                ))
+            .map(
+              (zone) => Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: FilterChip(
+                  label: Text(zone.displayName),
+                  selected: selectedZone == zone,
+                  onSelected: (_) => onZoneChanged(zone),
+                ),
+              ),
+            )
             .toList(),
       ),
     );

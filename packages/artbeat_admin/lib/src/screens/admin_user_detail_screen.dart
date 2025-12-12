@@ -414,7 +414,9 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
                     ),
                     if (_currentUser.suspensionReason != null) ...[
                       const SizedBox(height: 8),
-                      Text('admin_admin_user_detail_text_reason_currentusersuspensionreason'.tr()),
+                      Text(
+                          'admin_admin_user_detail_text_reason_currentusersuspensionreason'
+                              .tr()),
                     ],
                     if (_currentUser.suspendedAt != null) ...[
                       const SizedBox(height: 4),
@@ -423,7 +425,9 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
                     ],
                     if (_currentUser.suspendedBy != null) ...[
                       const SizedBox(height: 4),
-                      Text('admin_admin_user_detail_text_by_currentusersuspendedby'.tr()),
+                      Text(
+                          'admin_admin_user_detail_text_by_currentusersuspendedby'
+                              .tr()),
                     ],
                   ],
                 ),
@@ -601,7 +605,8 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
                       children: [
                         ElevatedButton(
                           onPressed: _updateUserProfile,
-                          child: Text('admin_admin_user_detail_text_save_changes'.tr()),
+                          child: Text(
+                              'admin_admin_user_detail_text_save_changes'.tr()),
                         ),
                         const SizedBox(width: 8),
                         TextButton(
@@ -624,7 +629,8 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
                     ElevatedButton.icon(
                       onPressed: () => setState(() => _isEditing = true),
                       icon: const Icon(Icons.edit),
-                      label: Text('admin_admin_user_detail_text_edit_profile'.tr()),
+                      label: Text(
+                          'admin_admin_user_detail_text_edit_profile'.tr()),
                     ),
                   ],
                   const SizedBox(height: 16),
@@ -636,7 +642,9 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
                     ElevatedButton.icon(
                       onPressed: _removeProfileImage,
                       icon: const Icon(Icons.delete),
-                      label: Text('admin_admin_user_detail_text_remove_profile_image'.tr()),
+                      label: Text(
+                          'admin_admin_user_detail_text_remove_profile_image'
+                              .tr()),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
                         foregroundColor: Colors.white,
@@ -942,13 +950,17 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('admin_admin_user_detail_success_user_profile_updated'.tr())),
+          SnackBar(
+              content: Text(
+                  'admin_admin_user_detail_success_user_profile_updated'.tr())),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('admin_admin_user_detail_error_failed_to_update'.tr())),
+          SnackBar(
+              content:
+                  Text('admin_admin_user_detail_error_failed_to_update'.tr())),
         );
       }
     } finally {
@@ -989,13 +1001,18 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('admin_admin_user_detail_success_profile_image_removed'.tr())),
+            SnackBar(
+                content: Text(
+                    'admin_admin_user_detail_success_profile_image_removed'
+                        .tr())),
           );
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('admin_admin_user_detail_error_failed_to_remove'.tr())),
+            SnackBar(
+                content: Text(
+                    'admin_admin_user_detail_error_failed_to_remove'.tr())),
           );
         }
       } finally {
@@ -1028,7 +1045,9 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('admin_admin_user_detail_error_failed_to_update_28'.tr())),
+          SnackBar(
+              content: Text(
+                  'admin_admin_user_detail_error_failed_to_update_28'.tr())),
         );
       }
     } finally {
@@ -1049,13 +1068,17 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('admin_admin_user_detail_success_user_type_updated'.tr())),
+          SnackBar(
+              content: Text(
+                  'admin_admin_user_detail_success_user_type_updated'.tr())),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('admin_admin_user_detail_error_failed_to_update_30'.tr())),
+          SnackBar(
+              content: Text(
+                  'admin_admin_user_detail_error_failed_to_update_30'.tr())),
         );
       }
     } finally {
@@ -1089,7 +1112,9 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('admin_admin_user_detail_error_failed_to_update_31'.tr())),
+          SnackBar(
+              content: Text(
+                  'admin_admin_user_detail_error_failed_to_update_31'.tr())),
         );
       }
     } finally {

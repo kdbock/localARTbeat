@@ -132,11 +132,7 @@ class _AdBadgeWidgetState extends State<AdBadgeWidget> {
                     shape: BoxShape.circle,
                   ),
                   padding: const EdgeInsets.all(4),
-                  child: Icon(
-                    Icons.close,
-                    size: 12,
-                    color: Colors.grey[600],
-                  ),
+                  child: Icon(Icons.close, size: 12, color: Colors.grey[600]),
                 ),
               ),
             ),

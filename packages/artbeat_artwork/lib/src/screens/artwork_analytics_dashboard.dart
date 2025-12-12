@@ -108,8 +108,7 @@ class _ArtworkAnalyticsDashboardState extends State<ArtworkAnalyticsDashboard> {
               onPressed: () {
                 // Copy to clipboard functionality could be added here
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                      content: Text('artwork_analytics_data_copied'.tr())),
+                  SnackBar(content: Text('artwork_analytics_data_copied'.tr())),
                 );
                 Navigator.pop(context);
               },
@@ -434,7 +433,8 @@ class _ArtworkAnalyticsDashboardState extends State<ArtworkAnalyticsDashboard> {
                       subtitle: Text(
                         'artwork_analytics_views_engagement'.tr(namedArgs: {
                           'views': (artwork['totalViews'] as int).toString(),
-                          'rate': (artwork['engagementRate'] as double).toStringAsFixed(1),
+                          'rate': (artwork['engagementRate'] as double)
+                              .toStringAsFixed(1),
                         }),
                       ),
                       trailing: IconButton(
@@ -600,7 +600,8 @@ class _ArtworkAnalyticsDashboardState extends State<ArtworkAnalyticsDashboard> {
                 children: [
                   Text(
                     'artwork_analytics_action_breakdown'.tr(),
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 12),
                   ...actionBreakdown.entries.map((entry) {

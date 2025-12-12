@@ -36,7 +36,11 @@ class _ChatSearchScreenState extends State<ChatSearchScreen> {
             return const Center(child: CircularProgressIndicator());
           }
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('messaging_chat_search_message_no_messages_found'.tr()));
+            return Center(
+              child: Text(
+                'messaging_chat_search_message_no_messages_found'.tr(),
+              ),
+            );
           }
           final filtered = snapshot.data!
               .where(
@@ -44,7 +48,9 @@ class _ChatSearchScreenState extends State<ChatSearchScreen> {
               )
               .toList();
           if (filtered.isEmpty) {
-            return Center(child: Text('messaging_chat_search_text_no_results'.tr()));
+            return Center(
+              child: Text('messaging_chat_search_text_no_results'.tr()),
+            );
           }
           return ListView.builder(
             itemCount: filtered.length,

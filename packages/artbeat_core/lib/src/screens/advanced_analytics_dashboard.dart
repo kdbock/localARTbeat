@@ -372,10 +372,22 @@ class _AdvancedAnalyticsDashboardState extends State<AdvancedAnalyticsDashboard>
               _loadAnalyticsData();
             },
             itemBuilder: (context) => [
-              PopupMenuItem(value: '1d', child: Text('core_analytics_last24h'.tr())),
-              PopupMenuItem(value: '7d', child: Text('core_analytics_last7d'.tr())),
-              PopupMenuItem(value: '30d', child: Text('core_analytics_last30d'.tr())),
-              PopupMenuItem(value: '90d', child: Text('core_analytics_last90d'.tr())),
+              PopupMenuItem(
+                value: '1d',
+                child: Text('core_analytics_last24h'.tr()),
+              ),
+              PopupMenuItem(
+                value: '7d',
+                child: Text('core_analytics_last7d'.tr()),
+              ),
+              PopupMenuItem(
+                value: '30d',
+                child: Text('core_analytics_last30d'.tr()),
+              ),
+              PopupMenuItem(
+                value: '90d',
+                child: Text('core_analytics_last90d'.tr()),
+              ),
             ],
           ),
         ],

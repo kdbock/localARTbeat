@@ -18,7 +18,7 @@ class ArtistSocialStatsWidget extends StatefulWidget {
 }
 
 class _ArtistSocialStatsWidgetState extends State<ArtistSocialStatsWidget> {
-  final artist_subscription.SubscriptionService _subscriptionService = 
+  final artist_subscription.SubscriptionService _subscriptionService =
       artist_subscription.SubscriptionService();
   late Future<Map<String, dynamic>> _statsFuture;
 

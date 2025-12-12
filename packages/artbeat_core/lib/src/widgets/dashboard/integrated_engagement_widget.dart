@@ -236,10 +236,7 @@ class _IntegratedEngagementWidgetState extends State<IntegratedEngagementWidget>
                 const SizedBox(height: 4),
                 const Text(
                   'Day Streak',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.white70,
-                  ),
+                  style: TextStyle(fontSize: 16, color: Colors.white70),
                 ),
                 const SizedBox(height: 16),
                 ClipRRect(
@@ -256,10 +253,7 @@ class _IntegratedEngagementWidgetState extends State<IntegratedEngagementWidget>
                 const SizedBox(height: 8),
                 Text(
                   '${(progressPercent * 100).round()}% of weekly goal',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.white70,
-                  ),
+                  style: const TextStyle(fontSize: 12, color: Colors.white70),
                 ),
               ],
             ),
@@ -304,7 +298,10 @@ class _IntegratedEngagementWidgetState extends State<IntegratedEngagementWidget>
                   Expanded(
                     child: Text(
                       '🔥 On Fire! Keep it up!',
-                      style: TextStyle(color: Colors.orange, fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                        color: Colors.orange,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],
@@ -415,10 +412,7 @@ class _IntegratedEngagementWidgetState extends State<IntegratedEngagementWidget>
                     color: Colors.blue.withValues(alpha: 0.2),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
-                    Icons.pending_actions,
-                    color: Colors.blue,
-                  ),
+                  child: const Icon(Icons.pending_actions, color: Colors.blue),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -537,10 +531,7 @@ class _IntegratedEngagementWidgetState extends State<IntegratedEngagementWidget>
                 const SizedBox(height: 16),
                 Text(
                   _testChallenge.description,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.white,
-                  ),
+                  style: const TextStyle(fontSize: 14, color: Colors.white),
                 ),
                 const SizedBox(height: 16),
                 ClipRRect(
@@ -705,7 +696,9 @@ class _IntegratedEngagementWidgetState extends State<IntegratedEngagementWidget>
                   ),
                 const SizedBox(height: 16),
                 ElevatedButton.icon(
-                  onPressed: widget.onLeaderboardTap ?? () => Navigator.pushNamed(context, '/leaderboard'),
+                  onPressed:
+                      widget.onLeaderboardTap ??
+                      () => Navigator.pushNamed(context, '/leaderboard'),
                   icon: const Icon(Icons.explore),
                   label: const Text('Full Leaderboard'),
                   style: ElevatedButton.styleFrom(
@@ -763,10 +756,7 @@ class _IntegratedEngagementWidgetState extends State<IntegratedEngagementWidget>
                 ),
                 Text(
                   'Level ${user.level}',
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(color: Colors.grey[600], fontSize: 12),
                 ),
               ],
             ),
@@ -784,10 +774,7 @@ class _IntegratedEngagementWidgetState extends State<IntegratedEngagementWidget>
               ),
               Text(
                 'XP',
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 12,
-                ),
+                style: TextStyle(color: Colors.grey[600], fontSize: 12),
               ),
             ],
           ),
@@ -857,5 +844,4 @@ class _IntegratedEngagementWidgetState extends State<IntegratedEngagementWidget>
     }
     return number.toString();
   }
-
 }

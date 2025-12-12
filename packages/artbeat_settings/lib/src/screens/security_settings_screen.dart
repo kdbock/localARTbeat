@@ -66,9 +66,9 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen> {
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('settings_load_failed'.tr())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('settings_load_failed'.tr())));
       }
     }
   }
@@ -87,16 +87,16 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen> {
           _securitySettings = settings;
           _isSaving = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('settings_updated'.tr())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('settings_updated'.tr())));
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isSaving = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('settings_update_failed'.tr())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('settings_update_failed'.tr())));
       }
     }
   }
@@ -127,7 +127,10 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen> {
 
     if (widget.useOwnScaffold) {
       return Scaffold(
-        appBar: AppBar(title: Text('settings_security_title'.tr()), elevation: 0),
+        appBar: AppBar(
+          title: Text('settings_security_title'.tr()),
+          elevation: 0,
+        ),
         body: body,
       );
     } else {
@@ -203,7 +206,10 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen> {
       initialValue: twoFactor.method,
       items: [
         DropdownMenuItem(value: 'sms', child: Text('settings_2fa_sms'.tr())),
-        DropdownMenuItem(value: 'email', child: Text('settings_2fa_email'.tr())),
+        DropdownMenuItem(
+          value: 'email',
+          child: Text('settings_2fa_email'.tr()),
+        ),
         DropdownMenuItem(
           value: 'authenticator',
           child: Text('settings_2fa_authenticator'.tr()),
@@ -299,7 +305,13 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'settings_password_last_changed'.tr(namedArgs: {'date': password.lastChanged != null ? _formatDate(password.lastChanged!) : 'settings_never'.tr()}),
+              'settings_password_last_changed'.tr(
+                namedArgs: {
+                  'date': password.lastChanged != null
+                      ? _formatDate(password.lastChanged!)
+                      : 'settings_never'.tr(),
+                },
+              ),
               style: const TextStyle(color: Colors.grey),
             ),
             const SizedBox(height: 16),
@@ -354,7 +366,9 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen> {
               leading: const Icon(Icons.devices),
               title: Text('settings_manage_devices'.tr()),
               subtitle: Text(
-                'settings_approved_devices'.tr(namedArgs: {'count': '${devices.approvedDevices.length}'}),
+                'settings_approved_devices'.tr(
+                  namedArgs: {'count': '${devices.approvedDevices.length}'},
+                ),
               ),
               trailing: const Icon(Icons.chevron_right),
               contentPadding: EdgeInsets.zero,
@@ -466,7 +480,9 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen> {
           children: [
             Text('settings_backup_codes_save'.tr()),
             const SizedBox(height: 16),
-            const SelectableText('A1B2-C3D4-E5F6\nG7H8-I9J0-K1L2\nM3N4-O5P6-Q7R8'),
+            const SelectableText(
+              'A1B2-C3D4-E5F6\nG7H8-I9J0-K1L2\nM3N4-O5P6-Q7R8',
+            ),
           ],
         ),
         actions: [
@@ -606,7 +622,9 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen> {
 
                 if (newPassword != confirmPassword) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('settings_passwords_do_not_match'.tr())),
+                    SnackBar(
+                      content: Text('settings_passwords_do_not_match'.tr()),
+                    ),
                   );
                   return;
                 }
@@ -748,12 +766,16 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen> {
             ListTile(
               leading: const Icon(Icons.smartphone, color: Colors.green),
               title: Text('artbeat_settings_trusted_device_iphone_15'.tr()),
-              subtitle: Text('artbeat_settings_login_history_today_sample'.tr()),
+              subtitle: Text(
+                'artbeat_settings_login_history_today_sample'.tr(),
+              ),
             ),
             ListTile(
               leading: const Icon(Icons.laptop_mac, color: Colors.green),
               title: Text('artbeat_settings_trusted_device_macbook_pro'.tr()),
-              subtitle: Text('artbeat_settings_login_history_yesterday_sample'.tr()),
+              subtitle: Text(
+                'artbeat_settings_login_history_yesterday_sample'.tr(),
+              ),
             ),
           ],
         ),
@@ -818,9 +840,7 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text('settings_sign_out_everywhere'.tr()),
-        content: Text(
-          'settings_sign_out_everywhere_msg'.tr(),
-        ),
+        content: Text('settings_sign_out_everywhere_msg'.tr()),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -830,9 +850,7 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen> {
             onPressed: () {
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('settings_signed_out_everywhere'.tr()),
-                ),
+                SnackBar(content: Text('settings_signed_out_everywhere'.tr())),
               );
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),

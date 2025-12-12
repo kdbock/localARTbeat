@@ -117,7 +117,8 @@ class AdminDrawer extends StatelessWidget {
                       icon: Icons.dashboard,
                       title: 'admin_drawer_menu_unified_dashboard'.tr(),
                       route: '/admin/dashboard',
-                      subtitle: 'admin_drawer_menu_unified_dashboard_subtitle'.tr(),
+                      subtitle:
+                          'admin_drawer_menu_unified_dashboard_subtitle'.tr(),
                     ),
 
                     const Divider(height: 16),
@@ -149,21 +150,24 @@ class AdminDrawer extends StatelessWidget {
                       title: 'admin_drawer_menu_content_moderation'.tr(),
                       route:
                           '/admin/dashboard', // Unified dashboard handles content moderation
-                      subtitle: 'admin_drawer_menu_content_moderation_subtitle'.tr(),
+                      subtitle:
+                          'admin_drawer_menu_content_moderation_subtitle'.tr(),
                     ),
                     _buildDrawerItem(
                       context,
                       icon: Icons.photo_library,
                       title: 'admin_drawer_menu_capture_moderation'.tr(),
                       route: '/capture/admin/moderation',
-                      subtitle: 'admin_drawer_menu_capture_moderation_subtitle'.tr(),
+                      subtitle:
+                          'admin_drawer_menu_capture_moderation_subtitle'.tr(),
                     ),
                     _buildDrawerItem(
                       context,
                       icon: Icons.route,
                       title: 'admin_drawer_menu_artwalk_moderation'.tr(),
                       route: '/artwalk/admin/moderation',
-                      subtitle: 'admin_drawer_menu_artwalk_moderation_subtitle'.tr(),
+                      subtitle:
+                          'admin_drawer_menu_artwalk_moderation_subtitle'.tr(),
                     ),
                     _buildDrawerItem(
                       context,
@@ -171,7 +175,8 @@ class AdminDrawer extends StatelessWidget {
                       title: 'admin_drawer_menu_user_management'.tr(),
                       route:
                           '/admin/dashboard', // Unified dashboard handles user management
-                      subtitle: 'admin_drawer_menu_user_management_subtitle'.tr(),
+                      subtitle:
+                          'admin_drawer_menu_user_management_subtitle'.tr(),
                     ),
 
                     const Divider(height: 16),
@@ -183,28 +188,32 @@ class AdminDrawer extends StatelessWidget {
                       icon: Icons.settings,
                       title: 'admin_drawer_menu_admin_settings'.tr(),
                       route: '/admin/settings',
-                      subtitle: 'admin_drawer_menu_admin_settings_subtitle'.tr(),
+                      subtitle:
+                          'admin_drawer_menu_admin_settings_subtitle'.tr(),
                     ),
                     _buildDrawerItem(
                       context,
                       icon: Icons.security,
                       title: 'admin_drawer_menu_security_center'.tr(),
                       route: '/admin/security',
-                      subtitle: 'admin_drawer_menu_security_center_subtitle'.tr(),
+                      subtitle:
+                          'admin_drawer_menu_security_center_subtitle'.tr(),
                     ),
                     _buildDrawerItem(
                       context,
                       icon: Icons.monitor,
                       title: 'admin_drawer_menu_system_monitoring'.tr(),
                       route: '/admin/monitoring',
-                      subtitle: 'admin_drawer_menu_system_monitoring_subtitle'.tr(),
+                      subtitle:
+                          'admin_drawer_menu_system_monitoring_subtitle'.tr(),
                     ),
                     _buildDrawerItem(
                       context,
                       icon: Icons.sync_alt,
                       title: 'admin_drawer_menu_data_migration'.tr(),
                       route: '/admin/migration',
-                      subtitle: 'admin_drawer_menu_data_migration_subtitle'.tr(),
+                      subtitle:
+                          'admin_drawer_menu_data_migration_subtitle'.tr(),
                     ),
 
                     const Divider(height: 16),
@@ -216,21 +225,24 @@ class AdminDrawer extends StatelessWidget {
                       icon: Icons.upload_file,
                       title: 'admin_drawer_menu_data_upload_tools'.tr(),
                       route: '/dev',
-                      subtitle: 'admin_drawer_menu_data_upload_tools_subtitle'.tr(),
+                      subtitle:
+                          'admin_drawer_menu_data_upload_tools_subtitle'.tr(),
                     ),
                     _buildDrawerItem(
                       context,
                       icon: Icons.feedback,
                       title: 'admin_drawer_menu_developer_feedback'.tr(),
                       route: '/developer-feedback-admin',
-                      subtitle: 'admin_drawer_menu_developer_feedback_subtitle'.tr(),
+                      subtitle:
+                          'admin_drawer_menu_developer_feedback_subtitle'.tr(),
                     ),
                     _buildDrawerItem(
                       context,
                       icon: Icons.admin_panel_settings,
                       title: 'admin_drawer_menu_admin_upload_tools'.tr(),
                       route: '/dev', // Developer menu has admin upload tools
-                      subtitle: 'admin_drawer_menu_admin_upload_tools_subtitle'.tr(),
+                      subtitle:
+                          'admin_drawer_menu_admin_upload_tools_subtitle'.tr(),
                     ),
 
                     const Divider(height: 16),
@@ -326,8 +338,7 @@ class AdminDrawer extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: Text('admin_drawer_logout_dialog_title'.tr()),
-        content:
-            Text('admin_drawer_logout_dialog_content'.tr()),
+        content: Text('admin_drawer_logout_dialog_content'.tr()),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -354,7 +365,8 @@ class AdminDrawer extends StatelessWidget {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('admin_drawer_logout_error'.tr(namedArgs: {'error': e.toString()})),
+                      content: Text('admin_drawer_logout_error'
+                          .tr(namedArgs: {'error': e.toString()})),
                       backgroundColor: Colors.red,
                     ),
                   );

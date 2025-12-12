@@ -110,7 +110,8 @@ class EarningsModel {
 class EarningsTransaction {
   final String id;
   final String artistId;
-  final String type; // gift, sponsorship, commission, subscription, artwork_sale
+  final String
+      type; // gift, sponsorship, commission, subscription, artwork_sale
   final double amount;
   final String fromUserId;
   final String fromUserName;

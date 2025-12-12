@@ -39,7 +39,9 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('messaging_blocked_users_error_error_loading_blocked'.tr()),
+            content: Text(
+              'messaging_blocked_users_error_error_loading_blocked'.tr(),
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -202,7 +204,12 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('messaging_user_unblocked'.tr().replaceAll('{user}', user.displayName)),
+            content: Text(
+              'messaging_user_unblocked'.tr().replaceAll(
+                '{user}',
+                user.displayName,
+              ),
+            ),
             backgroundColor: Colors.green,
           ),
         );
@@ -211,7 +218,9 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('messaging_blocked_users_error_error_unblocking_user'.tr()),
+            content: Text(
+              'messaging_blocked_users_error_error_unblocking_user'.tr(),
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -262,7 +271,9 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('messaging_blocked_users_label_report_userdisplayname_for'.tr()),
+            Text(
+              'messaging_blocked_users_label_report_userdisplayname_for'.tr(),
+            ),
             const SizedBox(height: 16),
             const TextField(
               decoration: InputDecoration(
@@ -290,7 +301,10 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
                 // ignore: use_build_context_synchronously
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('messaging_blocked_users_success_user_reported_successfully'.tr()),
+                    content: Text(
+                      'messaging_blocked_users_success_user_reported_successfully'
+                          .tr(),
+                    ),
                     backgroundColor: Colors.green,
                   ),
                 );
@@ -298,7 +312,9 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
                 // ignore: use_build_context_synchronously
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('messaging_blocked_users_error_failed_to_report'.tr()),
+                    content: Text(
+                      'messaging_blocked_users_error_failed_to_report'.tr(),
+                    ),
                     backgroundColor: Colors.red,
                   ),
                 );

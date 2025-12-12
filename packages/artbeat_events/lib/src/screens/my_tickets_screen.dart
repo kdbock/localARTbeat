@@ -468,7 +468,10 @@ class _MyTicketsScreenState extends State<MyTicketsScreen>
             style: TextStyle(color: Colors.red.shade600),
           ),
           const SizedBox(height: 16),
-          ElevatedButton(onPressed: _loadTickets, child: Text('common_retry'.tr())),
+          ElevatedButton(
+            onPressed: _loadTickets,
+            child: Text('common_retry'.tr()),
+          ),
         ],
       ),
     );
@@ -567,17 +570,32 @@ class _MyTicketsScreenState extends State<MyTicketsScreen>
                     'tickets_details_date'.tr(),
                     EventUtils.formatEventDateTime(event.dateTime),
                   ),
-                  _buildDetailRow('tickets_details_location'.tr(), event.location),
-                  _buildDetailRow('tickets_details_quantity'.tr(), ticket.quantity.toString()),
-                  _buildDetailRow('tickets_details_total_paid'.tr(), ticket.formattedAmount),
+                  _buildDetailRow(
+                    'tickets_details_location'.tr(),
+                    event.location,
+                  ),
+                  _buildDetailRow(
+                    'tickets_details_quantity'.tr(),
+                    ticket.quantity.toString(),
+                  ),
+                  _buildDetailRow(
+                    'tickets_details_total_paid'.tr(),
+                    ticket.formattedAmount,
+                  ),
                   _buildDetailRow(
                     'tickets_details_purchase_date'.tr(),
                     intl.DateFormat(
                       'MMM d, y \'at\' h:mm a',
                     ).format(ticket.purchaseDate),
                   ),
-                  _buildDetailRow('tickets_details_confirmation_id'.tr(), ticket.id),
-                  _buildDetailRow('tickets_details_status'.tr(), ticket.status.displayName),
+                  _buildDetailRow(
+                    'tickets_details_confirmation_id'.tr(),
+                    ticket.id,
+                  ),
+                  _buildDetailRow(
+                    'tickets_details_status'.tr(),
+                    ticket.status.displayName,
+                  ),
 
                   if (ticket.refundDate != null)
                     _buildDetailRow(
@@ -642,10 +660,16 @@ class _MyTicketsScreenState extends State<MyTicketsScreen>
           children: [
             Text('tickets_refund_dialog_message'.tr()),
             const SizedBox(height: 16),
-            Text('tickets_refund_amount'.tr(namedArgs: {'amount': ticket.formattedAmount})),
+            Text(
+              'tickets_refund_amount'.tr(
+                namedArgs: {'amount': ticket.formattedAmount},
+              ),
+            ),
             const SizedBox(height: 8),
             Text(
-              'tickets_refund_policy'.tr(namedArgs: {'terms': event.refundPolicy.terms}),
+              'tickets_refund_policy'.tr(
+                namedArgs: {'terms': event.refundPolicy.terms},
+              ),
               style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
             ),
           ],
@@ -699,7 +723,9 @@ class _MyTicketsScreenState extends State<MyTicketsScreen>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('tickets_refund_error'.tr(namedArgs: {'error': e.toString()})),
+            content: Text(
+              'tickets_refund_error'.tr(namedArgs: {'error': e.toString()}),
+            ),
             backgroundColor: Colors.red,
           ),
         );

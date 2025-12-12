@@ -60,7 +60,9 @@ class _ChatSettingsScreenState extends State<ChatSettingsScreen> {
           ListTile(
             leading: const Icon(Icons.notifications),
             title: Text('messaging_chat_settings_text_chat_notifications'.tr()),
-            subtitle: Text('messaging_chat_settings_message_get_notified_about'.tr()),
+            subtitle: Text(
+              'messaging_chat_settings_message_get_notified_about'.tr(),
+            ),
             trailing: Switch(
               value: _notificationsEnabled,
               onChanged: (value) async {
@@ -74,7 +76,9 @@ class _ChatSettingsScreenState extends State<ChatSettingsScreen> {
           ListTile(
             leading: const Icon(Icons.download),
             title: Text('messaging_chat_settings_text_autodownload_media'.tr()),
-            subtitle: Text('messaging_chat_settings_text_automatically_download_photos'.tr()),
+            subtitle: Text(
+              'messaging_chat_settings_text_automatically_download_photos'.tr(),
+            ),
             trailing: Switch(
               value: _mediaAutoDownload,
               onChanged: (value) async {
@@ -155,7 +159,9 @@ class _ChatSettingsScreenState extends State<ChatSettingsScreen> {
               showDialog<void>(
                 context: context,
                 builder: (context) => AlertDialog(
-                  title: Text('messaging_chat_settings_text_clear_chat_history'.tr()),
+                  title: Text(
+                    'messaging_chat_settings_text_clear_chat_history'.tr(),
+                  ),
                   content: const Text(
                     'Are you sure you want to clear all chat history? This action cannot be undone.',
                   ),
@@ -177,7 +183,10 @@ class _ChatSettingsScreenState extends State<ChatSettingsScreen> {
                             // ignore: use_build_context_synchronously
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('messaging_chat_settings_text_chat_history_cleared'.tr()),
+                                content: Text(
+                                  'messaging_chat_settings_text_chat_history_cleared'
+                                      .tr(),
+                                ),
                               ),
                             );
                           }
@@ -186,7 +195,10 @@ class _ChatSettingsScreenState extends State<ChatSettingsScreen> {
                             // ignore: use_build_context_synchronously
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('messaging_chat_settings_error_failed_to_clear'.tr()),
+                                content: Text(
+                                  'messaging_chat_settings_error_failed_to_clear'
+                                      .tr(),
+                                ),
                               ),
                             );
                           }

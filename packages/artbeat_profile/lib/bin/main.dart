@@ -73,7 +73,9 @@ class ProfileModuleHome extends StatelessWidget {
     final String demoUserId = userService.currentUserId ?? 'demo_user_id';
 
     return Scaffold(
-      appBar: AppBar(title: Text('profile_bin_main_text_artbeat_profile_module'.tr())),
+      appBar: AppBar(
+        title: Text('profile_bin_main_text_artbeat_profile_module'.tr()),
+      ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

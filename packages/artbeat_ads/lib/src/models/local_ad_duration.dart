@@ -1,8 +1,4 @@
-enum LocalAdDuration {
-  oneWeek,
-  oneMonth,
-  threeMonths,
-}
+enum LocalAdDuration { oneWeek, oneMonth, threeMonths }
 
 extension LocalAdDurationExtension on LocalAdDuration {
   String get displayName {

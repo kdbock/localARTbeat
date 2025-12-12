@@ -23,7 +23,9 @@ class LocalAdPurchase {
       id: id,
       userId: (map['userId'] ?? '') as String,
       iapTransactionId: (map['iapTransactionId'] ?? '') as String,
-      duration: LocalAdDurationExtension.fromIndex((map['duration'] ?? 0) as int),
+      duration: LocalAdDurationExtension.fromIndex(
+        (map['duration'] ?? 0) as int,
+      ),
       purchasedAt: ((map['purchasedAt']) as Timestamp).toDate(),
       price: ((map['price'] ?? 0.0) as num).toDouble(),
     );

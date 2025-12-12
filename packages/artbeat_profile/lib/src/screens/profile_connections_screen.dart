@@ -559,9 +559,9 @@ class _ProfileConnectionsScreenState extends State<ProfileConnectionsScreen>
   Future<void> _sendConnectionRequest(String userId) async {
     try {
       // Implement connection request logic
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('profile_connections_request_sent'.tr())));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('profile_connections_request_sent'.tr())),
+      );
     } catch (e) {
       ScaffoldMessenger.of(
         context,

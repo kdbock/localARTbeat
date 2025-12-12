@@ -580,8 +580,6 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
     }
   }
 
-
-
   Future<void> _handleShare() async {
     try {
       // For artwork content type, show enhanced share dialog

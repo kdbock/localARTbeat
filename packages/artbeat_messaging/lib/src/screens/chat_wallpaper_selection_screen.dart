@@ -18,7 +18,11 @@ class ChatWallpaperSelectionScreen extends StatelessWidget {
       Colors.grey,
     ];
     return Scaffold(
-      appBar: AppBar(title: Text('messaging_chat_wallpaper_selection_text_select_wallpaper'.tr())),
+      appBar: AppBar(
+        title: Text(
+          'messaging_chat_wallpaper_selection_text_select_wallpaper'.tr(),
+        ),
+      ),
       body: GridView.builder(
         padding: const EdgeInsets.all(16),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

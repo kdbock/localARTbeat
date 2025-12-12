@@ -171,9 +171,7 @@ class AttachmentButton extends StatelessWidget {
         builder: (BuildContext dialogContext) {
           return AlertDialog(
             title: Text('messaging_voice_permission_required'.tr()),
-            content: Text(
-              'messaging_voice_permission_message'.tr(),
-            ),
+            content: Text('messaging_voice_permission_message'.tr()),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(dialogContext).pop(),
@@ -202,9 +200,7 @@ class AttachmentButton extends StatelessWidget {
         builder: (BuildContext dialogContext) {
           return AlertDialog(
             title: Text('messaging_voice_unavailable'.tr()),
-            content: Text(
-              'messaging_voice_unavailable_message'.tr(),
-            ),
+            content: Text('messaging_voice_unavailable_message'.tr()),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(dialogContext).pop(),

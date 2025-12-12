@@ -367,10 +367,10 @@ void main() {
             home: Scaffold(
               body: LayoutBuilder(
                 builder: (context, constraints) => Center(
-                    child: Text(
-                      'Size: ${constraints.maxWidth}x${constraints.maxHeight}',
-                    ),
+                  child: Text(
+                    'Size: ${constraints.maxWidth}x${constraints.maxHeight}',
                   ),
+                ),
               ),
             ),
           ),

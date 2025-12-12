@@ -8,11 +8,7 @@ class AdCard extends StatelessWidget {
   final LocalAd ad;
   final VoidCallback? onDelete;
 
-  const AdCard({
-    Key? key,
-    required this.ad,
-    this.onDelete,
-  }) : super(key: key);
+  const AdCard({Key? key, required this.ad, this.onDelete}) : super(key: key);
 
   void _launchUrl(String url) async {
     if (await canLaunchUrl(Uri.parse(url))) {
@@ -41,9 +37,14 @@ class AdCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (ad.imageUrl != null && ad.imageUrl!.isNotEmpty && (ad.imageUrl!.startsWith('http://') || ad.imageUrl!.startsWith('https://')))
+          if (ad.imageUrl != null &&
+              ad.imageUrl!.isNotEmpty &&
+              (ad.imageUrl!.startsWith('http://') ||
+                  ad.imageUrl!.startsWith('https://')))
             ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(12),
+              ),
               child: CachedNetworkImage(
                 imageUrl: ad.imageUrl!,
                 height: 180,
@@ -72,9 +73,8 @@ class AdCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         ad.title,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),

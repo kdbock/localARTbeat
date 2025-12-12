@@ -155,11 +155,21 @@ class UserProfileScreen extends StatelessWidget {
               ScaffoldMessenger.of(
                 // ignore: use_build_context_synchronously
                 context,
-              ).showSnackBar(SnackBar(content: Text('messaging_user_profile_text_user_blocked'.tr())));
+              ).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'messaging_user_profile_text_user_blocked'.tr(),
+                  ),
+                ),
+              );
             } catch (e) {
               // ignore: use_build_context_synchronously
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('messaging_user_profile_error_failed_to_block'.tr())),
+                SnackBar(
+                  content: Text(
+                    'messaging_user_profile_error_failed_to_block'.tr(),
+                  ),
+                ),
               );
             }
           },
@@ -174,7 +184,10 @@ class UserProfileScreen extends StatelessWidget {
               context: context,
               builder: (context) => AlertDialog(
                 title: Text('messaging_blocked_users_text_report_user'.tr()),
-                content: Text('messaging_user_profile_text_reporting_functionality_coming'.tr()),
+                content: Text(
+                  'messaging_user_profile_text_reporting_functionality_coming'
+                      .tr(),
+                ),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),

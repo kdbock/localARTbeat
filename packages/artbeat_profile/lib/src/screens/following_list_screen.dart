@@ -43,7 +43,13 @@ class _FollowingListScreenState extends State<FollowingListScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('profile_following_list_screen_error_error_loading_following'.tr().replaceAll('{error}', e.toString()))),
+          SnackBar(
+            content: Text(
+              'profile_following_list_screen_error_error_loading_following'
+                  .tr()
+                  .replaceAll('{error}', e.toString()),
+            ),
+          ),
         );
         setState(() {
           _isLoading = false;
@@ -60,7 +66,12 @@ class _FollowingListScreenState extends State<FollowingListScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('profile_following_list_screen_text_unfollow_user'.tr().replaceAll('{followedUserUsername}', followedUser.username)),
+          title: Text(
+            'profile_following_list_screen_text_unfollow_user'.tr().replaceAll(
+              '{followedUserUsername}',
+              followedUser.username,
+            ),
+          ),
           content: Text('profile_following_confirm_unfollow'.tr()),
           actions: <Widget>[
             TextButton(
@@ -88,7 +99,14 @@ class _FollowingListScreenState extends State<FollowingListScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('profile_following_list_screen_success_you_unfollowed_user'.tr().replaceAll('{followedUserFullName}', followedUser.fullName)),
+              content: Text(
+                'profile_following_list_screen_success_you_unfollowed_user'
+                    .tr()
+                    .replaceAll(
+                      '{followedUserFullName}',
+                      followedUser.fullName,
+                    ),
+              ),
               duration: const Duration(seconds: 2),
             ),
           );
@@ -97,7 +115,11 @@ class _FollowingListScreenState extends State<FollowingListScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('profile_following_list_screen_error_error_unfollowing_user'.tr().replaceAll('{error}', e.toString())),
+              content: Text(
+                'profile_following_list_screen_error_error_unfollowing_user'
+                    .tr()
+                    .replaceAll('{error}', e.toString()),
+              ),
               backgroundColor: Colors.red,
             ),
           );

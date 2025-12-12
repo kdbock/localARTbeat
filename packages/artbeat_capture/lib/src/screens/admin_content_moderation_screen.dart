@@ -313,7 +313,9 @@ class _AdminContentModerationScreenState
             'art_walk_admin_art_walk_moderation_text_clear_reports'.tr(),
           ),
           content: Text(
-            'capture_admin_content_moderation_clear_reports_confirmation'.tr().replaceAll('{count}', capture.reportCount.toString()),
+            'capture_admin_content_moderation_clear_reports_confirmation'
+                .tr()
+                .replaceAll('{count}', capture.reportCount.toString()),
           ),
           actions: [
             TextButton(

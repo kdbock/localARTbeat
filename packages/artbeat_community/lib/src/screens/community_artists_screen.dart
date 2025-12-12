@@ -46,7 +46,9 @@ class _CommunityArtistsScreenState extends State<CommunityArtistsScreen> {
           child: artists.isEmpty
               ? Center(
                   child: Text(
-                    'art_walk_community_artists_no_artists_available'.tr().replaceAll('{title}', title.toLowerCase()),
+                    'art_walk_community_artists_no_artists_available'
+                        .tr()
+                        .replaceAll('{title}', title.toLowerCase()),
                     style: const TextStyle(
                       fontSize: 16,
                       color: core.ArtbeatColors.textSecondary,
@@ -86,7 +88,11 @@ class _CommunityArtistsScreenState extends State<CommunityArtistsScreen> {
         } else {
           // Fallback: show error message
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('community_community_artists_text_unable_to_load'.tr())),
+            SnackBar(
+              content: Text(
+                'community_community_artists_text_unable_to_load'.tr(),
+              ),
+            ),
           );
         }
       },
@@ -164,7 +170,8 @@ class _CommunityArtistsScreenState extends State<CommunityArtistsScreen> {
               ),
               const SizedBox(height: 12),
               Text(
-                artist['name']?.toString() ?? 'art_walk_community_artists_unknown_artist'.tr(),
+                artist['name']?.toString() ??
+                    'art_walk_community_artists_unknown_artist'.tr(),
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,

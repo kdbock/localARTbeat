@@ -83,10 +83,8 @@ class _AdCtaCardWidgetState extends State<AdCtaCardWidget> {
                     children: [
                       Text(
                         _ad!.title,
-                        style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -133,7 +131,9 @@ class _AdCtaCardWidgetState extends State<AdCtaCardWidget> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: Text(widget.ctaText ?? 'ads_ad_cta_text_learn_more'.tr()),
+                  child: Text(
+                    widget.ctaText ?? 'ads_ad_cta_text_learn_more'.tr(),
+                  ),
                 ),
               ),
           ],

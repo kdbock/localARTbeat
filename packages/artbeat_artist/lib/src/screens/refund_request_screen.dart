@@ -72,7 +72,8 @@ class _RefundRequestScreenState extends State<RefundRequestScreen> {
         await showDialog<void>(
           context: context,
           builder: (context) => AlertDialog(
-            title: Text(tr('artist_refund_request_text_refund_request_submitted')),
+            title:
+                Text(tr('artist_refund_request_text_refund_request_submitted')),
             content: const Text(
               'Your refund request has been submitted and will be reviewed. '
               'We\'ll contact you within 2-3 business days with the status of your request.',
@@ -128,7 +129,8 @@ class _RefundRequestScreenState extends State<RefundRequestScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(tr('art_walk_refund_information'),
+                        Text(
+                          tr('art_walk_refund_information'),
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -138,7 +140,8 @@ class _RefundRequestScreenState extends State<RefundRequestScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(tr('artist_refund_request_text_payment_amount')),
+                            Text(tr(
+                                'artist_refund_request_text_payment_amount')),
                             Text(
                               '\$${widget.amount.toStringAsFixed(2)}',
                               style:
@@ -158,7 +161,8 @@ class _RefundRequestScreenState extends State<RefundRequestScreen> {
                           ],
                         ),
                         const SizedBox(height: 16),
-                        Text(tr('art_walk_note__refunds_are_processed_within_5_7_business_days_______________________________depending_on_your_payment_method_and_financial_institution'),
+                        Text(
+                          tr('art_walk_note__refunds_are_processed_within_5_7_business_days_______________________________depending_on_your_payment_method_and_financial_institution'),
                           style: const TextStyle(
                             fontStyle: FontStyle.italic,
                             fontSize: 12,
@@ -173,7 +177,8 @@ class _RefundRequestScreenState extends State<RefundRequestScreen> {
                 const SizedBox(height: 24),
 
                 // Refund reason dropdown
-                Text(tr('art_walk_reason_for_refund'),
+                Text(
+                  tr('art_walk_reason_for_refund'),
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -207,7 +212,8 @@ class _RefundRequestScreenState extends State<RefundRequestScreen> {
                 const SizedBox(height: 24),
 
                 // Additional details
-                Text(tr('art_walk_additional_details'),
+                Text(
+                  tr('art_walk_additional_details'),
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -260,7 +266,8 @@ class _RefundRequestScreenState extends State<RefundRequestScreen> {
                     ),
                     child: _isProcessing
                         ? const CircularProgressIndicator()
-                        : Text(tr('artist_refund_request_text_submit_refund_request')),
+                        : Text(tr(
+                            'artist_refund_request_text_submit_refund_request')),
                   ),
                 ),
 
@@ -275,7 +282,8 @@ class _RefundRequestScreenState extends State<RefundRequestScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Text(tr('art_walk_refund_requests_are_reviewed_on_a_case_by_case_basis_______________________pro_rated_refunds_may_be_issued_for_unused_subscription_time_______________________please_allow_5_7_business_days_for_your_refund_to_process_after_approval'),
+                Text(
+                  tr('art_walk_refund_requests_are_reviewed_on_a_case_by_case_basis_______________________pro_rated_refunds_may_be_issued_for_unused_subscription_time_______________________please_allow_5_7_business_days_for_your_refund_to_process_after_approval'),
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey.shade700,

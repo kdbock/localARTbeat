@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';import 'package:artbeat_core/artbeat_core.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:artbeat_core/artbeat_core.dart';
 
 /// Artist Package Specific Header
 ///
@@ -236,7 +237,8 @@ class _ArtistHeaderState extends State<ArtistHeader> {
             // Header
             Container(
               padding: const EdgeInsets.all(20),
-              child: Text(tr('art_walk_artist_menu'),
+              child: Text(
+                tr('art_walk_artist_menu'),
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,

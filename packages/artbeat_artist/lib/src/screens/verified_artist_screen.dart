@@ -249,8 +249,8 @@ class _VerifiedArtistScreenState extends State<VerifiedArtistScreen> {
                               const SizedBox(height: 16),
                               Text(
                                 tr('art_walk_no_verified_artists_found'),
-                                style:
-                                    const TextStyle(fontSize: 18, color: Colors.grey),
+                                style: const TextStyle(
+                                    fontSize: 18, color: Colors.grey),
                               ),
                             ],
                           ),
@@ -496,7 +496,8 @@ class _VerifiedArtistScreenState extends State<VerifiedArtistScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Medium', style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text('Medium',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,

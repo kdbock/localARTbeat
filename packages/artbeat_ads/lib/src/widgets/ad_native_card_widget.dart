@@ -80,16 +80,17 @@ class _AdNativeCardWidgetState extends State<AdNativeCardWidget> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    if (_ad!.imageUrl != null && _ad!.imageUrl!.isNotEmpty && (_ad!.imageUrl!.startsWith('http://') || _ad!.imageUrl!.startsWith('https://')))
+                    if (_ad!.imageUrl != null &&
+                        _ad!.imageUrl!.isNotEmpty &&
+                        (_ad!.imageUrl!.startsWith('http://') ||
+                            _ad!.imageUrl!.startsWith('https://')))
                       CachedNetworkImage(
                         imageUrl: _ad!.imageUrl!,
                         height: 180,
                         width: double.infinity,
                         fit: BoxFit.cover,
-                        placeholder: (context, url) => Container(
-                          height: 180,
-                          color: Colors.grey[300],
-                        ),
+                        placeholder: (context, url) =>
+                            Container(height: 180, color: Colors.grey[300]),
                         errorWidget: (context, url, error) => Container(
                           height: 180,
                           color: Colors.grey[300],

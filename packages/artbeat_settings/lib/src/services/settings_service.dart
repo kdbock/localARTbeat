@@ -287,17 +287,23 @@ class SettingsService extends ChangeNotifier {
             .timeout(const Duration(seconds: 10));
 
         if (!doc.exists) {
-          AppLogger.info('No privacy settings found for user $userId - creating defaults');
+          AppLogger.info(
+            'No privacy settings found for user $userId - creating defaults',
+          );
           return PrivacySettingsModel.defaultSettings(userId);
         }
 
         return PrivacySettingsModel.fromFirestore(doc.data()!);
       } on FirebaseException catch (e) {
         if (e.code == 'permission-denied') {
-          AppLogger.warning('Permission denied accessing privacy settings - returning defaults');
+          AppLogger.warning(
+            'Permission denied accessing privacy settings - returning defaults',
+          );
           return PrivacySettingsModel.defaultSettings(userId);
         } else if (e.code == 'unavailable' || e.code == 'deadline-exceeded') {
-          AppLogger.warning('Firestore unavailable or timeout - returning defaults');
+          AppLogger.warning(
+            'Firestore unavailable or timeout - returning defaults',
+          );
           return PrivacySettingsModel.defaultSettings(userId);
         }
         rethrow;

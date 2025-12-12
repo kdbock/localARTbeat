@@ -303,7 +303,8 @@ class _ArtistProfileEditScreenState extends State<ArtistProfileEditScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Account type selection
-                    Text(tr('art_walk_account_type'),
+                    Text(
+                      tr('art_walk_account_type'),
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -473,7 +474,8 @@ class _ArtistProfileEditScreenState extends State<ArtistProfileEditScreen> {
                     const SizedBox(height: 24),
 
                     // Art information
-                    Text(tr('art_walk_art_information'),
+                    Text(
+                      tr('art_walk_art_information'),
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -508,7 +510,8 @@ class _ArtistProfileEditScreenState extends State<ArtistProfileEditScreen> {
                     if (_selectedMediums.isEmpty)
                       Padding(
                         padding: const EdgeInsets.only(top: 8),
-                        child: Text(tr('art_walk_please_select_at_least_one_medium'),
+                        child: Text(
+                          tr('art_walk_please_select_at_least_one_medium'),
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.error,
                             fontSize: 12,
@@ -545,7 +548,8 @@ class _ArtistProfileEditScreenState extends State<ArtistProfileEditScreen> {
                     if (_selectedStyles.isEmpty)
                       Padding(
                         padding: const EdgeInsets.only(top: 8),
-                        child: Text(tr('art_walk_please_select_at_least_one_style'),
+                        child: Text(
+                          tr('art_walk_please_select_at_least_one_style'),
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.error,
                             fontSize: 12,
@@ -556,7 +560,8 @@ class _ArtistProfileEditScreenState extends State<ArtistProfileEditScreen> {
                     const SizedBox(height: 24),
 
                     // Online presence
-                    Text(tr('art_walk_online_presence'),
+                    Text(
+                      tr('art_walk_online_presence'),
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,

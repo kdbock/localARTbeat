@@ -149,7 +149,10 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
           children: [
             Text(_error!, style: const TextStyle(color: Colors.red)),
             const SizedBox(height: 16),
-            ElevatedButton(onPressed: _loadEvent, child: Text('events_retry'.tr())),
+            ElevatedButton(
+              onPressed: _loadEvent,
+              child: Text('events_retry'.tr()),
+            ),
           ],
         ),
       );
@@ -637,9 +640,9 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
         case 'add_to_calendar':
           await _calendarService.addEventToCalendar(_event!);
           if (mounted) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text('events_added_to_calendar'.tr())));
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('events_added_to_calendar'.tr())),
+            );
           }
           break;
 
@@ -659,7 +662,12 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
     } on Exception catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('events_calendar_error'.tr(namedArgs: {'error': e.toString()})), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text(
+              'events_calendar_error'.tr(namedArgs: {'error': e.toString()}),
+            ),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } finally {
@@ -792,9 +800,9 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
     try {
       final currentUser = _auth.currentUser;
       if (currentUser == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('events_login_to_report'.tr())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('events_login_to_report'.tr())));
         return;
       }
 
@@ -835,7 +843,9 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('events_report_failed'.tr(namedArgs: {'error': e.toString()})),
+            content: Text(
+              'events_report_failed'.tr(namedArgs: {'error': e.toString()}),
+            ),
             backgroundColor: Colors.red,
           ),
         );

@@ -100,7 +100,10 @@ class _AdminSystemMonitoringScreenState
           _isLoading = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('admin_admin_system_monitoring_error_error_loading_system'.tr())),
+          SnackBar(
+              content: Text(
+                  'admin_admin_system_monitoring_error_error_loading_system'
+                      .tr())),
         );
       }
     }
@@ -135,7 +138,8 @@ class _AdminSystemMonitoringScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('admin_admin_system_monitoring_text_system_monitoring'.tr()),
+        title:
+            Text('admin_admin_system_monitoring_text_system_monitoring'.tr()),
         backgroundColor: Colors.blue[800],
         foregroundColor: Colors.white,
         actions: [
@@ -340,7 +344,8 @@ class _AdminSystemMonitoringScreenState
                       ),
                       TextButton(
                         onPressed: () => _tabController.animateTo(2),
-                        child: Text('admin_admin_system_monitoring_text_view_all'.tr()),
+                        child: Text(
+                            'admin_admin_system_monitoring_text_view_all'.tr()),
                       ),
                     ],
                   ),
@@ -349,7 +354,9 @@ class _AdminSystemMonitoringScreenState
                     Center(
                       child: Padding(
                         padding: const EdgeInsets.all(32),
-                        child: Text('admin_admin_system_monitoring_text_no_recent_alerts'.tr()),
+                        child: Text(
+                            'admin_admin_system_monitoring_text_no_recent_alerts'
+                                .tr()),
                       ),
                     )
                   else
@@ -487,7 +494,9 @@ class _AdminSystemMonitoringScreenState
                     Center(
                       child: Padding(
                         padding: const EdgeInsets.all(32),
-                        child: Text('admin_admin_system_monitoring_text_no_system_alerts'.tr()),
+                        child: Text(
+                            'admin_admin_system_monitoring_text_no_system_alerts'
+                                .tr()),
                       ),
                     )
                   else

@@ -265,7 +265,8 @@ class _AdminSearchModalState extends State<AdminSearchModal>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.content_copy_outlined, size: 64, color: Colors.grey),
+            const Icon(Icons.content_copy_outlined,
+                size: 64, color: Colors.grey),
             const SizedBox(height: 16),
             Text(
               'admin_search_modal_no_content'.tr(),

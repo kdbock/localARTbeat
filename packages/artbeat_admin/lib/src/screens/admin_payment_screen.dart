@@ -176,7 +176,8 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('admin_admin_payment_text_transaction_transactionid'.tr()),
-            Text('admin_admin_payment_text_amount_transactionformattedamount'.tr()),
+            Text('admin_admin_payment_text_amount_transactionformattedamount'
+                .tr()),
             Text('admin_admin_payment_label_user_transactionusername'.tr()),
             const SizedBox(height: 16),
             Text('admin_admin_payment_text_are_you_sure'.tr()),
@@ -772,28 +773,33 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
                     itemBuilder: (context) => [
                       PopupMenuItem(
                         value: 'completed',
-                        child: Text('admin_admin_payment_text_mark_as_completed'.tr()),
+                        child: Text(
+                            'admin_admin_payment_text_mark_as_completed'.tr()),
                       ),
                       PopupMenuItem(
                         value: 'pending',
-                        child: Text('admin_admin_payment_text_mark_as_pending'.tr()),
+                        child: Text(
+                            'admin_admin_payment_text_mark_as_pending'.tr()),
                       ),
                       PopupMenuItem(
                         value: 'failed',
-                        child: Text('admin_admin_payment_error_mark_as_failed'.tr()),
+                        child: Text(
+                            'admin_admin_payment_error_mark_as_failed'.tr()),
                       ),
                     ],
                     child: ElevatedButton.icon(
                       onPressed: null,
                       icon: const Icon(Icons.edit),
-                      label: Text('admin_admin_payment_text_update_status'.tr()),
+                      label:
+                          Text('admin_admin_payment_text_update_status'.tr()),
                     ),
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton.icon(
                     onPressed: _exportSelectedTransactions,
                     icon: const Icon(Icons.file_download),
-                    label: Text('admin_admin_payment_text_export_selected'.tr()),
+                    label:
+                        Text('admin_admin_payment_text_export_selected'.tr()),
                   ),
                 ],
               ],
@@ -847,15 +853,21 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('admin_admin_payment_text_transaction_id_transactionid'.tr()),
+                Text('admin_admin_payment_text_transaction_id_transactionid'
+                    .tr()),
                 Text(
                     'Date: ${intl.DateFormat('MMM dd, yyyy HH:mm').format(transaction.transactionDate)}'),
-                Text('admin_admin_payment_text_payment_method_transactionpaymentmethod'.tr()),
+                Text(
+                    'admin_admin_payment_text_payment_method_transactionpaymentmethod'
+                        .tr()),
                 if (transaction.itemTitle != null) ...[
-                  Text('admin_admin_payment_title_item_transactionitemtitle'.tr()),
+                  Text('admin_admin_payment_title_item_transactionitemtitle'
+                      .tr()),
                 ],
                 if (transaction.description != null) ...[
-                  Text('admin_admin_payment_message_description_transactiondescription'.tr()),
+                  Text(
+                      'admin_admin_payment_message_description_transactiondescription'
+                          .tr()),
                 ],
                 const SizedBox(height: 16),
                 Row(
@@ -897,7 +909,8 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
           const SizedBox(height: 16),
           ..._revenueBreakdown.entries.map((entry) => ListTile(
                 title: Text(entry.key),
-                trailing: Text('admin_admin_payment_text_entryvaluetostringasfixed2'.tr()),
+                trailing: Text(
+                    'admin_admin_payment_text_entryvaluetostringasfixed2'.tr()),
                 leading: const Icon(Icons.pie_chart),
               )),
           const SizedBox(height: 32),
@@ -1356,13 +1369,15 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
                           // ignore: use_build_context_synchronously
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                                content:
-                                    Text('admin_admin_payment_text_csv_content_copied'.tr())),
+                                content: Text(
+                                    'admin_admin_payment_text_csv_content_copied'
+                                        .tr())),
                           );
                         }
                       },
                       icon: const Icon(Icons.copy),
-                      label: Text('admin_admin_payment_text_copy_to_clipboard'.tr()),
+                      label: Text(
+                          'admin_admin_payment_text_copy_to_clipboard'.tr()),
                     ),
                   ],
                 ),

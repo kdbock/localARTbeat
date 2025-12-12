@@ -178,7 +178,8 @@ class _AdvancedArtworkSearchScreenState
                   Navigator.pop(context);
                   // ignore: use_build_context_synchronously
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('advanced_search_saved_success'.tr())),
+                    SnackBar(
+                        content: Text('advanced_search_saved_success'.tr())),
                   );
                 } catch (e) {
                   // ignore: use_build_context_synchronously
@@ -362,8 +363,7 @@ class _AdvancedArtworkSearchScreenState
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _searchController.text.isEmpty && _savedSearches.isEmpty
-                    ? Center(
-                        child: Text('advanced_search_empty_state'.tr()))
+                    ? Center(child: Text('advanced_search_empty_state'.tr()))
                     : _buildSearchResults(),
           ),
         ],
@@ -381,7 +381,8 @@ class _AdvancedArtworkSearchScreenState
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('advanced_search_filters_title'.tr(),
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
 
               // Location filter

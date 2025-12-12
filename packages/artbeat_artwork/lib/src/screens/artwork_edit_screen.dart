@@ -132,7 +132,10 @@ class _ArtworkEditScreenState extends State<ArtworkEditScreen> {
       // debugPrint('Error loading artwork: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('art_walk_error_loading_artwork'.tr().replaceAll('{error}', e.toString()))),
+          SnackBar(
+              content: Text('art_walk_error_loading_artwork'
+                  .tr()
+                  .replaceAll('{error}', e.toString()))),
         );
       }
     } finally {
@@ -159,7 +162,10 @@ class _ArtworkEditScreenState extends State<ArtworkEditScreen> {
       // debugPrint('Error picking image: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('art_walk_error_picking_image'.tr().replaceAll('{error}', e.toString()))),
+          SnackBar(
+              content: Text('art_walk_error_picking_image'
+                  .tr()
+                  .replaceAll('{error}', e.toString()))),
         );
       }
     }
@@ -218,7 +224,10 @@ class _ArtworkEditScreenState extends State<ArtworkEditScreen> {
       // debugPrint('Error updating artwork: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('art_walk_error_updating_artwork'.tr().replaceAll('{error}', e.toString()))),
+          SnackBar(
+              content: Text('art_walk_error_updating_artwork'
+                  .tr()
+                  .replaceAll('{error}', e.toString()))),
         );
       }
     } finally {
@@ -261,7 +270,8 @@ class _ArtworkEditScreenState extends State<ArtworkEditScreen> {
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('art_walk_artwork_deleted_successfully'.tr())),
+            SnackBar(
+                content: Text('art_walk_artwork_deleted_successfully'.tr())),
           );
           Navigator.of(context).pop(true); // Return true to indicate deletion
         }
@@ -269,7 +279,10 @@ class _ArtworkEditScreenState extends State<ArtworkEditScreen> {
         // debugPrint('Error deleting artwork: $e');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('art_walk_error_deleting_artwork'.tr().replaceAll('{error}', e.toString()))),
+            SnackBar(
+                content: Text('art_walk_error_deleting_artwork'
+                    .tr()
+                    .replaceAll('{error}', e.toString()))),
           );
         }
       } finally {

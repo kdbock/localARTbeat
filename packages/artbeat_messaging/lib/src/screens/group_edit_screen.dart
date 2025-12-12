@@ -16,7 +16,9 @@ class _GroupEditScreenState extends State<GroupEditScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('messaging_group_edit_text_edit_artist_feed'.tr())),
+      appBar: AppBar(
+        title: Text('messaging_group_edit_text_edit_artist_feed'.tr()),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -42,7 +44,11 @@ class _GroupEditScreenState extends State<GroupEditScreen> {
                 // Simple save - just pop the screen for now
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('messaging_group_edit_success_feed_settings_saved'.tr())),
+                  SnackBar(
+                    content: Text(
+                      'messaging_group_edit_success_feed_settings_saved'.tr(),
+                    ),
+                  ),
                 );
               },
               child: Text('artwork_edit_save_button'.tr()),

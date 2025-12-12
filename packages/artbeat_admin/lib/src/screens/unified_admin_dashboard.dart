@@ -654,11 +654,15 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
                       itemBuilder: (context) => [
                         PopupMenuItem(
                           value: 'view',
-                          child: Text('admin_unified_admin_dashboard_text_view_details'.tr()),
+                          child: Text(
+                              'admin_unified_admin_dashboard_text_view_details'
+                                  .tr()),
                         ),
                         PopupMenuItem(
                           value: 'edit',
-                          child: Text('admin_unified_admin_dashboard_text_edit_user'.tr()),
+                          child: Text(
+                              'admin_unified_admin_dashboard_text_edit_user'
+                                  .tr()),
                         ),
                         PopupMenuItem(
                           value: user.statusText == 'Active' ? 'ban' : 'unban',
@@ -860,8 +864,12 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
                         review.title,
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      Text('admin_unified_admin_dashboard_label_by_reviewauthorname'.tr()),
-                      Text('admin_unified_admin_dashboard_label_type_reviewcontenttypedisplayname'.tr()),
+                      Text(
+                          'admin_unified_admin_dashboard_label_by_reviewauthorname'
+                              .tr()),
+                      Text(
+                          'admin_unified_admin_dashboard_label_type_reviewcontenttypedisplayname'
+                              .tr()),
                       if (isReported)
                         Text(
                           'REPORTED CONTENT',
@@ -880,7 +888,9 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
                       backgroundColor: Colors.green,
                       foregroundColor: Colors.white,
                     ),
-                    child: Text('admin_modern_unified_admin_dashboard_text_approve'.tr()),
+                    child: Text(
+                        'admin_modern_unified_admin_dashboard_text_approve'
+                            .tr()),
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton(
@@ -889,7 +899,9 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
                       backgroundColor: Colors.red,
                       foregroundColor: Colors.white,
                     ),
-                    child: Text('admin_modern_unified_admin_dashboard_text_reject'.tr()),
+                    child: Text(
+                        'admin_modern_unified_admin_dashboard_text_reject'
+                            .tr()),
                   ),
                 ],
               ],
@@ -913,21 +925,25 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         title: Text(content.title),
-        subtitle: Text('admin_unified_admin_dashboard_hint_type_contenttype_status'.tr()),
+        subtitle: Text(
+            'admin_unified_admin_dashboard_hint_type_contenttype_status'.tr()),
         trailing: PopupMenuButton<String>(
           onSelected: (value) => _handleContentAction(content, value),
           itemBuilder: (context) => [
             PopupMenuItem(
               value: 'view',
-              child: Text('admin_unified_admin_dashboard_text_view_details'.tr()),
+              child:
+                  Text('admin_unified_admin_dashboard_text_view_details'.tr()),
             ),
             PopupMenuItem(
               value: 'edit',
-              child: Text('admin_modern_unified_admin_dashboard_text_edit'.tr()),
+              child:
+                  Text('admin_modern_unified_admin_dashboard_text_edit'.tr()),
             ),
             PopupMenuItem(
               value: 'delete',
-              child: Text('admin_modern_unified_admin_dashboard_text_delete'.tr()),
+              child:
+                  Text('admin_modern_unified_admin_dashboard_text_delete'.tr()),
             ),
           ],
         ),
@@ -1025,8 +1041,12 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
       mainAxisSpacing: 12,
       children: [
         _buildStatCard('Page Views', _analytics?.pageViews ?? 0, Colors.blue),
-        _buildStatCard('Total Events', _analytics?.totalEvents ?? 0, Colors.green),
-        _buildStatCard('Bounce Rate', '${(_analytics?.bounceRate ?? 0.0).toStringAsFixed(2)}%', Colors.orange),
+        _buildStatCard(
+            'Total Events', _analytics?.totalEvents ?? 0, Colors.green),
+        _buildStatCard(
+            'Bounce Rate',
+            '${(_analytics?.bounceRate ?? 0.0).toStringAsFixed(2)}%',
+            Colors.orange),
         _buildStatCard('Engagement', _analytics?.totalLikes ?? 0, Colors.red),
       ],
     );
@@ -1048,7 +1068,8 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
               Center(
                 child: Padding(
                   padding: const EdgeInsets.all(24),
-                  child: Text('admin_unified_admin_dashboard_text_no_recent_ad'.tr()),
+                  child: Text(
+                      'admin_unified_admin_dashboard_text_no_recent_ad'.tr()),
                 ),
               )
             else
@@ -1089,7 +1110,9 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
                 Expanded(
                   child: _buildFinancialMetric(
                     'Total Paid Out',
-                    financial != null ? _formatCurrency(financial.totalRevenue * 0.7) : '\$0',
+                    financial != null
+                        ? _formatCurrency(financial.totalRevenue * 0.7)
+                        : '\$0',
                     Icons.payment,
                     Colors.green,
                   ),
@@ -1097,7 +1120,10 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
                 Expanded(
                   child: _buildFinancialMetric(
                     'Pending Payouts',
-                    financial != null ? _formatCurrency(financial.monthlyRecurringRevenue * 0.3) : '\$0',
+                    financial != null
+                        ? _formatCurrency(
+                            financial.monthlyRecurringRevenue * 0.3)
+                        : '\$0',
                     Icons.hourglass_empty,
                     Colors.orange,
                   ),
@@ -1128,11 +1154,14 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
               itemCount: 5,
               itemBuilder: (context, index) {
                 return ListTile(
-                  title: Text('admin_unified_admin_dashboard_text_payout_index_1'.tr()),
-                  subtitle: Text('Processed on ${DateTime.now().subtract(Duration(days: index)).toString().split(' ')[0]}'),
+                  title: Text(
+                      'admin_unified_admin_dashboard_text_payout_index_1'.tr()),
+                  subtitle: Text(
+                      'Processed on ${DateTime.now().subtract(Duration(days: index)).toString().split(' ')[0]}'),
                   trailing: Text(
                     '\$${(100 + (index * 50)).toStringAsFixed(2)}',
-                    style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, color: Colors.green),
                   ),
                   leading: const Icon(Icons.check_circle, color: Colors.green),
                 );
@@ -1152,7 +1181,10 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [color.withValues(alpha: 0.2), color.withValues(alpha: 0.05)],
+            colors: [
+              color.withValues(alpha: 0.2),
+              color.withValues(alpha: 0.05)
+            ],
           ),
         ),
         child: Padding(
@@ -1259,7 +1291,8 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
             SizedBox(
               height: 200,
               child: Center(
-                child: Text('admin_unified_admin_dashboard_text_chart_will_be'.tr()),
+                child: Text(
+                    'admin_unified_admin_dashboard_text_chart_will_be'.tr()),
               ),
             ),
           ],
@@ -1323,7 +1356,9 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('admin_unified_admin_dashboard_error_error_e'.tr())),
+          SnackBar(
+              content:
+                  Text('admin_unified_admin_dashboard_error_error_e'.tr())),
         );
       }
     }
@@ -1351,13 +1386,18 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
       await _loadContentData();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('admin_unified_admin_dashboard_success_content_approved_successfully'.tr())),
+          SnackBar(
+              content: Text(
+                  'admin_unified_admin_dashboard_success_content_approved_successfully'
+                      .tr())),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('admin_unified_admin_dashboard_error_error_e'.tr())),
+          SnackBar(
+              content:
+                  Text('admin_unified_admin_dashboard_error_error_e'.tr())),
         );
       }
     }
@@ -1369,13 +1409,18 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
       await _loadContentData();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('admin_unified_admin_dashboard_success_content_rejected_successfully'.tr())),
+          SnackBar(
+              content: Text(
+                  'admin_unified_admin_dashboard_success_content_rejected_successfully'
+                      .tr())),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('admin_unified_admin_dashboard_error_error_e'.tr())),
+          SnackBar(
+              content:
+                  Text('admin_unified_admin_dashboard_error_error_e'.tr())),
         );
       }
     }
@@ -1396,7 +1441,9 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('admin_unified_admin_dashboard_error_error_e'.tr())),
+          SnackBar(
+              content:
+                  Text('admin_unified_admin_dashboard_error_error_e'.tr())),
         );
       }
     } finally {
@@ -1422,7 +1469,9 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('admin_unified_admin_dashboard_error_error_e'.tr())),
+          SnackBar(
+              content:
+                  Text('admin_unified_admin_dashboard_error_error_e'.tr())),
         );
       }
     } finally {

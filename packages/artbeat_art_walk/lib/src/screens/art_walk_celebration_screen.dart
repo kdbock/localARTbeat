@@ -521,7 +521,9 @@ class _ArtWalkCelebrationScreenState extends State<ArtWalkCelebrationScreen>
               child: ElevatedButton.icon(
                 onPressed: _shareAchievement,
                 icon: const Icon(Icons.share),
-                label: Text('art_walk_art_walk_celebration_text_share_achievement'.tr()),
+                label: Text(
+                  'art_walk_art_walk_celebration_text_share_achievement'.tr(),
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.purple.shade600,
                   foregroundColor: Colors.white,
@@ -543,7 +545,9 @@ class _ArtWalkCelebrationScreenState extends State<ArtWalkCelebrationScreen>
                     onPressed: () =>
                         Navigator.pushNamed(context, '/achievements'),
                     icon: const Icon(Icons.emoji_events),
-                    label: Text('admin_admin_system_monitoring_text_view_all'.tr()),
+                    label: Text(
+                      'admin_admin_system_monitoring_text_view_all'.tr(),
+                    ),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
@@ -563,7 +567,9 @@ class _ArtWalkCelebrationScreenState extends State<ArtWalkCelebrationScreen>
                       (route) => false,
                     ),
                     icon: const Icon(Icons.explore),
-                    label: Text('art_walk_art_walk_celebration_text_explore_more'.tr()),
+                    label: Text(
+                      'art_walk_art_walk_celebration_text_explore_more'.tr(),
+                    ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green.shade600,
                       foregroundColor: Colors.white,
@@ -590,9 +596,11 @@ class _ArtWalkCelebrationScreenState extends State<ArtWalkCelebrationScreen>
       }
 
       final socialService = SocialService();
-      final distanceMiles = (widget.celebrationData.distanceWalked * 0.621371).toStringAsFixed(1);
-      
-      final message = 'Congratulations to ${user.displayName ?? 'this walker'} for completing "${widget.celebrationData.walk.title}"! '
+      final distanceMiles = (widget.celebrationData.distanceWalked * 0.621371)
+          .toStringAsFixed(1);
+
+      final message =
+          'Congratulations to ${user.displayName ?? 'this walker'} for completing "${widget.celebrationData.walk.title}"! '
           'They walked $distanceMiles miles and visited ${widget.celebrationData.artPiecesVisited} amazing art pieces. '
           'Great job exploring our community\'s public art! 🎨';
 
@@ -615,7 +623,9 @@ class _ArtWalkCelebrationScreenState extends State<ArtWalkCelebrationScreen>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('art_walk_art_walk_celebration_text_achievement_posted_to'.tr()),
+            content: Text(
+              'art_walk_art_walk_celebration_text_achievement_posted_to'.tr(),
+            ),
             backgroundColor: Colors.green,
             behavior: SnackBarBehavior.floating,
           ),
@@ -625,7 +635,9 @@ class _ArtWalkCelebrationScreenState extends State<ArtWalkCelebrationScreen>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('art_walk_art_walk_celebration_error_failed_to_post'.tr()),
+            content: Text(
+              'art_walk_art_walk_celebration_error_failed_to_post'.tr(),
+            ),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),

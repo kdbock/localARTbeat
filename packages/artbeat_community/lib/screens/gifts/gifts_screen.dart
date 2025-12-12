@@ -10,7 +10,8 @@ class ViewReceivedGiftsScreen extends StatefulWidget {
   const ViewReceivedGiftsScreen({super.key});
 
   @override
-  State<ViewReceivedGiftsScreen> createState() => _ViewReceivedGiftsScreenState();
+  State<ViewReceivedGiftsScreen> createState() =>
+      _ViewReceivedGiftsScreenState();
 }
 
 class _ViewReceivedGiftsScreenState extends State<ViewReceivedGiftsScreen> {

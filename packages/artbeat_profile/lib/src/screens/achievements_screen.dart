@@ -102,7 +102,13 @@ class _AchievementsScreenState extends State<AchievementsScreen>
       setState(() => _isLoading = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('profile_achievements_screen_error_error_loading_achievements'.tr().replaceAll('{error}', e.toString()))),
+          SnackBar(
+            content: Text(
+              'profile_achievements_screen_error_error_loading_achievements'
+                  .tr()
+                  .replaceAll('{error}', e.toString()),
+            ),
+          ),
         );
       }
     }
@@ -267,7 +273,9 @@ class _AchievementsScreenState extends State<AchievementsScreen>
               if (mounted) {
                 // ignore: use_build_context_synchronously
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('profile_achievements_refreshed'.tr())),
+                  SnackBar(
+                    content: Text('profile_achievements_refreshed'.tr()),
+                  ),
                 );
               }
             },

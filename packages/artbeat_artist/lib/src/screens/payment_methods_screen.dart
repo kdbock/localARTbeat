@@ -288,7 +288,8 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            Text(tr('art_walk_add_a_credit_card_or_other_payment_method_to_manage_your_subscription'),
+            Text(
+              tr('art_walk_add_a_credit_card_or_other_payment_method_to_manage_your_subscription'),
               textAlign: TextAlign.center,
               style: const TextStyle(color: Colors.grey),
             ),
@@ -332,7 +333,8 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
           style: Theme.of(context).textTheme.headlineSmall,
         ),
         const SizedBox(height: 8),
-        Text(tr('art_walk_you_can_add__remove__or_set_a_default_payment_method_for_your_subscriptions'),
+        Text(
+          tr('art_walk_you_can_add__remove__or_set_a_default_payment_method_for_your_subscriptions'),
           style: const TextStyle(color: Colors.grey),
         ),
         const SizedBox(height: 24),
@@ -387,7 +389,8 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
                             .withAlpha(26), // Alpha 26 is approx 0.1 opacity
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: Text(tr('art_walk_default'),
+                      child: Text(
+                        tr('art_walk_default'),
                         style: TextStyle(
                           color: Theme.of(context).primaryColor,
                           fontWeight: FontWeight.bold,
@@ -411,7 +414,8 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
                   if (!isDefault)
                     TextButton(
                       onPressed: () => _setDefaultPaymentMethod(method.id),
-                      child: Text(tr('artist_payment_methods_text_set_as_default')),
+                      child: Text(
+                          tr('artist_payment_methods_text_set_as_default')),
                     ),
                   const SizedBox(width: 8),
                   TextButton(

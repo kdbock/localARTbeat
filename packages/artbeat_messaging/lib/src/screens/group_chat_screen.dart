@@ -16,7 +16,12 @@ class GroupChatScreen extends StatelessWidget {
         }
 
         if (snapshot.hasError) {
-          return Center(child: Text('messaging_enhanced_messaging_dashboard_error_error_snapshoterror'.tr()));
+          return Center(
+            child: Text(
+              'messaging_enhanced_messaging_dashboard_error_error_snapshoterror'
+                  .tr(),
+            ),
+          );
         }
 
         final chats =
@@ -43,7 +48,9 @@ class GroupChatScreen extends StatelessWidget {
                   onPressed: () =>
                       Navigator.pushNamed(context, '/messaging/group/new'),
                   icon: const Icon(Icons.add),
-                  label: Text('messaging_group_chat_text_create_group_chat'.tr()),
+                  label: Text(
+                    'messaging_group_chat_text_create_group_chat'.tr(),
+                  ),
                 ),
               ],
             ),

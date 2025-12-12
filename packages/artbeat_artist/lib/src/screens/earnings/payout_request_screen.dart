@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';import 'package:artbeat_core/artbeat_core.dart' as core;
+import 'package:easy_localization/easy_localization.dart';
+import 'package:artbeat_core/artbeat_core.dart' as core;
 import '../../services/earnings_service.dart';
 import '../../models/payout_model.dart';
 
@@ -131,7 +132,8 @@ class _PayoutRequestScreenState extends State<PayoutRequestScreen> {
               children: [
                 Icon(Icons.account_balance_wallet, color: Colors.green[700]),
                 const SizedBox(width: 12),
-                Text(tr('art_walk_available_balance'),
+                Text(
+                  tr('art_walk_available_balance'),
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -147,7 +149,8 @@ class _PayoutRequestScreenState extends State<PayoutRequestScreen> {
                   ),
             ),
             const SizedBox(height: 8),
-            Text(tr('art_walk_this_is_the_amount_available_for_payout_after_processing_fees'),
+            Text(
+              tr('art_walk_this_is_the_amount_available_for_payout_after_processing_fees'),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Colors.grey[600],
                   ),
@@ -165,7 +168,8 @@ class _PayoutRequestScreenState extends State<PayoutRequestScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(tr('art_walk_payout_amount'),
+            Text(
+              tr('art_walk_payout_amount'),
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -266,7 +270,8 @@ class _PayoutRequestScreenState extends State<PayoutRequestScreen> {
             Row(
               children: [
                 Expanded(
-                  child: Text(tr('art_walk_payout_account'),
+                  child: Text(
+                    tr('art_walk_payout_account'),
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -296,14 +301,16 @@ class _PayoutRequestScreenState extends State<PayoutRequestScreen> {
                     Icon(Icons.account_balance,
                         color: Colors.orange[700], size: 48),
                     const SizedBox(height: 12),
-                    Text(tr('art_walk_no_payout_accounts'),
+                    Text(
+                      tr('art_walk_no_payout_accounts'),
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: Colors.orange[700],
                           ),
                     ),
                     const SizedBox(height: 8),
-                    Text(tr('art_walk_you_need_to_add_a_payout_account_before_requesting_a_payout'),
+                    Text(
+                      tr('art_walk_you_need_to_add_a_payout_account_before_requesting_a_payout'),
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.orange[700]),
                     ),
@@ -375,7 +382,8 @@ class _PayoutRequestScreenState extends State<PayoutRequestScreen> {
               children: [
                 Icon(Icons.info_outline, color: Colors.blue[700]),
                 const SizedBox(width: 12),
-                Text(tr('art_walk_payout_information'),
+                Text(
+                  tr('art_walk_payout_information'),
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -394,7 +402,8 @@ class _PayoutRequestScreenState extends State<PayoutRequestScreen> {
                 color: Colors.blue[50],
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Text(tr('art_walk_payouts_are_processed_securely_through_our_payment_partner__you_will_receive_an_email_confirmation_once_the_payout_is_initiated'),
+              child: Text(
+                tr('art_walk_payouts_are_processed_securely_through_our_payment_partner__you_will_receive_an_email_confirmation_once_the_payout_is_initiated'),
                 style: TextStyle(
                   fontSize: 12,
                   color: Colors.blue[700],
@@ -473,7 +482,8 @@ class _PayoutRequestScreenState extends State<PayoutRequestScreen> {
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                 ),
               )
-            : Text(tr('art_walk_request_payout'),
+            : Text(
+                tr('art_walk_request_payout'),
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,

@@ -516,7 +516,8 @@ class _ArtworkUploadScreenState extends State<ArtworkUploadScreen> {
                             ? Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Icon(Icons.add_photo_alternate, size: 64),
+                                  const Icon(Icons.add_photo_alternate,
+                                      size: 64),
                                   const SizedBox(height: 8),
                                   Text('art_walk_select_image'.tr()),
                                 ],

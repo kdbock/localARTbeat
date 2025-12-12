@@ -1092,7 +1092,11 @@ class _UserEventsDashboardScreenState extends State<UserEventsDashboardScreen> {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              'events_attending_count'.tr(namedArgs: {'count': event.attendeeIds.length.toString()}),
+                              'events_attending_count'.tr(
+                                namedArgs: {
+                                  'count': event.attendeeIds.length.toString(),
+                                },
+                              ),
                               style: TextStyle(
                                 fontSize: 13,
                                 color: Colors.grey[600],

@@ -77,7 +77,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       case 'invalid-email':
         return 'auth_forgot_password_error_invalid_email'.tr();
       default:
-        return 'auth_forgot_password_error_failed'.tr(namedArgs: {'code': e.code});
+        return 'auth_forgot_password_error_failed'.tr(
+          namedArgs: {'code': e.code},
+        );
     }
   }
 

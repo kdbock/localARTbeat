@@ -82,8 +82,10 @@ class ReadingAnalyticsModel {
       startedAt: (data['startedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       completedAt: (data['completedAt'] as Timestamp?)?.toDate(),
       timeSpentSeconds: data['timeSpentSeconds'] as int? ?? 0,
-      lastScrollPosition: (data['lastScrollPosition'] as num?)?.toDouble() ?? 0.0,
-      completionPercentage: (data['completionPercentage'] as num?)?.toDouble() ?? 0.0,
+      lastScrollPosition:
+          (data['lastScrollPosition'] as num?)?.toDouble() ?? 0.0,
+      completionPercentage:
+          (data['completionPercentage'] as num?)?.toDouble() ?? 0.0,
       isCompleted: data['isCompleted'] as bool? ?? false,
       bookmarks: bookmarksList,
       device: data['device'] as String? ?? 'unknown',

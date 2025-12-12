@@ -81,7 +81,9 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(tr('artist_artist_browse_error_error_loading_artists'))),
+          SnackBar(
+              content:
+                  Text(tr('artist_artist_browse_error_error_loading_artists'))),
         );
         setState(() {
           _isLoading = false;
@@ -207,13 +209,15 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
               child: Row(
                 children: [
                   FilterChip(
-                    label: Text(tr('artist_artist_browse_text_medium_selectedmedium')),
+                    label: Text(
+                        tr('artist_artist_browse_text_medium_selectedmedium')),
                     selected: _selectedMedium != 'All',
                     onSelected: (_) => _showFilterDialog(),
                   ),
                   const SizedBox(width: 8),
                   FilterChip(
-                    label: Text(tr('artist_artist_browse_text_style_selectedstyle')),
+                    label: Text(
+                        tr('artist_artist_browse_text_style_selectedstyle')),
                     selected: _selectedStyle != 'All',
                     onSelected: (_) => _showFilterDialog(),
                   ),
@@ -226,7 +230,9 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : _artists.isEmpty
-                      ? Center(child: Text(tr('artist_artist_browse_text_no_artists_found')))
+                      ? Center(
+                          child: Text(
+                              tr('artist_artist_browse_text_no_artists_found')))
                       : ListView.builder(
                           itemCount: _artists.length,
                           itemBuilder: (context, index) {
@@ -439,7 +445,8 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
                           )),
                       if (artist.mediums.length > 2)
                         Chip(
-                          label: Text(tr('artist_artist_browse_text_artistmediumslength_2')),
+                          label: Text(tr(
+                              'artist_artist_browse_text_artistmediumslength_2')),
                           backgroundColor:
                               Theme.of(context).chipTheme.backgroundColor,
                           labelPadding:

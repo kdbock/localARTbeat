@@ -39,7 +39,8 @@ class _MigrationScreenState extends State<MigrationScreen> {
       });
     } catch (e) {
       setState(() {
-        _errorMessage = 'admin_migration_error_check_status_failed'.tr(namedArgs: {'error': e.toString()});
+        _errorMessage = 'admin_migration_error_check_status_failed'
+            .tr(namedArgs: {'error': e.toString()});
         _isLoading = false;
       });
     }
@@ -70,7 +71,8 @@ class _MigrationScreenState extends State<MigrationScreen> {
       await _checkMigrationStatus();
     } catch (e) {
       setState(() {
-        _errorMessage = 'admin_migration_error_failed'.tr(namedArgs: {'error': e.toString()});
+        _errorMessage = 'admin_migration_error_failed'
+            .tr(namedArgs: {'error': e.toString()});
         _isMigrating = false;
       });
     }
@@ -101,7 +103,8 @@ class _MigrationScreenState extends State<MigrationScreen> {
       await _checkMigrationStatus();
     } catch (e) {
       setState(() {
-        _errorMessage = 'admin_migration_error_rollback_failed'.tr(namedArgs: {'error': e.toString()});
+        _errorMessage = 'admin_migration_error_rollback_failed'
+            .tr(namedArgs: {'error': e.toString()});
         _isMigrating = false;
       });
     }
@@ -129,7 +132,8 @@ class _MigrationScreenState extends State<MigrationScreen> {
       });
     } catch (e) {
       setState(() {
-        _errorMessage = 'admin_migration_error_geo_failed'.tr(namedArgs: {'error': e.toString()});
+        _errorMessage = 'admin_migration_error_geo_failed'
+            .tr(namedArgs: {'error': e.toString()});
         _isMigrating = false;
       });
     }
@@ -253,7 +257,8 @@ class _MigrationScreenState extends State<MigrationScreen> {
                   ? const Center(child: CircularProgressIndicator())
                   : _migrationStatus == null
                       ? Center(
-                          child: Text('admin_migration_error_failed_to_load'.tr()))
+                          child:
+                              Text('admin_migration_error_failed_to_load'.tr()))
                       : _buildMigrationStatusList(),
             ),
 

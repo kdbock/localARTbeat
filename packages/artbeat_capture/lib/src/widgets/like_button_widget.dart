@@ -86,9 +86,16 @@ class _LikeButtonWidgetState extends State<LikeButtonWidget> {
     } catch (e) {
       AppLogger.error('Error toggling like: $e');
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('capture_like_error_generic'.tr().replaceAll('{error}', e.toString()))));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'capture_like_error_generic'.tr().replaceAll(
+                '{error}',
+                e.toString(),
+              ),
+            ),
+          ),
+        );
       }
     } finally {
       if (mounted) {

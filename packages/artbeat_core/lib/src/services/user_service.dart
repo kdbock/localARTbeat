@@ -1078,8 +1078,10 @@ class UserService extends ChangeNotifier {
       }).toList();
 
       results.sort((a, b) {
-        final nameA = (a['displayName'] as String?) ?? (a['fullName'] as String?) ?? '';
-        final nameB = (b['displayName'] as String?) ?? (b['fullName'] as String?) ?? '';
+        final nameA =
+            (a['displayName'] as String?) ?? (a['fullName'] as String?) ?? '';
+        final nameB =
+            (b['displayName'] as String?) ?? (b['fullName'] as String?) ?? '';
         return nameA.compareTo(nameB);
       });
 

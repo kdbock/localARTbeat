@@ -126,7 +126,10 @@ class UserAvatar extends StatelessWidget {
     if (trimmedName.isEmpty) {
       return '?';
     }
-    final nameParts = trimmedName.split(' ').where((part) => part.isNotEmpty).toList();
+    final nameParts = trimmedName
+        .split(' ')
+        .where((part) => part.isNotEmpty)
+        .toList();
     if (nameParts.length >= 2) {
       return '${nameParts[0][0]}${nameParts[1][0]}'.toUpperCase();
     }

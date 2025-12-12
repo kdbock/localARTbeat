@@ -430,7 +430,8 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
                                   color: Colors.grey.shade400,
                                 ),
                                 const SizedBox(height: 8),
-                                Text(tr('art_walk_add_cover_image'),
+                                Text(
+                                  tr('art_walk_add_cover_image'),
                                   style: TextStyle(
                                     color: Colors.grey.shade600,
                                   ),
@@ -466,7 +467,8 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(tr('art_walk_start_date'),
+                        Text(
+                          tr('art_walk_start_date'),
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                           ),
@@ -501,7 +503,8 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(tr('art_walk_end_date'),
+                        Text(
+                          tr('art_walk_end_date'),
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                           ),
@@ -543,7 +546,8 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(tr('art_walk_start_time'),
+                        Text(
+                          tr('art_walk_start_time'),
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                           ),
@@ -577,7 +581,8 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(tr('art_walk_end_time'),
+                        Text(
+                          tr('art_walk_end_time'),
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                           ),

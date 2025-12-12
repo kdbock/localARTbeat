@@ -1,8 +1,4 @@
-enum LocalAdPriority {
-  high,
-  medium,
-  low,
-}
+enum LocalAdPriority { high, medium, low }
 
 extension LocalAdPriorityExtension on LocalAdPriority {
   String get displayName {

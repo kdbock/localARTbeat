@@ -1201,9 +1201,9 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
     // Get current user ID from UserService
     final userId = core.UserService().currentUserId;
     if (userId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('events_not_logged_in'.tr())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('events_not_logged_in'.tr())));
       return;
     }
     final eventId =
@@ -1301,16 +1301,16 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
 
   void _showSearchModal(BuildContext context) {
     // Placeholder for search functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('events_search_unavailable'.tr())),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('events_search_unavailable'.tr())));
   }
 
   void _showProfileMenu(BuildContext context) {
     // Placeholder for profile menu
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('events_profile_unavailable'.tr())),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('events_profile_unavailable'.tr())));
   }
 
   void _showDeveloperTools(BuildContext context) {
@@ -1497,16 +1497,16 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
   void _showEventDataPreview(BuildContext context) {
     Navigator.pop(context); // Close developer tools
     // This would show a preview of the event data structure
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('events_preview_coming'.tr())),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('events_preview_coming'.tr())));
   }
 
   void _showStorageInfo(BuildContext context) {
     Navigator.pop(context); // Close developer tools
     // This would show Firebase Storage path information
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('events_storage_coming'.tr())),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('events_storage_coming'.tr())));
   }
 }

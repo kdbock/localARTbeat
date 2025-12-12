@@ -79,9 +79,15 @@ class _ArtworkDiscoveryScreenState extends State<ArtworkDiscoveryScreen>
         bottom: TabBar(
           controller: _tabController,
           tabs: [
-            Tab(text: 'artwork_personalized_tab'.tr(), icon: const Icon(Icons.person)),
-            Tab(text: 'artwork_trending_tab'.tr(), icon: const Icon(Icons.trending_up)),
-            Tab(text: 'artwork_similar_tab'.tr(), icon: const Icon(Icons.shuffle)),
+            Tab(
+                text: 'artwork_personalized_tab'.tr(),
+                icon: const Icon(Icons.person)),
+            Tab(
+                text: 'artwork_trending_tab'.tr(),
+                icon: const Icon(Icons.trending_up)),
+            Tab(
+                text: 'artwork_similar_tab'.tr(),
+                icon: const Icon(Icons.shuffle)),
           ],
         ),
         actions: [
@@ -93,7 +99,14 @@ class _ArtworkDiscoveryScreenState extends State<ArtworkDiscoveryScreen>
         ],
       ),
       body: _isLoading
-          ? Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [const CircularProgressIndicator(), const SizedBox(height: 16), Text('artwork_discover_loading'.tr())]))
+          ? Center(
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 16),
+                  Text('artwork_discover_loading'.tr())
+                ]))
           : _error != null
               ? _buildErrorView()
               : TabBarView(

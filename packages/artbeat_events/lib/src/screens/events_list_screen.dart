@@ -92,7 +92,9 @@ class _EventsListScreenState extends State<EventsListScreen>
         setState(() {
           _error = e.code == 'permission-denied'
               ? 'events_list_error_permission'.tr()
-              : 'events_list_error_load'.tr(namedArgs: {'message': e.message ?? ''});
+              : 'events_list_error_load'.tr(
+                  namedArgs: {'message': e.message ?? ''},
+                );
           _isLoading = false;
         });
       }
@@ -180,11 +182,17 @@ class _EventsListScreenState extends State<EventsListScreen>
       ('events_list_category_all'.tr(), 'events_list_category_all'),
       ('events_list_category_art_show'.tr(), 'events_list_category_art_show'),
       ('events_list_category_workshop'.tr(), 'events_list_category_workshop'),
-      ('events_list_category_exhibition'.tr(), 'events_list_category_exhibition'),
-      ('events_list_category_gallery_opening'.tr(), 'events_list_category_gallery_opening'),
+      (
+        'events_list_category_exhibition'.tr(),
+        'events_list_category_exhibition',
+      ),
+      (
+        'events_list_category_gallery_opening'.tr(),
+        'events_list_category_gallery_opening',
+      ),
       ('events_list_category_other'.tr(), 'events_list_category_other'),
     ];
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       child: Row(
@@ -206,13 +214,13 @@ class _EventsListScreenState extends State<EventsListScreen>
           DropdownButton<String>(
             value: _selectedCategory,
             items: categories
-                    .map(
-                      (category) => DropdownMenuItem(
-                        value: category.$2,
-                        child: Text(category.$1),
-                      ),
-                    )
-                    .toList(),
+                .map(
+                  (category) => DropdownMenuItem(
+                    value: category.$2,
+                    child: Text(category.$1),
+                  ),
+                )
+                .toList(),
             onChanged: (value) {
               if (value != null) {
                 setState(() {
@@ -308,7 +316,10 @@ class _EventsListScreenState extends State<EventsListScreen>
           children: [
             Text(_error!, style: const TextStyle(color: Colors.red)),
             const SizedBox(height: 16),
-            ElevatedButton(onPressed: _loadEvents, child: Text('events_list_retry'.tr())),
+            ElevatedButton(
+              onPressed: _loadEvents,
+              child: Text('events_list_retry'.tr()),
+            ),
           ],
         ),
       );

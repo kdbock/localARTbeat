@@ -99,7 +99,9 @@ class _InstantDiscoveryRadarScreenState
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('art_walk_instant_discovery_radar_text_you_discovered_all'.tr()),
+              content: Text(
+                'art_walk_instant_discovery_radar_text_you_discovered_all'.tr(),
+              ),
               duration: const Duration(seconds: 2),
             ),
           );

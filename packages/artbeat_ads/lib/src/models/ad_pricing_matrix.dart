@@ -67,26 +67,18 @@ class AdPricingMatrix {
   ) {
     try {
       return allConfigs.firstWhere(
-        (config) =>
-            config.size == size &&
-            config.duration == duration,
+        (config) => config.size == size && config.duration == duration,
       );
     } catch (e) {
       return null;
     }
   }
 
-  static String? getSku(
-    LocalAdSize size,
-    LocalAdDuration duration,
-  ) {
+  static String? getSku(LocalAdSize size, LocalAdDuration duration) {
     return getConfig(size, duration)?.sku;
   }
 
-  static double? getPrice(
-    LocalAdSize size,
-    LocalAdDuration duration,
-  ) {
+  static double? getPrice(LocalAdSize size, LocalAdDuration duration) {
     return getConfig(size, duration)?.price;
   }
 
