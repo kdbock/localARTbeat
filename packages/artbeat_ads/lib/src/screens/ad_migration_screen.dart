@@ -141,13 +141,13 @@ ${result.hasErrors ? '\n⚠️ Errors:\n${result.errors.take(5).join('\n')}${res
                           const SizedBox(height: 16),
                           if (_stats != null) ...[
                             _buildStatRow(
-                              'ads_ad_migration_text_old_collection'.tr() + ' (${_stats!.oldCollectionName})',
+                              '${'ads_ad_migration_text_old_collection'.tr()} (${_stats!.oldCollectionName})',
                               '${_stats!.oldCollectionCount} ads',
                               Colors.orange,
                             ),
                             const SizedBox(height: 8),
                             _buildStatRow(
-                              'ads_ad_migration_text_new_collection'.tr() + ' (${_stats!.newCollectionName})',
+                              '${'ads_ad_migration_text_new_collection'.tr()} (${_stats!.newCollectionName})',
                               '${_stats!.newCollectionCount} ads',
                               Colors.green,
                             ),
@@ -306,7 +306,7 @@ ${result.hasErrors ? '\n⚠️ Errors:\n${result.errors.take(5).join('\n')}${res
                             if (_lastResult!.hasErrors) ...[
                               const SizedBox(height: 8),
                               Text(
-                                'ads_ad_migration_text_errors'.tr() + ' (${_lastResult!.errors.length}):',
+                                '${'ads_ad_migration_text_errors'.tr()} (${_lastResult!.errors.length}):',
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: Colors.red,

@@ -559,20 +559,17 @@ class ArtbeatDrawerItems {
     // 1. Core Navigation (Always Visible)
     sections.add(DrawerSection(title: 'Navigation', items: coreItems));
 
-    // 2. Quests & Goals (Always Visible to All Users)
-    sections.add(DrawerSection(title: 'Engagement', items: questsAndGoals));
-
-    // 3. Creation Tools (for artists, galleries, admins)
+    // 2. Creation Tools (for artists, galleries, admins)
     final hasCreationRole =
         userRole == 'artist' || userRole == 'gallery' || userRole == 'admin';
     if (hasCreationRole) {
       sections.add(DrawerSection(title: 'Create', items: creationItems));
     }
 
-    // 4. Messaging (always available for authenticated users)
+    // 3. Messaging (always available for authenticated users)
     sections.add(const DrawerSection(items: [messaging]));
 
-    // 5. Role-Specific Management Tools
+    // 4. Role-Specific Management Tools
     switch (userRole) {
       case 'artist':
         sections.add(DrawerSection(title: 'Artist', items: artistItems));
@@ -582,18 +579,7 @@ class ArtbeatDrawerItems {
         break;
       case 'admin':
         sections.add(DrawerSection(title: 'Admin', items: adminItems));
-        // Also show artist tools for admins
-        sections.add(
-          const DrawerSection(
-            title: 'Artist Tools',
-            items: [
-              commissionRequests,
-              paymentMethods,
-              paymentScreen,
-              refundRequest,
-            ],
-          ),
-        );
+        // Removed paymentMethods from admin drawer - admins should use AdminPaymentScreen
         break;
       case 'moderator':
         sections.add(DrawerSection(title: 'Moderation', items: moderatorItems));

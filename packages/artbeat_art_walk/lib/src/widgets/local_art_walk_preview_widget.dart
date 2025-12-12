@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/foundation.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Widget to display a preview of local art walks on the dashboard
 class LocalArtWalkPreviewWidget extends StatefulWidget {
@@ -41,7 +42,9 @@ class _LocalArtWalkPreviewWidgetState extends State<LocalArtWalkPreviewWidget> {
               ),
               TextButton(
                 onPressed: widget.onSeeAllPressed,
-                child: Text('art_walk_local_art_walk_preview_widget_text_see_all'.tr()),
+                child: Text(
+                  'art_walk_local_art_walk_preview_widget_text_see_all'.tr(),
+                ),
               ),
             ],
           ),

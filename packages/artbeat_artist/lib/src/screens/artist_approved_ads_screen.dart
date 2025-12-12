@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class ArtistApprovedAdsScreen extends StatefulWidget {
   const ArtistApprovedAdsScreen({super.key});
@@ -25,7 +26,8 @@ class _ArtistApprovedAdsScreenState extends State<ArtistApprovedAdsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('art_walk_artist_approved_ads'.tr(),
+                  Text(
+                    tr('art_walk_artist_approved_ads'),
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -42,12 +44,14 @@ class _ArtistApprovedAdsScreenState extends State<ArtistApprovedAdsScreen> {
                             color: Theme.of(context).colorScheme.primary,
                           ),
                           const SizedBox(height: 16),
-                          Text('art_walk_ad_management_coming_soon'.tr(),
+                          Text(
+                            tr('art_walk_ad_management_coming_soon'),
                             style: Theme.of(context).textTheme.titleLarge,
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 8),
-                          Text('art_walk_manage_your_approved_advertisements_and_promotional_content_here__this_feature_is_currently_under_development'.tr(),
+                          Text(
+                            tr('art_walk_manage_your_approved_advertisements_and_promotional_content_here__this_feature_is_currently_under_development'),
                             style: Theme.of(context).textTheme.bodyMedium,
                             textAlign: TextAlign.center,
                           ),
@@ -56,7 +60,8 @@ class _ArtistApprovedAdsScreenState extends State<ArtistApprovedAdsScreen> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  Text('art_walk_features_coming_soon'.tr(),
+                  Text(
+                    tr('art_walk_features_coming_soon'),
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),

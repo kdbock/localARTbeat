@@ -4,7 +4,7 @@ import 'package:artbeat_artwork/artbeat_artwork.dart' as artwork_pkg;
 import '../services/admin_artwork_management_service.dart';
 
 class AdminArtworkManagementScreen extends StatefulWidget {
-  AdminArtworkManagementScreen({super.key});
+  const AdminArtworkManagementScreen({super.key});
 
   @override
   State<AdminArtworkManagementScreen> createState() =>
@@ -279,7 +279,7 @@ class _AdminArtworkManagementScreenState
         children: [
           _buildDetailHeader(artwork),
           Padding(
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -324,7 +324,7 @@ class _AdminArtworkManagementScreenState
               children: [
                 Text(
                   artwork.title,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -336,7 +336,7 @@ class _AdminArtworkManagementScreenState
                 ),
                 const SizedBox(height: 4),
                 Container(
-                  padding: EdgeInsets.symmetric(
+                  padding: const EdgeInsets.symmetric(
                     horizontal: 12,
                     vertical: 4,
                   ),
@@ -346,7 +346,7 @@ class _AdminArtworkManagementScreenState
                   ),
                   child: Text(
                     artwork.moderationStatus.displayName,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 12,
                     ),
@@ -363,11 +363,11 @@ class _AdminArtworkManagementScreenState
   Widget _buildAnalyticsSection(Map<String, dynamic> analytics) {
     return Card(
       child: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'Analytics',
               style: TextStyle(
                 fontSize: 16,
@@ -413,7 +413,7 @@ class _AdminArtworkManagementScreenState
         const SizedBox(height: 4),
         Text(
           value,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
@@ -427,7 +427,7 @@ class _AdminArtworkManagementScreenState
     if (reports.isEmpty) {
       return Card(
         child: Padding(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           child: Text(
             'No reports',
             style: TextStyle(color: Colors.grey[600]),
@@ -438,14 +438,14 @@ class _AdminArtworkManagementScreenState
 
     return Card(
       child: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
+                const Text(
                   'Reports',
                   style: TextStyle(
                     fontSize: 16,
@@ -462,7 +462,7 @@ class _AdminArtworkManagementScreenState
             ...reports.asMap().entries.map((entry) {
               final report = entry.value as Map<String, dynamic>;
               return Padding(
-                padding: EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.only(bottom: 12),
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
@@ -495,11 +495,11 @@ class _AdminArtworkManagementScreenState
   Widget _buildContentEditor(artwork_pkg.ArtworkModel artwork) {
     return Card(
       child: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'Edit Content',
               style: TextStyle(
                 fontSize: 16,
@@ -511,7 +511,7 @@ class _AdminArtworkManagementScreenState
               controller: _titleController,
               decoration: InputDecoration(
                 label: Text('admin_admin_artwork_management_title_title'.tr()),
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
               ),
               readOnly: true,
             ),
@@ -520,7 +520,7 @@ class _AdminArtworkManagementScreenState
               controller: _descriptionController,
               decoration: InputDecoration(
                 label: Text('admin_admin_artwork_management_message_description'.tr()),
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
               ),
               maxLines: 3,
               readOnly: true,
@@ -540,7 +540,7 @@ class _AdminArtworkManagementScreenState
     if (comments.isEmpty) {
       return Card(
         child: Padding(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           child: Text(
             'No comments',
             style: TextStyle(color: Colors.grey[600]),
@@ -551,14 +551,14 @@ class _AdminArtworkManagementScreenState
 
     return Card(
       child: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
+                const Text(
                   'Comments',
                   style: TextStyle(
                     fontSize: 16,
@@ -574,8 +574,8 @@ class _AdminArtworkManagementScreenState
             const SizedBox(height: 12),
             ...comments.map((comment) {
               return Container(
-                margin: EdgeInsets.only(bottom: 12),
-                padding: EdgeInsets.all(12),
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey[300]!),
                   borderRadius: BorderRadius.circular(4),
@@ -588,7 +588,7 @@ class _AdminArtworkManagementScreenState
                       children: [
                         Text(
                           comment.userName,
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         PopupMenuButton<String>(
                           itemBuilder: (context) => [
@@ -624,11 +624,11 @@ class _AdminArtworkManagementScreenState
   Widget _buildActionButtons(artwork_pkg.ArtworkModel artwork) {
     return Card(
       child: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'Actions',
               style: TextStyle(
                 fontSize: 16,

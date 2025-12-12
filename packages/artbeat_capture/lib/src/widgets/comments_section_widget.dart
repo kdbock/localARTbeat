@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../services/capture_service.dart';
 import 'comment_item_widget.dart';
 import 'package:artbeat_core/artbeat_core.dart' show AppLogger;
@@ -61,17 +62,24 @@ class _CommentsSectionWidgetState extends State<CommentsSectionWidget> {
         widget.onCommentAdded?.call();
 
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('capture_comments_added_success'.tr())));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('capture_comments_added_success'.tr())),
+          );
         }
       }
     } catch (e) {
       AppLogger.error('Error submitting comment: $e');
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('capture_comments_error_generic'.tr().replaceAll('{error}', e.toString()))));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'capture_comments_error_generic'.tr().replaceAll(
+                '{error}',
+                e.toString(),
+              ),
+            ),
+          ),
+        );
       }
     } finally {
       if (mounted) {
@@ -93,10 +101,10 @@ class _CommentsSectionWidgetState extends State<CommentsSectionWidget> {
       children: [
         // Comments header
         Padding(
-          padding: EdgeInsets.fromLTRB(16, 24, 16, 12),
+          padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
           child: Text(
             'capture_comments_section_title'.tr(),
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
         ),
 
@@ -114,15 +122,20 @@ class _CommentsSectionWidgetState extends State<CommentsSectionWidget> {
             if (snapshot.hasError) {
               return Padding(
                 padding: const EdgeInsets.all(16),
-                child: Text('capture_comments_error_loading'.tr().replaceAll('{error}', snapshot.error.toString())),
+                child: Text(
+                  'capture_comments_error_loading'.tr().replaceAll(
+                    '{error}',
+                    snapshot.error.toString(),
+                  ),
+                ),
               );
             }
 
             final comments = snapshot.data ?? [];
 
             if (comments.isEmpty) {
-              return const Padding(
-                padding: EdgeInsets.all(16),
+              return Padding(
+                padding: const EdgeInsets.all(16),
                 child: Text('capture_comments_no_comments'.tr()),
               );
             }

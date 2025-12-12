@@ -8,6 +8,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 // You can replace this with actual Firebase options for development
 const mockFirebaseOptions = FirebaseOptions(
@@ -99,15 +100,15 @@ class UadminModuleHome extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text('admin_main_demo_title'.tr(),
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
             const SizedBox(height: 20),
             Text('admin_main_demo_subtitle'.tr(),
-                style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic)),
+                style: const TextStyle(fontSize: 16, fontStyle: FontStyle.italic)),
             const SizedBox(height: 30),
             // Add navigation buttons to module screens here
             Text(
                 'admin_main_demo_description'.tr(),
-                style: TextStyle(color: Colors.grey)),
+                style: const TextStyle(color: Colors.grey)),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {},

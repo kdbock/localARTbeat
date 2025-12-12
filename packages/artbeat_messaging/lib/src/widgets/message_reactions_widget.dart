@@ -296,11 +296,11 @@ class _ReactionPickerBottomSheet extends StatelessWidget {
                 border: Border.all(color: Colors.grey),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Row(
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.emoji_emotions_outlined),
-                  SizedBox(width: 8),
+                  const Icon(Icons.emoji_emotions_outlined),
+                  const SizedBox(width: 8),
                   Text('messaging_reactions_more_emojis'.tr()),
                 ],
               ),
@@ -386,7 +386,7 @@ class _ReactionDetailsBottomSheet extends StatelessWidget {
 
           // Users list
           if (reactions.isEmpty)
-            const Text('messaging_reactions_no_reactions_yet'.tr())
+            Text('messaging_reactions_no_reactions_yet'.tr())
           else
             ...reactions.map(
               (reaction) => Padding(

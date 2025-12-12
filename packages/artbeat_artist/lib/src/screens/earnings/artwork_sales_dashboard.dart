@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
 import '../../services/earnings_service.dart';
 import '../../models/earnings_model.dart';
@@ -51,10 +52,10 @@ class _ArtworkSalesDashboardState extends State<ArtworkSalesDashboard>
       final stats = results[1] as Map<String, dynamic>;
 
       if (earnings != null) {
-        final salesTransactions = await _earningsService.getEarningsTransactions();
-        final filteredSales = salesTransactions
-            .where((t) => t.type == 'artwork_sale')
-            .toList();
+        final salesTransactions =
+            await _earningsService.getEarningsTransactions();
+        final filteredSales =
+            salesTransactions.where((t) => t.type == 'artwork_sale').toList();
 
         setState(() {
           _earnings = earnings;
@@ -138,7 +139,8 @@ class _ArtworkSalesDashboardState extends State<ArtworkSalesDashboard>
             children: [
               Icon(Icons.error_outline, size: 64, color: Colors.grey[400]),
               const SizedBox(height: 16),
-              Text('art_walk_failed_to_load_sales_data'.tr(),
+              Text(
+                tr('art_walk_failed_to_load_sales_data'),
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
               const SizedBox(height: 8),
@@ -152,7 +154,7 @@ class _ArtworkSalesDashboardState extends State<ArtworkSalesDashboard>
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: _loadSalesData,
-                child: const Text('art_walk_retry'.tr()),
+                child: Text(tr('art_walk_retry')),
               ),
             ],
           ),
@@ -166,8 +168,7 @@ class _ArtworkSalesDashboardState extends State<ArtworkSalesDashboard>
 
     final totalSalesRevenue = _earnings!.artworkSalesEarnings;
     final totalSales = _salesTransactions.length;
-    final avgSalePrice =
-        totalSales > 0 ? totalSalesRevenue / totalSales : 0.0;
+    final avgSalePrice = totalSales > 0 ? totalSalesRevenue / totalSales : 0.0;
 
     return Container(
       margin: const EdgeInsets.all(16),
@@ -192,11 +193,11 @@ class _ArtworkSalesDashboardState extends State<ArtworkSalesDashboard>
         children: [
           Row(
             children: [
-              const Icon(Icons.palette_outlined,
-                  color: Colors.white, size: 28),
+              const Icon(Icons.palette_outlined, color: Colors.white, size: 28),
               const SizedBox(width: 12),
               Expanded(
-                child: Text('art_walk_artwork_sales_revenue'.tr(),
+                child: Text(
+                  tr('art_walk_artwork_sales_revenue'),
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -299,11 +300,13 @@ class _ArtworkSalesDashboardState extends State<ArtworkSalesDashboard>
               Icon(Icons.image_not_supported,
                   size: 48, color: Colors.grey[300]),
               const SizedBox(height: 16),
-              Text('art_walk_no_sales_yet'.tr(),
+              Text(
+                tr('art_walk_no_sales_yet'),
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
               const SizedBox(height: 8),
-              Text('art_walk_start_by_uploading_and_listing_your_artwork'.tr(),
+              Text(
+                tr('art_walk_start_by_uploading_and_listing_your_artwork'),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Colors.grey[600],
                     ),
@@ -321,7 +324,8 @@ class _ArtworkSalesDashboardState extends State<ArtworkSalesDashboard>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('art_walk_sales_summary'.tr(),
+        Text(
+          tr('art_walk_sales_summary'),
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -349,14 +353,14 @@ class _ArtworkSalesDashboardState extends State<ArtworkSalesDashboard>
             _buildMetricTile(
               icon: Icons.attach_money,
               label: 'Avg. Sale',
-              value:
-                  '\$${(totalRevenue / totalSales).toStringAsFixed(0)}',
+              value: '\$${(totalRevenue / totalSales).toStringAsFixed(0)}',
               color: Colors.purple,
             ),
             _buildMetricTile(
               icon: Icons.calendar_today,
               label: 'This Month',
-              value: '\$${(_salesStats['artworkSalesEarnings'] ?? 0.0).toStringAsFixed(2)}',
+              value:
+                  '\$${(_salesStats['artworkSalesEarnings'] ?? 0.0).toStringAsFixed(2)}',
               color: Colors.orange,
             ),
           ],
@@ -433,14 +437,16 @@ class _ArtworkSalesDashboardState extends State<ArtworkSalesDashboard>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('art_walk_top_collectors'.tr(),
+            Text(
+              tr('art_walk_top_collectors'),
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
             ),
             const SizedBox(height: 16),
             if (topBuyers.isEmpty)
-              Text('art_walk_no_collectors_yet'.tr(),
+              Text(
+                tr('art_walk_no_collectors_yet'),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Colors.grey[600],
                     ),
@@ -474,10 +480,11 @@ class _ArtworkSalesDashboardState extends State<ArtworkSalesDashboard>
                         ),
                         child: Text(
                           '${entry.value} purchase${entry.value > 1 ? 's' : ''}',
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                color: Colors.purple,
-                                fontWeight: FontWeight.w500,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    color: Colors.purple,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                         ),
                       ),
                     ],
@@ -497,7 +504,8 @@ class _ArtworkSalesDashboardState extends State<ArtworkSalesDashboard>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('art_walk_quick_actions'.tr(),
+            Text(
+              tr('art_walk_quick_actions'),
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -508,13 +516,14 @@ class _ArtworkSalesDashboardState extends State<ArtworkSalesDashboard>
               child: ElevatedButton.icon(
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('art_walk_navigating_to_upload_artwork'.tr()),
+                    SnackBar(
+                      content:
+                          Text(tr('art_walk_navigating_to_upload_artwork')),
                     ),
                   );
                 },
                 icon: const Icon(Icons.add_photo_alternate),
-                label: const Text('art_walk_upload_new_artwork'.tr()),
+                label: Text(tr('art_walk_upload_new_artwork')),
               ),
             ),
             const SizedBox(height: 12),
@@ -523,13 +532,14 @@ class _ArtworkSalesDashboardState extends State<ArtworkSalesDashboard>
               child: OutlinedButton.icon(
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('art_walk_navigating_to_manage_listings'.tr()),
+                    SnackBar(
+                      content:
+                          Text(tr('art_walk_navigating_to_manage_listings')),
                     ),
                   );
                 },
                 icon: const Icon(Icons.manage_search),
-                label: const Text('art_walk_manage_listings'.tr()),
+                label: Text(tr('art_walk_manage_listings')),
               ),
             ),
           ],
@@ -544,7 +554,8 @@ class _ArtworkSalesDashboardState extends State<ArtworkSalesDashboard>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('art_walk_recent_sales'.tr(),
+          Text(
+            tr('art_walk_recent_sales'),
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -555,7 +566,8 @@ class _ArtworkSalesDashboardState extends State<ArtworkSalesDashboard>
               child: Padding(
                 padding: const EdgeInsets.all(32),
                 child: Center(
-                  child: Text('art_walk_no_sales_transactions_yet'.tr(),
+                  child: Text(
+                    tr('art_walk_no_sales_transactions_yet'),
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Colors.grey[600],
                         ),
@@ -652,10 +664,11 @@ class _ArtworkSalesDashboardState extends State<ArtworkSalesDashboard>
                         ),
                         child: Text(
                           transaction.status.toUpperCase(),
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                color: Colors.green,
-                                fontWeight: FontWeight.w600,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    color: Colors.green,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                         ),
                       ),
                     ],
@@ -684,7 +697,8 @@ class _ArtworkSalesDashboardState extends State<ArtworkSalesDashboard>
                       Icon(Icons.check_circle,
                           size: 14, color: Colors.green[600]),
                       const SizedBox(width: 6),
-                      Text('art_walk_completed'.tr(),
+                      Text(
+                        tr('art_walk_completed'),
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
                               color: Colors.green[600],
                             ),

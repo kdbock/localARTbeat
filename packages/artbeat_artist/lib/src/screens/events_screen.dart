@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:artbeat_core/artbeat_core.dart' hide EventModel;
+import 'package:easy_localization/easy_localization.dart';import 'package:artbeat_core/artbeat_core.dart' hide EventModel;
 import '../models/event_model_internal.dart';
 import '../services/event_service_adapter.dart';
 
@@ -82,12 +82,12 @@ class _EventsScreenState extends State<EventsScreen> {
                             const Icon(Icons.event_busy,
                                 size: 64, color: Colors.grey),
                             const SizedBox(height: 16),
-                            const Text('art_walk_no_events_found'.tr(),
-                              style: TextStyle(
+                            Text(tr('art_walk_no_events_found'),
+                              style: const TextStyle(
                                   fontSize: 18, fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 8),
-                            Text('art_walk_create_your_first_event_by_tapping_the___button'.tr(),
+                            Text(tr('art_walk_create_your_first_event_by_tapping_the___button'),
                               style: TextStyle(color: Colors.grey[600]),
                               textAlign: TextAlign.center,
                             ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class ArtWalkInfoCard extends StatefulWidget {
   final VoidCallback onDismiss;
@@ -91,7 +92,9 @@ class _ArtWalkInfoCardState extends State<ArtWalkInfoCard> {
               children: [
                 TextButton(
                   onPressed: _dismissForever,
-                  child: Text('art_walk_art_walk_info_card_text_dont_show_again'.tr()),
+                  child: Text(
+                    'art_walk_art_walk_info_card_text_dont_show_again'.tr(),
+                  ),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton(

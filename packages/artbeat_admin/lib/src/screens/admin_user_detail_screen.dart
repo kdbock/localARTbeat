@@ -10,7 +10,7 @@ import '../services/admin_service.dart';
 class AdminUserDetailScreen extends StatefulWidget {
   final UserAdminModel user;
 
-  AdminUserDetailScreen({
+  const AdminUserDetailScreen({
     super.key,
     required this.user,
   });
@@ -79,7 +79,7 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
       body: Column(
         children: [
           Material(
-            color: Color(0xFF8C52FF), // Admin header color
+            color: const Color(0xFF8C52FF), // Admin header color
             child: TabBar(
               controller: _tabController,
               labelColor: const Color(0xFF00BF63), // Admin text/icon color
@@ -136,7 +136,7 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
                             _currentUser.fullName.isNotEmpty
                                 ? _currentUser.fullName[0].toUpperCase()
                                 : 'U',
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
@@ -148,7 +148,7 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
                         _currentUser.fullName.isNotEmpty
                             ? _currentUser.fullName[0].toUpperCase()
                             : 'U',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
@@ -167,14 +167,14 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
                                 fontWeight: FontWeight.bold,
                               ),
                     ),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Text(
                       _currentUser.email,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: Colors.grey.shade600,
                           ),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Row(
                       children: [
                         _buildUserTypeChip(
@@ -188,7 +188,7 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
               ),
             ],
           ),
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
 
           // Stats cards
           GridView.count(
@@ -244,7 +244,7 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
 
   Widget _buildDetailsTab() {
     return SingleChildScrollView(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -312,7 +312,7 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
 
   Widget _buildActivityTab() {
     return SingleChildScrollView(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -328,11 +328,11 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
           // For now, show basic activity info
           Card(
             child: Padding(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  const Text(
                     'Activity Summary',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
@@ -381,11 +381,11 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
 
   Widget _buildAdminTab() {
     return SingleChildScrollView(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Admin Information',
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
@@ -394,11 +394,11 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
             Card(
               color: Colors.red.shade50,
               child: Padding(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
+                    const Row(
                       children: [
                         Icon(Icons.block, color: Colors.red),
                         SizedBox(width: 8),
@@ -433,11 +433,11 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
           ],
           Card(
             child: Padding(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  const Text(
                     'Admin Actions',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
@@ -478,11 +478,11 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
             const SizedBox(height: 16),
             Card(
               child: Padding(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'Admin Notes',
                       style:
                           TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
@@ -521,11 +521,11 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
             const SizedBox(height: 16),
             Card(
               child: Padding(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'Admin Flags',
                       style:
                           TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
@@ -556,54 +556,54 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  const Text(
                     'User Management',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   // Edit Profile Section
                   if (_isEditing) ...[
                     Text('admin_admin_user_detail_text_edit_profile'.tr(),
-                        style: TextStyle(fontWeight: FontWeight.w600)),
-                    SizedBox(height: 12),
+                        style: const TextStyle(fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 12),
                     TextField(
                       controller: _fullNameController,
                       decoration: const InputDecoration(labelText: 'Full Name'),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     TextField(
                       controller: _usernameController,
                       decoration: const InputDecoration(labelText: 'Username'),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     TextField(
                       controller: _emailController,
-                      decoration: InputDecoration(labelText: 'Email'),
+                      decoration: const InputDecoration(labelText: 'Email'),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     TextField(
                       controller: _bioController,
-                      decoration: InputDecoration(labelText: 'Bio'),
+                      decoration: const InputDecoration(labelText: 'Bio'),
                       maxLines: 3,
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     TextField(
                       controller: _locationController,
-                      decoration: InputDecoration(labelText: 'Location'),
+                      decoration: const InputDecoration(labelText: 'Location'),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     TextField(
                       controller: _zipCodeController,
-                      decoration: InputDecoration(labelText: 'Zip Code'),
+                      decoration: const InputDecoration(labelText: 'Zip Code'),
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     Row(
                       children: [
                         ElevatedButton(
                           onPressed: _updateUserProfile,
                           child: Text('admin_admin_user_detail_text_save_changes'.tr()),
                         ),
-                        SizedBox(width: 8),
+                        const SizedBox(width: 8),
                         TextButton(
                           onPressed: () {
                             setState(() => _isEditing = false);
@@ -627,11 +627,11 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
                       label: Text('admin_admin_user_detail_text_edit_profile'.tr()),
                     ),
                   ],
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   // Image Management
-                  Text('Image Management',
+                  const Text('Image Management',
                       style: TextStyle(fontWeight: FontWeight.w600)),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   if (_currentUser.profileImageUrl.isNotEmpty) ...[
                     ElevatedButton.icon(
                       onPressed: _removeProfileImage,
@@ -642,16 +642,16 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
                         foregroundColor: Colors.white,
                       ),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                   ],
                   // User Type Management
-                  SizedBox(height: 16),
-                  Text('User Type',
+                  const SizedBox(height: 16),
+                  const Text('User Type',
                       style: TextStyle(fontWeight: FontWeight.w600)),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   DropdownButton<UserType>(
                     value: _getUserTypeFromString(_currentUser.userType),
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.black,
                       fontSize: 16,
                     ),
@@ -666,7 +666,7 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
                         value: type,
                         child: Text(
                           type.name.toUpperCase(),
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.black,
                             fontSize: 16,
                           ),
@@ -674,11 +674,11 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
                       );
                     }).toList(),
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   // Verification and Featured Status
-                  Text('Status Management',
+                  const Text('Status Management',
                       style: TextStyle(fontWeight: FontWeight.w600)),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   SwitchListTile(
                     title: Text('admin_admin_user_detail_text_verified'.tr()),
                     value: _currentUser.isVerified,
@@ -745,7 +745,7 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
     return Card(
       elevation: 2,
       child: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -783,7 +783,7 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
   Widget _buildActivityItem(
       String title, String value, IconData icon, Color color) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
           Icon(icon, size: 20, color: color),
@@ -811,11 +811,11 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
   Widget _buildAdminActionTile(
       String title, String value, IconData icon, Color color) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
           Icon(icon, size: 20, color: color),
-          SizedBox(width: 12),
+          const SizedBox(width: 12),
           Expanded(child: Text(title)),
           Text(
             value,
@@ -833,7 +833,7 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
     final color = _getUserTypeColor(userType);
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
@@ -855,7 +855,7 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
     final color = _getStatusColor(_currentUser.statusColor);
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
@@ -962,7 +962,7 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
       context: context,
       builder: (context) => AlertDialog(
         title: Text('admin_admin_user_detail_text_remove_profile_image'.tr()),
-        content: Text(
+        content: const Text(
             'Are you sure you want to remove this user\'s profile image?'),
         actions: [
           TextButton(

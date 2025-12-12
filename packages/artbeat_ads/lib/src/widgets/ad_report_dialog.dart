@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../models/ad_report_model.dart';
 
 /// Dialog for reporting ads with predefined reasons
@@ -50,13 +51,13 @@ class _AdReportDialogState extends State<AdReportDialog> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.red.withValues(alpha: 0.1),
+                    color: const Color(0x19FF0000),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(Icons.flag, color: Colors.red, size: 24),
                 ),
                 const SizedBox(width: 12),
-                const Expanded(
+                Expanded(
                   child: Text(
                     'ads_ad_report_text_report_advertisement'.tr(),
                     style: const TextStyle(
@@ -305,7 +306,7 @@ class _AdReportDialogState extends State<AdReportDialog> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('ads_ad_report_text_failed_to_submit'.tr() + ': $e'),
+            content: Text('${'ads_ad_report_text_failed_to_submit'.tr()}: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -368,10 +369,8 @@ class AdReportButton extends StatelessWidget {
             final success = await onReport(adId, reason, details);
             if (success && context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
-                    'ads_ad_report_text_report_submitted'.tr(),
-                  ),
+                SnackBar(
+                  content: Text('ads_ad_report_text_report_submitted'.tr()),
                   backgroundColor: Colors.green,
                 ),
               );
@@ -380,7 +379,9 @@ class AdReportButton extends StatelessWidget {
             if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('ads_ad_report_text_failed_to_submit'.tr() + ': $e'),
+                  content: Text(
+                    '${'ads_ad_report_text_failed_to_submit'.tr()}: $e',
+                  ),
                   backgroundColor: Colors.red,
                 ),
               );

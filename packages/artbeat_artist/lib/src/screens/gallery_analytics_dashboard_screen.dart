@@ -228,8 +228,8 @@ class _GalleryAnalyticsDashboardScreenState
   Widget _buildRevenueChart() {
     if (_revenueData.isEmpty) {
       return Center(
-        child: Text(
-            'artist_gallery_analytics_dashboard_text_no_revenue_data'.tr()),
+        child:
+            Text(tr('artist_gallery_analytics_dashboard_text_no_revenue_data')),
       );
     }
 
@@ -328,20 +328,19 @@ class _GalleryAnalyticsDashboardScreenState
         columns: [
           DataColumn(
               label:
-                  Text('artist_gallery_analytics_dashboard_text_artist'.tr())),
+                  Text(tr('artist_gallery_analytics_dashboard_text_artist'))),
           DataColumn(
               label: Text(
                   'artist_gallery_analytics_dashboard_text_artwork_views'
                       .tr())),
           DataColumn(
-              label:
-                  Text('artist_gallery_analytics_dashboard_text_sales'.tr())),
+              label: Text(tr('artist_gallery_analytics_dashboard_text_sales'))),
           DataColumn(
               label:
-                  Text('artist_gallery_analytics_dashboard_text_revenue'.tr())),
+                  Text(tr('artist_gallery_analytics_dashboard_text_revenue'))),
           DataColumn(
               label: Text(
-                  'artist_gallery_analytics_dashboard_text_commission'.tr())),
+                  tr('artist_gallery_analytics_dashboard_text_commission'))),
         ],
         rows: _artistPerformance
             .map((artist) => DataRow(cells: [
@@ -493,7 +492,7 @@ class _GalleryAnalyticsDashboardScreenState
               PopupMenuItem(
                 value: 'week',
                 child: Text(
-                    'artist_gallery_analytics_dashboard_text_last_7_days'.tr()),
+                    tr('artist_gallery_analytics_dashboard_text_last_7_days')),
               ),
               PopupMenuItem(
                 value: 'month',
@@ -545,8 +544,9 @@ class _GalleryAnalyticsDashboardScreenState
                 const SizedBox(height: 24),
 
                 // Overview metrics
-                const Text('art_walk_performance_overview'.tr(),
-                  style: TextStyle(
+                Text(
+                  tr('art_walk_performance_overview'),
+                  style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
@@ -579,8 +579,9 @@ class _GalleryAnalyticsDashboardScreenState
                 const SizedBox(height: 32),
 
                 // Revenue chart
-                const Text('art_walk_revenue_trend'.tr(),
-                  style: TextStyle(
+                Text(
+                  tr('art_walk_revenue_trend'),
+                  style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
@@ -594,8 +595,9 @@ class _GalleryAnalyticsDashboardScreenState
                 const SizedBox(height: 32),
 
                 // Artist performance
-                const Text('art_walk_artist_performance'.tr(),
-                  style: TextStyle(
+                Text(
+                  tr('art_walk_artist_performance'),
+                  style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
@@ -612,8 +614,9 @@ class _GalleryAnalyticsDashboardScreenState
                 const SizedBox(height: 32),
 
                 // Commission summary
-                const Text('art_walk_commission_summary'.tr(),
-                  style: TextStyle(
+                Text(
+                  tr('art_walk_commission_summary'),
+                  style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
@@ -677,8 +680,9 @@ class _GalleryAnalyticsDashboardScreenState
                   child: ElevatedButton.icon(
                     onPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('art_walk_generating_report_pdf__check_your_downloads_folder'.tr()),
+                        SnackBar(
+                          content: Text(tr(
+                              'art_walk_generating_report_pdf__check_your_downloads_folder')),
                         ),
                       );
                     },

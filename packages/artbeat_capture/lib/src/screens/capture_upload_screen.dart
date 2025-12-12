@@ -150,7 +150,11 @@ class _CaptureUploadScreenState extends State<CaptureUploadScreen> {
     if (!serviceEnabled) {
       // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('capture_capture_upload_text_location_services_are'.tr())),
+        SnackBar(
+          content: Text(
+            'capture_capture_upload_text_location_services_are'.tr(),
+          ),
+        ),
       );
       return;
     }
@@ -161,7 +165,11 @@ class _CaptureUploadScreenState extends State<CaptureUploadScreen> {
       if (permission == LocationPermission.denied) {
         // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('capture_capture_upload_text_location_permissions_are'.tr())),
+          SnackBar(
+            content: Text(
+              'capture_capture_upload_text_location_permissions_are'.tr(),
+            ),
+          ),
         );
         return;
       }
@@ -170,11 +178,9 @@ class _CaptureUploadScreenState extends State<CaptureUploadScreen> {
     if (permission == LocationPermission.deniedForever) {
       // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'capture_upload_location_permissions_denied'.tr(),
-          ),
-        );
+        SnackBar(
+          content: Text('capture_upload_location_permissions_denied'.tr()),
+        ),
       );
       return;
     }
@@ -191,7 +197,11 @@ class _CaptureUploadScreenState extends State<CaptureUploadScreen> {
       ScaffoldMessenger.of(
         // ignore: use_build_context_synchronously
         context,
-      ).showSnackBar(SnackBar(content: Text('capture_capture_upload_error_failed_to_get'.tr())));
+      ).showSnackBar(
+        SnackBar(
+          content: Text('capture_capture_upload_error_failed_to_get'.tr()),
+        ),
+      );
     }
   }
 
@@ -226,9 +236,9 @@ class _CaptureUploadScreenState extends State<CaptureUploadScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'capture_upload_success_message'.tr(),
-                style: TextStyle(fontSize: 16),
+                style: const TextStyle(fontSize: 16),
               ),
               const SizedBox(height: 16),
               Container(
@@ -261,9 +271,9 @@ class _CaptureUploadScreenState extends State<CaptureUploadScreen> {
                       size: 32,
                     ),
                     const SizedBox(height: 8),
-                    const Text(
+                    Text(
                       'capture_upload_ready_create_art_walk'.tr(),
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                       ),
@@ -411,13 +421,11 @@ class _CaptureUploadScreenState extends State<CaptureUploadScreen> {
 
         // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'capture_upload_upload_success'.tr(),
-            ),
+          SnackBar(
+            content: Text('capture_upload_upload_success'.tr()),
             backgroundColor: Colors.green,
-            duration: Duration(seconds: 2),
-          );
+            duration: const Duration(seconds: 2),
+          ),
         );
 
         // Show success dialog with Create Art Walk option
@@ -655,7 +663,9 @@ class _CaptureUploadScreenState extends State<CaptureUploadScreen> {
                       },
                       hint: Text(
                         'capture_upload_select_art_type'.tr(),
-                        style: TextStyle(color: core.ArtbeatColors.textPrimary),
+                        style: const TextStyle(
+                          color: core.ArtbeatColors.textPrimary,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -696,7 +706,9 @@ class _CaptureUploadScreenState extends State<CaptureUploadScreen> {
                       },
                       hint: Text(
                         'capture_upload_select_art_medium'.tr(),
-                        style: TextStyle(color: core.ArtbeatColors.textPrimary),
+                        style: const TextStyle(
+                          color: core.ArtbeatColors.textPrimary,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -719,7 +731,10 @@ class _CaptureUploadScreenState extends State<CaptureUploadScreen> {
                       onChanged: (value) {
                         setState(() => _disclaimerAccepted = value ?? false);
                       },
-                      title: Text('capture_capture_upload_text_public_art_disclaimer'.tr()),
+                      title: Text(
+                        'capture_capture_upload_text_public_art_disclaimer'
+                            .tr(),
+                      ),
                       subtitle: const Text(
                         'I confirm this is public art in a safe, accessible location. No private property, unsafe areas, nudity, or derogatory content.',
                         style: TextStyle(fontSize: 12),
@@ -738,7 +753,10 @@ class _CaptureUploadScreenState extends State<CaptureUploadScreen> {
                               );
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text('capture_capture_upload_button_gesturedetector_was_tapped'.tr()),
+                                  content: Text(
+                                    'capture_capture_upload_button_gesturedetector_was_tapped'
+                                        .tr(),
+                                  ),
                                 ),
                               );
                               _submitCapture();

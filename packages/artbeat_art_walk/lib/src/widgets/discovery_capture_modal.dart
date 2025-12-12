@@ -8,6 +8,7 @@ import '../models/public_art_model.dart';
 import '../services/instant_discovery_service.dart';
 import '../services/social_service.dart';
 import '../theme/art_walk_design_system.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Modal for capturing discovered art
 class DiscoveryCaptureModal extends StatefulWidget {
@@ -138,7 +139,11 @@ class _DiscoveryCaptureModalState extends State<DiscoveryCaptureModal> {
         setState(() => _isCapturing = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('art_walk_discovery_capture_modal_error_error_capturing_discovery'.tr().replaceAll('{error}', e.toString())),
+            content: Text(
+              'art_walk_discovery_capture_modal_error_error_capturing_discovery'
+                  .tr()
+                  .replaceAll('{error}', e.toString()),
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -191,7 +196,11 @@ class _DiscoveryCaptureModalState extends State<DiscoveryCaptureModal> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('art_walk_discovery_capture_modal_error_error_opening_discussion'.tr().replaceAll('{error}', e.toString())),
+            content: Text(
+              'art_walk_discovery_capture_modal_error_error_opening_discussion'
+                  .tr()
+                  .replaceAll('{error}', e.toString()),
+            ),
             backgroundColor: Colors.red,
           ),
         );

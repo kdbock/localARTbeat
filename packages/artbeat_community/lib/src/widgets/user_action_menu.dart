@@ -61,7 +61,7 @@ class _UserActionMenuState extends State<UserActionMenu> {
   Future<void> _showBlockConfirmationDialog() async {
     if (currentUser == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('art_walk_user_action_sign_in_required'.tr()),
           backgroundColor: Colors.orange,
         ),
@@ -84,11 +84,21 @@ class _UserActionMenuState extends State<UserActionMenu> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text(_isBlocked ? 'art_walk_user_action_unblock_title'.tr() : 'art_walk_user_action_block_title'.tr()),
+        title: Text(
+          _isBlocked
+              ? 'art_walk_user_action_unblock_title'.tr()
+              : 'art_walk_user_action_block_title'.tr(),
+        ),
         content: Text(
           _isBlocked
-              ? 'art_walk_user_action_unblock_confirmation'.tr().replaceAll('{userName}', widget.userName ?? 'this user')
-              : 'art_walk_user_action_block_confirmation'.tr().replaceAll('{userName}', widget.userName ?? 'this user'),
+              ? 'art_walk_user_action_unblock_confirmation'.tr().replaceAll(
+                  '{userName}',
+                  widget.userName ?? 'this user',
+                )
+              : 'art_walk_user_action_block_confirmation'.tr().replaceAll(
+                  '{userName}',
+                  widget.userName ?? 'this user',
+                ),
         ),
         actions: [
           TextButton(
@@ -97,7 +107,11 @@ class _UserActionMenuState extends State<UserActionMenu> {
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(_isBlocked ? 'art_walk_user_action_unblock'.tr() : 'art_walk_user_action_block'.tr()),
+            child: Text(
+              _isBlocked
+                  ? 'art_walk_user_action_unblock'.tr()
+                  : 'art_walk_user_action_block'.tr(),
+            ),
           ),
         ],
       ),
@@ -113,15 +127,15 @@ class _UserActionMenuState extends State<UserActionMenu> {
     showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (loadingContext) => const Center(
+      builder: (loadingContext) => Center(
         child: Card(
           child: Padding(
-            padding: EdgeInsets.all(20),
+            padding: const EdgeInsets.all(20),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
+                const CircularProgressIndicator(),
+                const SizedBox(height: 16),
                 Text('art_walk_user_action_processing'.tr()),
               ],
             ),
@@ -184,11 +198,9 @@ class _UserActionMenuState extends State<UserActionMenu> {
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(
-                    'art_walk_user_action_block_failed'.tr(),
-                  ),
+                  content: Text('art_walk_user_action_block_failed'.tr()),
                   backgroundColor: Colors.red,
-                  duration: Duration(seconds: 3),
+                  duration: const Duration(seconds: 3),
                 ),
               );
             }
@@ -207,7 +219,12 @@ class _UserActionMenuState extends State<UserActionMenu> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('art_walk_user_action_error'.tr().replaceAll('{error}', e.toString())),
+              content: Text(
+                'art_walk_user_action_error'.tr().replaceAll(
+                  '{error}',
+                  e.toString(),
+                ),
+              ),
               backgroundColor: Colors.red,
               duration: const Duration(seconds: 4),
             ),
@@ -242,10 +259,10 @@ class _UserActionMenuState extends State<UserActionMenu> {
         }
       },
       itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-        const PopupMenuItem<String>(
+        PopupMenuItem<String>(
           value: 'report',
           child: ListTile(
-            leading: Icon(Icons.flag),
+            leading: const Icon(Icons.flag),
             title: Text('art_walk_user_action_report'.tr()),
           ),
         ),

@@ -974,36 +974,32 @@ class _CommunityDiscoverTabState extends State<CommunityDiscoverTab> {
     try {
       setState(() => _isLoadingFeaturedArtists = true);
 
-      final snapshot = await FirebaseFirestore.instance
-          .collection('artistProfiles')
-          .where('isFeatured', isEqualTo: true)
-          .limit(10)
-          .get();
+      // Get featured artists based on active features
+      final subscriptionService = SubscriptionService();
+      final featuredArtists = await subscriptionService.getFeaturedArtists();
 
       final artists = <Map<String, dynamic>>[];
-      for (final doc in snapshot.docs) {
-        final data = doc.data();
-        final followerCount = await _getFollowerCount(doc.id);
+      for (final artist in featuredArtists) {
+        final followerCount = await _getFollowerCount(artist.id);
 
-        final mediums = data['mediums'] as List<dynamic>? ?? [];
-        final styles = data['styles'] as List<dynamic>? ?? [];
+        final mediums = artist.mediums;
+        final styles = artist.styles;
         String specialty = '';
 
         if (mediums.isNotEmpty) {
-          specialty = mediums.first.toString();
+          specialty = mediums.first;
         } else if (styles.isNotEmpty) {
-          specialty = styles.first.toString();
-        } else if (data['location'] != null &&
-            (data['location'] as String).isNotEmpty) {
-          specialty = data['location'] as String;
+          specialty = styles.first;
+        } else if (artist.location != null && artist.location!.isNotEmpty) {
+          specialty = artist.location!;
         }
 
         artists.add({
-          'id': doc.id,
-          'userId': data['userId'] ?? '',
-          'name': data['displayName'] ?? 'Unknown Artist',
+          'id': artist.id,
+          'userId': artist.userId,
+          'name': artist.displayName,
           'specialty': specialty,
-          'avatar': data['profileImageUrl'] ?? '',
+          'avatar': artist.profileImageUrl ?? '',
           'followers': _formatFollowerCount(followerCount),
         });
       }

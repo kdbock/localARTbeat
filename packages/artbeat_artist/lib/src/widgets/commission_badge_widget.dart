@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:easy_localization/easy_localization.dart';
 /// Widget that displays commission status on artist profiles
 class CommissionBadge extends StatelessWidget {
   final bool acceptingCommissions;
@@ -35,7 +35,7 @@ class CommissionBadge extends StatelessWidget {
             size: 16,
           ),
           const SizedBox(width: 6),
-          Text('art_walk_accepting_commissions'.tr(),
+          Text(tr('art_walk_accepting_commissions'),
             style: TextStyle(
               color: Colors.green.shade700,
               fontWeight: FontWeight.w600,
@@ -77,7 +77,7 @@ class CommissionInfoCard extends StatelessWidget {
             children: [
               Icon(Icons.art_track, color: Colors.blue.shade700, size: 18),
               const SizedBox(width: 8),
-              Text('art_walk_commission_details'.tr(),
+              Text(tr('art_walk_commission_details'),
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Colors.blue.shade900,
@@ -92,7 +92,7 @@ class CommissionInfoCard extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('art_walk_base_price'.tr(),
+                  Text(tr('art_walk_base_price'),
                     style: TextStyle(color: Colors.blue.shade700),
                   ),
                   Text(
@@ -111,7 +111,7 @@ class CommissionInfoCard extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('art_walk_turnaround'.tr(),
+                  Text(tr('art_walk_turnaround'),
                     style: TextStyle(color: Colors.blue.shade700),
                   ),
                   Text(

@@ -67,7 +67,9 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
         // No artist profile found
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('artist_artist_public_profile_text_artist_profile_not'.tr())),
+            SnackBar(
+                content: Text(tr(
+                    'artist_artist_public_profile_text_artist_profile_not'))),
           );
           Navigator.pop(context);
         }
@@ -124,7 +126,9 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
       // debugPrint('❌ ArtistPublicProfileScreen: Error loading profile: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('artist_artist_public_profile_error_error_loading_artist'.tr())),
+          SnackBar(
+              content: Text(tr(
+                  'artist_artist_public_profile_error_error_loading_artist'))),
         );
         setState(() {
           _isLoading = false;
@@ -138,7 +142,9 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
       // Prompt user to log in
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('artist_artist_public_profile_text_please_log_in'.tr())),
+          SnackBar(
+              content:
+                  Text(tr('artist_artist_public_profile_text_please_log_in'))),
         );
       }
       return;
@@ -157,7 +163,8 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('admin_unified_admin_dashboard_error_error_e'.tr())),
+          SnackBar(
+              content: Text(tr('admin_unified_admin_dashboard_error_error_e'))),
         );
       }
     }
@@ -172,7 +179,9 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('artist_artist_public_profile_text_could_not_open'.tr())),
+          SnackBar(
+              content:
+                  Text(tr('artist_artist_public_profile_text_could_not_open'))),
         );
       }
     }
@@ -428,7 +437,8 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
 
           // Divider
           SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
             sliver: SliverToBoxAdapter(
               child: Divider(
                 color: Colors.grey[300],
@@ -467,10 +477,11 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
                     ),
 
                   // Specialties
-                  const Padding(
-                    padding: EdgeInsets.only(top: 16.0),
-                    child: Text('art_walk_specialties'.tr(),
-                      style: TextStyle(
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16.0),
+                    child: Text(
+                      tr('art_walk_specialties'),
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
                       ),
@@ -502,10 +513,11 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
                   ),
 
                   // Social media and website links
-                  const Padding(
-                    padding: EdgeInsets.only(top: 16.0),
-                    child: Text('art_walk_connect'.tr(),
-                      style: TextStyle(
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16.0),
+                    child: Text(
+                      tr('art_walk_connect'),
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
                       ),
@@ -569,8 +581,9 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('art_walk_artwork'.tr(),
-                    style: TextStyle(
+                  Text(
+                    tr('art_walk_artwork'),
+                    style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 18,
                     ),
@@ -592,7 +605,8 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
             sliver: _artwork.isEmpty
                 ? SliverToBoxAdapter(
                     child: Center(
-                      child: Text('artist_artist_public_profile_text_no_artwork_available'.tr()),
+                      child: Text(tr(
+                          'artist_artist_public_profile_text_no_artwork_available')),
                     ),
                   )
                 : SliverGrid(
@@ -779,7 +793,8 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
     if (_currentUserId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('artist_artist_public_profile_text_please_log_in_8'.tr()),
+          content:
+              Text(tr('artist_artist_public_profile_text_please_log_in_8')),
           backgroundColor: Colors.red,
         ),
       );
@@ -790,7 +805,8 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
     if (_currentUserId == _artistProfile!.userId) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('artist_artist_public_profile_text_you_cannot_send'.tr()),
+          content:
+              Text(tr('artist_artist_public_profile_text_you_cannot_send')),
           backgroundColor: Colors.orange,
         ),
       );

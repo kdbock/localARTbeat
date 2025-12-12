@@ -146,7 +146,7 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
               content: Text(
-                  'artist_event_creation_error_error_selecting_image'.tr())),
+                  tr('artist_event_creation_error_error_selecting_image'))),
         );
       }
     }
@@ -300,7 +300,7 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        appBar: AppBar(title: Text('artist_event_creation_text_event'.tr())),
+        appBar: AppBar(title: Text(tr('artist_event_creation_text_event'))),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
@@ -309,7 +309,7 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
     if (!_canCreateEvents) {
       return Scaffold(
         appBar: AppBar(
-            title: Text('artist_artist_dashboard_text_create_event'.tr())),
+            title: Text(tr('artist_artist_dashboard_text_create_event'))),
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(24.0),
@@ -349,7 +349,7 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
                       vertical: 12,
                     ),
                   ),
-                  child: Text('artist_event_creation_text_upgrade_to_pro'.tr()),
+                  child: Text(tr('artist_event_creation_text_upgrade_to_pro')),
                 ),
               ],
             ),
@@ -430,7 +430,7 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
                                   color: Colors.grey.shade400,
                                 ),
                                 const SizedBox(height: 8),
-                                Text('art_walk_add_cover_image'.tr(),
+                                Text(tr('art_walk_add_cover_image'),
                                   style: TextStyle(
                                     color: Colors.grey.shade600,
                                   ),
@@ -466,8 +466,8 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('art_walk_start_date'.tr(),
-                          style: TextStyle(
+                        Text(tr('art_walk_start_date'),
+                          style: const TextStyle(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -501,8 +501,8 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('art_walk_end_date'.tr(),
-                          style: TextStyle(
+                        Text(tr('art_walk_end_date'),
+                          style: const TextStyle(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -543,8 +543,8 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('art_walk_start_time'.tr(),
-                          style: TextStyle(
+                        Text(tr('art_walk_start_time'),
+                          style: const TextStyle(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -577,8 +577,8 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('art_walk_end_time'.tr(),
-                          style: TextStyle(
+                        Text(tr('art_walk_end_time'),
+                          style: const TextStyle(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -650,7 +650,7 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
 
               // Public/Private toggle
               SwitchListTile(
-                title: Text('artist_event_creation_text_public_event'.tr()),
+                title: Text(tr('artist_event_creation_text_public_event')),
                 subtitle: const Text(
                     'Allow others to see and register for this event'),
                 value: _isPublic,

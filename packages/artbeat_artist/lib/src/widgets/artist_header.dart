@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:artbeat_core/artbeat_core.dart';
+import 'package:easy_localization/easy_localization.dart';import 'package:artbeat_core/artbeat_core.dart';
 
 /// Artist Package Specific Header
 ///
@@ -236,8 +236,8 @@ class _ArtistHeaderState extends State<ArtistHeader> {
             // Header
             Container(
               padding: const EdgeInsets.all(20),
-              child: const Text('art_walk_artist_menu'.tr(),
-                style: TextStyle(
+              child: Text(tr('art_walk_artist_menu'),
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'Limelight',
@@ -248,7 +248,7 @@ class _ArtistHeaderState extends State<ArtistHeader> {
             // Menu items for artist package
             ListTile(
               leading: const Icon(Icons.palette, color: _headerColor),
-              title: const Text('art_walk_artist_dashboard'.tr()),
+              title: Text(tr('art_walk_artist_dashboard')),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/artist/dashboard');
@@ -256,7 +256,7 @@ class _ArtistHeaderState extends State<ArtistHeader> {
             ),
             ListTile(
               leading: const Icon(Icons.search, color: _headerColor),
-              title: const Text('art_walk_find_artists'.tr()),
+              title: Text(tr('art_walk_find_artists')),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/artist/search');
@@ -264,7 +264,7 @@ class _ArtistHeaderState extends State<ArtistHeader> {
             ),
             ListTile(
               leading: const Icon(Icons.star, color: _headerColor),
-              title: const Text('art_walk_subscription'.tr()),
+              title: Text(tr('art_walk_subscription')),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/artist/subscription');
@@ -290,19 +290,19 @@ class _ArtistHeaderState extends State<ArtistHeader> {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('art_walk_artist_developer_tools'.tr()),
+        title: Text(tr('art_walk_artist_developer_tools')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              title: const Text('art_walk_test_artist_subscription'.tr()),
+              title: Text(tr('art_walk_test_artist_subscription')),
               onTap: () {
                 Navigator.pop(context);
                 // Implement artist subscription testing
               },
             ),
             ListTile(
-              title: const Text('art_walk_clear_artist_cache'.tr()),
+              title: Text(tr('art_walk_clear_artist_cache')),
               onTap: () {
                 Navigator.pop(context);
                 // Implement artist cache clearing
@@ -313,7 +313,7 @@ class _ArtistHeaderState extends State<ArtistHeader> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('art_walk_close'.tr()),
+            child: Text(tr('art_walk_close')),
           ),
         ],
       ),

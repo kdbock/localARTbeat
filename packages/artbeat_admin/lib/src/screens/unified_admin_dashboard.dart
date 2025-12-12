@@ -232,10 +232,10 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.error_outline, size: 64, color: Colors.red),
-          SizedBox(height: 16),
+          const Icon(Icons.error_outline, size: 64, color: Colors.red),
+          const SizedBox(height: 16),
           Text('admin_unified_admin_dashboard_error_error_error'.tr()),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           ElevatedButton(
             onPressed: _loadAllData,
             child: Text('admin_admin_settings_text_retry'.tr()),
@@ -337,7 +337,7 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon, size: 32, color: color),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
               value,
               style: TextStyle(
@@ -360,15 +360,15 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
   Widget _buildQuickActions() {
     return Card(
       child: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'Quick Actions',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Wrap(
               spacing: 8,
               runSpacing: 8,
@@ -408,7 +408,7 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
       icon: Icon(icon, size: 18),
       label: Text(label),
       style: ElevatedButton.styleFrom(
-        backgroundColor: Color(0xFF8C52FF),
+        backgroundColor: const Color(0xFF8C52FF),
         foregroundColor: Colors.white,
       ),
     );
@@ -417,15 +417,15 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
   Widget _buildRecentActivity() {
     return Card(
       child: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'Recent Activity',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             if (_recentActivities.isEmpty)
               Text('admin_unified_admin_dashboard_text_no_recent_activity'.tr())
             else
@@ -456,11 +456,11 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
   Widget _buildSystemHealth() {
     return Card(
       child: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'System Health',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
@@ -492,7 +492,7 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
           color: isHealthy ? Colors.green : Colors.red,
           size: 32,
         ),
-        SizedBox(height: 4),
+        const SizedBox(height: 4),
         Text(
           service,
           style: const TextStyle(fontSize: 12),
@@ -582,7 +582,7 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
             },
           ),
           if (_isUserSelectionMode) ...[
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
               '${_selectedUserIds.length} users selected',
               style: const TextStyle(fontWeight: FontWeight.bold),
@@ -604,7 +604,7 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
     return RefreshIndicator(
       onRefresh: _loadUserData,
       child: ListView.builder(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         itemCount: filteredUsers.length,
         itemBuilder: (context, index) {
           final user = filteredUsers[index];
@@ -692,7 +692,7 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
       length: 3,
       child: Column(
         children: [
-          TabBar(
+          const TabBar(
             labelColor: Color(0xFF8C52FF),
             tabs: [
               Tab(text: 'Pending Review'),
@@ -830,7 +830,7 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
     final isSelected = _selectedContentIds.contains(review.contentId);
 
     return Card(
-      margin: EdgeInsets.only(bottom: 8),
+      margin: const EdgeInsets.only(bottom: 8),
       color: isReported ? Colors.red.shade50 : null,
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -882,7 +882,7 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
                     ),
                     child: Text('admin_modern_unified_admin_dashboard_text_approve'.tr()),
                   ),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   ElevatedButton(
                     onPressed: () => _rejectContent(review),
                     style: ElevatedButton.styleFrom(
@@ -895,7 +895,7 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
               ],
             ),
             if (review.description.isNotEmpty) ...[
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               Text(
                 review.description,
                 maxLines: 2,
@@ -910,7 +910,7 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
 
   Widget _buildContentCard(ContentModel content) {
     return Card(
-      margin: EdgeInsets.only(bottom: 8),
+      margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         title: Text(content.title),
         subtitle: Text('admin_unified_admin_dashboard_hint_type_contenttype_status'.tr()),
@@ -941,7 +941,7 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
       length: 3,
       child: Column(
         children: [
-          TabBar(
+          const TabBar(
             labelColor: Color(0xFF8C52FF),
             tabs: [
               Tab(text: 'Revenue'),
@@ -965,7 +965,7 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
 
   Widget _buildRevenueTab() {
     return SingleChildScrollView(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       child: Column(
         children: [
           _buildFinancialOverview(),
@@ -978,11 +978,11 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
 
   Widget _buildAdsTab() {
     return SingleChildScrollView(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Ad Management',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
@@ -999,11 +999,11 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
 
   Widget _buildPayoutsTab() {
     return SingleChildScrollView(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Payout Management',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
@@ -1035,11 +1035,11 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
   Widget _buildActiveAdsSection() {
     return Card(
       child: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'Recent Ad Activity',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
@@ -1054,7 +1054,7 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
             else
               ListView.builder(
                 shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
+                physics: const NeverScrollableScrollPhysics(),
                 itemCount: _recentActivities.take(5).length,
                 itemBuilder: (context, index) {
                   final activity = _recentActivities[index];
@@ -1075,11 +1075,11 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
     final financial = _analytics?.financialMetrics;
     return Card(
       child: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'Payout Summary',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
@@ -1113,18 +1113,18 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
   Widget _buildPayoutHistorySection() {
     return Card(
       child: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'Recent Payouts',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             ListView.builder(
               shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
+              physics: const NeverScrollableScrollPhysics(),
               itemCount: 5,
               itemBuilder: (context, index) {
                 return ListTile(
@@ -1186,11 +1186,11 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
 
     return Card(
       child: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'Financial Overview',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
@@ -1239,7 +1239,7 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
             color: color,
           ),
         ),
-        Text(title, style: TextStyle(fontSize: 12)),
+        Text(title, style: const TextStyle(fontSize: 12)),
       ],
     );
   }
@@ -1247,11 +1247,11 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
   Widget _buildRevenueChart() {
     return Card(
       child: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'Revenue Trend',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class _ArtistAutocompleteDialog extends StatefulWidget {
   final UserService userService;

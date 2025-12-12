@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/artwork_model.dart';
 import '../services/artwork_discovery_service.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Widget for displaying artwork discovery recommendations
 class ArtworkDiscoveryWidget extends StatefulWidget {
@@ -70,7 +71,9 @@ class _ArtworkDiscoveryWidgetState extends State<ArtworkDiscoveryWidget> {
             children: [
               const Icon(Icons.error_outline, color: Colors.red),
               const SizedBox(height: 8),
-              Text('art_walk_failed_to_load_recommendations'.tr().replaceAll('{error}', _error)),
+              Text('art_walk_failed_to_load_recommendations'
+                  .tr()
+                  .replaceAll('{error}', _error ?? 'Unknown error')),
               TextButton(
                 onPressed: _loadRecommendations,
                 child: Text('art_walk_retry'.tr()),
@@ -82,14 +85,14 @@ class _ArtworkDiscoveryWidgetState extends State<ArtworkDiscoveryWidget> {
     }
 
     if (_recommendations.isEmpty) {
-      return const SizedBox(
+      return SizedBox(
         height: 200,
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.palette_outlined, color: Colors.grey),
-              SizedBox(height: 8),
+              const Icon(Icons.palette_outlined, color: Colors.grey),
+              const SizedBox(height: 8),
               Text('art_walk_no_recommendations_available'.tr()),
             ],
           ),

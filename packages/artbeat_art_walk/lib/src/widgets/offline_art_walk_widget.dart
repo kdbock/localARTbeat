@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class OfflineArtWalkWidget extends StatelessWidget {
   final VoidCallback onRetry;
@@ -66,7 +67,9 @@ class OfflineArtWalkWidget extends StatelessWidget {
           onPressed: () {
             Navigator.pushNamed(context, '/art-walk/list');
           },
-          child: Text('art_walk_offline_art_walk_widget_text_view_art_walks_list'.tr()),
+          child: Text(
+            'art_walk_offline_art_walk_widget_text_view_art_walks_list'.tr(),
+          ),
         ),
       ],
     );

@@ -610,8 +610,7 @@ class AppRouter {
 
         // If no arguments provided, show the user's commission requests
         if (artistId == null || artistName == null) {
-          return RouteUtils.createMainLayoutRoute(
-            appBar: RouteUtils.createAppBar('My Commission Requests'),
+          return RouteUtils.createSimpleRoute(
             child: const community.DirectCommissionsScreen(),
           );
         }

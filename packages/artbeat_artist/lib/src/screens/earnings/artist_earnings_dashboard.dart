@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
 import '../../services/earnings_service.dart';
 import '../../models/earnings_model.dart';
@@ -132,7 +133,8 @@ class _ArtistEarningsDashboardState extends State<ArtistEarningsDashboard>
             children: [
               Icon(Icons.error_outline, size: 64, color: Colors.grey[400]),
               const SizedBox(height: 16),
-              Text('art_walk_failed_to_load_earnings_data'.tr(),
+              Text(
+                tr('art_walk_failed_to_load_earnings_data'),
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
               const SizedBox(height: 8),
@@ -146,7 +148,7 @@ class _ArtistEarningsDashboardState extends State<ArtistEarningsDashboard>
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: _loadEarningsData,
-                child: const Text('art_walk_retry'.tr()),
+                child: Text(tr('art_walk_retry')),
               ),
             ],
           ),
@@ -185,7 +187,8 @@ class _ArtistEarningsDashboardState extends State<ArtistEarningsDashboard>
                   color: Colors.white, size: 28),
               const SizedBox(width: 12),
               Expanded(
-                child: Text('art_walk_total_earnings'.tr(),
+                child: Text(
+                  tr('art_walk_total_earnings'),
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -310,7 +313,8 @@ class _ArtistEarningsDashboardState extends State<ArtistEarningsDashboard>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('art_walk_earnings_breakdown'.tr(),
+            Text(
+              tr('art_walk_earnings_breakdown'),
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -357,7 +361,8 @@ class _ArtistEarningsDashboardState extends State<ArtistEarningsDashboard>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('art_walk_quick_actions'.tr(),
+            Text(
+              tr('art_walk_quick_actions'),
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -372,7 +377,7 @@ class _ArtistEarningsDashboardState extends State<ArtistEarningsDashboard>
                         ? () => _navigateToPayoutRequest()
                         : null,
                     icon: const Icon(Icons.account_balance),
-                    label: const Text('art_walk_request_payout'.tr()),
+                    label: Text(tr('art_walk_request_payout')),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
@@ -383,7 +388,7 @@ class _ArtistEarningsDashboardState extends State<ArtistEarningsDashboard>
                   child: OutlinedButton.icon(
                     onPressed: () => _navigateToPayoutAccounts(),
                     icon: const Icon(Icons.settings),
-                    label: const Text('art_walk_manage_accounts'.tr()),
+                    label: Text(tr('art_walk_manage_accounts')),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
@@ -407,7 +412,8 @@ class _ArtistEarningsDashboardState extends State<ArtistEarningsDashboard>
             Row(
               children: [
                 Expanded(
-                  child: Text('art_walk_recent_activity'.tr(),
+                  child: Text(
+                    tr('art_walk_recent_activity'),
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -415,16 +421,16 @@ class _ArtistEarningsDashboardState extends State<ArtistEarningsDashboard>
                 ),
                 TextButton(
                   onPressed: () => _tabController.animateTo(1),
-                  child: const Text('art_walk_view_all'.tr()),
+                  child: Text(tr('art_walk_view_all')),
                 ),
               ],
             ),
             const SizedBox(height: 16),
             if (_recentTransactions.isEmpty)
-              const Center(
+              Center(
                 child: Padding(
-                  padding: EdgeInsets.all(24),
-                  child: Text('art_walk_no_recent_transactions'.tr()),
+                  padding: const EdgeInsets.all(24),
+                  child: Text(tr('art_walk_no_recent_transactions')),
                 ),
               )
             else
@@ -542,7 +548,7 @@ class _ArtistEarningsDashboardState extends State<ArtistEarningsDashboard>
           backgroundColor: statusColor.withValues(alpha: 0.1),
           child: Icon(statusIcon, color: statusColor),
         ),
-        title: const Text('art_walk_payout_request'.tr()),
+        title: Text(tr('art_walk_payout_request')),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

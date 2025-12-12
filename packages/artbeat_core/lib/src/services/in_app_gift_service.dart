@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/in_app_purchase_models.dart';
 import '../utils/logger.dart';
 import 'in_app_purchase_service.dart';
+import 'artist_feature_service.dart';
 
 /// Service for handling gift-specific in-app purchases
 class InAppGiftService {
@@ -19,25 +20,29 @@ class InAppGiftService {
     'artbeat_gift_small': {
       'amount': 4.99,
       'title': 'Supporter Gift',
-      'description': 'A small token of appreciation',
+      'description':
+          'Artist featured for 30 days - Give your favorite artist more visibility!',
       'credits': 50,
     },
     'artbeat_gift_medium': {
       'amount': 9.99,
       'title': 'Fan Gift',
-      'description': 'A thoughtful gift for an artist',
+      'description':
+          'Artist featured for 90 days + 1 artwork featured for 90 days - Boost their exposure!',
       'credits': 100,
     },
     'artbeat_gift_large': {
       'amount': 24.99,
       'title': 'Patron Gift',
-      'description': 'A generous gift to support creativity',
+      'description':
+          'Artist featured for 180 days + 5 artworks featured for 180 days + Artist ad in rotation for 180 days - Maximum support!',
       'credits': 250,
     },
     'artbeat_gift_premium': {
       'amount': 49.99,
       'title': 'Benefactor Gift',
-      'description': 'A premium gift for exceptional artists',
+      'description':
+          'Artist featured for 1 year + 5 artworks featured for 1 year + Artist ad in rotation for 1 year - Ultimate artist support!',
       'credits': 500,
     },
   };
@@ -185,6 +190,9 @@ class InAppGiftService {
       // Add credits to recipient's account
       final credits = giftData['credits'] as int;
       await _addCreditsToRecipient(recipientId, credits);
+
+      // Create artist features based on gift tier
+      await _createArtistFeatures(senderId, recipientId, productId);
 
       // Send notification to recipient
       await _sendGiftNotification(senderId, recipientId, giftData, message);
@@ -485,6 +493,28 @@ class InAppGiftService {
     } catch (e) {
       AppLogger.error('Error purchasing quick gift: $e');
       return false;
+    }
+  }
+
+  /// Create artist features for a completed gift purchase
+  Future<void> _createArtistFeatures(
+    String senderId,
+    String recipientId,
+    String productId,
+  ) async {
+    try {
+      final featureService = ArtistFeatureService();
+      await featureService.createFeaturesForGift(
+        giftId: productId,
+        artistId: recipientId,
+        purchaserId: senderId,
+      );
+
+      AppLogger.info('✅ Artist features created for gift: $productId');
+    } catch (e) {
+      AppLogger.error('❌ Error creating artist features: $e');
+      // Don't fail the gift purchase if feature creation fails
+      // Features can be created manually later if needed
     }
   }
 }

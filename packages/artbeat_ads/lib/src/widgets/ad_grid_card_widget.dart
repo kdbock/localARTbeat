@@ -5,6 +5,7 @@ import '../models/index.dart';
 import '../services/local_ad_service.dart';
 import '../services/ad_report_service.dart';
 import 'ad_report_dialog.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class AdGridCardWidget extends StatefulWidget {
   final LocalAdZone zone;

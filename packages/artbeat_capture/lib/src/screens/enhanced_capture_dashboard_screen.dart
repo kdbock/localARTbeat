@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_capture/artbeat_capture.dart';
-
 
 /// Enhanced Capture Dashboard Screen
 ///
@@ -145,23 +145,23 @@ class _EnhancedCaptureDashboardScreenState
               ),
 
               // Header
-              const Padding(
-                padding: EdgeInsets.all(20),
+              Padding(
+                padding: const EdgeInsets.all(20),
                 child: Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.search,
                       color: ArtbeatColors.primaryGreen,
                       size: 24,
                     ),
-                    SizedBox(width: 16),
+                    const SizedBox(width: 16),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             'capture_dashboard_search_captures'.tr(),
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                               color: ArtbeatColors.textPrimary,
@@ -169,7 +169,7 @@ class _EnhancedCaptureDashboardScreenState
                           ),
                           Text(
                             'capture_dashboard_find_art'.tr(),
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 14,
                               color: ArtbeatColors.textSecondary,
                             ),
@@ -190,7 +190,8 @@ class _EnhancedCaptureDashboardScreenState
                     _buildSearchOption(
                       icon: Icons.camera_alt,
                       title: 'capture_dashboard_search_captures'.tr(),
-                      subtitle: 'capture_dashboard_search_captures_subtitle'.tr(),
+                      subtitle: 'capture_dashboard_search_captures_subtitle'
+                          .tr(),
                       color: ArtbeatColors.primaryGreen,
                       onTap: () {
                         Navigator.pop(context);
@@ -210,7 +211,8 @@ class _EnhancedCaptureDashboardScreenState
                     _buildSearchOption(
                       icon: Icons.trending_up,
                       title: 'capture_dashboard_popular_captures'.tr(),
-                      subtitle: 'capture_dashboard_popular_captures_subtitle'.tr(),
+                      subtitle: 'capture_dashboard_popular_captures_subtitle'
+                          .tr(),
                       color: ArtbeatColors.secondaryTeal,
                       onTap: () {
                         Navigator.pop(context);
@@ -358,8 +360,6 @@ class _EnhancedCaptureDashboardScreenState
                   child: CustomScrollView(
                     controller: _scrollController,
                     slivers: [
-
-
                       // Header Section
                       SliverToBoxAdapter(
                         child: Container(
@@ -409,7 +409,8 @@ class _EnhancedCaptureDashboardScreenState
                                     ),
                                     const SizedBox(height: 8),
                                     Text(
-                                      'capture_dashboard_discover_document'.tr(),
+                                      'capture_dashboard_discover_document'
+                                          .tr(),
                                       style: Theme.of(context)
                                           .textTheme
                                           .bodyLarge
@@ -446,7 +447,7 @@ class _EnhancedCaptureDashboardScreenState
                                   ),
                                   label: Text(
                                     'capture_dashboard_start_capture'.tr(),
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -471,7 +472,8 @@ class _EnhancedCaptureDashboardScreenState
                                   children: [
                                     Expanded(
                                       child: _buildStatCard(
-                                        title: 'capture_dashboard_stat_captures'.tr(),
+                                        title: 'capture_dashboard_stat_captures'
+                                            .tr(),
                                         value: _totalUserCaptures.toString(),
                                         icon: Icons.camera_alt,
                                         color: ArtbeatColors.primaryGreen,
@@ -480,7 +482,9 @@ class _EnhancedCaptureDashboardScreenState
                                     const SizedBox(width: 16),
                                     Expanded(
                                       child: _buildStatCard(
-                                        title: 'capture_dashboard_stat_community_views'.tr(),
+                                        title:
+                                            'capture_dashboard_stat_community_views'
+                                                .tr(),
                                         value: _totalCommunityViews.toString(),
                                         icon: Icons.visibility,
                                         color: ArtbeatColors.primaryPurple,
@@ -490,8 +494,6 @@ class _EnhancedCaptureDashboardScreenState
                                 ),
                                 const SizedBox(height: 16),
                               ],
-
-
                             ],
                           ),
                         ),
@@ -542,7 +544,6 @@ class _EnhancedCaptureDashboardScreenState
 
                       // Ad placement beneath recent captures section
 
-
                       // Community inspiration section
                       if (_communityCaptures.isNotEmpty) ...[
                         SliverToBoxAdapter(
@@ -553,7 +554,8 @@ class _EnhancedCaptureDashboardScreenState
                               children: [
                                 const SizedBox(height: 16),
                                 Text(
-                                  'capture_dashboard_community_inspiration'.tr(),
+                                  'capture_dashboard_community_inspiration'
+                                      .tr(),
                                   style: Theme.of(context).textTheme.titleLarge
                                       ?.copyWith(
                                         fontWeight: FontWeight.bold,

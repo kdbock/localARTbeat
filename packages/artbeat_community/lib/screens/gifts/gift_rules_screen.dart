@@ -34,10 +34,10 @@ class GiftRulesScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             _buildSection('Gift Tiers', [
-              'Mini Palette (\$1) - Small token of appreciation',
-              'Brush Pack (\$5) - Show greater support',
-              'Gallery Frame (\$20) - Significant recognition',
-              'Golden Canvas (\$50) - Premium support',
+              'Supporter Gift (\$4.99) - Artist featured for 30 days',
+              'Fan Gift (\$9.99) - Artist featured for 90 days + 1 artwork featured for 90 days',
+              'Patron Gift (\$24.99) - Artist featured for 180 days + 5 artworks featured for 180 days + Artist ad in rotation for 180 days',
+              'Benefactor Gift (\$49.99) - Artist featured for 1 year + 5 artworks featured for 1 year + Artist ad in rotation for 1 year',
             ]),
             _buildSection('Rules', [
               'All gifts are non-refundable',

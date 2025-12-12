@@ -81,7 +81,7 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('artist_artist_browse_error_error_loading_artists'.tr())),
+          SnackBar(content: Text(tr('artist_artist_browse_error_error_loading_artists'))),
         );
         setState(() {
           _isLoading = false;
@@ -207,13 +207,13 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
               child: Row(
                 children: [
                   FilterChip(
-                    label: Text('artist_artist_browse_text_medium_selectedmedium'.tr()),
+                    label: Text(tr('artist_artist_browse_text_medium_selectedmedium')),
                     selected: _selectedMedium != 'All',
                     onSelected: (_) => _showFilterDialog(),
                   ),
                   const SizedBox(width: 8),
                   FilterChip(
-                    label: Text('artist_artist_browse_text_style_selectedstyle'.tr()),
+                    label: Text(tr('artist_artist_browse_text_style_selectedstyle')),
                     selected: _selectedStyle != 'All',
                     onSelected: (_) => _showFilterDialog(),
                   ),
@@ -226,7 +226,7 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : _artists.isEmpty
-                      ? Center(child: Text('artist_artist_browse_text_no_artists_found'.tr()))
+                      ? Center(child: Text(tr('artist_artist_browse_text_no_artists_found')))
                       : ListView.builder(
                           itemCount: _artists.length,
                           itemBuilder: (context, index) {
@@ -402,7 +402,7 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
                       ),
                       if (artist.userType.name == core.UserType.gallery.name)
                         Chip(
-                          label: Text('artist_artist_browse_text_gallery'.tr()),
+                          label: Text(tr('artist_artist_browse_text_gallery')),
                           backgroundColor: Theme.of(context)
                               .colorScheme
                               .secondary
@@ -439,7 +439,7 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
                           )),
                       if (artist.mediums.length > 2)
                         Chip(
-                          label: Text('artist_artist_browse_text_artistmediumslength_2'.tr()),
+                          label: Text(tr('artist_artist_browse_text_artistmediumslength_2')),
                           backgroundColor:
                               Theme.of(context).chipTheme.backgroundColor,
                           labelPadding:
@@ -467,7 +467,7 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
         String tempStyle = _selectedStyle;
 
         return AlertDialog(
-          title: Text('artist_artist_browse_text_filter_artists'.tr()),
+          title: Text(tr('artist_artist_browse_text_filter_artists')),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -491,8 +491,8 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
                   }).toList(),
                 ),
                 const SizedBox(height: 16),
-                const Text('art_walk_style'.tr(),
-                    style: TextStyle(fontWeight: FontWeight.bold)),
+                Text(tr('art_walk_style'),
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
@@ -516,7 +516,7 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Text('admin_admin_payment_text_cancel'.tr()),
+              child: Text(tr('admin_admin_payment_text_cancel')),
             ),
             TextButton(
               onPressed: () {
@@ -527,7 +527,7 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
                 Navigator.pop(context);
                 _applyFilters();
               },
-              child: Text('artist_artist_browse_text_apply'.tr()),
+              child: Text(tr('artist_artist_browse_text_apply')),
             ),
           ],
         );

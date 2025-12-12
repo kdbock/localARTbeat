@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 
@@ -271,11 +272,11 @@ class _CaptureDrawerState extends State<CaptureDrawer> {
               color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: const Row(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.camera_alt, color: Colors.white, size: 16),
-                SizedBox(width: 6),
+                const Icon(Icons.camera_alt, color: Colors.white, size: 16),
+                const SizedBox(width: 6),
                 Text(
                   'capture_drawer_art_capture'.tr(),
                   style: const TextStyle(
@@ -283,7 +284,7 @@ class _CaptureDrawerState extends State<CaptureDrawer> {
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -386,7 +387,12 @@ class _CaptureDrawerState extends State<CaptureDrawer> {
         // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('capture_drawer_error_signing_out'.tr().replaceAll('{error}', e.toString())),
+            content: Text(
+              'capture_drawer_error_signing_out'.tr().replaceAll(
+                '{error}',
+                e.toString(),
+              ),
+            ),
             backgroundColor: Colors.red,
           ),
         );

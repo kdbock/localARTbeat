@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_ads/artbeat_ads.dart';
 
 // Import the existing screens
 // Removed unnecessary import for gifts_screen.dart
-import 'package:artbeat_ads/src/screens/my_ads_screen.dart';
 // Removed unnecessary import for subscriptions_screen.dart
 
 class ArtbeatStoreScreen extends StatelessWidget {
@@ -27,7 +25,7 @@ class ArtbeatStoreScreen extends StatelessWidget {
             child: TabBarView(
               children: [
                 GiftsScreen(showAppBar: false),
-                MyAdsScreen(showAppBar: false),
+                AdsScreen(),
                 SubscriptionsScreen(showAppBar: false),
               ],
             ),

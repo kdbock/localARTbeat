@@ -418,7 +418,7 @@ class _AdvancedArtworkSearchScreenState
 
               // Price range
               Text('art_walk_price_range'.tr(),
-                  style: TextStyle(fontWeight: FontWeight.w500)),
+                  style: const TextStyle(fontWeight: FontWeight.w500)),
               const SizedBox(height: 8),
               Row(
                 children: [
@@ -452,7 +452,7 @@ class _AdvancedArtworkSearchScreenState
 
               // Date range
               Text('art_walk_date_range'.tr(),
-                  style: TextStyle(fontWeight: FontWeight.w500)),
+                  style: const TextStyle(fontWeight: FontWeight.w500)),
               const SizedBox(height: 8),
               Row(
                 children: [

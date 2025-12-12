@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_art_walk/artbeat_art_walk.dart';
 import '../screens/artbeat_artwalk_dashboard_screen.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Art Walk specific drawer with focused navigation for art walk features
 class ArtWalkDrawer extends StatefulWidget {
@@ -437,7 +438,10 @@ class _ArtWalkDrawerState extends State<ArtWalkDrawer> {
           context: context,
           builder: (context) => AlertDialog(
             title: Text('art_walk_button_sign_out'.tr()),
-            content: Text('art_walk_art_walk_drawer_text_are_you_sure_you_want_to_sign_out'.tr()),
+            content: Text(
+              'art_walk_art_walk_drawer_text_are_you_sure_you_want_to_sign_out'
+                  .tr(),
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),

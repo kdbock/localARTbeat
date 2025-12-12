@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'audio_navigation_service.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Tutorial step model for onboarding
 class TutorialStep {
@@ -350,12 +351,18 @@ class _TutorialOverlayState extends State<TutorialOverlay>
                         children: [
                           TextButton(
                             onPressed: _handleDismiss,
-                            child: Text('art_walk_smart_onboarding_service_button_skip'.tr()),
+                            child: Text(
+                              'art_walk_smart_onboarding_service_button_skip'
+                                  .tr(),
+                            ),
                           ),
                           const SizedBox(width: 8),
                           ElevatedButton(
                             onPressed: _handleComplete,
-                            child: Text('art_walk_smart_onboarding_service_button_got_it'.tr()),
+                            child: Text(
+                              'art_walk_smart_onboarding_service_button_got_it'
+                                  .tr(),
+                            ),
                           ),
                         ],
                       ),

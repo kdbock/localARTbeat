@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:artbeat_art_walk/artbeat_art_walk.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Widget to display a grid of achievement badges
 class AchievementsGrid extends StatelessWidget {
@@ -55,7 +56,9 @@ class AchievementsGrid extends StatelessWidget {
                   Navigator.of(context).pushNamed('/achievements/info');
                 },
                 icon: const Icon(Icons.info_outline, size: 18),
-                label: Text('art_walk_achievements_grid_button_learn_more'.tr()),
+                label: Text(
+                  'art_walk_achievements_grid_button_learn_more'.tr(),
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.grey[200],
                   foregroundColor: Colors.grey[700],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Widget that displays a horizontal list of local artists
 class LocalArtistsRowWidget extends StatelessWidget {
@@ -23,15 +24,16 @@ class LocalArtistsRowWidget extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('art_walk_local_artists'.tr(),
-                style: TextStyle(
+              Text(
+                tr('art_walk_local_artists'),
+                style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               TextButton(
                 onPressed: onSeeAllPressed,
-                child: const Text('art_walk_see_all'.tr()),
+                child: Text(tr('art_walk_see_all')),
               ),
             ],
           ),
@@ -55,20 +57,21 @@ class LocalArtistsRowWidget extends StatelessWidget {
               }
 
               if (snapshot.hasError) {
-                return const Center(
+                return Center(
                   child: Padding(
-                    padding: EdgeInsets.all(20.0),
+                    padding: const EdgeInsets.all(20.0),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.error_outline,
                           color: Colors.red,
                           size: 36,
                         ),
-                        SizedBox(height: 8),
-                        Text('art_walk_error_loading_artists'.tr(),
-                          style: TextStyle(color: Colors.red),
+                        const SizedBox(height: 8),
+                        Text(
+                          tr('art_walk_error_loading_artists'),
+                          style: const TextStyle(color: Colors.red),
                         ),
                       ],
                     ),

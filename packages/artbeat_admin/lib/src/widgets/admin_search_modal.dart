@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/user_admin_model.dart';
 import '../models/content_model.dart';
 import '../models/transaction_model.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Admin search modal for searching across users, content, and transactions
 class AdminSearchModal extends StatefulWidget {
@@ -122,7 +123,7 @@ class _AdminSearchModalState extends State<AdminSearchModal>
               children: [
                 Text(
                   'admin_search_modal_title'.tr(),
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
@@ -196,15 +197,15 @@ class _AdminSearchModalState extends State<AdminSearchModal>
 
   Widget _buildUsersTab() {
     if (_filteredUsers.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.people_outline, size: 64, color: Colors.grey),
-            SizedBox(height: 16),
+            const Icon(Icons.people_outline, size: 64, color: Colors.grey),
+            const SizedBox(height: 16),
             Text(
               'admin_search_modal_no_users'.tr(),
-              style: TextStyle(fontSize: 16, color: Colors.grey),
+              style: const TextStyle(fontSize: 16, color: Colors.grey),
             ),
           ],
         ),
@@ -260,15 +261,15 @@ class _AdminSearchModalState extends State<AdminSearchModal>
 
   Widget _buildContentTab() {
     if (_filteredContent.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.content_copy_outlined, size: 64, color: Colors.grey),
-            SizedBox(height: 16),
+            const Icon(Icons.content_copy_outlined, size: 64, color: Colors.grey),
+            const SizedBox(height: 16),
             Text(
               'admin_search_modal_no_content'.tr(),
-              style: TextStyle(fontSize: 16, color: Colors.grey),
+              style: const TextStyle(fontSize: 16, color: Colors.grey),
             ),
           ],
         ),
@@ -321,7 +322,8 @@ class _AdminSearchModalState extends State<AdminSearchModal>
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('admin_search_selected_content'.tr(namedArgs: {'title': content.title})),
+                  content: Text('admin_search_selected_content'
+                      .tr(namedArgs: {'title': content.title})),
                 ),
               );
             },
@@ -333,15 +335,15 @@ class _AdminSearchModalState extends State<AdminSearchModal>
 
   Widget _buildTransactionsTab() {
     if (_filteredTransactions.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.receipt_outlined, size: 64, color: Colors.grey),
-            SizedBox(height: 16),
+            const Icon(Icons.receipt_outlined, size: 64, color: Colors.grey),
+            const SizedBox(height: 16),
             Text(
               'admin_search_modal_no_transactions'.tr(),
-              style: TextStyle(fontSize: 16, color: Colors.grey),
+              style: const TextStyle(fontSize: 16, color: Colors.grey),
             ),
           ],
         ),
@@ -377,7 +379,9 @@ class _AdminSearchModalState extends State<AdminSearchModal>
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('admin_search_amount'.tr(namedArgs: {'amount': transaction.amount.toStringAsFixed(2)})),
+                Text('admin_search_amount'.tr(namedArgs: {
+                  'amount': transaction.amount.toStringAsFixed(2)
+                })),
                 Text(
                   'User: ${transaction.userName}',
                   style: const TextStyle(fontSize: 12),
@@ -390,7 +394,8 @@ class _AdminSearchModalState extends State<AdminSearchModal>
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('admin_search_selected_transaction'.tr(namedArgs: {'id': transaction.id})),
+                  content: Text('admin_search_selected_transaction'
+                      .tr(namedArgs: {'id': transaction.id})),
                 ),
               );
             },

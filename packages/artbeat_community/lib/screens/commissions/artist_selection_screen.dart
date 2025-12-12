@@ -254,10 +254,14 @@ class _ArtistCard extends StatelessWidget {
               // Profile Image
               CircleAvatar(
                 radius: 30,
-                backgroundImage: artist.profileImageUrl != null
+                backgroundImage:
+                    artist.profileImageUrl != null &&
+                        artist.profileImageUrl!.isNotEmpty
                     ? NetworkImage(artist.profileImageUrl!)
                     : null,
-                child: artist.profileImageUrl == null
+                child:
+                    artist.profileImageUrl == null ||
+                        artist.profileImageUrl!.isEmpty
                     ? const Icon(Icons.person, size: 30)
                     : null,
               ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
 import '../models/artwork_model.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Reusable artwork grid widget for displaying artworks in a consistent layout
 /// Extracted from duplicate implementations to provide single source of truth
@@ -119,23 +120,24 @@ class ArtworkGridWidget extends StatelessWidget {
                   onSelected: (value) =>
                       _handleMenuAction(context, value, artwork),
                   itemBuilder: (context) => [
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'edit',
                       child: Row(
                         children: [
-                          Icon(Icons.edit, size: 18),
-                          SizedBox(width: 8),
+                          const Icon(Icons.edit, size: 18),
+                          const SizedBox(width: 8),
                           Text('art_walk_edit'.tr()),
                         ],
                       ),
                     ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'delete',
                       child: Row(
                         children: [
-                          Icon(Icons.delete, size: 18, color: Colors.red),
-                          SizedBox(width: 8),
-                          Text('art_walk_delete'.tr(), style: TextStyle(color: Colors.red)),
+                          const Icon(Icons.delete, size: 18, color: Colors.red),
+                          const SizedBox(width: 8),
+                          Text('art_walk_delete'.tr(),
+                              style: const TextStyle(color: Colors.red)),
                         ],
                       ),
                     ),
@@ -205,7 +207,7 @@ class ArtworkGridWidget extends StatelessWidget {
             else
               Text(
                 'art_walk_not_for_sale'.tr(),
-                style: TextStyle(
+                style: const TextStyle(
                   color: core.ArtbeatColors.textSecondary,
                   fontSize: 10,
                 ),
@@ -258,7 +260,9 @@ class ArtworkGridWidget extends StatelessWidget {
       builder: (context) => AlertDialog(
         title: Text('art_walk_delete_artwork'.tr()),
         content: Text(
-          'art_walk_delete_confirmation_message'.tr().replaceAll('{title}', artwork.title),
+          'art_walk_delete_confirmation_message'
+              .tr()
+              .replaceAll('{title}', artwork.title),
         ),
         actions: [
           TextButton(

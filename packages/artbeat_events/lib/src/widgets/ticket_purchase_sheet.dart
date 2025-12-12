@@ -4,6 +4,7 @@ import '../models/artbeat_event.dart';
 import '../models/ticket_type.dart';
 import '../services/event_service.dart';
 import '../services/event_notification_service.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Bottom sheet for purchasing tickets
 class TicketPurchaseSheet extends StatefulWidget {
@@ -555,7 +556,7 @@ class _TicketPurchaseSheetState extends State<TicketPurchaseSheet> {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: const Text('events_tickets_purchased'.tr()),
+        title: Text('events_tickets_purchased'.tr()),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -577,7 +578,7 @@ class _TicketPurchaseSheetState extends State<TicketPurchaseSheet> {
               Navigator.pop(context); // Close dialog
               widget.onPurchaseComplete();
             },
-            child: const Text('events_done'.tr()),
+            child: Text('events_done'.tr()),
           ),
         ],
       ),
@@ -588,12 +589,12 @@ class _TicketPurchaseSheetState extends State<TicketPurchaseSheet> {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('events_purchase_failed'.tr()),
+        title: Text('events_purchase_failed'.tr()),
         content: Text('events_purchase_error'.tr().replaceAll('{error}', error)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('events_ok'.tr()),
+            child: Text('events_ok'.tr()),
           ),
         ],
       ),

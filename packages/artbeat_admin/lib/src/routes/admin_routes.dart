@@ -8,6 +8,7 @@ import '../screens/admin_system_monitoring_screen.dart';
 import '../screens/admin_payment_screen.dart';
 import '../screens/migration_screen.dart';
 import '../models/user_admin_model.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Admin routing configuration for the ARTbeat admin system
 ///
@@ -134,9 +135,9 @@ class AdminRoutes {
                 color: Colors.red,
               ),
               const SizedBox(height: 16),
-              const Text(
+              Text(
                 'admin_routes_navigation_error'.tr(),
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),

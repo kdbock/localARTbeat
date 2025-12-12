@@ -295,7 +295,8 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('art_walk_artist_marketing'.tr(),
+        Text(
+          tr('art_walk_artist_marketing'),
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -337,7 +338,8 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('art_walk_promote_your_art'.tr(),
+                        Text(
+                          tr('art_walk_promote_your_art'),
                           style:
                               Theme.of(context).textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.bold,
@@ -345,7 +347,8 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
                                   ),
                         ),
                         const SizedBox(height: 4),
-                        Text('art_walk_create_ads_featuring_your_artwork_to_reach_more_art_lovers'.tr(),
+                        Text(
+                          tr('art_walk_create_ads_featuring_your_artwork_to_reach_more_art_lovers'),
                           style:
                               Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     color: Colors.blue.shade700,
@@ -362,7 +365,7 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
                 child: ElevatedButton.icon(
                   onPressed: () => Navigator.pushNamed(context, '/ads/create'),
                   icon: const Icon(Icons.add_circle_outline),
-                  label: Text('ads_create_local_ad_text_create_ad'.tr()),
+                  label: Text(tr('ads_create_local_ad_text_create_ad')),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue.shade600,
                     foregroundColor: Colors.white,
@@ -435,7 +438,8 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
               color: Colors.red.shade300,
             ),
             const SizedBox(height: 16),
-            Text('art_walk_error_loading_dashboard'.tr(),
+            Text(
+              tr('art_walk_error_loading_dashboard'),
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
@@ -450,7 +454,7 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _loadArtistData,
-              child: Text('admin_admin_settings_text_retry'.tr()),
+              child: Text(tr('admin_admin_settings_text_retry')),
             ),
           ],
         ),
@@ -479,7 +483,8 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
                   // Stats Overview Section
-                  Text('art_walk_overview'.tr(),
+                  Text(
+                    tr('art_walk_overview'),
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -550,7 +555,8 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
                   const SizedBox(height: 24),
 
                   // Local Artists Section
-                  Text('art_walk_local_artists'.tr(),
+                  Text(
+                    tr('art_walk_local_artists'),
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -565,7 +571,8 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
                   const SizedBox(height: 24),
 
                   // Local Galleries Section
-                  Text('art_walk_local_galleries___museums'.tr(),
+                  Text(
+                    tr('art_walk_local_galleries___museums'),
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -580,7 +587,8 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
                   const SizedBox(height: 24),
 
                   // Upcoming Events Section
-                  Text('art_walk_upcoming_events'.tr(),
+                  Text(
+                    tr('art_walk_upcoming_events'),
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -600,7 +608,8 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
 
                   // Recent Activity Section
                   if (_recentActivities.isNotEmpty) ...[
-                    Text('art_walk_recent_activity'.tr(),
+                    Text(
+                      tr('art_walk_recent_activity'),
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -639,7 +648,8 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
                         onPressed: () {
                           Navigator.pushNamed(context, '/artist/activity');
                         },
-                        child: Text('artist_artist_dashboard_text_view_all_activity'.tr()),
+                        child: Text(tr(
+                            'artist_artist_dashboard_text_view_all_activity')),
                       ),
                     ),
                   ],
@@ -656,7 +666,8 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('art_walk_quick_actions'.tr(),
+        Text(
+          tr('art_walk_quick_actions'),
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -795,29 +806,31 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
               ),
 
               // Header
-              const Padding(
-                padding: EdgeInsets.all(20),
+              Padding(
+                padding: const EdgeInsets.all(20),
                 child: Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.post_add,
                       color: Colors.purple,
                       size: 28,
                     ),
-                    SizedBox(width: 16),
+                    const SizedBox(width: 16),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('art_walk_create_post'.tr(),
-                            style: TextStyle(
+                          Text(
+                            tr('art_walk_create_post'),
+                            style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                               color: Colors.black87,
                             ),
                           ),
-                          Text('art_walk_share_updates_with_your_community'.tr(),
-                            style: TextStyle(
+                          Text(
+                            tr('art_walk_share_updates_with_your_community'),
+                            style: const TextStyle(
                               fontSize: 14,
                               color: Colors.grey,
                             ),

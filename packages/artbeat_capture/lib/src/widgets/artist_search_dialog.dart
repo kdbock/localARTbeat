@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart' show ArtistModel, ArtistService;
 
 class ArtistSearchDialog extends StatefulWidget {
@@ -37,9 +38,16 @@ class _ArtistSearchDialogState extends State<ArtistSearchDialog> {
       });
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('capture_artist_search_error_searching'.tr().replaceAll('{error}', e.toString()))));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'capture_artist_search_error_searching'.tr().replaceAll(
+                '{error}',
+                e.toString(),
+              ),
+            ),
+          ),
+        );
       }
     } finally {
       if (mounted) {
@@ -61,9 +69,16 @@ class _ArtistSearchDialogState extends State<ArtistSearchDialog> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('capture_artist_search_error_creating'.tr().replaceAll('{error}', e.toString()))));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'capture_artist_search_error_creating'.tr().replaceAll(
+                '{error}',
+                e.toString(),
+              ),
+            ),
+          ),
+        );
       }
     } finally {
       if (mounted) {
@@ -86,7 +101,10 @@ class _ArtistSearchDialogState extends State<ArtistSearchDialog> {
               children: [
                 Text(
                   'capture_artist_search_title'.tr(),
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const Spacer(),
                 IconButton(
@@ -116,12 +134,12 @@ class _ArtistSearchDialogState extends State<ArtistSearchDialog> {
             if (_isLoading)
               const Center(child: CircularProgressIndicator())
             else if (_artists.isEmpty && !_showAddNew)
-              const Center(
+              Center(
                 child: Padding(
-                  padding: EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(16.0),
                   child: Text(
                     'capture_artist_search_no_results'.tr(),
-                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                    style: const TextStyle(fontSize: 16, color: Colors.grey),
                   ),
                 ),
               )
@@ -166,7 +184,10 @@ class _ArtistSearchDialogState extends State<ArtistSearchDialog> {
                                       color: Theme.of(context).primaryColor,
                                     ),
                                     const SizedBox(width: 4),
-                                    const Text('capture_artist_search_verified_label'.tr()),
+                                    Text(
+                                      'capture_artist_search_verified_label'
+                                          .tr(),
+                                    ),
                                   ],
                                 )
                               : null,
@@ -185,10 +206,15 @@ class _ArtistSearchDialogState extends State<ArtistSearchDialog> {
                             child: const Icon(Icons.add, color: Colors.white),
                           ),
                           title: Text(
-                            'capture_artist_search_add_new'.tr().replaceAll('{artistName}', _searchController.text),
+                            'capture_artist_search_add_new'.tr().replaceAll(
+                              '{artistName}',
+                              _searchController.text,
+                            ),
                             style: const TextStyle(fontWeight: FontWeight.w500),
                           ),
-                          subtitle: Text('capture_artist_search_create_profile'.tr()),
+                          subtitle: Text(
+                            'capture_artist_search_create_profile'.tr(),
+                          ),
                           onTap: () => _addNewArtist(_searchController.text),
                         ),
                       ),

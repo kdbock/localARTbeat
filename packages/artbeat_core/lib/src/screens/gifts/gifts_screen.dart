@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-// Removed unused import for in_app_purchase_manager.dart
 import '../../services/in_app_purchase_setup.dart';
 import '../../services/user_service.dart';
 import '../../models/user_model.dart';
@@ -15,13 +14,11 @@ class GiftsScreen extends StatefulWidget {
 }
 
 class _GiftsScreenState extends State<GiftsScreen> {
-  // Removed unused field _purchaseManager
   final UserService _userService = UserService();
 
   List<UserModel> _artists = [];
   UserModel? _selectedArtist;
   bool _isLoadingArtists = true;
-  // Removed unused field _isPurchaseInitialized
   String _searchQuery = '';
 
   @override
@@ -34,8 +31,6 @@ class _GiftsScreenState extends State<GiftsScreen> {
   Future<void> _initializePurchases() async {
     final setup = InAppPurchaseSetup();
     await setup.initialize();
-    // Removed assignment to _isPurchaseInitialized
-    // You may add any other logic here if needed
   }
 
   Future<void> _loadArtists() async {
@@ -94,38 +89,42 @@ class _GiftsScreenState extends State<GiftsScreen> {
   }
 
   @override
-  @override
   Widget build(BuildContext context) {
-    final content = SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Gift Credits',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Send credits to artists and collectors',
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
-          ),
-          const SizedBox(height: 24),
-          _buildArtistSelector(),
-          const SizedBox(height: 24),
-          ..._buildGiftPackages(),
-          const SizedBox(height: 32),
-        ],
+    final content = Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [ArtbeatColors.backgroundPrimary, Color(0xFFF8F9FA)],
+        ),
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Hero Section
+            _buildHeroSection(),
+            const SizedBox(height: 32),
+
+            // Artist Selection Section
+            _buildArtistSelectionSection(),
+            const SizedBox(height: 32),
+
+            // Gift Tiers Section
+            _buildGiftTiersSection(),
+            const SizedBox(height: 48),
+          ],
+        ),
       ),
     );
+
     if (widget.showAppBar) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('Send Credits'),
+          title: const Text('Support Artists'),
           backgroundColor: ArtbeatColors.primary,
           foregroundColor: Colors.white,
+          elevation: 0,
         ),
         body: content,
       );
@@ -134,243 +133,667 @@ class _GiftsScreenState extends State<GiftsScreen> {
     }
   }
 
+  Widget _buildHeroSection() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [ArtbeatColors.primary, ArtbeatColors.primaryPurple],
+        ),
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(32),
+          bottomRight: Radius.circular(32),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Icon(
+                  Icons.celebration,
+                  color: Colors.white,
+                  size: 32,
+                ),
+              ),
+              const SizedBox(width: 16),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Support Your Favorite Artists',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'Give gifts that boost their visibility and help them grow',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w300,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.2),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.lightbulb, color: Colors.white, size: 24),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Text(
+                    'Your gift gives artists real exposure - they get featured in discovery feeds, highlighted artworks, and ad placements!',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildArtistSelectionSection() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Choose an Artist to Support',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: ArtbeatColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Search and select the artist you want to help succeed',
+            style: TextStyle(fontSize: 14, color: ArtbeatColors.textSecondary),
+          ),
+          const SizedBox(height: 20),
+          _buildArtistSelector(),
+        ],
+      ),
+    );
+  }
+
   Widget _buildArtistSelector() {
     final filteredArtists = _getFilteredArtists();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Select Artist',
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 12),
-        TextField(
-          onChanged: (value) {
-            setState(() {
-              _searchQuery = value;
-            });
-          },
-          decoration: InputDecoration(
-            hintText: 'Search artists...',
-            prefixIcon: const Icon(Icons.search),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: TextField(
+            onChanged: (value) {
+              setState(() {
+                _searchQuery = value;
+              });
+            },
+            decoration: InputDecoration(
+              hintText: 'Search artists by name...',
+              hintStyle: TextStyle(
+                color: ArtbeatColors.textSecondary.withValues(alpha: 0.6),
+              ),
+              prefixIcon: Icon(Icons.search, color: ArtbeatColors.primary),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide.none,
+              ),
+              filled: true,
+              fillColor: Colors.white,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 16,
+              ),
+            ),
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         if (_isLoadingArtists)
-          const SizedBox(
-            height: 50,
-            child: Center(child: CircularProgressIndicator()),
+          Container(
+            padding: const EdgeInsets.all(40),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: const Center(
+              child: Column(
+                children: [
+                  CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      ArtbeatColors.primary,
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'Loading artists...',
+                    style: TextStyle(
+                      color: ArtbeatColors.textSecondary,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           )
         else if (filteredArtists.isEmpty)
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(40),
             decoration: BoxDecoration(
-              color: Colors.grey[100],
-              borderRadius: BorderRadius.circular(8),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Center(
-              child: Text(
-                _searchQuery.isEmpty
-                    ? 'No artists found'
-                    : 'No artists match your search',
-                style: TextStyle(color: Colors.grey[600]),
+              child: Column(
+                children: [
+                  Icon(
+                    Icons.search_off,
+                    size: 48,
+                    color: ArtbeatColors.textSecondary.withValues(alpha: 0.3),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    _searchQuery.isEmpty
+                        ? 'No artists available'
+                        : 'No artists match your search',
+                    style: const TextStyle(
+                      color: ArtbeatColors.textSecondary,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
               ),
             ),
           )
         else
           Container(
+            constraints: const BoxConstraints(maxHeight: 300),
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey[300]!),
-              borderRadius: BorderRadius.circular(8),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
-            constraints: const BoxConstraints(maxHeight: 200),
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: filteredArtists.length,
-              itemBuilder: (context, index) {
-                final artist = filteredArtists[index];
-                final isSelected = _selectedArtist?.id == artist.id;
-                return ListTile(
-                  onTap: () {
-                    setState(() {
-                      _selectedArtist = artist;
-                      _searchQuery = '';
-                    });
-                  },
-                  selected: isSelected,
-                  selectedTileColor: ArtbeatColors.primary.withValues(
-                    alpha: 0.1,
-                  ),
-                  leading: CircleAvatar(
-                    backgroundImage: artist.profileImageUrl.isNotEmpty
-                        ? NetworkImage(artist.profileImageUrl)
-                        : null,
-                    child: artist.profileImageUrl.isEmpty
-                        ? Text(
-                            artist.fullName.isNotEmpty
-                                ? artist.fullName[0]
-                                : '?',
-                          )
-                        : null,
-                  ),
-                  title: Text(artist.fullName),
-                  subtitle: Text('@${artist.username}'),
-                  trailing: isSelected
-                      ? const Icon(
-                          Icons.check_circle,
-                          color: ArtbeatColors.primary,
-                        )
-                      : null,
-                );
-              },
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: ListView.builder(
+                padding: EdgeInsets.zero,
+                itemCount: filteredArtists.length,
+                itemBuilder: (context, index) {
+                  final artist = filteredArtists[index];
+                  final isSelected = _selectedArtist?.id == artist.id;
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? ArtbeatColors.primary.withValues(alpha: 0.05)
+                          : Colors.white,
+                      border: Border(
+                        bottom: index < filteredArtists.length - 1
+                            ? BorderSide(
+                                color: Colors.grey.withValues(alpha: 0.1),
+                                width: 1,
+                              )
+                            : BorderSide.none,
+                      ),
+                    ),
+                    child: ListTile(
+                      onTap: () {
+                        setState(() {
+                          _selectedArtist = artist;
+                          _searchQuery = '';
+                        });
+                      },
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
+                      leading: Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: isSelected
+                                ? ArtbeatColors.primary
+                                : Colors.grey.withValues(alpha: 0.2),
+                            width: 2,
+                          ),
+                        ),
+                        child: CircleAvatar(
+                          backgroundImage: artist.profileImageUrl.isNotEmpty
+                              ? NetworkImage(artist.profileImageUrl)
+                              : null,
+                          backgroundColor: Colors.grey.withValues(alpha: 0.1),
+                          child: artist.profileImageUrl.isEmpty
+                              ? Text(
+                                  artist.fullName.isNotEmpty
+                                      ? artist.fullName[0].toUpperCase()
+                                      : '?',
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: ArtbeatColors.textPrimary,
+                                  ),
+                                )
+                              : null,
+                        ),
+                      ),
+                      title: Text(
+                        artist.fullName,
+                        style: TextStyle(
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.w500,
+                          color: ArtbeatColors.textPrimary,
+                        ),
+                      ),
+                      subtitle: Text(
+                        '@${artist.username}',
+                        style: TextStyle(
+                          color: ArtbeatColors.textSecondary,
+                          fontSize: 14,
+                        ),
+                      ),
+                      trailing: isSelected
+                          ? Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: const BoxDecoration(
+                                color: ArtbeatColors.primary,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.check,
+                                color: Colors.white,
+                                size: 16,
+                              ),
+                            )
+                          : Icon(
+                              Icons.chevron_right,
+                              color: ArtbeatColors.textSecondary.withValues(
+                                alpha: 0.5,
+                              ),
+                            ),
+                    ),
+                  );
+                },
+              ),
             ),
           ),
         if (_selectedArtist != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 12),
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: ArtbeatColors.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: ArtbeatColors.primary),
+          Container(
+            margin: const EdgeInsets.only(top: 16),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: ArtbeatColors.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: ArtbeatColors.primary.withValues(alpha: 0.3),
+                width: 1,
               ),
-              child: Row(
-                children: [
-                  const Icon(Icons.check_circle, color: ArtbeatColors.primary),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'Sending to ${_selectedArtist!.fullName}',
-                      style: const TextStyle(
-                        color: ArtbeatColors.primary,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: ArtbeatColors.primary,
                   ),
-                ],
-              ),
+                  child: const Icon(
+                    Icons.favorite,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Supporting ${_selectedArtist!.fullName}',
+                        style: const TextStyle(
+                          color: ArtbeatColors.primary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      Text(
+                        'Choose a gift tier below to boost their visibility!',
+                        style: TextStyle(
+                          color: ArtbeatColors.textSecondary,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  onPressed: () {
+                    setState(() {
+                      _selectedArtist = null;
+                    });
+                  },
+                  icon: Icon(
+                    Icons.close,
+                    color: ArtbeatColors.textSecondary.withValues(alpha: 0.7),
+                  ),
+                ),
+              ],
             ),
           ),
       ],
     );
   }
 
-  List<Widget> _buildGiftPackages() {
-    final gifts = [
+  Widget _buildGiftTiersSection() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Choose Your Gift',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: ArtbeatColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Each gift provides real exposure benefits for the artist',
+            style: TextStyle(fontSize: 14, color: ArtbeatColors.textSecondary),
+          ),
+          const SizedBox(height: 24),
+          ..._buildGiftTierCards(),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _buildGiftTierCards() {
+    final giftTiers = [
       {
-        'productId': r'artbeat_gift_small',
+        'id': 'artbeat_gift_small',
+        'name': 'Supporter',
+        'price': 4.99,
         'credits': 50,
-        'price': r' 24.99',
-        'icon': Icons.card_giftcard,
-        'name': 'Supporter Gift',
+        'icon': Icons.favorite_border,
+        'gradient': const [Color(0xFFE8F5E8), Color(0xFFF1F8E9)],
+        'accentColor': const Color(0xFF4CAF50),
+        'benefits': [
+          '🎯 Artist featured in discovery for 30 days',
+          '📱 Increased visibility in search results',
+          '⭐ Special "Featured" badge',
+        ],
+        'isPopular': false,
       },
       {
-        'productId': r'artbeat_gift_medium',
+        'id': 'artbeat_gift_medium',
+        'name': 'Fan',
+        'price': 9.99,
         'credits': 100,
-        'price': r' 9.99',
-        'icon': Icons.card_giftcard,
-        'name': 'Fan Gift',
+        'icon': Icons.star_border,
+        'gradient': const [Color(0xFFE3F2FD), Color(0xFFBBDEFB)],
+        'accentColor': const Color(0xFF2196F3),
+        'benefits': [
+          '🎯 Artist featured in discovery for 90 days',
+          '🖼️ 1 artwork featured for 90 days',
+          '📈 Enhanced search ranking',
+          '⭐ Premium "Featured" badge',
+        ],
+        'isPopular': false,
       },
       {
-        'productId': r'artbeat_gift_large',
+        'id': 'artbeat_gift_large',
+        'name': 'Patron',
+        'price': 24.99,
         'credits': 250,
-        'price': r' 24.99',
-        'icon': Icons.card_giftcard,
-        'name': 'Patron Gift',
+        'icon': Icons.diamond,
+        'gradient': const [Color(0xFFF3E5F5), Color(0xFFE1BEE7)],
+        'accentColor': const Color(0xFF9C27B0),
+        'benefits': [
+          '🎯 Artist featured in discovery for 180 days',
+          '🖼️ 5 artworks featured for 180 days',
+          '📢 Artist ads in rotation for 180 days',
+          '🏆 "Top Supporter" recognition',
+        ],
+        'isPopular': true,
       },
       {
-        'productId': r'artbeat_gift_premium',
+        'id': 'artbeat_gift_premium',
+        'name': 'Benefactor',
+        'price': 49.99,
         'credits': 500,
-        'price': r' 49.99',
-        'icon': Icons.card_giftcard,
-        'name': 'Benefactor Gift',
-        'isPopular': true,
+        'icon': Icons.workspace_premium,
+        'gradient': const [Color(0xFFFFF3E0), Color(0xFFFFE0B2)],
+        'accentColor': const Color(0xFFFF9800),
+        'benefits': [
+          '🎯 Artist featured in discovery for 1 year',
+          '🖼️ 5 artworks featured for 1 year',
+          '📢 Artist ads in rotation for 1 year',
+          '👑 "Legendary Supporter" status',
+          '📊 Priority support access',
+        ],
+        'isPopular': false,
       },
     ];
 
-    return gifts.map((gift) {
-      final isPopular = gift['isPopular'] as bool? ?? false;
-      return Column(
-        children: [
-          Card(
-            elevation: isPopular ? 8 : 2,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-              side: isPopular
-                  ? const BorderSide(color: ArtbeatColors.primary, width: 2)
-                  : BorderSide.none,
+    return giftTiers.map((tier) {
+      final isPopular = tier['isPopular'] as bool;
+      final benefits = tier['benefits'] as List<String>;
+      final gradient = tier['gradient'] as List<Color>;
+      final accentColor = tier['accentColor'] as Color;
+
+      return Container(
+        margin: const EdgeInsets.only(bottom: 20),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: gradient,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: accentColor.withValues(alpha: 0.2),
+              blurRadius: 15,
+              offset: const Offset(0, 8),
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
+          ],
+          border: isPopular ? Border.all(color: accentColor, width: 2) : null,
+        ),
+        child: Stack(
+          children: [
+            if (isPopular)
+              Positioned(
+                top: 16,
+                right: 16,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: accentColor,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Text(
+                    'Most Popular',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            Padding(
+              padding: const EdgeInsets.all(24),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.9),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Icon(
+                          tier['icon'] as IconData,
+                          color: accentColor,
+                          size: 28,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              tier['name'] as String,
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: ArtbeatColors.textPrimary,
+                              ),
+                            ),
+                            Text(
+                              '${tier['credits']} Credits',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: ArtbeatColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                       Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Row(
-                            children: [
-                              Icon(
-                                gift['icon'] as IconData,
-                                color: ArtbeatColors.primary,
-                                size: 28,
-                              ),
-                              const SizedBox(width: 12),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    '${gift['credits']} Credits',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .headlineSmall
-                                        ?.copyWith(fontWeight: FontWeight.bold),
-                                  ),
-                                  Text(
-                                    gift['price'] as String,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleLarge
-                                        ?.copyWith(
-                                          color: ArtbeatColors.primary,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                          Text(
+                            '\$${tier['price']}',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: accentColor,
+                            ),
+                          ),
+                          Text(
+                            'one-time',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: ArtbeatColors.textSecondary,
+                            ),
                           ),
                         ],
                       ),
-                      if (isPopular)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: ArtbeatColors.primary,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Text(
-                            'Best Value',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Benefits for the artist:',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: ArtbeatColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  ...benefits.map(
+                    (benefit) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.check_circle,
+                            color: accentColor,
+                            size: 18,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              benefit,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: ArtbeatColors.textPrimary,
+                                height: 1.4,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -382,7 +805,7 @@ class _GiftsScreenState extends State<GiftsScreen> {
                                 isScrollControlled: true,
                                 shape: const RoundedRectangleBorder(
                                   borderRadius: BorderRadius.vertical(
-                                    top: Radius.circular(16),
+                                    top: Radius.circular(20),
                                   ),
                                 ),
                                 builder: (context) => GiftSelectionWidget(
@@ -392,23 +815,33 @@ class _GiftsScreenState extends State<GiftsScreen> {
                               );
                             },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: isPopular
-                            ? ArtbeatColors.primary
-                            : Colors.grey[300],
-                        foregroundColor: isPopular
-                            ? Colors.white
-                            : Colors.black,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        backgroundColor: _selectedArtist == null
+                            ? Colors.grey[300]
+                            : accentColor,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        elevation: _selectedArtist == null ? 0 : 4,
+                        shadowColor: accentColor.withValues(alpha: 0.3),
                       ),
-                      child: const Text('Send Gift'),
+                      child: Text(
+                        _selectedArtist == null
+                            ? 'Select an artist first'
+                            : 'Send ${tier['name']} Gift',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-          ),
-          const SizedBox(height: 16),
-        ],
+          ],
+        ),
       );
     }).toList();
   }

@@ -54,7 +54,10 @@ class _MyCapturesScreenState extends State<MyCapturesScreen> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _error = 'capture_my_captures_error_loading'.tr().replaceAll('{error}', e.toString());
+          _error = 'capture_my_captures_error_loading'.tr().replaceAll(
+            '{error}',
+            e.toString(),
+          );
           _isLoading = false;
         });
       }
@@ -151,17 +154,17 @@ class _MyCapturesScreenState extends State<MyCapturesScreen> {
                   children: [
                     const Icon(Icons.camera_alt, size: 64, color: Colors.grey),
                     const SizedBox(height: 16),
-                    const Text(
+                    Text(
                       'capture_my_captures_no_captures_yet'.tr(),
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                     const SizedBox(height: 8),
-                    const Text(
+                    Text(
                       'capture_my_captures_start_capturing_description'.tr(),
-                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                      style: const TextStyle(fontSize: 14, color: Colors.grey),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 24),
@@ -187,7 +190,10 @@ class _MyCapturesScreenState extends State<MyCapturesScreen> {
                     const Icon(Icons.search_off, size: 64, color: Colors.grey),
                     const SizedBox(height: 16),
                     Text(
-                      'capture_my_captures_no_search_results'.tr().replaceAll('{query}', _searchQuery),
+                      'capture_my_captures_no_search_results'.tr().replaceAll(
+                        '{query}',
+                        _searchQuery,
+                      ),
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w500,
@@ -195,9 +201,9 @@ class _MyCapturesScreenState extends State<MyCapturesScreen> {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 8),
-                    const Text(
+                    Text(
                       'capture_my_captures_try_different_search'.tr(),
-                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                      style: const TextStyle(fontSize: 14, color: Colors.grey),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 24),
@@ -256,7 +262,10 @@ class _MyCapturesScreenState extends State<MyCapturesScreen> {
                                 style: const TextStyle(fontSize: 12),
                               ),
                             Text(
-                              'capture_my_captures_status'.tr().replaceAll('{status}', capture.status.value),
+                              'capture_my_captures_status'.tr().replaceAll(
+                                '{status}',
+                                capture.status.value,
+                              ),
                               style: TextStyle(
                                 fontSize: 12,
                                 color:

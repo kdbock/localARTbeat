@@ -80,7 +80,7 @@ class ProfileModuleHome extends StatelessWidget {
           children: [
             Text(
               'profile_bin_main_text_profile_module_demo'.tr(),
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
             // Navigation buttons to the profile screens

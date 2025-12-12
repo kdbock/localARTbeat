@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/top_follower_model.dart';
 import '../services/subscription_service.dart' as artist_subscription;
+import 'package:easy_localization/easy_localization.dart';
 
 /// Widget that displays top engaged followers (MySpace-style top 8)
 class TopFollowersWidget extends StatefulWidget {
@@ -22,7 +23,7 @@ class TopFollowersWidget extends StatefulWidget {
 }
 
 class _TopFollowersWidgetState extends State<TopFollowersWidget> {
-  final artist_subscription.SubscriptionService _subscriptionService = 
+  final artist_subscription.SubscriptionService _subscriptionService =
       artist_subscription.SubscriptionService();
   late Future<List<TopFollowerModel>> _topFollowersFuture;
 
@@ -58,13 +59,15 @@ class _TopFollowersWidgetState extends State<TopFollowersWidget> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
               child: Row(
                 children: [
                   const Icon(Icons.star, color: Colors.amber, size: 20),
                   const SizedBox(width: 8),
-                  const Text('art_walk_top_fans'.tr(),
-                    style: TextStyle(
+                  Text(
+                    tr('art_walk_top_fans'),
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -233,12 +236,13 @@ class _TopFollowersWidgetState extends State<TopFollowersWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.star, color: Colors.amber, size: 20),
-              SizedBox(width: 8),
-              Text('art_walk_top_fans'.tr(),
-                style: TextStyle(
+              const Icon(Icons.star, color: Colors.amber, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                tr('art_walk_top_fans'),
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -287,12 +291,13 @@ class _TopFollowersWidgetState extends State<TopFollowersWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.star, color: Colors.amber, size: 20),
-              SizedBox(width: 8),
-              Text('art_walk_top_fans'.tr(),
-                style: TextStyle(
+              const Icon(Icons.star, color: Colors.amber, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                tr('art_walk_top_fans'),
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -306,8 +311,9 @@ class _TopFollowersWidgetState extends State<TopFollowersWidget> {
               color: Colors.red.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Text('art_walk_error_loading_top_fans'.tr(),
-              style: TextStyle(color: Colors.red),
+            child: Text(
+              tr('art_walk_error_loading_top_fans'),
+              style: const TextStyle(color: Colors.red),
             ),
           ),
         ],
@@ -321,12 +327,13 @@ class _TopFollowersWidgetState extends State<TopFollowersWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.star, color: Colors.amber, size: 20),
-              SizedBox(width: 8),
-              Text('art_walk_top_fans'.tr(),
-                style: TextStyle(
+              const Icon(Icons.star, color: Colors.amber, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                tr('art_walk_top_fans'),
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -340,7 +347,8 @@ class _TopFollowersWidgetState extends State<TopFollowersWidget> {
               color: Colors.grey.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Text('art_walk_no_engaged_followers_yet'.tr(),
+            child: Text(
+              tr('art_walk_no_engaged_followers_yet'),
               style: TextStyle(color: Colors.grey[600]),
             ),
           ),

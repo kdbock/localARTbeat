@@ -126,52 +126,49 @@ class _DiscoverScreenState extends State<DiscoverScreen>
 
   Future<List<ArtistProfileModel>> _loadNearbyArtists(GeoPoint location) async {
     try {
+      // First, get featured artist IDs
+      final artistFeatureService = ArtistFeatureService();
+      final featuredArtistIds = await artistFeatureService
+          .getFeaturedArtistIds();
+
       final artistsRef = FirebaseFirestore.instance.collection(
         'artistProfiles',
       );
-      final snapshot = await artistsRef.orderBy('location').limit(50).get();
 
-      return snapshot.docs.map((doc) {
-        final data = doc.data();
-        return ArtistProfileModel(
-          id: doc.id,
-          userId: data['userId'] as String,
-          displayName: data['displayName'] as String,
-          bio: data['bio'] as String,
-          userType: UserType.artist,
-          location: data['location'] as String?,
-          mediums: List<String>.from(
-            (data['mediums'] ?? <dynamic>[]) as List<dynamic>,
+      // Get featured artists first (prioritize these)
+      final featuredArtists = <ArtistProfileModel>[];
+      if (featuredArtistIds.isNotEmpty) {
+        final featuredSnapshot = await artistsRef
+            .where(
+              FieldPath.documentId,
+              whereIn: featuredArtistIds.take(10).toList(),
+            )
+            .get();
+
+        featuredArtists.addAll(
+          featuredSnapshot.docs.map(
+            (doc) => ArtistProfileModel.fromFirestore(doc),
           ),
-          styles: List<String>.from(
-            (data['styles'] ?? <dynamic>[]) as List<dynamic>,
-          ),
-          profileImageUrl: data['profileImageUrl'] as String?,
-          coverImageUrl: data['coverImageUrl'] as String?,
-          socialLinks: Map<String, String>.from(
-            (data['socialLinks'] ?? <dynamic, dynamic>{})
-                as Map<dynamic, dynamic>,
-          ),
-          isVerified: data['isVerified'] as bool? ?? false,
-          isFeatured: data['isFeatured'] as bool? ?? false,
-          subscriptionTier: _getTierFromString(
-            data['subscriptionTier'] as String? ?? 'starter',
-          ),
-          createdAt: (data['createdAt'] as Timestamp).toDate(),
-          updatedAt: (data['updatedAt'] as Timestamp).toDate(),
         );
-      }).toList();
+      }
+
+      // Then get other nearby artists, excluding already included featured ones
+      final otherSnapshot = await artistsRef
+          .orderBy('location')
+          .limit(featuredArtists.isEmpty ? 20 : 10)
+          .get();
+
+      final otherArtists = otherSnapshot.docs
+          .where((doc) => !featuredArtistIds.contains(doc.id))
+          .map((doc) => ArtistProfileModel.fromFirestore(doc))
+          .toList();
+
+      // Combine: featured artists first, then other nearby artists
+      return [...featuredArtists, ...otherArtists];
     } catch (e) {
       // debugPrint('Error loading nearby artists: $e');
       return [];
     }
-  }
-
-  SubscriptionTier _getTierFromString(String tierString) {
-    return SubscriptionTier.values.firstWhere(
-      (t) => t.name == tierString,
-      orElse: () => SubscriptionTier.starter,
-    );
   }
 
   Future<List<artwork.ArtworkModel>> _loadNearbyArtworks(
@@ -631,9 +628,70 @@ class _DiscoverScreenState extends State<DiscoverScreen>
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
                         child: Column(
                           children: [
-                            const CircleAvatar(radius: 30),
+                            Stack(
+                              children: [
+                                CircleAvatar(
+                                  radius: 30,
+                                  backgroundImage:
+                                      artistProfile.profileImageUrl != null
+                                      ? NetworkImage(
+                                          artistProfile.profileImageUrl!,
+                                        )
+                                      : null,
+                                  child: artistProfile.profileImageUrl == null
+                                      ? Text(
+                                          artistProfile.displayName.isNotEmpty
+                                              ? artistProfile.displayName[0]
+                                                    .toUpperCase()
+                                              : '?',
+                                          style: const TextStyle(fontSize: 20),
+                                        )
+                                      : null,
+                                ),
+                                // Featured indicator
+                                FutureBuilder<bool>(
+                                  future: ArtistFeatureService()
+                                      .hasActiveFeature(
+                                        artistProfile.id,
+                                        FeatureType.artistFeatured,
+                                      ),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.data == true) {
+                                      return Positioned(
+                                        top: 0,
+                                        right: 0,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(2),
+                                          decoration: BoxDecoration(
+                                            color: Theme.of(
+                                              context,
+                                            ).primaryColor,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Icon(
+                                            Icons.star,
+                                            color: Colors.white,
+                                            size: 12,
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                    return const SizedBox.shrink();
+                                  },
+                                ),
+                              ],
+                            ),
                             const SizedBox(height: 8),
-                            Text(artistProfile.displayName),
+                            SizedBox(
+                              width: 70,
+                              child: Text(
+                                artistProfile.displayName,
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                            ),
                           ],
                         ),
                       );
@@ -791,12 +849,57 @@ class _DiscoverScreenState extends State<DiscoverScreen>
                   itemBuilder: (context, index) {
                     final artist = _featuredArtists[index];
                     return ListTile(
-                      leading: UserAvatar(
-                        imageUrl: artist.profileImageUrl,
-                        displayName: artist.displayName,
-                        radius: 20,
+                      leading: Stack(
+                        children: [
+                          UserAvatar(
+                            imageUrl: artist.profileImageUrl,
+                            displayName: artist.displayName,
+                            radius: 20,
+                          ),
+                          Positioned(
+                            top: 0,
+                            right: 0,
+                            child: Container(
+                              padding: const EdgeInsets.all(2),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).primaryColor,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.star,
+                                color: Colors.white,
+                                size: 12,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      title: Text(artist.displayName),
+                      title: Row(
+                        children: [
+                          Text(artist.displayName),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Theme.of(
+                                context,
+                              ).primaryColor.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              'Featured',
+                              style: TextStyle(
+                                color: Theme.of(context).primaryColor,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                       subtitle: Text(
                         artist.styles.isNotEmpty
                             ? artist.styles.first

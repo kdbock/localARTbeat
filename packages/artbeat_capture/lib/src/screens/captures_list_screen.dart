@@ -68,7 +68,10 @@ class _CapturesListScreenState extends State<CapturesListScreen> {
     } catch (e) {
       setState(() {
         _isLoading = false;
-        _error = 'capture_list_error_loading'.tr().replaceAll('{error}', e.toString());
+        _error = 'capture_list_error_loading'.tr().replaceAll(
+          '{error}',
+          e.toString(),
+        );
       });
     }
   }
@@ -112,16 +115,16 @@ class _CapturesListScreenState extends State<CapturesListScreen> {
     return core.MainLayout(
       currentIndex: 2, // Art Walk/Capture tab
       drawer: const CaptureDrawer(),
-      appBar: const core.EnhancedUniversalHeader(
+      appBar: core.EnhancedUniversalHeader(
         title: 'capture_list_title'.tr(),
         showLogo: false,
         showBackButton: true,
-        backgroundGradient: LinearGradient(
+        backgroundGradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.topRight,
           colors: [core.ArtbeatColors.primaryPurple, Colors.pink],
         ),
-        titleGradient: LinearGradient(
+        titleGradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.topRight,
           colors: [core.ArtbeatColors.primaryPurple, Colors.pink],
@@ -173,9 +176,9 @@ class _CapturesListScreenState extends State<CapturesListScreen> {
                     color: ArtbeatColors.textSecondary,
                   ),
                   const SizedBox(height: 16),
-                  const Text(
+                  Text(
                     'capture_list_no_captures_nearby'.tr(),
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w500,
                       color: ArtbeatColors.textSecondary,

@@ -4,6 +4,7 @@ import 'package:artbeat_core/artbeat_core.dart' show UserModerationMixin;
 import '../models/artwork_rating_model.dart';
 import '../services/artwork_rating_service.dart';
 import '../services/artwork_comment_service.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Comprehensive social engagement widget for artwork
 ///
@@ -377,30 +378,30 @@ class _ArtworkSocialWidgetState extends State<ArtworkSocialWidget>
                                   }
                                 },
                                 itemBuilder: (context) => [
-                                  const PopupMenuItem<String>(
+                                  PopupMenuItem<String>(
                                     value: 'block',
                                     child: Row(
                                       children: [
-                                        Icon(
+                                        const Icon(
                                           Icons.block,
                                           color: Colors.red,
                                           size: 18,
                                         ),
-                                        SizedBox(width: 8),
+                                        const SizedBox(width: 8),
                                         Text('art_walk_block_user'.tr()),
                                       ],
                                     ),
                                   ),
-                                  const PopupMenuItem<String>(
+                                  PopupMenuItem<String>(
                                     value: 'report',
                                     child: Row(
                                       children: [
-                                        Icon(
+                                        const Icon(
                                           Icons.flag,
                                           color: Colors.orange,
                                           size: 18,
                                         ),
-                                        SizedBox(width: 8),
+                                        const SizedBox(width: 8),
                                         Text('art_walk_report_comment'.tr()),
                                       ],
                                     ),
@@ -443,7 +444,7 @@ class _ArtworkSocialWidgetState extends State<ArtworkSocialWidget>
           SnackBar(
             content: Text('art_walk_thank_you_for_reporting'.tr()),
             backgroundColor: Colors.green,
-            duration: Duration(seconds: 2),
+            duration: const Duration(seconds: 2),
           ),
         );
       }
@@ -451,7 +452,9 @@ class _ArtworkSocialWidgetState extends State<ArtworkSocialWidget>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('art_walk_error_reporting_comment'.tr().replaceAll('{error}', e.toString())),
+            content: Text('art_walk_error_reporting_comment'
+                .tr()
+                .replaceAll('{error}', e.toString())),
             backgroundColor: Colors.red,
           ),
         );

@@ -86,7 +86,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     Center(
                       child: TextButton(
                         onPressed: () => Navigator.pop(context),
-                        child: Text('admin_admin_payment_text_cancel'.tr()),
+                        child: Text(tr('admin_admin_payment_text_cancel')),
                       ),
                     ),
                   ],
@@ -243,13 +243,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
           await showDialog<void>(
             context: context,
             builder: (context) => AlertDialog(
-              title: Text('artist_payment_success_subscription_successful'.tr()),
+              title: Text(tr('artist_payment_success_subscription_successful')),
               content: Text(
                   'You\'ve successfully subscribed to the ${_getTierName(widget.tier)}!'),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: Text('common_ok'.tr()),
+                  child: Text(tr('common_ok')),
                 ),
               ],
             ),

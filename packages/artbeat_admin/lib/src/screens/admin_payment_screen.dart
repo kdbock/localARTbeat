@@ -79,7 +79,7 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
     _animationController = AnimationController(
-      duration: Duration(milliseconds: 600),
+      duration: const Duration(milliseconds: 600),
       vsync: this,
     );
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -287,7 +287,7 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
             Text(
                 'Total amount: \$${selectedTransactions.fold(0.0, (sum, t) => sum + t.amount).toStringAsFixed(2)}'),
             const SizedBox(height: 16),
-            Text(
+            const Text(
                 'Are you sure you want to process refunds for all selected transactions?'),
           ],
         ),
@@ -613,9 +613,9 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
           ),
         ],
       ),
-      drawer: AdminDrawer(),
+      drawer: const AdminDrawer(),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : FadeTransition(
               opacity: _fadeAnimation,
               child: Column(
@@ -657,7 +657,7 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
 
   Widget _buildAnalyticsOverview() {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       child: Row(
         children: [
           Expanded(
@@ -689,7 +689,7 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
               trend: 5.1,
             ),
           ),
-          SizedBox(width: 16),
+          const SizedBox(width: 16),
           Expanded(
             child: AdminMetricsCard(
               title: 'Total Refunds',
@@ -709,13 +709,13 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
       children: [
         // Quick Filters
         Container(
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Row(
             children: [
               Expanded(
                 child: TextField(
                   controller: _searchController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Search transactions...',
                     prefixIcon: Icon(Icons.search),
                     border: OutlineInputBorder(),
@@ -723,7 +723,7 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
                   onChanged: (value) => _filterTransactions(),
                 ),
               ),
-              SizedBox(width: 16),
+              const SizedBox(width: 16),
               DropdownButton<String>(
                 value: _selectedStatus,
                 items: ['All', 'completed', 'pending', 'failed', 'refunded']
@@ -744,7 +744,7 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
         // Bulk Operations Toolbar
         if (_isSelectionMode || _selectedTransactionIds.isNotEmpty)
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
             child: Row(
               children: [
@@ -753,9 +753,9 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
                   onChanged: (value) => _toggleSelectAll(),
                 ),
                 Text('admin_admin_payment_text_select_all'.tr()),
-                SizedBox(width: 16),
+                const SizedBox(width: 16),
                 Text('${_selectedTransactionIds.length} selected'),
-                Spacer(),
+                const Spacer(),
                 if (_selectedTransactionIds.isNotEmpty) ...[
                   ElevatedButton.icon(
                     onPressed: _processBulkRefund,
@@ -789,7 +789,7 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
                       label: Text('admin_admin_payment_text_update_status'.tr()),
                     ),
                   ),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   ElevatedButton.icon(
                     onPressed: _exportSelectedTransactions,
                     icon: const Icon(Icons.file_download),
@@ -833,7 +833,7 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
               ),
         title: Text(
           transaction.formattedAmount,
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         subtitle: Text('${transaction.userName} • ${transaction.displayType}'),
         trailing: Chip(
@@ -843,7 +843,7 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
         ),
         children: [
           Padding(
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -865,7 +865,7 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
                       TextButton.icon(
                         onPressed: () => _processRefund(transaction),
                         icon: const Icon(Icons.undo, color: Colors.red),
-                        label: Text('Process Refund',
+                        label: const Text('Process Refund',
                             style: TextStyle(color: Colors.red)),
                       ),
                     ],
@@ -886,11 +886,11 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
 
   Widget _buildAnalyticsTab() {
     return SingleChildScrollView(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Revenue Breakdown',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
@@ -900,12 +900,12 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
                 trailing: Text('admin_admin_payment_text_entryvaluetostringasfixed2'.tr()),
                 leading: const Icon(Icons.pie_chart),
               )),
-          SizedBox(height: 32),
-          Text(
+          const SizedBox(height: 32),
+          const Text(
             'Payment Methods',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           // Payment method analytics
           ..._buildPaymentMethodAnalytics(),
         ],
@@ -953,7 +953,7 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
       final successRate = count > 0 ? (successful / count * 100) : 0.0;
 
       return Card(
-        margin: EdgeInsets.only(bottom: 8),
+        margin: const EdgeInsets.only(bottom: 8),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -968,7 +968,7 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
                   const SizedBox(width: 8),
                   Text(
                     method.toUpperCase(),
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
@@ -976,7 +976,7 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
                   const Spacer(),
                   Text(
                     '\$${totalAmount.toStringAsFixed(2)}',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: Colors.green,
@@ -1024,7 +1024,7 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
       children: [
         Text(
           value,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.bold,
           ),
@@ -1086,14 +1086,14 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              Icon(Icons.undo, color: Colors.red),
-              SizedBox(width: 8),
+              const Icon(Icons.undo, color: Colors.red),
+              const SizedBox(width: 8),
               Text(
                 '${refundTransactions.length} Refunds',
                 style:
                     const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-              Spacer(),
+              const Spacer(),
               Text(
                 'Total: \$${refundTransactions.fold(0.0, (sum, t) => sum + t.amount).toStringAsFixed(2)}',
                 style: const TextStyle(fontSize: 16, color: Colors.red),
@@ -1119,11 +1119,11 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Advanced Search & Filters',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
 
           // Date Range
           ListTile(
@@ -1147,8 +1147,8 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
           ),
 
           // Amount Range
-          SizedBox(height: 16),
-          Text('Amount Range',
+          const SizedBox(height: 16),
+          const Text('Amount Range',
               style: TextStyle(fontWeight: FontWeight.bold)),
           RangeSlider(
             values: RangeValues(_minAmount, _maxAmount),
@@ -1167,10 +1167,10 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
           ),
 
           // Transaction Type
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           DropdownButtonFormField<String>(
             initialValue: _selectedType,
-            decoration: InputDecoration(labelText: 'Transaction Type'),
+            decoration: const InputDecoration(labelText: 'Transaction Type'),
             items: [
               'All',
               'subscription',
@@ -1189,7 +1189,7 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
             },
           ),
 
-          SizedBox(height: 32),
+          const SizedBox(height: 32),
           ElevatedButton.icon(
             onPressed: () {
               setState(() {
@@ -1202,7 +1202,7 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
               });
               _filterTransactions();
             },
-            icon: Icon(Icons.clear),
+            icon: const Icon(Icons.clear),
             label: Text('admin_admin_payment_text_clear_all_filters'.tr()),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.grey,
@@ -1253,7 +1253,7 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
 
   Widget _buildDetailRow(String label, String value) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1261,7 +1261,7 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
             width: 120,
             child: Text(
               '$label:',
-              style: TextStyle(fontWeight: FontWeight.bold),
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
           Expanded(child: Text(value)),
@@ -1347,7 +1347,7 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text('admin_admin_payment_button_click_below_to'.tr()),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     ElevatedButton.icon(
                       onPressed: () async {
                         await Clipboard.setData(

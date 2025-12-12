@@ -4,7 +4,7 @@ import '../services/migration_service.dart';
 
 /// Screen for managing data migration to standardized moderation status
 class MigrationScreen extends StatefulWidget {
-  MigrationScreen({super.key});
+  const MigrationScreen({super.key});
 
   @override
   State<MigrationScreen> createState() => _MigrationScreenState();
@@ -184,7 +184,7 @@ class _MigrationScreenState extends State<MigrationScreen> {
             // Header
             Card(
               child: Padding(
-                padding: EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -193,7 +193,7 @@ class _MigrationScreenState extends State<MigrationScreen> {
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                     const SizedBox(height: 8),
-                    Text(
+                    const Text(
                       'This migration adds standardized moderation status fields to all content collections (posts, comments, artwork, captures, ads). '
                       'Existing content will be marked as "approved" by default.',
                     ),
@@ -209,7 +209,7 @@ class _MigrationScreenState extends State<MigrationScreen> {
               Card(
                 color: Colors.red[50],
                 child: Padding(
-                  padding: EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(16.0),
                   child: Row(
                     children: [
                       Icon(Icons.error, color: Colors.red[700]),
@@ -229,7 +229,7 @@ class _MigrationScreenState extends State<MigrationScreen> {
               Card(
                 color: Colors.green[50],
                 child: Padding(
-                  padding: EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(16.0),
                   child: Row(
                     children: [
                       Icon(Icons.check_circle, color: Colors.green[700]),
@@ -245,7 +245,7 @@ class _MigrationScreenState extends State<MigrationScreen> {
                 ),
               ),
 
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
 
             // Migration Status
             Expanded(
@@ -266,12 +266,12 @@ class _MigrationScreenState extends State<MigrationScreen> {
                     onPressed:
                         _isMigrating || _isLoading ? null : _runMigration,
                     icon: _isMigrating
-                        ? SizedBox(
+                        ? const SizedBox(
                             width: 16,
                             height: 16,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : Icon(Icons.play_arrow),
+                        : const Icon(Icons.play_arrow),
                     label:
                         Text(_isMigrating ? 'Migrating...' : 'Run Migration'),
                     style: ElevatedButton.styleFrom(
@@ -286,7 +286,7 @@ class _MigrationScreenState extends State<MigrationScreen> {
                   child: ElevatedButton.icon(
                     onPressed:
                         _isMigrating || _isLoading ? null : _rollbackMigration,
-                    icon: Icon(Icons.undo),
+                    icon: const Icon(Icons.undo),
                     label: Text('admin_migration_text_rollback'.tr()),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,

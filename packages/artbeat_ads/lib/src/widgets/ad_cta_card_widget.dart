@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/index.dart';
 import '../services/local_ad_service.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class AdCtaCardWidget extends StatefulWidget {
   final LocalAdZone zone;

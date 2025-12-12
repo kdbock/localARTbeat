@@ -250,7 +250,8 @@ class _GalleryArtistsManagementScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('artist_gallery_artists_management_success_invitation_sent_successfully'.tr()),
+            content: Text(tr(
+                'artist_gallery_artists_management_success_invitation_sent_successfully')),
             backgroundColor: Colors.green,
           ),
         );
@@ -258,7 +259,9 @@ class _GalleryArtistsManagementScreenState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('artist_gallery_artists_management_error_failed_to_send'.tr())),
+          SnackBar(
+              content: Text(tr(
+                  'artist_gallery_artists_management_error_failed_to_send'))),
         );
       }
     }
@@ -280,7 +283,8 @@ class _GalleryArtistsManagementScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('artist_gallery_artists_management_text_invitation_cancelled'.tr()),
+            content: Text(tr(
+                'artist_gallery_artists_management_text_invitation_cancelled')),
             backgroundColor: Colors.orange,
           ),
         );
@@ -288,7 +292,9 @@ class _GalleryArtistsManagementScreenState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('artist_gallery_artists_management_error_failed_to_cancel'.tr())),
+          SnackBar(
+              content: Text(tr(
+                  'artist_gallery_artists_management_error_failed_to_cancel'))),
         );
       }
     }
@@ -334,7 +340,8 @@ class _GalleryArtistsManagementScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('artist_gallery_artists_management_success_artist_removed_from'.tr()),
+            content: Text(tr(
+                'artist_gallery_artists_management_success_artist_removed_from')),
             backgroundColor: Colors.green,
           ),
         );
@@ -342,7 +349,9 @@ class _GalleryArtistsManagementScreenState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('artist_gallery_artists_management_error_failed_to_remove'.tr())),
+          SnackBar(
+              content: Text(tr(
+                  'artist_gallery_artists_management_error_failed_to_remove'))),
         );
       }
     }
@@ -354,7 +363,8 @@ class _GalleryArtistsManagementScreenState
       currentIndex: -1,
       child: Scaffold(
         appBar: AppBar(
-          title: Text('artist_gallery_artists_management_text_gallery_artists'.tr()),
+          title: Text(
+              tr('artist_gallery_artists_management_text_gallery_artists')),
           bottom: TabBar(
             controller: _tabController,
             tabs: const [
@@ -431,25 +441,27 @@ class _GalleryArtistsManagementScreenState
     }
 
     if (_pendingInvitations.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            const Icon(
               Icons.mail_outline,
               size: 64,
               color: Colors.grey,
             ),
-            SizedBox(height: 16),
-            Text('art_walk_no_pending_invitations'.tr(),
-              style: TextStyle(
+            const SizedBox(height: 16),
+            Text(
+              tr('art_walk_no_pending_invitations'),
+              style: const TextStyle(
                 fontSize: 18,
                 color: Colors.grey,
               ),
             ),
-            SizedBox(height: 8),
-            Text('art_walk_use_the___button_to_invite_artists_to_your_gallery'.tr(),
-              style: TextStyle(
+            const SizedBox(height: 8),
+            Text(
+              tr('art_walk_use_the___button_to_invite_artists_to_your_gallery'),
+              style: const TextStyle(
                 fontSize: 14,
                 color: Colors.grey,
               ),
@@ -539,21 +551,22 @@ class _GalleryArtistsManagementScreenState
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('artist_gallery_artists_management_text_cancel_invitation'.tr()),
+        title: Text(
+            tr('artist_gallery_artists_management_text_cancel_invitation')),
         content: Text(
           'Are you sure you want to cancel the invitation to ${invitation.artistName}?',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('admin_admin_payment_text_cancel'.tr()),
+            child: Text(tr('admin_admin_payment_text_cancel')),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
               _cancelInvitation(invitation.id);
             },
-            child: Text('admin_migration_text_confirm'.tr()),
+            child: Text(tr('admin_migration_text_confirm')),
           ),
         ],
       ),
@@ -593,7 +606,8 @@ class _GalleryArtistsManagementScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('artist_gallery_artists_management_text_invitation_reminder_sent'.tr()),
+            content: Text(tr(
+                'artist_gallery_artists_management_text_invitation_reminder_sent')),
             backgroundColor: Colors.green,
           ),
         );
@@ -601,7 +615,9 @@ class _GalleryArtistsManagementScreenState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('artist_gallery_artists_management_error_failed_to_resend'.tr())),
+          SnackBar(
+              content: Text(tr(
+                  'artist_gallery_artists_management_error_failed_to_resend'))),
         );
       }
     }
@@ -670,7 +686,8 @@ class _ArtistSearchDialogState extends State<_ArtistSearchDialog> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('artist_gallery_artists_management_error_error_searching_artists'.tr()),
+            content: Text(tr(
+                'artist_gallery_artists_management_error_error_searching_artists')),
             backgroundColor: Colors.red,
           ),
         );
@@ -688,8 +705,9 @@ class _ArtistSearchDialogState extends State<_ArtistSearchDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('art_walk_find_artists'.tr(),
-              style: TextStyle(
+            Text(
+              tr('art_walk_find_artists'),
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -760,7 +778,7 @@ class _ArtistSearchDialogState extends State<_ArtistSearchDialog> {
             const SizedBox(height: 16),
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text('admin_admin_payment_text_cancel'.tr()),
+              child: Text(tr('admin_admin_payment_text_cancel')),
             ),
           ],
         ),

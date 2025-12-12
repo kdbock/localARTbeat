@@ -369,7 +369,7 @@ class CommunityService extends ChangeNotifier {
             'engagementStats.lastUpdated': FieldValue.serverTimestamp(),
           });
           AppLogger.info('Removed like for post $postId by user $userId');
-          return false; // false = unliked
+          return true; // Changed from false to true - operation succeeded
         } else {
           // User hasn't liked - add like
           transaction.set(likeRef, {

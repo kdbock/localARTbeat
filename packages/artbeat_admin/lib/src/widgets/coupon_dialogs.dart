@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Dialog for creating new coupons
 class CreateCouponDialog extends StatefulWidget {
@@ -187,7 +188,7 @@ class _CreateCouponDialogState extends State<CreateCouponDialog> {
                           _expiresAt = null;
                         });
                       },
-                      child: Text('admin_coupon_button_clear').tr()),
+                      child: Text('admin_coupon_button_clear'.tr()),
                     ),
                 ],
               ),
@@ -265,7 +266,9 @@ class _CreateCouponDialogState extends State<CreateCouponDialog> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('admin_coupon_error_create'.tr(namedArgs: {'error': e.toString()}))),
+          SnackBar(
+              content: Text('admin_coupon_error_create'
+                  .tr(namedArgs: {'error': e.toString()}))),
         );
       }
     } finally {
@@ -456,7 +459,7 @@ class _EditCouponDialogState extends State<EditCouponDialog> {
                           _expiresAt = null;
                         });
                       },
-                      child: Text('admin_coupon_button_clear').tr()),
+                      child: Text('admin_coupon_button_clear'.tr()),
                     ),
                 ],
               ),
@@ -535,7 +538,9 @@ class _EditCouponDialogState extends State<EditCouponDialog> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('admin_coupon_error_update'.tr(namedArgs: {'error': e.toString()}))),
+          SnackBar(
+              content: Text('admin_coupon_error_update'
+                  .tr(namedArgs: {'error': e.toString()}))),
         );
       }
     } finally {

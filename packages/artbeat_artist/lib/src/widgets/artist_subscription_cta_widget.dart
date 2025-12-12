@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Widget for displaying artist subscription call to action
 class ArtistSubscriptionCTAWidget extends StatelessWidget {
@@ -34,16 +35,17 @@ class ArtistSubscriptionCTAWidget extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Row(
+              Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.palette,
                     color: Colors.white,
                     size: 28,
                   ),
-                  SizedBox(width: 12),
-                  Text('art_walk_are_you_an_artist'.tr(),
-                    style: TextStyle(
+                  const SizedBox(width: 12),
+                  Text(
+                    tr('art_walk_are_you_an_artist'),
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -52,7 +54,8 @@ class ArtistSubscriptionCTAWidget extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 12),
-              Text('art_walk_showcase_your_work_to_local_art_lovers__get_discovered__and_grow_your_career'.tr(),
+              Text(
+                tr('art_walk_showcase_your_work_to_local_art_lovers__get_discovered__and_grow_your_career'),
                 style: TextStyle(
                   color: Colors.white.withAlpha(230),
                   fontSize: 14,
@@ -98,8 +101,9 @@ class ArtistSubscriptionCTAWidget extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8.0),
                   ),
                 ),
-                child: const Text('art_walk_start_your_artist_journey'.tr(),
-                  style: TextStyle(
+                child: Text(
+                  tr('art_walk_start_your_artist_journey'),
+                  style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),

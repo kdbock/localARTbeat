@@ -111,21 +111,21 @@ class _MyArtworkScreenState extends State<MyArtworkScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('artist_my_artwork_text_delete_artwork'.tr()),
+        title: Text(tr('artist_my_artwork_text_delete_artwork')),
         content: Text(
           'Are you sure you want to delete "${artwork.title}"? This action cannot be undone.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text('admin_admin_payment_text_cancel'.tr()),
+            child: Text(tr('admin_admin_payment_text_cancel')),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: TextButton.styleFrom(
               foregroundColor: Colors.red,
             ),
-            child: Text('admin_modern_unified_admin_dashboard_text_delete'.tr()),
+            child: Text(tr('admin_modern_unified_admin_dashboard_text_delete')),
           ),
         ],
       ),
@@ -150,7 +150,7 @@ class _MyArtworkScreenState extends State<MyArtworkScreen> {
                   child: CircularProgressIndicator(strokeWidth: 2),
                 ),
                 const SizedBox(width: 16),
-                Text('artist_my_artwork_text_deleting_artwork'.tr()),
+                Text(tr('artist_my_artwork_text_deleting_artwork')),
               ],
             ),
             duration: const Duration(seconds: 30), // Long duration for deletion
@@ -167,7 +167,8 @@ class _MyArtworkScreenState extends State<MyArtworkScreen> {
         // Show success message
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('artist_my_artwork_success_artworktitle_has_been'.tr()),
+            content:
+                Text(tr('artist_my_artwork_success_artworktitle_has_been')),
             backgroundColor: core.ArtbeatColors.primaryGreen,
           ),
         );
@@ -183,7 +184,7 @@ class _MyArtworkScreenState extends State<MyArtworkScreen> {
         // Show error message
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('artist_my_artwork_error_failed_to_delete'.tr()),
+            content: Text(tr('artist_my_artwork_error_failed_to_delete')),
             backgroundColor: core.ArtbeatColors.error,
           ),
         );
@@ -228,7 +229,8 @@ class _MyArtworkScreenState extends State<MyArtworkScreen> {
               color: core.ArtbeatColors.error,
             ),
             const SizedBox(height: 16),
-            Text('art_walk_error'.tr(),
+            Text(
+              tr('art_walk_error'),
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 8),
@@ -243,7 +245,7 @@ class _MyArtworkScreenState extends State<MyArtworkScreen> {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _refreshArtwork,
-              child: Text('admin_admin_settings_text_retry'.tr()),
+              child: Text(tr('admin_admin_settings_text_retry')),
             ),
           ],
         ),
@@ -266,14 +268,15 @@ class _MyArtworkScreenState extends State<MyArtworkScreen> {
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 8),
-            const Text('art_walk_upload_your_first_artwork_to_get_started'.tr(),
-              style: TextStyle(color: core.ArtbeatColors.textSecondary),
+            Text(
+              tr('art_walk_upload_your_first_artwork_to_get_started'),
+              style: const TextStyle(color: core.ArtbeatColors.textSecondary),
             ),
             const SizedBox(height: 16),
             ElevatedButton.icon(
               onPressed: _navigateToUpload,
               icon: const Icon(Icons.add_photo_alternate),
-              label: Text('artist_artist_dashboard_text_upload_artwork'.tr()),
+              label: Text(tr('artist_artist_dashboard_text_upload_artwork')),
             ),
           ],
         ),
@@ -299,7 +302,7 @@ class _MyArtworkScreenState extends State<MyArtworkScreen> {
                   TextButton.icon(
                     onPressed: _navigateToUpload,
                     icon: const Icon(Icons.add),
-                    label: Text('artist_my_artwork_text_upload'.tr()),
+                    label: Text(tr('artist_my_artwork_text_upload')),
                   ),
                 ],
               ),
@@ -449,17 +452,19 @@ class _MyArtworkScreenState extends State<MyArtworkScreen> {
                       children: [
                         const Icon(Icons.edit, size: 18),
                         const SizedBox(width: 8),
-                        Text('admin_modern_unified_admin_dashboard_text_edit'.tr()),
+                        Text(tr(
+                            'admin_modern_unified_admin_dashboard_text_edit')),
                       ],
                     ),
                   ),
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'delete',
                     child: Row(
                       children: [
-                        Icon(Icons.delete, size: 18, color: Colors.red),
-                        SizedBox(width: 8),
-                        Text('art_walk_delete'.tr(), style: TextStyle(color: Colors.red)),
+                        const Icon(Icons.delete, size: 18, color: Colors.red),
+                        const SizedBox(width: 8),
+                        Text(tr('art_walk_delete'),
+                            style: const TextStyle(color: Colors.red)),
                       ],
                     ),
                   ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:artbeat_art_walk/artbeat_art_walk.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Widget that displays turn-by-turn navigation instructions
 class TurnByTurnNavigationWidget extends StatefulWidget {
@@ -75,7 +76,11 @@ class _TurnByTurnNavigationWidgetState extends State<TurnByTurnNavigationWidget>
               elevation: 8,
               child: Container(
                 padding: const EdgeInsets.all(16),
-                child: Text('art_walk_turn_by_turn_navigation_widget_error_navigation_error'.tr().replaceAll('{error}', snapshot.error.toString())),
+                child: Text(
+                  'art_walk_turn_by_turn_navigation_widget_error_navigation_error'
+                      .tr()
+                      .replaceAll('{error}', snapshot.error.toString()),
+                ),
               ),
             ),
           );
@@ -89,11 +94,14 @@ class _TurnByTurnNavigationWidgetState extends State<TurnByTurnNavigationWidget>
               elevation: 8,
               child: Container(
                 padding: const EdgeInsets.all(16),
-                child: const Row(
+                child: Row(
                   children: [
-                    CircularProgressIndicator(),
-                    SizedBox(width: 16),
-                    Text('art_walk_turn_by_turn_navigation_widget_text_loading_navigation'.tr()),
+                    const CircularProgressIndicator(),
+                    const SizedBox(width: 16),
+                    Text(
+                      'art_walk_turn_by_turn_navigation_widget_text_loading_navigation'
+                          .tr(),
+                    ),
                   ],
                 ),
               ),
@@ -219,13 +227,19 @@ class _TurnByTurnNavigationWidgetState extends State<TurnByTurnNavigationWidget>
                   ),
                   IconButton(
                     key: const ValueKey('stop_navigation_button'),
-                    icon: Icon(_isRouteCompleted(update) ? Icons.check_circle : Icons.close),
+                    icon: Icon(
+                      _isRouteCompleted(update)
+                          ? Icons.check_circle
+                          : Icons.close,
+                    ),
                     color: _isRouteCompleted(update) ? Colors.green : null,
                     onPressed: widget.onStopNavigation != null
                         ? () {
-                            debugPrint(_isRouteCompleted(update)
-                                ? '🧭 Complete Walk button pressed'
-                                : '🧭 Stop Navigation (X) button pressed');
+                            debugPrint(
+                              _isRouteCompleted(update)
+                                  ? '🧭 Complete Walk button pressed'
+                                  : '🧭 Stop Navigation (X) button pressed',
+                            );
                             widget.onStopNavigation!();
                           }
                         : null,
@@ -435,7 +449,9 @@ class _TurnByTurnNavigationWidgetState extends State<TurnByTurnNavigationWidget>
                   Expanded(
                     child: GestureDetector(
                       key: const ValueKey('previous_step_gesture'),
-                      onTap: (widget.onPreviousStep != null && !_isRouteCompleted(update))
+                      onTap:
+                          (widget.onPreviousStep != null &&
+                              !_isRouteCompleted(update))
                           ? () {
                               debugPrint('🧭 Previous Step gesture tapped');
                               widget.onPreviousStep!();
@@ -443,14 +459,19 @@ class _TurnByTurnNavigationWidgetState extends State<TurnByTurnNavigationWidget>
                           : null,
                       child: ElevatedButton.icon(
                         key: const ValueKey('previous_step_button'),
-                        onPressed: (widget.onPreviousStep != null && !_isRouteCompleted(update))
+                        onPressed:
+                            (widget.onPreviousStep != null &&
+                                !_isRouteCompleted(update))
                             ? () {
                                 debugPrint('🧭 Previous Step button pressed');
                                 widget.onPreviousStep!();
                               }
                             : null,
                         icon: const Icon(Icons.skip_previous),
-                        label: Text('art_walk_turn_by_turn_navigation_widget_button_previous'.tr()),
+                        label: Text(
+                          'art_walk_turn_by_turn_navigation_widget_button_previous'
+                              .tr(),
+                        ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: _isRouteCompleted(update)
                               ? Colors.grey[100]
@@ -469,36 +490,42 @@ class _TurnByTurnNavigationWidgetState extends State<TurnByTurnNavigationWidget>
                       key: const ValueKey('next_step_gesture'),
                       onTap: _isRouteCompleted(update)
                           ? (widget.onCompleteWalk != null
-                              ? () {
-                                  debugPrint('🧭 Route Complete gesture tapped');
-                                  widget.onCompleteWalk!();
-                                }
-                              : null)
+                                ? () {
+                                    debugPrint(
+                                      '🧭 Route Complete gesture tapped',
+                                    );
+                                    widget.onCompleteWalk!();
+                                  }
+                                : null)
                           : (widget.onNextStep != null
-                              ? () {
-                                  debugPrint('🧭 Next Step gesture tapped');
-                                  widget.onNextStep!();
-                                }
-                              : null),
+                                ? () {
+                                    debugPrint('🧭 Next Step gesture tapped');
+                                    widget.onNextStep!();
+                                  }
+                                : null),
                       child: ElevatedButton.icon(
                         key: const ValueKey('next_step_button'),
                         onPressed: _isRouteCompleted(update)
                             ? (widget.onCompleteWalk != null
-                                ? () {
-                                    debugPrint('🧭 Route Complete button pressed');
-                                    widget.onCompleteWalk!();
-                                  }
-                                : null)
+                                  ? () {
+                                      debugPrint(
+                                        '🧭 Route Complete button pressed',
+                                      );
+                                      widget.onCompleteWalk!();
+                                    }
+                                  : null)
                             : (widget.onNextStep != null
-                                ? () {
-                                    debugPrint('🧭 Next Step button pressed');
-                                    widget.onNextStep!();
-                                  }
-                                : null),
+                                  ? () {
+                                      debugPrint('🧭 Next Step button pressed');
+                                      widget.onNextStep!();
+                                    }
+                                  : null),
                         icon: _isRouteCompleted(update)
                             ? const Icon(Icons.check_circle)
                             : const Icon(Icons.skip_next),
-                        label: Text(_isRouteCompleted(update) ? 'Route Complete' : 'Next'),
+                        label: Text(
+                          _isRouteCompleted(update) ? 'Route Complete' : 'Next',
+                        ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: _isRouteCompleted(update)
                               ? Colors.green

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../services/social_integration_service.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Enhanced social feed widget for Phase 3 implementation
 /// Displays events from followed artists and trending content
@@ -189,7 +189,10 @@ class _SocialFeedWidgetState extends State<SocialFeedWidget> {
             style: TextStyle(color: Colors.grey[600]),
           ),
           const SizedBox(height: 16),
-          ElevatedButton(onPressed: _loadFeedItems, child: const Text('events_retry'.tr())),
+          ElevatedButton(
+            onPressed: _loadFeedItems,
+            child: Text('events_retry'.tr()),
+          ),
         ],
       ),
     );
@@ -282,7 +285,7 @@ class _SocialFeedWidgetState extends State<SocialFeedWidget> {
           if (!isFollowing)
             TextButton(
               onPressed: () => _followArtist(artist?['id']),
-              child: const Text('events_follow'.tr()),
+              child: Text('events_follow'.tr()),
             ),
         ],
       ),
@@ -439,9 +442,13 @@ class _SocialFeedWidgetState extends State<SocialFeedWidget> {
       await _loadFeedItems();
     } on Exception catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('events_follow_error'.tr().replaceAll('{error}', e.toString()))));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'events_follow_error'.tr().replaceAll('{error}', e.toString()),
+            ),
+          ),
+        );
       }
     }
   }
@@ -452,9 +459,13 @@ class _SocialFeedWidgetState extends State<SocialFeedWidget> {
       // In a real implementation, update the UI immediately for better UX
     } on Exception catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('events_like_error'.tr().replaceAll('{error}', e.toString()))));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'events_like_error'.tr().replaceAll('{error}', e.toString()),
+            ),
+          ),
+        );
       }
     }
   }
@@ -464,9 +475,13 @@ class _SocialFeedWidgetState extends State<SocialFeedWidget> {
       await _socialService.toggleEventSave(eventId);
     } on Exception catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('events_save_error'.tr().replaceAll('{error}', e.toString()))));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'events_save_error'.tr().replaceAll('{error}', e.toString()),
+            ),
+          ),
+        );
       }
     }
   }
@@ -477,7 +492,7 @@ class _SocialFeedWidgetState extends State<SocialFeedWidget> {
     if (mounted) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('events_shared'.tr())));
+      ).showSnackBar(SnackBar(content: Text('events_shared'.tr())));
     }
   }
 
@@ -547,9 +562,13 @@ class _CommentsBottomSheetState extends State<_CommentsBottomSheet> {
       await _loadComments();
     } on Exception catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('events_comment_error'.tr().replaceAll('{error}', e.toString()))));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'events_comment_error'.tr().replaceAll('{error}', e.toString()),
+            ),
+          ),
+        );
       }
     }
   }
@@ -579,7 +598,7 @@ class _CommentsBottomSheetState extends State<_CommentsBottomSheet> {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _comments.isEmpty
-                ? const Center(child: Text('events_no_comments'.tr()))
+                ? Center(child: Text('events_no_comments'.tr()))
                 : ListView.builder(
                     itemCount: _comments.length,
                     itemBuilder: (context, index) {

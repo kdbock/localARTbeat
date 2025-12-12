@@ -92,7 +92,11 @@ class _CaptureEditScreenState extends State<CaptureEditScreen> {
 
       if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('capture_capture_edit_success_capture_updated_successfully'.tr())),
+          SnackBar(
+            content: Text(
+              'capture_capture_edit_success_capture_updated_successfully'.tr(),
+            ),
+          ),
         );
         Navigator.pop(context, true);
       } else if (mounted) {
@@ -108,7 +112,9 @@ class _CaptureEditScreenState extends State<CaptureEditScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('art_walk_art_walk_detail_error_error_etostring'.tr()),
+            content: Text(
+              'art_walk_art_walk_detail_error_error_etostring'.tr(),
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -278,7 +284,9 @@ class _CaptureEditScreenState extends State<CaptureEditScreen> {
                         ),
                         const SizedBox(width: 12),
                         Text(
-                          _isPublic ? 'capture_edit_public'.tr() : 'capture_edit_private'.tr(),
+                          _isPublic
+                              ? 'capture_edit_public'.tr()
+                              : 'capture_edit_private'.tr(),
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                       ],
@@ -317,9 +325,9 @@ class _CaptureEditScreenState extends State<CaptureEditScreen> {
                             ),
                           ),
                         )
-                      : const Text(
+                      : Text(
                           'capture_edit_save_changes'.tr(),
-                          style: TextStyle(fontSize: 16),
+                          style: const TextStyle(fontSize: 16),
                         ),
                 ),
               ),

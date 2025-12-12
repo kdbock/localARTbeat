@@ -303,8 +303,8 @@ class _ArtistProfileEditScreenState extends State<ArtistProfileEditScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Account type selection
-                    const Text('art_walk_account_type'.tr(),
-                      style: TextStyle(
+                    Text(tr('art_walk_account_type'),
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
@@ -321,7 +321,7 @@ class _ArtistProfileEditScreenState extends State<ArtistProfileEditScreen> {
                         ),
                         ButtonSegment(
                           value: core.UserType.gallery,
-                          label: Text('artist_artist_browse_text_gallery'.tr()),
+                          label: Text(tr('artist_artist_browse_text_gallery')),
                           icon: const Icon(Icons.store),
                         ),
                       ],
@@ -473,8 +473,8 @@ class _ArtistProfileEditScreenState extends State<ArtistProfileEditScreen> {
                     const SizedBox(height: 24),
 
                     // Art information
-                    const Text('art_walk_art_information'.tr(),
-                      style: TextStyle(
+                    Text(tr('art_walk_art_information'),
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
@@ -482,7 +482,7 @@ class _ArtistProfileEditScreenState extends State<ArtistProfileEditScreen> {
                     const SizedBox(height: 8),
 
                     // Mediums
-                    Text('artist_artist_profile_edit_text_mediums'.tr()),
+                    Text(tr('artist_artist_profile_edit_text_mediums')),
                     const SizedBox(height: 8),
                     Wrap(
                       spacing: 8,
@@ -508,7 +508,7 @@ class _ArtistProfileEditScreenState extends State<ArtistProfileEditScreen> {
                     if (_selectedMediums.isEmpty)
                       Padding(
                         padding: const EdgeInsets.only(top: 8),
-                        child: Text('art_walk_please_select_at_least_one_medium'.tr(),
+                        child: Text(tr('art_walk_please_select_at_least_one_medium'),
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.error,
                             fontSize: 12,
@@ -519,7 +519,7 @@ class _ArtistProfileEditScreenState extends State<ArtistProfileEditScreen> {
                     const SizedBox(height: 16),
 
                     // Styles
-                    Text('artist_artist_profile_edit_text_styles'.tr()),
+                    Text(tr('artist_artist_profile_edit_text_styles')),
                     const SizedBox(height: 8),
                     Wrap(
                       spacing: 8,
@@ -545,7 +545,7 @@ class _ArtistProfileEditScreenState extends State<ArtistProfileEditScreen> {
                     if (_selectedStyles.isEmpty)
                       Padding(
                         padding: const EdgeInsets.only(top: 8),
-                        child: Text('art_walk_please_select_at_least_one_style'.tr(),
+                        child: Text(tr('art_walk_please_select_at_least_one_style'),
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.error,
                             fontSize: 12,
@@ -556,8 +556,8 @@ class _ArtistProfileEditScreenState extends State<ArtistProfileEditScreen> {
                     const SizedBox(height: 24),
 
                     // Online presence
-                    const Text('art_walk_online_presence'.tr(),
-                      style: TextStyle(
+                    Text(tr('art_walk_online_presence'),
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),

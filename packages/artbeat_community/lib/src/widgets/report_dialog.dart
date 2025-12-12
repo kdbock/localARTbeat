@@ -58,7 +58,7 @@ class _ReportDialogState extends State<ReportDialog> {
       if (mounted) {
         if (success) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Text('art_walk_report_dialog_submitted'.tr()),
               backgroundColor: Colors.green,
             ),
@@ -67,7 +67,7 @@ class _ReportDialogState extends State<ReportDialog> {
           widget.onReportSubmitted?.call();
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Text('art_walk_report_dialog_failed'.tr()),
               backgroundColor: Colors.red,
             ),
@@ -78,7 +78,12 @@ class _ReportDialogState extends State<ReportDialog> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('art_walk_report_dialog_error'.tr().replaceAll('{error}', e.toString())),
+            content: Text(
+              'art_walk_report_dialog_error'.tr().replaceAll(
+                '{error}',
+                e.toString(),
+              ),
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -99,9 +104,9 @@ class _ReportDialogState extends State<ReportDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'art_walk_report_dialog_description'.tr(),
-              style: TextStyle(fontSize: 14),
+              style: const TextStyle(fontSize: 14),
             ),
             const SizedBox(height: 16),
             DropdownButton<ReportReason>(

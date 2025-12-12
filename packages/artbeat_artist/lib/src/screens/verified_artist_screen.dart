@@ -95,7 +95,9 @@ class _VerifiedArtistScreenState extends State<VerifiedArtistScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('artist_verified_artist_error_error_loading_verified'.tr())),
+          SnackBar(
+              content: Text(
+                  tr('artist_verified_artist_error_error_loading_verified'))),
         );
         setState(() {
           _isLoading = false;
@@ -165,10 +167,11 @@ class _VerifiedArtistScreenState extends State<VerifiedArtistScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 24),
-                    child: Text('art_walk_explore_artists_who_have_been_verified_for_authenticity_and_quality'.tr(),
-                      style: TextStyle(
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Text(
+                      tr('art_walk_explore_artists_who_have_been_verified_for_authenticity_and_quality'),
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 16,
                         fontWeight: FontWeight.w400,
@@ -216,13 +219,15 @@ class _VerifiedArtistScreenState extends State<VerifiedArtistScreen> {
               child: Row(
                 children: [
                   FilterChip(
-                    label: Text('artist_artist_browse_text_medium_selectedmedium'.tr()),
+                    label: Text(
+                        tr('artist_artist_browse_text_medium_selectedmedium')),
                     selected: _selectedMedium != 'All',
                     onSelected: (_) => _showFilterDialog(),
                   ),
                   const SizedBox(width: 8),
                   FilterChip(
-                    label: Text('artist_artist_browse_text_style_selectedstyle'.tr()),
+                    label: Text(
+                        tr('artist_artist_browse_text_style_selectedstyle')),
                     selected: _selectedStyle != 'All',
                     onSelected: (_) => _showFilterDialog(),
                   ),
@@ -235,16 +240,17 @@ class _VerifiedArtistScreenState extends State<VerifiedArtistScreen> {
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : _artists.isEmpty
-                      ? const Center(
+                      ? Center(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.verified_user,
+                              const Icon(Icons.verified_user,
                                   size: 64, color: Colors.grey),
-                              SizedBox(height: 16),
-                              Text('art_walk_no_verified_artists_found'.tr(),
+                              const SizedBox(height: 16),
+                              Text(
+                                tr('art_walk_no_verified_artists_found'),
                                 style:
-                                    TextStyle(fontSize: 18, color: Colors.grey),
+                                    const TextStyle(fontSize: 18, color: Colors.grey),
                               ),
                             ],
                           ),
@@ -350,17 +356,18 @@ class _VerifiedArtistScreenState extends State<VerifiedArtistScreen> {
                       color: core.ArtbeatColors.verified,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.verified,
                           size: 16,
                           color: Colors.white,
                         ),
-                        SizedBox(width: 4),
-                        Text('art_walk_verified'.tr(),
-                          style: TextStyle(
+                        const SizedBox(width: 4),
+                        Text(
+                          tr('art_walk_verified'),
+                          style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
                             fontSize: 12,
@@ -416,7 +423,7 @@ class _VerifiedArtistScreenState extends State<VerifiedArtistScreen> {
                       ),
                       if (artist.userType.name == core.UserType.gallery.name)
                         Chip(
-                          label: Text('artist_artist_browse_text_gallery'.tr()),
+                          label: Text(tr('artist_artist_browse_text_gallery')),
                           backgroundColor: Theme.of(context)
                               .colorScheme
                               .secondary
@@ -453,7 +460,8 @@ class _VerifiedArtistScreenState extends State<VerifiedArtistScreen> {
                           )),
                       if (artist.mediums.length > 2)
                         Chip(
-                          label: Text('artist_artist_browse_text_artistmediumslength_2'.tr()),
+                          label: Text(tr(
+                              'artist_artist_browse_text_artistmediumslength_2')),
                           backgroundColor:
                               Theme.of(context).chipTheme.backgroundColor,
                           labelPadding:
@@ -481,14 +489,14 @@ class _VerifiedArtistScreenState extends State<VerifiedArtistScreen> {
         String tempStyle = _selectedStyle;
 
         return AlertDialog(
-          title: Text('artist_verified_artist_text_filter_verified_artists'.tr()),
+          title:
+              Text(tr('artist_verified_artist_text_filter_verified_artists')),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Medium',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text('Medium', style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
@@ -505,8 +513,8 @@ class _VerifiedArtistScreenState extends State<VerifiedArtistScreen> {
                   }).toList(),
                 ),
                 const SizedBox(height: 16),
-                const Text('art_walk_style'.tr(),
-                    style: TextStyle(fontWeight: FontWeight.bold)),
+                Text(tr('art_walk_style'),
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
@@ -530,7 +538,7 @@ class _VerifiedArtistScreenState extends State<VerifiedArtistScreen> {
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Text('admin_admin_payment_text_cancel'.tr()),
+              child: Text(tr('admin_admin_payment_text_cancel')),
             ),
             TextButton(
               onPressed: () {
@@ -541,7 +549,7 @@ class _VerifiedArtistScreenState extends State<VerifiedArtistScreen> {
                 Navigator.pop(context);
                 _applyFilters();
               },
-              child: Text('artist_artist_browse_text_apply'.tr()),
+              child: Text(tr('artist_artist_browse_text_apply')),
             ),
           ],
         );

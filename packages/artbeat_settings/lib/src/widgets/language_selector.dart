@@ -32,8 +32,11 @@ class _LanguageSelectorState extends State<LanguageSelector> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_initialized) {
-      _selectedLanguage = EasyLocalization.of(context)!.locale.languageCode;
-      _initialized = true;
+      final easyLoc = EasyLocalization.of(context);
+      if (easyLoc != null) {
+        _selectedLanguage = easyLoc.locale.languageCode;
+        _initialized = true;
+      }
     }
   }
 
@@ -80,11 +83,6 @@ class _LanguageSelectorState extends State<LanguageSelector> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          lang['flag']!,
-                          style: const TextStyle(fontSize: 18),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
                           lang['nameKey']!.tr(),
                           style: TextStyle(
                             color: isSelected
@@ -108,18 +106,26 @@ class _LanguageSelectorState extends State<LanguageSelector> {
   }
 
   Future<void> _changeLanguage(String languageCode) async {
+    final easyLoc = EasyLocalization.of(context);
+    if (easyLoc == null) return;
+
     setState(() {
       _selectedLanguage = languageCode;
     });
 
-    await EasyLocalization.of(context)!.setLocale(Locale(languageCode));
+    await easyLoc.setLocale(Locale(languageCode));
     widget.onLanguageChanged?.call(languageCode);
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'artbeat_settings_language_changed'.tr().replaceAll('{language}', languages.firstWhere((l) => l['code'] == languageCode)['nameKey']!.tr()),
+            'artbeat_settings_language_changed'.tr().replaceAll(
+              '{language}',
+              languages
+                  .firstWhere((l) => l['code'] == languageCode)['nameKey']!
+                  .tr(),
+            ),
             style: const TextStyle(color: Colors.white),
           ),
           backgroundColor: const Color(0xFF8B5CF6),

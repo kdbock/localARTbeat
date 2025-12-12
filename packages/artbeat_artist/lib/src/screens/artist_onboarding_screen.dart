@@ -90,7 +90,9 @@ class _ArtistOnboardingScreenState extends State<ArtistOnboardingScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('artist_artist_onboarding_success_artist_profile_created'.tr())),
+          SnackBar(
+              content: Text(tr(
+                  'artist_artist_onboarding_success_artist_profile_created'))),
         );
         // Navigate to subscription comparison after onboarding
         Navigator.pushNamed(context, '/subscription/comparison');
@@ -99,7 +101,9 @@ class _ArtistOnboardingScreenState extends State<ArtistOnboardingScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('artist_artist_onboarding_error_error_creating_artist'.tr())),
+          SnackBar(
+              content: Text(
+                  tr('artist_artist_onboarding_error_error_creating_artist'))),
         );
       }
     } finally {
@@ -152,7 +156,8 @@ class _ArtistOnboardingScreenState extends State<ArtistOnboardingScreen> {
                               ),
                             ),
                             const SizedBox(height: 16),
-                            Text('art_walk_welcome_to_artbeat_for_artists'.tr(),
+                            Text(
+                              tr('art_walk_welcome_to_artbeat_for_artists'),
                               style: Theme.of(context)
                                   .textTheme
                                   .headlineSmall
@@ -163,7 +168,8 @@ class _ArtistOnboardingScreenState extends State<ArtistOnboardingScreen> {
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 8),
-                            Text('art_walk_showcase_your_talent_and_join_a_vibrant_community_of_creators'.tr(),
+                            Text(
+                              tr('art_walk_showcase_your_talent_and_join_a_vibrant_community_of_creators'),
                               style: Theme.of(context)
                                   .textTheme
                                   .bodyLarge
@@ -179,7 +185,8 @@ class _ArtistOnboardingScreenState extends State<ArtistOnboardingScreen> {
                       const Divider(
                           color: core.ArtbeatColors.divider, thickness: 1.2),
                       const SizedBox(height: 18),
-                      Text('art_walk_about_you'.tr(),
+                      Text(
+                        tr('art_walk_about_you'),
                         style:
                             Theme.of(context).textTheme.titleMedium?.copyWith(
                                   color: core.ArtbeatColors.primaryPurple,
@@ -215,7 +222,8 @@ class _ArtistOnboardingScreenState extends State<ArtistOnboardingScreen> {
                       const Divider(
                           color: core.ArtbeatColors.divider, thickness: 1.2),
                       const SizedBox(height: 18),
-                      Text('art_walk_art_mediums'.tr(),
+                      Text(
+                        tr('art_walk_art_mediums'),
                         style:
                             Theme.of(context).textTheme.titleMedium?.copyWith(
                                   color: core.ArtbeatColors.primaryGreen,
@@ -223,7 +231,8 @@ class _ArtistOnboardingScreenState extends State<ArtistOnboardingScreen> {
                                 ),
                       ),
                       const SizedBox(height: 8),
-                      Text('art_walk_select_all_that_apply__what_materials_or_techniques_do_you_use_most'.tr(),
+                      Text(
+                        tr('art_walk_select_all_that_apply__what_materials_or_techniques_do_you_use_most'),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: core.ArtbeatColors.textSecondary,
                             ),
@@ -270,17 +279,19 @@ class _ArtistOnboardingScreenState extends State<ArtistOnboardingScreen> {
                         }).toList(),
                       ),
                       if (_selectedMediums.isEmpty)
-                        const Padding(
-                          padding: EdgeInsets.only(top: 8),
-                          child: Text('art_walk_please_select_at_least_one_medium'.tr(),
-                            style: TextStyle(color: core.ArtbeatColors.error),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Text(
+                            tr('art_walk_please_select_at_least_one_medium'),
+                            style: const TextStyle(color: core.ArtbeatColors.error),
                           ),
                         ),
                       const SizedBox(height: 24),
                       const Divider(
                           color: core.ArtbeatColors.divider, thickness: 1.2),
                       const SizedBox(height: 18),
-                      Text('art_walk_art_styles'.tr(),
+                      Text(
+                        tr('art_walk_art_styles'),
                         style:
                             Theme.of(context).textTheme.titleMedium?.copyWith(
                                   color: core.ArtbeatColors.accent1,
@@ -288,7 +299,8 @@ class _ArtistOnboardingScreenState extends State<ArtistOnboardingScreen> {
                                 ),
                       ),
                       const SizedBox(height: 8),
-                      Text('art_walk_what_styles_best_describe_your_work__select_as_many_as_you_like'.tr(),
+                      Text(
+                        tr('art_walk_what_styles_best_describe_your_work__select_as_many_as_you_like'),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: core.ArtbeatColors.textSecondary,
                             ),
@@ -335,10 +347,11 @@ class _ArtistOnboardingScreenState extends State<ArtistOnboardingScreen> {
                         }).toList(),
                       ),
                       if (_selectedStyles.isEmpty)
-                        const Padding(
-                          padding: EdgeInsets.only(top: 8),
-                          child: Text('art_walk_please_select_at_least_one_style'.tr(),
-                            style: TextStyle(color: core.ArtbeatColors.error),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Text(
+                            tr('art_walk_please_select_at_least_one_style'),
+                            style: const TextStyle(color: core.ArtbeatColors.error),
                           ),
                         ),
                       const SizedBox(height: 32),
@@ -368,8 +381,9 @@ class _ArtistOnboardingScreenState extends State<ArtistOnboardingScreen> {
                                         core.ArtbeatColors.white),
                                   ),
                                 )
-                              : const Text('art_walk_create_artist_profile'.tr(),
-                                  style: TextStyle(
+                              : Text(
+                                  tr('art_walk_create_artist_profile'),
+                                  style: const TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                     color: core.ArtbeatColors.white,
@@ -379,7 +393,8 @@ class _ArtistOnboardingScreenState extends State<ArtistOnboardingScreen> {
                       ),
                       const SizedBox(height: 8),
                       Center(
-                        child: Text('art_walk_you_can_edit_your_profile_and_add_more_details_later'.tr(),
+                        child: Text(
+                          tr('art_walk_you_can_edit_your_profile_and_add_more_details_later'),
                           style:
                               Theme.of(context).textTheme.bodySmall?.copyWith(
                                     color: core.ArtbeatColors.textDisabled,

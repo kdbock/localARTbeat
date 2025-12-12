@@ -12,6 +12,7 @@ import 'subscription_plan_validator.dart';
 import 'subscription_validation_service.dart';
 import 'coupon_service.dart';
 import 'payment_service.dart';
+import 'artist_feature_service.dart';
 import '../utils/logger.dart';
 
 /// Service for managing subscriptions
@@ -89,18 +90,32 @@ class SubscriptionService extends ChangeNotifier {
     }
   }
 
-  /// Get featured artists based on subscription tier
+  /// Get featured artists based on active features
   Future<List<ArtistProfileModel>> getFeaturedArtists() async {
     try {
-      final snapshot = await _firestore
-          .collection('artistProfiles')
-          .where('isFeatured', isEqualTo: true)
-          .limit(10)
-          .get();
+      // Get artist IDs with active featured features
+      final artistFeatureService = ArtistFeatureService();
+      final featuredArtistIds = await artistFeatureService
+          .getFeaturedArtistIds();
 
-      return snapshot.docs
-          .map((doc) => ArtistProfileModel.fromFirestore(doc))
-          .toList();
+      if (featuredArtistIds.isEmpty) {
+        return [];
+      }
+
+      // Get artist profiles for these IDs
+      final artists = <ArtistProfileModel>[];
+      for (final artistId in featuredArtistIds) {
+        final artistDoc = await _firestore
+            .collection('artistProfiles')
+            .doc(artistId)
+            .get();
+
+        if (artistDoc.exists) {
+          artists.add(ArtistProfileModel.fromFirestore(artistDoc));
+        }
+      }
+
+      return artists;
     } catch (e) {
       AppLogger.error('Error getting featured artists: $e');
       return [];

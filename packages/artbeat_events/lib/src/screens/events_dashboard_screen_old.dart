@@ -6,6 +6,7 @@ import '../models/artbeat_event.dart';
 import 'events_list_screen.dart';
 import 'my_tickets_screen.dart';
 import 'dart:developer' as developer;
+import 'package:easy_localization/easy_localization.dart';
 
 /// Central events dashboard screen - entry point for events tab
 /// This is a placeholder that redirects to the comprehensive events system
@@ -502,7 +503,6 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen> {
                 const SizedBox(height: 16),
 
                 // Events & Experiences Zone ad placement
-                
                 const SizedBox(height: 24),
 
                 // Quick Actions
@@ -1344,7 +1344,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen> {
                 backgroundColor: ArtbeatColors.primaryPurple,
                 foregroundColor: Colors.white,
               ),
-              child: const Text('events_retry'.tr()),
+              child: Text('events_retry'.tr()),
             ),
           ],
         ),
@@ -1385,7 +1385,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen> {
                   });
                   _applyFilters();
                 },
-                child: const Text('events_clear_filters'.tr()),
+                child: Text('events_clear_filters'.tr()),
               ),
             ],
           ],
@@ -1837,7 +1837,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen> {
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                const Column(
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('events_feature_purchase_tickets'.tr()),
@@ -1851,7 +1851,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen> {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () => Navigator.pushNamed(context, '/login'),
-                    child: const Text('events_sign_in_now'.tr()),
+                    child: Text('events_sign_in_now'.tr()),
                   ),
                 ),
               ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/search_criteria_model.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Advanced filter widget for public art search
 class PublicArtSearchFilter extends StatefulWidget {
@@ -305,8 +306,13 @@ class _PublicArtSearchFilterState extends State<PublicArtSearchFilter> {
             child: Column(
               children: [
                 CheckboxListTile(
-                  title: Text('art_walk_public_art_search_filter_text_verified_only'.tr()),
-                  subtitle: Text('art_walk_public_art_search_filter_text_show_only_verified_artwork'.tr()),
+                  title: Text(
+                    'art_walk_public_art_search_filter_text_verified_only'.tr(),
+                  ),
+                  subtitle: Text(
+                    'art_walk_public_art_search_filter_text_show_only_verified_artwork'
+                        .tr(),
+                  ),
                   value: _criteria.isVerified ?? false,
                   onChanged: (value) => _updateCriteria(isVerified: value),
                   controlAffinity: ListTileControlAffinity.leading,
@@ -416,16 +422,16 @@ class _PublicArtSearchFilterState extends State<PublicArtSearchFilter> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: SegmentedButton<bool>(
-                        segments: const [
+                        segments: [
                           ButtonSegment<bool>(
                             value: false,
                             label: Text('art_walk_text_ascending'.tr()),
-                            icon: Icon(Icons.arrow_upward, size: 16),
+                            icon: const Icon(Icons.arrow_upward, size: 16),
                           ),
                           ButtonSegment<bool>(
                             value: true,
                             label: Text('art_walk_text_descending'.tr()),
-                            icon: Icon(Icons.arrow_downward, size: 16),
+                            icon: const Icon(Icons.arrow_downward, size: 16),
                           ),
                         ],
                         selected: {_criteria.sortDescending ?? true},

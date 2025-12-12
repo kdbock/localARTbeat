@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Widget for displaying local galleries and museums in a grid layout
 class LocalGalleriesWidget extends StatelessWidget {
@@ -22,10 +23,11 @@ class LocalGalleriesWidget extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Expanded(
+              Expanded(
                 // Wrap the Text widget with Expanded
-                child: Text('art_walk_local_galleries___museums'.tr(),
-                  style: TextStyle(
+                child: Text(
+                  tr('art_walk_local_galleries___museums'),
+                  style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
@@ -34,7 +36,7 @@ class LocalGalleriesWidget extends StatelessWidget {
               ),
               TextButton(
                 onPressed: onSeeAllPressed,
-                child: const Text('art_walk_see_all'.tr()),
+                child: Text(tr('art_walk_see_all')),
               ),
             ],
           ),
@@ -96,9 +98,10 @@ class LocalGalleriesWidget extends StatelessWidget {
                       color: Colors.grey.shade600,
                     ),
                     const SizedBox(height: 12),
-                    const Text('art_walk_no_galleries_or_museums_found_in_your_area'.tr(),
+                    Text(
+                      tr('art_walk_no_galleries_or_museums_found_in_your_area'),
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.grey,
                         fontSize: 16,
                       ),
@@ -111,7 +114,7 @@ class LocalGalleriesWidget extends StatelessWidget {
                           onSeeAllPressed!();
                         }
                       },
-                      child: const Text('art_walk_browse_all_galleries'.tr()),
+                      child: Text(tr('art_walk_browse_all_galleries')),
                     ),
                   ],
                 ),
@@ -194,14 +197,15 @@ class LocalGalleriesWidget extends StatelessWidget {
                                       color: Colors.amber,
                                       borderRadius: BorderRadius.circular(12),
                                     ),
-                                    child: const Row(
+                                    child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Icon(Icons.star,
+                                        const Icon(Icons.star,
                                             size: 14, color: Colors.white),
-                                        SizedBox(width: 2),
-                                        Text('art_walk_featured'.tr(),
-                                          style: TextStyle(
+                                        const SizedBox(width: 2),
+                                        Text(
+                                          tr('art_walk_featured'),
+                                          style: const TextStyle(
                                             fontSize: 10,
                                             fontWeight: FontWeight.bold,
                                             color: Colors.white,

@@ -9,7 +9,11 @@ import '../models/index.dart';
 import '../services/index.dart';
 
 class CreateLocalAdScreen extends StatefulWidget {
-  const CreateLocalAdScreen({Key? key}) : super(key: key);
+  const CreateLocalAdScreen({Key? key, this.initialSize, this.initialDuration})
+    : super(key: key);
+
+  final LocalAdSize? initialSize;
+  final LocalAdDuration? initialDuration;
 
   @override
   State<CreateLocalAdScreen> createState() => _CreateLocalAdScreenState();
@@ -35,6 +39,8 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
   @override
   void initState() {
     super.initState();
+    _selectedSize = widget.initialSize ?? LocalAdSize.small;
+    _selectedDuration = widget.initialDuration ?? LocalAdDuration.oneWeek;
     _adService = LocalAdService();
     _iapService = LocalAdIapService();
   }
@@ -65,12 +71,12 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
     try {
       final fileName = 'ads/${DateTime.now().millisecondsSinceEpoch}.jpg';
       final reference = FirebaseStorage.instance.ref().child(fileName);
-      
+
       final uploadFile = _selectedImage!;
       try {
         await reference.putFile(uploadFile);
       } catch (e) {
-        if (e.toString().contains('NSURLFileProtectionComplete') || 
+        if (e.toString().contains('NSURLFileProtectionComplete') ||
             e.toString().contains('file protection')) {
           final tempDir = Directory.systemTemp;
           final tempFile = File('${tempDir.path}/temp_ad_image.jpg');
@@ -81,12 +87,14 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
           rethrow;
         }
       }
-      
+
       return await reference.getDownloadURL();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('ads_create_local_ad_error_failed_to_upload'.tr())),
+          SnackBar(
+            content: Text('ads_create_local_ad_error_failed_to_upload'.tr()),
+          ),
         );
       }
       return null;
@@ -105,9 +113,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
       if (user == null) throw Exception('User not authenticated');
 
       final now = DateTime.now();
-      final expiresAt = now.add(
-        Duration(days: _selectedDuration.days),
-      );
+      final expiresAt = now.add(Duration(days: _selectedDuration.days));
 
       final ad = LocalAd(
         id: '', // Will be set by service
@@ -136,14 +142,20 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('ads_create_local_ad_success_ad_posted_successfully'.tr())),
+          SnackBar(
+            content: Text(
+              'ads_create_local_ad_success_ad_posted_successfully'.tr(),
+            ),
+          ),
         );
         Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('ads_create_local_ad_error_failed_to_post'.tr())),
+          SnackBar(
+            content: Text('ads_create_local_ad_error_failed_to_post'.tr()),
+          ),
         );
       }
     } finally {
@@ -223,16 +235,16 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
             Text(
               'ads_create_local_ad_text_promote_your_art'.tr(),
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: ArtbeatColors.primaryPurple,
-                  ),
+                fontWeight: FontWeight.bold,
+                color: ArtbeatColors.primaryPurple,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               'ads_create_local_ad_text_reach_art_lovers'.tr(),
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey[600],
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
               textAlign: TextAlign.center,
             ),
           ],
@@ -248,9 +260,9 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
         Text(
           'ads_create_local_ad_text_ad_content'.tr(),
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: ArtbeatColors.primaryPurple,
-                fontWeight: FontWeight.bold,
-              ),
+            color: ArtbeatColors.primaryPurple,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 16),
         Container(
@@ -267,7 +279,8 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
               contentPadding: EdgeInsets.all(16),
               labelStyle: TextStyle(color: ArtbeatColors.primaryPurple),
             ),
-            validator: (value) => value?.isEmpty ?? true ? 'Title is required' : null,
+            validator: (value) =>
+                value?.isEmpty ?? true ? 'Title is required' : null,
           ),
         ),
         const SizedBox(height: 12),
@@ -302,9 +315,9 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
       children: [
         Text(
           'ads_create_local_ad_text_image_optional'.tr(),
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 8),
         if (_selectedImage == null)
@@ -331,9 +344,9 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
                     const SizedBox(height: 8),
                     Text(
                       'ads_create_local_ad_text_tap_to_select_image'.tr(),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.grey[600],
-                          ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
                     ),
                   ],
                 ),
@@ -376,16 +389,16 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
         Text(
           'ads_create_local_ad_text_where_to_display'.tr(),
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: ArtbeatColors.primaryPurple,
-                fontWeight: FontWeight.bold,
-              ),
+            color: ArtbeatColors.primaryPurple,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 16),
         Text(
           'ads_create_local_ad_text_select_zone'.tr(),
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 8),
         Container(
@@ -397,17 +410,22 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
             initialValue: _selectedZone,
             decoration: const InputDecoration(
               border: InputBorder.none,
-              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
             ),
             dropdownColor: Colors.white,
             items: LocalAdZone.values
-                .map((zone) => DropdownMenuItem(
-                      value: zone,
-                      child: Text(
-                        zone.displayName,
-                        style: const TextStyle(color: Colors.black87),
-                      ),
-                    ))
+                .map(
+                  (zone) => DropdownMenuItem(
+                    value: zone,
+                    child: Text(
+                      zone.displayName,
+                      style: const TextStyle(color: Colors.black87),
+                    ),
+                  ),
+                )
                 .toList(),
             onChanged: (zone) {
               if (zone != null) {
@@ -427,16 +445,16 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
         Text(
           'ads_create_local_ad_text_size_and_duration'.tr(),
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: ArtbeatColors.primaryPurple,
-                fontWeight: FontWeight.bold,
-              ),
+            color: ArtbeatColors.primaryPurple,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 16),
         Text(
           'ads_create_local_ad_text_select_size'.tr(),
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 8),
         Row(
@@ -466,7 +484,8 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
                       children: [
                         Text(
                           size.displayName,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: isSelected
                                     ? ArtbeatColors.primaryPurple
@@ -477,10 +496,8 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
                         Text(
                           size.description,
                           textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Colors.grey[600],
-                                fontSize: 10,
-                              ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: Colors.grey[600], fontSize: 10),
                         ),
                       ],
                     ),
@@ -493,9 +510,9 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
         const SizedBox(height: 24),
         Text(
           'ads_create_local_ad_text_select_duration'.tr(),
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 8),
         Column(
@@ -530,18 +547,18 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
                       Text(
                         duration.displayName,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              fontWeight: isSelected ? FontWeight.bold : null,
-                              color: isSelected
-                                  ? ArtbeatColors.primaryPurple
-                                  : Colors.black,
-                            ),
+                          fontWeight: isSelected ? FontWeight.bold : null,
+                          color: isSelected
+                              ? ArtbeatColors.primaryPurple
+                              : Colors.black,
+                        ),
                       ),
                       Text(
                         '\$${price.toStringAsFixed(2)}',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: ArtbeatColors.primaryGreen,
-                            ),
+                          fontWeight: FontWeight.bold,
+                          color: ArtbeatColors.primaryGreen,
+                        ),
                       ),
                     ],
                   ),
@@ -578,7 +595,10 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
                 ),
               )
             : Text(
-                'ads_create_local_ad_text_post_ad_for_price'.tr().replaceAll('{price}', '\$${price.toStringAsFixed(2)}'),
+                'ads_create_local_ad_text_post_ad_for_price'.tr().replaceAll(
+                  '{price}',
+                  '\$${price.toStringAsFixed(2)}',
+                ),
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 16,

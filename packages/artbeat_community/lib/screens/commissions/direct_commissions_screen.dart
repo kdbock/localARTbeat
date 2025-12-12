@@ -993,6 +993,9 @@ class _QuoteProvisionDialogState extends State<_QuoteProvisionDialog> {
   }
 
   void _removeMilestone(int index) {
+    if (index < 0 || index >= _milestones.length) {
+      return;
+    }
     setState(() {
       _milestones[index].dispose();
       _milestones.removeAt(index);

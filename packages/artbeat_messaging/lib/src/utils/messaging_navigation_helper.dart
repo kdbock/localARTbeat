@@ -22,7 +22,7 @@ class MessagingNavigationHelper {
         );
       } else if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('messaging_error_chat_not_found'.tr()),
             backgroundColor: Colors.red,
           ),
@@ -85,7 +85,7 @@ class MessagingNavigationHelper {
         );
       } else if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('messaging_error_user_not_found'.tr()),
             backgroundColor: Colors.red,
           ),
@@ -189,7 +189,7 @@ class MessagingNavigationHelper {
         // Handle unknown deep links
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Text('messaging_error_unknown_deep_link'.tr()),
               backgroundColor: Colors.orange,
             ),

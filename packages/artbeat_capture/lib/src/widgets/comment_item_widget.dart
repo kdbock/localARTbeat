@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/capture_service.dart';
 import 'package:artbeat_core/artbeat_core.dart' show AppLogger;
-import 'package:intl/intl.dart';
 
 /// Widget for displaying a single comment
 class CommentItemWidget extends StatefulWidget {
@@ -71,17 +71,24 @@ class _CommentItemWidgetState extends State<CommentItemWidget> {
       if (success) {
         widget.onDeleted?.call();
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('capture_comment_deleted_success'.tr())));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('capture_comment_deleted_success'.tr())),
+          );
         }
       }
     } catch (e) {
       AppLogger.error('Error deleting comment: $e');
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('capture_comment_error_generic'.tr().replaceAll('{error}', e.toString()))));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'capture_comment_error_generic'.tr().replaceAll(
+                '{error}',
+                e.toString(),
+              ),
+            ),
+          ),
+        );
       }
     } finally {
       if (mounted) {
@@ -109,9 +116,16 @@ class _CommentItemWidgetState extends State<CommentItemWidget> {
     } catch (e) {
       AppLogger.error('Error toggling comment like: $e');
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('capture_comment_error_generic'.tr().replaceAll('{error}', e.toString()))));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'capture_comment_error_generic'.tr().replaceAll(
+                '{error}',
+                e.toString(),
+              ),
+            ),
+          ),
+        );
       }
     }
   }

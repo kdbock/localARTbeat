@@ -26,25 +26,29 @@ class _GiftSelectionWidgetState extends State<GiftSelectionWidget> {
       'id': 'artbeat_gift_small',
       'name': '🎨 Supporter Gift',
       'price': 4.99,
-      'description': 'Token of appreciation',
+      'description':
+          'Artist featured for 30 days - Give your favorite artist more visibility!',
     },
     {
       'id': 'artbeat_gift_medium',
       'name': '🖼️ Fan Gift',
       'price': 9.99,
-      'description': 'Thoughtful support',
+      'description':
+          'Artist featured for 90 days + 1 artwork featured for 90 days - Boost their exposure!',
     },
     {
       'id': 'artbeat_gift_large',
       'name': '✨ Patron Gift',
       'price': 24.99,
-      'description': 'Generous support',
+      'description':
+          'Artist featured for 180 days + 5 artworks featured for 180 days + Artist ad in rotation for 180 days - Maximum support!',
     },
     {
       'id': 'artbeat_gift_premium',
       'name': '👑 Benefactor Gift',
       'price': 49.99,
-      'description': 'Maximum support',
+      'description':
+          'Artist featured for 1 year + 5 artworks featured for 1 year + Artist ad in rotation for 1 year - Ultimate artist support!',
     },
   ];
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:artbeat_art_walk/artbeat_art_walk.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Fallback widget displayed when Google Maps cannot be loaded
 ///
@@ -101,7 +102,9 @@ class OfflineMapFallback extends StatelessWidget {
                   Navigator.pushNamed(context, '/art-walk/list');
                 },
                 icon: const Icon(Icons.list_alt),
-                label: Text('art_walk_offline_map_fallback_text_view_art_walk_list'.tr()),
+                label: Text(
+                  'art_walk_offline_map_fallback_text_view_art_walk_list'.tr(),
+                ),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 24,

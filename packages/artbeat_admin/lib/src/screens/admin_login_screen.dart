@@ -6,7 +6,7 @@ import 'package:artbeat_core/artbeat_core.dart';
 import '../services/admin_service.dart';
 
 class AdminLoginScreen extends StatefulWidget {
-  AdminLoginScreen({Key? key}) : super(key: key);
+  const AdminLoginScreen({Key? key}) : super(key: key);
 
   @override
   State<AdminLoginScreen> createState() => _AdminLoginScreenState();
@@ -85,15 +85,15 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Icon(
+                const Icon(
                   Icons.admin_panel_settings,
                   size: 80,
                   color: Colors.blue,
                 ),
-                SizedBox(height: 48),
+                const SizedBox(height: 48),
                 TextFormField(
                   controller: _emailController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Email',
                     prefixIcon: Icon(Icons.email),
                     border: OutlineInputBorder(),
@@ -109,10 +109,10 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                     return null;
                   },
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 TextFormField(
                   controller: _passwordController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Password',
                     prefixIcon: Icon(Icons.lock),
                     border: OutlineInputBorder(),
@@ -131,7 +131,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                 const SizedBox(height: 24),
                 if (_error != null)
                   Padding(
-                    padding: EdgeInsets.only(bottom: 16),
+                    padding: const EdgeInsets.only(bottom: 16),
                     child: Text(
                       _error!,
                       style: const TextStyle(color: Colors.red),
@@ -144,7 +144,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                   child: _isLoading
-                      ? SizedBox(
+                      ? const SizedBox(
                           height: 20,
                           width: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),

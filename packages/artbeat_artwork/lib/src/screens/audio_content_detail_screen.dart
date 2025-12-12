@@ -6,6 +6,7 @@ import 'package:artbeat_artist/artbeat_artist.dart' as artist;
 import 'package:artbeat_core/artbeat_core.dart' hide ArtworkModel;
 import 'package:share_plus/share_plus.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Screen for listening to audio content (music, podcasts, audiobooks, etc.)
 class AudioContentDetailScreen extends StatefulWidget {
@@ -138,7 +139,10 @@ class _AudioContentDetailScreenState extends State<AudioContentDetailScreen> {
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('art_walk_error_loading_audio_content'.tr().replaceAll('{error}', e.toString()))),
+          SnackBar(
+              content: Text('art_walk_error_loading_audio_content'
+                  .tr()
+                  .replaceAll('{error}', e.toString()))),
         );
       }
     }
@@ -177,10 +181,10 @@ class _AudioContentDetailScreenState extends State<AudioContentDetailScreen> {
     }
 
     if (_artwork == null) {
-      return const MainLayout(
+      return MainLayout(
         currentIndex: 1,
         child: Center(
-        child: Text('art_walk_audio_content_not_found'.tr()),
+          child: Text('art_walk_audio_content_not_found'.tr()),
         ),
       );
     }

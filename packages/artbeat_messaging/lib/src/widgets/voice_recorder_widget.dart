@@ -382,21 +382,21 @@ class _VoiceRecorderWidgetState extends State<VoiceRecorderWidget>
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('messaging_voice_permission_required'.tr()),
-          content: const Text(
+          title: Text('messaging_voice_permission_required'.tr()),
+          content: Text(
             'messaging_voice_permission_message'.tr(),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('messaging_button_cancel'.tr()),
+              child: Text('messaging_button_cancel'.tr()),
             ),
             TextButton(
               onPressed: () async {
                 Navigator.of(context).pop();
                 await openAppSettings();
               },
-              child: const Text('messaging_button_open_settings'.tr()),
+              child: Text('messaging_button_open_settings'.tr()),
             ),
           ],
         );
@@ -437,7 +437,7 @@ class _VoiceRecorderWidgetState extends State<VoiceRecorderWidget>
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('messaging_button_cancel'.tr()),
+              child: Text('messaging_button_cancel'.tr()),
             ),
             if (showSettingsButton)
               TextButton(
@@ -445,7 +445,7 @@ class _VoiceRecorderWidgetState extends State<VoiceRecorderWidget>
                   Navigator.of(context).pop();
                   await openAppSettings();
                 },
-                child: const Text('messaging_button_open_settings'.tr()),
+                child: Text('messaging_button_open_settings'.tr()),
               ),
           ],
         );
@@ -458,14 +458,14 @@ class _VoiceRecorderWidgetState extends State<VoiceRecorderWidget>
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('messaging_voice_recording_error'.tr()),
-          content: const Text(
+          title: Text('messaging_voice_recording_error'.tr()),
+          content: Text(
             'messaging_voice_recording_error_message'.tr(),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('messaging_button_ok'.tr()),
+              child: Text('messaging_button_ok'.tr()),
             ),
           ],
         );

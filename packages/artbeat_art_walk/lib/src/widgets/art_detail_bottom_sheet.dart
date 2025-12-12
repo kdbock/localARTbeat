@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_art_walk/artbeat_art_walk.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Bottom sheet widget for displaying art details during art walk experience
 class ArtDetailBottomSheet extends StatelessWidget {
@@ -312,7 +313,10 @@ class ArtDetailBottomSheet extends StatelessWidget {
                       child: ElevatedButton.icon(
                         onPressed: () => _createArtWalk(context),
                         icon: const Icon(Icons.route),
-                        label: Text('art_walk_art_detail_bottom_sheet_button_create_art_walk'.tr()),
+                        label: Text(
+                          'art_walk_art_detail_bottom_sheet_button_create_art_walk'
+                              .tr(),
+                        ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.purple,
                           foregroundColor: Colors.white,

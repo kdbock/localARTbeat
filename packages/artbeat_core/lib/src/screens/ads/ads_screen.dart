@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../services/in_app_purchase_manager.dart';
-import '../../services/in_app_purchase_setup.dart';
+import 'package:artbeat_ads/artbeat_ads.dart';
 import '../../theme/artbeat_colors.dart';
 
 class AdsScreen extends StatefulWidget {
@@ -11,103 +10,229 @@ class AdsScreen extends StatefulWidget {
 }
 
 class _AdsScreenState extends State<AdsScreen> {
-  final InAppPurchaseManager _purchaseManager = InAppPurchaseManager();
+  final LocalAdIapService _iapService = LocalAdIapService();
   bool _isInitialized = false;
 
   @override
   void initState() {
     super.initState();
-    _initializePurchases();
+    _initializeIAP();
   }
 
-  Future<void> _initializePurchases() async {
-    final setup = InAppPurchaseSetup();
-    final initialized = await setup.initialize();
-    if (mounted) {
-      setState(() {
-        _isInitialized = initialized;
-      });
+  Future<void> _initializeIAP() async {
+    try {
+      await _iapService.initIap();
+      await _iapService.fetchProducts();
+      if (mounted) {
+        setState(() {
+          _isInitialized = true;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isInitialized = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to load ad packages: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(
-      title: const Text('Promote Artwork'),
-      backgroundColor: ArtbeatColors.primary,
-      foregroundColor: Colors.white,
-    ),
-    body: SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [ArtbeatColors.backgroundPrimary, Color(0xFFF8F9FA)],
+        ),
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Hero Section
+            _buildHeroSection(),
+            const SizedBox(height: 32),
+
+            // Ad Packages Section
+            _buildAdPackagesSection(),
+            const SizedBox(height: 48),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeroSection() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [ArtbeatColors.primary, ArtbeatColors.primaryPurple],
+        ),
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(32),
+          bottomRight: Radius.circular(32),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Icon(
+                  Icons.campaign,
+                  color: Colors.white,
+                  size: 32,
+                ),
+              ),
+              const SizedBox(width: 16),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Promote Your Business',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'Reach local art lovers and customers with targeted advertising',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w300,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.2),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.lightbulb, color: Colors.white, size: 20),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Text(
+                    'Choose from various ad sizes and durations to fit your business needs',
+                    style: TextStyle(color: Colors.white, fontSize: 14),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAdPackagesSection() {
+    if (!_isInitialized) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(48),
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Advertisement Packages',
-            style: Theme.of(context).textTheme.headlineSmall,
+            'Choose Your Ad Package',
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Text(
-            'Get more visibility for your artwork',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.grey[600],
-            ),
+            'Select the perfect package to promote your business',
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
           ),
           const SizedBox(height: 24),
-          _buildAdCategory(
-            'Small Ads',
-            [
-              {
-                'productId': 'ad_small_1w',
-                'duration': '1 Week',
-                'price': '\$4.99',
-                'impressions': '~5,000',
-              },
-              {
-                'productId': 'ad_small_1m',
-                'duration': '1 Month',
-                'price': '\$14.99',
-                'impressions': '~20,000',
-                'isPopular': true,
-              },
-              {
-                'productId': 'ad_small_3m',
-                'duration': '3 Months',
-                'price': '\$34.99',
-                'impressions': '~60,000',
-              },
-            ],
-          ),
+          _buildAdCategory('Small Ads', [
+            {
+              'size': LocalAdSize.small,
+              'duration': LocalAdDuration.oneWeek,
+              'displayDuration': '1 Week',
+              'impressions': '~5,000',
+            },
+            {
+              'size': LocalAdSize.small,
+              'duration': LocalAdDuration.oneMonth,
+              'displayDuration': '1 Month',
+              'impressions': '~20,000',
+              'isPopular': true,
+            },
+            {
+              'size': LocalAdSize.small,
+              'duration': LocalAdDuration.threeMonths,
+              'displayDuration': '3 Months',
+              'impressions': '~60,000',
+            },
+          ]),
           const SizedBox(height: 24),
-          _buildAdCategory(
-            'Large Ads',
-            [
-              {
-                'productId': 'ad_big_1w',
-                'duration': '1 Week',
-                'price': '\$9.99',
-                'impressions': '~15,000',
-              },
-              {
-                'productId': 'ad_big_1m',
-                'duration': '1 Month',
-                'price': '\$24.99',
-                'impressions': '~60,000',
-                'isPopular': true,
-              },
-              {
-                'productId': 'ad_big_3m',
-                'duration': '3 Months',
-                'price': '\$54.99',
-                'impressions': '~180,000',
-              },
-            ],
-          ),
-          const SizedBox(height: 32),
+          _buildAdCategory('Large Ads', [
+            {
+              'size': LocalAdSize.big,
+              'duration': LocalAdDuration.oneWeek,
+              'displayDuration': '1 Week',
+              'impressions': '~15,000',
+            },
+            {
+              'size': LocalAdSize.big,
+              'duration': LocalAdDuration.oneMonth,
+              'displayDuration': '1 Month',
+              'impressions': '~60,000',
+              'isPopular': true,
+            },
+            {
+              'size': LocalAdSize.big,
+              'duration': LocalAdDuration.threeMonths,
+              'displayDuration': '3 Months',
+              'impressions': '~180,000',
+            },
+          ]),
         ],
       ),
-    ),
-  );
+    );
+  }
 
   Widget _buildAdCategory(String title, List<Map<String, dynamic>> ads) {
     return Column(
@@ -115,13 +240,17 @@ class _AdsScreenState extends State<AdsScreen> {
       children: [
         Text(
           title,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 12),
         ...ads.map((ad) {
           final isPopular = ad['isPopular'] as bool? ?? false;
+          final size = ad['size'] as LocalAdSize;
+          final duration = ad['duration'] as LocalAdDuration;
+          final price = AdPricingMatrix.getPrice(size, duration) ?? 0.0;
+
           return Column(
             children: [
               Card(
@@ -156,21 +285,13 @@ class _AdsScreenState extends State<AdsScreen> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        ad['duration'] as String,
+                                        ad['displayDuration'] as String,
                                         style: Theme.of(context)
                                             .textTheme
                                             .titleMedium
                                             ?.copyWith(
                                               fontWeight: FontWeight.bold,
-                                            ),
-                                      ),
-                                      Text(
-                                        '${ad['impressions']} impressions',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodySmall
-                                            ?.copyWith(
-                                              color: Colors.grey[600],
+                                              color: Colors.black87,
                                             ),
                                       ),
                                     ],
@@ -183,10 +304,8 @@ class _AdsScreenState extends State<AdsScreen> {
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               Text(
-                                ad['price'] as String,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleLarge
+                                '\$${price.toStringAsFixed(2)}',
+                                style: Theme.of(context).textTheme.titleLarge
                                     ?.copyWith(
                                       color: ArtbeatColors.primary,
                                       fontWeight: FontWeight.bold,
@@ -220,10 +339,7 @@ class _AdsScreenState extends State<AdsScreen> {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: () => _handleAdPurchase(
-                            ad['productId'] as String,
-                            ad['duration'] as String,
-                          ),
+                          onPressed: () => _handleAdPurchase(size, duration),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: isPopular
                                 ? ArtbeatColors.primary
@@ -231,10 +347,9 @@ class _AdsScreenState extends State<AdsScreen> {
                             foregroundColor: isPopular
                                 ? Colors.white
                                 : Colors.black,
-                            padding:
-                                const EdgeInsets.symmetric(vertical: 12),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
                           ),
-                          child: const Text('Promote Now'),
+                          child: const Text('Create Ad'),
                         ),
                       ),
                     ],
@@ -249,49 +364,22 @@ class _AdsScreenState extends State<AdsScreen> {
     );
   }
 
-  Future<void> _handleAdPurchase(String productId, String duration) async {
-    if (!_isInitialized) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('In-app purchases not available. Please try again.'),
-            backgroundColor: Colors.orange,
-          ),
-        );
-      }
-      return;
-    }
-
+  Future<void> _handleAdPurchase(
+    LocalAdSize size,
+    LocalAdDuration duration,
+  ) async {
     try {
-      final success = await _purchaseManager.purchaseAdPackage(
-        adProductId: productId,
-        artworkId: 'demo_artwork',
-        targetingOptions: {
-          'ageRange': '18-65',
-          'interests': ['Art'],
-          'location': 'global',
-          'deviceTypes': ['mobile', 'tablet'],
-        },
+      await Navigator.push<CreateLocalAdScreen>(
+        context,
+        MaterialPageRoute<CreateLocalAdScreen>(
+          builder: (context) =>
+              CreateLocalAdScreen(initialSize: size, initialDuration: duration),
+        ),
       );
+    } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              success
-                  ? 'Ad campaign initiated for $duration!'
-                  : 'Failed to complete ad purchase',
-            ),
-            backgroundColor: success ? Colors.green : Colors.red,
-          ),
-        );
-      }
-    } catch (e, _) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
         );
       }
     }

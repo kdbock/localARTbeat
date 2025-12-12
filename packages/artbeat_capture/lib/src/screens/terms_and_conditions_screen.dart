@@ -195,20 +195,20 @@ class _TermsAndConditionsScreenState extends State<TermsAndConditionsScreen> {
                       color: ArtbeatColors.primaryGreen.withValues(alpha: 0.3),
                     ),
                   ),
-                  child: const Column(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.map,
                             color: ArtbeatColors.primaryGreen,
                             size: 24,
                           ),
-                          SizedBox(width: 12),
+                          const SizedBox(width: 12),
                           Text(
                             'capture_terms_community_contribution'.tr(),
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: ArtbeatColors.primaryGreen,
                               fontWeight: FontWeight.bold,
                               fontSize: 18,
@@ -216,10 +216,10 @@ class _TermsAndConditionsScreenState extends State<TermsAndConditionsScreen> {
                           ),
                         ],
                       ),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 16),
                       Text(
                         'capture_terms_community_description'.tr(),
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: ArtbeatColors.primaryGreen,
                           fontSize: 14,
                           height: 1.5,
@@ -296,7 +296,10 @@ class _TermsAndConditionsScreenState extends State<TermsAndConditionsScreen> {
                               ? _acceptTermsAndProceed
                               : null,
                           icon: const Icon(Icons.camera_alt),
-                          label: Text('capture_terms_and_conditions_text_accept_continue'.tr()),
+                          label: Text(
+                            'capture_terms_and_conditions_text_accept_continue'
+                                .tr(),
+                          ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.transparent,
                             foregroundColor: Colors.white,

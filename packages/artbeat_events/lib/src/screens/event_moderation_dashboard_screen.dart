@@ -74,9 +74,18 @@ class _EventModerationDashboardScreenState
         bottom: TabBar(
           controller: _tabController,
           tabs: [
-            Tab(text: 'event_mod_flagged_events'.tr(), icon: const Icon(Icons.flag)),
-            Tab(text: 'event_mod_pending_review'.tr(), icon: const Icon(Icons.pending)),
-            Tab(text: 'event_mod_analytics'.tr(), icon: const Icon(Icons.analytics)),
+            Tab(
+              text: 'event_mod_flagged_events'.tr(),
+              icon: const Icon(Icons.flag),
+            ),
+            Tab(
+              text: 'event_mod_pending_review'.tr(),
+              icon: const Icon(Icons.pending),
+            ),
+            Tab(
+              text: 'event_mod_analytics'.tr(),
+              icon: const Icon(Icons.analytics),
+            ),
           ],
         ),
       ),
@@ -113,7 +122,10 @@ class _EventModerationDashboardScreenState
             style: TextStyle(color: Colors.grey[600]),
           ),
           const SizedBox(height: 24),
-          ElevatedButton(onPressed: _loadData, child: Text('event_mod_retry'.tr())),
+          ElevatedButton(
+            onPressed: _loadData,
+            child: Text('event_mod_retry'.tr()),
+          ),
         ],
       ),
     );
@@ -209,13 +221,13 @@ class _EventModerationDashboardScreenState
 
   Widget _buildPendingEventsTab() {
     if (_pendingEvents.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.check_circle, size: 64, color: Colors.green),
-            SizedBox(height: 16),
-            Text(
+            const Icon(Icons.check_circle, size: 64, color: Colors.green),
+            const SizedBox(height: 16),
+            const Text(
               'No pending events',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
@@ -285,7 +297,7 @@ class _EventModerationDashboardScreenState
                 ElevatedButton.icon(
                   onPressed: () => _reviewEvent(event.id, true),
                   icon: const Icon(Icons.check),
-                  label: const Text('events_approve'.tr()),
+                  label: Text('events_approve'.tr()),
                 ),
               ],
             ),
@@ -297,7 +309,7 @@ class _EventModerationDashboardScreenState
 
   Widget _buildAnalyticsTab() {
     if (_analytics == null) {
-      return const Center(child: Text('events_analytics_not_available'.tr()));
+      return Center(child: Text('events_analytics_not_available'.tr()));
     }
 
     final flags = _analytics!['flags'] as Map<String, dynamic>;
@@ -419,7 +431,13 @@ class _EventModerationDashboardScreenState
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-            Text('events_progress'.tr().replaceAll('{current}', current.toString()).replaceAll('{total}', total.toString()).replaceAll('{percentage}', '${(percentage * 100).toInt()}')),
+            Text(
+              'events_progress'
+                  .tr()
+                  .replaceAll('{current}', current.toString())
+                  .replaceAll('{total}', total.toString())
+                  .replaceAll('{percentage}', '${(percentage * 100).toInt()}'),
+            ),
           ],
         ),
         const SizedBox(height: 8),
@@ -502,7 +520,9 @@ class _EventModerationDashboardScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('events_error'.tr().replaceAll('{error}', e.toString())),
+            content: Text(
+              'events_error'.tr().replaceAll('{error}', e.toString()),
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -519,7 +539,7 @@ class _EventModerationDashboardScreenState
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('events_flag_dismissed'.tr()),
             backgroundColor: Colors.green,
           ),
@@ -531,7 +551,12 @@ class _EventModerationDashboardScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('events_dismiss_flag_error'.tr().replaceAll('{error}', e.toString())),
+            content: Text(
+              'events_dismiss_flag_error'.tr().replaceAll(
+                '{error}',
+                e.toString(),
+              ),
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -585,7 +610,9 @@ class _EventModerationDashboardScreenState
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('${'event_mod_description_label'.tr()}: ${event.description}'),
+              Text(
+                '${'event_mod_description_label'.tr()}: ${event.description}',
+              ),
               const SizedBox(height: 8),
               Text('${'event_mod_location_label'.tr()}: ${event.location}'),
               const SizedBox(height: 8),
@@ -608,7 +635,10 @@ class _EventModerationDashboardScreenState
               _reviewEvent(event.id, false);
             },
             icon: const Icon(Icons.close, color: Colors.red),
-            label: Text('event_mod_reject'.tr(), style: const TextStyle(color: Colors.red)),
+            label: Text(
+              'event_mod_reject'.tr(),
+              style: const TextStyle(color: Colors.red),
+            ),
           ),
           ElevatedButton.icon(
             onPressed: () {

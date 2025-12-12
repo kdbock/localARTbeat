@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_art_walk/src/services/art_walk_service.dart';
 import 'package:artbeat_art_walk/src/models/comment_model.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:easy_localization/easy_localization.dart';
 
 class ArtWalkCommentSection extends StatefulWidget {
   final String artWalkId;
@@ -74,7 +75,11 @@ class _ArtWalkCommentSectionState extends State<ArtWalkCommentSection> {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('art_walk_art_walk_comment_section_error_error_loading_comments'.tr().replaceAll('{error}', e.toString())),
+                content: Text(
+                  'art_walk_art_walk_comment_section_error_error_loading_comments'
+                      .tr()
+                      .replaceAll('{error}', e.toString()),
+                ),
               ),
             );
           }
@@ -89,7 +94,12 @@ class _ArtWalkCommentSectionState extends State<ArtWalkCommentSection> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('art_walk_art_walk_comment_section_text_you_must_be_logged_in_to_comment'.tr())),
+        SnackBar(
+          content: Text(
+            'art_walk_art_walk_comment_section_text_you_must_be_logged_in_to_comment'
+                .tr(),
+          ),
+        ),
       );
       return;
     }
@@ -121,7 +131,13 @@ class _ArtWalkCommentSectionState extends State<ArtWalkCommentSection> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('art_walk_art_walk_comment_section_error_error_posting_comment'.tr().replaceAll('{error}', e.toString()))),
+          SnackBar(
+            content: Text(
+              'art_walk_art_walk_comment_section_error_error_posting_comment'
+                  .tr()
+                  .replaceAll('{error}', e.toString()),
+            ),
+          ),
         );
       }
     } finally {
@@ -154,8 +170,13 @@ class _ArtWalkCommentSectionState extends State<ArtWalkCommentSection> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('art_walk_art_walk_comment_section_text_delete_comment'.tr()),
-        content: Text('art_walk_art_walk_comment_section_text_are_you_sure_you_want_to_delete_this_comment'.tr()),
+        title: Text(
+          'art_walk_art_walk_comment_section_text_delete_comment'.tr(),
+        ),
+        content: Text(
+          'art_walk_art_walk_comment_section_text_are_you_sure_you_want_to_delete_this_comment'
+              .tr(),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -182,7 +203,13 @@ class _ArtWalkCommentSectionState extends State<ArtWalkCommentSection> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('art_walk_art_walk_comment_section_error_error_deleting_comment'.tr().replaceAll('{error}', e.toString()))),
+          SnackBar(
+            content: Text(
+              'art_walk_art_walk_comment_section_error_error_deleting_comment'
+                  .tr()
+                  .replaceAll('{error}', e.toString()),
+            ),
+          ),
         );
       }
     } finally {
@@ -198,7 +225,10 @@ class _ArtWalkCommentSectionState extends State<ArtWalkCommentSection> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('art_walk_art_walk_comment_section_text_you_must_be_logged_in_to_like_comments'.tr()),
+            content: Text(
+              'art_walk_art_walk_comment_section_text_you_must_be_logged_in_to_like_comments'
+                  .tr(),
+            ),
           ),
         );
       }
@@ -214,7 +244,13 @@ class _ArtWalkCommentSectionState extends State<ArtWalkCommentSection> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('art_walk_art_walk_comment_section_error_error_liking_comment'.tr().replaceAll('{error}', e.toString()))),
+          SnackBar(
+            content: Text(
+              'art_walk_art_walk_comment_section_error_error_liking_comment'
+                  .tr()
+                  .replaceAll('{error}', e.toString()),
+            ),
+          ),
         );
       }
     }

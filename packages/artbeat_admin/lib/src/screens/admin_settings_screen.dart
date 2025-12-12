@@ -10,7 +10,7 @@ import '../widgets/admin_drawer.dart';
 /// Allows administrators to configure system settings, manage configurations,
 /// and control various aspects of the application.
 class AdminSettingsScreen extends StatefulWidget {
-  AdminSettingsScreen({super.key});
+  const AdminSettingsScreen({super.key});
 
   @override
   State<AdminSettingsScreen> createState() => _AdminSettingsScreenState();
@@ -116,14 +116,14 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
           if (_hasUnsavedChanges)
             TextButton(
               onPressed: _saveSettings,
-              child: Text(
+              child: const Text(
                 'Save',
                 style: TextStyle(color: Color(0xFF00BF63)),
               ),
             ),
         ],
       ),
-      drawer: AdminDrawer(),
+      drawer: const AdminDrawer(),
       child: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -137,7 +137,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
         ),
         child: SafeArea(
           child: _isLoading
-              ? Center(child: CircularProgressIndicator())
+              ? const Center(child: CircularProgressIndicator())
               : _error != null
                   ? _buildErrorWidget()
                   : _buildSettingsContent(),
@@ -156,18 +156,18 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
             size: 64,
             color: Colors.red.shade300,
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Text(
             'Error loading settings',
             style: Theme.of(context).textTheme.titleMedium,
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             _error!,
             style: Theme.of(context).textTheme.bodyMedium,
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           ElevatedButton(
             onPressed: _loadSettings,
             child: Text('admin_admin_settings_text_retry'.tr()),
@@ -184,24 +184,24 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
 
     return SingleChildScrollView(
       controller: _scrollController,
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildGeneralSettings(),
-          SizedBox(height: 32),
+          const SizedBox(height: 32),
           _buildUserSettings(),
-          SizedBox(height: 32),
+          const SizedBox(height: 32),
           _buildContentSettings(),
-          SizedBox(height: 32),
+          const SizedBox(height: 32),
           _buildSecuritySettings(),
-          SizedBox(height: 32),
+          const SizedBox(height: 32),
           _buildSystemSettings(),
-          SizedBox(height: 32),
+          const SizedBox(height: 32),
           _buildNotificationSettings(),
-          SizedBox(height: 32),
+          const SizedBox(height: 32),
           _buildMaintenanceSettings(),
-          SizedBox(height: 32),
+          const SizedBox(height: 32),
           _buildDangerZone(),
         ],
       ),
@@ -474,7 +474,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
     return Card(
       color: color,
       child: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -484,7 +484,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                     fontWeight: FontWeight.bold,
                   ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             ...children,
           ],
         ),
@@ -502,7 +502,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
       subtitle: TextField(
         controller: TextEditingController(text: value),
         onChanged: onChanged,
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
           isDense: true,
           contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         ),
@@ -538,7 +538,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
             onChanged(number);
           }
         },
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
           isDense: true,
           contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         ),
@@ -551,7 +551,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text('admin_admin_settings_text_backup_database'.tr()),
-        content: Text(
+        content: const Text(
             'Are you sure you want to create a backup of the database?'),
         actions: [
           TextButton(
@@ -604,7 +604,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text('admin_admin_settings_text_reset_settings'.tr()),
-        content: Text(
+        content: const Text(
             'Are you sure you want to reset all settings to default values?'),
         actions: [
           TextButton(
@@ -642,7 +642,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text('admin_admin_settings_text_warning_this_will_64'.tr()),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Text('admin_admin_settings_text_are_you_absolutely'.tr()),
           ],
         ),

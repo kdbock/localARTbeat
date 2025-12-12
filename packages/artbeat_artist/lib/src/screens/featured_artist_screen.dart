@@ -35,39 +35,21 @@ class _FeaturedArtistScreenState extends State<FeaturedArtistScreen> {
     });
 
     try {
-      // Get featured artists (verified and with high engagement)
-      final artists = await _subscriptionService.getVerifiedArtists();
-
-      // Filter for featured artists and sort by engagement/followers
-      final featuredArtists = artists
-          .where((artist) => artist.isFeatured || artist.isVerified)
-          .toList();
-
-      // Sort by featured status and verification
-      featuredArtists.sort((a, b) {
-        // Prioritize featured artists first
-        if (a.isFeatured && !b.isFeatured) return -1;
-        if (!a.isFeatured && b.isFeatured) return 1;
-
-        // Then by verification status
-        if (a.isVerified && !b.isVerified) return -1;
-        if (!a.isVerified && b.isVerified) return 1;
-
-        // Finally by display name
-        return a.displayName.compareTo(b.displayName);
-      });
+      // Get featured artists based on active features
+      final artists = await _subscriptionService.getFeaturedArtists();
 
       if (mounted) {
         setState(() {
-          _featuredArtists =
-              featuredArtists.take(10).toList(); // Limit to top 10
+          _featuredArtists = artists.take(10).toList(); // Limit to top 10
           _isLoading = false;
         });
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('artist_featured_artist_error_error_loading_featured'.tr())),
+          SnackBar(
+              content: Text(
+                  tr('artist_featured_artist_error_error_loading_featured'))),
         );
         setState(() {
           _isLoading = false;
@@ -113,9 +95,10 @@ class _FeaturedArtistScreenState extends State<FeaturedArtistScreen> {
                               const Icon(Icons.arrow_back, color: Colors.white),
                           onPressed: () => Navigator.of(context).pop(),
                         ),
-                        const Expanded(
-                          child: Text('art_walk_featured_artists'.tr(),
-                            style: TextStyle(
+                        Expanded(
+                          child: Text(
+                            tr('art_walk_featured_artists'),
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 28,
                               fontWeight: FontWeight.bold,
@@ -127,8 +110,9 @@ class _FeaturedArtistScreenState extends State<FeaturedArtistScreen> {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    const Text('art_walk_discover_exceptional_artists_making_waves_in_the_community'.tr(),
-                      style: TextStyle(
+                    Text(
+                      tr('art_walk_discover_exceptional_artists_making_waves_in_the_community'),
+                      style: const TextStyle(
                         color: Colors.white70,
                         fontSize: 16,
                         fontWeight: FontWeight.w400,
@@ -157,22 +141,24 @@ class _FeaturedArtistScreenState extends State<FeaturedArtistScreen> {
   }
 
   Widget _buildEmptyState() {
-    return const Center(
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.star_outline, size: 80, color: Colors.white54),
-          SizedBox(height: 16),
-          Text('art_walk_no_featured_artists_yet'.tr(),
-            style: TextStyle(
+          const Icon(Icons.star_outline, size: 80, color: Colors.white54),
+          const SizedBox(height: 16),
+          Text(
+            tr('art_walk_no_featured_artists_yet'),
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 8),
-          Text('art_walk_check_back_soon_for_amazing_featured_artists'.tr(),
-            style: TextStyle(
+          const SizedBox(height: 8),
+          Text(
+            tr('art_walk_check_back_soon_for_amazing_featured_artists'),
+            style: const TextStyle(
               color: Colors.white70,
               fontSize: 16,
             ),
@@ -205,8 +191,9 @@ class _FeaturedArtistScreenState extends State<FeaturedArtistScreen> {
             child: Column(
               children: [
                 const SizedBox(height: 20),
-                const Text('art_walk_more_featured_artists'.tr(),
-                  style: TextStyle(
+                Text(
+                  tr('art_walk_more_featured_artists'),
+                  style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: core.ArtbeatColors.textPrimary,

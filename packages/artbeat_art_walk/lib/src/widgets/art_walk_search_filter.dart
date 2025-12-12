@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/search_criteria_model.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Advanced filter widget for art walk search
 class ArtWalkSearchFilter extends StatefulWidget {
@@ -248,16 +249,27 @@ class _ArtWalkSearchFilterState extends State<ArtWalkSearchFilter> {
             child: Column(
               children: [
                 CheckboxListTile(
-                  title: Text('art_walk_art_walk_search_filter_text_accessible'.tr()),
-                  subtitle: Text('art_walk_art_walk_search_filter_text_wheelchair_accessible_walks'.tr()),
+                  title: Text(
+                    'art_walk_art_walk_search_filter_text_accessible'.tr(),
+                  ),
+                  subtitle: Text(
+                    'art_walk_art_walk_search_filter_text_wheelchair_accessible_walks'
+                        .tr(),
+                  ),
                   value: _criteria.isAccessible ?? false,
                   onChanged: (value) => _updateCriteria(isAccessible: value),
                   controlAffinity: ListTileControlAffinity.leading,
                   contentPadding: EdgeInsets.zero,
                 ),
                 CheckboxListTile(
-                  title: Text('art_walk_art_walk_search_filter_text_public_walks_only'.tr()),
-                  subtitle: Text('art_walk_art_walk_search_filter_text_show_only_public_art_walks'.tr()),
+                  title: Text(
+                    'art_walk_art_walk_search_filter_text_public_walks_only'
+                        .tr(),
+                  ),
+                  subtitle: Text(
+                    'art_walk_art_walk_search_filter_text_show_only_public_art_walks'
+                        .tr(),
+                  ),
                   value: _criteria.isPublic ?? false,
                   onChanged: (value) => _updateCriteria(isPublic: value),
                   controlAffinity: ListTileControlAffinity.leading,
@@ -372,16 +384,16 @@ class _ArtWalkSearchFilterState extends State<ArtWalkSearchFilter> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: SegmentedButton<bool>(
-                        segments: const [
+                        segments: [
                           ButtonSegment<bool>(
                             value: false,
                             label: Text('art_walk_text_ascending'.tr()),
-                            icon: Icon(Icons.arrow_upward, size: 16),
+                            icon: const Icon(Icons.arrow_upward, size: 16),
                           ),
                           ButtonSegment<bool>(
                             value: true,
                             label: Text('art_walk_text_descending'.tr()),
-                            icon: Icon(Icons.arrow_downward, size: 16),
+                            icon: const Icon(Icons.arrow_downward, size: 16),
                           ),
                         ],
                         selected: {_criteria.sortDescending ?? true},

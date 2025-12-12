@@ -129,7 +129,7 @@ class MessageActionsSheet extends StatelessWidget {
           const SizedBox(height: 8),
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('messaging_button_cancel'.tr()),
+            child: Text('messaging_button_cancel'.tr()),
           ),
         ],
       ),
@@ -139,7 +139,7 @@ class MessageActionsSheet extends StatelessWidget {
   void _copyToClipboard(BuildContext context, String text) {
     // Implementation would copy text to clipboard
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('messaging_message_copied'.tr())),
+      SnackBar(content: Text('messaging_message_copied'.tr())),
     );
   }
 }
@@ -275,7 +275,7 @@ class _MessageEditWidgetState extends State<MessageEditWidget> {
             children: [
               TextButton(
                 onPressed: _isSaving ? null : widget.onCancel,
-                child: const Text('messaging_button_cancel'.tr()),
+                child: Text('messaging_button_cancel'.tr()),
               ),
               const SizedBox(width: 8),
               ElevatedButton(
@@ -288,7 +288,7 @@ class _MessageEditWidgetState extends State<MessageEditWidget> {
                         height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('messaging_button_save'.tr()),
+                    : Text('messaging_button_save'.tr()),
               ),
             ],
           ),
@@ -418,7 +418,7 @@ class _ForwardMessageSheetState extends State<ForwardMessageSheet> {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _allChats.isEmpty
-                ? const Center(child: Text('messaging_no_conversations'.tr()))
+                ? Center(child: Text('messaging_no_conversations'.tr()))
                 : ListView.builder(
                     itemCount: _allChats.length,
                     itemBuilder: (context, index) {
@@ -466,7 +466,7 @@ class _ForwardMessageSheetState extends State<ForwardMessageSheet> {
             children: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('messaging_button_cancel'.tr()),
+                child: Text('messaging_button_cancel'.tr()),
               ),
               const SizedBox(width: 8),
               ElevatedButton(
@@ -655,7 +655,7 @@ class InteractiveMessageBubble extends StatelessWidget {
             if (context.mounted) {
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('messaging_message_edited'.tr())),
+                SnackBar(content: Text('messaging_message_edited'.tr())),
               );
             }
           } catch (e) {
@@ -733,16 +733,16 @@ class InteractiveMessageBubble extends StatelessWidget {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('messaging_delete_message_title'.tr()),
-        content: const Text('messaging_delete_message_confirm'.tr()),
+        title: Text('messaging_delete_message_title'.tr()),
+        content: Text('messaging_delete_message_confirm'.tr()),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('messaging_button_cancel'.tr()),
+            child: Text('messaging_button_cancel'.tr()),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('messaging_button_delete'.tr()),
+            child: Text('messaging_button_delete'.tr()),
           ),
         ],
       ),
@@ -754,7 +754,7 @@ class InteractiveMessageBubble extends StatelessWidget {
         if (context.mounted) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(const SnackBar(content: Text('messaging_message_deleted'.tr())));
+          ).showSnackBar(SnackBar(content: Text('messaging_message_deleted'.tr())));
         }
       } catch (e) {
         if (context.mounted) {

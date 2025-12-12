@@ -33,7 +33,7 @@ class AttachmentButton extends StatelessWidget {
           children: [
             ListTile(
               leading: const Icon(Icons.photo),
-              title: const Text('messaging_attachment_photo'.tr()),
+              title: Text('messaging_attachment_photo'.tr()),
               onTap: () async {
                 Navigator.pop(context);
                 final XFile? image = await picker.pickImage(
@@ -46,7 +46,7 @@ class AttachmentButton extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.videocam),
-              title: const Text('messaging_attachment_video'.tr()),
+              title: Text('messaging_attachment_video'.tr()),
               onTap: () async {
                 Navigator.pop(context);
                 final XFile? video = await picker.pickVideo(
@@ -59,7 +59,7 @@ class AttachmentButton extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.attach_file),
-              title: const Text('messaging_attachment_file'.tr()),
+              title: Text('messaging_attachment_file'.tr()),
               onTap: () async {
                 Navigator.pop(context);
                 // Implement file picking logic
@@ -68,7 +68,7 @@ class AttachmentButton extends StatelessWidget {
             if (onVoiceRecorded != null)
               ListTile(
                 leading: const Icon(Icons.mic),
-                title: const Text('messaging_attachment_voice'.tr()),
+                title: Text('messaging_attachment_voice'.tr()),
                 onTap: () {
                   Navigator.pop(context);
                   _showVoiceRecorder(context);
@@ -170,21 +170,21 @@ class AttachmentButton extends StatelessWidget {
         context: context,
         builder: (BuildContext dialogContext) {
           return AlertDialog(
-            title: const Text('messaging_voice_permission_required'.tr()),
-            content: const Text(
+            title: Text('messaging_voice_permission_required'.tr()),
+            content: Text(
               'messaging_voice_permission_message'.tr(),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(dialogContext).pop(),
-                child: const Text('messaging_button_cancel'.tr()),
+                child: Text('messaging_button_cancel'.tr()),
               ),
               TextButton(
                 onPressed: () async {
                   Navigator.of(dialogContext).pop();
                   await openAppSettings();
                 },
-                child: const Text('messaging_button_open_settings'.tr()),
+                child: Text('messaging_button_open_settings'.tr()),
               ),
             ],
           );
@@ -201,14 +201,14 @@ class AttachmentButton extends StatelessWidget {
         context: context,
         builder: (BuildContext dialogContext) {
           return AlertDialog(
-            title: const Text('messaging_voice_unavailable'.tr()),
-            content: const Text(
+            title: Text('messaging_voice_unavailable'.tr()),
+            content: Text(
               'messaging_voice_unavailable_message'.tr(),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(dialogContext).pop(),
-                child: const Text('messaging_button_ok'.tr()),
+                child: Text('messaging_button_ok'.tr()),
               ),
             ],
           );

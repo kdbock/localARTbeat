@@ -16,7 +16,7 @@ import 'package:artbeat_artwork/artbeat_artwork.dart'
     show ArtworkService, ChapterService;
 
 // Rich text editing imports
-import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 
 enum WrittenContentUploadStep {
   content,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:intl/intl.dart';
 import 'package:artbeat_events/artbeat_events.dart';
 
 /// Widget for displaying upcoming local events in a horizontal scrollable row
@@ -27,15 +27,16 @@ class UpcomingEventsRowWidget extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('art_walk_upcoming_events'.tr(),
-                style: TextStyle(
+              Text(
+                tr('art_walk_upcoming_events'),
+                style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               TextButton(
                 onPressed: onSeeAllPressed,
-                child: const Text('art_walk_see_all'.tr()),
+                child: Text(tr('art_walk_see_all')),
               ),
             ],
           ),
@@ -61,9 +62,10 @@ class UpcomingEventsRowWidget extends StatelessWidget {
               }
 
               if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                return const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text('art_walk_no_upcoming_events_in_your_area'.tr(),
+                return Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    tr('art_walk_no_upcoming_events_in_your_area'),
                     textAlign: TextAlign.center,
                   ),
                 );
@@ -77,9 +79,10 @@ class UpcomingEventsRowWidget extends StatelessWidget {
               }).toList();
 
               if (events.isEmpty) {
-                return const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text('art_walk_no_upcoming_events_in_your_area'.tr(),
+                return Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    tr('art_walk_no_upcoming_events_in_your_area'),
                     textAlign: TextAlign.center,
                   ),
                 );

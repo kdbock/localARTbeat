@@ -3,6 +3,7 @@ import 'package:intl/intl.dart' as intl;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import '../models/models.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Card widget for displaying in-progress art walks
 class InProgressWalkCard extends StatelessWidget {
@@ -573,22 +574,22 @@ class CreatedWalkCard extends StatelessWidget {
                       }
                     },
                     itemBuilder: (context) => [
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'edit',
                         child: Row(
                           children: [
-                            Icon(Icons.edit),
-                            SizedBox(width: 8),
+                            const Icon(Icons.edit),
+                            const SizedBox(width: 8),
                             Text('art_walk_progress_cards_text_edit'.tr()),
                           ],
                         ),
                       ),
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'share',
                         child: Row(
                           children: [
-                            Icon(Icons.share),
-                            SizedBox(width: 8),
+                            const Icon(Icons.share),
+                            const SizedBox(width: 8),
                             Text('art_walk_progress_cards_button_share'.tr()),
                           ],
                         ),

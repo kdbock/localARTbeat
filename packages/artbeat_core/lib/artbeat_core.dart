@@ -21,6 +21,7 @@ export 'src/services/user_service.dart' show UserService;
 export 'src/services/connectivity_service.dart' show ConnectivityService;
 export 'src/services/subscription_service.dart' show SubscriptionService;
 export 'src/services/artist_service.dart' show ArtistService;
+export 'src/services/artist_feature_service.dart' show ArtistFeatureService;
 export 'src/services/unified_payment_service.dart'
     show
         UnifiedPaymentService,

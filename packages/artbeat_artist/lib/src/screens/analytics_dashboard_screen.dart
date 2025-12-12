@@ -91,7 +91,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-              'artist_analytics_dashboard_error_error_loading_analytics'.tr()),
+              tr('artist_analytics_dashboard_error_error_loading_analytics')),
         ),
       );
     }
@@ -228,8 +228,9 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        const Text('art_walk_overview'.tr(),
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        Text(
+          tr('art_walk_overview'),
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
         Row(
@@ -290,7 +291,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> {
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Center(
-            child: Text('artist_analytics_dashboard_text_no_visitor_data'.tr()),
+            child: Text(tr('artist_analytics_dashboard_text_no_visitor_data')),
           ),
         ),
       );
@@ -351,8 +352,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> {
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Center(
-            child:
-                Text('artist_analytics_dashboard_text_no_location_data'.tr()),
+            child: Text(tr('artist_analytics_dashboard_text_no_location_data')),
           ),
         ),
       );
@@ -416,8 +416,9 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        const Text('art_walk_top_performing_artwork'.tr(),
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        Text(
+          tr('art_walk_top_performing_artwork'),
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
         if (topArtworkIds.isEmpty)
@@ -425,8 +426,8 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> {
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Center(
-                child: Text(
-                    'artist_analytics_dashboard_text_no_artwork_data'.tr()),
+                child:
+                    Text(tr('artist_analytics_dashboard_text_no_artwork_data')),
               ),
             ),
           )
@@ -522,8 +523,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> {
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Center(
-            child:
-                Text('artist_analytics_dashboard_text_no_referral_data'.tr()),
+            child: Text(tr('artist_analytics_dashboard_text_no_referral_data')),
           ),
         ),
       );
@@ -611,14 +611,16 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            const Text('art_walk_upgrade_to_pro_for_advanced_analytics'.tr(),
-              style: TextStyle(
+            Text(
+              tr('art_walk_upgrade_to_pro_for_advanced_analytics'),
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 8),
-            const Text('art_walk_get_access_to_location_breakdown__top_artwork_performance__referral_sources__and_more_detailed_insights'.tr(),
+            Text(
+              tr('art_walk_get_access_to_location_breakdown__top_artwork_performance__referral_sources__and_more_detailed_insights'),
             ),
             const SizedBox(height: 16),
             ElevatedButton(
@@ -626,7 +628,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> {
                 // Navigate to subscription screen
                 Navigator.pushNamed(context, '/subscription');
               },
-              child: Text('artist_analytics_dashboard_text_upgrade_now'.tr()),
+              child: Text(tr('artist_analytics_dashboard_text_upgrade_now')),
             ),
           ],
         ),

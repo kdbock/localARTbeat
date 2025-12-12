@@ -3,6 +3,7 @@ import '../models/artbeat_event.dart';
 import '../services/event_service.dart';
 import 'event_card.dart';
 import '../screens/event_details_screen.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Widget that displays upcoming events in the community feed
 class CommunityFeedEventsWidget extends StatefulWidget {
@@ -90,7 +91,7 @@ class _CommunityFeedEventsWidgetState extends State<CommunityFeedEventsWidget> {
           if (widget.onViewAllPressed != null)
             TextButton(
               onPressed: widget.onViewAllPressed,
-              child: const Text('events_view_all'.tr()),
+              child: Text('events_view_all'.tr()),
             ),
         ],
       ),
@@ -131,7 +132,7 @@ class _CommunityFeedEventsWidgetState extends State<CommunityFeedEventsWidget> {
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: _loadEvents,
-                child: const Text('events_retry'.tr()),
+                child: Text('events_retry'.tr()),
               ),
             ],
           ),

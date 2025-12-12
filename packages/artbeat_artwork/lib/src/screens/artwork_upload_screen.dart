@@ -149,7 +149,9 @@ class _ArtworkUploadScreenState extends State<ArtworkUploadScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('artwork_upload_pick_image'.tr(namedArgs: {'error': e.toString()}))),
+          SnackBar(
+              content: Text('artwork_upload_pick_image'
+                  .tr(namedArgs: {'error': e.toString()}))),
         );
       }
     }
@@ -239,7 +241,10 @@ class _ArtworkUploadScreenState extends State<ArtworkUploadScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('art_walk_error_loading_artwork'.tr().replaceAll('{error}', e.toString()))),
+          SnackBar(
+              content: Text('art_walk_error_loading_artwork'
+                  .tr()
+                  .replaceAll('{error}', e.toString()))),
         );
       }
     } finally {
@@ -341,7 +346,9 @@ class _ArtworkUploadScreenState extends State<ArtworkUploadScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('artwork_upload_error'.tr(namedArgs: {'error': e.toString()}))),
+          SnackBar(
+              content: Text('artwork_upload_error'
+                  .tr(namedArgs: {'error': e.toString()}))),
         );
       }
     } finally {
@@ -506,11 +513,11 @@ class _ArtworkUploadScreenState extends State<ArtworkUploadScreen> {
                                   : null,
                         ),
                         child: _imageFile == null && _imageUrl == null
-                            ? const Column(
+                            ? Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(Icons.add_photo_alternate, size: 64),
-                                  SizedBox(height: 8),
+                                  const Icon(Icons.add_photo_alternate, size: 64),
+                                  const SizedBox(height: 8),
                                   Text('art_walk_select_image'.tr()),
                                 ],
                               )

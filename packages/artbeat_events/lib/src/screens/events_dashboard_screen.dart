@@ -184,7 +184,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
               backgroundColor: ArtbeatColors.primaryPurple,
               foregroundColor: Colors.white,
               icon: const Icon(Icons.add),
-              label: const Text('events_create_event'.tr()),
+              label: Text('events_create_event'.tr()),
             )
           : null,
     );
@@ -513,7 +513,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
               ),
               TextButton(
                 onPressed: () => Navigator.pushNamed(context, '/events/all'),
-                child: const Text('events_see_all'.tr()),
+                child: Text('events_see_all'.tr()),
               ),
             ],
           ),
@@ -845,7 +845,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
                       );
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
+                        SnackBar(
                           content: Text('events_sign_in_to_view_tickets'.tr()),
                         ),
                       );
@@ -1162,7 +1162,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: const Text('events_clear_filters'.tr()),
+            child: Text('events_clear_filters'.tr()),
           ),
         ],
       ),
@@ -1240,7 +1240,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
             ElevatedButton.icon(
               onPressed: _loadEvents,
               icon: const Icon(Icons.refresh),
-              label: const Text('events_try_again'.tr()),
+              label: Text('events_try_again'.tr()),
               style: ElevatedButton.styleFrom(
                 backgroundColor: ArtbeatColors.primaryPurple,
                 foregroundColor: Colors.white,

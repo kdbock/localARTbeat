@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Events Package Specific Header
 ///
@@ -212,7 +213,7 @@ class _EventsHeaderState extends State<EventsHeader> {
             // Menu items for events package
             ListTile(
               leading: const Icon(Icons.event, color: _headerColor),
-              title: const Text('events_browse_events'.tr()),
+              title: Text('events_browse_events'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/events/browse');
@@ -220,7 +221,7 @@ class _EventsHeaderState extends State<EventsHeader> {
             ),
             ListTile(
               leading: const Icon(Icons.add_circle, color: _headerColor),
-              title: const Text('events_create_event'.tr()),
+              title: Text('events_create_event'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/events/create');
@@ -231,7 +232,7 @@ class _EventsHeaderState extends State<EventsHeader> {
                 Icons.confirmation_number,
                 color: _headerColor,
               ),
-              title: const Text('events_my_tickets'.tr()),
+              title: Text('events_my_tickets'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/events/tickets');
@@ -257,19 +258,19 @@ class _EventsHeaderState extends State<EventsHeader> {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('events_developer_tools'.tr()),
+        title: Text('events_developer_tools'.tr()),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              title: const Text('events_test_creation'.tr()),
+              title: Text('events_test_creation'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 // Implement event creation testing
               },
             ),
             ListTile(
-              title: const Text('events_clear_cache'.tr()),
+              title: Text('events_clear_cache'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 // Implement events cache clearing
@@ -280,7 +281,7 @@ class _EventsHeaderState extends State<EventsHeader> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('events_close'.tr()),
+            child: Text('events_close'.tr()),
           ),
         ],
       ),

@@ -1,6 +1,7 @@
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:flutter/material.dart';
 import '../routes.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class BecomeArtistCard extends StatelessWidget {
   final UserModel user;

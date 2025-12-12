@@ -10,7 +10,7 @@ import '../widgets/admin_data_table.dart';
 /// System Monitoring Dashboard for real-time performance monitoring
 /// Provides comprehensive system health, performance metrics, and alerts
 class AdminSystemMonitoringScreen extends StatefulWidget {
-  AdminSystemMonitoringScreen({super.key});
+  const AdminSystemMonitoringScreen({super.key});
 
   @override
   State<AdminSystemMonitoringScreen> createState() =>
@@ -58,7 +58,7 @@ class _AdminSystemMonitoringScreenState
 
   void _startRealTimeMonitoring() {
     if (_isRealTimeEnabled) {
-      _refreshTimer = Timer.periodic(Duration(seconds: 30), (timer) {
+      _refreshTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
         if (mounted) {
           _loadSystemData();
         }
@@ -225,7 +225,7 @@ class _AdminSystemMonitoringScreenState
               const Spacer(),
               Container(
                 padding:
-                    EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: _isRealTimeEnabled ? Colors.green : Colors.grey,
                   borderRadius: BorderRadius.circular(20),
@@ -241,7 +241,7 @@ class _AdminSystemMonitoringScreenState
                     const SizedBox(width: 4),
                     Text(
                       _isRealTimeEnabled ? 'LIVE' : 'PAUSED',
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
@@ -252,7 +252,7 @@ class _AdminSystemMonitoringScreenState
               ),
             ],
           ),
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
 
           // Key Metrics Grid
           GridView.count(
@@ -303,7 +303,7 @@ class _AdminSystemMonitoringScreenState
           // Server Status
           Card(
             child: Padding(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -325,7 +325,7 @@ class _AdminSystemMonitoringScreenState
           // Recent Alerts
           Card(
             child: Padding(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -374,7 +374,7 @@ class _AdminSystemMonitoringScreenState
           // Performance Charts
           Card(
             child: Padding(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -398,7 +398,7 @@ class _AdminSystemMonitoringScreenState
           // Performance Metrics Table
           Card(
             child: Padding(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -472,7 +472,7 @@ class _AdminSystemMonitoringScreenState
           // Alerts List
           Card(
             child: Padding(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

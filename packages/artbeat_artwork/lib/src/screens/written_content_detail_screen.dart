@@ -4,8 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:artbeat_artwork/artbeat_artwork.dart';
 import 'package:artbeat_artist/artbeat_artist.dart' as artist;
 import 'package:artbeat_core/artbeat_core.dart' hide ArtworkModel;
-import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Screen for reading written content (books, stories, etc.)
 class WrittenContentDetailScreen extends StatefulWidget {
@@ -135,7 +136,10 @@ class _WrittenContentDetailScreenState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('art_walk_error_loading_content'.tr().replaceAll('{error}', e.toString()))),
+          SnackBar(
+              content: Text('art_walk_error_loading_content'
+                  .tr()
+                  .replaceAll('{error}', e.toString()))),
         );
       }
     } finally {
@@ -515,7 +519,8 @@ class _WrittenContentDetailScreenState
   Future<void> _purchaseContent() async {
     // TODO: Implement purchase flow
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('art_walk_purchase_functionality_coming_soon'.tr())),
+      SnackBar(
+          content: Text('art_walk_purchase_functionality_coming_soon'.tr())),
     );
   }
 

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'capture_detail_screen.dart';
@@ -103,15 +104,15 @@ class _CaptureScreenState extends State<CaptureScreen> {
         children: [
           // Show loading indicator while processing
           if (_isProcessing)
-            const Center(
+            Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircularProgressIndicator(color: Colors.white),
-                  SizedBox(height: 16),
+                  const CircularProgressIndicator(color: Colors.white),
+                  const SizedBox(height: 16),
                   Text(
                     'capture_screen_opening_camera'.tr(),
-                    style: TextStyle(color: Colors.white, fontSize: 16),
+                    style: const TextStyle(color: Colors.white, fontSize: 16),
                   ),
                 ],
               ),
