@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/semantics.dart';
 
 /// Comprehensive accessibility service for ARTbeat platform
 /// Provides screen reader support, keyboard navigation, and accessibility utilities
@@ -54,11 +53,7 @@ class AccessibilityService {
   /// Announce text to screen reader
   void announceToScreenReader(String message) {
     if (_isScreenReaderEnabled) {
-      SemanticsService.sendAnnouncement(
-        WidgetsBinding.instance.platformDispatcher.views.first,
-        message,
-        TextDirection.ltr,
-      );
+      SystemChannels.accessibility.send(message);
     }
   }
 

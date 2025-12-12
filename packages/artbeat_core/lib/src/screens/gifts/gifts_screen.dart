@@ -202,11 +202,11 @@ class _GiftsScreenState extends State<GiftsScreen> {
                 width: 1,
               ),
             ),
-            child: Row(
+            child: const Row(
               children: [
-                const Icon(Icons.lightbulb, color: Colors.white, size: 24),
-                const SizedBox(width: 12),
-                const Expanded(
+                Icon(Icons.lightbulb, color: Colors.white, size: 24),
+                SizedBox(width: 12),
+                Expanded(
                   child: Text(
                     'Your gift gives artists real exposure - they get featured in discovery feeds, highlighted artworks, and ad placements!',
                     style: TextStyle(
@@ -239,7 +239,7 @@ class _GiftsScreenState extends State<GiftsScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          Text(
+          const Text(
             'Search and select the artist you want to help succeed',
             style: TextStyle(fontSize: 14, color: ArtbeatColors.textSecondary),
           ),
@@ -279,7 +279,7 @@ class _GiftsScreenState extends State<GiftsScreen> {
               hintStyle: TextStyle(
                 color: ArtbeatColors.textSecondary.withValues(alpha: 0.6),
               ),
-              prefixIcon: Icon(Icons.search, color: ArtbeatColors.primary),
+              prefixIcon: const Icon(Icons.search, color: ArtbeatColors.primary),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide.none,
@@ -453,7 +453,7 @@ class _GiftsScreenState extends State<GiftsScreen> {
                       ),
                       subtitle: Text(
                         '@${artist.username}',
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: ArtbeatColors.textSecondary,
                           fontSize: 14,
                         ),
@@ -523,7 +523,7 @@ class _GiftsScreenState extends State<GiftsScreen> {
                           fontSize: 16,
                         ),
                       ),
-                      Text(
+                      const Text(
                         'Choose a gift tier below to boost their visibility!',
                         style: TextStyle(
                           color: ArtbeatColors.textSecondary,
@@ -566,7 +566,7 @@ class _GiftsScreenState extends State<GiftsScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          Text(
+          const Text(
             'Each gift provides real exposure benefits for the artist',
             style: TextStyle(fontSize: 14, color: ArtbeatColors.textSecondary),
           ),
@@ -728,7 +728,7 @@ class _GiftsScreenState extends State<GiftsScreen> {
                             ),
                             Text(
                               '${tier['credits']} Credits',
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 14,
                                 color: ArtbeatColors.textSecondary,
                               ),
@@ -747,7 +747,7 @@ class _GiftsScreenState extends State<GiftsScreen> {
                               color: accentColor,
                             ),
                           ),
-                          Text(
+                          const Text(
                             'one-time',
                             style: TextStyle(
                               fontSize: 12,

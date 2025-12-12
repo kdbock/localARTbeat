@@ -139,11 +139,11 @@ class _AdsScreenState extends State<AdsScreen> {
                 width: 1,
               ),
             ),
-            child: Row(
+            child: const Row(
               children: [
-                const Icon(Icons.lightbulb, color: Colors.white, size: 20),
-                const SizedBox(width: 12),
-                const Expanded(
+                Icon(Icons.lightbulb, color: Colors.white, size: 20),
+                SizedBox(width: 12),
+                Expanded(
                   child: Text(
                     'Choose from various ad sizes and durations to fit your business needs',
                     style: TextStyle(color: Colors.white, fontSize: 14),
