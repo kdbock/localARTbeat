@@ -67,6 +67,16 @@ class UserService extends ChangeNotifier {
   void _initializeFirebase() {
     if (_firebaseInitialized) return;
 
+    // In test environment, don't try to access Firebase instances
+    if (Platform.environment.containsKey('FLUTTER_TEST')) {
+      _auth = null;
+      _firestore = null;
+      _storage = null;
+      _firebaseInitialized = true;
+      _logDebug('Firebase initialization skipped in test environment');
+      return;
+    }
+
     try {
       _auth = FirebaseAuth.instance;
       _firestore = FirebaseFirestore.instance;

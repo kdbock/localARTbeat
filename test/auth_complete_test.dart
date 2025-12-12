@@ -1,5 +1,6 @@
 // Copyright (c) 2025 ArtBeat. All rights reserved.
 
+import 'package:artbeat_core/artbeat_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'auth_test_helpers.dart';
@@ -8,10 +9,13 @@ void main() {
   group('🎯 ArtBeat Authentication & Onboarding Tests (Complete)', () {
     group('1. AUTHENTICATION SCREENS - UI Tests', () {
       testWidgets('✅ Splash screen displays and animates', (tester) async {
-        await tester.pumpWidget(AuthTestHelpers.createTestSplashScreen());
+        await tester.pumpWidget(const MaterialApp(home: SplashScreen()));
+
+        // Wait for timers to complete
+        await tester.pumpAndSettle();
 
         // Verify splash screen elements are present
-        expect(find.byType(TestSplashScreen), findsOneWidget);
+        expect(find.byType(SplashScreen), findsOneWidget);
         expect(find.byType(Scaffold), findsOneWidget);
         expect(find.byType(Container), findsAtLeastNWidgets(1));
         expect(
@@ -19,16 +23,15 @@ void main() {
           findsAtLeastNWidgets(1),
         ); // Multiple animations expected
 
-        // Check for app branding
-        expect(find.text('ArtBeat'), findsOneWidget);
-        expect(find.byIcon(Icons.palette), findsOneWidget);
+        // Check for app branding (image logo)
+        expect(find.byType(Image), findsOneWidget);
 
         // Test animation
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 500));
 
-        // Animation should be running
-        expect(find.byType(Opacity), findsOneWidget);
+        // Animation should be running (ScaleTransition)
+        expect(find.byType(ScaleTransition), findsAtLeastNWidgets(1));
       });
 
       testWidgets('✅ Login screen displays correctly', (tester) async {

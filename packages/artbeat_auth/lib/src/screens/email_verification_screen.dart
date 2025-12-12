@@ -5,11 +5,14 @@ import 'dart:async';
 
 import '../widgets/auth_header.dart';
 import '../constants/routes.dart';
+import '../services/auth_service.dart';
 
 /// Email verification screen that prompts users to verify their email address
 /// Provides functionality to resend verification emails and check verification status
 class EmailVerificationScreen extends StatefulWidget {
-  const EmailVerificationScreen({super.key});
+  const EmailVerificationScreen({super.key, this.authService});
+
+  final AuthService? authService;
 
   @override
   State<EmailVerificationScreen> createState() =>
@@ -17,6 +20,7 @@ class EmailVerificationScreen extends StatefulWidget {
 }
 
 class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
+  late final AuthService _authService;
   bool _isLoading = false;
   bool _canResendEmail = true;
   Timer? _timer;
@@ -26,7 +30,8 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
   @override
   void initState() {
     super.initState();
-    _user = FirebaseAuth.instance.currentUser;
+    _authService = widget.authService ?? AuthService();
+    _user = _authService.currentUser;
     _startEmailVerificationCheck();
   }
 

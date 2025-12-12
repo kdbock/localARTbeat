@@ -1,9 +1,8 @@
 // Copyright (c) 2025 ArtBeat. All rights reserved.
 
+import 'package:artbeat_auth/artbeat_auth.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Firebase test configuration for widget tests
@@ -18,35 +17,21 @@ class FirebaseTestSetup {
 
     TestWidgetsFlutterBinding.ensureInitialized();
 
-    // Initialize fake Firebase services first
+    // Initialize fake Firebase services
     _fakeFirestore = FakeFirebaseFirestore();
     _mockAuth = MockFirebaseAuth();
 
-    try {
-      // Only initialize if not already initialized
-      if (Firebase.apps.isEmpty) {
-        // Use setupFirebaseAuthMocks() to properly mock Firebase in tests
-        // Note: This should be called before Firebase.initializeApp()
-
-        // Set up Firebase test options
-        await Firebase.initializeApp(
-          options: const FirebaseOptions(
-            apiKey: 'test-api-key',
-            appId: '1:123456789:android:test-app-id',
-            messagingSenderId: '123456789',
-            projectId: 'test-project-id',
-            authDomain: 'test-project.firebaseapp.com',
-            storageBucket: 'test-project.appspot.com',
-          ),
-        );
-      }
-    } on Exception catch (e) {
-      // If Firebase initialization fails in test environment, continue with mocks
-      // Suppress output in test environment
-      debugPrint('Firebase initialization warning in test: $e');
-    }
-
     _isInitialized = true;
+  }
+
+  /// Create a mock AuthService for testing
+  static AuthService createMockAuthService() {
+    if (!_isInitialized) {
+      throw StateError(
+        'Firebase not initialized for testing. Call initializeFirebaseForTesting() first.',
+      );
+    }
+    return AuthService(auth: _mockAuth, firestore: _fakeFirestore);
   }
 
   /// Get mock FirebaseAuth instance for testing

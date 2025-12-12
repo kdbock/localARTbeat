@@ -1,12 +1,15 @@
 // Copyright (c) 2025 ArtBeat. All rights reserved.
 
 import 'package:artbeat_auth/artbeat_auth.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:flutter/material.dart';
 
+import 'firebase_test_setup.dart';
+
 /// Test-specific wrapper widgets that provide mocked dependencies
-class TestAuthScreenWrapper extends StatelessWidget {
+class TestAuthScreenWrapper extends StatefulWidget {
   const TestAuthScreenWrapper({
     super.key,
     required this.child,
@@ -18,7 +21,55 @@ class TestAuthScreenWrapper extends StatelessWidget {
   final FakeFirebaseFirestore? mockFirestore;
 
   @override
-  Widget build(BuildContext context) => MaterialApp(home: child);
+  State<TestAuthScreenWrapper> createState() => _TestAuthScreenWrapperState();
+}
+
+class _TestAuthScreenWrapperState extends State<TestAuthScreenWrapper> {
+  bool _isInitialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeFirebase();
+  }
+
+  Future<void> _initializeFirebase() async {
+    if (widget.mockAuth != null && widget.mockFirestore != null) {
+      // Use provided mocks, assume Firebase is already initialized
+      if (mounted) {
+        setState(() {
+          _isInitialized = true;
+        });
+      }
+    } else {
+      // Initialize Firebase for testing
+      await FirebaseTestSetup.initializeFirebaseForTesting();
+      if (mounted) {
+        setState(() {
+          _isInitialized = true;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_isInitialized) {
+      // Show loading while Firebase initializes
+      return const MaterialApp(
+        home: Scaffold(body: Center(child: CircularProgressIndicator())),
+      );
+    }
+
+    return EasyLocalization(
+      supportedLocales: const [Locale('en')],
+      path: 'assets/translations',
+      fallbackLocale: const Locale('en'),
+      startLocale: const Locale('en'),
+      useOnlyLangCode: true,
+      child: MaterialApp(home: widget.child),
+    );
+  }
 }
 
 /// Test helper for creating auth screens with mocked dependencies
@@ -193,7 +244,8 @@ class TestProfileCreateScreen extends StatelessWidget {
 
 /// A simplified SplashScreen for testing that doesn't require Firebase
 class TestSplashScreen extends StatefulWidget {
-  const TestSplashScreen({super.key});
+  const TestSplashScreen({super.key, this.shouldNavigate = false});
+  final bool shouldNavigate;
 
   @override
   State<TestSplashScreen> createState() => _TestSplashScreenState();
@@ -213,6 +265,17 @@ class _TestSplashScreenState extends State<TestSplashScreen>
     );
     _animation = Tween<double>(begin: 0, end: 1).animate(_controller);
     _controller.forward();
+
+    // Only navigate if shouldNavigate is true
+    if (widget.shouldNavigate) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Navigator.of(
+            context,
+          ).pushNamedAndRemoveUntil('/login', (Route<dynamic> route) => false);
+        }
+      });
+    }
   }
 
   @override

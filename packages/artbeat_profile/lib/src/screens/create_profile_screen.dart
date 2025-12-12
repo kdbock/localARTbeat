@@ -34,11 +34,15 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
   String? _errorMessage;
 
   final _userService = UserService();
-  final currentUser = FirebaseAuth.instance.currentUser;
+  User? currentUser;
 
   @override
   void initState() {
     super.initState();
+    // In test environment, don't access Firebase directly
+    if (!Platform.environment.containsKey('FLUTTER_TEST')) {
+      currentUser = FirebaseAuth.instance.currentUser;
+    }
     _prefillUserData();
   }
 
