@@ -7,7 +7,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'firebase_test_setup.dart';
 
 class MockCommunityProvider extends ChangeNotifier {
-
   MockCommunityProvider() {
     // No Firebase initialization needed for mock
   }
