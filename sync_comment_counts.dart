@@ -38,8 +38,8 @@ Future<void> syncCommentCounts() async {
 
       if (kDebugMode) {
         print(
-        '📝 Post $postId: actual=$actualCommentCount, stored=$currentCommentCount',
-      );
+          '📝 Post $postId: actual=$actualCommentCount, stored=$currentCommentCount',
+        );
       }
 
       // If they don't match, update the post
@@ -52,8 +52,8 @@ Future<void> syncCommentCounts() async {
         updatedCount++;
         if (kDebugMode) {
           print(
-          '✅ Updated post $postId: $currentCommentCount → $actualCommentCount',
-        );
+            '✅ Updated post $postId: $currentCommentCount → $actualCommentCount',
+          );
         }
       }
     }
@@ -61,7 +61,7 @@ Future<void> syncCommentCounts() async {
     if (kDebugMode) {
       print('🎉 Synchronization complete! Updated $updatedCount posts.');
     }
-  // ignore: avoid_catches_without_on_clauses
+    // ignore: avoid_catches_without_on_clauses
   } catch (e) {
     if (kDebugMode) {
       print('❌ Error during synchronization: $e');
