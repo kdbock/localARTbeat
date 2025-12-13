@@ -4,24 +4,25 @@ import 'package:flutter/material.dart';
 /// Based on the modern dashboard design with glassmorphism and gradient themes
 class ArtWalkDesignSystem {
   // ==================== COLOR PALETTE ====================
+  // Updated to match main app colors (purple/green scheme)
 
-  /// Primary color palette
-  static const Color primaryTeal = Color(0xFF00838F);
-  static const Color primaryTealLight = Color(0xFF4FB3BE);
-  static const Color primaryTealDark = Color(0xFF005662);
+  /// Primary color palette - using app's purple/green scheme
+  static const Color primaryTeal = Color(0xFF8C52FF); // Primary Purple
+  static const Color primaryTealLight = Color(0xFF00BF63); // Primary Green
+  static const Color primaryTealDark = Color(0xFF6C3ACC); // Darker Purple
 
   /// Accent color palette
-  static const Color accentOrange = Color(0xFFFF7043);
-  static const Color accentOrangeLight = Color(0xFFFF9E80);
+  static const Color accentOrange = Color(0xFF00BFA5); // Secondary Teal
+  static const Color accentOrangeLight = Color(0xFF4DD0BF); // Lighter Teal
 
   /// Background colors
-  static const Color backgroundGradientStart = Color(0xFFE0F2F1);
-  static const Color backgroundGradientEnd = Color(0xFFE8F5E8);
-  static const Color cardBackground = Color(0xFFFAFAFA);
+  static const Color backgroundGradientStart = Color(0xFFF8F9FA);
+  static const Color backgroundGradientEnd = Color(0xFFFFFFFF);
+  static const Color cardBackground = Color(0xFFFFFFFF);
 
   /// Text colors
-  static const Color textPrimary = Color(0xFF263238);
-  static const Color textSecondary = Color(0xFF607D8B);
+  static const Color textPrimary = Color(0xFF212529);
+  static const Color textSecondary = Color(0xFF666666);
   static const Color textLight = Colors.white;
 
   /// Glass effect colors
@@ -35,40 +36,39 @@ class ArtWalkDesignSystem {
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [
-      primaryTealLight,
-      accentOrangeLight,
-      backgroundGradientStart,
-      backgroundGradientEnd,
+      Color(0xFFFFFFFF), // White
+      Color(0xFFF8F9FA), // Light gray
+      Color(0xFFFFFFFF), // White
     ],
-    stops: [0.0, 0.3, 0.7, 1.0],
+    stops: [0.0, 0.5, 1.0],
   );
 
-  /// Header gradient for app bars
+  /// Header gradient for app bars - purple to green
   static const LinearGradient headerGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.topRight,
-    colors: [primaryTealLight, accentOrangeLight],
+    colors: [primaryTeal, primaryTealLight], // Purple to Green
   );
 
   /// Title gradient for text
   static const LinearGradient titleGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.topRight,
-    colors: [primaryTealLight, accentOrangeLight],
+    colors: [primaryTeal, primaryTealLight], // Purple to Green
   );
 
-  /// Button gradient
+  /// Button gradient - purple gradient
   static const LinearGradient buttonGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [primaryTeal, primaryTealDark],
+    colors: [primaryTeal, primaryTealDark], // Purple shades
   );
 
-  /// Accent button gradient
+  /// Accent button gradient - green gradient
   static const LinearGradient accentButtonGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [accentOrange, accentOrangeLight],
+    colors: [primaryTealLight, accentOrange], // Green to teal
   );
 
   // ==================== DECORATIONS ====================

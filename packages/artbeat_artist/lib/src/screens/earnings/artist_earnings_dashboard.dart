@@ -48,19 +48,35 @@ class _ArtistEarningsDashboardState extends State<ArtistEarningsDashboard>
     });
 
     try {
-      final results = await Future.wait([
-        _earningsService.getArtistEarnings(),
-        _earningsService.getEarningsTransactions(limit: 10),
-        _earningsService.getPayoutHistory(limit: 5),
-      ]);
+      core.AppLogger.info('🔍 Loading earnings data...');
+
+      core.AppLogger.info('📊 Fetching artist earnings...');
+      final earnings = await _earningsService.getArtistEarnings();
+      core.AppLogger.info('✅ Artist earnings loaded');
+
+      core.AppLogger.info('💰 Fetching earnings transactions...');
+      final transactions =
+          await _earningsService.getEarningsTransactions(limit: 10);
+      core.AppLogger.info(
+          '✅ Transactions loaded: ${transactions.length} items');
+
+      core.AppLogger.info('💳 Fetching payout history...');
+      final payouts = await _earningsService.getPayoutHistory(limit: 5);
+      core.AppLogger.info('✅ Payouts loaded: ${payouts.length} items');
 
       setState(() {
-        _earnings = results[0] as EarningsModel?;
-        _recentTransactions = results[1] as List<EarningsTransaction>;
-        _recentPayouts = results[2] as List<PayoutModel>;
+        _earnings = earnings;
+        _recentTransactions = transactions;
+        _recentPayouts = payouts;
         _isLoading = false;
       });
-    } catch (e) {
+
+      core.AppLogger.info('✅ All earnings data loaded successfully');
+    } catch (e, stackTrace) {
+      core.AppLogger.error('❌ ERROR loading earnings data:');
+      core.AppLogger.error('Error: $e');
+      core.AppLogger.error('Stack trace: $stackTrace');
+
       setState(() {
         _errorMessage = e.toString();
         _isLoading = false;
@@ -124,33 +140,60 @@ class _ArtistEarningsDashboardState extends State<ArtistEarningsDashboard>
   }
 
   Widget _buildErrorView() {
+    final isIndexError = _errorMessage?.contains('index') ?? false;
+
     return Expanded(
       child: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.error_outline, size: 64, color: Colors.grey[400]),
-              const SizedBox(height: 16),
-              Text(
-                tr('art_walk_failed_to_load_earnings_data'),
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                _errorMessage!,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey[600],
-                    ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: _loadEarningsData,
-                child: Text(tr('art_walk_retry')),
-              ),
-            ],
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  isIndexError ? Icons.storage : Icons.error_outline,
+                  size: 64,
+                  color: isIndexError ? Colors.orange[400] : Colors.grey[400],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  tr('art_walk_failed_to_load_earnings_data'),
+                  style: Theme.of(context).textTheme.headlineSmall,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                if (isIndexError) ...[
+                  Text(
+                    '🔍 Firestore Index Required',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: Colors.orange[700],
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const SizedBox(height: 8),
+                ],
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: SelectableText(
+                    _errorMessage!,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.grey[800],
+                          fontFamily: 'monospace',
+                        ),
+                    textAlign: TextAlign.left,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: _loadEarningsData,
+                  child: Text(tr('art_walk_retry')),
+                ),
+              ],
+            ),
           ),
         ),
       ),

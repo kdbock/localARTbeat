@@ -985,31 +985,31 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
   }
 
   void _handleResultTap(KnownEntity entity) {
-    // Navigate to appropriate detail page based on entity type using route replacement
+    // Navigate to appropriate detail page based on entity type
     switch (entity.type) {
       case KnownEntityType.artist:
-        Navigator.pushReplacementNamed(
+        Navigator.pushNamed(
           context,
-          '/artist/profile',
-          arguments: {'userId': entity.id},
+          '/artist/public-profile',
+          arguments: {'artistId': entity.id},
         );
         break;
       case KnownEntityType.artwork:
-        Navigator.pushReplacementNamed(
+        Navigator.pushNamed(
           context,
-          '/capture/detail',
-          arguments: {'captureId': entity.id},
+          '/artwork/detail',
+          arguments: {'artworkId': entity.id},
         );
         break;
       case KnownEntityType.event:
-        Navigator.pushReplacementNamed(
+        Navigator.pushNamed(
           context,
           '/events/detail',
           arguments: {'eventId': entity.id},
         );
         break;
       case KnownEntityType.artWalk:
-        Navigator.pushReplacementNamed(
+        Navigator.pushNamed(
           context,
           '/art-walk/detail',
           arguments: {'walkId': entity.id},

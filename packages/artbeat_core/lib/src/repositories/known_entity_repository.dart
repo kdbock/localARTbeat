@@ -63,8 +63,9 @@ class KnownEntityRepository {
     final results = <KnownEntity>[];
 
     try {
-      // Search users collection
-      final usersQuery = await _firestore.collection('users').limit(20).get();
+      // Search users collection - increased limit to search more users
+      // TODO: Implement searchTokens field for better performance
+      final usersQuery = await _firestore.collection('users').limit(200).get();
 
       for (final doc in usersQuery.docs) {
         final data = doc.data();
@@ -76,7 +77,7 @@ class KnownEntityRepository {
       // Search artist profiles collection
       final artistProfilesQuery = await _firestore
           .collection('artist_profiles')
-          .limit(20)
+          .limit(200)
           .get();
 
       for (final doc in artistProfilesQuery.docs) {
@@ -150,7 +151,7 @@ class KnownEntityRepository {
       try {
         final artworkQuery = await _firestore
             .collection('artwork')
-            .limit(20)
+            .limit(100)
             .get();
 
         for (final doc in artworkQuery.docs) {
@@ -176,7 +177,7 @@ class KnownEntityRepository {
     try {
       final artWalksQuery = await _firestore
           .collection('art_walks')
-          .limit(20)
+          .limit(100)
           .get();
 
       for (final doc in artWalksQuery.docs) {
@@ -197,7 +198,10 @@ class KnownEntityRepository {
     final results = <KnownEntity>[];
 
     try {
-      final eventsQuery = await _firestore.collection('events').limit(20).get();
+      final eventsQuery = await _firestore
+          .collection('events')
+          .limit(100)
+          .get();
 
       for (final doc in eventsQuery.docs) {
         final data = doc.data();
@@ -221,7 +225,7 @@ class KnownEntityRepository {
       try {
         final postsQuery = await _firestore
             .collection('community_posts')
-            .limit(20)
+            .limit(100)
             .get();
 
         for (final doc in postsQuery.docs) {
@@ -238,7 +242,7 @@ class KnownEntityRepository {
       try {
         final artistDirQuery = await _firestore
             .collection('artist_directory')
-            .limit(20)
+            .limit(100)
             .get();
 
         for (final doc in artistDirQuery.docs) {
@@ -266,7 +270,7 @@ class KnownEntityRepository {
       try {
         final galleriesQuery = await _firestore
             .collection('galleries')
-            .limit(20)
+            .limit(100)
             .get();
 
         for (final doc in galleriesQuery.docs) {
@@ -283,7 +287,7 @@ class KnownEntityRepository {
       try {
         final venuesQuery = await _firestore
             .collection('venues')
-            .limit(20)
+            .limit(100)
             .get();
 
         for (final doc in venuesQuery.docs) {

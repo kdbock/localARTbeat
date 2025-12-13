@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_art_walk/artbeat_art_walk.dart';
 
 class ArtWalkListScreen extends StatefulWidget {
@@ -603,7 +604,8 @@ class _ArtWalkListScreenState extends State<ArtWalkListScreen> {
                         child: ElevatedButton(
                           onPressed: onApplyFilters,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: ArtWalkColors.primaryTeal,
+                            backgroundColor: ArtbeatColors.primaryPurple,
+                            foregroundColor: Colors.white,
                           ),
                           child: Text(
                             'art_walk_art_walk_list_text_apply_filters'.tr(),
@@ -729,7 +731,7 @@ class _ArtWalkListScreenState extends State<ArtWalkListScreen> {
                     children: [
                       CircularProgressIndicator(
                         valueColor: AlwaysStoppedAnimation<Color>(
-                          ArtWalkDesignSystem.primaryTeal,
+                          ArtbeatColors.primaryPurple,
                         ),
                       ),
                       SizedBox(height: ArtWalkDesignSystem.paddingM),
@@ -775,7 +777,7 @@ class _ArtWalkListScreenState extends State<ArtWalkListScreen> {
                 hintStyle: ArtWalkDesignSystem.cardSubtitleStyle,
                 prefixIcon: Icon(
                   Icons.search,
-                  color: ArtWalkDesignSystem.primaryTeal,
+                  color: ArtbeatColors.primaryPurple,
                 ),
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.all(ArtWalkDesignSystem.paddingM),
@@ -803,14 +805,14 @@ class _ArtWalkListScreenState extends State<ArtWalkListScreen> {
                       _applyFilters();
                     },
                     backgroundColor: Colors.white,
-                    selectedColor: ArtWalkColors.primaryTeal.withValues(
+                    selectedColor: ArtbeatColors.primaryPurple.withValues(
                       alpha: 0.1,
                     ),
-                    checkmarkColor: ArtWalkColors.primaryTeal,
+                    checkmarkColor: ArtbeatColors.primaryPurple,
                     labelStyle: TextStyle(
                       color: isSelected
-                          ? ArtWalkColors.primaryTeal
-                          : ArtWalkColors.textPrimary,
+                          ? ArtbeatColors.primaryPurple
+                          : ArtbeatColors.textPrimary,
                       fontWeight: isSelected
                           ? FontWeight.bold
                           : FontWeight.normal,
@@ -844,7 +846,7 @@ class _ArtWalkListScreenState extends State<ArtWalkListScreen> {
             child: ElevatedButton(
               onPressed: _isLoadingMore ? null : _loadMoreArtWalks,
               style: ElevatedButton.styleFrom(
-                backgroundColor: ArtWalkColors.primaryTeal,
+                backgroundColor: ArtbeatColors.primaryPurple,
                 foregroundColor: Colors.white,
                 minimumSize: const Size(double.infinity, 48),
               ),
@@ -866,22 +868,27 @@ class _ArtWalkListScreenState extends State<ArtWalkListScreen> {
 
   Widget _buildWalkCard(ArtWalkModel walk) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      margin: const EdgeInsets.only(bottom: 12),
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: () => _navigateToWalkDetail(walk.id),
-        borderRadius: BorderRadius.circular(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Cover image with overlay
-            AspectRatio(
-              aspectRatio: 16 / 9,
-              child: Stack(
-                children: [
-                  // Cover image - robust loading with error handling
-                  Builder(
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          height: 120,
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              // Thumbnail image
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  width: 100,
+                  height: 96,
+                  decoration: BoxDecoration(
+                    color: ArtbeatColors.primaryPurple.withValues(alpha: 0.1),
+                  ),
+                  child: Builder(
                     builder: (context) {
                       // Try cover image first
                       if (walk.coverImageUrl != null &&
@@ -889,42 +896,20 @@ class _ArtWalkListScreenState extends State<ArtWalkListScreen> {
                         return CachedNetworkImage(
                           imageUrl: walk.coverImageUrl!,
                           fit: BoxFit.cover,
-                          memCacheWidth:
-                              400, // Limit cache size for performance
-                          memCacheHeight: 225,
-                          placeholder: (context, url) => Container(
-                            decoration: BoxDecoration(
-                              color: ArtWalkColors.primaryTeal.withValues(
-                                alpha: 0.1,
+                          memCacheWidth: 200,
+                          memCacheHeight: 192,
+                          placeholder: (context, url) => const Center(
+                            child: CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                ArtbeatColors.primaryPurple,
                               ),
-                              borderRadius: const BorderRadius.vertical(
-                                top: Radius.circular(16),
-                              ),
-                            ),
-                            child: const Center(
-                              child: CircularProgressIndicator(
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  ArtWalkColors.primaryTeal,
-                                ),
-                              ),
+                              strokeWidth: 2,
                             ),
                           ),
-                          errorWidget: (context, url, error) => Container(
-                            decoration: BoxDecoration(
-                              color: ArtWalkColors.primaryTeal.withValues(
-                                alpha: 0.1,
-                              ),
-                              borderRadius: const BorderRadius.vertical(
-                                top: Radius.circular(16),
-                              ),
-                            ),
-                            child: const Center(
-                              child: Icon(
-                                Icons.map,
-                                color: ArtWalkColors.primaryTeal,
-                                size: 48,
-                              ),
-                            ),
+                          errorWidget: (context, url, error) => const Icon(
+                            Icons.map,
+                            color: ArtbeatColors.primaryPurple,
+                            size: 32,
                           ),
                         );
                       }
@@ -935,114 +920,72 @@ class _ArtWalkListScreenState extends State<ArtWalkListScreen> {
                         return CachedNetworkImage(
                           imageUrl: walk.imageUrls.first,
                           fit: BoxFit.cover,
-                          memCacheWidth: 400,
-                          memCacheHeight: 225,
-                          placeholder: (context, url) => Container(
-                            decoration: BoxDecoration(
-                              color: ArtWalkColors.primaryTeal.withValues(
-                                alpha: 0.1,
+                          memCacheWidth: 200,
+                          memCacheHeight: 192,
+                          placeholder: (context, url) => const Center(
+                            child: CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                ArtbeatColors.primaryPurple,
                               ),
-                              borderRadius: const BorderRadius.vertical(
-                                top: Radius.circular(16),
-                              ),
-                            ),
-                            child: const Center(
-                              child: CircularProgressIndicator(
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  ArtWalkColors.primaryTeal,
-                                ),
-                              ),
+                              strokeWidth: 2,
                             ),
                           ),
-                          errorWidget: (context, url, error) => Container(
-                            decoration: BoxDecoration(
-                              color: ArtWalkColors.primaryTeal.withValues(
-                                alpha: 0.1,
-                              ),
-                              borderRadius: const BorderRadius.vertical(
-                                top: Radius.circular(16),
-                              ),
-                            ),
-                            child: const Center(
-                              child: Icon(
-                                Icons.map,
-                                color: ArtWalkColors.primaryTeal,
-                                size: 48,
-                              ),
-                            ),
+                          errorWidget: (context, url, error) => const Icon(
+                            Icons.map,
+                            color: ArtbeatColors.primaryPurple,
+                            size: 32,
                           ),
                         );
                       }
 
                       // Fallback to placeholder
-                      return Container(
-                        decoration: BoxDecoration(
-                          color: ArtWalkColors.primaryTeal.withValues(
-                            alpha: 0.1,
-                          ),
-                          borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(16),
-                          ),
-                        ),
-                        child: const Center(
-                          child: Icon(
-                            Icons.map,
-                            color: ArtWalkColors.primaryTeal,
-                            size: 48,
-                          ),
-                        ),
+                      return const Icon(
+                        Icons.map,
+                        color: ArtbeatColors.primaryPurple,
+                        size: 32,
                       );
                     },
                   ),
-                  // Gradient overlay
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(16),
-                      ),
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          Colors.black.withValues(alpha: 0.6),
-                        ],
-                      ),
-                    ),
-                  ),
-                  // Title and stats overlay
-                  Positioned(
-                    bottom: 12,
-                    left: 12,
-                    right: 12,
-                    child: Column(
+                ),
+              ),
+
+              const SizedBox(width: 12),
+
+              // Content
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Title and location
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           walk.title,
                           style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
+                            fontSize: 16,
                             fontWeight: FontWeight.bold,
+                            color: ArtbeatColors.textPrimary,
                           ),
-                          maxLines: 2,
+                          maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 4),
                         Row(
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.location_on,
-                              color: Colors.white.withValues(alpha: 0.8),
-                              size: 16,
+                              size: 14,
+                              color: ArtbeatColors.textSecondary,
                             ),
                             const SizedBox(width: 4),
                             Expanded(
                               child: Text(
                                 walk.zipCode ?? 'Location not specified',
-                                style: TextStyle(
-                                  color: Colors.white.withValues(alpha: 0.8),
-                                  fontSize: 14,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: ArtbeatColors.textSecondary,
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -1052,113 +995,171 @@ class _ArtWalkListScreenState extends State<ArtWalkListScreen> {
                         ),
                       ],
                     ),
-                  ),
-                ],
-              ),
-            ),
-            // Content
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Description
-                  Text(
-                    walk.description,
-                    style: const TextStyle(
-                      color: ArtWalkColors.textSecondary,
-                      fontSize: 14,
+
+                    // Stats row
+                    Row(
+                      children: [
+                        // Art pieces
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: ArtbeatColors.primaryPurple.withValues(
+                              alpha: 0.1,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.image,
+                                size: 12,
+                                color: ArtbeatColors.primaryPurple,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                '${walk.artworkIds.length}',
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: ArtbeatColors.primaryPurple,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+
+                        // Duration
+                        if (walk.estimatedDuration != null)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: ArtbeatColors.primaryGreen.withValues(
+                                alpha: 0.1,
+                              ),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.schedule,
+                                  size: 12,
+                                  color: ArtbeatColors.primaryGreen,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '${walk.estimatedDuration!.round()}m',
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: ArtbeatColors.primaryGreen,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        const SizedBox(width: 6),
+
+                        // Distance
+                        if (walk.estimatedDistance != null)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: ArtbeatColors.secondaryTeal.withValues(
+                                alpha: 0.1,
+                              ),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.straighten,
+                                  size: 12,
+                                  color: ArtbeatColors.secondaryTeal,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '${walk.estimatedDistance!.toStringAsFixed(1)}mi',
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: ArtbeatColors.secondaryTeal,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                        const Spacer(),
+
+                        // Difficulty badge
+                        if (walk.difficulty != null)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: _getDifficultyColor(
+                                walk.difficulty!,
+                              ).withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                color: _getDifficultyColor(walk.difficulty!),
+                                width: 1,
+                              ),
+                            ),
+                            child: Text(
+                              walk.difficulty!,
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: _getDifficultyColor(walk.difficulty!),
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 12),
-                  // Stats and actions
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 8,
-                    children: [
-                      // Art pieces count
-                      _buildStatItem(
-                        icon: Icons.image,
-                        label: '${walk.artworkIds.length} pieces',
-                      ),
-                      // Views count
-                      _buildStatItem(
-                        icon: Icons.visibility,
-                        label: '${walk.viewCount} views',
-                      ),
-                      // Duration
-                      if (walk.estimatedDuration != null)
-                        _buildStatItem(
-                          icon: Icons.schedule,
-                          label: '${walk.estimatedDuration!.round()} min',
-                        ),
-                      // Distance
-                      if (walk.estimatedDistance != null)
-                        _buildStatItem(
-                          icon: Icons.straighten,
-                          label:
-                              '${walk.estimatedDistance!.toStringAsFixed(1)} mi',
-                        ),
-                      // Difficulty
-                      if (walk.difficulty != null)
-                        _buildStatItem(
-                          icon: Icons.terrain,
-                          label: walk.difficulty!,
-                        ),
-                      // Accessibility
-                      if (walk.isAccessible == true)
-                        _buildStatItem(
-                          icon: Icons.accessible,
-                          label: 'Accessible',
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  // Action button
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: ElevatedButton.icon(
-                      onPressed: () => _navigateToWalkDetail(walk.id),
-                      icon: const Icon(Icons.explore, size: 16),
-                      label: Text('art_walk_art_walk_list_text_explore'.tr()),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: ArtWalkColors.primaryTeal,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+
+              // Arrow indicator
+              const Icon(
+                Icons.chevron_right,
+                color: ArtbeatColors.textSecondary,
+                size: 24,
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildStatItem({required IconData icon, required String label}) {
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: ArtWalkColors.textSecondary),
-        const SizedBox(width: 4),
-        Text(
-          label,
-          style: const TextStyle(
-            color: ArtWalkColors.textSecondary,
-            fontSize: 12,
-          ),
-        ),
-      ],
-    );
+  Color _getDifficultyColor(String difficulty) {
+    switch (difficulty.toLowerCase()) {
+      case 'easy':
+        return ArtbeatColors.primaryGreen;
+      case 'medium':
+        return Colors.orange;
+      case 'hard':
+        return Colors.red;
+      default:
+        return ArtbeatColors.textSecondary;
+    }
   }
 
   Widget _buildEmptyState() {
@@ -1169,7 +1170,7 @@ class _ArtWalkListScreenState extends State<ArtWalkListScreen> {
           Icon(
             Icons.map_outlined,
             size: 64,
-            color: ArtWalkColors.textSecondary.withValues(alpha: 0.5),
+            color: ArtbeatColors.textSecondary.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
@@ -1177,7 +1178,7 @@ class _ArtWalkListScreenState extends State<ArtWalkListScreen> {
                 ? 'No art walks found for "$_searchQuery"'
                 : 'No art walks available',
             style: const TextStyle(
-              color: ArtWalkColors.textSecondary,
+              color: ArtbeatColors.textSecondary,
               fontSize: 16,
             ),
             textAlign: TextAlign.center,
@@ -1188,7 +1189,7 @@ class _ArtWalkListScreenState extends State<ArtWalkListScreen> {
                 ? 'Try adjusting your search terms'
                 : 'Create your first art walk to get started',
             style: TextStyle(
-              color: ArtWalkColors.textSecondary.withValues(alpha: 0.7),
+              color: ArtbeatColors.textSecondary.withValues(alpha: 0.7),
               fontSize: 14,
             ),
             textAlign: TextAlign.center,
@@ -1200,7 +1201,7 @@ class _ArtWalkListScreenState extends State<ArtWalkListScreen> {
               icon: const Icon(Icons.add),
               label: Text('art_walk_art_walk_list_text_create_art_walk'.tr()),
               style: ElevatedButton.styleFrom(
-                backgroundColor: ArtWalkColors.primaryTeal,
+                backgroundColor: ArtbeatColors.primaryPurple,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,

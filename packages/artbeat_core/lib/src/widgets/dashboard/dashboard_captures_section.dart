@@ -148,7 +148,7 @@ class DashboardCapturesSection extends StatelessWidget {
     }
 
     return SizedBox(
-      height: 280, // Increased height for better showcase
+      height: 280,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
@@ -157,7 +157,7 @@ class DashboardCapturesSection extends StatelessWidget {
           final capture = captures[index];
           return Padding(
             padding: EdgeInsets.only(
-              left: index == 0 ? 0 : 16, // Increased spacing
+              left: index == 0 ? 0 : 12,
               right: index == captures.length - 1 ? 0 : 0,
             ),
             child: _buildEnhancedCaptureCard(context, capture, index),
@@ -317,180 +317,78 @@ class DashboardCapturesSection extends StatelessWidget {
           tween: Tween(begin: 0.0, end: 1.0),
           builder: (context, value, child) {
             return Transform.translate(
-              offset: Offset(0, 20 * (1 - value)),
+              offset: Offset(0, 10 * (1 - value)),
               child: Opacity(
                 opacity: value,
                 child: SizedBox(
-                  width: 200, // Wider cards for better showcase
+                  width: 200,
+                  height: 280,
                   child: Hero(
                     tag: 'capture_${capture.id}',
                     child: Material(
-                      elevation: 8,
-                      borderRadius: BorderRadius.circular(20),
+                      elevation: 4,
+                      borderRadius: BorderRadius.circular(16),
                       shadowColor: ArtbeatColors.primaryPurple.withValues(
-                        alpha: 0.3,
+                        alpha: 0.2,
                       ),
                       child: InkWell(
                         onTap: () => _showCaptureDetails(context, capture),
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(16),
                         child: Container(
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [Colors.white, Colors.grey.shade50],
+                            borderRadius: BorderRadius.circular(16),
+                            color: Colors.white,
+                            border: Border.all(
+                              color: Colors.grey.shade200,
+                              width: 1,
                             ),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Enhanced image section with overlay
-                              Expanded(
-                                flex: 7, // More space for the image
-                                child: Stack(
-                                  children: [
-                                    // Main image
-                                    ClipRRect(
-                                      borderRadius: const BorderRadius.vertical(
-                                        top: Radius.circular(20),
-                                      ),
-                                      child: Container(
-                                        width: double.infinity,
-                                        decoration: BoxDecoration(
-                                          color:
-                                              ArtbeatColors.backgroundSecondary,
-                                          image:
-                                              ImageUrlValidator.isValidImageUrl(
-                                                capture.imageUrl,
-                                              )
-                                              ? DecorationImage(
-                                                  image: NetworkImage(
-                                                    capture.imageUrl,
-                                                  ),
-                                                  fit: BoxFit.cover,
-                                                )
-                                              : null,
-                                        ),
-                                        child:
-                                            !ImageUrlValidator.isValidImageUrl(
+                              // Image
+                              ClipRRect(
+                                borderRadius: const BorderRadius.vertical(
+                                  top: Radius.circular(16),
+                                ),
+                                child: Container(
+                                  width: double.infinity,
+                                  height: 180,
+                                  decoration: BoxDecoration(
+                                    color: ArtbeatColors.backgroundSecondary,
+                                    image:
+                                        ImageUrlValidator.isValidImageUrl(
+                                          capture.imageUrl,
+                                        )
+                                        ? DecorationImage(
+                                            image: NetworkImage(
                                               capture.imageUrl,
-                                            )
-                                            ? const Icon(
-                                                Icons.palette,
-                                                color:
-                                                    ArtbeatColors.primaryPurple,
-                                                size: 48,
-                                              )
-                                            : null,
-                                      ),
-                                    ),
-
-                                    // Gradient overlay for better text readability
-                                    Positioned.fill(
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              const BorderRadius.vertical(
-                                                top: Radius.circular(20),
-                                              ),
-                                          gradient: LinearGradient(
-                                            begin: Alignment.topCenter,
-                                            end: Alignment.bottomCenter,
-                                            colors: [
-                                              Colors.transparent,
-                                              Colors.black.withValues(
-                                                alpha: 0.7,
-                                              ),
-                                            ],
-                                            stops: const [0.6, 1.0],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-
-                                    // Floating engagement actions
-                                    Positioned(
-                                      top: 12,
-                                      right: 12,
-                                      child: Column(
-                                        children: [
-                                          _buildLikeButton(context, capture),
-                                          const SizedBox(height: 8),
-                                          _buildFloatingActionButton(
-                                            icon: Icons.share_outlined,
-                                            color: ArtbeatColors.primaryGreen,
-                                            onTap: () =>
-                                                _handleShare(context, capture),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-
-                                    // Location badge
-                                    if (capture.locationName?.isNotEmpty ==
-                                        true)
-                                      Positioned(
-                                        bottom: 12,
-                                        left: 12,
-                                        right: 12,
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 12,
-                                            vertical: 6,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: Colors.black.withValues(
-                                              alpha: 0.6,
                                             ),
-                                            borderRadius: BorderRadius.circular(
-                                              20,
-                                            ),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              const Icon(
-                                                Icons.location_on,
-                                                size: 14,
-                                                color: Colors.white,
-                                              ),
-                                              const SizedBox(width: 4),
-                                              Flexible(
-                                                child: Text(
-                                                  capture.locationName ??
-                                                      'Unknown Location',
-                                                  style: const TextStyle(
-                                                    fontSize: 12,
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.w500,
-                                                  ),
-                                                  maxLines: 1,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                  ],
+                                            fit: BoxFit.cover,
+                                          )
+                                        : null,
+                                  ),
+                                  child:
+                                      !ImageUrlValidator.isValidImageUrl(
+                                        capture.imageUrl,
+                                      )
+                                      ? const Icon(
+                                          Icons.photo_camera,
+                                          color: ArtbeatColors.primaryPurple,
+                                          size: 48,
+                                        )
+                                      : null,
                                 ),
                               ),
 
-                              // Content section
+                              // Content
                               Expanded(
-                                flex: 3,
                                 child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 8,
-                                  ),
+                                  padding: const EdgeInsets.all(12),
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      // Title with better typography
                                       Text(
                                         capture.title?.isNotEmpty == true
                                             ? capture.title!
@@ -499,52 +397,57 @@ class DashboardCapturesSection extends StatelessWidget {
                                           fontSize: 14,
                                           fontWeight: FontWeight.bold,
                                           color: ArtbeatColors.textPrimary,
-                                          height: 1.1,
                                         ),
-                                        maxLines: 1,
+                                        maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                       ),
-
-                                      const SizedBox(height: 4),
-
-                                      // Call to action
-                                      Container(
-                                        width: double.infinity,
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 4,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          gradient: const LinearGradient(
-                                            colors: [
-                                              ArtbeatColors.primaryPurple,
-                                              ArtbeatColors.primaryGreen,
-                                            ],
-                                          ),
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                        ),
-                                        child: const Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
+                                      if (capture.locationName?.isNotEmpty ==
+                                          true) ...[
+                                        const SizedBox(height: 4),
+                                        Row(
                                           children: [
-                                            Icon(
-                                              Icons.explore,
+                                            const Icon(
+                                              Icons.location_on,
                                               size: 12,
-                                              color: Colors.white,
+                                              color:
+                                                  ArtbeatColors.textSecondary,
                                             ),
-                                            SizedBox(width: 3),
-                                            Text(
-                                              'Discover',
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 11,
-                                                fontWeight: FontWeight.w600,
+                                            const SizedBox(width: 4),
+                                            Expanded(
+                                              child: Text(
+                                                capture.locationName!,
+                                                style: const TextStyle(
+                                                  fontSize: 11,
+                                                  color: ArtbeatColors
+                                                      .textSecondary,
+                                                ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
                                               ),
                                             ),
                                           ],
                                         ),
+                                      ],
+                                      const Spacer(),
+                                      Row(
+                                        children: [
+                                          _buildFloatingActionButton(
+                                            icon: Icons.favorite_border,
+                                            label:
+                                                '${capture.engagementStats.likeCount}',
+                                            color: ArtbeatColors.primaryPurple,
+                                            onPressed: () =>
+                                                _handleLike(context, capture),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          _buildFloatingActionButton(
+                                            icon: Icons.share,
+                                            label: '',
+                                            color: ArtbeatColors.primaryGreen,
+                                            onPressed: () =>
+                                                _handleShare(context, capture),
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),
@@ -572,92 +475,93 @@ class DashboardCapturesSection extends StatelessWidget {
       height: 280,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200, width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.2),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
+            color: Colors.grey.withValues(alpha: 0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Image skeleton
-          Expanded(
-            flex: 6,
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: ArtbeatColors.backgroundSecondary.withValues(alpha: 0.3),
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(20),
-                ),
+          Container(
+            width: double.infinity,
+            height: 180,
+            decoration: BoxDecoration(
+              color: ArtbeatColors.backgroundSecondary.withValues(alpha: 0.3),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(16),
               ),
-              child: const Center(
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    ArtbeatColors.primaryGreen,
-                  ),
+            ),
+            child: const Center(
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  ArtbeatColors.primaryPurple,
                 ),
               ),
             ),
           ),
 
           // Content skeleton
-          Expanded(
-            flex: 4,
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Title skeleton
-                  Flexible(
-                    child: Container(
-                      height: 12,
-                      width: double.infinity,
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  height: 14,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: ArtbeatColors.backgroundSecondary.withValues(
+                      alpha: 0.3,
+                    ),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  height: 12,
+                  width: 120,
+                  decoration: BoxDecoration(
+                    color: ArtbeatColors.backgroundSecondary.withValues(
+                      alpha: 0.3,
+                    ),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Container(
+                      height: 32,
+                      width: 60,
                       decoration: BoxDecoration(
                         color: ArtbeatColors.backgroundSecondary.withValues(
                           alpha: 0.3,
                         ),
-                        borderRadius: BorderRadius.circular(6),
+                        borderRadius: BorderRadius.circular(16),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 6),
-                  Flexible(
-                    child: Container(
-                      height: 12,
-                      width: 100,
+                    const SizedBox(width: 8),
+                    Container(
+                      height: 32,
+                      width: 40,
                       decoration: BoxDecoration(
                         color: ArtbeatColors.backgroundSecondary.withValues(
                           alpha: 0.3,
                         ),
-                        borderRadius: BorderRadius.circular(6),
+                        borderRadius: BorderRadius.circular(16),
                       ),
                     ),
-                  ),
-
-                  const Spacer(),
-
-                  // Button skeleton
-                  Flexible(
-                    child: Container(
-                      width: double.infinity,
-                      height: 24,
-                      decoration: BoxDecoration(
-                        color: ArtbeatColors.backgroundSecondary.withValues(
-                          alpha: 0.3,
-                        ),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
+              ],
             ),
           ),
         ],
@@ -665,43 +569,41 @@ class DashboardCapturesSection extends StatelessWidget {
     );
   }
 
-  /// Floating action button for engagement actions
+  /// Build a floating action button for capture actions
   Widget _buildFloatingActionButton({
     required IconData icon,
+    required String label,
     required Color color,
-    required VoidCallback onTap,
+    required VoidCallback onPressed,
   }) {
-    return Container(
-      width: 36,
-      height: 36,
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.9),
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(18),
-          child: Icon(icon, size: 18, color: color),
+    return InkWell(
+      onTap: onPressed,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: color.withValues(alpha: 0.2), width: 1),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 16, color: color),
+            if (label.isNotEmpty) ...[
+              const SizedBox(width: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: color,
+                ),
+              ),
+            ],
+          ],
         ),
       ),
-    );
-  }
-
-  /// Like button that shows filled/unfilled heart based on like status
-  Widget _buildLikeButton(BuildContext context, CaptureModel capture) {
-    return _LikeButtonWidget(
-      viewModel: viewModel,
-      capture: capture,
-      onLike: () => _handleLike(context, capture),
     );
   }
 

@@ -1313,6 +1313,17 @@ class AppRouter {
           ),
         );
 
+      case '/profile/deep':
+        // View another user's profile
+        final args = settings.arguments as Map<String, dynamic>?;
+        final userId = args?['userId'] as String?;
+        if (userId == null) {
+          return RouteUtils.createErrorRoute('No user ID provided');
+        }
+        return RouteUtils.createMainLayoutRoute(
+          child: profile.ProfileViewScreen(userId: userId),
+        );
+
       default:
         return RouteUtils.createComingSoonRoute('Profile feature');
     }

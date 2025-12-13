@@ -53,14 +53,14 @@ class ProfileActivityService extends ChangeNotifier {
     bool unreadOnly = false,
   }) async {
     try {
-      Query query = _activityCollection
-          .where('userId', isEqualTo: userId)
-          .orderBy('createdAt', descending: true)
-          .limit(limit);
+      // Build query with all where clauses before orderBy
+      Query query = _activityCollection.where('userId', isEqualTo: userId);
 
       if (unreadOnly) {
         query = query.where('isRead', isEqualTo: false);
       }
+
+      query = query.orderBy('createdAt', descending: true).limit(limit);
 
       if (startAfter != null) {
         query = query.startAfterDocument(startAfter);
@@ -162,14 +162,14 @@ class ProfileActivityService extends ChangeNotifier {
     bool unreadOnly = false,
   }) {
     try {
-      Query query = _activityCollection
-          .where('userId', isEqualTo: userId)
-          .orderBy('createdAt', descending: true)
-          .limit(limit);
+      // Build query with all where clauses before orderBy
+      Query query = _activityCollection.where('userId', isEqualTo: userId);
 
       if (unreadOnly) {
         query = query.where('isRead', isEqualTo: false);
       }
+
+      query = query.orderBy('createdAt', descending: true).limit(limit);
 
       return query.snapshots().map(
         (snapshot) => snapshot.docs

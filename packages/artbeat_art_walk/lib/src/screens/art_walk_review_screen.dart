@@ -8,6 +8,7 @@ import 'package:artbeat_core/artbeat_core.dart';
 import '../models/models.dart';
 import '../constants/routes.dart';
 import '../theme/art_walk_design_system.dart';
+import '../services/art_walk_service.dart';
 
 /// Review screen shown after creating an art walk, allows selfie upload before starting
 class ArtWalkReviewScreen extends StatefulWidget {
@@ -27,8 +28,10 @@ class ArtWalkReviewScreen extends StatefulWidget {
 }
 
 class _ArtWalkReviewScreenState extends State<ArtWalkReviewScreen> {
+  final ArtWalkService _artWalkService = ArtWalkService();
   File? _selfieFile;
   String _startingLocation = 'Current Location';
+  bool _isUploading = false;
 
   @override
   void initState() {
@@ -664,63 +667,88 @@ class _ArtWalkReviewScreenState extends State<ArtWalkReviewScreen> {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: _startArtWalk,
+          onTap: _isUploading ? null : _startArtWalk,
           borderRadius: BorderRadius.circular(25),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(
-                    Icons.explore,
-                    color: Colors.white,
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text(
-                      'Start My Art Walk',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+            child: _isUploading
+                ? const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
+                        ),
                       ),
-                    ),
-                    Text(
-                      'Let the adventure begin! 🚀',
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.8),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
+                      SizedBox(width: 16),
+                      Text(
+                        'Uploading selfie...',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(width: 16),
-                Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(20),
+                    ],
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(
+                          Icons.explore,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text(
+                            'Start My Art Walk',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            'Let the adventure begin! 🚀',
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.8),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(width: 16),
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Icon(
+                          Icons.arrow_forward,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                    ],
                   ),
-                  child: const Icon(
-                    Icons.arrow_forward,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                ),
-              ],
-            ),
           ),
         ),
       ),
@@ -755,10 +783,21 @@ class _ArtWalkReviewScreenState extends State<ArtWalkReviewScreen> {
   }
 
   Future<void> _startArtWalk() async {
+    if (_isUploading) return;
+
+    setState(() => _isUploading = true);
+
     try {
-      // If user took a selfie, we could upload it here as a post
-      // For now, we'll just navigate to the experience
+      // If user took a selfie, upload it as the cover image
+      if (_selfieFile != null) {
+        await _artWalkService.updateArtWalk(
+          walkId: widget.artWalkId,
+          coverImageFile: _selfieFile,
+        );
+      }
+
       if (mounted) {
+        setState(() => _isUploading = false);
         Navigator.of(context).pushNamed(
           ArtWalkRoutes.experience,
           arguments: {'artWalkId': widget.artWalkId, 'artWalk': widget.artWalk},
@@ -766,6 +805,7 @@ class _ArtWalkReviewScreenState extends State<ArtWalkReviewScreen> {
       }
     } catch (e) {
       if (mounted) {
+        setState(() => _isUploading = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(

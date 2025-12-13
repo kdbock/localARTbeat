@@ -3,22 +3,14 @@
 ## Overview
 
 Add missing translations for the following keys across all language files (de.json, en.json, es.json, fr.json, pt.json, zh.json):
-
-- art_walk_progress_cards_button_share
-- art_walk_progress_cards_button_review
-- events_list_tab_all
-- events_list_tab_upcoming
-- events_list_tab_today
-- events_list_tab_this_week
-- events_list_empty_near_you
-- events_list_empty_msg_near_you
-- events_list_view_all_events
-- tickets_tab_all
-- tickets_tab_upcoming
-- tickets_tab_past
-- tickets_title
-- tickets_error_loading
-
+ignore duplicates
+flutter: \^[[34m[🌎 Easy Localization] [WARNING] Localization key [art_walk_total_earnings] not found\^[[0m
+flutter: \^[[34m[🌎 Easy Localization] [WARNING] Localization key [art_walk_earnings_breakdown] not found\^[[0m
+flutter: \^[[34m[🌎 Easy Localization] [WARNING] Localization key [art_walk_request_payout] not found\^[[0m
+flutter: \^[[34m[🌎 Easy Localization] [WARNING] Localization key [art_walk_manage_accounts] not found\^[[0m
+flutter: \^[[34m[🌎 Easy Localization] [WARNING] Localization key [art_walk_recent_activity] not found\^[[0m
+flutter: \^[[34m[🌎 Easy Localization] [WARNING] Localization key [art_walk_view_all] not found\^[[0m
+flutter: \^[[34m[🌎 Easy Localization] [WARNING] Localization key [art_walk_no_recent_transactions] not found\^[[0m
 ## Steps
 
 1. Add missing keys to en.json with English translations

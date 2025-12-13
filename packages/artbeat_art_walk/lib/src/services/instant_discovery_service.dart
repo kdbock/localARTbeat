@@ -412,48 +412,64 @@ class InstantDiscoveryService {
   }
 
   /// Get current discovery streak
+  /// Counts consecutive days with at least one discovery, starting from today or yesterday
   Future<int> _getDiscoveryStreak(String userId) async {
     try {
-      // Get discoveries from last 7 days
-      final sevenDaysAgo = DateTime.now().subtract(const Duration(days: 7));
+      // Get discoveries from last 30 days to check for streaks
+      final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));
 
       final snapshot = await _firestore
           .collection('users')
           .doc(userId)
           .collection('discoveries')
-          .where('discoveredAt', isGreaterThanOrEqualTo: sevenDaysAgo)
+          .where('discoveredAt', isGreaterThanOrEqualTo: thirtyDaysAgo)
           .orderBy('discoveredAt', descending: true)
           .get();
 
       if (snapshot.docs.isEmpty) return 0;
 
-      // Count consecutive days with discoveries
-      int streak = 0;
-      DateTime? lastDate;
-
+      // Group discoveries by date (date only, no time)
+      final Map<String, bool> discoveryDates = {};
       for (var doc in snapshot.docs) {
         final discoveredAt = (doc.data()['discoveredAt'] as Timestamp).toDate();
-        final discoveryDate = DateTime(
-          discoveredAt.year,
-          discoveredAt.month,
-          discoveredAt.day,
-        );
+        final dateKey =
+            '${discoveredAt.year}-${discoveredAt.month.toString().padLeft(2, '0')}-${discoveredAt.day.toString().padLeft(2, '0')}';
+        discoveryDates[dateKey] = true;
+      }
 
-        if (lastDate == null) {
-          // First discovery
-          streak = 1;
-          lastDate = discoveryDate;
+      // Get today and yesterday as date keys
+      final now = DateTime.now();
+      final today =
+          '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+      final yesterday = now.subtract(const Duration(days: 1));
+      final yesterdayKey =
+          '${yesterday.year}-${yesterday.month.toString().padLeft(2, '0')}-${yesterday.day.toString().padLeft(2, '0')}';
+
+      // Determine starting point for streak calculation
+      int startOffset = 0;
+      if (discoveryDates.containsKey(today)) {
+        // User has discovered something today, start from today
+        startOffset = 0;
+      } else if (discoveryDates.containsKey(yesterdayKey)) {
+        // No discovery today, but has one yesterday - streak is still active
+        startOffset = 1;
+      } else {
+        // No discoveries today or yesterday - streak is broken
+        return 0;
+      }
+
+      // Count consecutive days starting from the appropriate date
+      int streak = 0;
+      for (int i = startOffset; i < 30; i++) {
+        final checkDate = now.subtract(Duration(days: i));
+        final dateKey =
+            '${checkDate.year}-${checkDate.month.toString().padLeft(2, '0')}-${checkDate.day.toString().padLeft(2, '0')}';
+
+        if (discoveryDates.containsKey(dateKey)) {
+          streak++;
         } else {
-          final daysDiff = lastDate.difference(discoveryDate).inDays;
-          if (daysDiff == 1) {
-            // Consecutive day
-            streak++;
-            lastDate = discoveryDate;
-          } else if (daysDiff > 1) {
-            // Streak broken
-            break;
-          }
-          // Same day, continue
+          // Gap found, streak ends
+          break;
         }
       }
 

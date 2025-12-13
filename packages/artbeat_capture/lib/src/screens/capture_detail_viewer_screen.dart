@@ -23,7 +23,7 @@ class _CaptureDetailViewerScreenState extends State<CaptureDetailViewerScreen> {
   bool _isLoading = true;
   String? _error;
 
-  late bool _isOwner;
+  bool _isOwner = false;
   late String _currentUserId;
 
   @override

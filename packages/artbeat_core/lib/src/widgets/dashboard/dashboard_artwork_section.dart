@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:share_plus/share_plus.dart';
+import 'package:artbeat_community/screens/feed/create_post_screen.dart';
 
 class DashboardArtworkSection extends StatelessWidget {
   final DashboardViewModel viewModel;
@@ -447,16 +447,22 @@ class DashboardArtworkSection extends StatelessWidget {
 
   void _handleAmplify(BuildContext context, ArtworkModel artwork) async {
     try {
-      // Create share content
-      final shareText =
+      // Create a caption for the community post
+      final caption =
           '${artwork.title} by ${artwork.artistName}\n\n'
           '${artwork.description}\n\n'
-          'Discover amazing art on ARTbeat!\n'
-          'https://artbeat.app/artwork/${artwork.id}';
+          '#artwork #artbeat';
 
-      // Share the artwork
-      // ignore: deprecated_member_use
-      await Share.share(shareText);
+      // Navigate to CreatePostScreen with pre-filled artwork data
+      Navigator.push(
+        context,
+        MaterialPageRoute<void>(
+          builder: (context) => CreatePostScreen(
+            prefilledImageUrl: artwork.imageUrl,
+            prefilledCaption: caption,
+          ),
+        ),
+      );
 
       // Track the share as an engagement
       final engagementService = ContentEngagementService();
@@ -465,17 +471,13 @@ class DashboardArtworkSection extends StatelessWidget {
         contentType: 'artwork',
         engagementType: EngagementType.share,
       );
-
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Artwork shared successfully!')),
-      );
     } catch (e) {
       AppLogger.error('Error sharing artwork: $e');
-      ScaffoldMessenger.of(
-        // ignore: use_build_context_synchronously
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error sharing: ${e.toString()}')));
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error sharing: ${e.toString()}')),
+        );
+      }
     }
   }
 

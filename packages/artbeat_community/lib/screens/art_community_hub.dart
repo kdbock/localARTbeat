@@ -1130,9 +1130,36 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
 
       AppLogger.info('📱 Total activities loaded: ${activities.length}');
 
+      // Filter out ALL RSS feeds - only keep genuine app activities
+      final filteredActivities = activities.where((activity) {
+        // Exclude any RSS feed activities
+        // RSS feeds typically have 'type' field set to 'rss' or similar
+        // Or check if the activity type indicates it's an RSS feed
+        final activityType = activity.type.toString().toLowerCase();
+        final isRssFeed =
+            activityType.contains('rss') ||
+            activityType.contains('feed') ||
+            activityType.contains('news');
+
+        // Also check message content for RSS indicators
+        final message = activity.message.toLowerCase();
+        final hasRssIndicators =
+            message.contains('rss') ||
+            message.contains('news feed') ||
+            message.contains('political news') ||
+            message.contains('news sports');
+
+        // Keep only genuine app activities (art walks, etc)
+        return !isRssFeed && !hasRssIndicators;
+      }).toList();
+
+      AppLogger.info(
+        '📱 Filtered out ${activities.length - filteredActivities.length} RSS feed activities, ${filteredActivities.length} genuine activities remaining',
+      );
+
       if (mounted) {
         setState(() {
-          _activities = activities;
+          _activities = filteredActivities;
         });
         _combineFeedItems();
       }
@@ -1451,7 +1478,6 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
             '🤍 Updated UI optimistically - new like count: ${newEngagementStats.likeCount}, new liked state: ${!isCurrentlyLiked}',
           );
         });
-        _combineFeedItems(); // Update feed items after optimistic update
       } else {
         AppLogger.error('🤍 Post not found in _posts list');
       }
@@ -1484,7 +1510,6 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
             );
           });
         }
-        _combineFeedItems(); // Update feed items after revert
         // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -1725,55 +1750,34 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
                 final item = _feedItems[index];
 
                 if (item is PostModel) {
-                  // Insert ads every 5 items
-                  if (index > 0 && index % 5 == 0) {
-                    return Column(
-                      children: [
-                        // Ad placement
-                        const SizedBox.shrink(),
-                        const SizedBox(height: 8),
-                        // Post card
-                        EnhancedPostCard(
-                          post: item,
-                          onTap: () => _handlePostTap(item),
-                          onLike: () => _handleLike(item),
-                          onComment: () => _handleComment(item),
-                          onShare: () => _handleShare(item),
-                          onImageTap: (String imageUrl, int imgIndex) =>
-                              _showFullscreenImage(
-                                imageUrl,
-                                imgIndex,
-                                item.imageUrls,
-                              ),
-                          onBlockStatusChanged: () =>
-                              loadPosts(widget.communityService),
-                        ),
-                      ],
-                    );
-                  }
-
-                  return EnhancedPostCard(
-                    post: item,
-                    onTap: () => _handlePostTap(item),
-                    onLike: () => _handleLike(item),
-                    onComment: () => _handleComment(item),
-                    onShare: () => _handleShare(item),
-                    onImageTap: (String imageUrl, int imgIndex) =>
-                        _showFullscreenImage(
-                          imageUrl,
-                          imgIndex,
-                          item.imageUrls,
-                        ),
-                    onBlockStatusChanged: () =>
-                        loadPosts(widget.communityService),
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: EnhancedPostCard(
+                      post: item,
+                      onTap: () => _handlePostTap(item),
+                      onLike: () => _handleLike(item),
+                      onComment: () => _handleComment(item),
+                      onShare: () => _handleShare(item),
+                      onImageTap: (String imageUrl, int imgIndex) =>
+                          _showFullscreenImage(
+                            imageUrl,
+                            imgIndex,
+                            item.imageUrls,
+                          ),
+                      onBlockStatusChanged: () =>
+                          loadPosts(widget.communityService),
+                    ),
                   );
                 } else if (item is art_walk.SocialActivity) {
-                  return ActivityCard(
-                    activity: item,
-                    onTap: () {
-                      // Handle activity tap - could show details or navigate
-                      AppLogger.info('Activity tapped: ${item.message}');
-                    },
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: ActivityCard(
+                      activity: item,
+                      onTap: () {
+                        // Handle activity tap - could show details or navigate
+                        AppLogger.info('Activity tapped: ${item.message}');
+                      },
+                    ),
                   );
                 }
 

@@ -140,8 +140,8 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
       final giftActivities = await _loadGiftActivities(userId);
       activities.addAll(giftActivities);
 
-      // Sort by most recent and take top 5
-      activities.sort((a, b) => b.timeAgo.compareTo(a.timeAgo));
+      // Sort by most recent (descending by timestamp)
+      activities.sort((a, b) => b.timestamp.compareTo(a.timestamp));
       return activities.take(5).toList();
     } catch (e) {
       return activities;
@@ -162,13 +162,15 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
       for (final doc in snapshot.docs) {
         final data = doc.data();
         final artworkTitle = data['artworkTitle'] as String? ?? 'Artwork';
-        final soldAt = (data['soldAt'] as Timestamp?)?.toDate();
+        final soldAt =
+            (data['soldAt'] as Timestamp?)?.toDate() ?? DateTime.now();
 
         activities.add(ActivityModel(
           type: ActivityType.sale,
           title: 'Artwork Sold',
           description: '"$artworkTitle" was sold',
-          timeAgo: soldAt != null ? _formatTimeAgo(soldAt) : 'Recently',
+          timeAgo: _formatTimeAgo(soldAt),
+          timestamp: soldAt,
         ));
       }
     } catch (e) {
@@ -191,13 +193,15 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
 
       for (final doc in snapshot.docs) {
         final data = doc.data();
-        final createdAt = (data['createdAt'] as Timestamp?)?.toDate();
+        final createdAt =
+            (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now();
 
         activities.add(ActivityModel(
           type: ActivityType.commission,
           title: 'Commission Request',
           description: 'New commission inquiry received',
-          timeAgo: createdAt != null ? _formatTimeAgo(createdAt) : 'Recently',
+          timeAgo: _formatTimeAgo(createdAt),
+          timestamp: createdAt,
         ));
       }
     } catch (e) {
@@ -220,15 +224,16 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
 
       for (final doc in snapshot.docs) {
         final data = doc.data();
-        final purchasedAt = (data['purchasedAt'] as Timestamp?)?.toDate();
+        final purchasedAt =
+            (data['purchasedAt'] as Timestamp?)?.toDate() ?? DateTime.now();
         final amount = (data['amount'] as num?)?.toDouble() ?? 0.0;
 
         activities.add(ActivityModel(
           type: ActivityType.gift,
           title: 'Gift Received',
           description: 'Received a gift of \$${amount.toStringAsFixed(2)}',
-          timeAgo:
-              purchasedAt != null ? _formatTimeAgo(purchasedAt) : 'Recently',
+          timeAgo: _formatTimeAgo(purchasedAt),
+          timestamp: purchasedAt,
         ));
       }
     } catch (e) {

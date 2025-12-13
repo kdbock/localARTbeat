@@ -621,7 +621,10 @@ class _IntegratedEngagementWidgetState extends State<IntegratedEngagementWidget>
           ),
           const SizedBox(height: 20),
           ElevatedButton.icon(
-            onPressed: () {},
+            onPressed: () {
+              // Navigate to Art Walk Dashboard to start the quest
+              Navigator.pushNamed(context, '/art-walk/dashboard');
+            },
             icon: const Icon(Icons.explore),
             label: const Text('Start Quest'),
             style: ElevatedButton.styleFrom(

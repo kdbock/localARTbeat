@@ -2,8 +2,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:http/http.dart' as http;
-import 'package:xml/xml.dart' as xml;
 import '../models/art_models.dart';
 import '../models/post_model.dart';
 import 'package:artbeat_core/artbeat_core.dart';
@@ -12,13 +10,6 @@ import 'package:artbeat_core/artbeat_core.dart';
 /// Simplified and focused on core art-sharing functionality
 class ArtCommunityService extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-  // RSS feed URLs
-  static const List<String> _rssFeedUrls = [
-    'https://www.neusenews.com/index?format=rss',
-    'https://www.neusenewssports.com/news-1?format=rss',
-    'https://www.ncpoliticalnews.com/news?format=rss',
-  ];
 
   // Stream controllers for real-time updates
   final StreamController<List<ArtPost>> _feedController =
@@ -243,23 +234,9 @@ class ArtCommunityService extends ChangeNotifier {
         posts.add(postWithLikeStatus);
       }
 
-      // Fetch RSS posts and add them to the feed
-      final rssPosts = await _fetchRssPosts();
-      posts.addAll(rssPosts);
-
-      // Sort combined posts by createdAt (newest first)
-      posts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-
-      // Limit to requested number
-      if (posts.length > limit) {
-        posts.removeRange(limit, posts.length);
-      }
-
       // Debug: Log the retrieved posts
       if (kDebugMode) {
-        print(
-          '📱 DEBUG: Retrieved ${posts.length} posts from Firestore and RSS',
-        );
+        print('📱 DEBUG: Retrieved ${posts.length} posts from Firestore');
         for (int i = 0; i < posts.length; i++) {
           final post = posts[i];
           print(
@@ -276,152 +253,6 @@ class ArtCommunityService extends ChangeNotifier {
       AppLogger.error('Error getting feed: $e');
       return [];
     }
-  }
-
-  /// Fetch RSS posts from configured feeds
-  Future<List<PostModel>> _fetchRssPosts() async {
-    final rssPosts = <PostModel>[];
-
-    for (final url in _rssFeedUrls) {
-      try {
-        final response = await http.get(Uri.parse(url));
-        if (response.statusCode == 200) {
-          final document = xml.XmlDocument.parse(response.body);
-          final items = document.findAllElements('item');
-
-          for (final item in items.take(5)) {
-            // Limit to 5 items per feed
-            final title =
-                item.findElements('title').firstOrNull?.innerText ?? '';
-            final description =
-                item.findElements('description').firstOrNull?.innerText ?? '';
-            final contentEncoded =
-                item.findElements('content:encoded').firstOrNull?.innerText ??
-                '';
-            final pubDate =
-                item.findElements('pubDate').firstOrNull?.innerText ?? '';
-
-            // Parse publication date
-            DateTime createdAt;
-            try {
-              createdAt = DateTime.parse(pubDate);
-            } catch (e) {
-              createdAt = DateTime.now().subtract(
-                const Duration(hours: 1),
-              ); // Fallback
-            }
-
-            // Extract image URLs from description, content:encoded, and media:content
-            final imageUrls = <String>[];
-
-            // From description
-            final imgRegex = RegExp(r'<img[^>]+src="([^">]+)"');
-            final descMatch = imgRegex.firstMatch(description);
-            if (descMatch != null) {
-              final url = descMatch.group(1)!;
-              if (url.isNotEmpty) {
-                imageUrls.add(url);
-              }
-            }
-
-            // From content:encoded
-            final contentMatch = imgRegex.firstMatch(contentEncoded);
-            if (contentMatch != null) {
-              final url = contentMatch.group(1)!;
-              if (url.isNotEmpty && !imageUrls.contains(url)) {
-                imageUrls.add(url);
-              }
-            }
-
-            // From media:content
-            final mediaContents = item.findAllElements('media:content');
-            for (final media in mediaContents) {
-              final mediaUrl = media.getAttribute('url');
-              if (mediaUrl != null &&
-                  mediaUrl.isNotEmpty &&
-                  !imageUrls.contains(mediaUrl)) {
-                imageUrls.add(mediaUrl);
-              }
-            }
-
-            // Use description for excerpt content
-            final rawContent = description;
-
-            // Clean HTML from content, preserving paragraph breaks
-            String cleanContent = rawContent;
-            // Replace paragraph and line break tags with spaces (to avoid unwanted line breaks)
-            cleanContent = cleanContent.replaceAll('</p>', ' ');
-            cleanContent = cleanContent.replaceAll('</div>', ' ');
-            cleanContent = cleanContent.replaceAll('<br>', ' ');
-            cleanContent = cleanContent.replaceAll('<br/>', ' ');
-            cleanContent = cleanContent.replaceAll('<br />', ' ');
-            // Remove all remaining HTML tags
-            cleanContent = cleanContent.replaceAll(RegExp(r'<[^>]*>'), '');
-            // Replace any remaining newlines with spaces and clean up multiple spaces
-            cleanContent = cleanContent
-                .replaceAll('\n', ' ')
-                .replaceAll(RegExp(r'\s+'), ' ')
-                .trim();
-
-            // Truncate to approximately 4 lines (300 chars), ending at sentence if possible
-            String truncatedContent = cleanContent;
-            const int maxLength = 300;
-            if (cleanContent.length > maxLength) {
-              final String candidate = cleanContent.substring(0, maxLength);
-              final int lastPeriod = candidate.lastIndexOf('.');
-              if (lastPeriod > maxLength * 0.5) {
-                truncatedContent = cleanContent.substring(0, lastPeriod + 1);
-              } else {
-                final int lastSpace = candidate.lastIndexOf(' ');
-                if (lastSpace > 0) {
-                  truncatedContent =
-                      '${cleanContent.substring(0, lastSpace)}...';
-                } else {
-                  truncatedContent = '$candidate...';
-                }
-              }
-            }
-
-            final rssPost = PostModel(
-              id: 'rss_${url.hashCode}_${title.hashCode}',
-              userId: 'rss_feed',
-              userName: _getFeedName(url),
-              userPhotoUrl: '', // Could add a default RSS icon
-              content: title.isNotEmpty
-                  ? '$title\n\n$truncatedContent'
-                  : truncatedContent,
-              imageUrls: imageUrls,
-              tags: ['news', 'rss'],
-              location: '',
-              createdAt: createdAt,
-              isPublic: true,
-              isUserVerified: true,
-              moderationStatus: PostModerationStatus.approved,
-              flagged: false,
-              isLikedByCurrentUser: false,
-            );
-
-            rssPosts.add(rssPost);
-          }
-        }
-      } catch (e) {
-        AppLogger.error('Error fetching RSS from $url: $e');
-      }
-    }
-
-    return rssPosts;
-  }
-
-  /// Get display name for RSS feed
-  String _getFeedName(String url) {
-    if (url.contains('neusenews.com')) {
-      return 'Neuse News';
-    } else if (url.contains('neusenewssports.com')) {
-      return 'Neuse News Sports';
-    } else if (url.contains('ncpoliticalnews.com')) {
-      return 'NC Political News';
-    }
-    return 'News Feed';
   }
 
   /// Get posts by specific artist

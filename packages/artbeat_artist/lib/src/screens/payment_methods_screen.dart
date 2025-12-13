@@ -26,11 +26,13 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
   @override
   void initState() {
     super.initState();
+    core.AppLogger.info('🔷 PaymentMethodsScreen: initState called');
     _loadPaymentMethods();
   }
 
   /// Load saved payment methods
   Future<void> _loadPaymentMethods() async {
+    core.AppLogger.info('🔷 PaymentMethodsScreen: Loading payment methods...');
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -39,6 +41,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
     try {
       // Get current user's Stripe customer ID
       final userId = _auth.currentUser?.uid;
+      core.AppLogger.info('🔷 PaymentMethodsScreen: Current user ID: $userId');
       if (userId == null) {
         throw Exception('User not authenticated');
       }
@@ -46,12 +49,16 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
       // Get customer data from Firestore
       final customerDoc =
           await _firestore.collection('customers').doc(userId).get();
+      core.AppLogger.info(
+          '🔷 PaymentMethodsScreen: Customer doc exists: ${customerDoc.exists}');
 
       if (!customerDoc.exists) {
         setState(() {
           _isLoading = false;
           _paymentMethods = [];
         });
+        core.AppLogger.info(
+            '🔷 PaymentMethodsScreen: No customer document found');
         return;
       }
 
@@ -60,22 +67,33 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
       _defaultPaymentMethodId =
           customerData?['defaultPaymentMethodId'] as String?;
 
+      core.AppLogger.info(
+          '🔷 PaymentMethodsScreen: Stripe Customer ID: $stripeCustomerId');
+
       if (stripeCustomerId == null) {
         setState(() {
           _isLoading = false;
           _paymentMethods = [];
         });
+        core.AppLogger.info(
+            '🔷 PaymentMethodsScreen: No Stripe customer ID found');
         return;
       }
 
       // Load payment methods
       final methods = await _paymentService.getPaymentMethods(stripeCustomerId);
+      core.AppLogger.info(
+          '🔷 PaymentMethodsScreen: Loaded ${methods.length} payment methods');
 
       setState(() {
         _isLoading = false;
         _paymentMethods = methods;
       });
-    } catch (error) {
+    } catch (error, stackTrace) {
+      core.AppLogger.error(
+          '❌ PaymentMethodsScreen: Error loading payment methods');
+      core.AppLogger.error('Error: $error');
+      core.AppLogger.error('Stack trace: $stackTrace');
       setState(() {
         _isLoading = false;
         _errorMessage = 'Error loading payment methods: ${error.toString()}';
@@ -238,6 +256,8 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    core.AppLogger.info(
+        '🔷 PaymentMethodsScreen: build() called - isLoading: $_isLoading, hasError: ${_errorMessage != null}');
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: _addPaymentMethod,

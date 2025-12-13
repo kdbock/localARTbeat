@@ -32,11 +32,13 @@ class ActivityModel {
   final String title;
   final String description;
   final String timeAgo;
+  final DateTime timestamp;
 
   const ActivityModel({
     required this.type,
     required this.title,
     required this.description,
     required this.timeAgo,
+    required this.timestamp,
   });
 }
