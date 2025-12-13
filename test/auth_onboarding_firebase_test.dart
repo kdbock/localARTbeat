@@ -6,6 +6,7 @@ import 'package:artbeat_profile/artbeat_profile.dart' hide UserService;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'auth_test_helpers.dart';
 import 'firebase_test_setup.dart';
@@ -15,6 +16,12 @@ void main() {
 
   group('🎯 ArtBeat Authentication & Onboarding Tests (Firebase Enabled)', () {
     setUpAll(() async {
+      // Initialize shared preferences mock for all tests
+      SharedPreferences.setMockInitialValues({});
+
+      // Initialize easy_localization for all tests
+      await EasyLocalization.ensureInitialized();
+
       // Initialize Firebase for all tests
       await FirebaseTestSetup.initializeFirebaseForTesting();
     });
@@ -160,7 +167,7 @@ void main() {
             supportedLocales: const [Locale('en')],
             path: 'assets/translations',
             fallbackLocale: const Locale('en'),
-            child: const MaterialApp(home: EmailVerificationScreen()),
+            child: const MaterialApp(home: TestEmailVerificationScreen()),
           ),
         );
 
@@ -168,7 +175,7 @@ void main() {
         await tester.pump();
 
         // Verify email verification screen loads
-        expect(find.byType(EmailVerificationScreen), findsOneWidget);
+        expect(find.byType(TestEmailVerificationScreen), findsOneWidget);
       });
 
       testWidgets('Profile creation screen displays correctly', (tester) async {

@@ -6,6 +6,8 @@ class EngagementStats {
   final int shareCount;
   final int createdCount;
   final int celebrateCount;
+  final int likeCount;
+  final int commentCount;
   final DateTime lastUpdated;
 
   EngagementStats({
@@ -14,6 +16,8 @@ class EngagementStats {
     this.shareCount = 0,
     this.createdCount = 0,
     this.celebrateCount = 0,
+    this.likeCount = 0,
+    this.commentCount = 0,
     required this.lastUpdated,
   });
 
@@ -24,6 +28,8 @@ class EngagementStats {
       shareCount: json['shareCount'] as int? ?? 0,
       createdCount: json['createdCount'] as int? ?? 0,
       celebrateCount: json['celebrateCount'] as int? ?? 0,
+      likeCount: json['likeCount'] as int? ?? 0,
+      commentCount: json['commentCount'] as int? ?? 0,
       lastUpdated: json['lastUpdated'] != null
           ? (json['lastUpdated'] as Timestamp).toDate()
           : DateTime.now(),
@@ -37,9 +43,18 @@ class EngagementStats {
       'shareCount': shareCount,
       'createdCount': createdCount,
       'celebrateCount': celebrateCount,
+      'likeCount': likeCount,
+      'commentCount': commentCount,
       'lastUpdated': Timestamp.fromDate(lastUpdated),
     };
   }
 
   Map<String, dynamic> toFirestore() => toJson();
+
+  factory EngagementStats.fromFirestore(Map<String, dynamic>? data) {
+    if (data == null) {
+      return EngagementStats(lastUpdated: DateTime.now());
+    }
+    return EngagementStats.fromJson(data);
+  }
 }

@@ -1,6 +1,6 @@
+import 'package:artbeat_community/screens/feed/create_post_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 
 class DashboardCapturesSection extends StatelessWidget {
@@ -755,26 +755,21 @@ class DashboardCapturesSection extends StatelessWidget {
   /// Handle share action
   void _handleShare(BuildContext context, CaptureModel capture) async {
     try {
-      final shareText =
-          'Check out my artwork "${capture.title ?? 'Untitled'}" on ArtBeat! '
-          '${capture.description?.isNotEmpty == true ? '\n\n${capture.description}' : ''}'
-          '\n\n#ArtBeat #DigitalArt';
+      // Create a pre-filled caption for the post
+      final caption =
+          'Check out this capture: "${capture.title ?? 'Untitled'}"\n\n'
+          '${capture.description?.isNotEmpty == true ? capture.description : ''}';
 
-      await SharePlus.instance.share(ShareParams(text: shareText));
-
-      // Show success feedback
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Artwork shared successfully!'),
-            backgroundColor: ArtbeatColors.success,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+      // Navigate to the CreatePostScreen
+      Navigator.push(
+        context,
+        MaterialPageRoute<void>(
+          builder: (context) => CreatePostScreen(
+            prefilledImageUrl: capture.imageUrl,
+            prefilledCaption: caption,
           ),
-        );
-      }
+        ),
+      );
     } catch (e) {
       // Show error feedback
       if (context.mounted) {

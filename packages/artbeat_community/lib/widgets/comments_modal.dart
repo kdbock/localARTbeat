@@ -10,11 +10,13 @@ import 'package:timeago/timeago.dart' as timeago;
 class CommentsModal extends StatefulWidget {
   final PostModel post;
   final ArtCommunityService communityService;
+  final VoidCallback? onCommentAdded;
 
   const CommentsModal({
     super.key,
     required this.post,
     required this.communityService,
+    this.onCommentAdded,
   });
 
   @override
@@ -113,6 +115,9 @@ class _CommentsModalState extends State<CommentsModal> {
 
         // Reload comments to show the new one
         await _loadComments();
+
+        // Notify parent that a comment was added
+        widget.onCommentAdded?.call();
 
         // Scroll to bottom to show new comment
         if (_scrollController.hasClients) {

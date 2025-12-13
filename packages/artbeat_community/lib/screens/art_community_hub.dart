@@ -1451,6 +1451,7 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
             '🤍 Updated UI optimistically - new like count: ${newEngagementStats.likeCount}, new liked state: ${!isCurrentlyLiked}',
           );
         });
+        _combineFeedItems(); // Update feed items after optimistic update
       } else {
         AppLogger.error('🤍 Post not found in _posts list');
       }
@@ -1483,7 +1484,7 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
             );
           });
         }
-
+        _combineFeedItems(); // Update feed items after revert
         // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -1527,6 +1528,7 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
         return CommentsModal(
           post: post,
           communityService: widget.communityService,
+          onCommentAdded: () => loadPosts(widget.communityService),
         );
       },
     );
@@ -1534,22 +1536,62 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
 
   void _handleShare(PostModel post) async {
     try {
-      // Navigate to create post screen with pre-filled content for sharing
-      Navigator.push(
-        context,
-        MaterialPageRoute<void>(
-          builder: (context) => CreatePostScreen(
-            prefilledCaption: 'Shared from ${post.userName}: "${post.content}"',
-          ),
-        ),
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please sign in to share posts')),
+        );
+        return;
+      }
+
+      // Create a new post that shares the original post
+      String shareContent = 'Shared from ARTbeat Community\n\n';
+      if (post.content.isNotEmpty) {
+        shareContent += '"${post.content}"\n\n';
+      }
+      shareContent += 'Originally posted by ${post.userName}';
+
+      if (post.location.isNotEmpty) {
+        shareContent += ' • ${post.location}';
+      }
+
+      if (post.tags.isNotEmpty) {
+        shareContent += '\n\n${post.tags.map((tag) => '#$tag').join(' ')}';
+      }
+
+      // Create the shared post
+      final postId = await widget.communityService.createPost(
+        content: shareContent,
+        imageUrls: post.imageUrls, // Include the original images
+        tags: post.tags,
+        isArtistPost: false, // Shared posts are not automatically artist posts
       );
+
+      if (postId != null) {
+        // Show success message
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Post shared successfully!')),
+          );
+        }
+
+        // Refresh the feed to show the new shared post
+        await loadPosts(widget.communityService);
+
+        // Also increment the share count on the original post
+        widget.communityService.incrementShareCount(post.id);
+      } else {
+        throw Exception('Failed to create shared post');
+      }
     } catch (e) {
       AppLogger.error('Error sharing post: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to share post. Please try again.'),
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to share post. Please try again.'),
+          ),
+        );
+      }
     }
   }
 

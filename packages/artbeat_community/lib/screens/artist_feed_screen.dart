@@ -6,7 +6,6 @@ import '../widgets/enhanced_post_card.dart';
 import '../widgets/comments_modal.dart';
 import '../widgets/fullscreen_image_viewer.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:share_plus/share_plus.dart';
 
 /// Screen showing all posts from a specific artist
 class ArtistFeedScreen extends StatefulWidget {
@@ -149,51 +148,72 @@ class _ArtistFeedScreenState extends State<ArtistFeedScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) =>
-          CommentsModal(post: post, communityService: _communityService),
+      builder: (context) => CommentsModal(
+        post: post,
+        communityService: _communityService,
+        onCommentAdded: _loadArtistAndPosts,
+      ),
     );
   }
 
   void _handleShare(PostModel post) async {
     try {
-      String shareText = '';
-      if (post.content.isNotEmpty) {
-        shareText = '"${post.content}"\n\n';
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please sign in to share posts')),
+        );
+        return;
       }
-      shareText += 'Shared from ARTbeat Community\n';
-      shareText += 'By ${post.userName}';
+
+      // Create a new post that shares the original post
+      String shareContent = 'Shared from ARTbeat Community\n\n';
+      if (post.content.isNotEmpty) {
+        shareContent += '"${post.content}"\n\n';
+      }
+      shareContent += 'Originally posted by ${post.userName}';
 
       if (post.location.isNotEmpty) {
-        shareText += ' • ${post.location}';
+        shareContent += ' • ${post.location}';
       }
 
       if (post.tags.isNotEmpty) {
-        shareText += '\n\n${post.tags.map((tag) => '#$tag').join(' ')}';
+        shareContent += '\n\n${post.tags.map((tag) => '#$tag').join(' ')}';
       }
 
-      await SharePlus.instance.share(ShareParams(text: shareText));
+      // Create the shared post
+      final postId = await _communityService.createPost(
+        content: shareContent,
+        imageUrls: post.imageUrls, // Include the original images
+        tags: post.tags,
+        isArtistPost: false, // Shared posts are not automatically artist posts
+      );
 
-      final postIndex = _posts.indexWhere((p) => p.id == post.id);
-      if (postIndex != -1) {
-        setState(() {
-          final currentShareCount =
-              _posts[postIndex].engagementStats.shareCount;
-          final newEngagementStats = EngagementStats(
-            likeCount: _posts[postIndex].engagementStats.likeCount,
-            commentCount: _posts[postIndex].engagementStats.commentCount,
-            shareCount: currentShareCount + 1,
-            lastUpdated: DateTime.now(),
+      if (postId != null) {
+        // Show success message
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Post shared successfully!')),
           );
+        }
 
-          _posts[postIndex] = _posts[postIndex].copyWith(
-            engagementStats: newEngagementStats,
-          );
-        });
+        // Refresh the feed to show the new shared post
+        await _loadArtistAndPosts();
 
+        // Also increment the share count on the original post
         _communityService.incrementShareCount(post.id);
+      } else {
+        throw Exception('Failed to create shared post');
       }
     } catch (e) {
       AppLogger.error('Error sharing post: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to share post. Please try again.'),
+          ),
+        );
+      }
     }
   }
 

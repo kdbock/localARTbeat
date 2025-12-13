@@ -476,11 +476,16 @@ class ArtCommunityService extends ChangeNotifier {
       // Get user profile data
       final userDoc = await _firestore.collection('users').doc(user.uid).get();
       final userData = userDoc.data() ?? {};
+      AppLogger.info('📝 User data for post creation: $userData');
+      AppLogger.info(
+        '📝 fullName: "${userData['fullName']}", displayName: "${userData['displayName']}", name: "${userData['name']}"',
+      );
 
       final post = ArtPost(
         id: '', // Will be set by Firestore
         userId: user.uid,
         userName:
+            userData['fullName'] as String? ??
             userData['displayName'] as String? ??
             userData['name'] as String? ??
             'Anonymous',
@@ -492,6 +497,8 @@ class ArtCommunityService extends ChangeNotifier {
         isArtistPost: isArtistPost,
         isUserVerified: userData['isVerified'] as bool? ?? false,
       );
+
+      AppLogger.info('📝 Post userName will be: "${post.userName}"');
 
       // Debug: Log the post data being saved
       if (kDebugMode) {
@@ -877,7 +884,16 @@ class ArtCommunityService extends ChangeNotifier {
 
       return docRef.id;
     } catch (e) {
+      final user = FirebaseAuth.instance.currentUser;
       AppLogger.error('Error adding comment: $e');
+      AppLogger.error(
+        'Comment data: postId=$postId, content length=${content.length}',
+      );
+      if (user != null) {
+        AppLogger.error('User authenticated: ${user.uid}');
+      } else {
+        AppLogger.error('User not authenticated');
+      }
       return null;
     }
   }
