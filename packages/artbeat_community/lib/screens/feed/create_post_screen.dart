@@ -660,10 +660,8 @@ class _CreatePostScreenState extends State<CreatePostScreen>
           CircleAvatar(
             radius: 24,
             backgroundColor: ArtbeatColors.primaryPurple.withValues(alpha: 0.1),
-            backgroundImage: user?.photoURL != null
-                ? NetworkImage(user!.photoURL!)
-                : null,
-            child: user?.photoURL == null
+            backgroundImage: ImageUrlValidator.safeNetworkImage(user?.photoURL),
+            child: !ImageUrlValidator.isValidImageUrl(user?.photoURL)
                 ? const Icon(
                     Icons.person,
                     color: ArtbeatColors.primaryPurple,

@@ -147,10 +147,10 @@ class _EnhancedPostCardState extends State<EnhancedPostCard> {
           CircleAvatar(
             radius: 20,
             backgroundColor: ArtbeatColors.primaryPurple.withValues(alpha: 0.1),
-            backgroundImage: widget.post.userPhotoUrl.isNotEmpty
-                ? NetworkImage(widget.post.userPhotoUrl)
-                : null,
-            child: widget.post.userPhotoUrl.isEmpty
+            backgroundImage: ImageUrlValidator.safeNetworkImage(
+              widget.post.userPhotoUrl,
+            ),
+            child: !ImageUrlValidator.isValidImageUrl(widget.post.userPhotoUrl)
                 ? const Icon(
                     Icons.person,
                     color: ArtbeatColors.primaryPurple,

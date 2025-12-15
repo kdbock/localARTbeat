@@ -280,12 +280,14 @@ class _StudioManagementScreenState extends State<StudioManagementScreen> {
                       margin: const EdgeInsets.only(bottom: 8),
                       child: ListTile(
                         leading: CircleAvatar(
-                          backgroundImage: memberData['profileImageUrl'] != null
-                              ? NetworkImage(
-                                  memberData['profileImageUrl'] as String,
-                                )
-                              : null,
-                          child: memberData['profileImageUrl'] == null
+                          backgroundImage:
+                              core.ImageUrlValidator.safeNetworkImage(
+                                memberData['profileImageUrl']?.toString(),
+                              ),
+                          child:
+                              !core.ImageUrlValidator.isValidImageUrl(
+                                memberData['profileImageUrl']?.toString(),
+                              )
                               ? Text(
                                   ((memberData['displayName'] as String?) ??
                                           'U')[0]

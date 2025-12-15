@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/src/models/artist_profile_model.dart';
 
 class ArtistsTab extends StatelessWidget {
@@ -18,7 +19,7 @@ class ArtistsTab extends StatelessWidget {
     if (isLoading) {
       return const Center(child: CircularProgressIndicator());
     } else if (artists.isEmpty) {
-      return const Center(child: Text('No artists found.'));
+      return Center(child: Text('dashboard_no_artists_found'.tr()));
     }
     return GridView.builder(
       shrinkWrap: true,

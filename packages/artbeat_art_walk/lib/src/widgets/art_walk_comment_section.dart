@@ -1,3 +1,4 @@
+import 'package:artbeat_core/artbeat_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -517,16 +518,10 @@ class CommentTile extends StatelessWidget {
               CircleAvatar(
                 radius: isReply ? 14.0 : 18.0,
                 backgroundColor: Colors.grey.shade300,
-                backgroundImage:
-                    authorPhotoUrl != null &&
-                        authorPhotoUrl!.isNotEmpty &&
-                        Uri.tryParse(authorPhotoUrl!)?.hasScheme == true
-                    ? NetworkImage(authorPhotoUrl!)
-                    : null,
-                child:
-                    authorPhotoUrl == null ||
-                        authorPhotoUrl!.isEmpty ||
-                        Uri.tryParse(authorPhotoUrl!)?.hasScheme != true
+                backgroundImage: ImageUrlValidator.safeNetworkImage(
+                  authorPhotoUrl,
+                ),
+                child: !ImageUrlValidator.isValidImageUrl(authorPhotoUrl)
                     ? Icon(
                         Icons.person,
                         size: isReply ? 16.0 : 20.0,

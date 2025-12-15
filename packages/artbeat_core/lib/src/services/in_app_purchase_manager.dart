@@ -151,14 +151,31 @@ class InAppPurchaseManager {
     final recipientId = metadata['recipientId'] as String?;
     final message = metadata['message'] as String?;
 
-    if (recipientId != null && message != null) {
+    if (recipientId == null || recipientId.isEmpty) {
+      AppLogger.error(
+        '❌ Gift purchase missing recipientId: ${purchase.productId}',
+      );
+      AppLogger.error('Metadata: $metadata');
+      return;
+    }
+
+    if (message == null || message.isEmpty) {
+      AppLogger.warning(
+        '⚠️ Gift purchase missing message, using default: ${purchase.productId}',
+      );
+    }
+
+    try {
       _giftService.completeGiftPurchase(
         senderId: purchase.userId,
         recipientId: recipientId,
         productId: purchase.productId,
         transactionId: purchase.transactionId ?? purchase.purchaseId,
-        message: message,
+        message: message ?? 'A gift from an ArtBeat supporter!',
       );
+      AppLogger.info('✅ Gift purchase completed successfully');
+    } catch (e) {
+      AppLogger.error('❌ Error completing gift purchase: $e');
     }
   }
 

@@ -628,10 +628,17 @@ class _CommissionSetupWizardScreenState
                           Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(8),
-                              image: DecorationImage(
-                                image: NetworkImage(_portfolioImages[index]),
-                                fit: BoxFit.cover,
-                              ),
+                              image:
+                                  core.ImageUrlValidator.isValidImageUrl(
+                                    _portfolioImages[index],
+                                  )
+                                  ? DecorationImage(
+                                      image: core.ImageUrlValidator.safeNetworkImage(
+                                        _portfolioImages[index],
+                                      )!,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : null,
                             ),
                           ),
                           Positioned(

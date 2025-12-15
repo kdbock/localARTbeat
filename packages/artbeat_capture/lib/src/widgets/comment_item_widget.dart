@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/capture_service.dart';
-import 'package:artbeat_core/artbeat_core.dart' show AppLogger;
+import 'package:artbeat_core/artbeat_core.dart' show AppLogger, ImageUrlValidator;
 
 /// Widget for displaying a single comment
 class CommentItemWidget extends StatefulWidget {
@@ -170,10 +170,8 @@ class _CommentItemWidgetState extends State<CommentItemWidget> {
           // Avatar
           CircleAvatar(
             radius: 18,
-            backgroundImage: userAvatar != null && userAvatar.isNotEmpty
-                ? NetworkImage(userAvatar)
-                : null,
-            child: userAvatar == null || userAvatar.isEmpty
+            backgroundImage: ImageUrlValidator.safeNetworkImage(userAvatar),
+            child: !ImageUrlValidator.isValidImageUrl(userAvatar)
                 ? const Icon(Icons.person, size: 18)
                 : null,
           ),

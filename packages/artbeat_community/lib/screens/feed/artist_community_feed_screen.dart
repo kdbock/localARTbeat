@@ -497,11 +497,13 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
               // Artist Avatar
               CircleAvatar(
                 radius: 40,
-                backgroundImage:
-                    widget.artist.profileImageUrl?.isNotEmpty == true
-                    ? NetworkImage(widget.artist.profileImageUrl!)
-                    : null,
-                child: widget.artist.profileImageUrl?.isNotEmpty != true
+                backgroundImage: ImageUrlValidator.safeNetworkImage(
+                  widget.artist.profileImageUrl,
+                ),
+                child:
+                    !ImageUrlValidator.isValidImageUrl(
+                      widget.artist.profileImageUrl,
+                    )
                     ? const Icon(
                         Icons.person,
                         size: 40,

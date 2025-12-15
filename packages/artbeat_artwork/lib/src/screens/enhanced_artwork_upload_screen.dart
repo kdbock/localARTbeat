@@ -14,7 +14,8 @@ import 'package:artbeat_core/artbeat_core.dart'
         ArtbeatColors,
         EnhancedStorageService,
         EnhancedUniversalHeader,
-        MainLayout;
+        MainLayout,
+        ImageUrlValidator;
 
 /// Enhanced artwork upload screen with support for multiple media types
 class EnhancedArtworkUploadScreen extends StatefulWidget {
@@ -1411,9 +1412,10 @@ class _EnhancedArtworkUploadScreenState
                               image: FileImage(_mainImageFile!),
                               fit: BoxFit.cover,
                             )
-                          : _imageUrl != null
+                          : ImageUrlValidator.isValidImageUrl(_imageUrl)
                               ? DecorationImage(
-                                  image: NetworkImage(_imageUrl!),
+                                  image: ImageUrlValidator.safeNetworkImage(
+                                      _imageUrl)!,
                                   fit: BoxFit.cover,
                                 )
                               : null,

@@ -180,10 +180,13 @@ class _UserPostsScreenState extends State<UserPostsScreen> {
                   Row(
                     children: [
                       CircleAvatar(
-                        backgroundImage: post['authorProfileImage'] != null
-                            ? NetworkImage(post['authorProfileImage'] as String)
-                            : null,
-                        child: post['authorProfileImage'] == null
+                        backgroundImage: ImageUrlValidator.safeNetworkImage(
+                          post['authorProfileImage']?.toString(),
+                        ),
+                        child:
+                            !ImageUrlValidator.isValidImageUrl(
+                              post['authorProfileImage']?.toString(),
+                            )
                             ? const Icon(Icons.person)
                             : null,
                       ),

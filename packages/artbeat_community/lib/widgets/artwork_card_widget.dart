@@ -1,3 +1,4 @@
+import 'package:artbeat_core/artbeat_core.dart' hide ArtworkModel, UserModel;
 import 'package:flutter/material.dart';
 import '../models/artwork_model.dart';
 import '../models/user_model.dart';
@@ -15,11 +16,6 @@ class ArtworkCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Check if the avatar URL is valid for NetworkImage
-    final bool isValidAvatarUrl =
-        artist.avatarUrl.isNotEmpty &&
-        (artist.avatarUrl.startsWith('http://') ||
-            artist.avatarUrl.startsWith('https://')) &&
-        artist.avatarUrl != 'placeholder_headshot_url';
 
     return Card(
       elevation: 4,
@@ -40,11 +36,11 @@ class ArtworkCardWidget extends StatelessWidget {
                     );
                   },
                   child: CircleAvatar(
-                    backgroundImage: isValidAvatarUrl
-                        ? NetworkImage(artist.avatarUrl)
-                        : null,
+                    backgroundImage: ImageUrlValidator.safeNetworkImage(
+                      artist.avatarUrl,
+                    ),
                     radius: 24,
-                    child: !isValidAvatarUrl
+                    child: !ImageUrlValidator.isValidImageUrl(artist.avatarUrl)
                         ? const Icon(Icons.person, size: 24)
                         : null,
                   ),

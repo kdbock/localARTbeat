@@ -254,10 +254,10 @@ class _CommentsModalState extends State<CommentsModal> {
                     // User avatar
                     CircleAvatar(
                       radius: 18,
-                      backgroundImage: user.photoURL != null
-                          ? NetworkImage(user.photoURL!)
-                          : null,
-                      child: user.photoURL == null
+                      backgroundImage: ImageUrlValidator.safeNetworkImage(
+                        user.photoURL,
+                      ),
+                      child: !ImageUrlValidator.isValidImageUrl(user.photoURL)
                           ? Text(
                               (user.displayName?.isNotEmpty == true
                                       ? user.displayName![0]
@@ -355,10 +355,10 @@ class _CommentsModalState extends State<CommentsModal> {
           // User avatar
           CircleAvatar(
             radius: 16,
-            backgroundImage: comment.userAvatarUrl.isNotEmpty
-                ? NetworkImage(comment.userAvatarUrl)
-                : null,
-            child: comment.userAvatarUrl.isEmpty
+            backgroundImage: ImageUrlValidator.safeNetworkImage(
+              comment.userAvatarUrl,
+            ),
+            child: !ImageUrlValidator.isValidImageUrl(comment.userAvatarUrl)
                 ? Text(
                     comment.userName.isNotEmpty
                         ? comment.userName[0].toUpperCase()

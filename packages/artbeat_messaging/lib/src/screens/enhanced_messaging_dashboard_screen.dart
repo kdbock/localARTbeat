@@ -1,3 +1,4 @@
+import 'package:artbeat_core/artbeat_core.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/services.dart';
@@ -781,7 +782,10 @@ class _MessagingDashboardScreenState extends State<MessagingDashboardScreen>
         leading: Stack(
           children: [
             CircleAvatar(
-              backgroundImage: NetworkImage(avatar),
+              backgroundImage:
+                  ImageUrlValidator.safeNetworkImage(avatar) ??
+                  const AssetImage('assets/default_profile.png')
+                      as ImageProvider,
               radius: 20,
               onBackgroundImageError: (exception, stackTrace) {
                 // Handle image loading errors gracefully

@@ -633,12 +633,13 @@ class _DiscoverScreenState extends State<DiscoverScreen>
                                 CircleAvatar(
                                   radius: 30,
                                   backgroundImage:
-                                      artistProfile.profileImageUrl != null
-                                      ? NetworkImage(
-                                          artistProfile.profileImageUrl!,
-                                        )
-                                      : null,
-                                  child: artistProfile.profileImageUrl == null
+                                      ImageUrlValidator.safeNetworkImage(
+                                        artistProfile.profileImageUrl,
+                                      ),
+                                  child:
+                                      !ImageUrlValidator.isValidImageUrl(
+                                        artistProfile.profileImageUrl,
+                                      )
                                       ? Text(
                                           artistProfile.displayName.isNotEmpty
                                               ? artistProfile.displayName[0]

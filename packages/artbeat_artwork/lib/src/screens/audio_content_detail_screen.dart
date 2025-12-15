@@ -217,15 +217,18 @@ class _AudioContentDetailScreenState extends State<AudioContentDetailScreen> {
                     height: 300,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),
-                      image: artwork.imageUrl.isNotEmpty
+                      image: ImageUrlValidator.isValidImageUrl(artwork.imageUrl)
                           ? DecorationImage(
-                              image: NetworkImage(artwork.imageUrl),
+                              image: ImageUrlValidator.safeNetworkImage(
+                                  artwork.imageUrl)!,
                               fit: BoxFit.cover,
                             )
                           : null,
-                      color: artwork.imageUrl.isEmpty
-                          ? ArtbeatColors.primaryGreen.withValues(alpha: 0.1)
-                          : null,
+                      color:
+                          !ImageUrlValidator.isValidImageUrl(artwork.imageUrl)
+                              ? ArtbeatColors.primaryGreen
+                                  .withValues(alpha: 0.1)
+                              : null,
                     ),
                     child: artwork.imageUrl.isEmpty
                         ? const Icon(

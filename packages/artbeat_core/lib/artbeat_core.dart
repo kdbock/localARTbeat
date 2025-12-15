@@ -134,6 +134,7 @@ export 'src/models/feature_limits.dart' show FeatureLimits;
 // Export Core Widgets
 export 'src/widgets/artbeat_button.dart';
 export 'src/widgets/artbeat_input.dart';
+export 'src/widgets/login_prompt_dialog.dart';
 
 export 'src/widgets/artbeat_drawer.dart';
 export 'src/widgets/artbeat_drawer_items.dart';
@@ -177,6 +178,7 @@ export 'src/utils/location_utils.dart' show LocationUtils;
 export 'src/utils/image_utils.dart' show ImageUtils;
 export 'src/utils/permission_utils.dart' show PermissionUtils;
 export 'src/utils/performance_monitor.dart' show PerformanceMonitor;
+export 'src/utils/auth_helper.dart' show AuthHelper;
 export 'src/utils/env_loader.dart' show EnvLoader;
 export 'src/utils/logger.dart' show AppLogger, LoggerExtension, LoggingMixin;
 export 'src/utils/image_url_validator.dart' show ImageUrlValidator;

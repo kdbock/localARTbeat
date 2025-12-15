@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/foundation.dart';
 import '../../../artbeat_core.dart' show CaptureModel;
@@ -123,7 +124,7 @@ class ExploreTab extends StatelessWidget {
             child: isLoadingCaptures
                 ? const Center(child: CircularProgressIndicator())
                 : captures.isEmpty
-                ? const Center(child: Text('No captures found.'))
+                ? Center(child: Text('dashboard_no_captures_found'.tr()))
                 : ListView.builder(
                     scrollDirection: Axis.horizontal,
                     itemCount: captures.length,

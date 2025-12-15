@@ -627,10 +627,10 @@ class _UnifiedAdminDashboardState extends State<UnifiedAdminDashboard>
                       },
                     )
                   : CircleAvatar(
-                      backgroundImage: user.profileImageUrl.isNotEmpty
-                          ? NetworkImage(user.profileImageUrl)
-                          : null,
-                      child: user.profileImageUrl.isEmpty
+                      backgroundImage: ImageUrlValidator.safeNetworkImage(
+                          user.profileImageUrl),
+                      child: !ImageUrlValidator.isValidImageUrl(
+                              user.profileImageUrl)
                           ? Text(user.fullName.isNotEmpty
                               ? user.fullName[0].toUpperCase()
                               : 'U')

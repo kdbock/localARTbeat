@@ -1,3 +1,4 @@
+import 'package:artbeat_core/artbeat_core.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -172,12 +173,10 @@ class LocalGalleriesWidget extends StatelessWidget {
                                 child: Container(
                                   decoration: BoxDecoration(
                                     image: DecorationImage(
-                                      image: (gallery['imageUrl'] as String? ??
-                                                  '')
-                                              .isNotEmpty
-                                          ? NetworkImage(
-                                              gallery['imageUrl'] as String)
-                                          : const AssetImage(
+                                      image: ImageUrlValidator.safeNetworkImage(
+                                              gallery['imageUrl']
+                                                  ?.toString()) ??
+                                          const AssetImage(
                                                   'assets/event_placeholder.png')
                                               as ImageProvider,
                                       fit: BoxFit.cover,

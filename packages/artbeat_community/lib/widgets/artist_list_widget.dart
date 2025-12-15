@@ -209,14 +209,11 @@ class _ArtistListWidgetState extends State<ArtistListWidget>
               // Artist Avatar
               CircleAvatar(
                 radius: 30,
-                backgroundImage:
-                    artist.profileImageUrl?.isNotEmpty == true &&
-                        Uri.tryParse(artist.profileImageUrl!)?.hasScheme == true
-                    ? NetworkImage(artist.profileImageUrl!)
-                    : null,
+                backgroundImage: ImageUrlValidator.safeNetworkImage(
+                  artist.profileImageUrl,
+                ),
                 child:
-                    artist.profileImageUrl?.isNotEmpty != true ||
-                        Uri.tryParse(artist.profileImageUrl!)?.hasScheme != true
+                    !ImageUrlValidator.isValidImageUrl(artist.profileImageUrl)
                     ? const Icon(Icons.person, size: 30)
                     : null,
               ),

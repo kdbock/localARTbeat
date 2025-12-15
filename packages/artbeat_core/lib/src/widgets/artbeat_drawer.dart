@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:artbeat_art_walk/artbeat_art_walk.dart';
 import '../theme/artbeat_colors.dart';
 import '../theme/artbeat_typography.dart';
 import '../services/user_service.dart';
@@ -70,6 +72,14 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer> {
         final model = await userService.getUserById(user.uid);
         if (mounted) {
           setState(() => _cachedUserModel = model);
+        }
+
+        // Process daily login for streak tracking
+        try {
+          final rewardsService = RewardsService();
+          await rewardsService.processDailyLogin(user.uid);
+        } catch (e) {
+          AppLogger.error('❌ Error processing daily login: $e');
         }
       }
     } catch (error) {
@@ -237,12 +247,14 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer> {
       showDialog<void>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Coming Soon'),
-          content: Text('The $route feature is coming soon!'),
+          title: Text('drawer_coming_soon'.tr()),
+          content: Text(
+            'drawer_coming_soon_message'.tr(namedArgs: {'route': route}),
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('OK'),
+              child: Text('drawer_ok'.tr()),
             ),
           ],
         ),
@@ -254,7 +266,11 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Navigation error: $error'),
+          content: Text(
+            'drawer_navigation_error'.tr(
+              namedArgs: {'error': error.toString()},
+            ),
+          ),
           backgroundColor: Colors.red,
           duration: const Duration(seconds: 3),
         ),
@@ -649,7 +665,7 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Text(
-        title.toUpperCase(),
+        title.tr().toUpperCase(),
         style: ArtbeatTypography.textTheme.bodySmall?.copyWith(
           color: ArtbeatColors.textSecondary,
           fontWeight: FontWeight.w600,
@@ -675,7 +691,7 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer> {
                     : (item.color ?? ArtbeatColors.primaryPurple),
               ),
         title: Text(
-          item.title,
+          item.title.tr(),
           style: ArtbeatTypography.textTheme.bodyMedium?.copyWith(
             fontWeight: isCurrentRoute ? FontWeight.w600 : FontWeight.w500,
             color: isCurrentRoute ? ArtbeatColors.primaryGreen : item.color,
@@ -684,7 +700,7 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer> {
         selected: isCurrentRoute,
         onTap: () async {
           // Handle sign out specially
-          if (item.route == '/login' && item.title == 'Sign Out') {
+          if (item.route == '/login' && item.title == 'drawer_sign_out') {
             Navigator.pop(context); // Close drawer
             await FirebaseAuth.instance.signOut();
             if (mounted) {

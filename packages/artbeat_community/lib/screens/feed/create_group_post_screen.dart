@@ -693,10 +693,8 @@ class _CreateGroupPostScreenState extends State<CreateGroupPostScreen>
           CircleAvatar(
             radius: 24,
             backgroundColor: _getGroupColor().withValues(alpha: 0.1),
-            backgroundImage: user?.photoURL != null
-                ? NetworkImage(user!.photoURL!)
-                : null,
-            child: user?.photoURL == null
+            backgroundImage: ImageUrlValidator.safeNetworkImage(user?.photoURL),
+            child: !ImageUrlValidator.isValidImageUrl(user?.photoURL)
                 ? Icon(Icons.person, color: _getGroupColor(), size: 24)
                 : null,
           ),

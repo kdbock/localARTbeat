@@ -38,8 +38,10 @@ class ImageUtils {
 
   /// Creates a safe NetworkImage provider or returns null if URL is invalid
   static ImageProvider<Object>? safeNetworkImage(String? url) {
-    if (isValidNetworkImageUrl(url)) {
-      return NetworkImage(url!);
+    if (url == null || url.trim().isEmpty) return null;
+    final trimmedUrl = url.trim();
+    if (isValidNetworkImageUrl(trimmedUrl)) {
+      return NetworkImage(trimmedUrl);
     }
     return null;
   }
@@ -55,11 +57,14 @@ class ImageUtils {
   }) {
     Widget avatar;
 
-    if (isValidNetworkImageUrl(imageUrl)) {
+    final trimmedUrl = imageUrl?.trim();
+    if (trimmedUrl != null &&
+        trimmedUrl.isNotEmpty &&
+        isValidNetworkImageUrl(trimmedUrl)) {
       avatar = CircleAvatar(
         radius: radius,
         backgroundColor: backgroundColor,
-        backgroundImage: NetworkImage(imageUrl!),
+        backgroundImage: NetworkImage(trimmedUrl),
         child: null,
       );
     } else {
@@ -91,8 +96,10 @@ class ImageUtils {
     String? url, {
     BoxFit fit = BoxFit.cover,
   }) {
-    if (isValidNetworkImageUrl(url)) {
-      return DecorationImage(image: NetworkImage(url!), fit: fit);
+    if (url == null || url.trim().isEmpty) return null;
+    final trimmedUrl = url.trim();
+    if (isValidNetworkImageUrl(trimmedUrl)) {
+      return DecorationImage(image: NetworkImage(trimmedUrl), fit: fit);
     }
     return null;
   }

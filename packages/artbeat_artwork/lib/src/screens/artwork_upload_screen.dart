@@ -14,7 +14,8 @@ import 'package:artbeat_core/artbeat_core.dart'
         EnhancedUniversalHeader,
         EnhancedStorageService,
         MainLayout,
-        AppLogger;
+        AppLogger,
+        ImageUrlValidator;
 
 /// Screen for uploading and editing artwork
 class ArtworkUploadScreen extends StatefulWidget {
@@ -505,9 +506,11 @@ class _ArtworkUploadScreenState extends State<ArtworkUploadScreen> {
                                   image: FileImage(_imageFile!),
                                   fit: BoxFit.cover,
                                 )
-                              : _imageUrl != null && _isValidImageUrl(_imageUrl)
+                              : ImageUrlValidator.isValidImageUrl(_imageUrl) &&
+                                      _isValidImageUrl(_imageUrl)
                                   ? DecorationImage(
-                                      image: NetworkImage(_imageUrl!),
+                                      image: ImageUrlValidator.safeNetworkImage(
+                                          _imageUrl)!,
                                       fit: BoxFit.cover,
                                     )
                                   : null,

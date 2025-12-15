@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 
 class DashboardHeroSection extends StatefulWidget {
   final DashboardViewModel viewModel;
-  final VoidCallback onProfileMenuTap;
   final VoidCallback onFindArtTap;
 
   const DashboardHeroSection({
     Key? key,
     required this.viewModel,
-    required this.onProfileMenuTap,
     required this.onFindArtTap,
   }) : super(key: key);
 
@@ -87,17 +86,20 @@ class _DashboardHeroSectionState extends State<DashboardHeroSection> {
             Positioned.fill(
               child: Container(
                 color: Colors.black45,
-                child: const Center(
+                child: Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      CircularProgressIndicator(
+                      const CircularProgressIndicator(
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       ),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 16),
                       Text(
-                        'Loading your location...',
-                        style: TextStyle(color: Colors.white, fontSize: 16),
+                        'dashboard_hero_loading_location'.tr(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
                       ),
                     ],
                   ),
@@ -121,14 +123,6 @@ class _DashboardHeroSectionState extends State<DashboardHeroSection> {
             ),
           ),
 
-          // Header content
-          Positioned(
-            top: 16,
-            left: 16,
-            right: 16,
-            child: _buildHeader(context),
-          ),
-
           // Tagline overlay
           Positioned(bottom: 24, left: 24, right: 24, child: _buildTagline()),
         ],
@@ -136,50 +130,13 @@ class _DashboardHeroSectionState extends State<DashboardHeroSection> {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        // Logo/Title
-        const Row(
-          children: [
-            Icon(Icons.palette, color: Colors.white, size: 28),
-            SizedBox(width: 12),
-            Text(
-              'ARTbeat',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-
-        // Profile/Menu button
-        Material(
-          color: Colors.white.withValues(alpha: 0.2),
-          borderRadius: BorderRadius.circular(20),
-          child: InkWell(
-            onTap: widget.onProfileMenuTap,
-            borderRadius: BorderRadius.circular(20),
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              child: const Icon(Icons.menu, color: Colors.white, size: 24),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildTagline() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Discover Art Around You',
-          style: TextStyle(
+        Text(
+          'dashboard_hero_tagline'.tr(),
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 28,
             fontWeight: FontWeight.bold,
@@ -188,7 +145,7 @@ class _DashboardHeroSectionState extends State<DashboardHeroSection> {
         ),
         const SizedBox(height: 8),
         Text(
-          'Connect with local artists and explore public art in your community',
+          'dashboard_hero_subtitle'.tr(),
           style: TextStyle(
             color: Colors.white.withValues(alpha: 0.9),
             fontSize: 16,
@@ -221,14 +178,14 @@ class _DashboardHeroSectionState extends State<DashboardHeroSection> {
           borderRadius: BorderRadius.circular(25),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            child: const Row(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.explore, color: Colors.white, size: 20),
-                SizedBox(width: 8),
+                const Icon(Icons.explore, color: Colors.white, size: 20),
+                const SizedBox(width: 8),
                 Text(
-                  'Find Art',
-                  style: TextStyle(
+                  'dashboard_hero_find_art'.tr(),
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -245,24 +202,24 @@ class _DashboardHeroSectionState extends State<DashboardHeroSection> {
   Widget _buildWebMapFallback() {
     return Container(
       color: ArtbeatColors.primaryPurple.withValues(alpha: 0.8),
-      child: const Center(
+      child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.map, size: 48, color: Colors.white70),
-            SizedBox(height: 16),
+            const Icon(Icons.map, size: 48, color: Colors.white70),
+            const SizedBox(height: 16),
             Text(
-              'Interactive Map',
-              style: TextStyle(
+              'dashboard_hero_interactive_map'.tr(),
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
-              'Available on mobile devices',
-              style: TextStyle(color: Colors.white70, fontSize: 14),
+              'dashboard_hero_mobile_only'.tr(),
+              style: const TextStyle(color: Colors.white70, fontSize: 14),
             ),
           ],
         ),

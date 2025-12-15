@@ -288,10 +288,13 @@ class _ProfileMentionsScreenState extends State<ProfileMentionsScreen>
                 children: [
                   CircleAvatar(
                     radius: 20,
-                    backgroundImage: mention['authorAvatar'] != null
-                        ? NetworkImage(mention['authorAvatar'].toString())
-                        : null,
-                    child: mention['authorAvatar'] == null
+                    backgroundImage: ImageUrlValidator.safeNetworkImage(
+                      mention['authorAvatar']?.toString(),
+                    ),
+                    child:
+                        !ImageUrlValidator.isValidImageUrl(
+                          mention['authorAvatar']?.toString(),
+                        )
                         ? Text(
                             mention['authorName'].toString()[0].toUpperCase(),
                           )
@@ -403,12 +406,17 @@ class _ProfileMentionsScreenState extends State<ProfileMentionsScreen>
                   margin: const EdgeInsets.only(right: 12),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
-                    image: DecorationImage(
-                      image: NetworkImage(
-                        (tag['photoUrl'] ?? tag['artworkUrl']).toString(),
-                      ),
-                      fit: BoxFit.cover,
-                    ),
+                    image:
+                        ImageUrlValidator.isValidImageUrl(
+                          (tag['photoUrl'] ?? tag['artworkUrl'])?.toString(),
+                        )
+                        ? DecorationImage(
+                            image: ImageUrlValidator.safeNetworkImage(
+                              (tag['photoUrl'] ?? tag['artworkUrl']).toString(),
+                            )!,
+                            fit: BoxFit.cover,
+                          )
+                        : null,
                   ),
                 )
               else
@@ -503,10 +511,13 @@ class _ProfileMentionsScreenState extends State<ProfileMentionsScreen>
                 children: [
                   CircleAvatar(
                     radius: 16,
-                    backgroundImage: comment['authorAvatar'] != null
-                        ? NetworkImage(comment['authorAvatar'].toString())
-                        : null,
-                    child: comment['authorAvatar'] == null
+                    backgroundImage: ImageUrlValidator.safeNetworkImage(
+                      comment['authorAvatar']?.toString(),
+                    ),
+                    child:
+                        !ImageUrlValidator.isValidImageUrl(
+                          comment['authorAvatar']?.toString(),
+                        )
                         ? Text(
                             comment['authorName'].toString()[0].toUpperCase(),
                           )

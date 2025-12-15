@@ -40,6 +40,12 @@ class _ProfileViewScreenState extends State<ProfileViewScreen>
   bool _isUserBlocked = false;
   final int _artwalksCompleted = 0;
 
+  // Streak data from stats field
+  int _loginStreak = 0;
+  int _challengeStreak = 0;
+  int _categoryStreak = 0;
+  String? _categoryName;
+
   @override
   void initState() {
     super.initState();
@@ -47,6 +53,7 @@ class _ProfileViewScreenState extends State<ProfileViewScreen>
     _loadUserProfile();
     _loadUserCaptures();
     _loadUserAchievements();
+    _loadStreakData();
   }
 
   @override
@@ -189,6 +196,53 @@ class _ProfileViewScreenState extends State<ProfileViewScreen>
       }
     } catch (e) {
       AppLogger.error('Error loading user achievements: $e');
+    }
+  }
+
+  Future<void> _loadStreakData() async {
+    try {
+      // Fetch streak data from Firestore stats field
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.userId)
+          .get();
+
+      if (userDoc.exists) {
+        final userData = userDoc.data();
+        final stats = userData?['stats'] as Map<String, dynamic>?;
+        final categoryStreaks =
+            userData?['categoryStreaks'] as Map<String, dynamic>?;
+
+        if (mounted) {
+          setState(() {
+            _loginStreak = stats?['loginStreak'] as int? ?? 0;
+            // Try to get challenge streak from stats or categoryStreaks
+            _challengeStreak = stats?['challengeStreak'] as int? ?? 0;
+
+            // Get category streak data
+            if (categoryStreaks != null && categoryStreaks.isNotEmpty) {
+              // Get the first category with highest streak
+              int maxStreak = 0;
+              String? topCategory;
+
+              categoryStreaks.forEach((category, data) {
+                if (data is Map) {
+                  final currentStreak = data['currentStreak'] as int? ?? 0;
+                  if (currentStreak > maxStreak) {
+                    maxStreak = currentStreak;
+                    topCategory = category;
+                  }
+                }
+              });
+
+              _categoryStreak = maxStreak;
+              _categoryName = topCategory;
+            }
+          });
+        }
+      }
+    } catch (e) {
+      AppLogger.error('Error loading streak data: $e');
     }
   }
 
@@ -345,15 +399,10 @@ class _ProfileViewScreenState extends State<ProfileViewScreen>
 
               // Streak Display
               StreakDisplay(
-                loginStreak:
-                    _userModel?.preferences?['loginStreak'] as int? ?? 0,
-                challengeStreak:
-                    _userModel?.preferences?['challengeStreak'] as int? ?? 0,
-                categoryStreak:
-                    _userModel?.preferences?['categoryStreak'] as int? ?? 0,
-                categoryName:
-                    _userModel?.preferences?['categoryName'] as String? ??
-                    'Street Art',
+                loginStreak: _loginStreak,
+                challengeStreak: _challengeStreak,
+                categoryStreak: _categoryStreak,
+                categoryName: _categoryName ?? 'Street Art',
               ),
 
               const SizedBox(height: 12),
@@ -578,16 +627,23 @@ class _ProfileViewScreenState extends State<ProfileViewScreen>
                                     borderRadius: const BorderRadius.vertical(
                                       top: Radius.circular(12),
                                     ),
-                                    image: capture.imageUrl.isNotEmpty
+                                    image:
+                                        ImageUrlValidator.isValidImageUrl(
+                                          capture.imageUrl,
+                                        )
                                         ? DecorationImage(
-                                            image: NetworkImage(
-                                              capture.imageUrl,
-                                            ),
+                                            image:
+                                                ImageUrlValidator.safeNetworkImage(
+                                                  capture.imageUrl,
+                                                )!,
                                             fit: BoxFit.cover,
                                           )
                                         : null,
                                   ),
-                                  child: capture.imageUrl.isEmpty
+                                  child:
+                                      !ImageUrlValidator.isValidImageUrl(
+                                        capture.imageUrl,
+                                      )
                                       ? const Center(
                                           child: Icon(
                                             Icons.image_not_supported,

@@ -159,10 +159,13 @@ class _ArtPostCardState extends State<ArtPostCard>
                             CircleAvatar(
                               radius: 16,
                               backgroundImage:
-                                  widget.post.userAvatarUrl.isNotEmpty
-                                  ? NetworkImage(widget.post.userAvatarUrl)
-                                  : null,
-                              child: widget.post.userAvatarUrl.isEmpty
+                                  ImageUrlValidator.safeNetworkImage(
+                                    widget.post.userAvatarUrl,
+                                  ),
+                              child:
+                                  !ImageUrlValidator.isValidImageUrl(
+                                    widget.post.userAvatarUrl,
+                                  )
                                   ? const Icon(Icons.person, size: 16)
                                   : null,
                             ),
@@ -1119,10 +1122,13 @@ class _ResponsiveArtPostCardState extends State<ResponsiveArtPostCard>
                       child: CircleAvatar(
                         radius: 22,
                         backgroundColor: Colors.transparent,
-                        backgroundImage: widget.post.userAvatarUrl.isNotEmpty
-                            ? NetworkImage(widget.post.userAvatarUrl)
-                            : null,
-                        child: widget.post.userAvatarUrl.isEmpty
+                        backgroundImage: ImageUrlValidator.safeNetworkImage(
+                          widget.post.userAvatarUrl,
+                        ),
+                        child:
+                            !ImageUrlValidator.isValidImageUrl(
+                              widget.post.userAvatarUrl,
+                            )
                             ? const Icon(
                                 Icons.person,
                                 size: 24,
@@ -1706,11 +1712,11 @@ class _ResponsiveArtPostCardState extends State<ResponsiveArtPostCard>
       children: [
         CircleAvatar(
           radius: 14,
-          backgroundImage: comment.userAvatarUrl.isNotEmpty
-              ? NetworkImage(comment.userAvatarUrl)
-              : null,
+          backgroundImage: ImageUrlValidator.safeNetworkImage(
+            comment.userAvatarUrl,
+          ),
           backgroundColor: ArtbeatColors.primaryPurple.withValues(alpha: 0.1),
-          child: comment.userAvatarUrl.isEmpty
+          child: !ImageUrlValidator.isValidImageUrl(comment.userAvatarUrl)
               ? const Icon(
                   Icons.person,
                   size: 16,

@@ -143,11 +143,11 @@ class _ProfileActivityScreenState extends State<ProfileActivityScreen>
       color: isUnread ? Colors.blue.shade50 : null,
       child: ListTile(
         leading: CircleAvatar(
-          backgroundImage: activity.targetUserAvatar != null
-              ? NetworkImage(activity.targetUserAvatar!)
-              : null,
+          backgroundImage: ImageUrlValidator.safeNetworkImage(
+            activity.targetUserAvatar,
+          ),
           backgroundColor: _getActivityColor(activity.activityType),
-          child: activity.targetUserAvatar == null
+          child: !ImageUrlValidator.isValidImageUrl(activity.targetUserAvatar)
               ? _getActivityIcon(activity.activityType)
               : null,
         ),

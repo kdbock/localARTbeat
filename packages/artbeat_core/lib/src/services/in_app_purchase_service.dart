@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -22,6 +23,9 @@ class InAppPurchaseService {
   StreamSubscription<List<PurchaseDetails>>? _subscription;
   bool _isAvailable = false;
   List<ProductDetails> _products = [];
+
+  // Store pending purchase metadata (cleared after purchase completes)
+  final Map<String, Map<String, dynamic>> _pendingPurchaseMetadata = {};
 
   // Product IDs for different purchase types
   static const Map<String, List<String>> _productIds = {
@@ -149,7 +153,17 @@ class InAppPurchaseService {
 
   /// Handle purchase updates
   void _onPurchaseUpdate(List<PurchaseDetails> purchaseDetailsList) {
+    if (kDebugMode) {
+      print(
+      '🔔 _onPurchaseUpdate called with ${purchaseDetailsList.length} purchases',
+    );
+    }
     for (final PurchaseDetails purchaseDetails in purchaseDetailsList) {
+      if (kDebugMode) {
+        print(
+        '   - Product: ${purchaseDetails.productID}, Status: ${purchaseDetails.status}',
+      );
+      }
       _handlePurchaseUpdate(purchaseDetails);
     }
   }
@@ -157,41 +171,73 @@ class InAppPurchaseService {
   /// Handle individual purchase update
   Future<void> _handlePurchaseUpdate(PurchaseDetails purchaseDetails) async {
     try {
+      if (kDebugMode) {
+        print('📦 Handling purchase update for ${purchaseDetails.productID}');
+      }
+      if (kDebugMode) {
+        print('   Status: ${purchaseDetails.status}');
+      }
+
       AppLogger.info(
         'Purchase update: ${purchaseDetails.productID} - ${purchaseDetails.status}',
       );
 
       switch (purchaseDetails.status) {
         case PurchaseStatus.pending:
+          if (kDebugMode) {
+            print('⏳ Purchase PENDING: ${purchaseDetails.productID}');
+          }
           AppLogger.info('Purchase pending: ${purchaseDetails.productID}');
           break;
 
         case PurchaseStatus.purchased:
+          if (kDebugMode) {
+            print('✅ Purchase PURCHASED: ${purchaseDetails.productID}');
+          }
           await _handleSuccessfulPurchase(purchaseDetails);
           break;
 
         case PurchaseStatus.error:
+          if (kDebugMode) {
+            print('❌ Purchase ERROR: ${purchaseDetails.error}');
+          }
           AppLogger.error('Purchase error: ${purchaseDetails.error}');
           onPurchaseError?.call(
             purchaseDetails.error?.message ?? 'Unknown error',
           );
+          // Clear pending metadata on error
+          _pendingPurchaseMetadata.remove(purchaseDetails.productID);
           break;
 
         case PurchaseStatus.canceled:
+          if (kDebugMode) {
+            print('🚫 Purchase CANCELED: ${purchaseDetails.productID}');
+          }
           AppLogger.info('Purchase cancelled: ${purchaseDetails.productID}');
           onPurchaseCancelled?.call(purchaseDetails.productID);
+          // Clear pending metadata on cancellation
+          _pendingPurchaseMetadata.remove(purchaseDetails.productID);
           break;
 
         case PurchaseStatus.restored:
+          if (kDebugMode) {
+            print('🔄 Purchase RESTORED: ${purchaseDetails.productID}');
+          }
           await _handleRestoredPurchase(purchaseDetails);
           break;
       }
 
       // Complete the purchase
       if (purchaseDetails.pendingCompletePurchase) {
+        if (kDebugMode) {
+          print('✔️ Completing purchase for ${purchaseDetails.productID}');
+        }
         await _inAppPurchase.completePurchase(purchaseDetails);
       }
     } catch (e) {
+      if (kDebugMode) {
+        print('💥 Error handling purchase update: ${e.toString()}');
+      }
       AppLogger.error('Error handling purchase update: ${e.toString()}');
     }
   }
@@ -224,6 +270,10 @@ class InAppPurchaseService {
         return;
       }
 
+      // Retrieve pending purchase metadata
+      final pendingMetadata =
+          _pendingPurchaseMetadata[purchaseDetails.productID] ?? {};
+
       // Create completed purchase record
       final completedPurchase = CompletedPurchase(
         purchaseId:
@@ -242,6 +292,7 @@ class InAppPurchaseService {
           'platform': Platform.isIOS ? 'ios' : 'android',
           'verificationData':
               purchaseDetails.verificationData.localVerificationData,
+          ...pendingMetadata, // Include stored metadata
         },
       );
 
@@ -254,6 +305,9 @@ class InAppPurchaseService {
       // Notify listeners
       onPurchaseCompleted?.call(completedPurchase);
 
+      // Clear pending metadata after successful purchase
+      _pendingPurchaseMetadata.remove(purchaseDetails.productID);
+
       AppLogger.info(
         '✅ Purchase completed successfully: ${purchaseDetails.productID}',
       );
@@ -265,14 +319,52 @@ class InAppPurchaseService {
   /// Handle restored purchase
   Future<void> _handleRestoredPurchase(PurchaseDetails purchaseDetails) async {
     try {
-      AppLogger.info('Restoring purchase: ${purchaseDetails.productID}');
-
-      // For non-consumable and subscription purchases, restore the benefits
-      final purchaseType = _getPurchaseType(purchaseDetails.productID);
-      if (purchaseType != PurchaseType.consumable) {
-        await _handleSuccessfulPurchase(purchaseDetails);
+      if (kDebugMode) {
+        print('🔄 Processing restored purchase: ${purchaseDetails.productID}');
       }
+
+      final purchaseType = _getPurchaseType(purchaseDetails.productID);
+
+      if (purchaseType == PurchaseType.consumable) {
+        if (kDebugMode) {
+          print(
+          '🎁 Consumable restored - this should not happen for consumables',
+        );
+        }
+        if (kDebugMode) {
+          print(
+          '   Consumables are one-time purchases and should not be restored',
+        );
+        }
+
+        // In debug mode, treat restored consumables as successful for testing
+        // This handles the case where IAP dialogs don't work on simulators
+        if (_isDebugMode() && _isGiftProduct(purchaseDetails.productID)) {
+          if (kDebugMode) {
+            print(
+            '🐛 DEBUG MODE: Treating restored consumable as successful purchase',
+          );
+          }
+          await _handleSuccessfulPurchase(purchaseDetails);
+          return;
+        }
+
+        if (kDebugMode) {
+          print('   Ignoring this restored consumable purchase');
+        }
+        // Do not process consumables as successful on restore
+        return;
+      }
+
+      if (kDebugMode) {
+        print('📦 Non-consumable restored purchase - restoring benefits');
+      }
+      // For non-consumable and subscription purchases, restore the benefits
+      await _handleSuccessfulPurchase(purchaseDetails);
     } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error handling restored purchase: $e');
+      }
       AppLogger.error('Error handling restored purchase: $e');
     }
   }
@@ -513,6 +605,12 @@ class InAppPurchaseService {
         '📱 Purchase parameters validated, initiating purchase...',
       );
 
+      // Store metadata for later retrieval when purchase completes
+      if (metadata != null && metadata.isNotEmpty) {
+        _pendingPurchaseMetadata[productId] = metadata;
+        AppLogger.info('📝 Stored purchase metadata for $productId');
+      }
+
       // Initiate purchase with comprehensive error handling
       final purchaseType = _getPurchaseType(productId);
       bool result;
@@ -520,16 +618,45 @@ class InAppPurchaseService {
       try {
         if (purchaseType == PurchaseType.consumable) {
           AppLogger.info('💳 Initiating consumable purchase: $productId');
+          if (kDebugMode) {
+            print('💳 Calling buyConsumable for $productId');
+          }
+          if (kDebugMode) {
+            print('   - User: ${user.uid}');
+          }
+          if (kDebugMode) {
+            print('   - Product: ${product.title} (${product.price})');
+          }
+
           result = await _inAppPurchase.buyConsumable(
             purchaseParam: purchaseParam,
           );
+
+          if (kDebugMode) {
+            print('💳 buyConsumable returned: $result');
+          }
         } else {
           AppLogger.info(
             '💳 Initiating non-consumable/subscription purchase: $productId',
           );
+          if (kDebugMode) {
+            print('💳 Calling buyNonConsumable for $productId');
+          }
+
           result = await _inAppPurchase.buyNonConsumable(
             purchaseParam: purchaseParam,
           );
+
+          if (kDebugMode) {
+            print('💳 buyNonConsumable returned: $result');
+          }
+        }
+
+        if (kDebugMode) {
+          print('✅ Purchase call completed. Result: $result');
+        }
+        if (kDebugMode) {
+          print('⏳ Now waiting for purchase update callback...');
         }
 
         AppLogger.info(
@@ -586,6 +713,14 @@ class InAppPurchaseService {
   List<ProductDetails> getGiftProducts() {
     return getProductsByCategory(PurchaseCategory.gifts);
   }
+
+  /// Check if a specific product is loaded
+  bool isProductLoaded(String productId) {
+    return _getProductDetails(productId) != null;
+  }
+
+  /// Get total number of loaded products
+  int get loadedProductCount => _products.length;
 
   /// Get ad products
   List<ProductDetails> getAdProducts() {
@@ -740,6 +875,18 @@ class InAppPurchaseService {
 
   /// Get all available products
   List<ProductDetails> get products => _products;
+
+  /// Check if running in debug mode
+  bool _isDebugMode() {
+    bool debug = false;
+    assert(debug = true);
+    return debug;
+  }
+
+  /// Check if product ID is a gift product
+  bool _isGiftProduct(String productId) {
+    return _productIds['gifts']?.contains(productId) ?? false;
+  }
 
   /// Dispose resources
   void dispose() {

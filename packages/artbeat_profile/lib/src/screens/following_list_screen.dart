@@ -194,11 +194,13 @@ class _FollowingListScreenState extends State<FollowingListScreen> {
                           leading: CircleAvatar(
                             radius: 25,
                             backgroundColor: ArtbeatColors.primaryPurple,
-                            backgroundImage:
-                                followedUser.profileImageUrl.isNotEmpty
-                                ? NetworkImage(followedUser.profileImageUrl)
-                                : null,
-                            child: followedUser.profileImageUrl.isEmpty
+                            backgroundImage: ImageUrlValidator.safeNetworkImage(
+                              followedUser.profileImageUrl,
+                            ),
+                            child:
+                                !ImageUrlValidator.isValidImageUrl(
+                                  followedUser.profileImageUrl,
+                                )
                                 ? Text(
                                     followedUser.fullName.isNotEmpty
                                         ? followedUser.fullName[0].toUpperCase()

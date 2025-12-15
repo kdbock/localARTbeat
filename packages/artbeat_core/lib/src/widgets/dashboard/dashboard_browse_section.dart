@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 
 /// Dashboard section that provides quick access to browse functionality
@@ -37,21 +38,21 @@ class DashboardBrowseSection extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Explore Everything',
-                        style: TextStyle(
+                        'dashboard_browse_title'.tr(),
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: ArtbeatColors.textPrimary,
                         ),
                       ),
                       Text(
-                        'Discover all content in one place',
-                        style: TextStyle(
+                        'dashboard_browse_subtitle'.tr(),
+                        style: const TextStyle(
                           fontSize: 14,
                           color: ArtbeatColors.textSecondary,
                         ),
@@ -72,8 +73,8 @@ class DashboardBrowseSection extends StatelessWidget {
               children: [
                 _buildBrowseCard(
                   context,
-                  'Browse All',
-                  'Everything in one place',
+                  'dashboard_browse_all'.tr(),
+                  'dashboard_browse_all_desc'.tr(),
                   Icons.explore_rounded,
                   ArtbeatColors.primaryPurple,
                   () => Navigator.pushNamed(context, '/browse'),
@@ -81,8 +82,8 @@ class DashboardBrowseSection extends StatelessWidget {
                 const SizedBox(width: 12),
                 _buildBrowseCard(
                   context,
-                  'Artists',
-                  'Discover creators',
+                  'dashboard_browse_artists'.tr(),
+                  'dashboard_browse_artists_desc'.tr(),
                   Icons.people_rounded,
                   ArtbeatColors.primaryBlue,
                   () => Navigator.pushNamed(context, '/artist/browse'),
@@ -90,8 +91,8 @@ class DashboardBrowseSection extends StatelessWidget {
                 const SizedBox(width: 12),
                 _buildBrowseCard(
                   context,
-                  'Artwork',
-                  'Beautiful creations',
+                  'dashboard_browse_artwork'.tr(),
+                  'dashboard_browse_artwork_desc'.tr(),
                   Icons.image_rounded,
                   ArtbeatColors.accentOrange,
                   () => Navigator.pushNamed(context, '/artwork/browse'),
@@ -99,8 +100,8 @@ class DashboardBrowseSection extends StatelessWidget {
                 const SizedBox(width: 12),
                 _buildBrowseCard(
                   context,
-                  'Captures',
-                  'Photo discoveries',
+                  'dashboard_browse_captures'.tr(),
+                  'dashboard_browse_captures_desc'.tr(),
                   Icons.camera_alt_rounded,
                   ArtbeatColors.primaryBlue,
                   () => Navigator.pushNamed(context, '/capture/browse'),
@@ -108,8 +109,8 @@ class DashboardBrowseSection extends StatelessWidget {
                 const SizedBox(width: 12),
                 _buildBrowseCard(
                   context,
-                  'Art Walks',
-                  'Guided experiences',
+                  'dashboard_browse_artwalks'.tr(),
+                  'dashboard_browse_artwalks_desc'.tr(),
                   Icons.map_rounded,
                   ArtbeatColors.primaryGreen,
                   () => Navigator.pushNamed(context, '/art-walk/list'),

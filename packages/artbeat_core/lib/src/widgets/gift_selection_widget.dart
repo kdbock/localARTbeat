@@ -20,6 +20,38 @@ class GiftSelectionWidget extends StatefulWidget {
 class _GiftSelectionWidgetState extends State<GiftSelectionWidget> {
   final InAppGiftService _giftService = InAppGiftService();
   bool _isLoading = false;
+  bool _isInitializing = true;
+  String? _initError;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkAvailability();
+  }
+
+  Future<void> _checkAvailability() async {
+    setState(() {
+      _isInitializing = true;
+      _initError = null;
+    });
+
+    // Small delay to let IAP complete initialization if just started
+    // ignore: inference_failure_on_instance_creation
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    if (!_giftService.isAvailable) {
+      setState(() {
+        _initError =
+            'In-app purchases are not available. Please ensure you are connected to the internet and your device supports in-app purchases.';
+        _isInitializing = false;
+      });
+      return;
+    }
+
+    setState(() {
+      _isInitializing = false;
+    });
+  }
 
   final List<Map<String, dynamic>> _gifts = [
     {
@@ -78,7 +110,9 @@ class _GiftSelectionWidgetState extends State<GiftSelectionWidget> {
       // Check if in-app purchases are available
       if (!_giftService.isAvailable) {
         AppLogger.error('In-app purchases not available');
-        _showError('In-app purchases are not available on this device');
+        _showError(
+          'In-app purchases are not available. Please check your internet connection and app store settings.',
+        );
         setState(() => _isLoading = false);
         return;
       }
@@ -102,8 +136,15 @@ class _GiftSelectionWidgetState extends State<GiftSelectionWidget> {
           if (mounted) Navigator.pop(context);
         });
       } else {
+        AppLogger.error(
+          'Gift purchase returned false - check logs for details',
+        );
         _showError(
-          'Gift purchase failed. Please check your payment method and try again.',
+          'Unable to start purchase. This may be due to:\n'
+          '• Products not loaded from store\n'
+          '• Device payment method not configured\n'
+          '• Network connectivity issue\n\n'
+          'Please check your internet connection and device payment settings.',
         );
         setState(() => _isLoading = false);
       }
@@ -151,6 +192,50 @@ class _GiftSelectionWidgetState extends State<GiftSelectionWidget> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isInitializing) {
+      return const Padding(
+        padding: EdgeInsets.all(32.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Checking gift availability...'),
+          ],
+        ),
+      );
+    }
+
+    if (_initError != null) {
+      return Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.error_outline, size: 48, color: Colors.red),
+            const SizedBox(height: 16),
+            Text(
+              _initError!,
+              style: const TextStyle(color: Colors.red),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                _checkAvailability();
+              },
+              child: const Text('Retry'),
+            ),
+            const SizedBox(height: 8),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+          ],
+        ),
+      );
+    }
+
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -178,9 +263,45 @@ class _GiftSelectionWidgetState extends State<GiftSelectionWidget> {
                 color: Colors.blue.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Text(
-                'Your gift provides greater exposure for their artwork and events within the app.',
-                style: Theme.of(context).textTheme.bodyMedium,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Your gift provides greater exposure for their artwork and events within the app.',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  TextButton.icon(
+                    onPressed: () {
+                      // Log diagnostic info
+                      AppLogger.info('=== GIFT DIAGNOSTICS ===');
+                      AppLogger.info(
+                        'IAP Available: ${_giftService.isAvailable}',
+                      );
+                      final products = _giftService.getGiftProductDetails(
+                        'artbeat_gift_small',
+                      );
+                      AppLogger.info(
+                        'Gift products config: ${products != null}',
+                      );
+                      AppLogger.info('======================');
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Diagnostic info logged - check console',
+                          ),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.bug_report, size: 16),
+                    label: const Text(
+                      'Debug Info',
+                      style: TextStyle(fontSize: 12),
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 16),

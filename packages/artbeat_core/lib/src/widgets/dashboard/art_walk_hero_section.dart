@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_art_walk/artbeat_art_walk.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:geolocator/geolocator.dart';
@@ -279,9 +280,9 @@ class _ArtWalkHeroSectionState extends State<ArtWalkHeroSection>
 
                   // Show immediate feedback
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Opening messages...'),
-                      duration: Duration(seconds: 1),
+                    SnackBar(
+                      content: Text('dashboard_opening_messages'.tr()),
+                      duration: const Duration(seconds: 1),
                     ),
                   );
 
@@ -296,7 +297,11 @@ class _ArtWalkHeroSectionState extends State<ArtWalkHeroSection>
                       AppLogger.error('Messaging navigation error: $error');
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('Messaging navigation error: $error'),
+                          content: Text(
+                            'dashboard_messaging_error'.tr(
+                              namedArgs: {'error': error.toString()},
+                            ),
+                          ),
                           backgroundColor: Colors.red,
                           duration: const Duration(seconds: 4),
                         ),

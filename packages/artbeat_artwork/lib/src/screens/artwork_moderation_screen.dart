@@ -1,3 +1,4 @@
+import 'package:artbeat_core/artbeat_core.dart' hide ArtworkModel;
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -401,10 +402,15 @@ class _ArtworkModerationScreenState extends State<ArtworkModerationScreen> {
                                   height: 200,
                                   width: double.infinity,
                                   decoration: BoxDecoration(
-                                    image: DecorationImage(
-                                      image: NetworkImage(artwork.imageUrl),
-                                      fit: BoxFit.cover,
-                                    ),
+                                    image: ImageUrlValidator.isValidImageUrl(
+                                            artwork.imageUrl)
+                                        ? DecorationImage(
+                                            image: ImageUrlValidator
+                                                .safeNetworkImage(
+                                                    artwork.imageUrl)!,
+                                            fit: BoxFit.cover,
+                                          )
+                                        : null,
                                   ),
                                 ),
 

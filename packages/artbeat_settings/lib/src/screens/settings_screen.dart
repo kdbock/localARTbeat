@@ -50,6 +50,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildProfileSummary(BuildContext context) {
+    final user = _auth.currentUser;
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -57,8 +59,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
           children: [
             CircleAvatar(
               radius: 30,
-              backgroundImage: const AssetImage('assets/default_profile.png'),
-              child: Container(),
+              backgroundImage:
+                  ImageUrlValidator.safeNetworkImage(user?.photoURL) ??
+                  const AssetImage('assets/default_profile.png')
+                      as ImageProvider,
+              child: !ImageUrlValidator.isValidImageUrl(user?.photoURL)
+                  ? const Icon(Icons.person, size: 30)
+                  : null,
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -100,14 +107,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: ListTile(
         leading: _getIconForCategory(category.iconData),
         title: Text(
-          category.title,
+          category.title.tr(),
           style: const TextStyle(
             color: Colors.black87,
             fontWeight: FontWeight.w500,
           ),
         ),
         subtitle: Text(
-          category.description,
+          category.description.tr(),
           style: const TextStyle(color: Colors.black54),
         ),
         trailing: const Icon(Icons.arrow_forward_ios, size: 16),

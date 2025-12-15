@@ -53,7 +53,7 @@ class ArtistFeature {
       'artistId': artistId,
       'giftId': giftId,
       'purchaserId': purchaserId,
-      'type': type.name,
+      'type': _featureTypeToString(type),
       'startDate': Timestamp.fromDate(startDate),
       'endDate': Timestamp.fromDate(endDate),
       'isActive': isActive,
@@ -62,13 +62,27 @@ class ArtistFeature {
     };
   }
 
+  static String _featureTypeToString(FeatureType type) {
+    switch (type) {
+      case FeatureType.artistFeatured:
+        return 'artist_featured';
+      case FeatureType.artworkFeatured:
+        return 'artwork_featured';
+      case FeatureType.adRotation:
+        return 'ad_rotation';
+    }
+  }
+
   static FeatureType _parseFeatureType(String typeString) {
     switch (typeString) {
       case 'artist_featured':
+      case 'artistFeatured':
         return FeatureType.artistFeatured;
       case 'artwork_featured':
+      case 'artworkFeatured':
         return FeatureType.artworkFeatured;
       case 'ad_rotation':
+      case 'adRotation':
         return FeatureType.adRotation;
       default:
         return FeatureType.artistFeatured;

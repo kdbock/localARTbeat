@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:artbeat_art_walk/artbeat_art_walk.dart' as artWalkLib;
 
@@ -96,9 +97,9 @@ class _LiveActivityFeedState extends State<LiveActivityFeed>
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Text(
-                  'Live Activity',
-                  style: TextStyle(
+                Text(
+                  'live_activity_title'.tr(),
+                  style: const TextStyle(
                     color: Colors.black87,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -132,7 +133,7 @@ class _LiveActivityFeedState extends State<LiveActivityFeed>
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        'No recent discoveries nearby. Start exploring!',
+                        'live_activity_empty'.tr(),
                         style: TextStyle(
                           color: Colors.grey.withValues(alpha: 0.7),
                           fontSize: 14,
@@ -167,7 +168,9 @@ class _LiveActivityFeedState extends State<LiveActivityFeed>
             color: Colors.grey.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(16),
           ),
-          child: activity.avatarUrl != null
+          child:
+              (activity.avatarUrl != null &&
+                  activity.avatarUrl!.trim().isNotEmpty)
               ? ClipRRect(
                   borderRadius: BorderRadius.circular(16),
                   child: Image.network(
@@ -268,17 +271,17 @@ class _LiveActivityFeedState extends State<LiveActivityFeed>
   String _getActionText(artWalkLib.SocialActivityType type) {
     switch (type) {
       case artWalkLib.SocialActivityType.discovery:
-        return 'discovered';
+        return 'live_activity_discovered'.tr();
       case artWalkLib.SocialActivityType.capture:
-        return 'captured';
+        return 'live_activity_captured'.tr();
       case artWalkLib.SocialActivityType.walkCompleted:
-        return 'completed';
+        return 'live_activity_completed'.tr();
       case artWalkLib.SocialActivityType.achievement:
-        return 'achieved';
+        return 'live_activity_achieved'.tr();
       case artWalkLib.SocialActivityType.friendJoined:
-        return 'joined';
+        return 'live_activity_joined'.tr();
       case artWalkLib.SocialActivityType.milestone:
-        return 'reached';
+        return 'live_activity_reached'.tr();
     }
   }
 
@@ -286,7 +289,7 @@ class _LiveActivityFeedState extends State<LiveActivityFeed>
     if (activity.metadata != null && activity.metadata!['artTitle'] != null) {
       return '"${activity.metadata!['artTitle']}"';
     }
-    return 'artwork';
+    return 'live_activity_artwork'.tr();
   }
 }
 

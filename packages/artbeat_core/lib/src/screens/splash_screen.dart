@@ -92,15 +92,12 @@ class _SplashScreenState extends State<SplashScreen>
 
       FocusScope.of(context).unfocus();
 
-      String route = '/login';
-      if (user != null) {
-        route = '/dashboard';
-      }
+      // Always route to dashboard - even if not authenticated
+      // Users will be prompted to login when they try to access protected features
+      const String route = '/dashboard';
 
       // Start dashboard navigation timing
-      if (route == '/dashboard' || route == '/artist/dashboard') {
-        PerformanceMonitor.startTimer('dashboard_navigation');
-      }
+      PerformanceMonitor.startTimer('dashboard_navigation');
 
       if (!mounted || _hasNavigated) return;
       _hasNavigated = true;

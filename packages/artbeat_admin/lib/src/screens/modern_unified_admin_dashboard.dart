@@ -2346,10 +2346,14 @@ class _ModernUnifiedAdminDashboardState
                             width: double.infinity,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12),
-                              image: DecorationImage(
-                                image: NetworkImage(content.imageUrl!),
-                                fit: BoxFit.cover,
-                              ),
+                              image: ImageUrlValidator.isValidImageUrl(
+                                      content.imageUrl)
+                                  ? DecorationImage(
+                                      image: ImageUrlValidator.safeNetworkImage(
+                                          content.imageUrl)!,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : null,
                             ),
                           ),
                           const SizedBox(height: 12),
@@ -2364,10 +2368,17 @@ class _ModernUnifiedAdminDashboardState
                                 width: double.infinity,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(12),
-                                  image: DecorationImage(
-                                    image: NetworkImage(imageUrl),
-                                    fit: BoxFit.cover,
-                                  ),
+                                  image: ImageUrlValidator.isValidImageUrl(
+                                              imageUrl) &&
+                                          ImageUrlValidator.safeNetworkImage(
+                                                  imageUrl) !=
+                                              null
+                                      ? DecorationImage(
+                                          image: ImageUrlValidator
+                                              .safeNetworkImage(imageUrl)!,
+                                          fit: BoxFit.cover,
+                                        )
+                                      : null,
                                 ),
                               ),
                               const SizedBox(height: 12),

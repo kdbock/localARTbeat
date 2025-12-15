@@ -1,6 +1,7 @@
 import 'package:artbeat_community/screens/feed/create_post_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 
 class DashboardCapturesSection extends StatelessWidget {
@@ -55,13 +56,13 @@ class DashboardCapturesSection extends StatelessWidget {
           child: const Icon(Icons.camera_alt, color: Colors.white, size: 20),
         ),
         const SizedBox(width: 12),
-        const Expanded(
+        Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Local Captures',
-                style: TextStyle(
+                'dashboard_captures_title'.tr(),
+                style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: ArtbeatColors.textPrimary,
@@ -69,8 +70,8 @@ class DashboardCapturesSection extends StatelessWidget {
                 ),
               ),
               Text(
-                'Discover amazing street art, murals, and sculptures found by our community',
-                style: TextStyle(
+                'dashboard_captures_subtitle'.tr(),
+                style: const TextStyle(
                   fontSize: 14,
                   color: ArtbeatColors.textSecondary,
                   height: 1.3,
@@ -357,21 +358,24 @@ class DashboardCapturesSection extends StatelessWidget {
                                   decoration: BoxDecoration(
                                     color: ArtbeatColors.backgroundSecondary,
                                     image:
-                                        ImageUrlValidator.isValidImageUrl(
-                                          capture.imageUrl,
-                                        )
-                                        ? DecorationImage(
-                                            image: NetworkImage(
+                                        ImageUrlValidator.safeNetworkImage(
                                               capture.imageUrl,
-                                            ),
+                                            ) !=
+                                            null
+                                        ? DecorationImage(
+                                            image:
+                                                ImageUrlValidator.safeNetworkImage(
+                                                  capture.imageUrl,
+                                                )!,
                                             fit: BoxFit.cover,
                                           )
                                         : null,
                                   ),
                                   child:
-                                      !ImageUrlValidator.isValidImageUrl(
-                                        capture.imageUrl,
-                                      )
+                                      ImageUrlValidator.safeNetworkImage(
+                                            capture.imageUrl,
+                                          ) ==
+                                          null
                                       ? const Icon(
                                           Icons.photo_camera,
                                           color: ArtbeatColors.primaryPurple,
@@ -384,40 +388,41 @@ class DashboardCapturesSection extends StatelessWidget {
                               // Content
                               Expanded(
                                 child: Padding(
-                                  padding: const EdgeInsets.all(12),
+                                  padding: const EdgeInsets.all(8),
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Text(
                                         capture.title?.isNotEmpty == true
                                             ? capture.title!
                                             : 'Untitled Artwork',
                                         style: const TextStyle(
-                                          fontSize: 14,
+                                          fontSize: 13,
                                           fontWeight: FontWeight.bold,
                                           color: ArtbeatColors.textPrimary,
                                         ),
-                                        maxLines: 2,
+                                        maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                       if (capture.locationName?.isNotEmpty ==
                                           true) ...[
-                                        const SizedBox(height: 4),
+                                        const SizedBox(height: 2),
                                         Row(
                                           children: [
                                             const Icon(
                                               Icons.location_on,
-                                              size: 12,
+                                              size: 11,
                                               color:
                                                   ArtbeatColors.textSecondary,
                                             ),
-                                            const SizedBox(width: 4),
+                                            const SizedBox(width: 2),
                                             Expanded(
                                               child: Text(
                                                 capture.locationName!,
                                                 style: const TextStyle(
-                                                  fontSize: 11,
+                                                  fontSize: 10,
                                                   color: ArtbeatColors
                                                       .textSecondary,
                                                 ),
@@ -439,7 +444,7 @@ class DashboardCapturesSection extends StatelessWidget {
                                             onPressed: () =>
                                                 _handleLike(context, capture),
                                           ),
-                                          const SizedBox(width: 8),
+                                          const SizedBox(width: 6),
                                           _buildFloatingActionButton(
                                             icon: Icons.share,
                                             label: '',
@@ -491,7 +496,7 @@ class DashboardCapturesSection extends StatelessWidget {
           // Image skeleton
           Container(
             width: double.infinity,
-            height: 180,
+            height: 170,
             decoration: BoxDecoration(
               color: ArtbeatColors.backgroundSecondary.withValues(alpha: 0.3),
               borderRadius: const BorderRadius.vertical(
@@ -580,7 +585,7 @@ class DashboardCapturesSection extends StatelessWidget {
       onTap: onPressed,
       borderRadius: BorderRadius.circular(16),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(16),
@@ -589,7 +594,7 @@ class DashboardCapturesSection extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 16, color: color),
+            Icon(icon, size: 14, color: color),
             if (label.isNotEmpty) ...[
               const SizedBox(width: 4),
               Text(
@@ -643,7 +648,11 @@ class DashboardCapturesSection extends StatelessWidget {
       // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to update like: ${e.toString()}'),
+          content: Text(
+            'dashboard_failed_to_update_like'.tr(
+              namedArgs: {'error': e.toString()},
+            ),
+          ),
           backgroundColor: ArtbeatColors.error,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
@@ -677,7 +686,11 @@ class DashboardCapturesSection extends StatelessWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to share artwork: $e'),
+            content: Text(
+              'dashboard_failed_to_share'.tr(
+                namedArgs: {'error': e.toString()},
+              ),
+            ),
             backgroundColor: ArtbeatColors.error,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
@@ -815,7 +828,7 @@ class DashboardCapturesSection extends StatelessWidget {
                             );
                           },
                           icon: const Icon(Icons.directions_walk),
-                          label: const Text('Create Art Walk'),
+                          label: Text('dashboard_create_art_walk'.tr()),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: ArtbeatColors.primaryGreen,
                             foregroundColor: Colors.white,

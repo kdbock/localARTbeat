@@ -1,3 +1,4 @@
+import 'package:artbeat_core/artbeat_core.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -457,10 +458,13 @@ class _ForwardMessageSheetState extends State<ForwardMessageSheet> {
                         ),
                         subtitle: Text(chat.lastMessage?.content ?? ''),
                         secondary: CircleAvatar(
-                          backgroundImage: chat.groupImage != null
-                              ? NetworkImage(chat.groupImage!)
-                              : null,
-                          child: chat.groupImage == null
+                          backgroundImage: ImageUrlValidator.safeNetworkImage(
+                            chat.groupImage,
+                          ),
+                          child:
+                              !ImageUrlValidator.isValidImageUrl(
+                                chat.groupImage,
+                              )
                               ? Text(
                                   chat.isGroup
                                       ? chat.groupName?.substring(0, 1) ?? 'G'

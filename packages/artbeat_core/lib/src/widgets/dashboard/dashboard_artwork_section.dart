@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_community/screens/feed/create_post_screen.dart';
 
@@ -52,21 +53,21 @@ class DashboardArtworkSection extends StatelessWidget {
           child: const Icon(Icons.palette, color: Colors.white, size: 20),
         ),
         const SizedBox(width: 12),
-        const Expanded(
+        Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Artwork Gallery',
-                style: TextStyle(
+                'dashboard_artwork_title'.tr(),
+                style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: ArtbeatColors.textPrimary,
                 ),
               ),
               Text(
-                'Explore beautiful artwork from local artists',
-                style: TextStyle(
+                'dashboard_artwork_subtitle'.tr(),
+                style: const TextStyle(
                   fontSize: 14,
                   color: ArtbeatColors.textSecondary,
                 ),
@@ -436,12 +437,20 @@ class DashboardArtworkSection extends StatelessWidget {
       ScaffoldMessenger.of(
         // ignore: use_build_context_synchronously
         context,
-      ).showSnackBar(const SnackBar(content: Text('Artwork appreciated!')));
+      ).showSnackBar(
+        SnackBar(content: Text('dashboard_artwork_appreciated'.tr())),
+      );
     } catch (e) {
       ScaffoldMessenger.of(
         // ignore: use_build_context_synchronously
         context,
-      ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
+      ).showSnackBar(
+        SnackBar(
+          content: Text(
+            'dashboard_error'.tr(namedArgs: {'error': e.toString()}),
+          ),
+        ),
+      );
     }
   }
 
@@ -475,7 +484,11 @@ class DashboardArtworkSection extends StatelessWidget {
       AppLogger.error('Error sharing artwork: $e');
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error sharing: ${e.toString()}')),
+          SnackBar(
+            content: Text(
+              'dashboard_error_sharing'.tr(namedArgs: {'error': e.toString()}),
+            ),
+          ),
         );
       }
     }

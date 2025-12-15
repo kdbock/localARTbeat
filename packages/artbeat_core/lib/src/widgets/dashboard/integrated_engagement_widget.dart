@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_art_walk/artbeat_art_walk.dart' as artWalkLib;
 
@@ -150,10 +151,13 @@ class _IntegratedEngagementWidgetState extends State<IntegratedEngagementWidget>
               labelColor: Colors.white,
               unselectedLabelColor: Colors.grey[600],
               tabs: [
-                _buildTab(Icons.local_fire_department, 'Streak'),
-                _buildTab(Icons.assignment, 'Daily'),
-                _buildTab(Icons.calendar_today, 'Weekly'),
-                _buildTab(Icons.emoji_events, 'Leaders'),
+                _buildTab(
+                  Icons.local_fire_department,
+                  'engagement_tab_streak'.tr(),
+                ),
+                _buildTab(Icons.assignment, 'engagement_tab_daily'.tr()),
+                _buildTab(Icons.calendar_today, 'engagement_tab_weekly'.tr()),
+                _buildTab(Icons.emoji_events, 'engagement_tab_leaders'.tr()),
               ],
             ),
           ),
@@ -178,10 +182,11 @@ class _IntegratedEngagementWidgetState extends State<IntegratedEngagementWidget>
     return Tab(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 20),
-          const SizedBox(height: 4),
-          Text(label, style: const TextStyle(fontSize: 12)),
+          Icon(icon, size: 18),
+          const SizedBox(height: 2),
+          Text(label, style: const TextStyle(fontSize: 11)),
         ],
       ),
     );
@@ -234,9 +239,9 @@ class _IntegratedEngagementWidgetState extends State<IntegratedEngagementWidget>
                   ),
                 ),
                 const SizedBox(height: 4),
-                const Text(
-                  'Day Streak',
-                  style: TextStyle(fontSize: 16, color: Colors.white70),
+                Text(
+                  'engagement_day_streak'.tr(),
+                  style: const TextStyle(fontSize: 16, color: Colors.white70),
                 ),
                 const SizedBox(height: 16),
                 ClipRRect(
@@ -252,7 +257,11 @@ class _IntegratedEngagementWidgetState extends State<IntegratedEngagementWidget>
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '${(progressPercent * 100).round()}% of weekly goal',
+                  'engagement_weekly_goal_percent'.tr(
+                    namedArgs: {
+                      'percent': (progressPercent * 100).round().toString(),
+                    },
+                  ),
                   style: const TextStyle(fontSize: 12, color: Colors.white70),
                 ),
               ],
@@ -267,7 +276,7 @@ class _IntegratedEngagementWidgetState extends State<IntegratedEngagementWidget>
                   icon: Icons.explore,
                   color: Colors.blue,
                   value: '${widget.totalDiscoveries}',
-                  label: 'Discoveries',
+                  label: 'engagement_discoveries'.tr(),
                 ),
               ),
               const SizedBox(width: 12),
@@ -276,7 +285,7 @@ class _IntegratedEngagementWidgetState extends State<IntegratedEngagementWidget>
                   icon: Icons.emoji_events,
                   color: Colors.orange,
                   value: '${widget.achievements.length}',
-                  label: 'Badges',
+                  label: 'engagement_badges'.tr(),
                 ),
               ),
             ],
@@ -291,14 +300,14 @@ class _IntegratedEngagementWidgetState extends State<IntegratedEngagementWidget>
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(Icons.star, color: Colors.orange, size: 20),
-                  SizedBox(width: 12),
+                  const Icon(Icons.star, color: Colors.orange, size: 20),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      '🔥 On Fire! Keep it up!',
-                      style: TextStyle(
+                      'engagement_on_fire'.tr(),
+                      style: const TextStyle(
                         color: Colors.orange,
                         fontWeight: FontWeight.w600,
                       ),
@@ -352,10 +361,10 @@ class _IntegratedEngagementWidgetState extends State<IntegratedEngagementWidget>
                       size: 24,
                     ),
                     const SizedBox(width: 12),
-                    const Expanded(
+                    Expanded(
                       child: Text(
-                        'Weekly Goal',
-                        style: TextStyle(
+                        'engagement_weekly_goal'.tr(),
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
                           color: Colors.white,
@@ -386,7 +395,11 @@ class _IntegratedEngagementWidgetState extends State<IntegratedEngagementWidget>
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  '${(progressPercent * 100).round()}% complete',
+                  'engagement_percent_complete'.tr(
+                    namedArgs: {
+                      'percent': (progressPercent * 100).round().toString(),
+                    },
+                  ),
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -419,9 +432,9 @@ class _IntegratedEngagementWidgetState extends State<IntegratedEngagementWidget>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Activities Left',
-                        style: TextStyle(
+                      Text(
+                        'engagement_activities_left'.tr(),
+                        style: const TextStyle(
                           fontSize: 14,
                           color: Colors.grey,
                           fontWeight: FontWeight.w500,
@@ -429,7 +442,13 @@ class _IntegratedEngagementWidgetState extends State<IntegratedEngagementWidget>
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${(widget.weeklyGoal - widget.weeklyProgress).clamp(0, widget.weeklyGoal)} to complete goal',
+                        'engagement_to_complete_goal'.tr(
+                          namedArgs: {
+                            'count': (widget.weeklyGoal - widget.weeklyProgress)
+                                .clamp(0, widget.weeklyGoal)
+                                .toString(),
+                          },
+                        ),
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -446,7 +465,7 @@ class _IntegratedEngagementWidgetState extends State<IntegratedEngagementWidget>
           ElevatedButton.icon(
             onPressed: widget.onWeeklyGoalsTap,
             icon: const Icon(Icons.trending_up),
-            label: const Text('View Weekly Details'),
+            label: Text('dashboard_view_weekly_details'.tr()),
             style: ElevatedButton.styleFrom(
               backgroundColor: ArtbeatColors.primaryGreen,
               foregroundColor: Colors.white,
@@ -517,7 +536,14 @@ class _IntegratedEngagementWidgetState extends State<IntegratedEngagementWidget>
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Expires in ${_testChallenge.expiresAt.difference(DateTime.now()).inHours}h',
+                            'engagement_expires_in'.tr(
+                              namedArgs: {
+                                'hours': _testChallenge.expiresAt
+                                    .difference(DateTime.now())
+                                    .inHours
+                                    .toString(),
+                              },
+                            ),
                             style: const TextStyle(
                               fontSize: 12,
                               color: Colors.white70,
@@ -550,7 +576,12 @@ class _IntegratedEngagementWidgetState extends State<IntegratedEngagementWidget>
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      '${_testChallenge.currentCount}/${_testChallenge.targetCount} Complete',
+                      'engagement_progress_complete'.tr(
+                        namedArgs: {
+                          'current': _testChallenge.currentCount.toString(),
+                          'target': _testChallenge.targetCount.toString(),
+                        },
+                      ),
                       style: const TextStyle(
                         fontSize: 12,
                         color: Colors.white70,
@@ -596,9 +627,9 @@ class _IntegratedEngagementWidgetState extends State<IntegratedEngagementWidget>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Reward',
-                        style: TextStyle(
+                      Text(
+                        'engagement_reward'.tr(),
+                        style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                           color: Colors.black87,
@@ -626,7 +657,7 @@ class _IntegratedEngagementWidgetState extends State<IntegratedEngagementWidget>
               Navigator.pushNamed(context, '/art-walk/dashboard');
             },
             icon: const Icon(Icons.explore),
-            label: const Text('Start Quest'),
+            label: Text('dashboard_start_quest'.tr()),
             style: ElevatedButton.styleFrom(
               backgroundColor: ArtbeatColors.primaryPurple,
               foregroundColor: Colors.white,
@@ -654,10 +685,10 @@ class _IntegratedEngagementWidgetState extends State<IntegratedEngagementWidget>
                       size: 28,
                     ),
                     const SizedBox(width: 12),
-                    const Expanded(
+                    Expanded(
                       child: Text(
-                        'Top Contributors',
-                        style: TextStyle(
+                        'engagement_top_contributors'.tr(),
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.black87,
@@ -667,9 +698,9 @@ class _IntegratedEngagementWidgetState extends State<IntegratedEngagementWidget>
                     if (widget.onLeaderboardTap != null)
                       GestureDetector(
                         onTap: widget.onLeaderboardTap,
-                        child: const Text(
-                          'View All',
-                          style: TextStyle(
+                        child: Text(
+                          'engagement_view_all'.tr(),
+                          style: const TextStyle(
                             fontSize: 12,
                             color: ArtbeatColors.primaryPurple,
                             fontWeight: FontWeight.w600,
@@ -684,7 +715,7 @@ class _IntegratedEngagementWidgetState extends State<IntegratedEngagementWidget>
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 40),
                       child: Text(
-                        'No contributors yet',
+                        'engagement_no_contributors'.tr(),
                         style: TextStyle(color: Colors.grey[500]),
                       ),
                     ),
@@ -703,7 +734,7 @@ class _IntegratedEngagementWidgetState extends State<IntegratedEngagementWidget>
                       widget.onLeaderboardTap ??
                       () => Navigator.pushNamed(context, '/leaderboard'),
                   icon: const Icon(Icons.explore),
-                  label: const Text('Full Leaderboard'),
+                  label: Text('dashboard_full_leaderboard'.tr()),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: ArtbeatColors.primaryPurple,
                     foregroundColor: Colors.white,
@@ -758,7 +789,9 @@ class _IntegratedEngagementWidgetState extends State<IntegratedEngagementWidget>
                   ),
                 ),
                 Text(
-                  'Level ${user.level}',
+                  'engagement_level'.tr(
+                    namedArgs: {'level': user.level.toString()},
+                  ),
                   style: TextStyle(color: Colors.grey[600], fontSize: 12),
                 ),
               ],
@@ -776,7 +809,7 @@ class _IntegratedEngagementWidgetState extends State<IntegratedEngagementWidget>
                 ),
               ),
               Text(
-                'XP',
+                'engagement_xp'.tr(),
                 style: TextStyle(color: Colors.grey[600], fontSize: 12),
               ),
             ],

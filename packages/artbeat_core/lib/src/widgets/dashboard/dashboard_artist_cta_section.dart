@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-// ...existing code...
+import 'package:easy_localization/easy_localization.dart';
 
 class DashboardArtistCtaSection extends StatelessWidget {
   final DashboardViewModel viewModel;
@@ -52,9 +52,9 @@ class DashboardArtistCtaSection extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Are You an Artist?',
-                        style: TextStyle(
+                      Text(
+                        'dashboard_artist_cta_title'.tr(),
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -62,7 +62,7 @@ class DashboardArtistCtaSection extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Join our community of creators',
+                        'dashboard_artist_cta_subtitle'.tr(),
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.9),
                           fontSize: 16,
@@ -81,20 +81,20 @@ class DashboardArtistCtaSection extends StatelessWidget {
               children: [
                 _buildBenefitItem(
                   icon: Icons.upload,
-                  title: 'Share Your Artwork',
-                  description: 'Upload and showcase your creative pieces',
+                  title: 'dashboard_artist_cta_benefit_1_title'.tr(),
+                  description: 'dashboard_artist_cta_benefit_1_desc'.tr(),
                 ),
                 const SizedBox(height: 12),
                 _buildBenefitItem(
                   icon: Icons.people,
-                  title: 'Connect with Collectors',
-                  description: 'Build relationships with art enthusiasts',
+                  title: 'dashboard_artist_cta_benefit_2_title'.tr(),
+                  description: 'dashboard_artist_cta_benefit_2_desc'.tr(),
                 ),
                 const SizedBox(height: 12),
                 _buildBenefitItem(
                   icon: Icons.trending_up,
-                  title: 'Grow Your Following',
-                  description: 'Expand your reach and build your brand',
+                  title: 'dashboard_artist_cta_benefit_3_title'.tr(),
+                  description: 'dashboard_artist_cta_benefit_3_desc'.tr(),
                 ),
               ],
             ),
@@ -117,9 +117,9 @@ class DashboardArtistCtaSection extends StatelessWidget {
                       ),
                       elevation: 0,
                     ),
-                    child: const Text(
-                      'Become an Artist',
-                      style: TextStyle(
+                    child: Text(
+                      'dashboard_artist_cta_button_primary'.tr(),
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                       ),
@@ -139,9 +139,9 @@ class DashboardArtistCtaSection extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text(
-                      'Browse Artists',
-                      style: TextStyle(
+                    child: Text(
+                      'dashboard_artist_cta_button_secondary'.tr(),
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                       ),

@@ -349,11 +349,13 @@ class _GalleryAnalyticsDashboardScreenState
                       children: [
                         CircleAvatar(
                           radius: 16,
-                          backgroundImage: artist['profileImageUrl'] != null
-                              ? NetworkImage(
-                                  artist['profileImageUrl'] as String)
-                              : null,
-                          child: artist['profileImageUrl'] == null
+                          backgroundImage:
+                              core.ImageUrlValidator.safeNetworkImage(
+                            artist['profileImageUrl']?.toString(),
+                          ),
+                          child: !core.ImageUrlValidator.isValidImageUrl(
+                            artist['profileImageUrl']?.toString(),
+                          )
                               ? const Icon(Icons.person, size: 16)
                               : null,
                         ),

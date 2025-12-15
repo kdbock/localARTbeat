@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_art_walk/artbeat_art_walk.dart';
 import '../widgets/dashboard/dashboard_browse_section.dart';
-import '../widgets/dashboard/art_walk_hero_section.dart';
 
 /// ARTbeat Dynamic Engagement Dashboard
 ///
@@ -84,11 +83,13 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
   void _checkForCelebrations(DashboardViewModel viewModel) {
     // Check for achievements, streaks, or milestones
     if (viewModel.currentStreak >= 7 && !_showCelebration) {
-      _triggerCelebration('🔥 7-day streak! You\'re on fire!');
+      _triggerCelebration('dashboard_celebration_7_day_streak'.tr());
     } else if (viewModel.totalDiscoveries > 0 &&
         viewModel.totalDiscoveries % 10 == 0) {
       _triggerCelebration(
-        '🎨 ${viewModel.totalDiscoveries} discoveries! Amazing progress!',
+        'dashboard_celebration_discoveries'.tr(
+          namedArgs: {'count': viewModel.totalDiscoveries.toString()},
+        ),
       );
     }
   }
@@ -151,6 +152,75 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
     return Scaffold(
       key: _scaffoldKey,
       drawer: const ArtbeatDrawer(),
+      appBar: AppBar(
+        backgroundColor: ArtbeatColors.primaryPurple,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.menu, color: Colors.white),
+          onPressed: () => _openDrawer(),
+        ),
+        title: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.palette, color: Colors.white, size: 24),
+            SizedBox(width: 8),
+            Text(
+              'ARTbeat',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search, color: Colors.white),
+            onPressed: () => Navigator.pushNamed(context, '/search'),
+          ),
+          IconButton(
+            icon: const Icon(Icons.message, color: Colors.white),
+            onPressed: () => Navigator.pushNamed(context, '/messaging'),
+          ),
+          Stack(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.notifications, color: Colors.white),
+                onPressed: () => _navigateToNotifications(context),
+              ),
+              if (_hasNotifications(viewModel))
+                Positioned(
+                  right: 8,
+                  top: 8,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 16,
+                      minHeight: 16,
+                    ),
+                    child: Text(
+                      _getNotificationCount(viewModel) > 9
+                          ? '9+'
+                          : _getNotificationCount(viewModel).toString(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
       body: _buildContent(viewModel),
     );
   }
@@ -163,10 +233,13 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
 
   /// Get appropriate error message
   String _getErrorMessage(DashboardViewModel viewModel) {
-    if (viewModel.eventsError != null) return 'Unable to load events';
-    if (viewModel.artworkError != null) return 'Unable to load artwork';
-    if (viewModel.artistsError != null) return 'Unable to load artists';
-    return 'Something went wrong. Please try again.';
+    if (viewModel.eventsError != null)
+      return 'dashboard_error_unable_load_events'.tr();
+    if (viewModel.artworkError != null)
+      return 'dashboard_error_unable_load_artwork'.tr();
+    if (viewModel.artistsError != null)
+      return 'dashboard_error_unable_load_artists'.tr();
+    return 'dashboard_error_something_wrong_retry'.tr();
   }
 
   Widget _buildContent(DashboardViewModel viewModel) {
@@ -220,6 +293,11 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
                   ),
                 ),
               ),
+
+              // === ANONYMOUS USER WELCOME BANNER ===
+              // Show sign-in banner for anonymous users
+              if (!viewModel.isAuthenticated)
+                SliverToBoxAdapter(child: _buildAnonymousUserBanner()),
 
               // === INTEGRATED ENGAGEMENT WIDGET ===
               // Combines Daily Quest, Weekly Goals & Leaderboard
@@ -293,14 +371,80 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
       ),
       child: Column(
         children: [
-          // Enhanced Art Walk Hero with location context
-          ArtWalkHeroSection(
-            onInstantDiscoveryTap: () => _navigateToArtWalk(context),
-            onProfileMenuTap: () => _showProfileMenu(context),
-            onMenuPressed: () => _openDrawer(),
-            onNotificationPressed: () => _navigateToNotifications(context),
-            hasNotifications: _hasNotifications(viewModel),
-            notificationCount: _getNotificationCount(viewModel),
+          // Enhanced Dashboard Hero with map and location context
+          DashboardHeroSection(
+            viewModel: viewModel,
+            onFindArtTap: () => _navigateToArtWalk(context),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Banner for anonymous users to encourage sign up
+  Widget _buildAnonymousUserBanner() {
+    return Container(
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [ArtbeatColors.primaryPurple, ArtbeatColors.primaryGreen],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: ArtbeatColors.primaryPurple.withValues(alpha: 0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.2),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.person_add, color: Colors.white, size: 32),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'dashboard_anonymous_title'.tr(),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'dashboard_anonymous_message'.tr(),
+                  style: const TextStyle(fontSize: 14, color: Colors.white70),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          ElevatedButton(
+            onPressed: () => Navigator.pushNamed(context, '/auth'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: ArtbeatColors.primaryPurple,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              'dashboard_anonymous_button'.tr(),
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
           ),
         ],
       ),
@@ -498,7 +642,8 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        _celebrationMessage ?? 'Achievement Unlocked!',
+                        _celebrationMessage ??
+                            'dashboard_achievement_unlocked'.tr(),
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,

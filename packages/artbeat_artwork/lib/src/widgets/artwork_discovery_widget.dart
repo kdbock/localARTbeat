@@ -1,3 +1,4 @@
+import 'package:artbeat_core/artbeat_core.dart' hide ArtworkModel;
 import 'package:flutter/material.dart';
 import '../models/artwork_model.dart';
 import '../services/artwork_discovery_service.dart';
@@ -160,10 +161,13 @@ class _ArtworkDiscoveryWidgetState extends State<ArtworkDiscoveryWidget> {
                 decoration: BoxDecoration(
                   borderRadius:
                       const BorderRadius.vertical(top: Radius.circular(12)),
-                  image: DecorationImage(
-                    image: NetworkImage(artwork.imageUrl),
-                    fit: BoxFit.cover,
-                  ),
+                  image: ImageUrlValidator.isValidImageUrl(artwork.imageUrl)
+                      ? DecorationImage(
+                          image: ImageUrlValidator.safeNetworkImage(
+                              artwork.imageUrl)!,
+                          fit: BoxFit.cover,
+                        )
+                      : null,
                 ),
               ),
             ),

@@ -117,21 +117,14 @@ class _CommunityArtistsScreenState extends State<CommunityArtistsScreen> {
                 children: [
                   CircleAvatar(
                     radius: 40,
-                    backgroundImage:
-                        artist['avatar']?.toString().isNotEmpty == true &&
-                            Uri.tryParse(
-                                  artist['avatar'].toString(),
-                                )?.hasScheme ==
-                                true
-                        ? NetworkImage(artist['avatar'].toString())
-                        : null,
+                    backgroundImage: core.ImageUrlValidator.safeNetworkImage(
+                      artist['avatar']?.toString(),
+                    ),
                     backgroundColor: color.withValues(alpha: 0.1),
                     child:
-                        artist['avatar']?.isEmpty != false ||
-                            Uri.tryParse(
-                                  artist['avatar']?.toString() ?? '',
-                                )?.hasScheme !=
-                                true
+                        !core.ImageUrlValidator.isValidImageUrl(
+                          artist['avatar']?.toString(),
+                        )
                         ? Icon(Icons.person, size: 40, color: color)
                         : null,
                   ),

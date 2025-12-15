@@ -1344,26 +1344,13 @@ class _CommunityDiscoverTabState extends State<CommunityDiscoverTab> {
                                   CircleAvatar(
                                     radius: 25,
                                     backgroundImage:
-                                        (artist['avatar'] != null &&
-                                            (artist['avatar'] as String)
-                                                .isNotEmpty &&
-                                            Uri.tryParse(
-                                                  artist['avatar'] as String,
-                                                )?.hasScheme ==
-                                                true)
-                                        ? NetworkImage(
-                                                artist['avatar'] as String,
-                                              )
-                                              as ImageProvider
-                                        : null,
+                                        ImageUrlValidator.safeNetworkImage(
+                                          artist['avatar']?.toString(),
+                                        ),
                                     child:
-                                        (artist['avatar'] == null ||
-                                            (artist['avatar'] as String)
-                                                .isEmpty ||
-                                            Uri.tryParse(
-                                                  artist['avatar'] as String,
-                                                )?.hasScheme !=
-                                                true)
+                                        !ImageUrlValidator.isValidImageUrl(
+                                          artist['avatar']?.toString(),
+                                        )
                                         ? const Icon(Icons.person, size: 30)
                                         : null,
                                   ),
@@ -1920,26 +1907,13 @@ class _CommunityDiscoverTabState extends State<CommunityDiscoverTab> {
                                     CircleAvatar(
                                       radius: 22,
                                       backgroundImage:
-                                          (artist['avatar'] != null &&
-                                              (artist['avatar'] as String)
-                                                  .isNotEmpty &&
-                                              Uri.tryParse(
-                                                    artist['avatar'] as String,
-                                                  )?.hasScheme ==
-                                                  true)
-                                          ? NetworkImage(
-                                                  artist['avatar'] as String,
-                                                )
-                                                as ImageProvider
-                                          : null,
+                                          ImageUrlValidator.safeNetworkImage(
+                                            artist['avatar']?.toString(),
+                                          ),
                                       child:
-                                          (artist['avatar'] == null ||
-                                              (artist['avatar'] as String)
-                                                  .isEmpty ||
-                                              Uri.tryParse(
-                                                    artist['avatar'] as String,
-                                                  )?.hasScheme !=
-                                                  true)
+                                          !ImageUrlValidator.isValidImageUrl(
+                                            artist['avatar']?.toString(),
+                                          )
                                           ? const Icon(Icons.person, size: 26)
                                           : null,
                                     ),

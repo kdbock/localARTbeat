@@ -113,15 +113,27 @@ class GroupPostCard extends StatelessWidget {
             ),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
-              image: isValidUrl
-                  ? DecorationImage(
-                      image: NetworkImage(imageUrl) as ImageProvider,
-                      fit: BoxFit.cover,
-                    )
+              image: isValidUrl && ImageUrlValidator.isValidImageUrl(imageUrl)
+                  ? ImageUrlValidator.safeNetworkImage(imageUrl) != null
+                        ? DecorationImage(
+                            image: ImageUrlValidator.safeNetworkImage(
+                              imageUrl,
+                            )!,
+                            fit: BoxFit.cover,
+                          )
+                        : null
                   : null,
-              color: !isValidUrl ? Colors.grey[300] : null,
+              color:
+                  !isValidUrl ||
+                      !ImageUrlValidator.isValidImageUrl(imageUrl) ||
+                      ImageUrlValidator.safeNetworkImage(imageUrl) == null
+                  ? Colors.grey[300]
+                  : null,
             ),
-            child: !isValidUrl
+            child:
+                !isValidUrl ||
+                    !ImageUrlValidator.isValidImageUrl(imageUrl) ||
+                    ImageUrlValidator.safeNetworkImage(imageUrl) == null
                 ? const Center(
                     child: Icon(
                       Icons.broken_image,

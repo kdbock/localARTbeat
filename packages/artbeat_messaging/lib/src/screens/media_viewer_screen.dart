@@ -1,3 +1,4 @@
+import 'package:artbeat_core/artbeat_core.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:share_plus/share_plus.dart';
@@ -50,12 +51,28 @@ class MediaViewerScreen extends StatelessWidget {
       body: PhotoViewGallery.builder(
         scrollPhysics: const BouncingScrollPhysics(),
         builder: (BuildContext context, int index) {
+          final imageUrl = mediaUrls[index];
+
+          // Validate URL is not empty and has valid scheme
+          final isValidUrl =
+              imageUrl.isNotEmpty &&
+              (imageUrl.startsWith('http://') ||
+                  imageUrl.startsWith('https://'));
+
+          final imageProvider = isValidUrl
+              ? ImageUrlValidator.safeNetworkImage(imageUrl)
+              : null;
+
           return PhotoViewGalleryPageOptions(
-            imageProvider: NetworkImage(mediaUrls[index]),
+            imageProvider:
+                imageProvider ??
+                const AssetImage('assets/default_profile.png') as ImageProvider,
             initialScale: PhotoViewComputedScale.contained,
             minScale: PhotoViewComputedScale.contained,
             maxScale: PhotoViewComputedScale.covered * 2,
-            heroAttributes: PhotoViewHeroAttributes(tag: mediaUrls[index]),
+            heroAttributes: PhotoViewHeroAttributes(
+              tag: imageUrl.isNotEmpty ? imageUrl : 'placeholder_$index',
+            ),
           );
         },
         itemCount: mediaUrls.length,

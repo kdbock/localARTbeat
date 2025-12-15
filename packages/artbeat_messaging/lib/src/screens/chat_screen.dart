@@ -3,7 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:artbeat_core/artbeat_core.dart'
-    show EnhancedUniversalHeader, ArtbeatColors, ArtbeatGradientBackground;
+    show EnhancedUniversalHeader, ArtbeatColors, ArtbeatGradientBackground, ImageUrlValidator;
 import 'package:geolocator/geolocator.dart';
 import '../models/chat_model.dart';
 import '../models/message_model.dart';
@@ -618,14 +618,13 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                           child: CircleAvatar(
                             radius: 18,
                             backgroundColor: ArtbeatColors.primaryPurple,
-                            backgroundImage:
-                                imageSnapshot.data != null &&
-                                    imageSnapshot.data!.isNotEmpty
-                                ? NetworkImage(imageSnapshot.data!)
-                                : null,
+                            backgroundImage: ImageUrlValidator.safeNetworkImage(
+                              imageSnapshot.data,
+                            ),
                             child:
-                                imageSnapshot.data == null ||
-                                    imageSnapshot.data!.isEmpty
+                                !ImageUrlValidator.isValidImageUrl(
+                                  imageSnapshot.data,
+                                )
                                 ? Text(
                                     title.isNotEmpty
                                         ? title[0].toUpperCase()

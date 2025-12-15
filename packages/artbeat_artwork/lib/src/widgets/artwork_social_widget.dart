@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:artbeat_core/artbeat_core.dart' show UserModerationMixin;
+import 'package:artbeat_core/artbeat_core.dart' show UserModerationMixin, ImageUrlValidator;
 import '../models/artwork_rating_model.dart';
 import '../services/artwork_rating_service.dart';
 import '../services/artwork_comment_service.dart';
@@ -344,10 +344,10 @@ class _ArtworkSocialWidgetState extends State<ArtworkSocialWidget>
                       margin: const EdgeInsets.only(bottom: 8),
                       child: ListTile(
                         leading: CircleAvatar(
-                          backgroundImage: comment.userAvatarUrl.isNotEmpty
-                              ? NetworkImage(comment.userAvatarUrl)
-                              : null,
-                          child: comment.userAvatarUrl.isEmpty
+                          backgroundImage: ImageUrlValidator.safeNetworkImage(
+                              comment.userAvatarUrl),
+                          child: !ImageUrlValidator.isValidImageUrl(
+                                  comment.userAvatarUrl)
                               ? Text(comment.userName[0].toUpperCase())
                               : null,
                         ),

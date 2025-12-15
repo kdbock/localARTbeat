@@ -18,6 +18,7 @@ class _LanguageSelectorState extends State<LanguageSelector> {
     {'code': 'de', 'nameKey': 'artbeat_settings_language_german'},
     {'code': 'pt', 'nameKey': 'artbeat_settings_language_portuguese'},
     {'code': 'zh', 'nameKey': 'artbeat_settings_language_chinese'},
+    {'code': 'ar', 'nameKey': 'artbeat_settings_language_arabic'},
   ];
 
   late String _selectedLanguage;

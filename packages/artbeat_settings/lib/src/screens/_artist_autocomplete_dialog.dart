@@ -56,9 +56,12 @@ class _ArtistAutocompleteDialogState extends State<_ArtistAutocompleteDialog> {
                 itemBuilder: (context, index) {
                   final user = _results[index];
                   return ListTile(
-                    leading: user.profileImageUrl.isNotEmpty
+                    leading:
+                        ImageUrlValidator.isValidImageUrl(user.profileImageUrl)
                         ? CircleAvatar(
-                            backgroundImage: NetworkImage(user.profileImageUrl),
+                            backgroundImage: ImageUrlValidator.safeNetworkImage(
+                              user.profileImageUrl,
+                            ),
                           )
                         : const CircleAvatar(child: Icon(Icons.person)),
                     title: Text(user.fullName),

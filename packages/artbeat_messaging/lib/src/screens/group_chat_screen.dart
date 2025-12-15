@@ -1,3 +1,4 @@
+import 'package:artbeat_core/artbeat_core.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../models/chat_model.dart';
@@ -63,11 +64,10 @@ class GroupChatScreen extends StatelessWidget {
             final chat = chats[index];
             return ListTile(
               leading: CircleAvatar(
-                backgroundImage:
-                    chat.groupImage != null && chat.groupImage!.isNotEmpty
-                    ? NetworkImage(chat.groupImage!)
-                    : null,
-                child: chat.groupImage == null || chat.groupImage!.isEmpty
+                backgroundImage: ImageUrlValidator.safeNetworkImage(
+                  chat.groupImage,
+                ),
+                child: !ImageUrlValidator.isValidImageUrl(chat.groupImage)
                     ? const Icon(Icons.group, size: 32)
                     : null,
               ),

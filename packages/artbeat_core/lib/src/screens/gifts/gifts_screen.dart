@@ -1,9 +1,8 @@
+import 'package:artbeat_core/artbeat_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import '../../services/in_app_purchase_setup.dart';
-import '../../services/user_service.dart';
-import '../../models/user_model.dart';
-import '../../theme/artbeat_colors.dart';
-import '../../widgets/gift_selection_widget.dart';
+import 'dart:async';
+import '../../services/in_app_gift_service.dart';
 
 class GiftsScreen extends StatefulWidget {
   final bool showAppBar;
@@ -20,6 +19,7 @@ class _GiftsScreenState extends State<GiftsScreen> {
   UserModel? _selectedArtist;
   bool _isLoadingArtists = true;
   String _searchQuery = '';
+  StreamSubscription<PurchaseEvent>? _purchaseSubscription;
 
   @override
   void initState() {
@@ -31,6 +31,25 @@ class _GiftsScreenState extends State<GiftsScreen> {
   Future<void> _initializePurchases() async {
     final setup = InAppPurchaseSetup();
     await setup.initialize();
+
+    // Listen to purchase events to show success messages
+    _purchaseSubscription = setup.purchaseManager.purchaseEventStream.listen(
+      (event) {
+        if (event.type == PurchaseEventType.completed) {
+          _handlePurchaseCompleted(event.purchase!);
+        } else if (event.type == PurchaseEventType.error) {
+          _handlePurchaseError(event.error!);
+        } else if (event.type == PurchaseEventType.cancelled) {
+          _handlePurchaseCancelled();
+        }
+      },
+      // ignore: inference_failure_on_untyped_parameter
+      onError: (error) {
+        if (kDebugMode) {
+          print('Purchase event error: $error');
+        }
+      },
+    );
   }
 
   Future<void> _loadArtists() async {
@@ -86,6 +105,79 @@ class _GiftsScreenState extends State<GiftsScreen> {
               ),
         )
         .toList();
+  }
+
+  Future<void> _purchaseGift(
+    String productId,
+    String giftName,
+    double price,
+  ) async {
+    if (_selectedArtist == null) {
+      if (kDebugMode) {
+        print('🎁 No artist selected');
+      }
+      return;
+    }
+
+    if (kDebugMode) {
+      print('🎁 Starting gift purchase flow');
+    }
+    if (kDebugMode) {
+      print(
+        '   - Product: $productId ($giftName - \$${price.toStringAsFixed(2)})',
+      );
+    }
+    if (kDebugMode) {
+      print(
+        '   - Recipient: ${_selectedArtist!.fullName} (${_selectedArtist!.id})',
+      );
+    }
+
+    try {
+      final giftService = InAppGiftService();
+
+      final success = await giftService.purchaseGift(
+        giftProductId: productId,
+        recipientId: _selectedArtist!.id,
+        message: '',
+      );
+
+      if (kDebugMode) {
+        print('🎁 Purchase initiation result: $success');
+      }
+
+      if (!mounted) return;
+
+      if (!success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Failed to start gift purchase. Please check:\n'
+              '• Internet connection\n'
+              '• In-app purchases are enabled\n'
+              '• You\'re signed in with a valid account',
+            ),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 5),
+          ),
+        );
+      }
+      // Apple/Google will now show their native purchase dialog
+      // Success message will be shown when purchase completes
+    } catch (e) {
+      if (kDebugMode) {
+        print('🎁 Exception during purchase: $e');
+      }
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 5),
+        ),
+      );
+    }
   }
 
   @override
@@ -427,11 +519,14 @@ class _GiftsScreenState extends State<GiftsScreen> {
                           ),
                         ),
                         child: CircleAvatar(
-                          backgroundImage: artist.profileImageUrl.isNotEmpty
-                              ? NetworkImage(artist.profileImageUrl)
-                              : null,
+                          backgroundImage: ImageUrlValidator.safeNetworkImage(
+                            artist.profileImageUrl,
+                          ),
                           backgroundColor: Colors.grey.withValues(alpha: 0.1),
-                          child: artist.profileImageUrl.isEmpty
+                          child:
+                              !ImageUrlValidator.isValidImageUrl(
+                                artist.profileImageUrl,
+                              )
                               ? Text(
                                   artist.fullName.isNotEmpty
                                       ? artist.fullName[0].toUpperCase()
@@ -802,21 +897,11 @@ class _GiftsScreenState extends State<GiftsScreen> {
                     child: ElevatedButton(
                       onPressed: _selectedArtist == null
                           ? null
-                          : () {
-                              showModalBottomSheet<void>(
-                                context: context,
-                                isScrollControlled: true,
-                                shape: const RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.vertical(
-                                    top: Radius.circular(20),
-                                  ),
-                                ),
-                                builder: (context) => GiftSelectionWidget(
-                                  recipientId: _selectedArtist!.id,
-                                  recipientName: _selectedArtist!.fullName,
-                                ),
-                              );
-                            },
+                          : () => _purchaseGift(
+                              tier['id'] as String,
+                              tier['name'] as String,
+                              tier['price'] as double,
+                            ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: _selectedArtist == null
                             ? Colors.grey[300]
@@ -847,5 +932,51 @@ class _GiftsScreenState extends State<GiftsScreen> {
         ),
       );
     }).toList();
+  }
+
+  @override
+  void dispose() {
+    _purchaseSubscription?.cancel();
+    super.dispose();
+  }
+
+  void _handlePurchaseCompleted(CompletedPurchase purchase) {
+    if (purchase.category == PurchaseCategory.gifts) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Gift sent successfully! Thank you for supporting artists.',
+            ),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
+  void _handlePurchaseError(String error) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Purchase failed: $error'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 5),
+        ),
+      );
+    }
+  }
+
+  void _handlePurchaseCancelled() {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Purchase cancelled'),
+          backgroundColor: Colors.orange,
+          duration: Duration(seconds: 3),
+        ),
+      );
+    }
   }
 }

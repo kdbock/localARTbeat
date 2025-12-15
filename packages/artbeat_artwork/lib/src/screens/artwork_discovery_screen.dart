@@ -1,3 +1,4 @@
+import 'package:artbeat_core/artbeat_core.dart' hide ArtworkModel;
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -298,10 +299,13 @@ class _ArtworkDiscoveryScreenState extends State<ArtworkDiscoveryScreen>
                 decoration: BoxDecoration(
                   borderRadius:
                       const BorderRadius.vertical(top: Radius.circular(12)),
-                  image: DecorationImage(
-                    image: NetworkImage(artwork.imageUrl),
-                    fit: BoxFit.cover,
-                  ),
+                  image: ImageUrlValidator.isValidImageUrl(artwork.imageUrl)
+                      ? DecorationImage(
+                          image: ImageUrlValidator.safeNetworkImage(
+                              artwork.imageUrl)!,
+                          fit: BoxFit.cover,
+                        )
+                      : null,
                 ),
                 child: Stack(
                   children: [

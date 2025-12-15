@@ -1,3 +1,4 @@
+import 'package:artbeat_core/artbeat_core.dart';
 import 'package:flutter/material.dart';
 import '../models/chat_model.dart';
 import 'chat_screen.dart';
@@ -222,7 +223,14 @@ class _SimpleMessagingDashboardScreenState
                               ),
                               child: CircleAvatar(
                                 radius: 14,
-                                backgroundImage: NetworkImage(avatar),
+                                backgroundImage:
+                                    ImageUrlValidator.safeNetworkImage(
+                                      avatar,
+                                    ) ??
+                                    const AssetImage(
+                                          'assets/default_profile.png',
+                                        )
+                                        as ImageProvider,
                               ),
                             ),
                             // Online indicator
@@ -329,7 +337,10 @@ class _SimpleMessagingDashboardScreenState
                               : null,
                         ),
                         child: CircleAvatar(
-                          backgroundImage: NetworkImage(avatar),
+                          backgroundImage:
+                              ImageUrlValidator.safeNetworkImage(avatar) ??
+                              const AssetImage('assets/default_profile.png')
+                                  as ImageProvider,
                           radius: 20,
                         ),
                       ),

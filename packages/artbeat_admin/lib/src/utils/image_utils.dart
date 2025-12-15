@@ -4,12 +4,19 @@ import 'package:flutter/material.dart';
 class ImageUtils {
   /// Creates a safe NetworkImage provider that handles null/empty URLs
   static ImageProvider? safeNetworkImage(String? url) {
-    if (url == null ||
-        url.trim().isEmpty ||
-        Uri.tryParse(url)?.hasScheme != true) {
+    if (url == null || url.trim().isEmpty) {
       return null;
     }
-    return NetworkImage(url);
+    final trimmedUrl = url.trim();
+    if (Uri.tryParse(trimmedUrl)?.hasScheme != true) {
+      return null;
+    }
+    // Additional check for valid HTTP/HTTPS scheme
+    if (!trimmedUrl.startsWith('http://') &&
+        !trimmedUrl.startsWith('https://')) {
+      return null;
+    }
+    return NetworkImage(trimmedUrl);
   }
 
   /// Creates a safe Image.network widget with proper error handling

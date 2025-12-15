@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_community/artbeat_community.dart';
@@ -111,21 +112,21 @@ class _DashboardCommunitySectionState extends State<DashboardCommunitySection> {
           ),
         ),
         const SizedBox(width: 12),
-        const Expanded(
+        Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Community Posts',
-                style: TextStyle(
+                'dashboard_community_title'.tr(),
+                style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: ArtbeatColors.textPrimary,
                 ),
               ),
               Text(
-                'See what the art community is sharing',
-                style: TextStyle(
+                'dashboard_community_subtitle'.tr(),
+                style: const TextStyle(
                   fontSize: 14,
                   color: ArtbeatColors.textSecondary,
                 ),
@@ -423,23 +424,24 @@ class _DashboardCommunitySectionState extends State<DashboardCommunitySection> {
                   ],
                 ),
 
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
 
                 // Post content
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       // Post text
                       if (post.content.isNotEmpty)
                         Text(
                           post.content,
                           style: const TextStyle(
-                            fontSize: 14,
+                            fontSize: 13,
                             color: ArtbeatColors.textPrimary,
-                            height: 1.4,
+                            height: 1.3,
                           ),
-                          maxLines: 3,
+                          maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
 

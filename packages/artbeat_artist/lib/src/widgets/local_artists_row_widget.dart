@@ -158,20 +158,15 @@ class LocalArtistsRowWidget extends StatelessWidget {
                                           artist.profileImageUrl !=
                                               'placeholder_headshot_url')
                                       ? DecorationImage(
-                                          image: NetworkImage(
-                                              artist.profileImageUrl!),
+                                          image: ImageUrlValidator
+                                              .safeNetworkImage(
+                                                  artist.profileImageUrl)!,
                                           fit: BoxFit.cover,
                                         )
                                       : null,
                                 ),
-                                child: !(artist.profileImageUrl != null &&
-                                        artist.profileImageUrl!.isNotEmpty &&
-                                        (artist.profileImageUrl!
-                                                .startsWith('http://') ||
-                                            artist.profileImageUrl!
-                                                .startsWith('https://')) &&
-                                        artist.profileImageUrl !=
-                                            'placeholder_headshot_url')
+                                child: !ImageUrlValidator.isValidImageUrl(
+                                        artist.profileImageUrl)
                                     ? const Icon(
                                         Icons.person,
                                         size: 60,

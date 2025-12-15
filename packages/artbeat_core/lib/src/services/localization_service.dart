@@ -16,6 +16,7 @@ class LocalizationService {
     Locale('de'),
     Locale('pt'),
     Locale('zh'),
+    Locale('ar'),
   ];
 
   late SharedPreferences _prefs;
@@ -57,6 +58,8 @@ class LocalizationService {
         return 'Português';
       case 'zh':
         return '中文';
+      case 'ar':
+        return 'العربية';
       default:
         return 'English';
     }

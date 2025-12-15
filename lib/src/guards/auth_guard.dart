@@ -7,11 +7,13 @@ class AuthGuard {
   bool get isAuthenticated => FirebaseAuth.instance.currentUser != null;
 
   /// Checks if the user is authenticated and returns appropriate route
+  /// If not authenticated, shows a login prompt dialog instead of blocking
   static Route<dynamic>? guardRoute({
     required RouteSettings settings,
     required Widget Function() authenticatedBuilder,
     required Widget Function()? unauthenticatedBuilder,
     String? redirectRoute,
+    String? featureName,
   }) {
     final user = FirebaseAuth.instance.currentUser;
 
@@ -22,20 +24,18 @@ class AuthGuard {
         settings: settings,
       );
     } else {
-      // User is not authenticated
+      // User is not authenticated - return wrapper that shows dialog
       if (unauthenticatedBuilder != null) {
         return MaterialPageRoute(
           builder: (_) => unauthenticatedBuilder(),
           settings: settings,
         );
       } else {
-        // Redirect to login or specified route
+        // Return a route that shows auth prompt when user tries to interact
         return MaterialPageRoute(
-          builder: (_) => const core.MainLayout(
-            currentIndex: -1,
-            child: core.AuthRequiredScreen(),
-          ),
-          settings: RouteSettings(name: redirectRoute ?? '/auth'),
+          builder: (context) =>
+              _AuthPromptWrapper(featureName: featureName ?? 'this feature'),
+          settings: RouteSettings(name: redirectRoute ?? '/auth-required'),
         );
       }
     }
@@ -60,6 +60,50 @@ class AuthGuard {
     // For now, return true if user is authenticated
     return true;
   }
+
+  /// Show login prompt dialog - returns true if user should proceed
+  static Future<bool> showLoginPrompt(
+    BuildContext context, {
+    String? featureName,
+  }) async {
+    final result = await core.LoginPromptDialog.show(
+      context,
+      featureName: featureName,
+    );
+    return result ?? false;
+  }
+}
+
+/// Wrapper widget that shows auth prompt dialog immediately
+class _AuthPromptWrapper extends StatefulWidget {
+
+  const _AuthPromptWrapper({required this.featureName});
+  final String featureName;
+
+  @override
+  State<_AuthPromptWrapper> createState() => _AuthPromptWrapperState();
+}
+
+class _AuthPromptWrapperState extends State<_AuthPromptWrapper> {
+  @override
+  void initState() {
+    super.initState();
+    // Show dialog after frame is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showPrompt();
+    });
+  }
+
+  Future<void> _showPrompt() async {
+    await core.LoginPromptDialog.show(context, featureName: widget.featureName);
+    // After dialog closes, go back
+    if (mounted) {
+      Navigator.of(context).pop();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => const Scaffold(body: Center(child: CircularProgressIndicator()));
 }
 
 /// Widget to show when authentication is required

@@ -394,11 +394,13 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
           children: [
             CircleAvatar(
               radius: 50,
-              backgroundImage:
-                  _accountSettings?.profileImageUrl.isNotEmpty == true
-                  ? NetworkImage(_accountSettings!.profileImageUrl)
-                  : null,
-              child: _accountSettings?.profileImageUrl.isEmpty != false
+              backgroundImage: ImageUrlValidator.safeNetworkImage(
+                _accountSettings?.profileImageUrl,
+              ),
+              child:
+                  !ImageUrlValidator.isValidImageUrl(
+                    _accountSettings?.profileImageUrl,
+                  )
                   ? const Icon(Icons.person, size: 50)
                   : null,
             ),

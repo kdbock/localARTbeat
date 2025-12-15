@@ -414,10 +414,14 @@ class _ArtWalkDashboardScreenState extends State<ArtWalkDashboardScreen> {
                     margin: const EdgeInsets.only(bottom: 16),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
-                      image: DecorationImage(
-                        image: NetworkImage(capture.imageUrl) as ImageProvider,
-                        fit: BoxFit.cover,
-                      ),
+                      image: ImageUrlValidator.isValidImageUrl(capture.imageUrl)
+                          ? DecorationImage(
+                              image: ImageUrlValidator.safeNetworkImage(
+                                capture.imageUrl,
+                              )!,
+                              fit: BoxFit.cover,
+                            )
+                          : null,
                     ),
                   ),
                 Text(

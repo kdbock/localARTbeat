@@ -367,10 +367,13 @@ class _ArtistProfileEditScreenState extends State<ArtistProfileEditScreen> {
                                                 FileImage(_profileImageFile!),
                                             fit: BoxFit.cover,
                                           )
-                                        : _profileImageUrl != null
+                                        : core.ImageUrlValidator
+                                                .isValidImageUrl(
+                                                    _profileImageUrl)
                                             ? DecorationImage(
-                                                image: NetworkImage(
-                                                    _profileImageUrl!),
+                                                image: core.ImageUrlValidator
+                                                    .safeNetworkImage(
+                                                        _profileImageUrl)!,
                                                 fit: BoxFit.cover,
                                               )
                                             : null,
@@ -403,10 +406,12 @@ class _ArtistProfileEditScreenState extends State<ArtistProfileEditScreen> {
                                             image: FileImage(_coverImageFile!),
                                             fit: BoxFit.cover,
                                           )
-                                        : _coverImageUrl != null
+                                        : core.ImageUrlValidator
+                                                .isValidImageUrl(_coverImageUrl)
                                             ? DecorationImage(
-                                                image: NetworkImage(
-                                                    _coverImageUrl!),
+                                                image: core.ImageUrlValidator
+                                                    .safeNetworkImage(
+                                                        _coverImageUrl)!,
                                                 fit: BoxFit.cover,
                                               )
                                             : null,

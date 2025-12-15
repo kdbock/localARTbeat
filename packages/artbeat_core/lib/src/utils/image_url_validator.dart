@@ -32,7 +32,9 @@ class ImageUrlValidator {
   /// Returns a NetworkImage if the URL is valid, or null if invalid.
   /// Use this when you need to conditionally create a NetworkImage.
   static NetworkImage? safeNetworkImage(String? url) {
-    return isValidImageUrl(url) ? NetworkImage(url!) : null;
+    if (url == null || url.trim().isEmpty) return null;
+    final trimmedUrl = url.trim();
+    return isValidImageUrl(trimmedUrl) ? NetworkImage(trimmedUrl) : null;
   }
 
   /// Creates a corrected NetworkImage for old artwork paths
@@ -40,11 +42,13 @@ class ImageUrlValidator {
   /// Automatically corrects 'artwork/' paths to 'artwork_images/' paths
   /// to handle legacy Firebase Storage URLs.
   static NetworkImage? safeCorrectedNetworkImage(String? url) {
-    if (!isValidImageUrl(url)) {
+    if (url == null || url.trim().isEmpty) return null;
+    final trimmedUrl = url.trim();
+    if (!isValidImageUrl(trimmedUrl)) {
       return null;
     }
 
-    final correctedUrl = _generateCorrectedArtworkUrl(url!);
+    final correctedUrl = _generateCorrectedArtworkUrl(trimmedUrl);
     return NetworkImage(correctedUrl);
   }
 

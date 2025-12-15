@@ -413,16 +413,12 @@ class _GalleryArtistsManagementScreenState
         final artist = _galleryArtists[index];
         return ListTile(
           leading: CircleAvatar(
-            backgroundImage: artist.profileImageUrl != null &&
-                    artist.profileImageUrl!.isNotEmpty &&
-                    Uri.tryParse(artist.profileImageUrl!)?.hasScheme == true
-                ? NetworkImage(artist.profileImageUrl!)
-                : null,
-            child: artist.profileImageUrl == null ||
-                    artist.profileImageUrl!.isEmpty ||
-                    Uri.tryParse(artist.profileImageUrl!)?.hasScheme != true
-                ? const Icon(Icons.person)
-                : null,
+            backgroundImage:
+                core.ImageUrlValidator.safeNetworkImage(artist.profileImageUrl),
+            child:
+                !core.ImageUrlValidator.isValidImageUrl(artist.profileImageUrl)
+                    ? const Icon(Icons.person)
+                    : null,
           ),
           title: Text(artist.displayName),
           subtitle: Text(artist.bio ?? ''),
@@ -480,16 +476,10 @@ class _GalleryArtistsManagementScreenState
           margin: const EdgeInsets.only(bottom: 8),
           child: ListTile(
             leading: CircleAvatar(
-              backgroundImage: invitation.artistProfileImage != null &&
-                      invitation.artistProfileImage!.isNotEmpty &&
-                      Uri.tryParse(invitation.artistProfileImage!)?.hasScheme ==
-                          true
-                  ? NetworkImage(invitation.artistProfileImage!)
-                  : null,
-              child: invitation.artistProfileImage == null ||
-                      invitation.artistProfileImage!.isEmpty ||
-                      Uri.tryParse(invitation.artistProfileImage!)?.hasScheme !=
-                          true
+              backgroundImage: core.ImageUrlValidator.safeNetworkImage(
+                  invitation.artistProfileImage),
+              child: !core.ImageUrlValidator.isValidImageUrl(
+                      invitation.artistProfileImage)
                   ? const Icon(Icons.person)
                   : null,
             ),
@@ -747,19 +737,11 @@ class _ArtistSearchDialogState extends State<_ArtistSearchDialog> {
                                 horizontal: 16,
                               ),
                               leading: CircleAvatar(
-                                backgroundImage: artist.profileImageUrl !=
-                                            null &&
-                                        artist.profileImageUrl!.isNotEmpty &&
-                                        Uri.tryParse(artist.profileImageUrl!)
-                                                ?.hasScheme ==
-                                            true
-                                    ? NetworkImage(artist.profileImageUrl!)
-                                    : null,
-                                child: artist.profileImageUrl == null ||
-                                        artist.profileImageUrl!.isEmpty ||
-                                        Uri.tryParse(artist.profileImageUrl!)
-                                                ?.hasScheme !=
-                                            true
+                                backgroundImage:
+                                    core.ImageUrlValidator.safeNetworkImage(
+                                        artist.profileImageUrl),
+                                child: !core.ImageUrlValidator.isValidImageUrl(
+                                        artist.profileImageUrl)
                                     ? const Icon(Icons.person)
                                     : null,
                               ),

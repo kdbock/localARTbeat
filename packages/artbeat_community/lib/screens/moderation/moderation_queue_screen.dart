@@ -168,10 +168,10 @@ class _ModerationQueueScreenState extends State<ModerationQueueScreen>
             Row(
               children: [
                 CircleAvatar(
-                  backgroundImage: post.userPhotoUrl.isNotEmpty
-                      ? NetworkImage(post.userPhotoUrl)
-                      : null,
-                  child: post.userPhotoUrl.isEmpty
+                  backgroundImage: ImageUrlValidator.safeNetworkImage(
+                    post.userPhotoUrl,
+                  ),
+                  child: !ImageUrlValidator.isValidImageUrl(post.userPhotoUrl)
                       ? Text(post.userName.isNotEmpty ? post.userName[0] : '?')
                       : null,
                 ),
@@ -295,10 +295,11 @@ class _ModerationQueueScreenState extends State<ModerationQueueScreen>
             Row(
               children: [
                 CircleAvatar(
-                  backgroundImage: comment.userAvatarUrl.isNotEmpty
-                      ? NetworkImage(comment.userAvatarUrl)
-                      : null,
-                  child: comment.userAvatarUrl.isEmpty
+                  backgroundImage: ImageUrlValidator.safeNetworkImage(
+                    comment.userAvatarUrl,
+                  ),
+                  child:
+                      !ImageUrlValidator.isValidImageUrl(comment.userAvatarUrl)
                       ? Text(
                           comment.userName.isNotEmpty
                               ? comment.userName[0]

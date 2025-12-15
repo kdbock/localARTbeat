@@ -167,15 +167,32 @@ class AppRouter {
 
   bool _isProtectedRoute(String routeName) =>
       routeName != AppRoutes.splash &&
+      routeName != AppRoutes.dashboard &&
       routeName != AppRoutes.login &&
       routeName != AppRoutes.register &&
       routeName != AppRoutes.forgotPassword &&
       routeName != AppRoutes.artistSearch &&
       routeName != AppRoutes.artistSearchShort &&
+      routeName != AppRoutes.artistBrowse &&
+      routeName != AppRoutes.artistFeatured &&
       routeName != AppRoutes.trending &&
       routeName != AppRoutes.local &&
       routeName != AppRoutes.artworkBrowse &&
-      !routeName.startsWith('/public/');
+      routeName != AppRoutes.artworkFeatured &&
+      routeName != AppRoutes.artworkRecent &&
+      routeName != AppRoutes.artworkTrending &&
+      routeName != AppRoutes.artworkSearch &&
+      routeName != AppRoutes.allEvents &&
+      routeName != AppRoutes.search &&
+      // Bottom navigation routes - allow anonymous browsing
+      routeName != '/art-walk/map' &&
+      routeName != '/art-walk/dashboard' &&
+      routeName != '/capture/camera' &&
+      routeName != '/community/hub' &&
+      routeName != '/events/discover' &&
+      !routeName.startsWith('/public/') &&
+      !routeName.startsWith('/art-walk/') &&
+      !routeName.startsWith('/community/');
 
   /// Handles specialized routes that aren't in core handler
   Route<dynamic>? _handleSpecializedRoutes(RouteSettings settings) {
@@ -1963,9 +1980,9 @@ class _ProfileActivityContentState extends State<_ProfileActivityContent> {
       color: isUnread ? Colors.blue.shade50 : null,
       child: ListTile(
         leading: CircleAvatar(
-          backgroundImage: activity.targetUserAvatar != null
-              ? NetworkImage(activity.targetUserAvatar!)
-              : null,
+          backgroundImage: core.ImageUrlValidator.safeNetworkImage(
+            activity.targetUserAvatar,
+          ),
           backgroundColor: _getActivityColor(activity.activityType),
           child: activity.targetUserAvatar == null
               ? _getActivityIcon(activity.activityType)

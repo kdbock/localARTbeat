@@ -226,10 +226,10 @@ class _WrittenContentDetailScreenState
               children: [
                 CircleAvatar(
                   radius: 16,
-                  backgroundImage: _artist?.profileImageUrl != null
-                      ? NetworkImage(_artist!.profileImageUrl!)
-                      : null,
-                  child: _artist?.profileImageUrl == null
+                  backgroundImage: ImageUrlValidator.safeNetworkImage(
+                      _artist?.profileImageUrl),
+                  child: !ImageUrlValidator.isValidImageUrl(
+                          _artist?.profileImageUrl)
                       ? Text((_artist?.displayName ??
                               _fallbackArtistName ??
                               'A')[0]

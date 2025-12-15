@@ -1,3 +1,4 @@
+import 'package:artbeat_core/artbeat_core.dart';
 import 'package:flutter/material.dart';
 import '../models/top_follower_model.dart';
 import '../services/subscription_service.dart' as artist_subscription;
@@ -145,16 +146,17 @@ class _TopFollowersWidgetState extends State<TopFollowersWidget> {
                       color: Colors.amber,
                       width: 2,
                     ),
-                    image: (follower.followerAvatarUrl != null &&
-                            follower.followerAvatarUrl!.isNotEmpty)
+                    image: ImageUrlValidator.isValidImageUrl(
+                            follower.followerAvatarUrl)
                         ? DecorationImage(
-                            image: NetworkImage(follower.followerAvatarUrl!),
+                            image: ImageUrlValidator.safeNetworkImage(
+                                follower.followerAvatarUrl)!,
                             fit: BoxFit.cover,
                           )
                         : null,
                   ),
-                  child: (follower.followerAvatarUrl == null ||
-                          follower.followerAvatarUrl!.isEmpty)
+                  child: !ImageUrlValidator.isValidImageUrl(
+                          follower.followerAvatarUrl)
                       ? const Icon(
                           Icons.person,
                           size: 50,

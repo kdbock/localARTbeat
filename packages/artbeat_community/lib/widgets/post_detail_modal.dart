@@ -639,14 +639,10 @@ class _PostDetailModalState extends State<PostDetailModal> {
             children: [
               CircleAvatar(
                 radius: 16,
-                backgroundImage:
-                    comment.userAvatarUrl.isNotEmpty &&
-                        Uri.tryParse(comment.userAvatarUrl)?.hasScheme == true
-                    ? NetworkImage(comment.userAvatarUrl)
-                    : null,
-                child:
-                    comment.userAvatarUrl.isEmpty ||
-                        Uri.tryParse(comment.userAvatarUrl)?.hasScheme != true
+                backgroundImage: ImageUrlValidator.safeNetworkImage(
+                  comment.userAvatarUrl,
+                ),
+                child: !ImageUrlValidator.isValidImageUrl(comment.userAvatarUrl)
                     ? const Icon(Icons.person, size: 16)
                     : null,
               ),

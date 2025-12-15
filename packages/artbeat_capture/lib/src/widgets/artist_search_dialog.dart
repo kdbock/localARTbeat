@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:artbeat_core/artbeat_core.dart' show ArtistModel, ArtistService;
+import 'package:artbeat_core/artbeat_core.dart' show ArtistModel, ArtistService, ImageUrlValidator;
 
 class ArtistSearchDialog extends StatefulWidget {
   final void Function(ArtistModel) onArtistSelected;
@@ -152,22 +152,13 @@ class _ArtistSearchDialogState extends State<ArtistSearchDialog> {
                       (artist) => Card(
                         child: ListTile(
                           leading: CircleAvatar(
-                            backgroundImage:
-                                artist.profileImageUrl != null &&
-                                    artist.profileImageUrl!.isNotEmpty &&
-                                    Uri.tryParse(
-                                          artist.profileImageUrl!,
-                                        )?.hasScheme ==
-                                        true
-                                ? NetworkImage(artist.profileImageUrl!)
-                                : null,
+                            backgroundImage: ImageUrlValidator.safeNetworkImage(
+                              artist.profileImageUrl,
+                            ),
                             child:
-                                artist.profileImageUrl == null ||
-                                    artist.profileImageUrl!.isEmpty ||
-                                    Uri.tryParse(
-                                          artist.profileImageUrl!,
-                                        )?.hasScheme !=
-                                        true
+                                !ImageUrlValidator.isValidImageUrl(
+                                  artist.profileImageUrl,
+                                )
                                 ? const Icon(Icons.person)
                                 : null,
                           ),

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:provider/provider.dart';
-import 'package:artbeat_core/artbeat_core.dart' show ArtbeatColors;
+import 'package:artbeat_core/artbeat_core.dart'
+    show ArtbeatColors, ImageUrlValidator;
 import '../models/chat_model.dart';
 import '../services/chat_service.dart';
 
@@ -267,10 +268,8 @@ class ChatListTile extends StatelessWidget {
               child: CircleAvatar(
                 backgroundColor: _getAvatarColor(chatName),
                 radius: 28,
-                backgroundImage: imageUrl != null && imageUrl.isNotEmpty
-                    ? NetworkImage(imageUrl)
-                    : null,
-                child: imageUrl == null || imageUrl.isEmpty
+                backgroundImage: ImageUrlValidator.safeNetworkImage(imageUrl),
+                child: !ImageUrlValidator.isValidImageUrl(imageUrl)
                     ? Text(
                         _getInitials(chatName),
                         style: const TextStyle(

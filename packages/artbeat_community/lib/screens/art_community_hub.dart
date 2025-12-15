@@ -1233,10 +1233,10 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
               Row(
                 children: [
                   CircleAvatar(
-                    backgroundImage: post.userPhotoUrl.isNotEmpty
-                        ? NetworkImage(post.userPhotoUrl)
-                        : null,
-                    child: post.userPhotoUrl.isEmpty
+                    backgroundImage: ImageUrlValidator.safeNetworkImage(
+                      post.userPhotoUrl,
+                    ),
+                    child: !ImageUrlValidator.isValidImageUrl(post.userPhotoUrl)
                         ? Text(post.userName[0].toUpperCase())
                         : null,
                   ),

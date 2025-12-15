@@ -62,14 +62,16 @@ class InAppGiftService {
       final user = _auth.currentUser;
       if (user == null) {
         AppLogger.error('❌ User not authenticated for gift purchase');
-        return false;
+        throw Exception('You must be signed in to send gifts');
       }
       AppLogger.info('✅ User authenticated: ${user.uid}');
 
       // Check if in-app purchases are available
       if (!_purchaseService.isAvailable) {
         AppLogger.error('❌ In-app purchases not available');
-        return false;
+        throw Exception(
+          'In-app purchases are not available on this device. Please check your App Store connection.',
+        );
       }
       AppLogger.info('✅ In-app purchases are available');
 
@@ -77,7 +79,7 @@ class InAppGiftService {
       final recipientExists = await _validateRecipient(recipientId);
       if (!recipientExists) {
         AppLogger.error('❌ Recipient not found: $recipientId');
-        return false;
+        throw Exception('Recipient artist not found');
       }
       AppLogger.info('✅ Recipient validated');
 
@@ -85,7 +87,7 @@ class InAppGiftService {
       if (!_giftProducts.containsKey(giftProductId)) {
         AppLogger.error('❌ Invalid gift product: $giftProductId');
         AppLogger.error('Available products: ${_giftProducts.keys.join(', ')}');
-        return false;
+        throw Exception('Invalid gift product: $giftProductId');
       }
       AppLogger.info('✅ Gift product validated');
 
@@ -117,12 +119,15 @@ class InAppGiftService {
         );
       } else {
         AppLogger.error('❌ Failed to initiate gift purchase');
+        throw Exception(
+          'Could not start purchase. The gift product may not be available in the App Store.',
+        );
       }
 
       return success;
     } catch (e) {
       AppLogger.error('❌ Error purchasing gift: $e');
-      return false;
+      rethrow; // Re-throw to show user the specific error
     }
   }
 

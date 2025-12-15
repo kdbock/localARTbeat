@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 
 class DashboardEventsSection extends StatelessWidget {
@@ -56,7 +57,7 @@ class DashboardEventsSection extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Featured Events',
+                'dashboard_events_title',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -64,7 +65,7 @@ class DashboardEventsSection extends StatelessWidget {
                 ),
               ),
               Text(
-                'Art exhibitions, workshops, and community events',
+                'dashboard_events_subtitle',
                 style: TextStyle(
                   fontSize: 14,
                   color: ArtbeatColors.textSecondary,
@@ -235,7 +236,7 @@ class DashboardEventsSection extends StatelessWidget {
             ElevatedButton.icon(
               onPressed: () => Navigator.pushNamed(context, '/events/create'),
               icon: const Icon(Icons.add, size: 16),
-              label: const Text('Create Event'),
+              label: Text('dashboard_create_event'.tr()),
               style: ElevatedButton.styleFrom(
                 backgroundColor: ArtbeatColors.error,
                 foregroundColor: Colors.white,
@@ -287,7 +288,10 @@ class DashboardEventsSection extends StatelessWidget {
                       placeholder: const AssetImage(
                         'assets/default_profile.png',
                       ),
-                      image: NetworkImage(event.imageUrl ?? ''),
+                      image:
+                          ImageUrlValidator.safeNetworkImage(event.imageUrl) ??
+                          const AssetImage('assets/default_profile.png')
+                              as ImageProvider,
                       imageErrorBuilder: (context, error, stackTrace) {
                         AppLogger.error('Error loading event image: $error');
                         return Container(

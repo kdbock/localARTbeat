@@ -203,11 +203,13 @@ class _FollowedArtistsScreenState extends State<FollowedArtistsScreen> {
                           leading: CircleAvatar(
                             radius: 25,
                             backgroundColor: ArtbeatColors.primaryPurple,
-                            backgroundImage:
-                                (artist.profileImageUrl?.isNotEmpty == true)
-                                ? NetworkImage(artist.profileImageUrl!)
-                                : null,
-                            child: (artist.profileImageUrl?.isEmpty != false)
+                            backgroundImage: ImageUrlValidator.safeNetworkImage(
+                              artist.profileImageUrl,
+                            ),
+                            child:
+                                !ImageUrlValidator.isValidImageUrl(
+                                  artist.profileImageUrl,
+                                )
                                 ? Text(
                                     artist.displayName.isNotEmpty
                                         ? artist.displayName[0].toUpperCase()

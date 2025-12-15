@@ -244,10 +244,13 @@ class _ProfileConnectionsScreenState extends State<ProfileConnectionsScreen>
                       children: [
                         CircleAvatar(
                           radius: 25,
-                          backgroundImage: userInfo?['photoURL'] != null
-                              ? NetworkImage(userInfo!['photoURL'].toString())
-                              : null,
-                          child: userInfo?['photoURL'] == null
+                          backgroundImage: ImageUrlValidator.safeNetworkImage(
+                            userInfo?['photoURL']?.toString(),
+                          ),
+                          child:
+                              !ImageUrlValidator.isValidImageUrl(
+                                userInfo?['photoURL']?.toString(),
+                              )
                               ? const Icon(Icons.person, size: 25)
                               : null,
                         ),
@@ -303,12 +306,13 @@ class _ProfileConnectionsScreenState extends State<ProfileConnectionsScreen>
                           final friendInfo = snapshot.data;
                           return CircleAvatar(
                             radius: 16,
-                            backgroundImage: friendInfo?['photoURL'] != null
-                                ? NetworkImage(
-                                    friendInfo!['photoURL'].toString(),
-                                  )
-                                : null,
-                            child: friendInfo?['photoURL'] == null
+                            backgroundImage: ImageUrlValidator.safeNetworkImage(
+                              friendInfo?['photoURL']?.toString(),
+                            ),
+                            child:
+                                !ImageUrlValidator.isValidImageUrl(
+                                  friendInfo?['photoURL']?.toString(),
+                                )
                                 ? const Icon(Icons.person, size: 16)
                                 : null,
                           );
@@ -346,10 +350,13 @@ class _ProfileConnectionsScreenState extends State<ProfileConnectionsScreen>
                       children: [
                         CircleAvatar(
                           radius: 25,
-                          backgroundImage: userInfo?['photoURL'] != null
-                              ? NetworkImage(userInfo!['photoURL'].toString())
-                              : null,
-                          child: userInfo?['photoURL'] == null
+                          backgroundImage: ImageUrlValidator.safeNetworkImage(
+                            userInfo?['photoURL']?.toString(),
+                          ),
+                          child:
+                              !ImageUrlValidator.isValidImageUrl(
+                                userInfo?['photoURL']?.toString(),
+                              )
                               ? const Icon(Icons.person, size: 25)
                               : null,
                         ),
@@ -443,10 +450,13 @@ class _ProfileConnectionsScreenState extends State<ProfileConnectionsScreen>
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundImage: userInfo?['photoURL'] != null
-              ? NetworkImage(userInfo!['photoURL'].toString())
-              : null,
-          child: userInfo?['photoURL'] == null
+          backgroundImage: ImageUrlValidator.safeNetworkImage(
+            userInfo?['photoURL']?.toString(),
+          ),
+          child:
+              !ImageUrlValidator.isValidImageUrl(
+                userInfo?['photoURL']?.toString(),
+              )
               ? const Icon(Icons.person)
               : null,
         ),

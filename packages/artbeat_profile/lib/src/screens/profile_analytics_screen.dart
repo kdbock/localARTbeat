@@ -337,12 +337,14 @@ class _ProfileAnalyticsScreenState extends State<ProfileAnalyticsScreen> {
                               final userInfo = snapshot.data;
                               return ListTile(
                                 leading: CircleAvatar(
-                                  backgroundImage: userInfo?['photoURL'] != null
-                                      ? NetworkImage(
-                                          userInfo!['photoURL'].toString(),
-                                        )
-                                      : null,
-                                  child: userInfo?['photoURL'] == null
+                                  backgroundImage:
+                                      ImageUrlValidator.safeNetworkImage(
+                                        userInfo?['photoURL']?.toString(),
+                                      ),
+                                  child:
+                                      !ImageUrlValidator.isValidImageUrl(
+                                        userInfo?['photoURL']?.toString(),
+                                      )
                                       ? const Icon(Icons.person)
                                       : null,
                                 ),

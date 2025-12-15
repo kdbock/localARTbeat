@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class ArtworkTab extends StatelessWidget {
   final bool isLoading;
@@ -17,7 +18,7 @@ class ArtworkTab extends StatelessWidget {
     if (isLoading) {
       return const Center(child: CircularProgressIndicator());
     } else if (artworks.isEmpty) {
-      return const Center(child: Text('No artwork found.'));
+      return Center(child: Text('dashboard_no_artwork_found'.tr()));
     }
     return GridView.builder(
       shrinkWrap: true,

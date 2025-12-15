@@ -1,3 +1,4 @@
+import 'package:artbeat_core/artbeat_core.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:provider/provider.dart';
@@ -219,11 +220,13 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                         ),
                         ...(_participants.map(
                           (user) => ListTile(
-                            leading: (user.photoUrl?.isNotEmpty == true)
+                            leading:
+                                ImageUrlValidator.isValidImageUrl(user.photoUrl)
                                 ? CircleAvatar(
-                                    backgroundImage: NetworkImage(
-                                      user.photoUrl!,
-                                    ),
+                                    backgroundImage:
+                                        ImageUrlValidator.safeNetworkImage(
+                                          user.photoUrl,
+                                        ),
                                   )
                                 : CircleAvatar(
                                     child: Text(

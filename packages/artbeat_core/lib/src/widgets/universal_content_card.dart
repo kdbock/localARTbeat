@@ -1,9 +1,6 @@
+import 'package:artbeat_core/artbeat_core.dart';
 import 'package:flutter/material.dart';
-import '../models/engagement_model.dart';
-import '../theme/artbeat_colors.dart';
 
-import 'content_engagement_bar.dart';
-import 'optimized_image.dart';
 
 /// Universal content card that can display any ARTbeat content type
 /// with consistent engagement actions: Appreciate, Connect, Discuss, Amplify
@@ -144,11 +141,10 @@ class UniversalContentCard extends StatelessWidget {
             child: CircleAvatar(
               radius: 20,
               backgroundColor: ArtbeatColors.lightGray,
-              backgroundImage:
-                  authorImageUrl != null && authorImageUrl!.isNotEmpty
-                  ? NetworkImage(authorImageUrl!)
-                  : null,
-              child: authorImageUrl == null || authorImageUrl!.isEmpty
+              backgroundImage: ImageUrlValidator.safeNetworkImage(
+                authorImageUrl,
+              ),
+              child: !ImageUrlValidator.isValidImageUrl(authorImageUrl)
                   ? const Icon(
                       Icons.person,
                       color: ArtbeatColors.darkGray,

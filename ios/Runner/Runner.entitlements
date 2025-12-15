@@ -16,7 +16,7 @@
 	<string>development</string>
 	<key>com.apple.developer.default-data-protection</key>
 	<string>NSFileProtectionComplete</string>
-	<key>com.apple.developer.in-app-payments</key>
+	<key>com.apple.developer.in-app-purchase</key>
 	<array/>
 </dict>
 </plist>

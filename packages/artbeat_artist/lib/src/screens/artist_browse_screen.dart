@@ -285,19 +285,16 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
                     borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(12),
                     ),
-                    image: artist.coverImageUrl != null &&
-                            artist.coverImageUrl!.isNotEmpty &&
-                            Uri.tryParse(artist.coverImageUrl!)?.hasScheme ==
-                                true
+                    image: core.ImageUrlValidator.isValidImageUrl(
+                            artist.coverImageUrl)
                         ? DecorationImage(
-                            image: NetworkImage(artist.coverImageUrl!),
+                            image: core.ImageUrlValidator.safeNetworkImage(
+                                artist.coverImageUrl)!,
                             fit: BoxFit.cover,
                           )
                         : null,
-                    color: artist.coverImageUrl == null ||
-                            artist.coverImageUrl!.isEmpty ||
-                            Uri.tryParse(artist.coverImageUrl!)?.hasScheme !=
-                                true
+                    color: !core.ImageUrlValidator.isValidImageUrl(
+                            artist.coverImageUrl)
                         ? Colors.grey[300]
                         : null,
                   ),

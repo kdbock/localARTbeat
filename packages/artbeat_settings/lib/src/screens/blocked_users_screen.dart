@@ -190,10 +190,11 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: ArtbeatColors.primaryPurple.withValues(alpha: 0.1),
-          backgroundImage: user.blockedUserProfileImage.isNotEmpty
-              ? NetworkImage(user.blockedUserProfileImage)
-              : null,
-          child: user.blockedUserProfileImage.isEmpty
+          backgroundImage: ImageUrlValidator.safeNetworkImage(
+            user.blockedUserProfileImage,
+          ),
+          child:
+              !ImageUrlValidator.isValidImageUrl(user.blockedUserProfileImage)
               ? Text(
                   user.blockedUserName.isNotEmpty
                       ? user.blockedUserName[0].toUpperCase()

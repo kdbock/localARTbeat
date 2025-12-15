@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../services/capture_service.dart';
 import 'comment_item_widget.dart';
-import 'package:artbeat_core/artbeat_core.dart' show AppLogger;
+import 'package:artbeat_core/artbeat_core.dart' show AppLogger, ImageUrlValidator;
 
 /// Widget for displaying and managing comments on a capture
 class CommentsSectionWidget extends StatefulWidget {
@@ -169,11 +169,10 @@ class _CommentsSectionWidgetState extends State<CommentsSectionWidget> {
               // Avatar
               CircleAvatar(
                 radius: 20,
-                backgroundImage:
-                    widget.userAvatar != null && widget.userAvatar!.isNotEmpty
-                    ? NetworkImage(widget.userAvatar!)
-                    : null,
-                child: widget.userAvatar == null || widget.userAvatar!.isEmpty
+                backgroundImage: ImageUrlValidator.safeNetworkImage(
+                  widget.userAvatar,
+                ),
+                child: !ImageUrlValidator.isValidImageUrl(widget.userAvatar)
                     ? const Icon(Icons.person)
                     : null,
               ),
