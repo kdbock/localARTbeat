@@ -196,10 +196,10 @@ class AppRouter {
 
   /// Handles specialized routes that aren't in core handler
   Route<dynamic>? _handleSpecializedRoutes(RouteSettings settings) {
-    final routeName = settings.name!;
+    final routeName = settings.name;
 
     // Artist routes
-    if (routeName.startsWith('/artist')) {
+    if (routeName!.startsWith('/artist')) {
       return _handleArtistRoutes(settings);
     }
 
@@ -1690,21 +1690,21 @@ class _ArtistFeedLoaderState extends State<_ArtistFeedLoader> {
             .get();
 
         if (userDoc.exists) {
-          final userData = userDoc.data()!;
+          final userData = userDoc.data();
           _artistProfile = core.ArtistProfileModel(
             id: widget.artistUserId,
             userId: widget.artistUserId,
             displayName:
-                (userData['displayName'] as String?) ?? 'Unknown Artist',
-            bio: userData['bio'] as String?,
-            profileImageUrl: userData['profileImageUrl'] as String?,
-            location: userData['location'] as String?,
+                (userData?['displayName'] as String?) ?? 'Unknown Artist',
+            bio: userData?['bio'] as String?,
+            profileImageUrl: userData?['profileImageUrl'] as String?,
+            location: userData?['location'] as String?,
             userType: core.UserType.artist,
             createdAt:
-                (userData['createdAt'] as Timestamp?)?.toDate() ??
+                (userData?['createdAt'] as Timestamp?)?.toDate() ??
                 DateTime.now(),
             updatedAt:
-                (userData['updatedAt'] as Timestamp?)?.toDate() ??
+                (userData?['updatedAt'] as Timestamp?)?.toDate() ??
                 DateTime.now(),
             mediums: [],
             styles: [],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import '../models/challenge_model.dart';
 
@@ -141,9 +142,9 @@ class _DailyQuestCardState extends State<DailyQuestCard>
                           children: [
                             Row(
                               children: [
-                                const Text(
-                                  '🎯 DAILY QUEST',
-                                  style: TextStyle(
+                                Text(
+                                  'daily_quest_label'.tr(),
+                                  style: const TextStyle(
                                     color: Colors.white70,
                                     fontSize: 11,
                                     fontWeight: FontWeight.bold,
@@ -343,9 +344,9 @@ class _DailyQuestCardState extends State<DailyQuestCard>
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
-                                  'Quest Complete!',
-                                  style: TextStyle(
+                                Text(
+                                  'daily_quest_complete'.tr(),
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
@@ -409,9 +410,9 @@ class _DailyQuestCardState extends State<DailyQuestCard>
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          'How to Complete',
-                          style: TextStyle(
+                        Text(
+                          'daily_quest_how_to_complete'.tr(),
+                          style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                             color: Colors.black87,

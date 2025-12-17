@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_ads/artbeat_ads.dart';
 import '../../widgets/enhanced_artwork_card.dart';
@@ -48,10 +49,10 @@ class _EnhancedCommunityFeedScreenState
       appBar: AppBar(
         title: Text(
           widget.topicFilter != null
-              ? '${widget.topicFilter} Feed'
+              ? '${widget.topicFilter} ${"screen_title_community_feed".tr()}'
               : widget.artistFilter != null
-              ? 'Artist Feed'
-              : 'Community Feed',
+              ? 'Artist ${"screen_title_community_feed".tr()}'
+              : 'screen_title_community_feed'.tr(),
         ),
         backgroundColor: ArtbeatColors.primaryPurple,
         foregroundColor: Colors.white,

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../theme/artbeat_colors.dart';
 import '../providers/messaging_provider.dart';
 import 'enhanced_profile_menu.dart';
@@ -146,7 +147,7 @@ class _EnhancedUniversalHeaderState extends State<EnhancedUniversalHeader>
               ),
               onPressed:
                   widget.onBackPressed ?? () => Navigator.maybePop(context),
-              tooltip: 'Back',
+              tooltip: 'header_tooltip_back'.tr(),
             )
           : IconButton(
               icon: Icon(
@@ -154,7 +155,7 @@ class _EnhancedUniversalHeaderState extends State<EnhancedUniversalHeader>
                 color: widget.foregroundColor ?? ArtbeatColors.headerText,
               ),
               onPressed: widget.onMenuPressed ?? () => _openDrawer(),
-              tooltip: 'Menu',
+              tooltip: 'header_tooltip_menu'.tr(),
             ),
     );
   }
@@ -230,7 +231,7 @@ class _EnhancedUniversalHeaderState extends State<EnhancedUniversalHeader>
             color: widget.foregroundColor ?? ArtbeatColors.headerText,
           ),
           onPressed: () => Navigator.pushNamed(context, '/search'),
-          tooltip: 'Search',
+          tooltip: 'header_tooltip_search'.tr(),
         ),
       );
     }
@@ -250,7 +251,7 @@ class _EnhancedUniversalHeaderState extends State<EnhancedUniversalHeader>
             color: widget.foregroundColor ?? ArtbeatColors.headerText,
           ),
           onPressed: widget.onDeveloperPressed ?? () => _showDeveloperTools(),
-          tooltip: 'Developer Tools',
+          tooltip: 'header_tooltip_developer_tools'.tr(),
         ),
       );
     }
@@ -276,7 +277,7 @@ class _EnhancedUniversalHeaderState extends State<EnhancedUniversalHeader>
           // Navigate to messaging and refresh count when returning
           await Navigator.pushNamed(context, '/messaging');
         },
-        tooltip: 'Messages',
+        tooltip: 'header_tooltip_messages'.tr(),
       );
     }
 
@@ -370,7 +371,7 @@ class _EnhancedUniversalHeaderState extends State<EnhancedUniversalHeader>
         color: widget.foregroundColor ?? ArtbeatColors.headerText,
       ),
       onPressed: widget.onProfilePressed ?? () => _showProfileMenu(),
-      tooltip: 'Profile',
+      tooltip: 'header_tooltip_profile'.tr(),
     );
   }
 

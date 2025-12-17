@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_core/src/services/in_app_gift_service.dart';
 import '../../widgets/gift_card_widget.dart';
@@ -108,13 +109,13 @@ class _ViewReceivedGiftsScreenState extends State<ViewReceivedGiftsScreen> {
     return MainLayout(
       currentIndex: -1, // Not a main navigation screen
       scaffoldKey: _scaffoldKey,
-      appBar: const EnhancedUniversalHeader(
-        title: 'Gifts',
+      appBar: EnhancedUniversalHeader(
+        title: 'screen_title_gifts'.tr(),
         showBackButton: true,
         showSearch: false,
         showDeveloperTools: true,
         backgroundGradient: CommunityColors.communityGradient,
-        titleGradient: LinearGradient(
+        titleGradient: const LinearGradient(
           colors: [Colors.white, Colors.white],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,

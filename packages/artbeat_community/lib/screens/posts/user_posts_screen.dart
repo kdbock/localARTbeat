@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -85,7 +86,7 @@ class _UserPostsScreenState extends State<UserPostsScreen> {
       currentIndex: -1, // Not a main navigation screen
       scaffoldKey: _scaffoldKey,
       appBar: EnhancedUniversalHeader(
-        title: 'My Posts',
+        title: 'screen_title_my_posts'.tr(),
         showBackButton: true,
         showSearch: false,
         showDeveloperTools: true,

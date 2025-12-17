@@ -266,7 +266,7 @@ class _ArtbeatArtwalkDashboardScreenState
                           size: 24,
                         ),
                         onPressed: () => Scaffold.of(context).openDrawer(),
-                        tooltip: 'Open Menu',
+                        tooltip: 'art_walk_dashboard_menu_tooltip'.tr(),
                       ),
                     ),
                   ),
@@ -300,9 +300,9 @@ class _ArtbeatArtwalkDashboardScreenState
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              const Text(
-                                'Ready for your next art adventure?',
-                                style: TextStyle(
+                              Text(
+                                'art_walk_dashboard_greeting_subtitle'.tr(),
+                                style: const TextStyle(
                                   color: Colors.white70,
                                   fontSize: 14,
                                 ),
@@ -332,21 +332,21 @@ class _ArtbeatArtwalkDashboardScreenState
             icon: Icons.local_fire_department,
             iconColor: ArtWalkDashboardColors.accentOrange,
             value: '$_currentStreak',
-            label: 'Day Streak',
+            label: 'art_walk_dashboard_stat_streak'.tr(),
           ),
           const SizedBox(width: 12),
           _buildStatCard(
             icon: Icons.explore,
             iconColor: ArtWalkDashboardColors.primaryGreen,
             value: '${_localCaptures.length}',
-            label: 'Discoveries',
+            label: 'art_walk_dashboard_stat_discoveries'.tr(),
           ),
           const SizedBox(width: 12),
           _buildStatCard(
             icon: Icons.star,
             iconColor: ArtWalkDashboardColors.primaryPurple,
             value: '$_level',
-            label: 'Level',
+            label: 'art_walk_dashboard_stat_level'.tr(),
           ),
         ],
       ),
@@ -559,21 +559,21 @@ class _ArtbeatArtwalkDashboardScreenState
                           ),
                         ),
                         const SizedBox(width: 16),
-                        const Expanded(
+                        Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Instant Discovery',
-                                style: TextStyle(
+                                'art_walk_dashboard_discovery_title'.tr(),
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                               Text(
-                                'Find art around you in real-time',
-                                style: TextStyle(
+                                'art_walk_dashboard_discovery_subtitle'.tr(),
+                                style: const TextStyle(
                                   color: Colors.white70,
                                   fontSize: 14,
                                 ),
@@ -616,12 +616,12 @@ class _ArtbeatArtwalkDashboardScreenState
                                     ),
                                   ),
                                   const Text(
-                                    'nearby',
+                                    'art_walk_dashboard_discovery_nearby',
                                     style: TextStyle(
                                       color: Colors.white70,
                                       fontSize: 12,
                                     ),
-                                  ),
+                                  ).tr(),
                                 ],
                               ),
                             ),
@@ -644,8 +644,8 @@ class _ArtbeatArtwalkDashboardScreenState
 
                           Text(
                             _nearbyArtCount == 0
-                                ? 'Move around to discover art nearby'
-                                : 'Tap below to start exploring',
+                                ? 'art_walk_dashboard_radar_move_around'.tr()
+                                : 'art_walk_dashboard_radar_tap_explore'.tr(),
                             style: const TextStyle(
                               color: Colors.white70,
                               fontSize: 13,
@@ -672,9 +672,9 @@ class _ArtbeatArtwalkDashboardScreenState
                             borderRadius: BorderRadius.circular(25),
                           ),
                         ),
-                        child: const Text(
-                          'Start Discovery',
-                          style: TextStyle(
+                        child: Text(
+                          'art_walk_dashboard_discovery_button'.tr(),
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
@@ -729,21 +729,21 @@ class _ArtbeatArtwalkDashboardScreenState
                   ),
                 ),
                 const SizedBox(width: 12),
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Community Activity',
-                        style: TextStyle(
+                        'art_walk_dashboard_community_title'.tr(),
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: ArtWalkDashboardColors.textPrimary,
                         ),
                       ),
                       Text(
-                        'See what others are discovering',
-                        style: TextStyle(
+                        'art_walk_dashboard_community_subtitle'.tr(),
+                        style: const TextStyle(
                           fontSize: 14,
                           color: ArtWalkDashboardColors.textSecondary,
                         ),
@@ -763,7 +763,9 @@ class _ArtbeatArtwalkDashboardScreenState
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    '$_activeWalkersNearby online',
+                    'art_walk_dashboard_community_online'.tr(
+                      namedArgs: {'count': _activeWalkersNearby.toString()},
+                    ),
                     style: const TextStyle(
                       color: ArtWalkDashboardColors.primaryGreen,
                       fontSize: 12,
@@ -811,21 +813,21 @@ class _ArtbeatArtwalkDashboardScreenState
                   ),
                 ),
                 const SizedBox(width: 12),
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Quick Actions',
-                        style: TextStyle(
+                        'art_walk_dashboard_quick_actions_title'.tr(),
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: ArtWalkDashboardColors.textPrimary,
                         ),
                       ),
                       Text(
-                        'Explore more features',
-                        style: TextStyle(
+                        'art_walk_dashboard_quick_actions_subtitle'.tr(),
+                        style: const TextStyle(
                           fontSize: 14,
                           color: ArtWalkDashboardColors.textSecondary,
                         ),
@@ -849,25 +851,25 @@ class _ArtbeatArtwalkDashboardScreenState
             childAspectRatio: 1.3,
             children: [
               _buildActionCard(
-                'Create Walk',
+                'art_walk_dashboard_action_create_walk'.tr(),
                 Icons.add_location_rounded,
                 ArtWalkDashboardColors.accentOrange,
                 () => Navigator.pushNamed(context, '/art-walk/create'),
               ),
               _buildActionCard(
-                'Browse Art',
+                'art_walk_dashboard_action_browse_art'.tr(),
                 Icons.palette_rounded,
                 ArtWalkDashboardColors.primaryPurple,
                 () => Navigator.pushNamed(context, '/artwork/browse'),
               ),
               _buildActionCard(
-                'My Walks',
+                'art_walk_dashboard_action_my_walks'.tr(),
                 Icons.map_rounded,
                 ArtWalkDashboardColors.primaryBlue,
                 () => Navigator.pushNamed(context, '/art-walk/list'),
               ),
               _buildActionCard(
-                'Achievements',
+                'art_walk_dashboard_action_achievements'.tr(),
                 Icons.emoji_events_rounded,
                 ArtWalkDashboardColors.primaryGreen,
                 () => Navigator.pushNamed(context, '/achievements'),
@@ -966,21 +968,21 @@ class _ArtbeatArtwalkDashboardScreenState
                   ),
                 ),
                 const SizedBox(width: 12),
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Achievements',
-                        style: TextStyle(
+                        'art_walk_dashboard_achievements_title'.tr(),
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: ArtWalkDashboardColors.textPrimary,
                         ),
                       ),
                       Text(
-                        'Your art walk milestones',
-                        style: TextStyle(
+                        'art_walk_dashboard_achievements_subtitle'.tr(),
+                        style: const TextStyle(
                           fontSize: 14,
                           color: ArtWalkDashboardColors.textSecondary,
                         ),
@@ -1041,21 +1043,21 @@ class _ArtbeatArtwalkDashboardScreenState
                   ),
                 ),
                 const SizedBox(width: 12),
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Nearby Art Hotspots',
-                        style: TextStyle(
+                        'art_walk_dashboard_nearby_title'.tr(),
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: ArtWalkDashboardColors.textPrimary,
                         ),
                       ),
                       Text(
-                        'Explore art clusters near you',
-                        style: TextStyle(
+                        'art_walk_dashboard_nearby_subtitle'.tr(),
+                        style: const TextStyle(
                           fontSize: 14,
                           color: ArtWalkDashboardColors.textSecondary,
                         ),
@@ -1082,16 +1084,22 @@ class _ArtbeatArtwalkDashboardScreenState
 
   String _getDynamicGreeting() {
     final hour = DateTime.now().hour;
-    if (hour < 12) return 'Good morning';
-    if (hour < 17) return 'Good afternoon';
-    return 'Good evening';
+    if (hour < 12) return 'art_walk_dashboard_greeting_morning'.tr();
+    if (hour < 17) return 'art_walk_dashboard_greeting_afternoon'.tr();
+    return 'art_walk_dashboard_greeting_evening'.tr();
   }
 
   String _getRadarStatusMessage() {
-    if (_nearbyArtCount == 0) return 'Scanning for art...';
-    if (_nearbyArtCount == 1) return '1 artwork nearby!';
-    if (_nearbyArtCount < 5) return '$_nearbyArtCount artworks nearby!';
-    return 'Art hotspot! $_nearbyArtCount artworks nearby!';
+    if (_nearbyArtCount == 0) return 'art_walk_dashboard_radar_scanning'.tr();
+    if (_nearbyArtCount == 1)
+      return 'art_walk_dashboard_radar_one_artwork'.tr();
+    if (_nearbyArtCount < 5)
+      return 'art_walk_dashboard_radar_multiple_artworks'.tr(
+        namedArgs: {'count': _nearbyArtCount.toString()},
+      );
+    return 'art_walk_dashboard_radar_hotspot'.tr(
+      namedArgs: {'count': _nearbyArtCount.toString()},
+    );
   }
 
   Widget _buildEmptyAchievementsState() {
@@ -1109,9 +1117,9 @@ class _ArtbeatArtwalkDashboardScreenState
             size: 48,
           ),
           const SizedBox(height: 12),
-          const Text(
-            'Your achievement gallery awaits!',
-            style: TextStyle(
+          Text(
+            'art_walk_dashboard_empty_achievements'.tr(),
+            style: const TextStyle(
               color: ArtWalkDashboardColors.textPrimary,
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -1119,9 +1127,9 @@ class _ArtbeatArtwalkDashboardScreenState
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 4),
-          const Text(
-            'Start discovering art to unlock amazing achievements',
-            style: TextStyle(
+          Text(
+            'art_walk_dashboard_empty_achievements_subtitle'.tr(),
+            style: const TextStyle(
               color: ArtWalkDashboardColors.textSecondary,
               fontSize: 12,
             ),
@@ -1197,9 +1205,9 @@ class _ArtbeatArtwalkDashboardScreenState
             size: 48,
           ),
           const SizedBox(height: 12),
-          const Text(
-            'Art hotspots loading...',
-            style: TextStyle(
+          Text(
+            'art_walk_dashboard_empty_clusters'.tr(),
+            style: const TextStyle(
               color: ArtWalkDashboardColors.textPrimary,
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -1207,9 +1215,9 @@ class _ArtbeatArtwalkDashboardScreenState
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 4),
-          const Text(
-            'Move around to discover amazing art in your area!',
-            style: TextStyle(
+          Text(
+            'art_walk_dashboard_empty_clusters_subtitle'.tr(),
+            style: const TextStyle(
               color: ArtWalkDashboardColors.textSecondary,
               fontSize: 12,
             ),

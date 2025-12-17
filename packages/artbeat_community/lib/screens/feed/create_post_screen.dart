@@ -8,6 +8,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:image_editor_plus/image_editor_plus.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../services/art_community_service.dart';
 import '../../services/firebase_storage_service.dart';
 import '../../services/moderation_service.dart';
@@ -565,9 +566,9 @@ class _CreatePostScreenState extends State<CreatePostScreen>
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: const Text(
-          'Create Post',
-          style: TextStyle(fontWeight: FontWeight.w600),
+        title: Text(
+          'screen_title_create_post'.tr(),
+          style: const TextStyle(fontWeight: FontWeight.w600),
         ),
         backgroundColor: ArtbeatColors.primaryPurple,
         foregroundColor: Colors.white,

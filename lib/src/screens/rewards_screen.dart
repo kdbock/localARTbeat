@@ -99,13 +99,13 @@ class _RewardsScreenState extends State<RewardsScreen>
       return const Center(child: Text('Please sign in to view your rewards'));
     }
 
-    final userData = currentUser!;
+    final userData = currentUser;
 
     // Get user stats from Firestore or use defaults
-    final xp = userData.experiencePoints;
-    final levelTitle = rewardsService.getLevelTitle(userData.level);
+    final xp = userData?.experiencePoints;
+    final levelTitle = rewardsService.getLevelTitle(userData!.level);
     final levelRange = rewardsService.getLevelXPRange(userData.level);
-    final progress = rewardsService.getLevelProgress(xp, userData.level);
+    final progress = rewardsService.getLevelProgress(xp!, userData.level);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),

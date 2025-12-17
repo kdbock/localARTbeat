@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>aps-environment</key>
-	<string>development</string>
+	<string>production</string>
 	<key>com.apple.developer.applesignin</key>
 	<array>
 		<string>Default</string>
@@ -13,10 +13,10 @@
 		<string>applinks:wordnerd-artbeat.firebaseapp.com</string>
 	</array>
 	<key>com.apple.developer.devicecheck.appattest-environment</key>
-	<string>development</string>
+	<string>production</string>
 	<key>com.apple.developer.default-data-protection</key>
 	<string>NSFileProtectionComplete</string>
-	<key>com.apple.developer.in-app-purchase</key>
+	<key>com.apple.developer.in-app-payments</key>
 	<array/>
 </dict>
 </plist>

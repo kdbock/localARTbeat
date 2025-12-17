@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -55,13 +56,13 @@ class _QuietModeScreenState extends State<QuietModeScreen> {
     return MainLayout(
       currentIndex: -1, // Not a main navigation screen
       scaffoldKey: _scaffoldKey,
-      appBar: const EnhancedUniversalHeader(
-        title: 'Quiet Mode',
+      appBar: EnhancedUniversalHeader(
+        title: 'screen_title_quiet_mode'.tr(),
         showBackButton: true,
         showSearch: false,
         showDeveloperTools: true,
         backgroundGradient: CommunityColors.communityGradient,
-        titleGradient: LinearGradient(
+        titleGradient: const LinearGradient(
           colors: [Colors.white, Colors.white],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,

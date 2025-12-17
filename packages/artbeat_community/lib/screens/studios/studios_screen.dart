@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
 import '../../models/studio_model.dart';
 import '../../services/firestore_service.dart';
@@ -69,10 +70,10 @@ class _StudiosScreenState extends State<StudiosScreen> {
     return core.MainLayout(
       scaffoldKey: scaffoldKey,
       currentIndex: 3, // Community tab in bottom navigation
-      appBar: const core.EnhancedUniversalHeader(
-        title: 'Studios',
+      appBar: core.EnhancedUniversalHeader(
+        title: 'screen_title_studios'.tr(),
         backgroundGradient: CommunityColors.communityGradient,
-        titleGradient: LinearGradient(
+        titleGradient: const LinearGradient(
           colors: [Colors.white, Colors.white],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,

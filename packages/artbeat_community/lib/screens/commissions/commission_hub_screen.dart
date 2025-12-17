@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
 import 'package:artbeat_artist/artbeat_artist.dart';
 import '../../models/direct_commission_model.dart';
@@ -146,20 +147,20 @@ class _CommissionHubScreenState extends State<CommissionHubScreen> {
                   child: const Icon(Icons.work, color: Colors.white, size: 24),
                 ),
                 const SizedBox(width: 12),
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        'Commission Hub',
-                        style: TextStyle(
+                        'screen_title_commissions'.tr(),
+                        style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 18,
                           color: Colors.white,
                         ),
                       ),
-                      Text(
+                      const Text(
                         'Manage your commission requests',
                         style: TextStyle(fontSize: 11, color: Colors.white70),
                         overflow: TextOverflow.ellipsis,

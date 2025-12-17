@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../models/weekly_goal_model.dart';
 
 /// Widget to display weekly goals in a beautiful card format
@@ -69,9 +70,9 @@ class _WeeklyGoalsCardState extends State<WeeklyGoalsCard> {
                           children: [
                             Row(
                               children: [
-                                const Text(
-                                  'Weekly Goals',
-                                  style: TextStyle(
+                                Text(
+                                  'weekly_goals_title'.tr(),
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 20,
                                     fontWeight: FontWeight.bold,
@@ -102,7 +103,12 @@ class _WeeklyGoalsCardState extends State<WeeklyGoalsCard> {
                               ],
                             ),
                             Text(
-                              '${_getCompletedCount()} of ${widget.goals.length} completed',
+                              'weekly_goals_completed'.tr(
+                                namedArgs: {
+                                  'count': _getCompletedCount().toString(),
+                                  'total': widget.goals.length.toString(),
+                                },
+                              ),
                               style: const TextStyle(
                                 color: Colors.white70,
                                 fontSize: 14,
@@ -135,23 +141,21 @@ class _WeeklyGoalsCardState extends State<WeeklyGoalsCard> {
                 if (widget.onTap != null)
                   Padding(
                     padding: const EdgeInsets.all(16),
-                    child: Center(
-                      child: TextButton.icon(
-                        onPressed: widget.onTap,
-                        icon: const Icon(Icons.visibility, color: Colors.white),
-                        label: const Text(
-                          'View All Goals',
-                          style: TextStyle(color: Colors.white),
+                    child: TextButton.icon(
+                      onPressed: widget.onTap,
+                      icon: const Icon(Icons.visibility, color: Colors.white),
+                      label: Text(
+                        'weekly_goals_view_all'.tr(),
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      style: TextButton.styleFrom(
+                        backgroundColor: Colors.white.withValues(alpha: 0.2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
                         ),
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.white.withValues(alpha: 0.2),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 12,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
                     ),
@@ -315,7 +319,9 @@ class _WeeklyGoalsCardState extends State<WeeklyGoalsCard> {
               ),
               const SizedBox(width: 4),
               Text(
-                '${goal.daysRemaining}d left',
+                'weekly_goals_days_left'.tr(
+                  namedArgs: {'days': goal.daysRemaining.toString()},
+                ),
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.7),
                   fontSize: 12,
@@ -343,7 +349,7 @@ class _WeeklyGoalsCardState extends State<WeeklyGoalsCard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Milestones',
+            'weekly_goals_milestones'.tr(),
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.7),
               fontSize: 11,

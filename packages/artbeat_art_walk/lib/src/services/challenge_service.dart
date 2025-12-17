@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../models/challenge_model.dart';
 import 'rewards_service.dart';
 
@@ -61,15 +62,17 @@ class ChallengeService {
       ChallengeModel(
         id: 'discover_art_${DateTime.now().millisecondsSinceEpoch}',
         userId: userId,
-        title: 'Art Explorer',
-        description:
-            'Discover ${_scaleTarget(3, userLevel)} new pieces of public art today',
+        title: 'quest_art_explorer_title'.tr(),
+        description: 'quest_art_explorer_desc'.tr(
+          namedArgs: {'count': _scaleTarget(3, userLevel).toString()},
+        ),
         type: ChallengeType.daily,
         targetCount: _scaleTarget(3, userLevel),
         currentCount: 0,
         rewardXP: _scaleReward(50, userLevel),
-        rewardDescription:
-            '${_scaleReward(50, userLevel)} XP for exploring art!',
+        rewardDescription: 'quest_art_explorer_reward'.tr(
+          namedArgs: {'xp': _scaleReward(50, userLevel).toString()},
+        ),
         isCompleted: false,
         createdAt: DateTime.now(),
         expiresAt: DateTime.now().add(const Duration(days: 1)),
@@ -77,15 +80,17 @@ class ChallengeService {
       ChallengeModel(
         id: 'discover_neighborhood_${DateTime.now().millisecondsSinceEpoch}',
         userId: userId,
-        title: 'Neighborhood Scout',
-        description:
-            'Find art in ${_scaleTarget(2, userLevel)} different neighborhoods',
+        title: 'quest_neighborhood_scout_title'.tr(),
+        description: 'quest_neighborhood_scout_desc'.tr(
+          namedArgs: {'count': _scaleTarget(2, userLevel).toString()},
+        ),
         type: ChallengeType.daily,
         targetCount: _scaleTarget(2, userLevel),
         currentCount: 0,
         rewardXP: _scaleReward(65, userLevel),
-        rewardDescription:
-            '${_scaleReward(65, userLevel)} XP for exploring new areas!',
+        rewardDescription: 'quest_neighborhood_scout_reward'.tr(
+          namedArgs: {'xp': _scaleReward(65, userLevel).toString()},
+        ),
         isCompleted: false,
         createdAt: DateTime.now(),
         expiresAt: DateTime.now().add(const Duration(days: 1)),
@@ -95,15 +100,17 @@ class ChallengeService {
       ChallengeModel(
         id: 'capture_photos_${DateTime.now().millisecondsSinceEpoch}',
         userId: userId,
-        title: 'Photo Hunter',
-        description:
-            'Take ${_scaleTarget(5, userLevel)} photos of different artworks',
+        title: 'quest_photo_hunter_title'.tr(),
+        description: 'quest_photo_hunter_desc'.tr(
+          namedArgs: {'count': _scaleTarget(5, userLevel).toString()},
+        ),
         type: ChallengeType.daily,
         targetCount: _scaleTarget(5, userLevel),
         currentCount: 0,
         rewardXP: _scaleReward(75, userLevel),
-        rewardDescription:
-            '${_scaleReward(75, userLevel)} XP for your photography skills!',
+        rewardDescription: 'quest_photo_hunter_reward'.tr(
+          namedArgs: {'xp': _scaleReward(75, userLevel).toString()},
+        ),
         isCompleted: false,
         createdAt: DateTime.now(),
         expiresAt: DateTime.now().add(const Duration(days: 1)),
@@ -111,15 +118,17 @@ class ChallengeService {
       ChallengeModel(
         id: 'golden_hour_${DateTime.now().millisecondsSinceEpoch}',
         userId: userId,
-        title: 'Golden Hour Artist',
-        description:
-            'Capture ${_scaleTarget(3, userLevel)} artworks during sunrise or sunset',
+        title: 'quest_golden_hour_artist_title'.tr(),
+        description: 'quest_golden_hour_artist_desc'.tr(
+          namedArgs: {'count': _scaleTarget(3, userLevel).toString()},
+        ),
         type: ChallengeType.daily,
         targetCount: _scaleTarget(3, userLevel),
         currentCount: 0,
         rewardXP: _scaleReward(90, userLevel),
-        rewardDescription:
-            '${_scaleReward(90, userLevel)} XP for perfect lighting!',
+        rewardDescription: 'quest_golden_hour_artist_reward'.tr(
+          namedArgs: {'xp': _scaleReward(90, userLevel).toString()},
+        ),
         isCompleted: false,
         createdAt: DateTime.now(),
         expiresAt: DateTime.now().add(const Duration(days: 1)),
@@ -129,15 +138,17 @@ class ChallengeService {
       ChallengeModel(
         id: 'social_share_${DateTime.now().millisecondsSinceEpoch}',
         userId: userId,
-        title: 'Art Sharer',
-        description:
-            'Share ${_scaleTarget(2, userLevel)} art discoveries with friends',
+        title: 'quest_art_sharer_title'.tr(),
+        description: 'quest_art_sharer_desc'.tr(
+          namedArgs: {'count': _scaleTarget(2, userLevel).toString()},
+        ),
         type: ChallengeType.daily,
         targetCount: _scaleTarget(2, userLevel),
         currentCount: 0,
         rewardXP: _scaleReward(40, userLevel),
-        rewardDescription:
-            '${_scaleReward(40, userLevel)} XP for sharing the art love!',
+        rewardDescription: 'quest_art_sharer_reward'.tr(
+          namedArgs: {'xp': _scaleReward(40, userLevel).toString()},
+        ),
         isCompleted: false,
         createdAt: DateTime.now(),
         expiresAt: DateTime.now().add(const Duration(days: 1)),
@@ -145,15 +156,17 @@ class ChallengeService {
       ChallengeModel(
         id: 'community_connector_${DateTime.now().millisecondsSinceEpoch}',
         userId: userId,
-        title: 'Community Connector',
-        description:
-            'Comment on ${_scaleTarget(3, userLevel)} other users\' art discoveries',
+        title: 'quest_community_connector_title'.tr(),
+        description: 'quest_community_connector_desc'.tr(
+          namedArgs: {'count': _scaleTarget(3, userLevel).toString()},
+        ),
         type: ChallengeType.daily,
         targetCount: _scaleTarget(3, userLevel),
         currentCount: 0,
         rewardXP: _scaleReward(45, userLevel),
-        rewardDescription:
-            '${_scaleReward(45, userLevel)} XP for building community!',
+        rewardDescription: 'quest_community_connector_reward'.tr(
+          namedArgs: {'xp': _scaleReward(45, userLevel).toString()},
+        ),
         isCompleted: false,
         createdAt: DateTime.now(),
         expiresAt: DateTime.now().add(const Duration(days: 1)),
@@ -163,14 +176,17 @@ class ChallengeService {
       ChallengeModel(
         id: 'walk_distance_${DateTime.now().millisecondsSinceEpoch}',
         userId: userId,
-        title: 'Urban Wanderer',
-        description: 'Walk ${_scaleTarget(2, userLevel)}km while exploring art',
+        title: 'quest_urban_wanderer_title'.tr(),
+        description: 'quest_urban_wanderer_desc'.tr(
+          namedArgs: {'count': _scaleTarget(2, userLevel).toString()},
+        ),
         type: ChallengeType.daily,
         targetCount: _scaleTarget(2000, userLevel), // meters
         currentCount: 0,
         rewardXP: _scaleReward(60, userLevel),
-        rewardDescription:
-            '${_scaleReward(60, userLevel)} XP for your urban adventure!',
+        rewardDescription: 'quest_urban_wanderer_reward'.tr(
+          namedArgs: {'xp': _scaleReward(60, userLevel).toString()},
+        ),
         isCompleted: false,
         createdAt: DateTime.now(),
         expiresAt: DateTime.now().add(const Duration(days: 1)),
@@ -178,15 +194,17 @@ class ChallengeService {
       ChallengeModel(
         id: 'step_master_${DateTime.now().millisecondsSinceEpoch}',
         userId: userId,
-        title: 'Step Master',
-        description:
-            'Take ${_scaleTarget(5000, userLevel)} steps on your art journey',
+        title: 'quest_step_master_title'.tr(),
+        description: 'quest_step_master_desc'.tr(
+          namedArgs: {'count': _scaleTarget(5000, userLevel).toString()},
+        ),
         type: ChallengeType.daily,
         targetCount: _scaleTarget(5000, userLevel),
         currentCount: 0,
         rewardXP: _scaleReward(70, userLevel),
-        rewardDescription:
-            '${_scaleReward(70, userLevel)} XP for staying active!',
+        rewardDescription: 'quest_step_master_reward'.tr(
+          namedArgs: {'xp': _scaleReward(70, userLevel).toString()},
+        ),
         isCompleted: false,
         createdAt: DateTime.now(),
         expiresAt: DateTime.now().add(const Duration(days: 1)),
@@ -196,14 +214,15 @@ class ChallengeService {
       ChallengeModel(
         id: 'early_bird_${DateTime.now().millisecondsSinceEpoch}',
         userId: userId,
-        title: 'Early Bird Explorer',
-        description: 'Discover art before 9 AM',
+        title: 'quest_early_bird_title'.tr(),
+        description: 'quest_early_bird_desc'.tr(),
         type: ChallengeType.daily,
         targetCount: _scaleTarget(2, userLevel),
         currentCount: 0,
         rewardXP: _scaleReward(55, userLevel),
-        rewardDescription:
-            '${_scaleReward(55, userLevel)} XP for early exploration!',
+        rewardDescription: 'quest_early_bird_reward'.tr(
+          namedArgs: {'xp': _scaleReward(55, userLevel).toString()},
+        ),
         isCompleted: false,
         createdAt: DateTime.now(),
         expiresAt: DateTime.now().add(const Duration(days: 1)),
@@ -211,15 +230,17 @@ class ChallengeService {
       ChallengeModel(
         id: 'night_owl_${DateTime.now().millisecondsSinceEpoch}',
         userId: userId,
-        title: 'Night Owl Artist',
-        description:
-            'Capture ${_scaleTarget(3, userLevel)} illuminated artworks after sunset',
+        title: 'quest_night_owl_title'.tr(),
+        description: 'quest_night_owl_desc'.tr(
+          namedArgs: {'count': _scaleTarget(3, userLevel).toString()},
+        ),
         type: ChallengeType.daily,
         targetCount: _scaleTarget(3, userLevel),
         currentCount: 0,
         rewardXP: _scaleReward(80, userLevel),
-        rewardDescription:
-            '${_scaleReward(80, userLevel)} XP for night photography!',
+        rewardDescription: 'quest_night_owl_reward'.tr(
+          namedArgs: {'xp': _scaleReward(80, userLevel).toString()},
+        ),
         isCompleted: false,
         createdAt: DateTime.now(),
         expiresAt: DateTime.now().add(const Duration(days: 1)),
@@ -229,15 +250,17 @@ class ChallengeService {
       ChallengeModel(
         id: 'art_critic_${DateTime.now().millisecondsSinceEpoch}',
         userId: userId,
-        title: 'Art Critic',
-        description:
-            'Write detailed descriptions for ${_scaleTarget(3, userLevel)} artworks',
+        title: 'quest_art_critic_title'.tr(),
+        description: 'quest_art_critic_desc'.tr(
+          namedArgs: {'count': _scaleTarget(3, userLevel).toString()},
+        ),
         type: ChallengeType.daily,
         targetCount: _scaleTarget(3, userLevel),
         currentCount: 0,
         rewardXP: _scaleReward(50, userLevel),
-        rewardDescription:
-            '${_scaleReward(50, userLevel)} XP for thoughtful reviews!',
+        rewardDescription: 'quest_art_critic_reward'.tr(
+          namedArgs: {'xp': _scaleReward(50, userLevel).toString()},
+        ),
         isCompleted: false,
         createdAt: DateTime.now(),
         expiresAt: DateTime.now().add(const Duration(days: 1)),
@@ -245,15 +268,17 @@ class ChallengeService {
       ChallengeModel(
         id: 'style_collector_${DateTime.now().millisecondsSinceEpoch}',
         userId: userId,
-        title: 'Style Collector',
-        description:
-            'Find art in ${_scaleTarget(3, userLevel)} different styles (mural, sculpture, etc.)',
+        title: 'quest_style_collector_title'.tr(),
+        description: 'quest_style_collector_desc'.tr(
+          namedArgs: {'count': _scaleTarget(3, userLevel).toString()},
+        ),
         type: ChallengeType.daily,
         targetCount: _scaleTarget(3, userLevel),
         currentCount: 0,
         rewardXP: _scaleReward(85, userLevel),
-        rewardDescription:
-            '${_scaleReward(85, userLevel)} XP for diverse taste!',
+        rewardDescription: 'quest_style_collector_reward'.tr(
+          namedArgs: {'xp': _scaleReward(85, userLevel).toString()},
+        ),
         isCompleted: false,
         createdAt: DateTime.now(),
         expiresAt: DateTime.now().add(const Duration(days: 1)),
@@ -264,15 +289,17 @@ class ChallengeService {
         ChallengeModel(
           id: 'streak_warrior_${DateTime.now().millisecondsSinceEpoch}',
           userId: userId,
-          title: 'Streak Warrior',
-          description:
-              'Complete any ${_scaleTarget(2, userLevel)} art activities to maintain your streak',
+          title: 'quest_streak_warrior_title'.tr(),
+          description: 'quest_streak_warrior_desc'.tr(
+            namedArgs: {'count': _scaleTarget(2, userLevel).toString()},
+          ),
           type: ChallengeType.daily,
           targetCount: _scaleTarget(2, userLevel),
           currentCount: 0,
           rewardXP: _scaleReward(100, userLevel),
-          rewardDescription:
-              '${_scaleReward(100, userLevel)} XP + Streak Bonus!',
+          rewardDescription: 'quest_streak_warrior_reward'.tr(
+            namedArgs: {'xp': _scaleReward(100, userLevel).toString()},
+          ),
           isCompleted: false,
           createdAt: DateTime.now(),
           expiresAt: DateTime.now().add(const Duration(days: 1)),

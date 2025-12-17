@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import '../screens/unified_community_hub.dart';
 import '../screens/feed/enhanced_community_feed_screen.dart';
@@ -91,7 +92,7 @@ class _CommunityDrawerState extends State<CommunityDrawer> {
                     children: [
                       _buildDrawerItem(
                         icon: Icons.home,
-                        title: 'Community Hub',
+                        title: 'community_drawer_community_hub'.tr(),
                         onTap: () => _navigateToScreen(
                           context,
                           const UnifiedCommunityHub(),
@@ -99,7 +100,7 @@ class _CommunityDrawerState extends State<CommunityDrawer> {
                       ),
                       _buildDrawerItem(
                         icon: Icons.feed,
-                        title: 'Art Feed',
+                        title: 'community_drawer_art_feed'.tr(),
                         onTap: () => _navigateToScreen(
                           context,
                           const EnhancedCommunityFeedScreen(),
@@ -107,7 +108,7 @@ class _CommunityDrawerState extends State<CommunityDrawer> {
                       ),
                       _buildDrawerItem(
                         icon: Icons.trending_up,
-                        title: 'Trending',
+                        title: 'community_drawer_trending'.tr(),
                         onTap: () => _navigateToScreen(
                           context,
                           const TrendingContentScreen(),
@@ -115,7 +116,7 @@ class _CommunityDrawerState extends State<CommunityDrawer> {
                       ),
                       _buildDrawerItem(
                         icon: Icons.palette,
-                        title: 'Artist Portfolios',
+                        title: 'community_drawer_artist_portfolios'.tr(),
                         onTap: () => _navigateToScreen(
                           context,
                           const PortfoliosScreen(),
@@ -123,13 +124,13 @@ class _CommunityDrawerState extends State<CommunityDrawer> {
                       ),
                       _buildDrawerItem(
                         icon: Icons.business,
-                        title: 'Studios',
+                        title: 'community_drawer_studios'.tr(),
                         onTap: () =>
                             _navigateToScreen(context, const StudiosScreen()),
                       ),
                       _buildDrawerItem(
                         icon: Icons.handshake,
-                        title: 'Commissions',
+                        title: 'community_drawer_commissions'.tr(),
                         onTap: () => _navigateToScreen(
                           context,
                           const CommissionHubScreen(),
@@ -137,7 +138,7 @@ class _CommunityDrawerState extends State<CommunityDrawer> {
                       ),
                       _buildDrawerItem(
                         icon: Icons.card_giftcard,
-                        title: 'Gifts',
+                        title: 'community_drawer_gifts'.tr(),
                         onTap: () => _navigateToScreen(
                           context,
                           const ViewReceivedGiftsScreen(),
@@ -146,7 +147,7 @@ class _CommunityDrawerState extends State<CommunityDrawer> {
                       const Divider(),
                       _buildDrawerItem(
                         icon: Icons.search,
-                        title: 'Search Community',
+                        title: 'community_drawer_search_community'.tr(),
                         onTap: () => _navigateToScreen(
                           context,
                           const CommunityArtistsScreen(),
@@ -154,13 +155,13 @@ class _CommunityDrawerState extends State<CommunityDrawer> {
                       ),
                       _buildDrawerItem(
                         icon: Icons.settings,
-                        title: 'Community Settings',
+                        title: 'community_drawer_community_settings'.tr(),
                         onTap: () =>
                             _navigateToScreen(context, const QuietModeScreen()),
                       ),
                       _buildDrawerItem(
                         icon: Icons.admin_panel_settings,
-                        title: 'Moderation',
+                        title: 'community_drawer_moderation'.tr(),
                         onTap: () => _navigateToScreen(
                           context,
                           const ModerationQueueScreen(),
@@ -175,9 +176,9 @@ class _CommunityDrawerState extends State<CommunityDrawer> {
               Container(
                 padding: const EdgeInsets.all(16),
                 color: Colors.white,
-                child: const Text(
-                  'ARTbeat Community v0.0.2',
-                  style: TextStyle(
+                child: Text(
+                  'community_drawer_version'.tr(),
+                  style: const TextStyle(
                     color: CommunityColors.textSecondary,
                     fontSize: 12,
                   ),
@@ -234,8 +235,9 @@ class _CommunityDrawerState extends State<CommunityDrawer> {
           // User name
           Text(
             _isLoading
-                ? 'Loading...'
-                : _currentUser?.fullName ?? 'Community Member',
+                ? 'community_drawer_loading'.tr()
+                : _currentUser?.fullName ??
+                      'community_drawer_community_member'.tr(),
             style: const TextStyle(
               color: Colors.white,
               fontSize: 18,
@@ -258,22 +260,22 @@ class _CommunityDrawerState extends State<CommunityDrawer> {
   }
 
   String _getUserRoleText() {
-    if (_currentUser == null) return 'Member';
+    if (_currentUser == null) return 'community_drawer_member'.tr();
 
     final userType = _currentUser!.userType;
-    if (userType == null) return 'Community Member';
+    if (userType == null) return 'community_drawer_community_member'.tr();
 
     switch (userType) {
       case 'artist':
-        return 'Artist';
+        return 'community_drawer_artist'.tr();
       case 'business':
-        return 'Gallery';
+        return 'community_drawer_gallery'.tr();
       case 'moderator':
-        return 'Moderator';
+        return 'community_drawer_moderator'.tr();
       case 'admin':
-        return 'Admin';
+        return 'community_drawer_admin'.tr();
       default:
-        return 'Community Member';
+        return 'community_drawer_community_member'.tr();
     }
   }
 

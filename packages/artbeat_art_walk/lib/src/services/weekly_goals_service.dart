@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../models/weekly_goal_model.dart';
 import 'rewards_service.dart';
 
@@ -67,15 +68,17 @@ class WeeklyGoalsService {
       WeeklyGoalModel(
         id: 'weekly_explorer_${now.millisecondsSinceEpoch}',
         userId: userId,
-        title: 'Weekly Art Explorer',
-        description:
-            'Discover ${_scaleTarget(15, userLevel)} pieces of art this week',
+        title: 'goal_weekly_art_explorer_title'.tr(),
+        description: 'goal_weekly_art_explorer_desc'.tr(
+          namedArgs: {'count': _scaleTarget(15, userLevel).toString()},
+        ),
         category: WeeklyGoalCategory.exploration,
         targetCount: _scaleTarget(15, userLevel),
         currentCount: 0,
         rewardXP: _scaleReward(500, userLevel),
-        rewardDescription:
-            '${_scaleReward(500, userLevel)} XP + Explorer Badge',
+        rewardDescription: 'goal_weekly_art_explorer_reward'.tr(
+          namedArgs: {'xp': _scaleReward(500, userLevel).toString()},
+        ),
         isCompleted: false,
         createdAt: now,
         expiresAt: weekEnd,
@@ -83,23 +86,25 @@ class WeeklyGoalsService {
         year: now.year,
         iconEmoji: '🗺️',
         milestones: [
-          'Discover 5 artworks',
-          'Discover 10 artworks',
-          'Complete the challenge!',
+          'goal_weekly_art_explorer_milestone_1'.tr(),
+          'goal_weekly_art_explorer_milestone_2'.tr(),
+          'goal_weekly_art_explorer_milestone_3'.tr(),
         ],
       ),
       WeeklyGoalModel(
         id: 'weekly_neighborhoods_${now.millisecondsSinceEpoch}',
         userId: userId,
-        title: 'Neighborhood Navigator',
-        description:
-            'Explore ${_scaleTarget(5, userLevel)} different neighborhoods',
+        title: 'goal_neighborhood_navigator_title'.tr(),
+        description: 'goal_neighborhood_navigator_desc'.tr(
+          namedArgs: {'count': _scaleTarget(5, userLevel).toString()},
+        ),
         category: WeeklyGoalCategory.exploration,
         targetCount: _scaleTarget(5, userLevel),
         currentCount: 0,
         rewardXP: _scaleReward(600, userLevel),
-        rewardDescription:
-            '${_scaleReward(600, userLevel)} XP + Navigator Badge',
+        rewardDescription: 'goal_neighborhood_navigator_reward'.tr(
+          namedArgs: {'xp': _scaleReward(600, userLevel).toString()},
+        ),
         isCompleted: false,
         createdAt: now,
         expiresAt: weekEnd,
@@ -107,9 +112,9 @@ class WeeklyGoalsService {
         year: now.year,
         iconEmoji: '🏘️',
         milestones: [
-          'Visit 2 neighborhoods',
-          'Visit 4 neighborhoods',
-          'Complete the challenge!',
+          'goal_neighborhood_navigator_milestone_1'.tr(),
+          'goal_neighborhood_navigator_milestone_2'.tr(),
+          'goal_neighborhood_navigator_milestone_3'.tr(),
         ],
       ),
 
@@ -117,15 +122,17 @@ class WeeklyGoalsService {
       WeeklyGoalModel(
         id: 'weekly_photographer_${now.millisecondsSinceEpoch}',
         userId: userId,
-        title: 'Master Photographer',
-        description:
-            'Capture ${_scaleTarget(20, userLevel)} stunning art photos',
+        title: 'goal_master_photographer_title'.tr(),
+        description: 'goal_master_photographer_desc'.tr(
+          namedArgs: {'count': _scaleTarget(20, userLevel).toString()},
+        ),
         category: WeeklyGoalCategory.photography,
         targetCount: _scaleTarget(20, userLevel),
         currentCount: 0,
         rewardXP: _scaleReward(550, userLevel),
-        rewardDescription:
-            '${_scaleReward(550, userLevel)} XP + Photographer Badge',
+        rewardDescription: 'goal_master_photographer_reward'.tr(
+          namedArgs: {'xp': _scaleReward(550, userLevel).toString()},
+        ),
         isCompleted: false,
         createdAt: now,
         expiresAt: weekEnd,
@@ -133,23 +140,25 @@ class WeeklyGoalsService {
         year: now.year,
         iconEmoji: '📸',
         milestones: [
-          'Take 7 photos',
-          'Take 14 photos',
-          'Complete the challenge!',
+          'goal_master_photographer_milestone_1'.tr(),
+          'goal_master_photographer_milestone_2'.tr(),
+          'goal_master_photographer_milestone_3'.tr(),
         ],
       ),
       WeeklyGoalModel(
         id: 'weekly_golden_hour_${now.millisecondsSinceEpoch}',
         userId: userId,
-        title: 'Golden Hour Master',
-        description:
-            'Capture ${_scaleTarget(10, userLevel)} artworks during golden hour',
+        title: 'goal_golden_hour_master_title'.tr(),
+        description: 'goal_golden_hour_master_desc'.tr(
+          namedArgs: {'count': _scaleTarget(10, userLevel).toString()},
+        ),
         category: WeeklyGoalCategory.photography,
         targetCount: _scaleTarget(10, userLevel),
         currentCount: 0,
         rewardXP: _scaleReward(700, userLevel),
-        rewardDescription:
-            '${_scaleReward(700, userLevel)} XP + Golden Hour Badge',
+        rewardDescription: 'goal_golden_hour_master_reward'.tr(
+          namedArgs: {'xp': _scaleReward(700, userLevel).toString()},
+        ),
         isCompleted: false,
         createdAt: now,
         expiresAt: weekEnd,
@@ -157,9 +166,9 @@ class WeeklyGoalsService {
         year: now.year,
         iconEmoji: '🌅',
         milestones: [
-          'Capture 3 golden hour photos',
-          'Capture 7 golden hour photos',
-          'Complete the challenge!',
+          'goal_golden_hour_master_milestone_1'.tr(),
+          'goal_golden_hour_master_milestone_2'.tr(),
+          'goal_golden_hour_master_milestone_3'.tr(),
         ],
       ),
 
@@ -167,14 +176,20 @@ class WeeklyGoalsService {
       WeeklyGoalModel(
         id: 'weekly_social_butterfly_${now.millisecondsSinceEpoch}',
         userId: userId,
-        title: 'Social Butterfly',
-        description:
-            'Share ${_scaleTarget(10, userLevel)} discoveries and get ${_scaleTarget(20, userLevel)} likes',
+        title: 'goal_social_butterfly_title'.tr(),
+        description: 'goal_social_butterfly_desc'.tr(
+          namedArgs: {
+            'count': _scaleTarget(10, userLevel).toString(),
+            'likes': _scaleTarget(20, userLevel).toString(),
+          },
+        ),
         category: WeeklyGoalCategory.social,
         targetCount: _scaleTarget(10, userLevel),
         currentCount: 0,
         rewardXP: _scaleReward(450, userLevel),
-        rewardDescription: '${_scaleReward(450, userLevel)} XP + Social Badge',
+        rewardDescription: 'goal_social_butterfly_reward'.tr(
+          namedArgs: {'xp': _scaleReward(450, userLevel).toString()},
+        ),
         isCompleted: false,
         createdAt: now,
         expiresAt: weekEnd,
@@ -182,23 +197,25 @@ class WeeklyGoalsService {
         year: now.year,
         iconEmoji: '🦋',
         milestones: [
-          'Share 3 discoveries',
-          'Share 7 discoveries',
-          'Complete the challenge!',
+          'goal_social_butterfly_milestone_1'.tr(),
+          'goal_social_butterfly_milestone_2'.tr(),
+          'goal_social_butterfly_milestone_3'.tr(),
         ],
       ),
       WeeklyGoalModel(
         id: 'weekly_community_builder_${now.millisecondsSinceEpoch}',
         userId: userId,
-        title: 'Community Builder',
-        description:
-            'Comment on ${_scaleTarget(15, userLevel)} other users\' discoveries',
+        title: 'goal_community_builder_title'.tr(),
+        description: 'goal_community_builder_desc'.tr(
+          namedArgs: {'count': _scaleTarget(15, userLevel).toString()},
+        ),
         category: WeeklyGoalCategory.social,
         targetCount: _scaleTarget(15, userLevel),
         currentCount: 0,
         rewardXP: _scaleReward(500, userLevel),
-        rewardDescription:
-            '${_scaleReward(500, userLevel)} XP + Community Badge',
+        rewardDescription: 'goal_community_builder_reward'.tr(
+          namedArgs: {'xp': _scaleReward(500, userLevel).toString()},
+        ),
         isCompleted: false,
         createdAt: now,
         expiresAt: weekEnd,
@@ -206,9 +223,9 @@ class WeeklyGoalsService {
         year: now.year,
         iconEmoji: '🤝',
         milestones: [
-          'Comment 5 times',
-          'Comment 10 times',
-          'Complete the challenge!',
+          'goal_community_builder_milestone_1'.tr(),
+          'goal_community_builder_milestone_2'.tr(),
+          'goal_community_builder_milestone_3'.tr(),
         ],
       ),
 
@@ -216,33 +233,43 @@ class WeeklyGoalsService {
       WeeklyGoalModel(
         id: 'weekly_walker_${now.millisecondsSinceEpoch}',
         userId: userId,
-        title: 'Urban Walker',
-        description: 'Walk ${_scaleTarget(15, userLevel)}km exploring art',
+        title: 'goal_urban_walker_title'.tr(),
+        description: 'goal_urban_walker_desc'.tr(
+          namedArgs: {'count': _scaleTarget(15, userLevel).toString()},
+        ),
         category: WeeklyGoalCategory.fitness,
         targetCount: _scaleTarget(15000, userLevel), // meters
         currentCount: 0,
         rewardXP: _scaleReward(650, userLevel),
-        rewardDescription: '${_scaleReward(650, userLevel)} XP + Walker Badge',
+        rewardDescription: 'goal_urban_walker_reward'.tr(
+          namedArgs: {'xp': _scaleReward(650, userLevel).toString()},
+        ),
         isCompleted: false,
         createdAt: now,
         expiresAt: weekEnd,
         weekNumber: weekNumber,
         year: now.year,
         iconEmoji: '🚶',
-        milestones: ['Walk 5km', 'Walk 10km', 'Complete the challenge!'],
+        milestones: [
+          'goal_urban_walker_milestone_1'.tr(),
+          'goal_urban_walker_milestone_2'.tr(),
+          'goal_urban_walker_milestone_3'.tr(),
+        ],
       ),
       WeeklyGoalModel(
         id: 'weekly_step_champion_${now.millisecondsSinceEpoch}',
         userId: userId,
-        title: 'Step Champion',
-        description:
-            'Take ${_scaleTarget(35000, userLevel)} steps on your art journey',
+        title: 'goal_step_champion_title'.tr(),
+        description: 'goal_step_champion_desc'.tr(
+          namedArgs: {'count': _scaleTarget(35000, userLevel).toString()},
+        ),
         category: WeeklyGoalCategory.fitness,
         targetCount: _scaleTarget(35000, userLevel),
         currentCount: 0,
         rewardXP: _scaleReward(600, userLevel),
-        rewardDescription:
-            '${_scaleReward(600, userLevel)} XP + Champion Badge',
+        rewardDescription: 'goal_step_champion_reward'.tr(
+          namedArgs: {'xp': _scaleReward(600, userLevel).toString()},
+        ),
         isCompleted: false,
         createdAt: now,
         expiresAt: weekEnd,
@@ -250,9 +277,9 @@ class WeeklyGoalsService {
         year: now.year,
         iconEmoji: '👟',
         milestones: [
-          'Take 10,000 steps',
-          'Take 25,000 steps',
-          'Complete the challenge!',
+          'goal_step_champion_milestone_1'.tr(),
+          'goal_step_champion_milestone_2'.tr(),
+          'goal_step_champion_milestone_3'.tr(),
         ],
       ),
 
@@ -260,13 +287,17 @@ class WeeklyGoalsService {
       WeeklyGoalModel(
         id: 'weekly_quest_master_${now.millisecondsSinceEpoch}',
         userId: userId,
-        title: 'Quest Master',
-        description: 'Complete ${_scaleTarget(5, userLevel)} daily quests',
+        title: 'goal_quest_master_title'.tr(),
+        description: 'goal_quest_master_desc'.tr(
+          namedArgs: {'count': _scaleTarget(5, userLevel).toString()},
+        ),
         category: WeeklyGoalCategory.mastery,
         targetCount: _scaleTarget(5, userLevel),
         currentCount: 0,
         rewardXP: _scaleReward(800, userLevel),
-        rewardDescription: '${_scaleReward(800, userLevel)} XP + Master Badge',
+        rewardDescription: 'goal_quest_master_reward'.tr(
+          namedArgs: {'xp': _scaleReward(800, userLevel).toString()},
+        ),
         isCompleted: false,
         createdAt: now,
         expiresAt: weekEnd,
@@ -274,22 +305,23 @@ class WeeklyGoalsService {
         year: now.year,
         iconEmoji: '🏆',
         milestones: [
-          'Complete 2 daily quests',
-          'Complete 4 daily quests',
-          'Complete the challenge!',
+          'goal_quest_master_milestone_1'.tr(),
+          'goal_quest_master_milestone_2'.tr(),
+          'goal_quest_master_milestone_3'.tr(),
         ],
       ),
       WeeklyGoalModel(
         id: 'weekly_streak_keeper_${now.millisecondsSinceEpoch}',
         userId: userId,
-        title: 'Streak Keeper',
-        description: 'Maintain a 7-day streak',
+        title: 'goal_streak_keeper_title'.tr(),
+        description: 'goal_streak_keeper_desc'.tr(),
         category: WeeklyGoalCategory.mastery,
         targetCount: 7,
         currentCount: 0,
         rewardXP: _scaleReward(1000, userLevel),
-        rewardDescription:
-            '${_scaleReward(1000, userLevel)} XP + Legendary Streak Badge',
+        rewardDescription: 'goal_streak_keeper_reward'.tr(
+          namedArgs: {'xp': _scaleReward(1000, userLevel).toString()},
+        ),
         isCompleted: false,
         createdAt: now,
         expiresAt: weekEnd,
@@ -297,9 +329,9 @@ class WeeklyGoalsService {
         year: now.year,
         iconEmoji: '🔥',
         milestones: [
-          'Maintain 3-day streak',
-          'Maintain 5-day streak',
-          'Complete the challenge!',
+          'goal_streak_keeper_milestone_1'.tr(),
+          'goal_streak_keeper_milestone_2'.tr(),
+          'goal_streak_keeper_milestone_3'.tr(),
         ],
       ),
 
@@ -307,15 +339,17 @@ class WeeklyGoalsService {
       WeeklyGoalModel(
         id: 'weekly_style_collector_${now.millisecondsSinceEpoch}',
         userId: userId,
-        title: 'Style Collector',
-        description:
-            'Find art in ${_scaleTarget(8, userLevel)} different styles',
+        title: 'goal_style_collector_title'.tr(),
+        description: 'goal_style_collector_desc'.tr(
+          namedArgs: {'count': _scaleTarget(8, userLevel).toString()},
+        ),
         category: WeeklyGoalCategory.collection,
         targetCount: _scaleTarget(8, userLevel),
         currentCount: 0,
         rewardXP: _scaleReward(750, userLevel),
-        rewardDescription:
-            '${_scaleReward(750, userLevel)} XP + Collector Badge',
+        rewardDescription: 'goal_style_collector_reward'.tr(
+          namedArgs: {'xp': _scaleReward(750, userLevel).toString()},
+        ),
         isCompleted: false,
         createdAt: now,
         expiresAt: weekEnd,
@@ -323,22 +357,25 @@ class WeeklyGoalsService {
         year: now.year,
         iconEmoji: '🎨',
         milestones: [
-          'Collect 3 styles',
-          'Collect 6 styles',
-          'Complete the challenge!',
+          'goal_style_collector_milestone_1'.tr(),
+          'goal_style_collector_milestone_2'.tr(),
+          'goal_style_collector_milestone_3'.tr(),
         ],
       ),
       WeeklyGoalModel(
         id: 'weekly_artist_fan_${now.millisecondsSinceEpoch}',
         userId: userId,
-        title: 'Artist Fan',
-        description:
-            'Discover works from ${_scaleTarget(10, userLevel)} different artists',
+        title: 'goal_artist_fan_title'.tr(),
+        description: 'goal_artist_fan_desc'.tr(
+          namedArgs: {'count': _scaleTarget(10, userLevel).toString()},
+        ),
         category: WeeklyGoalCategory.collection,
         targetCount: _scaleTarget(10, userLevel),
         currentCount: 0,
         rewardXP: _scaleReward(700, userLevel),
-        rewardDescription: '${_scaleReward(700, userLevel)} XP + Fan Badge',
+        rewardDescription: 'goal_artist_fan_reward'.tr(
+          namedArgs: {'xp': _scaleReward(700, userLevel).toString()},
+        ),
         isCompleted: false,
         createdAt: now,
         expiresAt: weekEnd,
@@ -346,9 +383,9 @@ class WeeklyGoalsService {
         year: now.year,
         iconEmoji: '🎭',
         milestones: [
-          'Discover 3 artists',
-          'Discover 7 artists',
-          'Complete the challenge!',
+          'goal_artist_fan_milestone_1'.tr(),
+          'goal_artist_fan_milestone_2'.tr(),
+          'goal_artist_fan_milestone_3'.tr(),
         ],
       ),
     ];

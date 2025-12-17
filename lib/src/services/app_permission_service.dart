@@ -66,8 +66,8 @@ class AppPermissionService {
     final List<Permission> permissionsToRequest = [];
 
     for (final permission in essentialPermissions) {
-      final status = _permissionStatus[permission]!;
-      if (status.isDenied) {
+      final status = _permissionStatus[permission];
+      if (status!.isDenied) {
         permissionsToRequest.add(permission);
       }
     }

@@ -2,6 +2,7 @@ import 'package:artbeat_artwork/artbeat_artwork.dart'
     show ArtworkCleanupService;
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -46,31 +47,31 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      return const Scaffold(
+      return Scaffold(
         appBar: EnhancedUniversalHeader(
-          title: 'Notifications',
+          title: 'notifications_title'.tr(),
           showLogo: false,
           showSearch: false,
           showBackButton: true,
         ),
-        body: Center(child: Text('Please log in to view notifications.')),
+        body: Center(child: Text('notifications_login_required'.tr())),
       );
     }
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notifications'),
+        title: Text('notifications_title'.tr()),
         actions: [
           IconButton(
             icon: const Icon(Icons.done_all),
-            tooltip: 'Mark all as read',
+            tooltip: 'notifications_mark_all_read'.tr(),
             onPressed: () async {
               await _notificationService.markAllNotificationsAsRead();
               if (mounted) {
                 // ignore: use_build_context_synchronously
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('All notifications marked as read'),
-                    duration: Duration(seconds: 2),
+                  SnackBar(
+                    content: Text('notifications_all_marked_read'.tr()),
+                    duration: const Duration(seconds: 2),
                   ),
                 );
               }
@@ -80,15 +81,14 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           if (kDebugMode)
             IconButton(
               icon: const Icon(Icons.add),
-              tooltip: 'Add test notification',
+              tooltip: 'notifications_add_test'.tr(),
               onPressed: () async {
                 final user = FirebaseAuth.instance.currentUser;
                 if (user != null) {
                   await _notificationService.sendNotification(
                     userId: user.uid,
-                    title: 'Test Notification',
-                    message:
-                        'This is a test notification to verify the system is working!',
+                    title: 'notifications_test_title'.tr(),
+                    message: 'notifications_test_message'.tr(),
                     type: NotificationType.achievement,
                     data: {'testData': 'This is test data'},
                   );
@@ -120,21 +120,24 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return ListView(
               padding: const EdgeInsets.all(20),
-              children: const [
-                SizedBox(height: 40),
-                Icon(Icons.notifications, size: 64, color: Colors.grey),
-                SizedBox(height: 24),
+              children: [
+                const SizedBox(height: 40),
+                const Icon(Icons.notifications, size: 64, color: Colors.grey),
+                const SizedBox(height: 24),
                 Center(
                   child: Text(
-                    'No notifications yet',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    'notifications_empty_title'.tr(),
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Center(
                   child: Text(
-                    'You’ll see updates, messages, and alerts here.',
-                    style: TextStyle(fontSize: 15, color: Colors.grey),
+                    'notifications_empty_subtitle'.tr(),
+                    style: const TextStyle(fontSize: 15, color: Colors.grey),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -151,7 +154,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               final data = doc.data() as Map<String, dynamic>;
               final title = data['title'] is String
                   ? data['title'] as String
-                  : 'Notification';
+                  : 'notifications_default_title'.tr();
               final message = data['message'] is String
                   ? data['message'] as String
                   : (data['body'] is String ? data['body'] as String : '');
@@ -231,7 +234,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       floatingActionButton: _isAdminUser() && kDebugMode
           ? FloatingActionButton.extended(
               onPressed: _runImageCleanup,
-              label: const Text('Fix Images'),
+              label: Text('notifications_fix_images'.tr()),
               icon: const Icon(Icons.build),
             )
           : null,
@@ -340,13 +343,19 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     final difference = now.difference(date);
 
     if (difference.inMinutes < 1) {
-      return 'Just now';
+      return 'notifications_just_now'.tr();
     } else if (difference.inMinutes < 60) {
-      return '${difference.inMinutes}m ago';
+      return 'notifications_minutes_ago'.tr(
+        namedArgs: {'count': difference.inMinutes.toString()},
+      );
     } else if (difference.inHours < 24) {
-      return '${difference.inHours}h ago';
+      return 'notifications_hours_ago'.tr(
+        namedArgs: {'count': difference.inHours.toString()},
+      );
     } else if (difference.inDays < 7) {
-      return '${difference.inDays}d ago';
+      return 'notifications_days_ago'.tr(
+        namedArgs: {'count': difference.inDays.toString()},
+      );
     } else {
       return intl.DateFormat('MMM d, y').format(date);
     }

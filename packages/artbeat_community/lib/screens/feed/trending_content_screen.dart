@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import '../../models/post_model.dart';
 import '../../widgets/post_card.dart';
@@ -218,13 +219,13 @@ class _TrendingContentScreenState extends State<TrendingContentScreen> {
     return MainLayout(
       currentIndex: 3, // Community tab in bottom navigation
       scaffoldKey: _scaffoldKey,
-      appBar: const EnhancedUniversalHeader(
-        title: 'Trending Content',
+      appBar: EnhancedUniversalHeader(
+        title: 'screen_title_trending_content'.tr(),
         showBackButton: true,
         showSearch: false,
         showDeveloperTools: true,
         backgroundGradient: CommunityColors.communityGradient,
-        titleGradient: LinearGradient(
+        titleGradient: const LinearGradient(
           colors: [Colors.white, Colors.white],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,

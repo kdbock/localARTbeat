@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -155,9 +156,16 @@ class _CommissionsTabState extends State<CommissionsTab>
     } catch (e) {
       setState(() => _isLoading = false);
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error loading commissions: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'community_hub_error_loading_commissions'.tr().replaceAll(
+              '{error}',
+              e.toString(),
+            ),
+          ),
+        ),
+      );
     }
   }
 
@@ -168,10 +176,10 @@ class _CommissionsTabState extends State<CommissionsTab>
         // Tabs for filtering commissions
         TabBar(
           controller: _tabController,
-          tabs: const [
-            Tab(text: 'Active'),
-            Tab(text: 'Pending'),
-            Tab(text: 'Completed'),
+          tabs: [
+            Tab(text: 'community_hub_commission_tab_active'.tr()),
+            Tab(text: 'community_hub_commission_tab_pending'.tr()),
+            Tab(text: 'community_hub_commission_tab_completed'.tr()),
           ],
         ),
         // Commission list
@@ -217,7 +225,7 @@ class _CommissionsTabState extends State<CommissionsTab>
 
   Widget _buildCommissionList(List<DirectCommissionModel> commissions) {
     if (commissions.isEmpty) {
-      return const Center(child: Text('No commissions found'));
+      return Center(child: Text('community_hub_no_commissions'.tr()));
     }
 
     return ListView.builder(
@@ -852,22 +860,25 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
                   ),
                 ),
                 const SizedBox(width: 12),
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        'Art Community',
-                        style: TextStyle(
+                        'community_hub_title'.tr(),
+                        style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 18,
                           color: Colors.white,
                         ),
                       ),
                       Text(
-                        'Connect with artists',
-                        style: TextStyle(fontSize: 11, color: Colors.white70),
+                        'community_hub_subtitle'.tr(),
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: Colors.white70,
+                        ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ],
@@ -955,10 +966,19 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
                 fontWeight: FontWeight.w400,
                 fontSize: 16,
               ),
-              tabs: const [
-                Tab(text: 'Feed', icon: Icon(Icons.feed, size: 20)),
-                Tab(text: 'Artists', icon: Icon(Icons.palette, size: 20)),
-                Tab(text: 'Groups', icon: Icon(Icons.group, size: 20)),
+              tabs: [
+                Tab(
+                  text: 'community_hub_tab_feed'.tr(),
+                  icon: const Icon(Icons.feed, size: 20),
+                ),
+                Tab(
+                  text: 'community_hub_tab_artists'.tr(),
+                  icon: const Icon(Icons.palette, size: 20),
+                ),
+                Tab(
+                  text: 'community_hub_tab_groups'.tr(),
+                  icon: const Icon(Icons.group, size: 20),
+                ),
               ],
             ),
           ),
@@ -1376,7 +1396,7 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
                           : Icons.favorite_border,
                       color: post.isLikedByCurrentUser ? Colors.red : null,
                     ),
-                    label: const Text('Like'),
+                    label: Text('community_hub_post_action_like'.tr()),
                   ),
                   TextButton.icon(
                     onPressed: () {
@@ -1390,7 +1410,7 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
                       );
                     },
                     icon: const Icon(Icons.comment),
-                    label: const Text('Comment'),
+                    label: Text('community_hub_post_action_comment'.tr()),
                   ),
                   TextButton.icon(
                     onPressed: () {
@@ -1399,7 +1419,7 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
                       _handleShare(post);
                     },
                     icon: const Icon(Icons.share),
-                    label: const Text('Share'),
+                    label: Text('community_hub_post_action_share'.tr()),
                   ),
                 ],
               ),
@@ -1416,18 +1436,38 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
 
     if (difference.inDays > 365) {
       final years = (difference.inDays / 365).floor();
-      return '$years year${years > 1 ? 's' : ''} ago';
+      final plural = years > 1 ? 's' : '';
+      return 'community_hub_time_years_ago'
+          .tr()
+          .replaceAll('{count}', years.toString())
+          .replaceAll('{plural}', plural);
     } else if (difference.inDays > 30) {
       final months = (difference.inDays / 30).floor();
-      return '$months month${months > 1 ? 's' : ''} ago';
+      final plural = months > 1 ? 's' : '';
+      return 'community_hub_time_months_ago'
+          .tr()
+          .replaceAll('{count}', months.toString())
+          .replaceAll('{plural}', plural);
     } else if (difference.inDays > 0) {
-      return '${difference.inDays} day${difference.inDays > 1 ? 's' : ''} ago';
+      final plural = difference.inDays > 1 ? 's' : '';
+      return 'community_hub_time_days_ago'
+          .tr()
+          .replaceAll('{count}', difference.inDays.toString())
+          .replaceAll('{plural}', plural);
     } else if (difference.inHours > 0) {
-      return '${difference.inHours} hour${difference.inHours > 1 ? 's' : ''} ago';
+      final plural = difference.inHours > 1 ? 's' : '';
+      return 'community_hub_time_hours_ago'
+          .tr()
+          .replaceAll('{count}', difference.inHours.toString())
+          .replaceAll('{plural}', plural);
     } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes} minute${difference.inMinutes > 1 ? 's' : ''} ago';
+      final plural = difference.inMinutes > 1 ? 's' : '';
+      return 'community_hub_time_minutes_ago'
+          .tr()
+          .replaceAll('{count}', difference.inMinutes.toString())
+          .replaceAll('{plural}', plural);
     } else {
-      return 'Just now';
+      return 'community_hub_time_just_now'.tr();
     }
   }
 
@@ -1440,7 +1480,7 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
       if (user == null) {
         AppLogger.error('🤍 User not authenticated, cannot like post');
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please sign in to like posts')),
+          SnackBar(content: Text('community_hub_sign_in_like'.tr())),
         );
         return;
       }
@@ -1512,9 +1552,7 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
         }
         // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to update like. Please try again.'),
-          ),
+          SnackBar(content: Text('community_hub_like_failed'.tr())),
         );
       } else {
         AppLogger.info('🤍 Like successfully updated!');
@@ -1522,9 +1560,10 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
     } catch (e) {
       AppLogger.error('Error handling like: $e');
       // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error updating like. Please try again.')),
-      );
+      ScaffoldMessenger.of(
+        // ignore: use_build_context_synchronously
+        context,
+      ).showSnackBar(SnackBar(content: Text('community_hub_error_like'.tr())));
     }
   }
 
@@ -1536,9 +1575,7 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
     if (user == null) {
       AppLogger.error('💬 User not authenticated, cannot view comments');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please sign in to view and add comments'),
-        ),
+        SnackBar(content: Text('community_hub_sign_in_comment'.tr())),
       );
       return;
     }
@@ -1564,17 +1601,19 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please sign in to share posts')),
+          SnackBar(content: Text('community_hub_sign_in_share'.tr())),
         );
         return;
       }
 
       // Create a new post that shares the original post
-      String shareContent = 'Shared from ARTbeat Community\n\n';
+      final shareIntro = 'community_hub_share_intro'.tr();
+      final shareOriginal = 'community_hub_share_original'.tr();
+      String shareContent = '$shareIntro\n\n';
       if (post.content.isNotEmpty) {
         shareContent += '"${post.content}"\n\n';
       }
-      shareContent += 'Originally posted by ${post.userName}';
+      shareContent += '$shareOriginal ${post.userName}';
 
       if (post.location.isNotEmpty) {
         shareContent += ' • ${post.location}';
@@ -1596,7 +1635,7 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
         // Show success message
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Post shared successfully!')),
+            SnackBar(content: Text('community_hub_share_success'.tr())),
           );
         }
 
@@ -1612,9 +1651,7 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
       AppLogger.error('Error sharing post: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to share post. Please try again.'),
-          ),
+          SnackBar(content: Text('community_hub_share_failed'.tr())),
         );
       }
     }
@@ -1665,18 +1702,21 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
               ),
             ),
             const SizedBox(height: 24),
-            const Text(
-              'No posts or activities yet',
-              style: TextStyle(
+            Text(
+              'community_hub_no_posts'.tr(),
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: ArtbeatColors.textPrimary,
               ),
             ),
             const SizedBox(height: 12),
-            const Text(
-              'Be the first to share your creative work or complete an art walk!',
-              style: TextStyle(color: ArtbeatColors.textSecondary, height: 1.5),
+            Text(
+              'community_hub_no_posts_subtitle'.tr(),
+              style: const TextStyle(
+                color: ArtbeatColors.textSecondary,
+                height: 1.5,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
@@ -1684,7 +1724,7 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text('Show Activities'),
+                Text('community_hub_show_activities'.tr()),
                 Switch(
                   value: _showActivities,
                   onChanged: (value) => _toggleActivitiesFilter(),
@@ -1712,9 +1752,9 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
-                    'Show Activities',
-                    style: TextStyle(
+                  Text(
+                    'community_hub_show_activities'.tr(),
+                    style: const TextStyle(
                       fontSize: 14,
                       color: ArtbeatColors.textSecondary,
                     ),

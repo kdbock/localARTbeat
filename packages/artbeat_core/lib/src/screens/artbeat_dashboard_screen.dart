@@ -219,6 +219,10 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
                 ),
             ],
           ),
+          IconButton(
+            icon: const Icon(Icons.account_circle, color: Colors.white),
+            onPressed: () => _showProfileMenu(context),
+          ),
         ],
       ),
       body: _buildContent(viewModel),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 
 /// Enhanced Profile Menu - Comprehensive dropdown for user profile actions
@@ -89,12 +90,12 @@ class _EnhancedProfileMenuState extends State<EnhancedProfileMenu> {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 children: [
                   // Notifications Section
-                  _buildSectionHeader('Notifications'),
+                  _buildSectionHeader('profile_menu_notifications'.tr()),
                   _buildMenuTile(
                     context: context,
                     icon: Icons.notifications,
-                    title: 'Notifications',
-                    subtitle: 'View your recent notifications',
+                    title: 'profile_menu_notifications'.tr(),
+                    subtitle: 'profile_menu_notifications_subtitle'.tr(),
                     color: ArtbeatColors.primaryPurple,
                     onTap: () => _navigateToRoute('/notifications'),
                   ),
@@ -102,36 +103,36 @@ class _EnhancedProfileMenuState extends State<EnhancedProfileMenu> {
                   const SizedBox(height: 16),
 
                   // Profile Management Section
-                  _buildSectionHeader('Profile Management'),
+                  _buildSectionHeader('profile_menu_profile_management'.tr()),
                   _buildMenuTile(
                     context: context,
                     icon: Icons.person,
-                    title: 'View Profile',
-                    subtitle: 'See your public profile',
+                    title: 'profile_menu_view_profile'.tr(),
+                    subtitle: 'profile_menu_view_profile_subtitle'.tr(),
                     color: ArtbeatColors.primaryPurple,
                     onTap: () => _navigateToRoute('/profile'),
                   ),
                   _buildMenuTile(
                     context: context,
                     icon: Icons.edit,
-                    title: 'Edit Profile',
-                    subtitle: 'Update your information',
+                    title: 'profile_menu_edit_profile'.tr(),
+                    subtitle: 'profile_menu_edit_profile_subtitle'.tr(),
                     color: ArtbeatColors.primaryGreen,
                     onTap: () => _navigateToRoute('/profile/edit'),
                   ),
                   _buildMenuTile(
                     context: context,
                     icon: Icons.camera_alt,
-                    title: 'My Captures',
-                    subtitle: 'View your captured artwork',
+                    title: 'profile_menu_my_captures'.tr(),
+                    subtitle: 'profile_menu_my_captures_subtitle'.tr(),
                     color: ArtbeatColors.info,
                     onTap: () => _navigateToRoute('/capture/my-captures'),
                   ),
                   _buildMenuTile(
                     context: context,
                     icon: Icons.map,
-                    title: 'My Art Walks',
-                    subtitle: 'Your art walk adventures',
+                    title: 'profile_menu_my_art_walks'.tr(),
+                    subtitle: 'profile_menu_my_art_walks_subtitle'.tr(),
                     color: ArtbeatColors.primaryGreen,
                     onTap: () => _navigateToRoute('/art-walk/my-walks'),
                   ),
@@ -139,36 +140,36 @@ class _EnhancedProfileMenuState extends State<EnhancedProfileMenu> {
                   const SizedBox(height: 16),
 
                   // Activity & Social Section
-                  _buildSectionHeader('Activity & Social'),
+                  _buildSectionHeader('profile_menu_activity_social'.tr()),
                   _buildMenuTile(
                     context: context,
                     icon: Icons.favorite,
-                    title: 'Liked Items',
-                    subtitle: 'Artwork, captures, and walks you liked',
+                    title: 'profile_menu_liked_items'.tr(),
+                    subtitle: 'profile_menu_liked_items_subtitle'.tr(),
                     color: ArtbeatColors.error,
                     onTap: () => _navigateToRoute('/profile/liked'),
                   ),
                   _buildMenuTile(
                     context: context,
                     icon: Icons.people,
-                    title: 'Following',
-                    subtitle: 'People you follow',
+                    title: 'profile_menu_following'.tr(),
+                    subtitle: 'profile_menu_following_subtitle'.tr(),
                     color: ArtbeatColors.primaryPurple,
                     onTap: () => _navigateToRoute('/profile/following'),
                   ),
                   _buildMenuTile(
                     context: context,
                     icon: Icons.history,
-                    title: 'Activity History',
-                    subtitle: 'Your recent actions',
+                    title: 'profile_menu_activity_history'.tr(),
+                    subtitle: 'profile_menu_activity_history_subtitle'.tr(),
                     color: ArtbeatColors.textSecondary,
                     onTap: () => _navigateToRoute('/profile/activity'),
                   ),
                   _buildMenuTile(
                     context: context,
                     icon: Icons.analytics,
-                    title: 'Profile Analytics',
-                    subtitle: 'View your profile insights',
+                    title: 'profile_menu_profile_analytics'.tr(),
+                    subtitle: 'profile_menu_profile_analytics_subtitle'.tr(),
                     color: ArtbeatColors.warning,
                     onTap: () => _navigateToRoute('/profile/analytics'),
                   ),
@@ -176,20 +177,20 @@ class _EnhancedProfileMenuState extends State<EnhancedProfileMenu> {
                   const SizedBox(height: 16),
 
                   // Achievements & Rewards Section
-                  _buildSectionHeader('Achievements & Rewards'),
+                  _buildSectionHeader('profile_menu_achievements_rewards'.tr()),
                   _buildMenuTile(
                     context: context,
                     icon: Icons.emoji_events,
-                    title: 'Achievements',
-                    subtitle: 'Your badges and milestones',
+                    title: 'profile_menu_achievements'.tr(),
+                    subtitle: 'profile_menu_achievements_subtitle'.tr(),
                     color: ArtbeatColors.warning,
                     onTap: () => _navigateToRoute('/profile/achievements'),
                   ),
                   _buildMenuTile(
                     context: context,
                     icon: Icons.card_giftcard,
-                    title: 'Rewards',
-                    subtitle: 'Redeem points and coupons',
+                    title: 'profile_menu_rewards'.tr(),
+                    subtitle: 'profile_menu_rewards_subtitle'.tr(),
                     color: ArtbeatColors.primaryGreen,
                     onTap: () => _navigateToRoute('/rewards'),
                   ),
@@ -197,28 +198,29 @@ class _EnhancedProfileMenuState extends State<EnhancedProfileMenu> {
                   const SizedBox(height: 16),
 
                   // Account & Settings Section
-                  _buildSectionHeader('Account & Settings'),
+                  _buildSectionHeader('profile_menu_account_settings'.tr()),
                   _buildMenuTile(
                     context: context,
                     icon: Icons.settings,
-                    title: 'Account Settings',
-                    subtitle: 'Privacy, notifications, preferences',
+                    title: 'profile_menu_account_settings_title'.tr(),
+                    subtitle: 'profile_menu_account_settings_subtitle'.tr(),
                     color: ArtbeatColors.textSecondary,
                     onTap: () => _navigateToRoute('/settings'),
                   ),
                   _buildMenuTile(
                     context: context,
                     icon: Icons.security,
-                    title: 'Privacy & Security',
-                    subtitle: 'Manage your privacy settings',
+                    title: 'profile_menu_privacy_security'.tr(),
+                    subtitle: 'profile_menu_privacy_security_subtitle'.tr(),
                     color: ArtbeatColors.info,
                     onTap: () => _navigateToRoute('/settings/privacy'),
                   ),
                   _buildMenuTile(
                     context: context,
                     icon: Icons.notifications,
-                    title: 'Notifications',
-                    subtitle: 'Customize your alerts',
+                    title: 'profile_menu_notifications_settings'.tr(),
+                    subtitle: 'profile_menu_notifications_settings_subtitle'
+                        .tr(),
                     color: ArtbeatColors.primaryPurple,
                     onTap: () => _navigateToRoute('/settings/notifications'),
                   ),
@@ -226,20 +228,20 @@ class _EnhancedProfileMenuState extends State<EnhancedProfileMenu> {
                   const SizedBox(height: 16),
 
                   // Subscription & Billing Section
-                  _buildSectionHeader('Subscription & Billing'),
+                  _buildSectionHeader('profile_menu_subscription_billing'.tr()),
                   _buildMenuTile(
                     context: context,
                     icon: Icons.star,
-                    title: 'Become an Artist',
-                    subtitle: 'Start your artist journey',
+                    title: 'profile_menu_become_artist'.tr(),
+                    subtitle: 'profile_menu_become_artist_subtitle'.tr(),
                     color: ArtbeatColors.warning,
                     onTap: () => _navigateToRoute('/artist/signup'),
                   ),
                   _buildMenuTile(
                     context: context,
                     icon: Icons.payment,
-                    title: 'Billing & Payments',
-                    subtitle: 'Payment methods and history',
+                    title: 'profile_menu_billing_payments'.tr(),
+                    subtitle: 'profile_menu_billing_payments_subtitle'.tr(),
                     color: ArtbeatColors.primaryGreen,
                     onTap: () => _navigateToRoute('/billing'),
                   ),
@@ -247,28 +249,28 @@ class _EnhancedProfileMenuState extends State<EnhancedProfileMenu> {
                   const SizedBox(height: 16),
 
                   // Support & Help Section
-                  _buildSectionHeader('Support & Help'),
+                  _buildSectionHeader('profile_menu_support_help'.tr()),
                   _buildMenuTile(
                     context: context,
                     icon: Icons.help,
-                    title: 'Help & Support',
-                    subtitle: 'Get help and contact support',
+                    title: 'profile_menu_help_support'.tr(),
+                    subtitle: 'profile_menu_help_support_subtitle'.tr(),
                     color: ArtbeatColors.info,
                     onTap: () => _navigateToRoute('/help'),
                   ),
                   _buildMenuTile(
                     context: context,
                     icon: Icons.feedback,
-                    title: 'Send Feedback',
-                    subtitle: 'Help us improve ARTbeat',
+                    title: 'profile_menu_send_feedback'.tr(),
+                    subtitle: 'profile_menu_send_feedback_subtitle'.tr(),
                     color: ArtbeatColors.primaryPurple,
                     onTap: () => _navigateToRoute('/feedback'),
                   ),
                   _buildMenuTile(
                     context: context,
                     icon: Icons.info,
-                    title: 'About ARTbeat',
-                    subtitle: 'App version and information',
+                    title: 'profile_menu_about_artbeat'.tr(),
+                    subtitle: 'profile_menu_about_artbeat_subtitle'.tr(),
                     color: ArtbeatColors.textSecondary,
                     onTap: () => _navigateToRoute('/about'),
                   ),
@@ -276,12 +278,12 @@ class _EnhancedProfileMenuState extends State<EnhancedProfileMenu> {
                   const SizedBox(height: 16),
 
                   // Sign Out Section
-                  _buildSectionHeader('Account Actions'),
+                  _buildSectionHeader('profile_menu_account_actions'.tr()),
                   _buildMenuTile(
                     context: context,
                     icon: Icons.logout,
-                    title: 'Sign Out',
-                    subtitle: 'Sign out of your account',
+                    title: 'profile_menu_sign_out'.tr(),
+                    subtitle: 'profile_menu_sign_out_subtitle'.tr(),
                     color: ArtbeatColors.error,
                     onTap: () => _showSignOutDialog(),
                   ),
@@ -318,18 +320,18 @@ class _EnhancedProfileMenuState extends State<EnhancedProfileMenu> {
               color: ArtbeatColors.textSecondary,
             ),
             const SizedBox(height: 12),
-            const Text(
-              'Welcome to ARTbeat',
-              style: TextStyle(
+            Text(
+              'profile_menu_welcome_artbeat'.tr(),
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: ArtbeatColors.textPrimary,
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Sign in to access your profile and personalized features',
-              style: TextStyle(
+            Text(
+              'profile_menu_sign_in_message'.tr(),
+              style: const TextStyle(
                 fontSize: 14,
                 color: ArtbeatColors.textSecondary,
               ),
@@ -345,7 +347,7 @@ class _EnhancedProfileMenuState extends State<EnhancedProfileMenu> {
                       backgroundColor: ArtbeatColors.primaryPurple,
                       foregroundColor: Colors.white,
                     ),
-                    child: const Text('Sign In'),
+                    child: Text('profile_menu_sign_in'.tr()),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -355,7 +357,7 @@ class _EnhancedProfileMenuState extends State<EnhancedProfileMenu> {
                     style: OutlinedButton.styleFrom(
                       foregroundColor: ArtbeatColors.primaryPurple,
                     ),
-                    child: const Text('Sign Up'),
+                    child: Text('profile_menu_sign_up'.tr()),
                   ),
                 ),
               ],
@@ -402,7 +404,9 @@ class _EnhancedProfileMenuState extends State<EnhancedProfileMenu> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  _currentUser?.fullName ?? user.displayName ?? 'ARTbeat User',
+                  _currentUser?.fullName ??
+                      user.displayName ??
+                      'profile_menu_artbeat_user'.tr(),
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -411,7 +415,9 @@ class _EnhancedProfileMenuState extends State<EnhancedProfileMenu> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  _currentUser?.email ?? user.email ?? 'No email',
+                  _currentUser?.email ??
+                      user.email ??
+                      'profile_menu_no_email'.tr(),
                   style: const TextStyle(
                     fontSize: 14,
                     color: ArtbeatColors.textSecondary,
@@ -540,14 +546,12 @@ class _EnhancedProfileMenuState extends State<EnhancedProfileMenu> {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Sign Out'),
-        content: const Text(
-          'Are you sure you want to sign out of your account?',
-        ),
+        title: Text('profile_menu_sign_out_dialog_title'.tr()),
+        content: Text('profile_menu_sign_out_dialog_message'.tr()),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text('profile_menu_cancel'.tr()),
           ),
           TextButton(
             onPressed: () async {
@@ -563,7 +567,7 @@ class _EnhancedProfileMenuState extends State<EnhancedProfileMenu> {
               }
             },
             style: TextButton.styleFrom(foregroundColor: ArtbeatColors.error),
-            child: const Text('Sign Out'),
+            child: Text('profile_menu_sign_out'.tr()),
           ),
         ],
       ),

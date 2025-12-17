@@ -194,11 +194,11 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
       if (!serviceEnabled) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Text(
-                'Location services are disabled. Using saved location or default.',
+                'art_walk_art_walk_map_error_location_services_disabled'.tr(),
               ),
-              duration: Duration(seconds: 3),
+              duration: const Duration(seconds: 3),
             ),
           );
         }
@@ -212,11 +212,11 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
         if (permission == LocationPermission.denied) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
+              SnackBar(
                 content: Text(
-                  'Location permission denied. Using saved location or default.',
+                  'art_walk_art_walk_map_error_location_permission_denied'.tr(),
                 ),
-                duration: Duration(seconds: 3),
+                duration: const Duration(seconds: 3),
               ),
             );
           }
@@ -252,18 +252,18 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
     } on TimeoutException {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text(
-              'Location services timed out. Using saved location or default.',
+              'art_walk_art_walk_map_error_location_services_timeout'.tr(),
             ),
-            duration: Duration(seconds: 3),
+            duration: const Duration(seconds: 3),
           ),
         );
       }
       return null;
     } catch (e) {
       if (e is SocketException) {
-        _showSnackBar('Network error. Using saved location or default.');
+        _showSnackBar('art_walk_art_walk_map_error_network_error'.tr());
       }
       return null;
     }
@@ -622,7 +622,7 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
       drawer: const ArtWalkDrawer(),
       child: Scaffold(
         appBar: ArtWalkDesignSystem.buildAppBar(
-          title: 'Art Walk Map',
+          title: 'art_walk_art_walk_map_text_art_walk_map'.tr(),
           showBackButton: false, // Don't show back button
           scaffoldKey: _scaffoldKey, // Provide scaffold key for hamburger menu
           actions: [
@@ -652,7 +652,7 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            'Interactive Map',
+                            'art_walk_art_walk_map_text_interactive_map'.tr(),
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -661,7 +661,8 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Map features are optimized for mobile devices.\nUse the navigation controls below to explore art pieces.',
+                            'art_walk_art_walk_map_text_map_features_mobile'
+                                .tr(),
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 14,
@@ -846,9 +847,9 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
                     Navigator.pushNamed(context, '/art-walk/create');
                   },
                   icon: const Icon(Icons.add_location, color: Colors.white),
-                  label: const Text(
-                    'Create Art Walk',
-                    style: TextStyle(
+                  label: Text(
+                    'art_walk_art_walk_map_text_create_art_walk'.tr(),
+                    style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                     ),
@@ -889,9 +890,18 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    _buildFilterButton('Public', 'public'),
-                    _buildFilterButton('My Captures', 'my_captures'),
-                    _buildFilterButton('My Artwalks', 'my_artwalks'),
+                    _buildFilterButton(
+                      'art_walk_art_walk_map_text_public'.tr(),
+                      'public',
+                    ),
+                    _buildFilterButton(
+                      'art_walk_art_walk_map_text_my_captures'.tr(),
+                      'my_captures',
+                    ),
+                    _buildFilterButton(
+                      'art_walk_art_walk_map_text_my_artwalks'.tr(),
+                      'my_artwalks',
+                    ),
                   ],
                 ),
               ),
@@ -968,7 +978,7 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'Nearby Captures (${_nearbyCaptures.length})',
+                              '${"art_walk_art_walk_map_text_nearby_captures".tr()} (${_nearbyCaptures.length})',
                               style: Theme.of(context).textTheme.titleMedium,
                             ),
                             IconButton(

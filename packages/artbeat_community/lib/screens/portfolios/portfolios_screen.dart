@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:artbeat_core/artbeat_core.dart';
@@ -78,13 +79,13 @@ class _PortfoliosScreenState extends State<PortfoliosScreen> {
       return MainLayout(
         currentIndex: -1, // Not a main navigation screen
         scaffoldKey: _scaffoldKey,
-        appBar: const EnhancedUniversalHeader(
-          title: 'Portfolios',
+        appBar: EnhancedUniversalHeader(
+          title: 'screen_title_artist_portfolios'.tr(),
           showBackButton: true,
           showSearch: false,
           showDeveloperTools: true,
           backgroundGradient: CommunityColors.communityGradient,
-          titleGradient: LinearGradient(
+          titleGradient: const LinearGradient(
             colors: [Colors.white, Colors.white],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -99,13 +100,13 @@ class _PortfoliosScreenState extends State<PortfoliosScreen> {
     return MainLayout(
       currentIndex: -1, // Not a main navigation screen
       scaffoldKey: _scaffoldKey,
-      appBar: const EnhancedUniversalHeader(
-        title: 'Portfolios',
+      appBar: EnhancedUniversalHeader(
+        title: 'screen_title_artist_portfolios'.tr(),
         showBackButton: true,
         showSearch: false,
         showDeveloperTools: true,
         backgroundGradient: CommunityColors.communityGradient,
-        titleGradient: LinearGradient(
+        titleGradient: const LinearGradient(
           colors: [Colors.white, Colors.white],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,

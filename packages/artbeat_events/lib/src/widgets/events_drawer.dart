@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import '../models/artbeat_event.dart';
 import '../services/event_service.dart';
@@ -107,41 +108,41 @@ class _EventsDrawerState extends State<EventsDrawer> {
                     children: [
                       _buildDrawerItem(
                         icon: Icons.home,
-                        title: 'Home',
+                        title: 'events_drawer_home'.tr(),
                         onTap: () => _navigateToScreen(context, '/dashboard'),
                       ),
                       _buildDrawerItem(
                         icon: Icons.search,
-                        title: 'Search',
+                        title: 'events_drawer_search'.tr(),
                         onTap: () =>
                             _navigateToScreen(context, '/events/search'),
                       ),
                       _buildDrawerItem(
                         icon: Icons.message,
-                        title: 'Messages',
+                        title: 'events_drawer_messages'.tr(),
                         onTap: () => _navigateToScreen(context, '/messaging'),
                       ),
                       _buildDrawerItem(
                         icon: Icons.person,
-                        title: 'Profile',
+                        title: 'events_drawer_profile'.tr(),
                         onTap: () => _navigateToScreen(context, '/profile'),
                       ),
                       const Divider(),
                       _buildDrawerItem(
                         icon: Icons.event,
-                        title: 'Events Dashboard',
+                        title: 'events_drawer_events_dashboard'.tr(),
                         onTap: () =>
                             _navigateToScreen(context, '/events/dashboard'),
                       ),
                       _buildDrawerItem(
                         icon: Icons.add_circle,
-                        title: 'Create Event',
+                        title: 'events_drawer_create_event'.tr(),
                         onTap: () =>
                             _navigateToScreen(context, '/events/create'),
                       ),
                       _buildDrawerItem(
                         icon: Icons.event_note,
-                        title: 'My Events',
+                        title: 'events_drawer_my_events'.tr(),
                         onTap: () =>
                             _navigateToScreen(context, '/events/my-events'),
                         badge: _userEvents.isNotEmpty
@@ -150,13 +151,13 @@ class _EventsDrawerState extends State<EventsDrawer> {
                       ),
                       _buildDrawerItem(
                         icon: Icons.confirmation_number,
-                        title: 'My Tickets',
+                        title: 'events_drawer_my_tickets'.tr(),
                         onTap: () =>
                             _navigateToScreen(context, '/events/my-tickets'),
                       ),
                       _buildDrawerItem(
                         icon: Icons.calendar_today,
-                        title: 'Calendar',
+                        title: 'events_drawer_calendar'.tr(),
                         onTap: () => _navigateToScreen(
                           context,
                           '/events/dashboard',
@@ -164,7 +165,7 @@ class _EventsDrawerState extends State<EventsDrawer> {
                       ),
                       _buildDrawerItem(
                         icon: Icons.location_on,
-                        title: 'Nearby Events',
+                        title: 'events_drawer_nearby_events'.tr(),
                         onTap: () => _navigateToScreen(
                           context,
                           '/events/discover',
@@ -173,18 +174,18 @@ class _EventsDrawerState extends State<EventsDrawer> {
                       const Divider(),
                       _buildDrawerItem(
                         icon: Icons.notifications,
-                        title: 'Notifications',
+                        title: 'events_drawer_notifications'.tr(),
                         onTap: () =>
                             _navigateToScreen(context, '/notifications'),
                       ),
                       _buildDrawerItem(
                         icon: Icons.settings,
-                        title: 'Settings',
+                        title: 'events_drawer_settings'.tr(),
                         onTap: () => _navigateToScreen(context, '/settings'),
                       ),
                       _buildDrawerItem(
                         icon: Icons.help,
-                        title: 'Help',
+                        title: 'events_drawer_help'.tr(),
                         onTap: () => _navigateToScreen(context, '/support'),
                       ),
                     ],
@@ -196,9 +197,9 @@ class _EventsDrawerState extends State<EventsDrawer> {
               Container(
                 padding: const EdgeInsets.all(16),
                 color: Colors.white,
-                child: const Text(
-                  'ARTbeat Events v1.0.1',
-                  style: TextStyle(
+                child: Text(
+                  'events_drawer_version'.tr(),
+                  style: const TextStyle(
                     color: ArtbeatColors.textSecondary,
                     fontSize: 12,
                   ),
@@ -255,8 +256,8 @@ class _EventsDrawerState extends State<EventsDrawer> {
           // User name
           Text(
             _isLoading
-                ? 'Loading...'
-                : _currentUser?.fullName ?? 'Event Attendee',
+                ? 'events_drawer_loading'.tr()
+                : _currentUser?.fullName ?? 'events_drawer_event_attendee'.tr(),
             style: const TextStyle(
               color: Colors.white,
               fontSize: 18,
@@ -281,9 +282,15 @@ class _EventsDrawerState extends State<EventsDrawer> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildStatChip('${_userEvents.length}', 'My Events'),
+                _buildStatChip(
+                  '${_userEvents.length}',
+                  'events_drawer_my_events_stat'.tr(),
+                ),
                 const SizedBox(width: 8),
-                _buildStatChip('${_upcomingEvents.length}', 'Upcoming'),
+                _buildStatChip(
+                  '${_upcomingEvents.length}',
+                  'events_drawer_upcoming_stat'.tr(),
+                ),
               ],
             ),
         ],
@@ -318,22 +325,22 @@ class _EventsDrawerState extends State<EventsDrawer> {
   }
 
   String _getUserRoleText() {
-    if (_currentUser == null) return 'Attendee';
+    if (_currentUser == null) return 'events_drawer_attendee'.tr();
 
     final userType = _currentUser!.userType;
-    if (userType == null) return 'Event Attendee';
+    if (userType == null) return 'events_drawer_event_attendee'.tr();
 
     switch (userType) {
       case 'artist':
-        return 'Event Artist';
+        return 'events_drawer_event_artist'.tr();
       case 'business':
-        return 'Event Organizer';
+        return 'events_drawer_event_organizer'.tr();
       case 'moderator':
-        return 'Event Moderator';
+        return 'events_drawer_event_moderator'.tr();
       case 'admin':
-        return 'Event Admin';
+        return 'events_drawer_event_admin'.tr();
       default:
-        return 'Event Attendee';
+        return 'events_drawer_event_attendee'.tr();
     }
   }
 

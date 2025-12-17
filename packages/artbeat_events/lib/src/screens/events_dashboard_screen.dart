@@ -166,8 +166,11 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
                   // All Events List
                   SliverToBoxAdapter(
                     child: _buildSectionHeader(
-                      'Upcoming Events',
-                      '${_filteredEvents.length} events near you',
+                      'events_upcoming_title'.tr(),
+                      'events_upcoming_subtitle'.tr().replaceAll(
+                        '{count}',
+                        '${_filteredEvents.length}',
+                      ),
                     ),
                   ),
 
@@ -251,9 +254,9 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
                             ),
                           ),
                           const SizedBox(height: 4),
-                          const Text(
-                            'What\'s happening in your city?',
-                            style: TextStyle(
+                          Text(
+                            'events_header_subtitle'.tr(),
+                            style: const TextStyle(
                               color: Colors.white70,
                               fontSize: 16,
                             ),
@@ -288,7 +291,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
                         Icon(Icons.search, color: Colors.grey[400], size: 24),
                         const SizedBox(width: 12),
                         Text(
-                          'Search events, venues, artists...',
+                          'events_search_placeholder'.tr(),
                           style: TextStyle(
                             color: Colors.grey[400],
                             fontSize: 16,
@@ -308,9 +311,9 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
 
   String _getDynamicGreeting() {
     final hour = DateTime.now().hour;
-    if (hour < 12) return 'Good Morning';
-    if (hour < 17) return 'Good Afternoon';
-    return 'Good Evening';
+    if (hour < 12) return 'events_greeting_morning'.tr();
+    if (hour < 17) return 'events_greeting_afternoon'.tr();
+    return 'events_greeting_evening'.tr();
   }
 
   // ==================== STATS SECTION ====================
@@ -340,21 +343,21 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
             icon: Icons.today,
             iconColor: ArtbeatColors.accentOrange,
             value: '$todayEvents',
-            label: 'Today',
+            label: 'events_stat_today'.tr(),
           ),
           const SizedBox(width: 12),
           _buildStatCard(
             icon: Icons.calendar_month,
             iconColor: ArtbeatColors.primaryGreen,
             value: '$thisWeekEvents',
-            label: 'This Week',
+            label: 'events_stat_this_week'.tr(),
           ),
           const SizedBox(width: 12),
           _buildStatCard(
             icon: Icons.event_available,
             iconColor: ArtbeatColors.primaryPurple,
             value: '${_events.length}',
-            label: 'Upcoming',
+            label: 'events_stat_upcoming'.tr(),
           ),
         ],
       ),
@@ -419,11 +422,11 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
-            'Browse by Category',
-            style: TextStyle(
+            'events_browse_category'.tr(),
+            style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
               color: ArtbeatColors.textPrimary,
@@ -491,20 +494,20 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Column(
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Featured Events',
-                    style: TextStyle(
+                    'events_featured_title'.tr(),
+                    style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                       color: ArtbeatColors.textPrimary,
                     ),
                   ),
                   Text(
-                    'Don\'t miss these popular events',
-                    style: TextStyle(
+                    'events_featured_subtitle'.tr(),
+                    style: const TextStyle(
                       fontSize: 14,
                       color: ArtbeatColors.textSecondary,
                     ),
@@ -760,9 +763,9 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Discover Events',
-            style: TextStyle(
+          Text(
+            'events_discover_title'.tr(),
+            style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
               color: ArtbeatColors.textPrimary,
@@ -774,7 +777,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
               Expanded(
                 child: _buildQuickActionCard(
                   icon: Icons.location_on,
-                  title: 'Near Me',
+                  title: 'events_quick_near_me'.tr(),
                   color: ArtbeatColors.primaryGreen,
                   onTap: () {
                     Navigator.of(context).push(
@@ -792,7 +795,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
               Expanded(
                 child: _buildQuickActionCard(
                   icon: Icons.trending_up,
-                  title: 'Trending',
+                  title: 'events_quick_trending'.tr(),
                   color: ArtbeatColors.accentOrange,
                   onTap: () {
                     Navigator.of(context).push(
@@ -814,7 +817,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
               Expanded(
                 child: _buildQuickActionCard(
                   icon: Icons.calendar_today,
-                  title: 'This Weekend',
+                  title: 'events_quick_this_weekend'.tr(),
                   color: ArtbeatColors.primaryPurple,
                   onTap: () {
                     Navigator.of(context).push(
@@ -832,7 +835,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
               Expanded(
                 child: _buildQuickActionCard(
                   icon: Icons.confirmation_number,
-                  title: 'My Tickets',
+                  title: 'events_quick_my_tickets'.tr(),
                   color: ArtbeatColors.secondaryTeal,
                   onTap: () {
                     final currentUser = FirebaseAuth.instance.currentUser;
@@ -1086,7 +1089,10 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
                         Icon(Icons.people, size: 12, color: Colors.grey[600]),
                         const SizedBox(width: 4),
                         Text(
-                          '${event.attendeeIds.length} attending',
+                          'events_attending_count'.tr().replaceAll(
+                            '{count}',
+                            '${event.attendeeIds.length}',
+                          ),
                           style: TextStyle(
                             fontSize: 12,
                             color: Colors.grey[600],
@@ -1132,9 +1138,9 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
             ),
           ),
           const SizedBox(height: 20),
-          const Text(
-            'No Events Found',
-            style: TextStyle(
+          Text(
+            'events_empty_title'.tr(),
+            style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
               color: ArtbeatColors.textPrimary,
@@ -1142,7 +1148,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
           ),
           const SizedBox(height: 8),
           Text(
-            'Try adjusting your filters or check back later',
+            'events_empty_message'.tr(),
             style: TextStyle(fontSize: 14, color: Colors.grey[600]),
             textAlign: TextAlign.center,
           ),
@@ -1188,9 +1194,9 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
             ),
           ),
           const SizedBox(height: 20),
-          const Text(
-            'Loading events...',
-            style: TextStyle(
+          Text(
+            'events_loading'.tr(),
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,
               color: ArtbeatColors.textSecondary,
@@ -1222,9 +1228,9 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
               ),
             ),
             const SizedBox(height: 20),
-            const Text(
-              'Oops! Something went wrong',
-              style: TextStyle(
+            Text(
+              'events_error_title'.tr(),
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: ArtbeatColors.textPrimary,
@@ -1232,7 +1238,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
             ),
             const SizedBox(height: 8),
             Text(
-              _error ?? 'Unknown error occurred',
+              _error ?? 'events_error_unknown'.tr(),
               style: TextStyle(fontSize: 14, color: Colors.grey[600]),
               textAlign: TextAlign.center,
             ),
@@ -1287,31 +1293,31 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
                 ),
               ),
               // Header
-              const Padding(
-                padding: EdgeInsets.all(20),
+              Padding(
+                padding: const EdgeInsets.all(20),
                 child: Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.search,
                       color: ArtbeatColors.primaryPurple,
                       size: 24,
                     ),
-                    SizedBox(width: 16),
+                    const SizedBox(width: 16),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Search Events',
-                            style: TextStyle(
+                            'events_search_modal_title'.tr(),
+                            style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                               color: ArtbeatColors.textPrimary,
                             ),
                           ),
                           Text(
-                            'Find events, venues, and organizers',
-                            style: TextStyle(
+                            'events_search_modal_subtitle'.tr(),
+                            style: const TextStyle(
                               fontSize: 14,
                               color: ArtbeatColors.textSecondary,
                             ),
@@ -1330,8 +1336,8 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
                   children: [
                     _buildSearchOption(
                       icon: Icons.event,
-                      title: 'Find Events',
-                      subtitle: 'Search by name, category, or location',
+                      title: 'events_search_find_events'.tr(),
+                      subtitle: 'events_search_find_events_subtitle'.tr(),
                       color: ArtbeatColors.primaryPurple,
                       onTap: () {
                         Navigator.pop(context);
@@ -1340,8 +1346,8 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
                     ),
                     _buildSearchOption(
                       icon: Icons.location_on,
-                      title: 'Nearby Events',
-                      subtitle: 'Discover events in your area',
+                      title: 'events_search_nearby'.tr(),
+                      subtitle: 'events_search_nearby_subtitle'.tr(),
                       color: ArtbeatColors.primaryGreen,
                       onTap: () {
                         Navigator.pop(context);
@@ -1357,8 +1363,8 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
                     ),
                     _buildSearchOption(
                       icon: Icons.trending_up,
-                      title: 'Popular Events',
-                      subtitle: 'See what\'s trending now',
+                      title: 'events_search_popular_events'.tr(),
+                      subtitle: 'events_search_popular_subtitle'.tr(),
                       color: ArtbeatColors.secondaryTeal,
                       onTap: () {
                         Navigator.pop(context);
@@ -1374,8 +1380,8 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
                     ),
                     _buildSearchOption(
                       icon: Icons.business,
-                      title: 'Venues',
-                      subtitle: 'Find event venues and locations',
+                      title: 'events_search_venues'.tr(),
+                      subtitle: 'events_search_venues_subtitle'.tr(),
                       color: ArtbeatColors.accentYellow,
                       onTap: () {
                         Navigator.pop(context);
@@ -1469,9 +1475,9 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
     final eventDate = DateTime(dateTime.year, dateTime.month, dateTime.day);
 
     if (eventDate == today) {
-      return 'Today, ${_formatTime(dateTime)}';
+      return '${'events_time_today'.tr()}, ${_formatTime(dateTime)}';
     } else if (eventDate == tomorrow) {
-      return 'Tomorrow, ${_formatTime(dateTime)}';
+      return '${'events_time_tomorrow'.tr()}, ${_formatTime(dateTime)}';
     } else {
       return '${_formatDate(dateTime)}, ${_formatTime(dateTime)}';
     }
@@ -1480,7 +1486,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
   String _formatTime(DateTime dateTime) {
     final hour = dateTime.hour;
     final minute = dateTime.minute;
-    final period = hour < 12 ? 'AM' : 'PM';
+    final period = hour < 12 ? 'events_time_am'.tr() : 'events_time_pm'.tr();
     final displayHour = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
     final minuteStr = minute.toString().padLeft(2, '0');
     return '$displayHour:$minuteStr $period';
@@ -1488,18 +1494,18 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
 
   String _formatDate(DateTime dateTime) {
     final months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
+      'events_month_jan'.tr(),
+      'events_month_feb'.tr(),
+      'events_month_mar'.tr(),
+      'events_month_apr'.tr(),
+      'events_month_may'.tr(),
+      'events_month_jun'.tr(),
+      'events_month_jul'.tr(),
+      'events_month_aug'.tr(),
+      'events_month_sep'.tr(),
+      'events_month_oct'.tr(),
+      'events_month_nov'.tr(),
+      'events_month_dec'.tr(),
     ];
     return '${months[dateTime.month - 1]} ${dateTime.day}';
   }
