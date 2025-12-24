@@ -85,6 +85,7 @@ class _MainLayoutState extends State<MainLayout> {
       appBar: widget.appBar,
       drawer: widget.drawer,
       endDrawer: widget.endDrawer,
+      backgroundColor: const Color(0xFF07060F),
       body: widget.child,
       bottomNavigationBar: widget.currentIndex == -1
           ? null

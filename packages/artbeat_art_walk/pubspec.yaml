@@ -19,6 +19,7 @@ dependencies:
   google_maps_flutter: ^2.5.3
   provider: ^6.1.1
   crypto: ^3.0.3
+  google_fonts: ^6.2.1
   google_maps_flutter_android: ^2.6.2
   google_maps_flutter_platform_interface: ^2.4.3
   geolocator: ^14.0.1

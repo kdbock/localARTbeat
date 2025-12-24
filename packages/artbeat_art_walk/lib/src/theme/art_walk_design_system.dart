@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:artbeat_core/artbeat_core.dart';
 
 /// Comprehensive Art Walk Design System
 /// Based on the modern dashboard design with glassmorphism and gradient themes
@@ -28,6 +29,12 @@ class ArtWalkDesignSystem {
   /// Glass effect colors
   static const Color glassBackground = Colors.white;
   static const Color glassBorder = Colors.white;
+
+  /// Enhanced Bottom Navigation colors (dark HUD theme)
+  static const Color hudBackground = Color(0xFF0A0B14); // Dark blue/black
+  static const Color hudActiveColor = Color(0xFF22D3EE); // Neon cyan/teal
+  static const Color hudInactiveColor = Color(0xFFFFFFFF); // White with opacity
+  static const Color hudBorder = Color(0xFFFFFFFF); // White with opacity
 
   // ==================== GRADIENTS ====================
 
@@ -71,6 +78,25 @@ class ArtWalkDesignSystem {
     colors: [primaryTealLight, accentOrange], // Green to teal
   );
 
+  /// HUD-style header gradient for dark theme
+  static const LinearGradient hudHeaderGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [hudBackground, Color(0xFF1A1B26)], // Dark gradient
+  );
+
+  /// HUD button gradient - matching the Capture button style
+  static const LinearGradient hudButtonGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      ArtbeatColors.primaryPurple, // Primary Purple
+      hudActiveColor, // Neon cyan
+      ArtbeatColors.primaryGreen, // Primary Green
+    ],
+    stops: [0.0, 0.5, 1.0],
+  );
+
   // ==================== DECORATIONS ====================
 
   /// Glass morphism decoration for cards and containers
@@ -89,6 +115,32 @@ class ArtWalkDesignSystem {
           color: primaryTeal.withValues(alpha: shadowAlpha),
           blurRadius: 20,
           offset: const Offset(0, 10),
+        ),
+      ],
+    );
+  }
+
+  /// HUD-style glass morphism decoration for dark theme
+  static BoxDecoration hudGlassDecoration({
+    double borderRadius = 20,
+    double alpha = 0.62,
+    double borderAlpha = 0.10,
+    double shadowAlpha = 0.35,
+  }) {
+    return BoxDecoration(
+      color: hudBackground.withValues(alpha: alpha),
+      borderRadius: BorderRadius.circular(borderRadius),
+      border: Border.all(color: hudBorder.withValues(alpha: borderAlpha)),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: shadowAlpha),
+          blurRadius: 26,
+          offset: const Offset(0, 14),
+        ),
+        BoxShadow(
+          color: hudActiveColor.withValues(alpha: 0.10),
+          blurRadius: 28,
+          spreadRadius: 1,
         ),
       ],
     );
@@ -197,6 +249,20 @@ class ArtWalkDesignSystem {
     fontSize: 14,
     fontWeight: FontWeight.w600,
     color: textLight,
+  );
+
+  /// HUD-style card title style (for dark theme)
+  static const TextStyle hudCardTitleStyle = TextStyle(
+    fontSize: 18,
+    fontWeight: FontWeight.w600,
+    color: hudInactiveColor,
+  );
+
+  /// HUD-style card subtitle style (for dark theme)
+  static const TextStyle hudCardSubtitleStyle = TextStyle(
+    fontSize: 14,
+    color: hudInactiveColor,
+    fontWeight: FontWeight.w500,
   );
 
   // ==================== SPACING ====================
@@ -402,24 +468,30 @@ class ArtWalkDesignSystem {
     bool showBackButton = true,
     List<Widget>? actions,
     GlobalKey<ScaffoldState>? scaffoldKey,
+    bool useHudStyle = false,
   }) {
     return AppBar(
       title: Text(
         title,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 24,
           fontWeight: FontWeight.w700,
-          color: Colors.white,
+          color: useHudStyle ? hudInactiveColor : Colors.white,
         ),
       ),
       backgroundColor: Colors.transparent,
       elevation: 0,
       flexibleSpace: Container(
-        decoration: const BoxDecoration(gradient: headerGradient),
+        decoration: BoxDecoration(
+          gradient: useHudStyle ? hudHeaderGradient : headerGradient,
+        ),
       ),
       leading: showBackButton
           ? IconButton(
-              icon: const Icon(Icons.arrow_back_ios, color: textLight),
+              icon: Icon(
+                Icons.arrow_back_ios,
+                color: useHudStyle ? hudInactiveColor : textLight,
+              ),
               onPressed: () {
                 final context = scaffoldKey?.currentContext;
                 if (context != null && Navigator.canPop(context)) {
@@ -429,7 +501,10 @@ class ArtWalkDesignSystem {
             )
           : (scaffoldKey != null
                 ? IconButton(
-                    icon: const Icon(Icons.menu, color: textLight),
+                    icon: Icon(
+                      Icons.menu,
+                      color: useHudStyle ? hudInactiveColor : textLight,
+                    ),
                     onPressed: () => scaffoldKey.currentState?.openDrawer(),
                   )
                 : null),

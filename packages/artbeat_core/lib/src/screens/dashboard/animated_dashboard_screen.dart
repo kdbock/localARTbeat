@@ -3,12 +3,14 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:artbeat_core/src/theme/artbeat_colors.dart';
 
 class AnimatedDashboardScreen extends StatefulWidget {
   const AnimatedDashboardScreen({super.key});
 
   @override
-  State<AnimatedDashboardScreen> createState() => _AnimatedDashboardScreenState();
+  State<AnimatedDashboardScreen> createState() =>
+      _AnimatedDashboardScreenState();
 }
 
 class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
@@ -23,10 +25,14 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
   @override
   void initState() {
     super.initState();
-    _loop = AnimationController(vsync: this, duration: const Duration(seconds: 9))
-      ..repeat();
-    _intro = AnimationController(vsync: this, duration: const Duration(milliseconds: 900))
-      ..forward();
+    _loop = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 9),
+    )..repeat();
+    _intro = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..forward();
   }
 
   @override
@@ -41,7 +47,7 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
     final w = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF07060F),
+      backgroundColor: ArtbeatColors.backgroundDark,
       body: Stack(
         children: [
           // GAME WORLD BACKGROUND
@@ -62,7 +68,7 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                     radius: 1.1,
                     colors: [
                       Colors.transparent,
-                      Colors.black.withOpacity(0.55),
+                      Colors.black.withValues(alpha: 0.55),
                     ],
                   ),
                 ),
@@ -111,16 +117,18 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                               index: 0,
                               width: w,
                               title: "CAPTURE",
-                              subtitle:
-                                  "Scan art → upload it to the map",
+                              subtitle: "Scan art → upload it to the map",
                               tag: "DROP A PIN",
                               icon: Icons.camera_alt_rounded,
                               palette: const _QuestPalette(
-                                base: Color(0xFF7C4DFF),
-                                neon: Color(0xFF22D3EE),
-                                accent: Color(0xFFFFC857),
+                                base: ArtbeatColors.primaryPurple,
+                                neon: ArtbeatColors.secondaryTeal,
+                                accent: ArtbeatColors.accentYellow,
                               ),
-                              onTap: () => Navigator.pushNamed(context, '/capture/dashboard'),
+                              onTap: () => Navigator.pushNamed(
+                                context,
+                                '/capture/dashboard',
+                              ),
                             ),
                           ),
                           const SizedBox(height: 14),
@@ -132,16 +140,18 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                               index: 1,
                               width: w,
                               title: "DISCOVER",
-                              subtitle:
-                                  "Find captured art → earn XP",
+                              subtitle: "Find captured art → earn XP",
                               tag: "+XP HUNT",
                               icon: Icons.radar_rounded,
                               palette: const _QuestPalette(
-                                base: Color(0xFF00E5FF),
-                                neon: Color(0xFF34D399),
-                                accent: Color(0xFFFF3D8D),
+                                base: ArtbeatColors.primaryBlue,
+                                neon: ArtbeatColors.primaryGreen,
+                                accent: ArtbeatColors.accentOrange,
                               ),
-                              onTap: () => Navigator.pushNamed(context, '/old-dashboard'),
+                              onTap: () => Navigator.pushNamed(
+                                context,
+                                '/old-dashboard',
+                              ),
                             ),
                           ),
                           const SizedBox(height: 14),
@@ -153,16 +163,18 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                               index: 2,
                               width: w,
                               title: "ART WALKS",
-                              subtitle:
-                                  "Build a walk → complete it for XP",
+                              subtitle: "Build a walk → complete it for XP",
                               tag: "QUEST ROUTE",
                               icon: Icons.route_rounded,
                               palette: const _QuestPalette(
-                                base: Color(0xFF34D399),
-                                neon: Color(0xFFFFC857),
-                                accent: Color(0xFF22D3EE),
+                                base: ArtbeatColors.primaryGreen,
+                                neon: ArtbeatColors.accentYellow,
+                                accent: ArtbeatColors.secondaryTeal,
                               ),
-                              onTap: () => Navigator.pushNamed(context, '/art-walk/dashboard'),
+                              onTap: () => Navigator.pushNamed(
+                                context,
+                                '/art-walk/dashboard',
+                              ),
                             ),
                           ),
                           const SizedBox(height: 14),
@@ -174,16 +186,18 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                               index: 3,
                               width: w,
                               title: "CONNECT",
-                              subtitle:
-                                  "Artists, feed, commissions & events",
+                              subtitle: "Artists, feed, commissions & events",
                               tag: "SOCIAL",
                               icon: Icons.people_alt_rounded,
                               palette: const _QuestPalette(
-                                base: Color(0xFFFF3D8D),
-                                neon: Color(0xFF7C4DFF),
-                                accent: Color(0xFF34D399),
+                                base: ArtbeatColors.accentOrange,
+                                neon: ArtbeatColors.primaryPurple,
+                                accent: ArtbeatColors.primaryGreen,
                               ),
-                              onTap: () => Navigator.pushNamed(context, '/community/hub'),
+                              onTap: () => Navigator.pushNamed(
+                                context,
+                                '/community/hub',
+                              ),
                             ),
                           ),
 
@@ -194,8 +208,12 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                             intro: _intro,
                             index: 4,
                             child: _BottomChips(
-                              onArtist: () => Navigator.pushNamed(context, '/2025_modern_onboarding'),
-                              onBusiness: () => Navigator.pushNamed(context, '/iap/ads'),
+                              onArtist: () => Navigator.pushNamed(
+                                context,
+                                '/2025_modern_onboarding',
+                              ),
+                              onBusiness: () =>
+                                  Navigator.pushNamed(context, '/iap/ads'),
                             ),
                           ),
 
@@ -276,9 +294,9 @@ class _TitleBlock extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.06),
+                color: Colors.white.withValues(alpha: 0.06),
                 borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: Colors.white.withOpacity(0.10)),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
               ),
               child: Row(
                 children: [
@@ -289,22 +307,28 @@ class _TitleBlock extends StatelessWidget {
                       borderRadius: BorderRadius.circular(14),
                       gradient: LinearGradient(
                         colors: [
-                          const Color(0xFF22D3EE).withOpacity(0.75),
-                          const Color(0xFFFF3D8D).withOpacity(0.65),
-                          const Color(0xFFFFC857).withOpacity(0.55),
+                          ArtbeatColors.secondaryTeal.withValues(alpha: 0.75),
+                          ArtbeatColors.accentOrange.withValues(alpha: 0.65),
+                          ArtbeatColors.accentYellow.withValues(alpha: 0.55),
                         ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF22D3EE).withOpacity(0.16 * pulse),
+                          color: const Color(
+                            0xFF22D3EE,
+                          ).withValues(alpha: 0.16 * pulse),
                           blurRadius: 18,
                           spreadRadius: 1,
                         ),
                       ],
                     ),
-                    child: const Icon(Icons.explore_rounded, color: Colors.white, size: 18),
+                    child: const Icon(
+                      Icons.explore_rounded,
+                      color: Colors.white,
+                      size: 18,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -314,7 +338,7 @@ class _TitleBlock extends StatelessWidget {
                           TextSpan(
                             text: "Local ",
                             style: GoogleFonts.spaceGrotesk(
-                              color: Colors.white.withOpacity(0.88),
+                              color: Colors.white.withValues(alpha: 0.88),
                               fontSize: 18,
                               fontWeight: FontWeight.w800,
                               letterSpacing: -0.4,
@@ -332,7 +356,7 @@ class _TitleBlock extends StatelessWidget {
                           TextSpan(
                             text: "beat",
                             style: GoogleFonts.spaceGrotesk(
-                              color: Colors.white.withOpacity(0.88),
+                              color: Colors.white.withValues(alpha: 0.88),
                               fontSize: 18,
                               fontWeight: FontWeight.w800,
                               letterSpacing: -0.4,
@@ -345,7 +369,7 @@ class _TitleBlock extends StatelessWidget {
                   Text(
                     "QUEST HUB",
                     style: GoogleFonts.spaceGrotesk(
-                      color: Colors.white.withOpacity(0.62),
+                      color: Colors.white.withValues(alpha: 0.62),
                       fontSize: 11,
                       fontWeight: FontWeight.w900,
                       letterSpacing: 1.3,
@@ -443,18 +467,22 @@ class _QuestButtonState extends State<_QuestButton> {
                     width: widget.width,
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.06),
+                      color: Colors.white.withValues(alpha: 0.06),
                       borderRadius: BorderRadius.circular(28),
-                      border: Border.all(color: Colors.white.withOpacity(0.12)),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.12),
+                      ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.35),
+                          color: Colors.black.withValues(alpha: 0.35),
                           blurRadius: 28,
                           offset: const Offset(0, 18),
                         ),
                         // neon edge aura (gaming vibe)
                         BoxShadow(
-                          color: widget.palette.neon.withOpacity(edgeGlow),
+                          color: widget.palette.neon.withValues(
+                            alpha: edgeGlow,
+                          ),
                           blurRadius: 34,
                           spreadRadius: 1,
                         ),
@@ -465,7 +493,10 @@ class _QuestButtonState extends State<_QuestButton> {
                         Row(
                           children: [
                             // Tag chip
-                            _TagChip(text: widget.tag, color: widget.palette.accent),
+                            _TagChip(
+                              text: widget.tag,
+                              color: widget.palette.accent,
+                            ),
 
                             const Spacer(),
 
@@ -477,21 +508,27 @@ class _QuestButtonState extends State<_QuestButton> {
                                 borderRadius: BorderRadius.circular(18),
                                 gradient: LinearGradient(
                                   colors: [
-                                    widget.palette.base.withOpacity(0.95),
-                                    widget.palette.neon.withOpacity(0.80),
+                                    widget.palette.base.withValues(alpha: 0.95),
+                                    widget.palette.neon.withValues(alpha: 0.80),
                                   ],
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: widget.palette.base.withOpacity(0.30),
+                                    color: widget.palette.base.withValues(
+                                      alpha: 0.30,
+                                    ),
                                     blurRadius: 18,
                                     offset: const Offset(0, 12),
                                   ),
                                 ],
                               ),
-                              child: Icon(widget.icon, color: Colors.white, size: 26),
+                              child: Icon(
+                                widget.icon,
+                                color: Colors.white,
+                                size: 26,
+                              ),
                             ),
                           ],
                         ),
@@ -508,7 +545,9 @@ class _QuestButtonState extends State<_QuestButton> {
                                   Text(
                                     widget.title,
                                     style: GoogleFonts.spaceGrotesk(
-                                      color: Colors.white.withOpacity(0.95),
+                                      color: Colors.white.withValues(
+                                        alpha: 0.95,
+                                      ),
                                       fontSize: 20,
                                       fontWeight: FontWeight.w900,
                                       letterSpacing: 0.3,
@@ -518,7 +557,9 @@ class _QuestButtonState extends State<_QuestButton> {
                                   Text(
                                     widget.subtitle,
                                     style: GoogleFonts.spaceGrotesk(
-                                      color: Colors.white.withOpacity(0.70),
+                                      color: Colors.white.withValues(
+                                        alpha: 0.70,
+                                      ),
                                       fontSize: 13.5,
                                       fontWeight: FontWeight.w600,
                                       height: 1.15,
@@ -537,12 +578,14 @@ class _QuestButtonState extends State<_QuestButton> {
                                 height: 40,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(16),
-                                  color: Colors.white.withOpacity(0.08),
-                                  border: Border.all(color: Colors.white.withOpacity(0.14)),
+                                  color: Colors.white.withValues(alpha: 0.08),
+                                  border: Border.all(
+                                    color: Colors.white.withValues(alpha: 0.14),
+                                  ),
                                 ),
                                 child: Icon(
                                   Icons.arrow_forward_rounded,
-                                  color: Colors.white.withOpacity(0.92),
+                                  color: Colors.white.withValues(alpha: 0.92),
                                   size: 20,
                                 ),
                               ),
@@ -560,7 +603,10 @@ class _QuestButtonState extends State<_QuestButton> {
                     child: Opacity(
                       opacity: 0.70,
                       child: Transform.translate(
-                        offset: Offset((sweep * 2 - 1) * widget.width * 0.55, 0),
+                        offset: Offset(
+                          (sweep * 2 - 1) * widget.width * 0.55,
+                          0,
+                        ),
                         child: Transform.rotate(
                           angle: -0.55,
                           child: Container(
@@ -568,8 +614,12 @@ class _QuestButtonState extends State<_QuestButton> {
                               gradient: LinearGradient(
                                 colors: [
                                   Colors.transparent,
-                                  Colors.white.withOpacity(0.16 + 0.12 * power),
-                                  widget.palette.neon.withOpacity(0.10 + 0.08 * power),
+                                  Colors.white.withValues(
+                                    alpha: 0.16 + 0.12 * power,
+                                  ),
+                                  widget.palette.neon.withValues(
+                                    alpha: 0.10 + 0.08 * power,
+                                  ),
                                   Colors.transparent,
                                 ],
                                 stops: const [0.0, 0.46, 0.58, 1.0],
@@ -631,13 +681,13 @@ class _TagChip extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(999),
           gradient: LinearGradient(
-            colors: [color, Colors.white.withOpacity(0.35)],
+            colors: [color, Colors.white.withValues(alpha: 0.35)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.22),
+              color: color.withValues(alpha: 0.22),
               blurRadius: 16,
               offset: const Offset(0, 10),
             ),
@@ -646,7 +696,7 @@ class _TagChip extends StatelessWidget {
         child: Text(
           text,
           style: GoogleFonts.spaceGrotesk(
-            color: Colors.black.withOpacity(0.85),
+            color: Colors.black.withValues(alpha: 0.85),
             fontSize: 11,
             fontWeight: FontWeight.w900,
             letterSpacing: 1.0,
@@ -675,7 +725,7 @@ class _BottomChips extends StatelessWidget {
           child: _ChipButton(
             icon: Icons.palette_outlined,
             label: "I’m an Artist",
-            glow: const Color(0xFFFFC857),
+            glow: ArtbeatColors.accentYellow,
             onTap: onArtist,
           ),
         ),
@@ -684,7 +734,7 @@ class _BottomChips extends StatelessWidget {
           child: _ChipButton(
             icon: Icons.storefront_outlined,
             label: "Local Business",
-            glow: const Color(0xFF34D399),
+            glow: ArtbeatColors.primaryGreen,
             onTap: onBusiness,
           ),
         ),
@@ -723,20 +773,25 @@ class _ChipButtonState extends State<_ChipButton> {
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
           child: Material(
-            color: Colors.white.withOpacity(0.06),
+            color: Colors.white.withValues(alpha: 0.06),
             child: InkWell(
               onTap: widget.onTap,
               onTapDown: (_) => setState(() => _pressed = true),
               onTapUp: (_) => setState(() => _pressed = false),
               onTapCancel: () => setState(() => _pressed = false),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 14,
+                ),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: Colors.white.withOpacity(0.10)),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.10),
+                  ),
                   boxShadow: [
                     BoxShadow(
-                      color: widget.glow.withOpacity(0.10),
+                      color: widget.glow.withValues(alpha: 0.10),
                       blurRadius: 18,
                       spreadRadius: 1,
                     ),
@@ -748,11 +803,17 @@ class _ChipButtonState extends State<_ChipButton> {
                       width: 34,
                       height: 34,
                       decoration: BoxDecoration(
-                        color: widget.glow.withOpacity(0.16),
+                        color: widget.glow.withValues(alpha: 0.16),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: widget.glow.withOpacity(0.26)),
+                        border: Border.all(
+                          color: widget.glow.withValues(alpha: 0.26),
+                        ),
                       ),
-                      child: Icon(widget.icon, color: Colors.white.withOpacity(0.92), size: 18),
+                      child: Icon(
+                        widget.icon,
+                        color: Colors.white.withValues(alpha: 0.92),
+                        size: 18,
+                      ),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
@@ -761,7 +822,7 @@ class _ChipButtonState extends State<_ChipButton> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.spaceGrotesk(
-                          color: Colors.white.withOpacity(0.88),
+                          color: Colors.white.withValues(alpha: 0.88),
                           fontSize: 13,
                           fontWeight: FontWeight.w800,
                         ),
@@ -796,9 +857,9 @@ class _HUDPill extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.06),
+              color: Colors.white.withValues(alpha: 0.06),
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: Colors.white.withOpacity(0.10)),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
             ),
             child: child,
           ),
@@ -820,7 +881,7 @@ class _IconPill extends StatelessWidget {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
         child: Material(
-          color: Colors.white.withOpacity(0.06),
+          color: Colors.white.withValues(alpha: 0.06),
           child: InkWell(
             onTap: onTap,
             child: Container(
@@ -829,9 +890,13 @@ class _IconPill extends StatelessWidget {
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: Colors.white.withOpacity(0.10)),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
               ),
-              child: Icon(icon, color: Colors.white.withOpacity(0.85), size: 20),
+              child: Icon(
+                icon,
+                color: Colors.white.withValues(alpha: 0.85),
+                size: 20,
+              ),
             ),
           ),
         ),
@@ -852,8 +917,8 @@ class _LevelBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         gradient: LinearGradient(
           colors: [
-            const Color(0xFFFFC857).withOpacity(0.95),
-            const Color(0xFFFF3D8D).withOpacity(0.85),
+            const Color(0xFFFFC857).withValues(alpha: 0.95),
+            const Color(0xFFFF3D8D).withValues(alpha: 0.85),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -862,7 +927,7 @@ class _LevelBadge extends StatelessWidget {
       child: Text(
         "LV $level",
         style: GoogleFonts.spaceGrotesk(
-          color: Colors.black.withOpacity(0.86),
+          color: Colors.black.withValues(alpha: 0.86),
           fontWeight: FontWeight.w900,
           fontSize: 12,
           letterSpacing: 0.7,
@@ -884,7 +949,7 @@ class _XPBar extends StatelessWidget {
         Text(
           "XP",
           style: GoogleFonts.spaceGrotesk(
-            color: Colors.white.withOpacity(0.65),
+            color: Colors.white.withValues(alpha: 0.65),
             fontSize: 10.5,
             fontWeight: FontWeight.w800,
             letterSpacing: 1.0,
@@ -895,17 +960,17 @@ class _XPBar extends StatelessWidget {
           borderRadius: BorderRadius.circular(999),
           child: Container(
             height: 10,
-            color: Colors.white.withOpacity(0.08),
+            color: Colors.white.withValues(alpha: 0.08),
             child: FractionallySizedBox(
               alignment: Alignment.centerLeft,
               widthFactor: progress.clamp(0.0, 1.0),
               child: Container(
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      const Color(0xFF22D3EE),
-                      const Color(0xFF7C4DFF),
-                      const Color(0xFFFF3D8D),
+                      Color(0xFF22D3EE),
+                      Color(0xFF7C4DFF),
+                      Color(0xFFFF3D8D),
                     ],
                   ),
                 ),
@@ -928,17 +993,21 @@ class _Streak extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
-        color: Colors.white.withOpacity(0.08),
-        border: Border.all(color: Colors.white.withOpacity(0.10)),
+        color: Colors.white.withValues(alpha: 0.08),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
       ),
       child: Row(
         children: [
-          Icon(Icons.local_fire_department_rounded, color: const Color(0xFFFFC857).withOpacity(0.95), size: 18),
+          Icon(
+            Icons.local_fire_department_rounded,
+            color: const Color(0xFFFFC857).withValues(alpha: 0.95),
+            size: 18,
+          ),
           const SizedBox(width: 6),
           Text(
             "$streakDays",
             style: GoogleFonts.spaceGrotesk(
-              color: Colors.white.withOpacity(0.92),
+              color: Colors.white.withValues(alpha: 0.92),
               fontWeight: FontWeight.w900,
               fontSize: 12,
             ),
@@ -981,7 +1050,7 @@ class _QuestWorldPainter extends CustomPainter {
       final p = Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.2
-        ..color = Colors.white.withOpacity(0.045);
+        ..color = Colors.white.withValues(alpha: 0.045);
       canvas.drawCircle(center, r, p);
     }
 
@@ -991,7 +1060,7 @@ class _QuestWorldPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 22
       ..strokeCap = StrokeCap.round
-      ..color = const Color(0xFF22D3EE).withOpacity(0.06)
+      ..color = const Color(0xFF22D3EE).withValues(alpha: 0.06)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 14);
 
     canvas.drawArc(
@@ -1017,7 +1086,7 @@ class _QuestWorldPainter extends CustomPainter {
     final linePaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.2
-      ..color = Colors.white.withOpacity(0.05);
+      ..color = Colors.white.withValues(alpha: 0.05);
     canvas.drawPath(path, linePaint);
 
     final metrics = path.computeMetrics().toList();
@@ -1033,7 +1102,8 @@ class _QuestWorldPainter extends CustomPainter {
 
         final isNode = i % 7 == 0;
         final dotPaint = Paint()
-          ..color = (isNode ? const Color(0xFFFFC857) : Colors.white).withOpacity(isNode ? 0.14 : 0.10)
+          ..color = (isNode ? const Color(0xFFFFC857) : Colors.white)
+              .withValues(alpha: isNode ? 0.14 : 0.10)
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
 
         canvas.drawCircle(pos, isNode ? 4.0 : 2.1, dotPaint);
@@ -1041,12 +1111,15 @@ class _QuestWorldPainter extends CustomPainter {
         if (isNode) {
           // node ring that “traces” gently
           final local = ((t + i * 0.09) % 1.0);
-          final sweep = (0.2 + 0.7 * (local * local * (3 - 2 * local))).clamp(0.0, 1.0);
+          final sweep = (0.2 + 0.7 * (local * local * (3 - 2 * local))).clamp(
+            0.0,
+            1.0,
+          );
           final ringPaint = Paint()
             ..style = PaintingStyle.stroke
             ..strokeWidth = 1.6
             ..strokeCap = StrokeCap.round
-            ..color = const Color(0xFFFF3D8D).withOpacity(0.08);
+            ..color = const Color(0xFFFF3D8D).withValues(alpha: 0.08);
 
           canvas.drawArc(
             Rect.fromCircle(center: pos, radius: 12),
@@ -1066,8 +1139,15 @@ class _QuestWorldPainter extends CustomPainter {
     _blob(canvas, size, const Color(0xFF34D399), 0.16, 0.78, 0.34, phase: 0.62);
   }
 
-  void _blob(Canvas canvas, Size size, Color color, double ax, double ay, double r,
-      {required double phase}) {
+  void _blob(
+    Canvas canvas,
+    Size size,
+    Color color,
+    double ax,
+    double ay,
+    double r, {
+    required double phase,
+  }) {
     final dx = math.sin((t + phase) * 2 * math.pi) * 0.035;
     final dy = math.cos((t + phase) * 2 * math.pi) * 0.035;
 
@@ -1076,7 +1156,7 @@ class _QuestWorldPainter extends CustomPainter {
 
     final paint = Paint()
       ..shader = RadialGradient(
-        colors: [color.withOpacity(0.26), color.withOpacity(0.0)],
+        colors: [color.withValues(alpha: 0.26), color.withValues(alpha: 0.0)],
       ).createShader(Rect.fromCircle(center: center, radius: radius))
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 70);
 
@@ -1084,7 +1164,8 @@ class _QuestWorldPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _QuestWorldPainter oldDelegate) => oldDelegate.t != t;
+  bool shouldRepaint(covariant _QuestWorldPainter oldDelegate) =>
+      oldDelegate.t != t;
 }
 
 /// Reticle overlay for each button (rune ring + ticks)
@@ -1093,11 +1174,7 @@ class _ReticlePainter extends CustomPainter {
   final Color neon;
   final Color accent;
 
-  _ReticlePainter({
-    required this.t,
-    required this.neon,
-    required this.accent,
-  });
+  _ReticlePainter({required this.t, required this.neon, required this.accent});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1115,25 +1192,38 @@ class _ReticlePainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
       ..strokeWidth = 1.6
-      ..color = neon.withOpacity(0.06 + 0.08 * power);
+      ..color = neon.withValues(alpha: 0.06 + 0.08 * power);
 
-    canvas.drawArc(Rect.fromCircle(center: center, radius: r), start, sweep, false, ringPaint);
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: r),
+      start,
+      sweep,
+      false,
+      ringPaint,
+    );
 
     // ticks
     final tickPaint = Paint()
       ..strokeWidth = 1.0
-      ..color = accent.withOpacity(0.05 + 0.06 * power);
+      ..color = accent.withValues(alpha: 0.05 + 0.06 * power);
 
     for (int i = 0; i < 10; i++) {
       final a = (i / 10.0) * 2 * math.pi + t * 0.6;
-      final p1 = Offset(center.dx + math.cos(a) * (r * 0.78), center.dy + math.sin(a) * (r * 0.78));
-      final p2 = Offset(center.dx + math.cos(a) * (r * 0.88), center.dy + math.sin(a) * (r * 0.88));
+      final p1 = Offset(
+        center.dx + math.cos(a) * (r * 0.78),
+        center.dy + math.sin(a) * (r * 0.78),
+      );
+      final p2 = Offset(
+        center.dx + math.cos(a) * (r * 0.88),
+        center.dy + math.sin(a) * (r * 0.88),
+      );
       canvas.drawLine(p1, p2, tickPaint);
     }
   }
 
   @override
-  bool shouldRepaint(covariant _ReticlePainter oldDelegate) => oldDelegate.t != t;
+  bool shouldRepaint(covariant _ReticlePainter oldDelegate) =>
+      oldDelegate.t != t;
 }
 
 /// =======================
@@ -1155,15 +1245,27 @@ class _StampFadeIn extends StatelessWidget {
   Widget build(BuildContext context) {
     final fade = CurvedAnimation(
       parent: intro,
-      curve: Interval(delay, (delay + 0.45).clamp(0.0, 1.0), curve: Curves.easeOut),
-    );
-    final slide = Tween<Offset>(begin: const Offset(0, 0.06), end: Offset.zero).animate(
-      CurvedAnimation(
-        parent: intro,
-        curve: Interval(delay, (delay + 0.65).clamp(0.0, 1.0), curve: Curves.easeOutCubic),
+      curve: Interval(
+        delay,
+        (delay + 0.45).clamp(0.0, 1.0),
+        curve: Curves.easeOut,
       ),
     );
-    return FadeTransition(opacity: fade, child: SlideTransition(position: slide, child: child));
+    final slide = Tween<Offset>(begin: const Offset(0, 0.06), end: Offset.zero)
+        .animate(
+          CurvedAnimation(
+            parent: intro,
+            curve: Interval(
+              delay,
+              (delay + 0.65).clamp(0.0, 1.0),
+              curve: Curves.easeOutCubic,
+            ),
+          ),
+        );
+    return FadeTransition(
+      opacity: fade,
+      child: SlideTransition(position: slide, child: child),
+    );
   }
 }
 
@@ -1183,13 +1285,23 @@ class _StampPopIn extends StatelessWidget {
     final start = 0.18 + index * 0.09;
     final end = start + 0.42;
 
-    final fade = CurvedAnimation(parent: intro, curve: Interval(start, end, curve: Curves.easeOut));
+    final fade = CurvedAnimation(
+      parent: intro,
+      curve: Interval(start, end, curve: Curves.easeOut),
+    );
     final pop = Tween<double>(begin: 0.95, end: 1.0).animate(
-      CurvedAnimation(parent: intro, curve: Interval(start, end, curve: Curves.easeOutBack)),
+      CurvedAnimation(
+        parent: intro,
+        curve: Interval(start, end, curve: Curves.easeOutBack),
+      ),
     );
-    final tilt = Tween<double>(begin: (index.isEven ? -0.03 : 0.03), end: 0.0).animate(
-      CurvedAnimation(parent: intro, curve: Interval(start, end, curve: Curves.easeOutCubic)),
-    );
+    final tilt = Tween<double>(begin: (index.isEven ? -0.03 : 0.03), end: 0.0)
+        .animate(
+          CurvedAnimation(
+            parent: intro,
+            curve: Interval(start, end, curve: Curves.easeOutCubic),
+          ),
+        );
 
     return FadeTransition(
       opacity: fade,

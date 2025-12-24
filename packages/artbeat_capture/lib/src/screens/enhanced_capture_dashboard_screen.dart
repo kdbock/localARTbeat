@@ -1,23 +1,14 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:google_fonts/google_fonts.dart';
+
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_capture/artbeat_capture.dart';
 
-/// Enhanced Capture Dashboard Screen
-///
-/// This new capture dashboard combines the best elements from:
-/// - Original Capture Dashboard (safety focus)
-/// - Fluid Dashboard (smooth UX)
-/// - Art Walk Dashboard (personalization & data integration)
-///
-/// Features:
-/// - Personalized welcome message
-/// - Recent captures showcase
-/// - Capture stats and achievements
-/// - Safety guidelines integration
-/// - Community contribution highlights
-/// - Quick action buttons
-/// - Smooth scrolling experience
+/// Quest-style Capture Dashboard (Local ARTbeat)
+/// - Same services/data/routes as your original
+/// - Completely different presentation: gaming/quest hub vibe
 class EnhancedCaptureDashboardScreen extends StatefulWidget {
   const EnhancedCaptureDashboardScreen({Key? key}) : super(key: key);
 
@@ -27,7 +18,8 @@ class EnhancedCaptureDashboardScreen extends StatefulWidget {
 }
 
 class _EnhancedCaptureDashboardScreenState
-    extends State<EnhancedCaptureDashboardScreen> {
+    extends State<EnhancedCaptureDashboardScreen>
+    with TickerProviderStateMixin {
   final ScrollController _scrollController = ScrollController();
 
   bool _isLoading = true;
@@ -43,15 +35,30 @@ class _EnhancedCaptureDashboardScreenState
   final CaptureService _captureService = CaptureService();
   final UserService _userService = UserService();
 
+  // Animations
+  late final AnimationController _loop; // ambient world loop
+  late final AnimationController _intro; // entrance
+
   @override
   void initState() {
     super.initState();
+    _loop = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 9),
+    )..repeat();
+    _intro = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..forward();
+
     _loadData();
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _loop.dispose();
+    _intro.dispose();
     super.dispose();
   }
 
@@ -59,61 +66,57 @@ class _EnhancedCaptureDashboardScreenState
     setState(() => _isLoading = true);
 
     try {
-      // Load user data
       final user = await _userService.getCurrentUserModel();
 
-      // Load recent captures
       List<CaptureModel> recentCaptures = [];
       List<CaptureModel> communityCaptures = [];
       int totalUserCaptures = 0;
       int totalCommunityViews = 0;
 
       if (user != null) {
-        // Get user's recent captures
         recentCaptures = await _captureService.getUserCaptures(
           userId: user.id,
           limit: 6,
         );
-
-        // Get user's total capture count
         totalUserCaptures = await _captureService.getUserCaptureCount(user.id);
-
-        // Get total community views of user's captures
         totalCommunityViews = await _captureService.getUserCaptureViews(
           user.id,
         );
       }
 
-      // Get some community captures for inspiration
       communityCaptures = await _captureService.getAllCaptures(limit: 8);
 
-      if (mounted) {
-        setState(() {
-          _currentUser = user;
-          _recentCaptures = recentCaptures;
-          _communityCaptures = communityCaptures;
-          _totalUserCaptures = totalUserCaptures;
-          _totalCommunityViews = totalCommunityViews;
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      // debugPrint('Error loading capture dashboard data: $e');
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      if (!mounted) return;
+      setState(() {
+        _currentUser = user;
+        _recentCaptures = recentCaptures;
+        _communityCaptures = communityCaptures;
+        _totalUserCaptures = totalUserCaptures;
+        _totalCommunityViews = totalCommunityViews;
+        _isLoading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
     }
   }
 
-  Future<void> _refreshData() async {
-    await _loadData();
-  }
+  Future<void> _refreshData() async => _loadData();
 
   void _openTermsAndConditionsScreen() {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (context) => const TermsAndConditionsScreen(),
       ),
+    );
+  }
+
+  void _showProfileMenu(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => const EnhancedProfileMenu(),
     );
   }
 
@@ -133,7 +136,6 @@ class _EnhancedCaptureDashboardScreenState
           ),
           child: Column(
             children: [
-              // Handle bar
               Container(
                 width: 40,
                 height: 4,
@@ -143,8 +145,6 @@ class _EnhancedCaptureDashboardScreenState
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-
-              // Header
               Padding(
                 padding: const EdgeInsets.all(20),
                 child: Row(
@@ -180,8 +180,6 @@ class _EnhancedCaptureDashboardScreenState
                   ],
                 ),
               ),
-
-              // Search options
               Expanded(
                 child: ListView(
                   controller: scrollController,
@@ -236,15 +234,6 @@ class _EnhancedCaptureDashboardScreenState
           ),
         ),
       ),
-    );
-  }
-
-  void _showProfileMenu(BuildContext context) {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => const EnhancedProfileMenu(),
     );
   }
 
@@ -310,428 +299,903 @@ class _EnhancedCaptureDashboardScreenState
     );
   }
 
+  // --- UI ---
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
-      extendBodyBehindAppBar: true,
+      backgroundColor: const Color(0xFF07060F),
       drawer: const CaptureDrawer(),
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(kToolbarHeight + 4),
-        child: ArtbeatGradientBackground(
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.topRight,
-            colors: [ArtbeatColors.primaryPurple, Colors.pink],
+      body: Stack(
+        children: [
+          // Ambient animated background (no heavy overlay blocks)
+          Positioned.fill(
+            child: AnimatedBuilder(
+              animation: _loop,
+              builder: (_, __) => CustomPaint(
+                painter: _QuestAmbientPainter(t: _loop.value),
+                size: Size.infinite,
+              ),
+            ),
           ),
-          addShadow: true,
-          child: EnhancedUniversalHeader(
-            title: 'Art Capture',
-            showLogo: false,
-            showSearch: true,
-            showDeveloperTools: true,
-            showBackButton: false,
-            onSearchPressed: (String query) => _showSearchModal(context),
-            onProfilePressed: () => _showProfileMenu(context),
-            backgroundColor: Colors.transparent,
-            // Removed foregroundColor to use deep purple default
-            elevation: 0,
-          ),
-        ),
-      ),
-      body: Container(
-        constraints: const BoxConstraints.expand(),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              ArtbeatColors.primaryPurple.withValues(alpha: 0.05),
-              Colors.white,
-              ArtbeatColors.primaryGreen.withValues(alpha: 0.05),
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : RefreshIndicator(
-                  onRefresh: _refreshData,
-                  child: CustomScrollView(
-                    controller: _scrollController,
-                    slivers: [
-                      // Header Section
-                      SliverToBoxAdapter(
-                        child: Container(
-                          padding: const EdgeInsets.all(24.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Welcome message
-                              Container(
-                                width: double.infinity,
-                                padding: const EdgeInsets.all(24),
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      ArtbeatColors.primaryGreen.withValues(
-                                        alpha: 0.1,
-                                      ),
-                                      ArtbeatColors.primaryPurple.withValues(
-                                        alpha: 0.1,
-                                      ),
-                                    ],
-                                  ),
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: ArtbeatColors.primaryGreen
-                                        .withValues(alpha: 0.3),
-                                  ),
-                                ),
-                                child: Column(
-                                  children: [
-                                    const Icon(
-                                      Icons.camera_alt,
-                                      size: 48,
-                                      color: ArtbeatColors.primaryGreen,
-                                    ),
-                                    const SizedBox(height: 16),
-                                    Text(
-                                      'capture_dashboard_ready_capture'.tr(),
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .headlineSmall
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                            color: ArtbeatColors.textPrimary,
-                                          ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      'capture_dashboard_discover_document'
-                                          .tr(),
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyLarge
-                                          ?.copyWith(
-                                            color: ArtbeatColors.textSecondary,
-                                          ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ],
-                                ),
-                              ),
 
-                              const SizedBox(height: 24),
-
-                              // Main action button
-                              SizedBox(
-                                width: double.infinity,
-                                child: ElevatedButton.icon(
-                                  onPressed: _openTermsAndConditionsScreen,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: ArtbeatColors.primaryGreen,
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 18,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    elevation: 2,
-                                  ),
-                                  icon: const Icon(
-                                    Icons.assignment_turned_in,
-                                    size: 24,
-                                  ),
-                                  label: Text(
-                                    'capture_dashboard_start_capture'.tr(),
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                              ),
-
-                              const SizedBox(height: 32),
-
-                              // Stats section
-                              if (_currentUser != null) ...[
-                                Text(
-                                  'capture_dashboard_your_impact'.tr(),
-                                  style: Theme.of(context).textTheme.titleLarge
-                                      ?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        color: ArtbeatColors.textPrimary,
-                                      ),
-                                ),
-                                const SizedBox(height: 16),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: _buildStatCard(
-                                        title: 'capture_dashboard_stat_captures'
-                                            .tr(),
-                                        value: _totalUserCaptures.toString(),
-                                        icon: Icons.camera_alt,
-                                        color: ArtbeatColors.primaryGreen,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 16),
-                                    Expanded(
-                                      child: _buildStatCard(
-                                        title:
-                                            'capture_dashboard_stat_community_views'
-                                                .tr(),
-                                        value: _totalCommunityViews.toString(),
-                                        icon: Icons.visibility,
-                                        color: ArtbeatColors.primaryPurple,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 16),
-                              ],
-                            ],
-                          ),
-                        ),
+          SafeArea(
+            child: _isLoading
+                ? const Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Color(0xFF22D3EE),
                       ),
-
-                      // Recent captures section
-                      if (_recentCaptures.isNotEmpty)
+                    ),
+                  )
+                : RefreshIndicator(
+                    onRefresh: _refreshData,
+                    color: const Color(0xFF22D3EE),
+                    backgroundColor: const Color(0xFF0C0A16),
+                    child: CustomScrollView(
+                      controller: _scrollController,
+                      physics: const BouncingScrollPhysics(),
+                      slivers: [
                         SliverToBoxAdapter(
                           child: Padding(
-                            padding: const EdgeInsets.all(24.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'capture_dashboard_recent_captures'.tr(),
-                                  style: Theme.of(context).textTheme.titleLarge
-                                      ?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        color: ArtbeatColors.textPrimary,
-                                      ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-
-                      // Recent captures grid
-                      if (_recentCaptures.isNotEmpty)
-                        SliverPadding(
-                          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                          sliver: SliverGrid(
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2,
-                                  crossAxisSpacing: 16,
-                                  mainAxisSpacing: 16,
-                                  childAspectRatio: 1,
-                                ),
-                            delegate: SliverChildBuilderDelegate((
-                              context,
-                              index,
-                            ) {
-                              final capture = _recentCaptures[index];
-                              return _buildCaptureCard(capture);
-                            }, childCount: _recentCaptures.length),
-                          ),
-                        ),
-
-                      // Ad placement beneath recent captures section
-
-                      // Community inspiration section
-                      if (_communityCaptures.isNotEmpty) ...[
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.all(24.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const SizedBox(height: 16),
-                                Text(
-                                  'capture_dashboard_community_inspiration'
-                                      .tr(),
-                                  style: Theme.of(context).textTheme.titleLarge
-                                      ?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        color: ArtbeatColors.textPrimary,
-                                      ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'capture_dashboard_see_others'.tr(),
-                                  style: Theme.of(context).textTheme.bodyMedium
-                                      ?.copyWith(
-                                        color: ArtbeatColors.textSecondary,
-                                      ),
-                                ),
-                                const SizedBox(height: 16),
-                              ],
-                            ),
-                          ),
-                        ),
-                        SliverToBoxAdapter(
-                          child: SizedBox(
-                            height: 200,
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 24.0,
+                            padding: const EdgeInsets.fromLTRB(14, 10, 14, 0),
+                            child: _StampFadeIn(
+                              intro: _intro,
+                              delay: 0.0,
+                              child: _TopHudBar(
+                                title: "CAPTURE",
+                                subtitle: "Scout → Snap → Upload to the map",
+                                onMenu: () => Scaffold.of(context).openDrawer(),
+                                onSearch: () => _showSearchModal(context),
+                                onProfile: () => _showProfileMenu(context),
                               ),
-                              itemCount: _communityCaptures.length,
-                              itemBuilder: (context, index) {
-                                final capture = _communityCaptures[index];
-                                return Container(
-                                  width: 160,
-                                  margin: const EdgeInsets.only(right: 16),
-                                  child: _buildCommunityCard(capture),
-                                );
-                              },
                             ),
                           ),
                         ),
 
-                        // Artist CTA widget
+                        // Hero / Quest banner
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(14, 14, 14, 0),
+                            child: _StampFadeIn(
+                              intro: _intro,
+                              delay: 0.08,
+                              child: _QuestHeroCard(
+                                username: _currentUser?.username,
+                                onStart: _openTermsAndConditionsScreen,
+                                loop: _loop,
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        // HUD stats
+                        if (_currentUser != null)
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(14, 14, 14, 0),
+                              child: _StampFadeIn(
+                                intro: _intro,
+                                delay: 0.14,
+                                child: _ImpactHud(
+                                  totalCaptures: _totalUserCaptures,
+                                  totalViews: _totalCommunityViews,
+                                  loop: _loop,
+                                ),
+                              ),
+                            ),
+                          ),
+
+                        // Recent (loot grid)
+                        if (_recentCaptures.isNotEmpty)
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                14,
+                                18,
+                                14,
+                                10,
+                              ),
+                              child: _SectionHeader(
+                                title: "YOUR RECENT LOOT",
+                                subtitle: "Tap to review your last drops",
+                                accent: const Color(0xFF7C4DFF),
+                              ),
+                            ),
+                          ),
+
+                        if (_recentCaptures.isNotEmpty)
+                          SliverPadding(
+                            padding: const EdgeInsets.symmetric(horizontal: 14),
+                            sliver: SliverGrid(
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 2,
+                                    crossAxisSpacing: 12,
+                                    mainAxisSpacing: 12,
+                                    childAspectRatio: 1,
+                                  ),
+                              delegate: SliverChildBuilderDelegate((
+                                context,
+                                index,
+                              ) {
+                                final capture = _recentCaptures[index];
+                                return _QuestCaptureTile(capture: capture);
+                              }, childCount: _recentCaptures.length),
+                            ),
+                          ),
+
+                        // Community inspiration
+                        if (_communityCaptures.isNotEmpty)
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                14,
+                                20,
+                                14,
+                                10,
+                              ),
+                              child: _SectionHeader(
+                                title: "INSPIRATION RUN",
+                                subtitle: "See what other hunters are finding",
+                                accent: const Color(0xFF22D3EE),
+                              ),
+                            ),
+                          ),
+
+                        if (_communityCaptures.isNotEmpty)
+                          SliverToBoxAdapter(
+                            child: SizedBox(
+                              height: 220,
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                physics: const BouncingScrollPhysics(),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                ),
+                                itemCount: _communityCaptures.length,
+                                itemBuilder: (context, index) {
+                                  final capture = _communityCaptures[index];
+                                  return _QuestCommunityCard(capture: capture);
+                                },
+                              ),
+                            ),
+                          ),
+
+                        // Keep your existing artist CTA
                         const SliverToBoxAdapter(
                           child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 8.0),
+                            padding: EdgeInsets.fromLTRB(8, 18, 8, 0),
                             child: CompactArtistCTAWidget(),
                           ),
                         ),
 
-                        // Bottom padding
-                        const SliverToBoxAdapter(child: SizedBox(height: 100)),
+                        const SliverToBoxAdapter(child: SizedBox(height: 110)),
                       ],
+                    ),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// =======================
+/// Background painter: subtle “art energy” blobs (gaming vibe)
+/// =======================
+
+class _QuestAmbientPainter extends CustomPainter {
+  final double t;
+  _QuestAmbientPainter({required this.t});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Base dark gradient
+    final base = Paint()
+      ..shader = const LinearGradient(
+        colors: const [
+          const Color(0xFF07060F),
+          const Color(0xFF0A1330),
+          const Color(0xFF071C18),
+        ],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ).createShader(Offset.zero & size);
+    canvas.drawRect(Offset.zero & size, base);
+
+    _blob(canvas, size, const Color(0xFF22D3EE), 0.18, 0.20, 0.36, phase: 0.0);
+    _blob(canvas, size, const Color(0xFF7C4DFF), 0.84, 0.22, 0.30, phase: 0.2);
+    _blob(canvas, size, const Color(0xFFFF3D8D), 0.78, 0.76, 0.42, phase: 0.45);
+    _blob(canvas, size, const Color(0xFF34D399), 0.16, 0.78, 0.34, phase: 0.62);
+
+    // soft vignette (very subtle)
+    final vignette = Paint()
+      ..shader = const RadialGradient(
+        radius: 1.15,
+        colors: const [Colors.transparent, const Color.fromRGBO(0, 0, 0, 0.55)],
+      ).createShader(Offset.zero & size);
+    canvas.drawRect(Offset.zero & size, vignette);
+  }
+
+  void _blob(
+    Canvas canvas,
+    Size size,
+    Color color,
+    double ax,
+    double ay,
+    double r, {
+    required double phase,
+  }) {
+    final dx = math.sin((t + phase) * 2 * math.pi) * 0.03;
+    final dy = math.cos((t + phase) * 2 * math.pi) * 0.03;
+
+    final center = Offset(size.width * (ax + dx), size.height * (ay + dy));
+    final radius = size.width * r;
+
+    final paint = Paint()
+      ..shader = RadialGradient(
+        colors: [color.withValues(alpha: 0.22), color.withValues(alpha: 0.0)],
+      ).createShader(Rect.fromCircle(center: center, radius: radius))
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 70);
+
+    canvas.drawCircle(center, radius, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _QuestAmbientPainter oldDelegate) =>
+      oldDelegate.t != t;
+}
+
+/// =======================
+/// Top HUD
+/// =======================
+
+class _TopHudBar extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final VoidCallback onMenu;
+  final VoidCallback onSearch;
+  final VoidCallback onProfile;
+
+  const _TopHudBar({
+    required this.title,
+    required this.subtitle,
+    required this.onMenu,
+    required this.onSearch,
+    required this.onProfile,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return _Glass(
+      radius: 18,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      child: Row(
+        children: [
+          IconButton(
+            onPressed: onMenu,
+            icon: const Icon(Icons.menu_rounded, color: Colors.white),
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.spaceGrotesk(
+                    color: Colors.white.withValues(alpha: 0.95),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: GoogleFonts.spaceGrotesk(
+                    color: Colors.white.withValues(alpha: 0.65),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            onPressed: onSearch,
+            icon: const Icon(Icons.search_rounded, color: Colors.white),
+          ),
+          IconButton(
+            onPressed: onProfile,
+            icon: const Icon(Icons.person_rounded, color: Colors.white),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// =======================
+/// Hero quest card
+/// =======================
+
+class _QuestHeroCard extends StatelessWidget {
+  final String? username;
+  final VoidCallback onStart;
+  final AnimationController loop;
+
+  const _QuestHeroCard({
+    required this.username,
+    required this.onStart,
+    required this.loop,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: loop,
+      builder: (_, __) {
+        final t = loop.value;
+        final pulse = 0.70 + 0.30 * (0.5 + 0.5 * math.sin(t * 2 * math.pi));
+
+        return _Glass(
+          radius: 22,
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  _TagChip(
+                    text: "PRIMARY QUEST",
+                    color: const Color(0xFFFFC857),
+                  ),
+                  const Spacer(),
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(14),
+                      gradient: LinearGradient(
+                        colors: [
+                          const Color(0xFF22D3EE).withValues(alpha: 0.9),
+                          const Color(0xFF7C4DFF).withValues(alpha: 0.75),
+                          const Color(0xFFFF3D8D).withValues(alpha: 0.70),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(
+                            0xFF22D3EE,
+                          ).withValues(alpha: 0.14 * pulse),
+                          blurRadius: 18,
+                          spreadRadius: 1,
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.camera_alt_rounded,
+                      color: Colors.white,
+                      size: 18,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+
+              Text(
+                username == null
+                    ? 'capture_dashboard_ready_capture'.tr()
+                    : "${'capture_dashboard_ready_capture'.tr()}, $username",
+                style: GoogleFonts.spaceGrotesk(
+                  color: Colors.white.withValues(alpha: 0.95),
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -0.2,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'capture_dashboard_discover_document'.tr(),
+                style: GoogleFonts.spaceGrotesk(
+                  color: Colors.white.withValues(alpha: 0.70),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  height: 1.15,
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              _QuestPrimaryButton(
+                label: 'capture_dashboard_start_capture'.tr(),
+                icon: Icons.assignment_turned_in_rounded,
+                onTap: onStart,
+                loop: loop,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _QuestPrimaryButton extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final VoidCallback onTap;
+  final AnimationController loop;
+
+  const _QuestPrimaryButton({
+    required this.label,
+    required this.icon,
+    required this.onTap,
+    required this.loop,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: loop,
+      builder: (_, __) {
+        final t = loop.value;
+        final sweep = (t * 1.15) % 1.0;
+
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(18),
+          child: Stack(
+            children: [
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: onTap,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 14,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(18),
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF34D399), Color(0xFF22D3EE)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(
+                            0xFF34D399,
+                          ).withValues(alpha: 0.22),
+                          blurRadius: 18,
+                          offset: const Offset(0, 12),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 38,
+                          height: 38,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(14),
+                            color: Colors.white.withValues(alpha: 0.16),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.22),
+                            ),
+                          ),
+                          child: Icon(icon, color: Colors.white, size: 20),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            label.toUpperCase(),
+                            style: GoogleFonts.spaceGrotesk(
+                              color: Colors.white,
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.8,
+                            ),
+                          ),
+                        ),
+                        const Icon(
+                          Icons.arrow_forward_rounded,
+                          color: Colors.white,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              // Spotlight sweep (animated highlight)
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: Opacity(
+                    opacity: 0.55,
+                    child: Transform.translate(
+                      offset: Offset((sweep * 2 - 1) * 240, 0),
+                      child: Transform.rotate(
+                        angle: -0.55,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.transparent,
+                                Colors.white.withValues(alpha: 0.22),
+                                Colors.transparent,
+                              ],
+                              stops: const [0.0, 0.5, 1.0],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// =======================
+/// Impact HUD
+/// =======================
+
+class _ImpactHud extends StatelessWidget {
+  final int totalCaptures;
+  final int totalViews;
+  final AnimationController loop;
+
+  const _ImpactHud({
+    required this.totalCaptures,
+    required this.totalViews,
+    required this.loop,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // Fake “level” and “xp” vibe derived from stats (presentation only)
+    final level = (1 + (totalCaptures / 5).floor()).clamp(1, 99);
+    final xp = (totalViews % 1000).clamp(0, 1000);
+    final xpProgress = ((xp / 1000.0)).clamp(0.05, 0.98);
+
+    return _Glass(
+      radius: 20,
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              _HudPill(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFFFC857), Color(0xFFFF3D8D)],
+                ),
+                child: Text(
+                  "LV $level",
+                  style: GoogleFonts.spaceGrotesk(
+                    color: Colors.black.withValues(alpha: 0.86),
+                    fontWeight: FontWeight.w900,
+                    fontSize: 12,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(child: _XpBar(progress: xpProgress)),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: _MiniStat(
+                  label: 'capture_dashboard_stat_captures'.tr(),
+                  value: totalCaptures.toString(),
+                  accent: const Color(0xFF34D399),
+                  icon: Icons.camera_alt_rounded,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _MiniStat(
+                  label: 'capture_dashboard_stat_community_views'.tr(),
+                  value: totalViews.toString(),
+                  accent: const Color(0xFF7C4DFF),
+                  icon: Icons.visibility_rounded,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _XpBar extends StatelessWidget {
+  final double progress;
+  const _XpBar({required this.progress});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "XP",
+          style: GoogleFonts.spaceGrotesk(
+            color: Colors.white.withValues(alpha: 0.65),
+            fontSize: 10.5,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1.0,
+          ),
+        ),
+        const SizedBox(height: 6),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(999),
+          child: Container(
+            height: 10,
+            color: Colors.white.withValues(alpha: 0.08),
+            child: FractionallySizedBox(
+              alignment: Alignment.centerLeft,
+              widthFactor: progress,
+              child: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Color(0xFF22D3EE),
+                      Color(0xFF7C4DFF),
+                      Color(0xFFFF3D8D),
                     ],
                   ),
                 ),
+              ),
+            ),
+          ),
         ),
-      ),
+      ],
     );
   }
+}
 
-  Widget _buildStatCard({
-    required String title,
-    required String value,
-    required IconData icon,
-    required Color color,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Column(
+class _MiniStat extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color accent;
+  final IconData icon;
+
+  const _MiniStat({
+    required this.label,
+    required this.value,
+    required this.accent,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return _Glass(
+      radius: 18,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      child: Row(
         children: [
-          Icon(icon, color: color, size: 32),
-          const SizedBox(height: 12),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: color,
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              color: accent.withValues(alpha: 0.16),
+              border: Border.all(color: accent.withValues(alpha: 0.28)),
+            ),
+            child: Icon(
+              icon,
+              color: Colors.white.withValues(alpha: 0.92),
+              size: 18,
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 12,
-              color: color.withValues(alpha: 0.8),
-              fontWeight: FontWeight.w500,
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  value,
+                  style: GoogleFonts.spaceGrotesk(
+                    color: Colors.white.withValues(alpha: 0.95),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.spaceGrotesk(
+                    color: Colors.white.withValues(alpha: 0.62),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
             ),
-            textAlign: TextAlign.center,
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildCaptureCard(CaptureModel capture) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+/// =======================
+/// Section header
+/// =======================
+
+class _SectionHeader extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final Color accent;
+
+  const _SectionHeader({
+    required this.title,
+    required this.subtitle,
+    required this.accent,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 10,
+          height: 10,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: accent.withValues(alpha: 0.95),
+            boxShadow: [
+              BoxShadow(
+                color: accent.withValues(alpha: 0.25),
+                blurRadius: 16,
+                spreadRadius: 1,
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: GoogleFonts.spaceGrotesk(
+                  color: Colors.white.withValues(alpha: 0.95),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.1,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                subtitle,
+                style: GoogleFonts.spaceGrotesk(
+                  color: Colors.white.withValues(alpha: 0.62),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// =======================
+/// Capture tiles + community cards
+/// =======================
+
+class _QuestCaptureTile extends StatelessWidget {
+  final CaptureModel capture;
+  const _QuestCaptureTile({required this.capture});
+
+  Color _statusColor(CaptureStatus status) {
+    switch (status) {
+      case CaptureStatus.approved:
+        return const Color(0xFF34D399);
+      case CaptureStatus.pending:
+        return const Color(0xFFFFC857);
+      case CaptureStatus.rejected:
+        return const Color(0xFFFF3D8D);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final statusColor = _statusColor(capture.status);
+
+    return _Glass(
+      radius: 20,
+      padding: EdgeInsets.zero,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(20),
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // Image
             SecureNetworkImage(
               imageUrl: capture.imageUrl,
               fit: BoxFit.cover,
               errorWidget: Container(
-                color: Colors.grey[300],
-                child: const Icon(Icons.broken_image, color: Colors.grey),
+                color: const Color.fromRGBO(255, 255, 255, 0.06),
+                child: const Icon(
+                  Icons.broken_image_rounded,
+                  color: Colors.white54,
+                ),
               ),
             ),
-
-            // Overlay
-            Container(
+            // bottom fade
+            DecoratedBox(
               decoration: BoxDecoration(
-                gradient: LinearGradient(
+                gradient: const LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [
+                  colors: const [
                     Colors.transparent,
-                    Colors.black.withValues(alpha: 0.7),
+                    const Color.fromRGBO(0, 0, 0, 0.78),
                   ],
                 ),
               ),
             ),
-
-            // Content
+            // status chip + title
             Positioned(
-              bottom: 8,
-              left: 8,
-              right: 8,
+              left: 10,
+              right: 10,
+              bottom: 10,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (capture.title?.isNotEmpty == true)
+                  if ((capture.title ?? '').isNotEmpty)
                     Text(
                       capture.title!,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.white.withValues(alpha: 0.95),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
+                  const SizedBox(height: 6),
                   Container(
-                    margin: const EdgeInsets.only(top: 4),
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
+                      horizontal: 8,
+                      vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: _getStatusColor(capture.status),
-                      borderRadius: BorderRadius.circular(8),
+                      color: statusColor.withValues(alpha: 0.85),
+                      borderRadius: BorderRadius.circular(999),
+                      boxShadow: [
+                        BoxShadow(
+                          color: statusColor.withValues(alpha: 0.20),
+                          blurRadius: 14,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
                     ),
                     child: Text(
                       capture.status.value.toUpperCase(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 8,
-                        fontWeight: FontWeight.bold,
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.black.withValues(alpha: 0.88),
+                        fontSize: 10,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.7,
                       ),
                     ),
                   ),
@@ -743,78 +1207,222 @@ class _EnhancedCaptureDashboardScreenState
       ),
     );
   }
+}
 
-  Widget _buildCommunityCard(CaptureModel capture) {
+class _QuestCommunityCard extends StatelessWidget {
+  final CaptureModel capture;
+  const _QuestCommunityCard({required this.capture});
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            // Image
-            SecureNetworkImage(
-              imageUrl: capture.imageUrl,
-              fit: BoxFit.cover,
-              errorWidget: Container(
-                color: Colors.grey[300],
-                child: const Icon(Icons.broken_image, color: Colors.grey),
+      width: 170,
+      margin: const EdgeInsets.only(right: 12),
+      child: _Glass(
+        radius: 22,
+        padding: EdgeInsets.zero,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(22),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              SecureNetworkImage(
+                imageUrl: capture.imageUrl,
+                fit: BoxFit.cover,
+                errorWidget: Container(
+                  color: const Color.fromRGBO(255, 255, 255, 0.06),
+                  child: const Icon(
+                    Icons.broken_image_rounded,
+                    color: Colors.white54,
+                  ),
+                ),
               ),
-            ),
-
-            // Overlay
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    Colors.black.withValues(alpha: 0.7),
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: const [
+                      Colors.transparent,
+                      const Color.fromRGBO(0, 0, 0, 0.80),
+                    ],
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 12,
+                right: 12,
+                bottom: 12,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _TagChip(text: "SPOTTED", color: const Color(0xFF22D3EE)),
+                    const SizedBox(height: 8),
+                    Text(
+                      capture.title ??
+                          'capture_dashboard_community_capture'.tr(),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.white.withValues(alpha: 0.95),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w900,
+                        height: 1.1,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      capture.artistName ?? 'Unknown Artist',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.white.withValues(alpha: 0.70),
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ],
                 ),
               ),
-            ),
-
-            // Content
-            Positioned(
-              bottom: 8,
-              left: 8,
-              right: 8,
-              child: Text(
-                capture.title ?? 'capture_dashboard_community_capture'.tr(),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
+}
 
-  Color _getStatusColor(CaptureStatus status) {
-    switch (status) {
-      case CaptureStatus.approved:
-        return ArtbeatColors.primaryGreen;
-      case CaptureStatus.pending:
-        return ArtbeatColors.accentYellow;
-      case CaptureStatus.rejected:
-        return Colors.red;
-    }
+/// =======================
+/// Shared UI atoms
+/// =======================
+
+class _Glass extends StatelessWidget {
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+  final double radius;
+
+  const _Glass({
+    required this.child,
+    this.padding = const EdgeInsets.all(16),
+    this.radius = 16,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: padding,
+      decoration: BoxDecoration(
+        color: const Color.fromRGBO(255, 255, 255, 0.06),
+        borderRadius: BorderRadius.circular(radius),
+        border: Border.all(color: const Color.fromRGBO(255, 255, 255, 0.12)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.35),
+            blurRadius: 26,
+            offset: const Offset(0, 16),
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+}
+
+class _HudPill extends StatelessWidget {
+  final Widget child;
+  final LinearGradient gradient;
+
+  const _HudPill({required this.child, required this.gradient});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        gradient: gradient,
+      ),
+      child: child,
+    );
+  }
+}
+
+class _TagChip extends StatelessWidget {
+  final String text;
+  final Color color;
+  const _TagChip({required this.text, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Transform.rotate(
+      angle: -0.05,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(999),
+          gradient: LinearGradient(
+            colors: [color, Colors.white.withValues(alpha: 0.30)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: color.withValues(alpha: 0.20),
+              blurRadius: 16,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Text(
+          text,
+          style: GoogleFonts.spaceGrotesk(
+            color: Colors.black.withValues(alpha: 0.85),
+            fontSize: 10.5,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 1.0,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _StampFadeIn extends StatelessWidget {
+  final AnimationController intro;
+  final double delay;
+  final Widget child;
+
+  const _StampFadeIn({
+    required this.intro,
+    required this.delay,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final fade = CurvedAnimation(
+      parent: intro,
+      curve: Interval(
+        delay,
+        (delay + 0.55).clamp(0.0, 1.0),
+        curve: Curves.easeOut,
+      ),
+    );
+    final slide = Tween<Offset>(begin: const Offset(0, 0.05), end: Offset.zero)
+        .animate(
+          CurvedAnimation(
+            parent: intro,
+            curve: Interval(
+              delay,
+              (delay + 0.75).clamp(0.0, 1.0),
+              curve: Curves.easeOutCubic,
+            ),
+          ),
+        );
+
+    return FadeTransition(
+      opacity: fade,
+      child: SlideTransition(position: slide, child: child),
+    );
   }
 }

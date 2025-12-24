@@ -625,13 +625,48 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
           title: 'art_walk_art_walk_map_text_art_walk_map'.tr(),
           showBackButton: false, // Don't show back button
           scaffoldKey: _scaffoldKey, // Provide scaffold key for hamburger menu
+          useHudStyle: true, // Use HUD style to match enhanced bottom nav
           actions: [
             IconButton(
-              icon: const Icon(
+              icon: Icon(
                 Icons.search,
-                color: ArtWalkDesignSystem.textLight,
+                color: ArtWalkDesignSystem.hudInactiveColor.withValues(
+                  alpha: 0.8,
+                ),
               ),
               onPressed: () => Navigator.pushNamed(context, '/search'),
+            ),
+            IconButton(
+              icon: Icon(
+                Icons.message,
+                color: ArtWalkDesignSystem.hudInactiveColor.withValues(
+                  alpha: 0.8,
+                ),
+              ),
+              onPressed: () => Navigator.pushNamed(context, '/messaging'),
+            ),
+            Stack(
+              children: [
+                IconButton(
+                  icon: Icon(
+                    Icons.notifications,
+                    color: ArtWalkDesignSystem.hudInactiveColor.withValues(
+                      alpha: 0.8,
+                    ),
+                  ),
+                  onPressed: () => Navigator.pushNamed(context, '/notifications'),
+                ),
+                // TODO: Add notification badge logic here if needed
+              ],
+            ),
+            IconButton(
+              icon: Icon(
+                Icons.account_circle,
+                color: ArtWalkDesignSystem.hudInactiveColor.withValues(
+                  alpha: 0.8,
+                ),
+              ),
+              onPressed: () => Navigator.pushNamed(context, '/profile'),
             ),
           ],
         ),
@@ -688,17 +723,21 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
             // Loading indicator
             if (_isLoading || _isSearchingZip)
               Container(
-                decoration: const BoxDecoration(
-                  gradient: ArtWalkDesignSystem.backgroundGradient,
+                decoration: BoxDecoration(
+                  gradient: ArtWalkDesignSystem.hudHeaderGradient,
                 ),
                 child: Center(
-                  child: ArtWalkDesignSystem.buildGlassCard(
+                  child: Container(
+                    padding: const EdgeInsets.all(
+                      ArtWalkDesignSystem.paddingXL,
+                    ),
+                    decoration: ArtWalkDesignSystem.hudGlassDecoration(),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const CircularProgressIndicator(
+                        CircularProgressIndicator(
                           valueColor: AlwaysStoppedAnimation<Color>(
-                            ArtWalkDesignSystem.primaryTeal,
+                            ArtWalkDesignSystem.hudActiveColor,
                           ),
                         ),
                         const SizedBox(height: ArtWalkDesignSystem.paddingM),
@@ -706,7 +745,7 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
                           _isSearchingZip
                               ? 'Searching location...'
                               : 'Loading map...',
-                          style: ArtWalkDesignSystem.cardTitleStyle,
+                          style: ArtWalkDesignSystem.hudCardTitleStyle,
                         ),
                       ],
                     ),
@@ -736,25 +775,29 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
                 padding: const EdgeInsets.symmetric(
                   horizontal: ArtWalkDesignSystem.paddingM,
                 ),
-                decoration: ArtWalkDesignSystem.glassDecoration(
+                decoration: ArtWalkDesignSystem.hudGlassDecoration(
                   borderRadius: ArtWalkDesignSystem.radiusM,
                 ),
                 child: TextField(
-                  style: ArtWalkDesignSystem.cardTitleStyle,
+                  style: ArtWalkDesignSystem.hudCardTitleStyle,
                   decoration: InputDecoration(
                     hintText: _currentZipCode.isEmpty
                         ? 'Enter ZIP code'
                         : 'Enter ZIP code (current: $_currentZipCode)',
-                    hintStyle: ArtWalkDesignSystem.cardSubtitleStyle,
+                    hintStyle: ArtWalkDesignSystem.hudCardSubtitleStyle
+                        .copyWith(
+                          color: ArtWalkDesignSystem.hudInactiveColor
+                              .withValues(alpha: 0.6),
+                        ),
                     border: InputBorder.none,
                     suffixIcon: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         if (_currentZipCode != '28501')
                           IconButton(
-                            icon: const Icon(
+                            icon: Icon(
                               Icons.refresh,
-                              color: ArtWalkDesignSystem.primaryTeal,
+                              color: ArtWalkDesignSystem.hudActiveColor,
                               size: 20,
                             ),
                             onPressed: () async {
@@ -773,9 +816,9 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
                               );
                             },
                           ),
-                        const Icon(
+                        Icon(
                           Icons.search,
-                          color: ArtWalkDesignSystem.primaryTeal,
+                          color: ArtWalkDesignSystem.hudActiveColor,
                         ),
                       ],
                     ),
@@ -826,31 +869,32 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(25),
-                  gradient: const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Color(0xFF6B73FF), // Purple
-                      Color(0xFF9DEDC6), // Green
-                    ],
-                  ),
+                  gradient: ArtWalkDesignSystem.hudButtonGradient,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
+                      color: ArtWalkDesignSystem.hudActiveColor.withValues(alpha: 0.3),
+                      blurRadius: 18,
+                      spreadRadius: 1,
+                      offset: const Offset(0, 10),
                     ),
                   ],
+                  border: Border.all(
+                    color: ArtWalkDesignSystem.hudInactiveColor.withValues(alpha: 0.2),
+                    width: 1,
+                  ),
                 ),
                 child: ElevatedButton.icon(
                   onPressed: () {
                     Navigator.pushNamed(context, '/art-walk/create');
                   },
-                  icon: const Icon(Icons.add_location, color: Colors.white),
+                  icon: Icon(
+                    Icons.add_location,
+                    color: ArtWalkDesignSystem.hudInactiveColor,
+                  ),
                   label: Text(
                     'art_walk_art_walk_map_text_create_art_walk'.tr(),
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: ArtWalkDesignSystem.hudInactiveColor,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -876,16 +920,8 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
               right: 16,
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.9),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+                decoration: ArtWalkDesignSystem.hudGlassDecoration(
+                  borderRadius: 20,
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -918,8 +954,9 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
                   FloatingActionButton(
                     heroTag: 'toggle_slider',
                     mini: true,
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.black87,
+                    backgroundColor: ArtWalkDesignSystem.hudBackground
+                        .withValues(alpha: 0.8),
+                    foregroundColor: ArtWalkDesignSystem.hudInactiveColor,
                     onPressed: () {
                       setState(() {
                         _showCapturesSlider = !_showCapturesSlider;
@@ -933,8 +970,9 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
                   FloatingActionButton(
                     heroTag: 'my_location',
                     mini: true,
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.black87,
+                    backgroundColor: ArtWalkDesignSystem.hudBackground
+                        .withValues(alpha: 0.8),
+                    foregroundColor: ArtWalkDesignSystem.hudInactiveColor,
                     onPressed: _currentPosition != null
                         ? () {
                             _mapController?.animateCamera(
@@ -964,9 +1002,19 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
                 right: 0,
                 child: Container(
                   height: 200,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.vertical(
+                  decoration: BoxDecoration(
+                    color: ArtWalkDesignSystem.hudBackground.withValues(
+                      alpha: 0.9,
+                    ),
+                    border: Border(
+                      top: BorderSide(
+                        color: ArtWalkDesignSystem.hudBorder.withValues(
+                          alpha: 0.3,
+                        ),
+                        width: 1,
+                      ),
+                    ),
+                    borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(16),
                     ),
                   ),
@@ -979,13 +1027,17 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
                           children: [
                             Text(
                               '${"art_walk_art_walk_map_text_nearby_captures".tr()} (${_nearbyCaptures.length})',
-                              style: Theme.of(context).textTheme.titleMedium,
+                              style: ArtWalkDesignSystem.hudCardTitleStyle,
                             ),
                             IconButton(
                               onPressed: () {
                                 setState(() => _showCapturesSlider = false);
                               },
-                              icon: const Icon(Icons.close),
+                              icon: Icon(
+                                Icons.close,
+                                color: ArtWalkDesignSystem.hudInactiveColor
+                                    .withValues(alpha: 0.8),
+                              ),
                             ),
                           ],
                         ),
@@ -996,6 +1048,8 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
                                 child: Text(
                                   'art_walk_art_walk_map_text_no_captures_found'
                                       .tr(),
+                                  style:
+                                      ArtWalkDesignSystem.hudCardSubtitleStyle,
                                 ),
                               )
                             : ListView.builder(
@@ -1025,14 +1079,24 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
         child: ElevatedButton(
           onPressed: () => _changeFilter(filter),
           style: ElevatedButton.styleFrom(
-            backgroundColor: isSelected ? ArtbeatColors.primary : Colors.white,
-            foregroundColor: isSelected ? Colors.white : ArtbeatColors.primary,
+            backgroundColor: isSelected
+                ? ArtWalkDesignSystem.hudActiveColor.withValues(alpha: 0.2)
+                : ArtWalkDesignSystem.hudBackground.withValues(alpha: 0.3),
+            foregroundColor: isSelected
+                ? ArtWalkDesignSystem.hudActiveColor
+                : ArtWalkDesignSystem.hudInactiveColor.withValues(alpha: 0.8),
             elevation: isSelected ? 2 : 0,
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
             minimumSize: const Size(0, 32),
             textStyle: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
+            ),
+            side: BorderSide(
+              color: isSelected
+                  ? ArtWalkDesignSystem.hudActiveColor.withValues(alpha: 0.5)
+                  : ArtWalkDesignSystem.hudBorder.withValues(alpha: 0.3),
+              width: 1,
             ),
           ),
           child: Text(label),

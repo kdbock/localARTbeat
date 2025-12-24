@@ -7,6 +7,7 @@ import 'package:artbeat_auth/artbeat_auth.dart' as auth;
 import 'package:artbeat_capture/artbeat_capture.dart' as capture;
 import 'package:artbeat_community/artbeat_community.dart' as community;
 import 'package:artbeat_core/artbeat_core.dart' as core;
+// ignore: implementation_imports
 import 'package:artbeat_core/src/screens/artbeat_dashboard_screen.dart'
     as old_dashboard;
 import 'package:artbeat_events/artbeat_events.dart' as events;
