@@ -7,6 +7,8 @@ import 'package:artbeat_auth/artbeat_auth.dart' as auth;
 import 'package:artbeat_capture/artbeat_capture.dart' as capture;
 import 'package:artbeat_community/artbeat_community.dart' as community;
 import 'package:artbeat_core/artbeat_core.dart' as core;
+import 'package:artbeat_core/src/screens/artbeat_dashboard_screen.dart'
+    as old_dashboard;
 import 'package:artbeat_events/artbeat_events.dart' as events;
 import 'package:artbeat_messaging/artbeat_messaging.dart' as messaging;
 import 'package:artbeat_profile/artbeat_profile.dart' as profile;
@@ -58,6 +60,17 @@ class AppRouter {
         return RouteUtils.createMainNavRoute(
           currentIndex: 0,
           child: const core.ArtbeatDashboardScreen(),
+        );
+
+      case '/old-dashboard':
+        return RouteUtils.createMainNavRoute(
+          currentIndex: 0,
+          child: const old_dashboard.ArtbeatDashboardScreen(),
+        );
+
+      case '/2025_modern_onboarding':
+        return RouteUtils.createSimpleRoute(
+          child: const artist.Modern2025OnboardingScreen(),
         );
 
       case '/debug/payment':

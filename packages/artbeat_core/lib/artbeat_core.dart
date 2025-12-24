@@ -186,7 +186,8 @@ export 'src/utils/distance_utils.dart' show DistanceUtils;
 
 // Export Screens
 export 'src/screens/splash_screen.dart' show SplashScreen;
-export 'src/screens/artbeat_dashboard_screen.dart' show ArtbeatDashboardScreen;
+export 'src/screens/dashboard/artbeat_dashboard_screen.dart'
+    show ArtbeatDashboardScreen;
 // Deprecated: Use SearchResultsPage instead
 // export 'src/screens/search_results_screen.dart' show SearchResultsScreen;
 export 'src/screens/search_results_page.dart' show SearchResultsPage;

@@ -2,10 +2,10 @@ create animated_dashboard_screen.dart - new screen
 create animated dashboard with light pale purple to green gradient background
 App hero
 4 animated, pulsing buttons with arrow and animated circular aminations
-    Capture Button gradient Purple to orange linked to enhanced capture dashboard
-    Explore Button Gradient Orange to Blue linked to artbeat dashboard
-    Discover Button Gradient Blue to Pink linked to artbeat artwalk dashboard
-    Connect Button Gradient Pink to Green linked to art community hub
+    Capture linked to enhanced capture dashboard
+    Explore  linked to artbeat dashboard
+    Discover  linked to artbeat artwalk dashboard
+    Connect  linked to art community hub
 
     Add Are you an Artist CTA widget linked to modern 2025 onboarding screen
 

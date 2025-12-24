@@ -35,6 +35,7 @@ dependencies:
   geocoding: ^4.0.0
 
   # Authentication
+  google_fonts: ^6.1.0
   google_sign_in: ^6.2.1
 
   # Payments and data

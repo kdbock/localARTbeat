@@ -159,20 +159,23 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
           icon: const Icon(Icons.menu, color: Colors.white),
           onPressed: () => _openDrawer(),
         ),
-        title: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.palette, color: Colors.white, size: 24),
-            SizedBox(width: 8),
-            Text(
-              'ARTbeat',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+        title: GestureDetector(
+          onTap: () => Navigator.pushNamed(context, '/dashboard'),
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.palette, color: Colors.white, size: 24),
+              SizedBox(width: 8),
+              Text(
+                'ARTbeat',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         centerTitle: true,
         actions: [
