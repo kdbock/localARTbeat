@@ -1364,8 +1364,9 @@ class AppRouter {
   Route<dynamic>? _handleCaptureRoutes(RouteSettings settings) {
     switch (settings.name) {
       case AppRoutes.captures:
-        return RouteUtils.createMainNavRoute(
+        return RouteUtils.createMainLayoutRoute(
           currentIndex: 2,
+          drawer: const capture.CaptureDrawer(),
           child: const capture.EnhancedCaptureDashboardScreen(),
         );
 
@@ -1386,8 +1387,9 @@ class AppRouter {
         );
 
       case AppRoutes.captureDashboard:
-        return RouteUtils.createMainNavRoute(
+        return RouteUtils.createMainLayoutRoute(
           currentIndex: 2,
+          drawer: const capture.CaptureDrawer(),
           child: const capture.EnhancedCaptureDashboardScreen(),
         );
 

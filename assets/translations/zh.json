@@ -1651,6 +1651,9 @@
   "capture_captures_list_text_retry": "重试",
   "capture_captures_list_text_retry_3": "重试",
   "capture_detail_viewer_default_title": "捕获详情",
+  "capture_dashboard_discover_document": "Discover and document public art to help build our community map",
+  "capture_dashboard_ready_capture": "Ready to Capture Art?",
+  "capture_dashboard_start_capture": "Start Capture",
   "capture_enhanced_capture_dashboard_hint_find_art_captures": "按位置或类型查找艺术捕获",
   "capture_enhanced_capture_dashboard_hint_search_captures": "搜索捕获",
   "capture_enhanced_capture_dashboard_hint_search_for_artists": "搜索艺术家及其捕获",
@@ -3196,5 +3199,7 @@
   "screen_title_quiet_mode": "静音模式",
   "screen_title_moderation": "审核",
   "screen_title_my_posts": "我的发布",
-  "screen_title_create_post": "创建 & 分享"
+  "screen_title_create_post": "创建 & 分享",
+  "capture_dashboard_stat_captures": "捕获",
+  "capture_dashboard_stat_community_views": "社区浏览"
 }

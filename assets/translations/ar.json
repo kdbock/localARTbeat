@@ -1718,6 +1718,9 @@
   "capture_captures_list_text_retry": "إعادة المحاولة",
   "capture_captures_list_text_retry_3": "إعادة المحاولة",
   "capture_detail_viewer_default_title": "تفاصيل اللقطة",
+  "capture_dashboard_discover_document": "Discover and document public art to help build our community map",
+  "capture_dashboard_ready_capture": "Ready to Capture Art?",
+  "capture_dashboard_start_capture": "Start Capture",
   "capture_enhanced_capture_dashboard_hint_find_art_captures": "العثور على التقاطات فنية حسب الموقع أو النوع",
   "capture_enhanced_capture_dashboard_hint_search_captures": "البحث في اللقطات",
   "capture_enhanced_capture_dashboard_hint_search_for_artists": "البحث عن الفنانين ولقطاتهم",
@@ -3477,5 +3480,7 @@
   "screen_title_quiet_mode": "الوضع الصامت",
   "screen_title_moderation": "الإشراف",
   "screen_title_my_posts": "منشوراتي",
-  "screen_title_create_post": "إنشاء & مشاركة"
+  "screen_title_create_post": "إنشاء & مشاركة",
+  "capture_dashboard_stat_captures": "التقاطات",
+  "capture_dashboard_stat_community_views": "مشاهدات المجتمع"
 }

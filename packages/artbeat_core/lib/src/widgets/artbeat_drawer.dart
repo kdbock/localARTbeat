@@ -1,9 +1,16 @@
 import 'dart:async';
+import 'dart:ui';
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:google_fonts/google_fonts.dart';
+
 import 'package:artbeat_art_walk/artbeat_art_walk.dart';
+import 'package:artbeat_messaging/artbeat_messaging.dart';
+
 import '../theme/artbeat_colors.dart';
 import '../theme/artbeat_typography.dart';
 import '../services/user_service.dart';
@@ -11,10 +18,8 @@ import '../models/user_model.dart' as core;
 import 'artbeat_drawer_items.dart';
 import 'user_avatar.dart';
 import '../utils/logger.dart';
-import 'package:artbeat_messaging/artbeat_messaging.dart';
 
 // Define main navigation routes that should use pushReplacement
-// Only include true top-level destinations that should replace the current screen
 const Set<String> mainRoutes = {
   '/dashboard',
   '/browse',
@@ -32,16 +37,24 @@ class ArtbeatDrawer extends StatefulWidget {
   State<ArtbeatDrawer> createState() => _ArtbeatDrawerState();
 }
 
-class _ArtbeatDrawerState extends State<ArtbeatDrawer> {
+class _ArtbeatDrawerState extends State<ArtbeatDrawer>
+    with TickerProviderStateMixin {
   core.UserModel? _cachedUserModel;
   StreamSubscription<User?>? _authSubscription;
   String? _roleOverride; // For admin role switching
 
+  late final AnimationController _loop; // ambient animation
+
   @override
   void initState() {
     super.initState();
+    _loop = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 9),
+    )..repeat();
+
     _loadUserModel();
-    // Listen for auth state changes to refresh user model
+
     _authSubscription = FirebaseAuth.instance.authStateChanges().listen((
       User? user,
     ) {
@@ -51,7 +64,7 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer> {
         if (mounted) {
           setState(() {
             _cachedUserModel = null;
-            _roleOverride = null; // Reset role override when signing out
+            _roleOverride = null;
           });
         }
       }
@@ -61,6 +74,7 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer> {
   @override
   void dispose() {
     _authSubscription?.cancel();
+    _loop.dispose();
     super.dispose();
   }
 
@@ -70,9 +84,7 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer> {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
         final model = await userService.getUserById(user.uid);
-        if (mounted) {
-          setState(() => _cachedUserModel = model);
-        }
+        if (mounted) setState(() => _cachedUserModel = model);
 
         // Process daily login for streak tracking
         try {
@@ -93,18 +105,15 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer> {
     String route,
     bool isMainRoute,
   ) {
-    // Ensure the provided snackBarContext is still valid before doing
-    // navigation that will rely on it. Guard the BuildContext usage across
-    // async gaps to avoid use_build_context_synchronously lints.
     if (!snackBarContext.mounted) return;
-    // List of implemented routes based on app_router.dart
+
     final implementedRoutes = {
       '/dashboard',
       '/profile',
       '/profile/edit',
       '/login',
       '/register',
-      '/browse', // ✅ Full browse screen with all content types
+      '/browse',
       '/artist/dashboard',
       '/artist/onboarding',
       '/artist/profile-edit',
@@ -151,7 +160,7 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer> {
       '/art-walk/list',
       '/art-walk/detail',
       '/art-walk/create',
-      '/art-walk/experience', // Consolidated route (was /enhanced-art-walk-experience)
+      '/art-walk/experience',
       '/art-walk/search',
       '/art-walk/explore',
       '/art-walk/start',
@@ -170,7 +179,7 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer> {
       '/events/detail',
       '/admin/dashboard',
       '/admin/settings',
-      '/settings', // ✅ Generic settings route
+      '/settings',
       '/settings/account',
       '/settings/notifications',
       '/settings/privacy',
@@ -218,24 +227,20 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer> {
       '/weekly-goals',
     };
 
-    // Add Artbeat Store route
     if (route == '/store') {
       Navigator.of(snackBarContext, rootNavigator: true).pushNamed('/store');
       return;
     }
+
     if (implementedRoutes.contains(route)) {
       try {
         AppLogger.info('🔄 Navigating to: $route (isMainRoute: $isMainRoute)');
-
-        // Use push for most routes to maintain navigation stack
-        // Only use pushReplacementNamed for true top-level destinations
         if (isMainRoute && mainRoutes.contains(route)) {
           Navigator.of(
             snackBarContext,
             rootNavigator: true,
           ).pushReplacementNamed(route);
         } else {
-          // Use regular push to maintain back button functionality
           Navigator.of(snackBarContext, rootNavigator: true).pushNamed(route);
         }
       } catch (error) {
@@ -243,7 +248,6 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer> {
         _showError(snackBarContext, error.toString());
       }
     } else {
-      // Show "Coming Soon" dialog for unimplemented routes
       showDialog<void>(
         context: context,
         builder: (context) => AlertDialog(
@@ -263,46 +267,35 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer> {
   }
 
   void _showError(BuildContext context, String error) {
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'drawer_navigation_error'.tr(
-              namedArgs: {'error': error.toString()},
-            ),
-          ),
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 3),
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'drawer_navigation_error'.tr(namedArgs: {'error': error.toString()}),
         ),
-      );
-    }
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 3),
+      ),
+    );
   }
 
   String? _getUserRole() {
-    // If admin is using role override, return the override
     if (_roleOverride != null && _isCurrentUserAdmin()) {
-      // If override is 'user', return null to show regular user view
-      if (_roleOverride == 'user') {
-        return null;
-      }
+      if (_roleOverride == 'user') return null;
       return _roleOverride;
     }
 
     final userModel = _cachedUserModel;
     if (userModel != null) {
-      // Use the proper role detection methods from UserModel
       if (userModel.isAdmin) return 'admin';
       if (userModel.isArtist) return 'artist';
       if (userModel.isGallery) return 'gallery';
       if (userModel.isModerator) return 'moderator';
     }
-    return null; // Regular user
+    return null;
   }
 
-  bool _isCurrentUserAdmin() {
-    final userModel = _cachedUserModel;
-    return userModel?.isAdmin ?? false;
-  }
+  bool _isCurrentUserAdmin() => _cachedUserModel?.isAdmin ?? false;
 
   void _toggleRoleOverride() {
     if (!_isCurrentUserAdmin()) return;
@@ -322,7 +315,7 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer> {
           _roleOverride = 'moderator';
           break;
         case 'moderator':
-          _roleOverride = null; // Back to admin view
+          _roleOverride = null;
           break;
         default:
           _roleOverride = null;
@@ -336,32 +329,42 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer> {
     final drawerSections = ArtbeatDrawerItems.getSectionsForRole(userRole);
 
     return Drawer(
-      backgroundColor: Colors.white,
-      elevation: 2.0,
+      backgroundColor: const Color(0xFF07060F),
+      elevation: 0,
       child: SafeArea(
-        child: Container(
-          decoration: const BoxDecoration(color: Colors.white),
-          child: Column(
-            children: [
-              // Header
-              _buildDrawerHeader(),
-
-              // Navigation Items
-              Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  itemCount: _calculateTotalItems(drawerSections),
-                  itemBuilder: (context, index) {
-                    return _buildDrawerItemAtIndex(
-                      context,
-                      drawerSections,
-                      index,
-                    );
-                  },
+        child: Stack(
+          children: [
+            // Ambient background inside drawer
+            Positioned.fill(
+              child: AnimatedBuilder(
+                animation: _loop,
+                builder: (_, __) => CustomPaint(
+                  painter: _DrawerAmbientPainter(t: _loop.value),
+                  size: Size.infinite,
                 ),
               ),
-            ],
-          ),
+            ),
+
+            // Content
+            Column(
+              children: [
+                _buildDrawerHeader(),
+                Expanded(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(10, 10, 10, 14),
+                    itemCount: _calculateTotalItems(drawerSections),
+                    itemBuilder: (context, index) {
+                      return _buildDrawerItemAtIndex(
+                        context,
+                        drawerSections,
+                        index,
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -370,9 +373,9 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer> {
   int _calculateTotalItems(List<DrawerSection> sections) {
     int total = 0;
     for (final section in sections) {
-      if (section.title != null) total++; // Header
+      if (section.title != null) total++;
       total += section.items.length;
-      if (section.showDivider) total++; // Divider
+      if (section.showDivider) total++;
     }
     return total;
   }
@@ -385,22 +388,18 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer> {
     int currentIndex = 0;
 
     for (final section in sections) {
-      // Add section header if it exists
       if (section.title != null) {
-        if (currentIndex == index) {
-          return _buildSectionHeader(section.title!);
-        }
+        if (currentIndex == index) return _buildSectionHeader(section.title!);
         currentIndex++;
       }
 
-      // Add section items
       for (final item in section.items) {
         if (currentIndex == index) {
-          // Add divider before sign out
           if (item.route == '/login') {
             return Column(
               children: [
-                const Divider(height: 1),
+                const SizedBox(height: 8),
+                _QuestDivider(),
                 const SizedBox(height: 8),
                 _buildDrawerItem(context, item),
               ],
@@ -411,11 +410,8 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer> {
         currentIndex++;
       }
 
-      // Add divider if specified
       if (section.showDivider) {
-        if (currentIndex == index) {
-          return const Divider(height: 1);
-        }
+        if (currentIndex == index) return const _QuestDivider();
         currentIndex++;
       }
     }
@@ -424,162 +420,124 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer> {
   }
 
   Widget _buildDrawerHeader() {
-    return Container(
-      height: _isCurrentUserAdmin()
-          ? 170
-          : 145, // Increased height for admin toggle
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.white,
-            ArtbeatColors.primaryPurple.withValues(alpha: 0.15),
-            const Color(0xFF4A90E2).withValues(alpha: 0.2),
-            Colors.white.withValues(alpha: 0.95),
-            ArtbeatColors.primaryGreen.withValues(alpha: 0.12),
-            Colors.white,
-          ],
-          stops: const [0.0, 0.2, 0.4, 0.6, 0.8, 1.0],
-        ),
-      ),
-      child: Stack(
-        children: [
-          // Logo on the right side
-          Positioned(
-            right: 0,
-            top: 8,
-            child: Opacity(
-              opacity: 0.25,
-              child: Image.asset(
-                'assets/images/artbeat_logo.png',
-                width: 50,
-                height: 50,
-                fit: BoxFit.contain,
-              ),
-            ),
-          ),
+    final headerHeight = _isCurrentUserAdmin() ? 170.0 : 150.0;
 
-          // User info section
-          StreamBuilder<User?>(
-            stream: FirebaseAuth.instance.userChanges(),
-            builder: (context, snapshot) {
-              final user = snapshot.data;
-              if (user == null) {
-                return Padding(
-                  padding: const EdgeInsets.only(left: 16, right: 80),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const UserAvatar(displayName: 'Guest', radius: 14),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Guest User',
-                        style: ArtbeatTypography.textTheme.bodyMedium?.copyWith(
-                          color: ArtbeatColors.textPrimary,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 11,
-                        ),
-                        maxLines: 1,
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Not signed in',
-                        style: ArtbeatTypography.textTheme.bodySmall?.copyWith(
-                          color: ArtbeatColors.textSecondary,
-                          fontSize: 8,
-                        ),
-                        maxLines: 1,
-                      ),
-                    ],
+    return SizedBox(
+      height: headerHeight,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+        child: _QuestGlass(
+          radius: 22,
+          padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+          child: Stack(
+            children: [
+              // Decorative logo watermark
+              Positioned(
+                right: -6,
+                top: -6,
+                child: Opacity(
+                  opacity: 0.16,
+                  child: Image.asset(
+                    'assets/images/artbeat_logo.png',
+                    width: 70,
+                    height: 70,
+                    fit: BoxFit.contain,
                   ),
-                );
-              }
-
-              // Use cached user model to prevent repeated queries
-              final userModel = _cachedUserModel;
-              final displayName =
-                  userModel?.fullName ?? user.displayName ?? 'User';
-              final profileImageUrl = userModel?.profileImageUrl;
-
-              return Padding(
-                padding: const EdgeInsets.only(left: 16, right: 80),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    UserAvatar(
-                      imageUrl: profileImageUrl,
-                      displayName: displayName,
-                      radius: 13, // Slightly smaller avatar
-                    ),
-                    const SizedBox(height: 3), // Reduced spacing
-                    Text(
-                      displayName,
-                      style: ArtbeatTypography.textTheme.bodyMedium?.copyWith(
-                        color: ArtbeatColors.textPrimary,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 11,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                    ),
-                    const SizedBox(height: 1), // Reduced spacing
-                    Text(
-                      user.email ?? '',
-                      style: ArtbeatTypography.textTheme.bodySmall?.copyWith(
-                        color: ArtbeatColors.textSecondary,
-                        fontSize: 8,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                    ),
-                    // Show user role badge if applicable
-                    if (_getUserRole() != null) ...[
-                      const SizedBox(height: 2), // Reduced spacing
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 4,
-                          vertical: 1, // Reduced padding
-                        ),
-                        decoration: BoxDecoration(
-                          color: ArtbeatColors.primaryPurple.withValues(
-                            alpha: 0.1,
-                          ),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          _getUserRole()!.toUpperCase(),
-                          style: ArtbeatTypography.textTheme.bodySmall
-                              ?.copyWith(
-                                color: ArtbeatColors.primaryPurple,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 6,
-                              ),
-                        ),
-                      ),
-                    ],
-
-                    // Admin role toggle
-                    if (_isCurrentUserAdmin()) ...[
-                      const SizedBox(height: 4), // Reduced spacing
-                      _buildRoleToggle(),
-                    ],
-                  ],
                 ),
-              );
-            },
+              ),
+
+              // Subtle shimmer band
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: AnimatedBuilder(
+                    animation: _loop,
+                    builder: (_, __) {
+                      final sweep = (_loop.value * 1.15) % 1.0;
+                      return Opacity(
+                        opacity: 0.65,
+                        child: Transform.translate(
+                          offset: Offset((sweep * 2 - 1) * 220, 0),
+                          child: Transform.rotate(
+                            angle: -0.55,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Colors.transparent,
+                                    Colors.white.withValues(alpha: 0.14),
+                                    Colors.transparent,
+                                  ],
+                                  stops: const [0.0, 0.5, 1.0],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+
+              // User info
+              StreamBuilder<User?>(
+                stream: FirebaseAuth.instance.userChanges(),
+                builder: (context, snapshot) {
+                  final user = snapshot.data;
+
+                  if (user == null) {
+                    return _HeaderUserBlock(
+                      displayName: 'Guest User',
+                      subtitle: 'Not signed in',
+                      role: null,
+                      profileUrl: null,
+                      showRoleToggle: false,
+                      roleToggle: null,
+                      isAdmin: false,
+                      modeChip: null,
+                    );
+                  }
+
+                  final userModel = _cachedUserModel;
+                  final displayName =
+                      userModel?.fullName ?? user.displayName ?? 'User';
+                  final profileImageUrl = userModel?.profileImageUrl;
+
+                  final role = _getUserRole();
+                  final isAdmin = _isCurrentUserAdmin();
+
+                  return _HeaderUserBlock(
+                    displayName: displayName,
+                    subtitle: user.email ?? '',
+                    role: role,
+                    profileUrl: profileImageUrl,
+                    showRoleToggle: isAdmin,
+                    roleToggle: isAdmin ? _buildRoleToggleChip() : null,
+                    isAdmin: isAdmin,
+                    modeChip: _buildModeChip(role),
+                  );
+                },
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildRoleToggle() {
+  Widget _buildModeChip(String? role) {
+    // "Local ARTbeat" brand chip (always)
+    final label = role == null
+        ? "LOCAL ARTBEAT"
+        : "LOCAL ARTBEAT • ${role.toUpperCase()}";
+    return _NeonChip(
+      label: label,
+      accent: const Color(0xFF22D3EE),
+      icon: Icons.radar_rounded,
+    );
+  }
+
+  Widget _buildRoleToggleChip() {
     final currentViewRole = _roleOverride ?? 'admin';
     String displayText;
     Color badgeColor;
@@ -587,90 +545,74 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer> {
 
     switch (currentViewRole) {
       case 'admin':
-        displayText = 'ADMIN';
+        displayText = 'ADMIN MODE';
         badgeColor = ArtbeatColors.primaryPurple;
-        icon = Icons.admin_panel_settings;
+        icon = Icons.admin_panel_settings_rounded;
         break;
       case 'user':
-        displayText = 'USER';
+        displayText = 'USER MODE';
         badgeColor = ArtbeatColors.textSecondary;
-        icon = Icons.person;
+        icon = Icons.person_rounded;
         break;
       case 'artist':
-        displayText = 'ARTIST';
+        displayText = 'ARTIST MODE';
         badgeColor = ArtbeatColors.primaryGreen;
-        icon = Icons.palette;
+        icon = Icons.palette_rounded;
         break;
       case 'gallery':
-        displayText = 'GALLERY';
+        displayText = 'GALLERY MODE';
         badgeColor = const Color(0xFF2196F3);
-        icon = Icons.business;
+        icon = Icons.business_rounded;
         break;
       case 'moderator':
-        displayText = 'MOD';
+        displayText = 'MOD MODE';
         badgeColor = const Color(0xFFFF9800);
-        icon = Icons.gavel;
+        icon = Icons.gavel_rounded;
         break;
       default:
-        displayText = 'ADMIN';
+        displayText = 'ADMIN MODE';
         badgeColor = ArtbeatColors.primaryPurple;
-        icon = Icons.admin_panel_settings;
+        icon = Icons.admin_panel_settings_rounded;
     }
 
-    return GestureDetector(
+    return InkWell(
       onTap: _toggleRoleOverride,
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 4,
-          vertical: 2,
-        ), // Further reduced padding
-        decoration: BoxDecoration(
-          color: badgeColor.withValues(alpha: 0.15),
-          borderRadius: BorderRadius.circular(8), // Smaller radius
-          border: Border.all(
-            color: badgeColor.withValues(alpha: 0.3),
-            width: 1,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 8, color: badgeColor), // Smaller icon
-            const SizedBox(width: 1.5), // Further reduced spacing
-            Flexible(
-              child: Text(
-                displayText,
-                style: ArtbeatTypography.textTheme.bodySmall?.copyWith(
-                  color: badgeColor,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 6, // Smaller text
-                ),
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
-              ),
-            ),
-            const SizedBox(width: 1), // Minimal spacing
-            Icon(
-              Icons.swap_horiz,
-              size: 6, // Smaller swap icon
-              color: badgeColor.withValues(alpha: 0.7),
-            ),
-          ],
-        ),
+      borderRadius: BorderRadius.circular(999),
+      child: _NeonChip(
+        label: displayText,
+        accent: badgeColor,
+        icon: icon,
+        trailing: Icons.swap_horiz_rounded,
       ),
     );
   }
 
   Widget _buildSectionHeader(String title) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Text(
-        title.tr().toUpperCase(),
-        style: ArtbeatTypography.textTheme.bodySmall?.copyWith(
-          color: ArtbeatColors.textSecondary,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.5,
-        ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(6, 12, 6, 8),
+      child: Row(
+        children: [
+          Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white.withValues(alpha: 0.22),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              title.tr().toUpperCase(),
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white.withValues(alpha: 0.62),
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.2,
+                fontSize: 11,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -680,44 +622,33 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer> {
     final bool isCurrentRoute = currentRoute == item.route;
     final bool isMainNavigationRoute = mainRoutes.contains(item.route);
 
+    final Color accent = item.color ?? const Color(0xFF7C4DFF);
+    final Color activeAccent = const Color(0xFF34D399);
+
     return Builder(
-      builder: (snackBarContext) => ListTile(
-        leading: item.supportsBadge
-            ? _buildIconWithBadge(item, isCurrentRoute)
-            : Icon(
-                item.icon,
-                color: isCurrentRoute
-                    ? ArtbeatColors.primaryGreen
-                    : (item.color ?? ArtbeatColors.primaryPurple),
-              ),
-        title: Text(
-          item.title.tr(),
-          style: ArtbeatTypography.textTheme.bodyMedium?.copyWith(
-            fontWeight: isCurrentRoute ? FontWeight.w600 : FontWeight.w500,
-            color: isCurrentRoute ? ArtbeatColors.primaryGreen : item.color,
-          ),
-        ),
-        selected: isCurrentRoute,
-        onTap: () async {
-          // Handle sign out specially
-          if (item.route == '/login' && item.title == 'drawer_sign_out') {
-            Navigator.pop(context); // Close drawer
-            await FirebaseAuth.instance.signOut();
-            if (mounted) {
-              setState(() => _cachedUserModel = null);
-              // ignore: use_build_context_synchronously
-              Navigator.pushReplacementNamed(context, '/login');
+      builder: (snackBarContext) => Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(18),
+          onTap: () async {
+            // Handle sign out specially (keep same logic)
+            if (item.route == '/login' && item.title == 'drawer_sign_out') {
+              Navigator.pop(context);
+              await FirebaseAuth.instance.signOut();
+              if (mounted) {
+                setState(() => _cachedUserModel = null);
+                // ignore: use_build_context_synchronously
+                Navigator.pushReplacementNamed(context, '/login');
+              }
+              return;
             }
-            return;
-          }
 
-          // Close drawer first
-          Navigator.pop(context);
+            Navigator.pop(context);
 
-          if (!isCurrentRoute) {
-            // Add a small delay to ensure drawer is fully closed
-            await Future<void>.delayed(const Duration(milliseconds: 250));
-            if (mounted) {
+            if (!isCurrentRoute) {
+              await Future<void>.delayed(const Duration(milliseconds: 220));
+              if (!mounted) return;
+
               try {
                 _handleNavigation(
                   // ignore: use_build_context_synchronously
@@ -733,14 +664,77 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer> {
                 _showError(context, 'Navigation failed: ${error.toString()}');
               }
             }
-          }
-        },
+          },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeOut,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(18),
+              color: isCurrentRoute
+                  ? activeAccent.withValues(alpha: 0.14)
+                  : Colors.white.withValues(alpha: 0.05),
+              border: Border.all(
+                color: isCurrentRoute
+                    ? activeAccent.withValues(alpha: 0.30)
+                    : Colors.white.withValues(alpha: 0.10),
+              ),
+              boxShadow: [
+                if (isCurrentRoute)
+                  BoxShadow(
+                    color: activeAccent.withValues(alpha: 0.18),
+                    blurRadius: 18,
+                    offset: const Offset(0, 10),
+                  ),
+              ],
+            ),
+            child: Row(
+              children: [
+                // Icon capsule (with badge support)
+                _QuestIconCapsule(
+                  iconBuilder: item.supportsBadge
+                      ? () => _buildIconWithBadge(item, isCurrentRoute)
+                      : () => Icon(
+                          item.icon,
+                          color: Colors.white.withValues(alpha: 0.92),
+                          size: 20,
+                        ),
+                  accent: isCurrentRoute ? activeAccent : accent,
+                ),
+
+                const SizedBox(width: 12),
+
+                Expanded(
+                  child: Text(
+                    item.title.tr(),
+                    style: GoogleFonts.spaceGrotesk(
+                      color: Colors.white.withValues(
+                        alpha: isCurrentRoute ? 0.95 : 0.82,
+                      ),
+                      fontWeight: isCurrentRoute
+                          ? FontWeight.w900
+                          : FontWeight.w800,
+                      fontSize: 14,
+                      letterSpacing: -0.1,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: Colors.white.withValues(alpha: 0.35),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
 
   Widget _buildIconWithBadge(ArtbeatDrawerItem item, bool isCurrentRoute) {
-    // For messaging item, show unread count badge
     if (item.route == '/messaging') {
       return StreamBuilder<int>(
         stream: ChatService().getTotalUnreadCount(),
@@ -752,32 +746,42 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer> {
             children: [
               Icon(
                 item.icon,
-                color: isCurrentRoute
-                    ? ArtbeatColors.primaryGreen
-                    : (item.color ?? ArtbeatColors.primaryPurple),
+                color: Colors.white.withValues(alpha: 0.92),
+                size: 20,
               ),
               if (unreadCount > 0)
                 Positioned(
-                  right: -6,
-                  top: -6,
+                  right: -7,
+                  top: -7,
                   child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      borderRadius: BorderRadius.circular(10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 3,
                     ),
-                    constraints: const BoxConstraints(
-                      minWidth: 18,
-                      minHeight: 18,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFF3D8D),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.18),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(
+                            0xFFFF3D8D,
+                          ).withValues(alpha: 0.22),
+                          blurRadius: 14,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
                     ),
                     child: Text(
                       unreadCount > 99 ? '99+' : unreadCount.toString(),
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.black.withValues(alpha: 0.88),
                         fontSize: 10,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.2,
                       ),
-                      textAlign: TextAlign.center,
                     ),
                   ),
                 ),
@@ -787,12 +791,310 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer> {
       );
     }
 
-    // For other items that support badges, return regular icon for now
     return Icon(
       item.icon,
-      color: isCurrentRoute
-          ? ArtbeatColors.primaryGreen
-          : (item.color ?? ArtbeatColors.primaryPurple),
+      color: Colors.white.withValues(alpha: 0.92),
+      size: 20,
     );
   }
+}
+
+/// =======================
+/// Header building blocks
+/// =======================
+
+class _HeaderUserBlock extends StatelessWidget {
+  final String displayName;
+  final String subtitle;
+  final String? role;
+  final String? profileUrl;
+
+  final bool showRoleToggle;
+  final Widget? roleToggle;
+
+  final bool isAdmin;
+  final Widget? modeChip;
+
+  const _HeaderUserBlock({
+    required this.displayName,
+    required this.subtitle,
+    required this.role,
+    required this.profileUrl,
+    required this.showRoleToggle,
+    required this.roleToggle,
+    required this.isAdmin,
+    required this.modeChip,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 70),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (modeChip != null) ...[modeChip!, const SizedBox(height: 10)],
+          Row(
+            children: [
+              UserAvatar(
+                imageUrl: profileUrl,
+                displayName: displayName,
+                radius: 16,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      displayName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.white.withValues(alpha: 0.95),
+                        fontWeight: FontWeight.w900,
+                        fontSize: 14,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.white.withValues(alpha: 0.60),
+                        fontWeight: FontWeight.w700,
+                        fontSize: 11.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 10),
+
+          // Role badge row
+          Row(
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              if (role != null)
+                Flexible(
+                  child: _NeonChip(
+                    label: role!.toUpperCase(),
+                    accent: const Color(0xFF7C4DFF),
+                    icon: Icons.verified_rounded,
+                  ),
+                ),
+              if (role != null) const SizedBox(width: 8),
+              if (showRoleToggle && roleToggle != null)
+                Flexible(child: roleToggle!),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// =======================
+/// Visual atoms
+/// =======================
+
+class _QuestDivider extends StatelessWidget {
+  const _QuestDivider();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 1,
+      margin: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.transparent,
+            Colors.white.withValues(alpha: 0.14),
+            Colors.transparent,
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _QuestIconCapsule extends StatelessWidget {
+  final Widget Function() iconBuilder;
+  final Color accent;
+
+  const _QuestIconCapsule({required this.iconBuilder, required this.accent});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: LinearGradient(
+          colors: [
+            accent.withValues(alpha: 0.95),
+            const Color(0xFF22D3EE).withValues(alpha: 0.75),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: accent.withValues(alpha: 0.22),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Center(child: iconBuilder()),
+    );
+  }
+}
+
+class _NeonChip extends StatelessWidget {
+  final String label;
+  final Color accent;
+  final IconData icon;
+  final IconData? trailing;
+
+  const _NeonChip({
+    required this.label,
+    required this.accent,
+    required this.icon,
+    this.trailing,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(999),
+        color: accent.withValues(alpha: 0.14),
+        border: Border.all(color: accent.withValues(alpha: 0.28)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: Colors.white.withValues(alpha: 0.92)),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Text(
+              label,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white.withValues(alpha: 0.92),
+                fontSize: 11,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.6,
+              ),
+            ),
+          ),
+          if (trailing != null) ...[
+            const SizedBox(width: 8),
+            Icon(
+              trailing,
+              size: 16,
+              color: Colors.white.withValues(alpha: 0.55),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _QuestGlass extends StatelessWidget {
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+  final double radius;
+
+  const _QuestGlass({
+    required this.child,
+    this.padding = const EdgeInsets.all(16),
+    this.radius = 18,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(radius),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+        child: Container(
+          padding: padding,
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.06),
+            borderRadius: BorderRadius.circular(radius),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.40),
+                blurRadius: 26,
+                offset: const Offset(0, 18),
+              ),
+            ],
+          ),
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
+/// Subtle ambient painter for the drawer background
+class _DrawerAmbientPainter extends CustomPainter {
+  final double t;
+  _DrawerAmbientPainter({required this.t});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Base gradient
+    final base = Paint()
+      ..shader = const LinearGradient(
+        colors: [Color(0xFF07060F), Color(0xFF0A1330), Color(0xFF071C18)],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ).createShader(Offset.zero & size);
+    canvas.drawRect(Offset.zero & size, base);
+
+    void blob(Color c, double ax, double ay, double r, double phase) {
+      final dx = math.sin((t + phase) * 2 * math.pi) * 0.03;
+      final dy = math.cos((t + phase) * 2 * math.pi) * 0.03;
+      final center = Offset(size.width * (ax + dx), size.height * (ay + dy));
+      final radius = size.width * r;
+
+      final paint = Paint()
+        ..shader = RadialGradient(
+          colors: [c.withValues(alpha: 0.20), c.withValues(alpha: 0.0)],
+        ).createShader(Rect.fromCircle(center: center, radius: radius))
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 70);
+
+      canvas.drawCircle(center, radius, paint);
+    }
+
+    blob(const Color(0xFF22D3EE), 0.18, 0.18, 0.38, 0.00);
+    blob(const Color(0xFF7C4DFF), 0.82, 0.22, 0.32, 0.22);
+    blob(const Color(0xFFFF3D8D), 0.76, 0.78, 0.46, 0.48);
+    blob(const Color(0xFF34D399), 0.14, 0.80, 0.34, 0.62);
+
+    // Mild vignette
+    final vignette = Paint()
+      ..shader = RadialGradient(
+        radius: 1.15,
+        colors: [Colors.transparent, Colors.black.withValues(alpha: 0.62)],
+      ).createShader(Offset.zero & size);
+    canvas.drawRect(Offset.zero & size, vignette);
+  }
+
+  @override
+  bool shouldRepaint(covariant _DrawerAmbientPainter oldDelegate) =>
+      oldDelegate.t != t;
 }

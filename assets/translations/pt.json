@@ -1656,6 +1656,9 @@
   "capture_captures_list_text_retry": "Tentar Novamente",
   "capture_captures_list_text_retry_3": "Tentar Novamente",
   "capture_detail_viewer_default_title": "Detalhes da captura",
+  "capture_dashboard_discover_document": "Discover and document public art to help build our community map",
+  "capture_dashboard_ready_capture": "Ready to Capture Art?",
+  "capture_dashboard_start_capture": "Start Capture",
   "capture_enhanced_capture_dashboard_hint_find_art_captures": "Encontrar capturas de arte por localização ou tipo",
   "capture_enhanced_capture_dashboard_hint_search_captures": "Pesquisar Capturas",
   "capture_enhanced_capture_dashboard_hint_search_for_artists": "Pesquisar artistas e suas capturas",
@@ -3200,5 +3203,7 @@
   "screen_title_quiet_mode": "Modo Silencioso",
   "screen_title_moderation": "Moderação",
   "screen_title_my_posts": "Minhas Publicações",
-  "screen_title_create_post": "Criar & Compartilhar"
+  "screen_title_create_post": "Criar & Compartilhar",
+  "capture_dashboard_stat_captures": "Capturas",
+  "capture_dashboard_stat_community_views": "Visualizações da Comunidade"
 }

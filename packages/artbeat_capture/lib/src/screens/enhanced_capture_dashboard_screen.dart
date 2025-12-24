@@ -1,10 +1,10 @@
 import 'dart:math' as math;
+import 'package:artbeat_capture/artbeat_capture.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_capture/artbeat_capture.dart';
 
 /// Quest-style Capture Dashboard (Local ARTbeat)
 /// - Same services/data/routes as your original
@@ -305,7 +305,6 @@ class _EnhancedCaptureDashboardScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF07060F),
-      drawer: const CaptureDrawer(),
       body: Stack(
         children: [
           // Ambient animated background (no heavy overlay blocks)

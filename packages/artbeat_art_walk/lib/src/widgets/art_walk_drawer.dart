@@ -1,9 +1,13 @@
+import 'dart:async';
+import 'dart:math' as math;
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_art_walk/artbeat_art_walk.dart';
-import '../screens/artbeat_artwalk_dashboard_screen.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 /// Art Walk specific drawer with focused navigation for art walk features
 class ArtWalkDrawer extends StatefulWidget {
@@ -13,341 +17,430 @@ class ArtWalkDrawer extends StatefulWidget {
   State<ArtWalkDrawer> createState() => _ArtWalkDrawerState();
 }
 
-class _ArtWalkDrawerState extends State<ArtWalkDrawer> {
+class _ArtWalkDrawerState extends State<ArtWalkDrawer>
+    with TickerProviderStateMixin {
   UserModel? _currentUser;
   final UserService _userService = UserService();
+
+  late final AnimationController _loop;
 
   @override
   void initState() {
     super.initState();
+    _loop = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 9),
+    )..repeat();
+
     _loadCurrentUser();
+  }
+
+  @override
+  void dispose() {
+    _loop.dispose();
+    super.dispose();
   }
 
   Future<void> _loadCurrentUser() async {
     try {
       final user = await _userService.getCurrentUserModel();
-      if (mounted) {
-        setState(() => _currentUser = user);
-      }
-    } catch (e) {
-      // Handle error silently
+      if (mounted) setState(() => _currentUser = user);
+    } catch (_) {
+      // silent
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFF07060F),
+      elevation: 0,
       child: SafeArea(
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                ArtWalkDashboardColors.primaryPurple.withValues(alpha: 0.05),
-                Colors.white,
-                ArtWalkDashboardColors.accentOrange.withValues(alpha: 0.02),
-              ],
-            ),
-          ),
-          child: Column(
-            children: [
-              // Header with user info
-              _buildDrawerHeader(),
-
-              // Navigation items
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  children: [
-                    // Quick Actions Section
-                    _buildSectionHeader('art_walk_drawer_quick_actions'.tr()),
-                    _buildDrawerItem(
-                      context,
-                      'art_walk_drawer_create_art_walk'.tr(),
-                      Icons.add_location,
-                      '/art-walk/create',
-                      ArtWalkDashboardColors.accentOrange,
-                    ),
-                    _buildDrawerItem(
-                      context,
-                      'art_walk_drawer_explore_map'.tr(),
-                      Icons.map,
-                      '/art-walk/map',
-                      ArtWalkDashboardColors.primaryGreen,
-                    ),
-                    _buildDrawerItem(
-                      context,
-                      'art_walk_drawer_browse_walks'.tr(),
-                      Icons.list,
-                      '/art-walk/list',
-                      ArtWalkDashboardColors.primaryGreen,
-                    ),
-                    _buildDrawerItem(
-                      context,
-                      'art_walk_drawer_messages'.tr(),
-                      Icons.message,
-                      '/messaging/inbox',
-                      ArtWalkDashboardColors.primaryGreen,
-                    ),
-                    _buildDrawerItem(
-                      context,
-                      'art_walk_drawer_search'.tr(),
-                      Icons.search,
-                      '/search',
-                      ArtWalkDashboardColors.primaryBlue,
-                    ),
-                    _buildDrawerItem(
-                      context,
-                      'art_walk_drawer_main_dashboard'.tr(),
-                      Icons.dashboard,
-                      '/dashboard',
-                      ArtWalkDashboardColors.primaryPurple,
-                    ),
-
-                    const Divider(height: 24),
-
-                    // My Art Walks Section
-                    _buildSectionHeader('art_walk_drawer_my_art_walks'.tr()),
-                    _buildDrawerItem(
-                      context,
-                      'art_walk_drawer_my_walks'.tr(),
-                      Icons.directions_walk,
-                      '/art-walk/my-walks',
-                      ArtWalkDashboardColors.primaryGreen,
-                    ),
-                    _buildDrawerItem(
-                      context,
-                      'art_walk_drawer_completed_walks'.tr(),
-                      Icons.check_circle,
-                      '/art-walk/completed',
-                      ArtWalkDashboardColors.primaryGreen,
-                    ),
-                    _buildDrawerItem(
-                      context,
-                      'art_walk_drawer_saved_walks'.tr(),
-                      Icons.bookmark,
-                      '/art-walk/saved',
-                      ArtWalkDashboardColors.primaryGreen,
-                    ),
-
-                    const Divider(height: 24),
-
-                    // Discover Section
-                    _buildSectionHeader('art_walk_drawer_discover'.tr()),
-                    _buildDrawerItem(
-                      context,
-                      'art_walk_drawer_nearby_art'.tr(),
-                      Icons.location_on,
-                      '/art-walk/nearby',
-                      ArtWalkDashboardColors.accentOrange,
-                    ),
-                    _buildDrawerItem(
-                      context,
-                      'art_walk_drawer_instant_discovery'.tr(),
-                      Icons.radar,
-                      '/instant-discovery',
-                      ArtWalkDashboardColors.primaryGreen,
-                    ),
-                    _buildDrawerItem(
-                      context,
-                      'art_walk_drawer_popular_walks'.tr(),
-                      Icons.trending_up,
-                      '/art-walk/popular',
-                      ArtWalkDashboardColors.primaryGreen,
-                    ),
-                    _buildDrawerItem(
-                      context,
-                      'art_walk_drawer_achievements'.tr(),
-                      Icons.emoji_events,
-                      '/art-walk/achievements',
-                      ArtWalkDashboardColors.accentOrange,
-                    ),
-
-                    const Divider(height: 24),
-
-                    // Gamification Section
-                    _buildSectionHeader('art_walk_drawer_gamification'.tr()),
-                    _buildDrawerItem(
-                      context,
-                      'art_walk_drawer_quest_history'.tr(),
-                      Icons.assignment_turned_in,
-                      '/quest-history',
-                      ArtWalkDashboardColors.primaryGreen,
-                    ),
-                    _buildDrawerItem(
-                      context,
-                      'art_walk_drawer_weekly_goals'.tr(),
-                      Icons.flag,
-                      '/weekly-goals',
-                      ArtWalkDashboardColors.accentOrange,
-                    ),
-
-                    const Divider(height: 24),
-
-                    // Tools Section
-                    _buildSectionHeader('art_walk_drawer_tools'.tr()),
-                    _buildDrawerItem(
-                      context,
-                      'art_walk_drawer_my_captures'.tr(),
-                      Icons.camera_alt,
-                      '/art-walk/my-captures',
-                      ArtWalkDashboardColors.primaryGreen,
-                    ),
-                    _buildDrawerItem(
-                      context,
-                      'art_walk_drawer_art_walk_settings'.tr(),
-                      Icons.settings,
-                      '/art-walk/settings',
-                      Colors.grey,
-                    ),
-
-                    const Divider(height: 24),
-
-                    // General Navigation
-                    _buildSectionHeader('art_walk_drawer_navigation'.tr()),
-                    _buildDrawerItem(
-                      context,
-                      'art_walk_drawer_profile'.tr(),
-                      Icons.person,
-                      '/profile',
-                      Colors.grey,
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Sign Out
-                    _buildSignOutItem(context),
-                  ],
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: AnimatedBuilder(
+                animation: _loop,
+                builder: (_, __) => CustomPaint(
+                  painter: _DrawerAmbientPainter(t: _loop.value),
+                  size: Size.infinite,
                 ),
               ),
-            ],
-          ),
+            ),
+            Column(
+              children: [
+                _buildDrawerHeader(context),
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(10, 10, 10, 14),
+                    children: [
+                      _buildSectionHeader('art_walk_drawer_quick_actions'.tr()),
+                      _buildDrawerItem(
+                        context,
+                        'art_walk_drawer_create_art_walk'.tr(),
+                        Icons.add_location_alt_rounded,
+                        '/art-walk/create',
+                        const Color(0xFFFFC857),
+                      ),
+                      _buildDrawerItem(
+                        context,
+                        'art_walk_drawer_explore_map'.tr(),
+                        Icons.map_rounded,
+                        '/art-walk/map',
+                        const Color(0xFF34D399),
+                      ),
+                      _buildDrawerItem(
+                        context,
+                        'art_walk_drawer_browse_walks'.tr(),
+                        Icons.route_rounded,
+                        '/art-walk/list',
+                        const Color(0xFF22D3EE),
+                      ),
+                      _buildDrawerItem(
+                        context,
+                        'art_walk_drawer_messages'.tr(),
+                        Icons.forum_rounded,
+                        '/messaging/inbox',
+                        const Color(0xFFFF3D8D),
+                      ),
+                      _buildDrawerItem(
+                        context,
+                        'art_walk_drawer_search'.tr(),
+                        Icons.search_rounded,
+                        '/search',
+                        const Color(0xFF7C4DFF),
+                      ),
+                      _buildDrawerItem(
+                        context,
+                        'art_walk_drawer_main_dashboard'.tr(),
+                        Icons.dashboard_rounded,
+                        '/dashboard',
+                        const Color(0xFF7C4DFF),
+                      ),
+
+                      const SizedBox(height: 10),
+                      const _QuestDivider(),
+                      const SizedBox(height: 10),
+
+                      _buildSectionHeader('art_walk_drawer_my_art_walks'.tr()),
+                      _buildDrawerItem(
+                        context,
+                        'art_walk_drawer_my_walks'.tr(),
+                        Icons.directions_walk_rounded,
+                        '/art-walk/my-walks',
+                        const Color(0xFF34D399),
+                      ),
+                      _buildDrawerItem(
+                        context,
+                        'art_walk_drawer_completed_walks'.tr(),
+                        Icons.verified_rounded,
+                        '/art-walk/completed',
+                        const Color(0xFF22D3EE),
+                      ),
+                      _buildDrawerItem(
+                        context,
+                        'art_walk_drawer_saved_walks'.tr(),
+                        Icons.bookmark_rounded,
+                        '/art-walk/saved',
+                        const Color(0xFFFFC857),
+                      ),
+
+                      const SizedBox(height: 10),
+                      const _QuestDivider(),
+                      const SizedBox(height: 10),
+
+                      _buildSectionHeader('art_walk_drawer_discover'.tr()),
+                      _buildDrawerItem(
+                        context,
+                        'art_walk_drawer_nearby_art'.tr(),
+                        Icons.my_location_rounded,
+                        '/art-walk/nearby',
+                        const Color(0xFFFFC857),
+                      ),
+                      _buildDrawerItem(
+                        context,
+                        'art_walk_drawer_instant_discovery'.tr(),
+                        Icons.radar_rounded,
+                        '/instant-discovery',
+                        const Color(0xFF34D399),
+                      ),
+                      _buildDrawerItem(
+                        context,
+                        'art_walk_drawer_popular_walks'.tr(),
+                        Icons.trending_up_rounded,
+                        '/art-walk/popular',
+                        const Color(0xFFFF3D8D),
+                      ),
+                      _buildDrawerItem(
+                        context,
+                        'art_walk_drawer_achievements'.tr(),
+                        Icons.emoji_events_rounded,
+                        '/art-walk/achievements',
+                        const Color(0xFFFFC857),
+                      ),
+
+                      const SizedBox(height: 10),
+                      const _QuestDivider(),
+                      const SizedBox(height: 10),
+
+                      _buildSectionHeader('art_walk_drawer_gamification'.tr()),
+                      _buildDrawerItem(
+                        context,
+                        'art_walk_drawer_quest_history'.tr(),
+                        Icons.assignment_turned_in_rounded,
+                        '/quest-history',
+                        const Color(0xFF22D3EE),
+                      ),
+                      _buildDrawerItem(
+                        context,
+                        'art_walk_drawer_weekly_goals'.tr(),
+                        Icons.flag_rounded,
+                        '/weekly-goals',
+                        const Color(0xFFFFC857),
+                      ),
+
+                      const SizedBox(height: 10),
+                      const _QuestDivider(),
+                      const SizedBox(height: 10),
+
+                      _buildSectionHeader('art_walk_drawer_tools'.tr()),
+                      _buildDrawerItem(
+                        context,
+                        'art_walk_drawer_my_captures'.tr(),
+                        Icons.camera_alt_rounded,
+                        '/art-walk/my-captures',
+                        const Color(0xFF34D399),
+                      ),
+                      _buildDrawerItem(
+                        context,
+                        'art_walk_drawer_art_walk_settings'.tr(),
+                        Icons.settings_rounded,
+                        '/art-walk/settings',
+                        Colors.white.withValues(alpha: 0.65),
+                      ),
+
+                      const SizedBox(height: 10),
+                      const _QuestDivider(),
+                      const SizedBox(height: 10),
+
+                      _buildSectionHeader('art_walk_drawer_navigation'.tr()),
+                      _buildDrawerItem(
+                        context,
+                        'art_walk_drawer_profile'.tr(),
+                        Icons.person_rounded,
+                        '/profile',
+                        Colors.white.withValues(alpha: 0.65),
+                      ),
+
+                      const SizedBox(height: 10),
+                      const _QuestDivider(),
+                      const SizedBox(height: 10),
+
+                      _buildSignOutItem(context),
+                      const SizedBox(height: 6),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildDrawerHeader() {
+  Widget _buildDrawerHeader(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
     final displayName =
         _currentUser?.fullName ??
         user?.displayName ??
         'art_walk_drawer_art_walker'.tr();
     final email = user?.email ?? '';
+    final profileImageUrl = _currentUser?.profileImageUrl;
 
-    return Container(
-      height: 140,
-      padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            ArtWalkDashboardColors.primaryGreen,
-            ArtWalkDashboardColors.primaryBlue,
-          ],
-        ),
-      ),
-      child: Row(
-        children: [
-          // User Avatar
-          Builder(
-            builder: (context) {
-              final profileImageUrl = _currentUser?.profileImageUrl;
-              return CircleAvatar(
-                radius: 30,
-                backgroundColor: Colors.white,
-                backgroundImage: ImageUrlValidator.safeNetworkImage(
-                  profileImageUrl,
-                ),
-                child:
-                    profileImageUrl == null ||
-                        !ImageUrlValidator.isValidImageUrl(profileImageUrl)
-                    ? Text(
-                        displayName.isNotEmpty
-                            ? displayName[0].toUpperCase()
-                            : 'A',
-                        style: const TextStyle(
-                          color: ArtWalkDashboardColors.primaryGreen,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+      child: _QuestGlass(
+        radius: 22,
+        padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+        child: Stack(
+          children: [
+            // Shimmer band
+            Positioned.fill(
+              child: IgnorePointer(
+                child: AnimatedBuilder(
+                  animation: _loop,
+                  builder: (_, __) {
+                    final sweep = (_loop.value * 1.1) % 1.0;
+                    return Opacity(
+                      opacity: 0.60,
+                      child: Transform.translate(
+                        offset: Offset((sweep * 2 - 1) * 240, 0),
+                        child: Transform.rotate(
+                          angle: -0.55,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.transparent,
+                                  Colors.white.withValues(alpha: 0.14),
+                                  Colors.transparent,
+                                ],
+                                stops: const [0.0, 0.5, 1.0],
+                              ),
+                            ),
+                          ),
                         ),
-                      )
-                    : null,
-              );
-            },
-          ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
 
-          const SizedBox(width: 16),
-
-          // User Info
-          Expanded(
-            child: Column(
+            Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  'art_walk_drawer_welcome_back'.tr(),
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.8),
-                    fontSize: 12,
-                  ),
+                // Mode chip
+                _NeonChip(
+                  label: "ART WALKS • QUEST MENU",
+                  accent: const Color(0xFF22D3EE),
+                  icon: Icons.route_rounded,
                 ),
-                Text(
-                  displayName,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                if (email.isNotEmpty)
-                  Text(
-                    email,
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.7),
-                      fontSize: 12,
+                const SizedBox(height: 10),
+
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 18,
+                      backgroundColor: Colors.white.withValues(alpha: 0.10),
+                      backgroundImage:
+                          ImageUrlValidator.safeNetworkImage(profileImageUrl),
+                      child: (profileImageUrl == null ||
+                              !ImageUrlValidator.isValidImageUrl(
+                                profileImageUrl,
+                              ))
+                          ? Text(
+                              displayName.isNotEmpty
+                                  ? displayName[0].toUpperCase()
+                                  : 'A',
+                              style: GoogleFonts.spaceGrotesk(
+                                color: Colors.white.withValues(alpha: 0.92),
+                                fontSize: 16,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            )
+                          : null,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'art_walk_drawer_welcome_back'.tr(),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.spaceGrotesk(
+                              color: Colors.white.withValues(alpha: 0.62),
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            displayName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.spaceGrotesk(
+                              color: Colors.white.withValues(alpha: 0.95),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: -0.2,
+                            ),
+                          ),
+                          if (email.isNotEmpty) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              email,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.spaceGrotesk(
+                                color: Colors.white.withValues(alpha: 0.58),
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+
+                    // Icon capsule
+                    Container(
+                      width: 42,
+                      height: 42,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        gradient: LinearGradient(
+                          colors: [
+                            const Color(0xFF34D399).withValues(alpha: 0.95),
+                            const Color(0xFF22D3EE).withValues(alpha: 0.75),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color:
+                                const Color(0xFF34D399).withValues(alpha: 0.20),
+                            blurRadius: 18,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        Icons.directions_walk_rounded,
+                        color: Colors.white.withValues(alpha: 0.92),
+                        size: 20,
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
-          ),
-
-          // Art Walk Icon
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(
-              Icons.directions_walk,
-              color: Colors.white,
-              size: 24,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildSectionHeader(String title) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-      child: Text(
-        title,
-        style: const TextStyle(
-          color: ArtWalkDashboardColors.textSecondary,
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.5,
-        ),
+      padding: const EdgeInsets.fromLTRB(6, 12, 6, 8),
+      child: Row(
+        children: [
+          Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white.withValues(alpha: 0.22),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              title.toUpperCase(),
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white.withValues(alpha: 0.62),
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.2,
+                fontSize: 11,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -357,115 +450,387 @@ class _ArtWalkDrawerState extends State<ArtWalkDrawer> {
     String title,
     IconData icon,
     String route,
-    Color color,
+    Color accent,
   ) {
     final currentRoute = ModalRoute.of(context)?.settings.name;
     final isCurrentRoute = currentRoute == route;
 
     return Builder(
-      builder: (snackBarContext) => ListTile(
-        leading: Icon(
-          icon,
-          color: isCurrentRoute ? ArtWalkDashboardColors.accentOrange : color,
-          size: 24,
-        ),
-        title: Text(
-          title,
-          style: TextStyle(
-            color: isCurrentRoute
-                ? ArtWalkDashboardColors.accentOrange
-                : ArtWalkDashboardColors.textPrimary,
-            fontSize: 16,
-            fontWeight: isCurrentRoute ? FontWeight.w600 : FontWeight.w500,
+      builder: (snackBarContext) => Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(18),
+          onTap: () async {
+            Navigator.pop(context);
+            if (route == currentRoute) return;
+
+            await Future<void>.delayed(const Duration(milliseconds: 250));
+            if (!mounted) return;
+            if (!snackBarContext.mounted) return;
+
+            // Keep your navigation rules EXACTLY
+            AppLogger.info(
+              'ArtWalkDrawer: navigate to $route (current: $currentRoute)',
+            );
+            if (route.startsWith('/art-walk/') ||
+                route == '/capture/public' ||
+                route == '/quest-history' ||
+                route == '/weekly-goals') {
+              Navigator.of(snackBarContext, rootNavigator: true).pushNamed(route);
+            } else {
+              Navigator.of(snackBarContext, rootNavigator: true)
+                  .pushReplacementNamed(route);
+            }
+          },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeOut,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(18),
+              color: isCurrentRoute
+                  ? const Color(0xFF34D399).withValues(alpha: 0.14)
+                  : Colors.white.withValues(alpha: 0.05),
+              border: Border.all(
+                color: isCurrentRoute
+                    ? const Color(0xFF34D399).withValues(alpha: 0.30)
+                    : Colors.white.withValues(alpha: 0.10),
+              ),
+              boxShadow: [
+                if (isCurrentRoute)
+                  BoxShadow(
+                    color: const Color(0xFF34D399).withValues(alpha: 0.18),
+                    blurRadius: 18,
+                    offset: const Offset(0, 10),
+                  ),
+              ],
+            ),
+            child: Row(
+              children: [
+                _QuestIconCapsule(
+                  icon: icon,
+                  accent: isCurrentRoute ? const Color(0xFF34D399) : accent,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.spaceGrotesk(
+                      color: Colors.white.withValues(
+                        alpha: isCurrentRoute ? 0.95 : 0.82,
+                      ),
+                      fontWeight:
+                          isCurrentRoute ? FontWeight.w900 : FontWeight.w800,
+                      fontSize: 14,
+                      letterSpacing: -0.1,
+                    ),
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: Colors.white.withValues(alpha: 0.35),
+                ),
+              ],
+            ),
           ),
         ),
-        selected: isCurrentRoute,
-        selectedTileColor: ArtWalkDashboardColors.primaryGreen.withValues(
-          alpha: 0.1,
-        ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        onTap: () async {
-          Navigator.pop(context); // Close drawer
-
-          if (route == currentRoute) return;
-
-          // Wait briefly to ensure the drawer has closed before navigating.
-          // This mirrors the behavior in the core `ArtbeatDrawer` which helps
-          // avoid navigation race conditions that can cause navigation to fail
-          // or appear to reload the app.
-          await Future<void>.delayed(const Duration(milliseconds: 250));
-
-          if (!mounted) return;
-          // Guard builder/context we will use for navigation. The linter warns
-          // about using a BuildContext (snackBarContext) across the async gap;
-          // check it is still mounted before using it.
-          if (!snackBarContext.mounted) return;
-
-          // Handle navigation using snackBarContext so the Scaffold's state is
-          // used correctly after the drawer is closed.
-          AppLogger.info(
-            'ArtWalkDrawer: navigate to $route (current: $currentRoute)',
-          );
-          if (route.startsWith('/art-walk/') ||
-              route == '/capture/public' ||
-              route == '/quest-history' ||
-              route == '/weekly-goals') {
-            Navigator.of(snackBarContext, rootNavigator: true).pushNamed(route);
-          } else {
-            Navigator.of(
-              snackBarContext,
-              rootNavigator: true,
-            ).pushReplacementNamed(route);
-          }
-        },
       ),
     );
   }
 
   Widget _buildSignOutItem(BuildContext context) {
-    return ListTile(
-      leading: const Icon(Icons.logout, color: Colors.red, size: 24),
-      title: Text(
-        'art_walk_drawer_sign_out'.tr(),
-        style: const TextStyle(
-          color: Colors.red,
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-      onTap: () async {
-        Navigator.pop(context); // Close drawer
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: () async {
+          Navigator.pop(context);
 
-        final confirm = await showDialog<bool>(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: Text('art_walk_button_sign_out'.tr()),
-            content: Text(
-              'art_walk_art_walk_drawer_text_are_you_sure_you_want_to_sign_out'
-                  .tr(),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: Text('art_walk_button_cancel'.tr()),
+          final confirm = await showDialog<bool>(
+            context: context,
+            builder: (context) => AlertDialog(
+              backgroundColor: const Color(0xFF0B1026),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18),
+                side: BorderSide(
+                  color: Colors.white.withValues(alpha: 0.10),
+                ),
               ),
-              TextButton(
-                onPressed: () => Navigator.pop(context, true),
-                style: TextButton.styleFrom(foregroundColor: Colors.red),
-                child: Text('art_walk_button_sign_out'.tr()),
+              title: Text(
+                'art_walk_button_sign_out'.tr(),
+                style: GoogleFonts.spaceGrotesk(
+                  color: Colors.white.withValues(alpha: 0.92),
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              content: Text(
+                'art_walk_art_walk_drawer_text_are_you_sure_you_want_to_sign_out'
+                    .tr(),
+                style: GoogleFonts.spaceGrotesk(
+                  color: Colors.white.withValues(alpha: 0.72),
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: Text(
+                    'art_walk_button_cancel'.tr(),
+                    style: GoogleFonts.spaceGrotesk(
+                      color: Colors.white.withValues(alpha: 0.75),
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  style: TextButton.styleFrom(
+                    foregroundColor: const Color(0xFFFF3D8D),
+                  ),
+                  child: Text(
+                    'art_walk_button_sign_out'.tr(),
+                    style: GoogleFonts.spaceGrotesk(
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+
+          if (confirm == true) {
+            await FirebaseAuth.instance.signOut();
+            if (mounted) {
+              // ignore: use_build_context_synchronously
+              Navigator.pushReplacementNamed(context, '/login');
+            }
+          }
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            color: const Color(0xFFFF3D8D).withValues(alpha: 0.10),
+            border: Border.all(
+              color: const Color(0xFFFF3D8D).withValues(alpha: 0.22),
+            ),
+          ),
+          child: Row(
+            children: [
+              _QuestIconCapsule(
+                icon: Icons.logout_rounded,
+                accent: const Color(0xFFFF3D8D),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'art_walk_drawer_sign_out'.tr(),
+                  style: GoogleFonts.spaceGrotesk(
+                    color: Colors.white.withValues(alpha: 0.90),
+                    fontWeight: FontWeight.w900,
+                    fontSize: 14,
+                    letterSpacing: -0.1,
+                  ),
+                ),
+              ),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: Colors.white.withValues(alpha: 0.35),
               ),
             ],
           ),
-        );
-
-        if (confirm == true) {
-          await FirebaseAuth.instance.signOut();
-          if (mounted) {
-            // ignore: use_build_context_synchronously
-            Navigator.pushReplacementNamed(context, '/login');
-          }
-        }
-      },
+        ),
+      ),
     );
   }
+}
+
+/// =======================
+/// Visual atoms + ambient background
+/// =======================
+
+class _QuestDivider extends StatelessWidget {
+  const _QuestDivider();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 1,
+      margin: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.transparent,
+            Colors.white.withValues(alpha: 0.14),
+            Colors.transparent,
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _QuestIconCapsule extends StatelessWidget {
+  final IconData icon;
+  final Color accent;
+
+  const _QuestIconCapsule({required this.icon, required this.accent});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: LinearGradient(
+          colors: [
+            accent.withValues(alpha: 0.95),
+            const Color(0xFF22D3EE).withValues(alpha: 0.70),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: accent.withValues(alpha: 0.18),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Icon(
+        icon,
+        color: Colors.white.withValues(alpha: 0.92),
+        size: 20,
+      ),
+    );
+  }
+}
+
+class _NeonChip extends StatelessWidget {
+  final String label;
+  final Color accent;
+  final IconData icon;
+
+  const _NeonChip({
+    required this.label,
+    required this.accent,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(999),
+        color: accent.withValues(alpha: 0.14),
+        border: Border.all(color: accent.withValues(alpha: 0.28)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: Colors.white.withValues(alpha: 0.92)),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white.withValues(alpha: 0.92),
+              fontSize: 11,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.6,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QuestGlass extends StatelessWidget {
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+  final double radius;
+
+  const _QuestGlass({
+    required this.child,
+    this.padding = const EdgeInsets.all(16),
+    this.radius = 18,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(radius),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+        child: Container(
+          padding: padding,
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.06),
+            borderRadius: BorderRadius.circular(radius),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.40),
+                blurRadius: 26,
+                offset: const Offset(0, 18),
+              ),
+            ],
+          ),
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
+class _DrawerAmbientPainter extends CustomPainter {
+  final double t;
+  _DrawerAmbientPainter({required this.t});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final base = Paint()
+      ..shader = const LinearGradient(
+        colors: [Color(0xFF07060F), Color(0xFF0A1330), Color(0xFF071C18)],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ).createShader(Offset.zero & size);
+    canvas.drawRect(Offset.zero & size, base);
+
+    void blob(Color c, double ax, double ay, double r, double phase) {
+      final dx = math.sin((t + phase) * 2 * math.pi) * 0.03;
+      final dy = math.cos((t + phase) * 2 * math.pi) * 0.03;
+      final center = Offset(size.width * (ax + dx), size.height * (ay + dy));
+      final radius = size.width * r;
+
+      final paint = Paint()
+        ..shader = RadialGradient(
+          colors: [c.withValues(alpha: 0.20), c.withValues(alpha: 0.0)],
+        ).createShader(Rect.fromCircle(center: center, radius: radius))
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 70);
+
+      canvas.drawCircle(center, radius, paint);
+    }
+
+    blob(const Color(0xFF22D3EE), 0.18, 0.18, 0.38, 0.00);
+    blob(const Color(0xFF7C4DFF), 0.82, 0.22, 0.32, 0.22);
+    blob(const Color(0xFFFF3D8D), 0.76, 0.78, 0.46, 0.48);
+    blob(const Color(0xFF34D399), 0.14, 0.80, 0.34, 0.62);
+
+    final vignette = Paint()
+      ..shader = RadialGradient(
+        radius: 1.15,
+        colors: [Colors.transparent, Colors.black.withValues(alpha: 0.62)],
+      ).createShader(Offset.zero & size);
+    canvas.drawRect(Offset.zero & size, vignette);
+  }
+
+  @override
+  bool shouldRepaint(covariant _DrawerAmbientPainter oldDelegate) =>
+      oldDelegate.t != t;
 }
