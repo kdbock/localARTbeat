@@ -16,6 +16,7 @@ class ArtistProfileService {
   Future<core.ArtistProfileModel> createArtistProfile({
     required String userId,
     required String displayName,
+    required String username,
     required String bio,
     String? website,
     List<String>? mediums,
@@ -29,6 +30,7 @@ class ArtistProfileService {
       final data = {
         'userId': userId,
         'displayName': displayName,
+        'username': username,
         'bio': bio,
         'website': website,
         'mediums': mediums ?? [],
@@ -51,6 +53,7 @@ class ArtistProfileService {
         id: docRef.id,
         userId: userId,
         displayName: displayName,
+        username: username,
         bio: bio,
         userType: userType,
         location: location,
@@ -93,6 +96,7 @@ class ArtistProfileService {
         id: doc.id,
         userId: data['userId'] as String,
         displayName: data['displayName'] as String,
+        username: data['username'] as String? ?? '',
         bio: data['bio'] as String?,
         userType: core.UserType.fromString(
             (data['userType'] as String?) ?? core.UserType.artist.name),
@@ -138,6 +142,7 @@ class ArtistProfileService {
         id: doc.id,
         userId: data['userId'] as String,
         displayName: data['displayName'] as String,
+        username: data['username'] as String? ?? '',
         bio: (data['bio'] as String?) ?? '',
         userType: core.UserType.fromString(
             (data['userType'] as String?) ?? core.UserType.artist.name),
@@ -293,6 +298,7 @@ class ArtistProfileService {
             displayName: (userData['fullName'] as String?) ??
                 (userData['displayName'] as String?) ??
                 'Unknown Artist',
+            username: userData['username'] as String? ?? '',
             bio: userData['bio'] as String? ?? '',
             userType: core.UserType.artist,
             location: userData['location'] as String?,
@@ -364,6 +370,7 @@ class ArtistProfileService {
             displayName: (userData['fullName'] as String?) ??
                 (userData['displayName'] as String?) ??
                 'Unknown Artist',
+            username: userData['username'] as String? ?? '',
             bio: userData['bio'] as String? ?? '',
             userType: core.UserType.artist,
             location: userData['location'] as String?,
@@ -464,6 +471,7 @@ class ArtistProfileService {
             id: user.id,
             userId: user.id,
             displayName: user.fullName,
+            username: user.username,
             bio: user.bio,
             userType: core.UserType.artist,
             location: user.location,

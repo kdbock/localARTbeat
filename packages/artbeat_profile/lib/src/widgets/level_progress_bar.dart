@@ -1,6 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_art_walk/artbeat_art_walk.dart';
+
+// Dummy level system for progress calculation
+const Map<int, Map<String, dynamic>> _levelSystem = {
+  1: {'minXP': 0, 'maxXP': 100, 'title': 'Beginner'},
+  2: {'minXP': 101, 'maxXP': 300, 'title': 'Explorer'},
+  3: {'minXP': 301, 'maxXP': 600, 'title': 'Artist'},
+  4: {'minXP': 601, 'maxXP': 1000, 'title': 'Creator'},
+  5: {'minXP': 1001, 'maxXP': 1500, 'title': 'Master'},
+  // Add more levels as needed
+};
 
 /// Widget that displays the user's level progress with XP bar
 class LevelProgressBar extends StatelessWidget {
@@ -17,9 +26,8 @@ class LevelProgressBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final levelInfo =
-        RewardsService.levelSystem[level] ?? RewardsService.levelSystem[1]!;
-    final nextLevelInfo = RewardsService.levelSystem[level + 1];
+    final levelInfo = _levelSystem[level] ?? _levelSystem[1]!;
+    final nextLevelInfo = _levelSystem[level + 1];
 
     final minXP = levelInfo['minXP'] as int;
     final maxXP = levelInfo['maxXP'] as int;

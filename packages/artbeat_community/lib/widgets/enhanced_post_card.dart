@@ -27,7 +27,8 @@ class _LAB {
   static const Color textSecondary = Color(0xB3FFFFFF);
   static const Color textTertiary = Color(0x73FFFFFF);
 
-  static Color glassFill([double a = 0.08]) => Colors.white.withValues(alpha: a);
+  static Color glassFill([double a = 0.08]) =>
+      Colors.white.withValues(alpha: a);
   static Color glassBorder([double a = 0.14]) =>
       Colors.white.withValues(alpha: a);
 }
@@ -86,7 +87,7 @@ class _Glass extends StatelessWidget {
 }
 
 class _GradientIconChip extends StatelessWidget {
-  const _GradientIconChip({required this.icon, this.size = 40});
+  const _GradientIconChip({required this.icon, required this.size});
   final IconData icon;
   final double size;
 
@@ -163,8 +164,9 @@ class _EnhancedPostCardState extends State<EnhancedPostCard> {
 
   Future<void> _initializeMedia() async {
     if (widget.post.videoUrl != null) {
-      _videoController =
-          VideoPlayerController.networkUrl(Uri.parse(widget.post.videoUrl!));
+      _videoController = VideoPlayerController.networkUrl(
+        Uri.parse(widget.post.videoUrl!),
+      );
       try {
         await _videoController!.initialize();
         if (!mounted) return;
@@ -240,7 +242,9 @@ class _EnhancedPostCardState extends State<EnhancedPostCard> {
   }
 
   Widget _buildHeader() {
-    final hasAvatar = ImageUrlValidator.isValidImageUrl(widget.post.userPhotoUrl);
+    final hasAvatar = ImageUrlValidator.isValidImageUrl(
+      widget.post.userPhotoUrl,
+    );
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(14, 14, 10, 10),
@@ -267,10 +271,17 @@ class _EnhancedPostCardState extends State<EnhancedPostCard> {
                 borderRadius: BorderRadius.circular(16),
                 child: CircleAvatar(
                   backgroundColor: Colors.black.withValues(alpha: 0.35),
-                  backgroundImage:
-                      hasAvatar ? ImageUrlValidator.safeNetworkImage(widget.post.userPhotoUrl) : null,
+                  backgroundImage: hasAvatar
+                      ? ImageUrlValidator.safeNetworkImage(
+                          widget.post.userPhotoUrl,
+                        )
+                      : null,
                   child: !hasAvatar
-                      ? const Icon(Icons.person, color: _LAB.textPrimary, size: 22)
+                      ? const Icon(
+                          Icons.person,
+                          color: _LAB.textPrimary,
+                          size: 22,
+                        )
                       : null,
                 ),
               ),
@@ -300,11 +311,7 @@ class _EnhancedPostCardState extends State<EnhancedPostCard> {
                       ),
                     ),
                     if (widget.post.isUserVerified)
-                      const Icon(
-                        Icons.verified,
-                        color: _LAB.green,
-                        size: 16,
-                      ),
+                      const Icon(Icons.verified, color: _LAB.green, size: 16),
                     if (widget.post.groupType != null)
                       _pill(
                         _getGroupDisplayName(widget.post.groupType!),
@@ -349,8 +356,9 @@ class _EnhancedPostCardState extends State<EnhancedPostCard> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: (filled ? accent : Colors.white)
-            .withValues(alpha: filled ? 0.18 : 0.10),
+        color: (filled ? accent : Colors.white).withValues(
+          alpha: filled ? 0.18 : 0.10,
+        ),
         borderRadius: BorderRadius.circular(999),
         border: Border.all(color: accent.withValues(alpha: 0.30), width: 1),
       ),
@@ -416,10 +424,16 @@ class _EnhancedPostCardState extends State<EnhancedPostCard> {
   Widget _buildImagesGrid() {
     final images = widget.post.imageUrls;
 
-    Widget imageTile(String url, int index,
-        {BorderRadius? radius, Widget? overlay}) {
+    Widget imageTile(
+      String url,
+      int index, {
+      BorderRadius? radius,
+      Widget? overlay,
+    }) {
       return GestureDetector(
-        onTap: widget.onImageTap != null ? () => widget.onImageTap!(url, index) : null,
+        onTap: widget.onImageTap != null
+            ? () => widget.onImageTap!(url, index)
+            : null,
         child: ClipRRect(
           borderRadius: radius ?? BorderRadius.circular(14),
           child: Stack(
@@ -502,8 +516,8 @@ class _EnhancedPostCardState extends State<EnhancedPostCard> {
 
   Widget _buildVideoPlayer() {
     if (_videoController == null || !_isVideoInitialized) {
-      return Padding(
-        padding: const EdgeInsets.only(top: 10),
+      return const Padding(
+        padding: EdgeInsets.only(top: 10),
         child: _Glass(
           radius: 18,
           blur: 12,
@@ -541,11 +555,14 @@ class _EnhancedPostCardState extends State<EnhancedPostCard> {
                   child: GestureDetector(
                     onTap: _toggleVideoPlayback,
                     child: DecoratedBox(
-                      decoration:
-                          BoxDecoration(color: Colors.black.withValues(alpha: 0.001)),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.001),
+                      ),
                       child: Center(
                         child: AnimatedOpacity(
-                          opacity: _videoController!.value.isPlaying ? 0.0 : 1.0,
+                          opacity: _videoController!.value.isPlaying
+                              ? 0.0
+                              : 1.0,
                           duration: const Duration(milliseconds: 250),
                           child: Container(
                             padding: const EdgeInsets.all(14),
@@ -577,8 +594,10 @@ class _EnhancedPostCardState extends State<EnhancedPostCard> {
 
   Widget _buildAudioPlayer() {
     final progress = _audioDuration.inMilliseconds > 0
-        ? (_audioPosition.inMilliseconds / _audioDuration.inMilliseconds)
-            .clamp(0.0, 1.0)
+        ? (_audioPosition.inMilliseconds / _audioDuration.inMilliseconds).clamp(
+            0.0,
+            1.0,
+          )
         : 0.0;
 
     return Padding(
@@ -629,7 +648,9 @@ class _EnhancedPostCardState extends State<EnhancedPostCard> {
                       value: progress,
                       minHeight: 6,
                       backgroundColor: Colors.white.withValues(alpha: 0.10),
-                      valueColor: const AlwaysStoppedAnimation<Color>(_LAB.teal),
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        _LAB.teal,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -669,9 +690,7 @@ class _EnhancedPostCardState extends State<EnhancedPostCard> {
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(999),
-              border: Border.all(
-                color: _LAB.glassBorder(0.16),
-              ),
+              border: Border.all(color: _LAB.glassBorder(0.16)),
             ),
             child: Text(
               '#$tag',
@@ -753,11 +772,15 @@ class _EnhancedPostCardState extends State<EnhancedPostCard> {
             ),
             const Spacer(),
             if (widget.post.videoUrl != null)
-              Icon(Icons.videocam, color: _LAB.textTertiary, size: 16),
+              const Icon(Icons.videocam, color: _LAB.textTertiary, size: 16),
             if (widget.post.audioUrl != null)
-              Padding(
-                padding: const EdgeInsets.only(left: 8),
-                child: Icon(Icons.audiotrack, color: _LAB.textTertiary, size: 16),
+              const Padding(
+                padding: EdgeInsets.only(left: 8),
+                child: Icon(
+                  Icons.audiotrack,
+                  color: _LAB.textTertiary,
+                  size: 16,
+                ),
               ),
           ],
         ),

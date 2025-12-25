@@ -25,6 +25,7 @@ class UserModel {
   final int experiencePoints;
   final int level;
   final String? zipCode;
+  final bool isVerified;
   final bool onboardingCompleted;
 
   UserModel({
@@ -46,8 +47,20 @@ class UserModel {
     this.level = 1,
     this.zipCode,
     this.onboardingCompleted = false,
+    this.isVerified = false,
   }) : engagementStats =
            engagementStats ?? EngagementStats(lastUpdated: DateTime.now());
+
+  // Getters for compatibility
+  int get xp => experiencePoints;
+  int get nextLevelXp => level * 100; // Dummy calculation
+  String get avatarUrl => profileImageUrl;
+  String get displayName => fullName;
+  String get handle => username;
+  List<String> get badges => []; // Dummy
+  List<String> get favorites => []; // Dummy
+  bool get isFollowing => false; // Dummy
+  set isFollowing(bool value) {} // Dummy
 
   // Factory constructor from Firestore document
   factory UserModel.fromFirestore(DocumentSnapshot doc) {
@@ -133,6 +146,7 @@ class UserModel {
       level: json['level'] as int? ?? 1,
       zipCode: json['zipCode'] as String?,
       onboardingCompleted: json['onboardingCompleted'] as bool? ?? false,
+      isVerified: json['isVerified'] as bool? ?? false,
     );
   }
 
@@ -177,6 +191,7 @@ class UserModel {
       'level': level,
       'zipCode': zipCode,
       'onboardingCompleted': onboardingCompleted,
+      'isVerified': isVerified,
     };
   }
 
@@ -202,6 +217,7 @@ class UserModel {
       'level': level,
       'zipCode': zipCode,
       'onboardingCompleted': onboardingCompleted,
+      'isVerified': isVerified,
     };
   }
 

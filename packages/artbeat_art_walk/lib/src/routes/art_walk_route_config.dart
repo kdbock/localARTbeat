@@ -8,7 +8,7 @@ class ArtWalkRouteConfig {
   static Map<String, Widget Function(BuildContext)> routes = {
     ArtWalkRoutes.map: (_) => const ArtWalkMapScreen(),
     ArtWalkRoutes.list: (_) => const ArtWalkListScreen(),
-    ArtWalkRoutes.dashboard: (_) => const ArtbeatArtwalkDashboardScreen(),
+    ArtWalkRoutes.dashboard: (_) => const DiscoverDashboardScreen(),
   };
 
   static Route<dynamic>? generateRoute(RouteSettings settings) {

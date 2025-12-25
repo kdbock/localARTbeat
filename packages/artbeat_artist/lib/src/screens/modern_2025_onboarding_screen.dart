@@ -794,10 +794,17 @@ class _Modern2025OnboardingScreenState extends State<Modern2025OnboardingScreen>
       final artistProfileService = ArtistProfileService();
       final userService = UserService();
 
+      // Get the user data to access username
+      final user = await userService.getUserById(currentUser.uid);
+      if (user == null) {
+        throw Exception('User data not found');
+      }
+
       // Create artist profile with basic info
       await artistProfileService.createArtistProfile(
         userId: currentUser.uid,
         displayName: currentUser.displayName ?? 'Artist',
+        username: user.username,
         bio: '',
         userType: UserType.artist,
         subscriptionTier: tier,

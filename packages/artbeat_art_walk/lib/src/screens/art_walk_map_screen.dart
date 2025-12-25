@@ -723,7 +723,7 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
             // Loading indicator
             if (_isLoading || _isSearchingZip)
               Container(
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   gradient: ArtWalkDesignSystem.hudHeaderGradient,
                 ),
                 child: Center(
@@ -735,7 +735,7 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        CircularProgressIndicator(
+                        const CircularProgressIndicator(
                           valueColor: AlwaysStoppedAnimation<Color>(
                             ArtWalkDesignSystem.hudActiveColor,
                           ),
@@ -795,7 +795,7 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
                       children: [
                         if (_currentZipCode != '28501')
                           IconButton(
-                            icon: Icon(
+                            icon: const Icon(
                               Icons.refresh,
                               color: ArtWalkDesignSystem.hudActiveColor,
                               size: 20,
@@ -816,7 +816,7 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
                               );
                             },
                           ),
-                        Icon(
+                        const Icon(
                           Icons.search,
                           color: ArtWalkDesignSystem.hudActiveColor,
                         ),
@@ -887,13 +887,13 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
                   onPressed: () {
                     Navigator.pushNamed(context, '/art-walk/create');
                   },
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.add_location,
                     color: ArtWalkDesignSystem.hudInactiveColor,
                   ),
                   label: Text(
                     'art_walk_art_walk_map_text_create_art_walk'.tr(),
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: ArtWalkDesignSystem.hudInactiveColor,
                       fontWeight: FontWeight.bold,
                     ),

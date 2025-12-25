@@ -16,6 +16,7 @@ class AppRoutes {
   static const String profileCreate = '/profile/create';
   static const String profileDeep = '/profile/deep';
   static const String profilePictureViewer = '/profile/picture-viewer';
+  static const String profileMenu = '/profile/menu';
   static const String favorites = '/favorites';
   static const String favoriteDeep = '/favorite/deep';
 
@@ -258,6 +259,7 @@ class AppRoutes {
     profileCreate,
     profileDeep,
     profilePictureViewer,
+    profileMenu,
     favorites,
     favoriteDeep,
     artistDashboard,

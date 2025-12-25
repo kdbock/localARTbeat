@@ -75,6 +75,7 @@ class _ArtistOnboardingScreenState extends State<ArtistOnboardingScreen> {
       await artistProfileService.createArtistProfile(
         userId: widget.user.id,
         displayName: widget.user.fullName,
+        username: widget.user.username,
         bio: _bioController.text,
         website: _websiteController.text,
         mediums: _selectedMediums,

@@ -7,9 +7,6 @@ import 'package:artbeat_auth/artbeat_auth.dart' as auth;
 import 'package:artbeat_capture/artbeat_capture.dart' as capture;
 import 'package:artbeat_community/artbeat_community.dart' as community;
 import 'package:artbeat_core/artbeat_core.dart' as core;
-// ignore: implementation_imports
-import 'package:artbeat_core/src/screens/artbeat_dashboard_screen.dart'
-    as old_dashboard;
 import 'package:artbeat_events/artbeat_events.dart' as events;
 import 'package:artbeat_messaging/artbeat_messaging.dart' as messaging;
 import 'package:artbeat_profile/artbeat_profile.dart' as profile;
@@ -60,13 +57,13 @@ class AppRouter {
       case AppRoutes.dashboard:
         return RouteUtils.createMainNavRoute(
           currentIndex: 0,
-          child: const core.ArtbeatDashboardScreen(),
+          child: const core.AnimatedDashboardScreen(),
         );
 
       case '/old-dashboard':
         return RouteUtils.createMainNavRoute(
           currentIndex: 0,
-          child: const old_dashboard.ArtbeatDashboardScreen(),
+          child: const core.ArtbeatDashboardScreen(),
         );
 
       case '/2025_modern_onboarding':
@@ -670,7 +667,7 @@ class AppRouter {
     switch (settings.name) {
       case AppRoutes.artWalkDashboard:
         return RouteUtils.createSimpleRoute(
-          child: const art_walk.ArtbeatArtwalkDashboardScreen(),
+          child: const art_walk.DiscoverDashboardScreen(),
         );
 
       case AppRoutes.artWalkMap:
@@ -1194,12 +1191,7 @@ class AppRouter {
             return core.MainLayout(
               currentIndex: -1,
               appBar: RouteUtils.createAppBar('Edit Profile'),
-              child: profile.EditProfileScreen(
-                userId: currentUser.uid,
-                onProfileUpdated: () {
-                  // Handle profile update if needed
-                },
-              ),
+              child: profile.EditProfileScreen(userId: currentUser.uid),
             );
           },
           unauthenticatedBuilder: () => const core.MainLayout(
@@ -1214,10 +1206,17 @@ class AppRouter {
           authenticatedBuilder: () {
             final args = settings.arguments as Map<String, dynamic>?;
             final imageUrl = args?['imageUrl'] as String? ?? '';
+            final userId =
+                args?['userId'] as String? ??
+                FirebaseAuth.instance.currentUser?.uid ??
+                '';
             return core.MainLayout(
               currentIndex: -1,
               appBar: RouteUtils.createAppBar('Profile Picture'),
-              child: profile.ProfilePictureViewerScreen(imageUrl: imageUrl),
+              child: profile.ProfilePictureViewerScreen(
+                imageUrl: imageUrl,
+                userId: userId,
+              ),
             );
           },
           unauthenticatedBuilder: () => const core.MainLayout(
@@ -1288,8 +1287,8 @@ class AppRouter {
             }
             return core.MainLayout(
               currentIndex: -1,
-              appBar: RouteUtils.createAppBar('Following Artists'),
-              child: profile.FollowedArtistsScreen(userId: currentUser.uid),
+              appBar: RouteUtils.createAppBar('Following'),
+              child: profile.FollowingListScreen(userId: currentUser.uid),
             );
           },
           unauthenticatedBuilder: () => const core.MainLayout(
@@ -1344,6 +1343,91 @@ class AppRouter {
           ),
         );
 
+      case '/profile/settings':
+        return AuthGuard.guardRoute(
+          settings: settings,
+          authenticatedBuilder: () => const core.MainLayout(
+            currentIndex: -1,
+            child: profile.ProfileSettingsScreen(),
+          ),
+          unauthenticatedBuilder: () => const core.MainLayout(
+            currentIndex: -1,
+            child: core.AuthRequiredScreen(),
+          ),
+        );
+
+      case '/profile/blocked':
+        return AuthGuard.guardRoute(
+          settings: settings,
+          authenticatedBuilder: () {
+            final currentUser = FirebaseAuth.instance.currentUser;
+            if (currentUser == null) {
+              return const core.MainLayout(
+                currentIndex: -1,
+                child: Center(child: Text('Blocked users not available')),
+              );
+            }
+            return core.MainLayout(
+              currentIndex: -1,
+              appBar: RouteUtils.createAppBar('Blocked Users'),
+              child: const profile.BlockedUsersScreen(blockedUsers: []),
+            );
+          },
+          unauthenticatedBuilder: () => const core.MainLayout(
+            currentIndex: -1,
+            child: core.AuthRequiredScreen(),
+          ),
+        );
+
+      case '/profile/achievement-info':
+        return AuthGuard.guardRoute(
+          settings: settings,
+          authenticatedBuilder: () => const core.MainLayout(
+            currentIndex: -1,
+            child: profile.AchievementInfoScreen(),
+          ),
+          unauthenticatedBuilder: () => const core.MainLayout(
+            currentIndex: -1,
+            child: core.AuthRequiredScreen(),
+          ),
+        );
+
+      case '/profile/favorites':
+        return AuthGuard.guardRoute(
+          settings: settings,
+          authenticatedBuilder: () {
+            final currentUser = FirebaseAuth.instance.currentUser;
+            if (currentUser == null) {
+              return const core.MainLayout(
+                currentIndex: -1,
+                child: Center(child: Text('Favorites not available')),
+              );
+            }
+            return core.MainLayout(
+              currentIndex: -1,
+              appBar: RouteUtils.createAppBar('Favorites'),
+              child: profile.FavoritesScreen(userId: currentUser.uid),
+            );
+          },
+          unauthenticatedBuilder: () => const core.MainLayout(
+            currentIndex: -1,
+            child: core.AuthRequiredScreen(),
+          ),
+        );
+
+      case '/profile/badges':
+        return AuthGuard.guardRoute(
+          settings: settings,
+          authenticatedBuilder: () => const core.MainLayout(
+            currentIndex: -1,
+            child: profile.AchievementInfoScreen(),
+          ),
+          unauthenticatedBuilder: () => const core.MainLayout(
+            currentIndex: -1,
+            child: core.AuthRequiredScreen(),
+          ),
+        );
+
       case '/profile/deep':
         // View another user's profile
         final args = settings.arguments as Map<String, dynamic>?;
@@ -1353,6 +1437,11 @@ class AppRouter {
         }
         return RouteUtils.createMainLayoutRoute(
           child: profile.ProfileViewScreen(userId: userId),
+        );
+
+      case AppRoutes.profileMenu:
+        return RouteUtils.createSimpleRoute(
+          child: const profile.ProfileMenuScreen(),
         );
 
       default:
@@ -1712,6 +1801,7 @@ class _ArtistFeedLoaderState extends State<_ArtistFeedLoader> {
             userId: widget.artistUserId,
             displayName:
                 (userData?['displayName'] as String?) ?? 'Unknown Artist',
+            username: userData?['username'] as String? ?? '',
             bio: userData?['bio'] as String?,
             profileImageUrl: userData?['profileImageUrl'] as String?,
             location: userData?['location'] as String?,

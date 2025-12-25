@@ -31,6 +31,65 @@ class _EnhancedCaptureDashboardScreenState
   int _totalUserCaptures = 0;
   int _totalCommunityViews = 0;
 
+  int get _todayCaptureCount {
+    final now = DateTime.now();
+    return _recentCaptures.where((capture) {
+      final created = capture.createdAt;
+      return created.year == now.year &&
+          created.month == now.month &&
+          created.day == now.day;
+    }).length;
+  }
+
+  int get _uniqueNeighborhoodDrops {
+    final now = DateTime.now();
+    final todaysLocations = _recentCaptures
+        .where((capture) {
+          final created = capture.createdAt;
+          return created.year == now.year &&
+              created.month == now.month &&
+              created.day == now.day;
+        })
+        .map(
+          (capture) =>
+              (capture.locationName ?? capture.location?.toString())?.trim(),
+        );
+    return todaysLocations
+        .whereType<String>()
+        .where((name) => name.isNotEmpty)
+        .toSet()
+        .length;
+  }
+
+  int get _communityArtistCount =>
+      _communityCaptures.map((capture) => capture.userId).toSet().length;
+
+  int get _communityEngagementScore => _communityCaptures.fold(
+    0,
+    (total, capture) =>
+        total +
+        capture.engagementStats.likeCount +
+        capture.engagementStats.shareCount +
+        capture.engagementStats.commentCount,
+  );
+
+  String get _trendingCommunityLocation {
+    final counts = <String, int>{};
+    for (final capture in _communityCaptures) {
+      final key = (capture.locationName ?? capture.artType ?? '').trim();
+      if (key.isEmpty) {
+        continue;
+      }
+      counts[key] = (counts[key] ?? 0) + 1;
+    }
+    if (counts.isEmpty) {
+      return 'Your city';
+    }
+    final sorted = counts.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    return sorted.first.key;
+  }
+
   // Services
   final CaptureService _captureService = CaptureService();
   final UserService _userService = UserService();
@@ -102,6 +161,86 @@ class _EnhancedCaptureDashboardScreenState
   }
 
   Future<void> _refreshData() async => _loadData();
+
+  void _startCaptureFlow() {
+    Navigator.pushNamed(context, '/capture/camera');
+  }
+
+  void _navigateToCaptureDetail(String captureId) {
+    Navigator.pushNamed(
+      context,
+      '/capture/detail',
+      arguments: {'captureId': captureId},
+    );
+  }
+
+  List<_CaptureMissionModel> _buildMissionData(BuildContext context) {
+    return [
+      _CaptureMissionModel(
+        title: 'capture_dashboard_mission_daily_drop_title'.tr(),
+        description: 'capture_dashboard_mission_daily_drop_desc'.tr(),
+        xpReward: 75,
+        icon: Icons.camera_enhance_rounded,
+        accent: const Color(0xFF34D399),
+        current: math.min(_todayCaptureCount, 3),
+        target: 3,
+        onTap: _startCaptureFlow,
+      ),
+      _CaptureMissionModel(
+        title: 'capture_dashboard_mission_community_scout_title'.tr(),
+        description: 'capture_dashboard_mission_community_scout_desc'.tr(),
+        xpReward: 40,
+        icon: Icons.feedback_outlined,
+        accent: const Color(0xFF22D3EE),
+        current: math.min(_communityCaptures.length, 5),
+        target: 5,
+        onTap: () => Navigator.pushNamed(context, '/capture/popular'),
+      ),
+      _CaptureMissionModel(
+        title: 'capture_dashboard_mission_map_block_title'.tr(),
+        description: 'capture_dashboard_mission_map_block_desc'.tr(),
+        xpReward: 120,
+        icon: Icons.map_outlined,
+        accent: const Color(0xFFFFC857),
+        current: math.min(_uniqueNeighborhoodDrops, 2),
+        target: 2,
+        onTap: () => Navigator.pushNamed(context, '/capture/nearby'),
+      ),
+    ];
+  }
+
+  List<_QuickActionData> _buildQuickActions(BuildContext context) {
+    return [
+      _QuickActionData(
+        label: 'capture_dashboard_quick_capture_now_title'.tr(),
+        subtitle: 'capture_dashboard_quick_capture_now_subtitle'.tr(),
+        icon: Icons.camera_alt_rounded,
+        accent: const Color(0xFF34D399),
+        onTap: _startCaptureFlow,
+      ),
+      _QuickActionData(
+        label: 'capture_dashboard_quick_my_drops_title'.tr(),
+        subtitle: 'capture_dashboard_quick_my_drops_subtitle'.tr(),
+        icon: Icons.inventory_2_rounded,
+        accent: const Color(0xFF22D3EE),
+        onTap: () => Navigator.pushNamed(context, '/capture/my-captures'),
+      ),
+      _QuickActionData(
+        label: 'capture_dashboard_quick_community_heat_title'.tr(),
+        subtitle: 'capture_dashboard_quick_community_heat_subtitle'.tr(),
+        icon: Icons.local_fire_department_rounded,
+        accent: const Color(0xFFFF6B6B),
+        onTap: () => Navigator.pushNamed(context, '/capture/popular'),
+      ),
+      _QuickActionData(
+        label: 'capture_dashboard_quick_guidelines_title'.tr(),
+        subtitle: 'capture_dashboard_quick_guidelines_subtitle'.tr(),
+        icon: Icons.policy_rounded,
+        accent: const Color(0xFFFFC857),
+        onTap: _openTermsAndConditionsScreen,
+      ),
+    ];
+  }
 
   void _openTermsAndConditionsScreen() {
     Navigator.of(context).push(
@@ -303,6 +442,11 @@ class _EnhancedCaptureDashboardScreenState
 
   @override
   Widget build(BuildContext context) {
+    final missionData = _buildMissionData(context);
+    final quickActions = _buildQuickActions(context);
+    final userLevel = _currentUser?.level;
+    final userXp = _currentUser?.experiencePoints;
+
     return Scaffold(
       backgroundColor: const Color(0xFF07060F),
       body: Stack(
@@ -342,8 +486,9 @@ class _EnhancedCaptureDashboardScreenState
                               intro: _intro,
                               delay: 0.0,
                               child: _TopHudBar(
-                                title: "CAPTURE",
-                                subtitle: "Scout → Snap → Upload to the map",
+                                title: 'capture_dashboard_title_capture'.tr(),
+                                subtitle:
+                                    'capture_dashboard_subtitle_capture'.tr(),
                                 onMenu: () => Scaffold.of(context).openDrawer(),
                                 onSearch: () => _showSearchModal(context),
                                 onProfile: () => _showProfileMenu(context),
@@ -361,7 +506,7 @@ class _EnhancedCaptureDashboardScreenState
                               delay: 0.08,
                               child: _QuestHeroCard(
                                 username: _currentUser?.username,
-                                onStart: _openTermsAndConditionsScreen,
+                                onStart: _startCaptureFlow,
                                 loop: _loop,
                               ),
                             ),
@@ -380,6 +525,76 @@ class _EnhancedCaptureDashboardScreenState
                                   totalCaptures: _totalUserCaptures,
                                   totalViews: _totalCommunityViews,
                                   loop: _loop,
+                                  userLevel: userLevel,
+                                  userXp: userXp,
+                                  communityPulse: _communityEngagementScore,
+                                ),
+                              ),
+                            ),
+                          ),
+
+                        if (quickActions.isNotEmpty)
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(14, 14, 14, 0),
+                              child: _StampFadeIn(
+                                intro: _intro,
+                                delay: 0.18,
+                                child: _CaptureQuickActions(
+                                  actions: quickActions,
+                                ),
+                              ),
+                            ),
+                          ),
+
+                        if (missionData.isNotEmpty)
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                14,
+                                18,
+                                14,
+                                10,
+                              ),
+                              child: _StampFadeIn(
+                                intro: _intro,
+                                delay: 0.2,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _SectionHeader(
+                                      title:
+                                          'capture_dashboard_section_quest_tracker_title'
+                                              .tr(),
+                                      subtitle:
+                                          'capture_dashboard_section_quest_tracker_subtitle'
+                                              .tr(),
+                                      accent: const Color(0xFF34D399),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    _CaptureMissionList(missions: missionData),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+
+                        if (_communityCaptures.isNotEmpty)
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(14, 10, 14, 0),
+                              child: _StampFadeIn(
+                                intro: _intro,
+                                delay: 0.22,
+                                child: _CommunityPulse(
+                                  activeHunters: _communityArtistCount,
+                                  newDrops: _communityCaptures.length,
+                                  xpPulse: _communityEngagementScore,
+                                  trendingLocation: _trendingCommunityLocation,
+                                  onExplore: () => Navigator.pushNamed(
+                                    context,
+                                    '/capture/popular',
+                                  ),
                                 ),
                               ),
                             ),
@@ -389,15 +604,14 @@ class _EnhancedCaptureDashboardScreenState
                         if (_recentCaptures.isNotEmpty)
                           SliverToBoxAdapter(
                             child: Padding(
-                              padding: const EdgeInsets.fromLTRB(
-                                14,
-                                18,
-                                14,
-                                10,
-                              ),
+                              padding: const EdgeInsets.fromLTRB(14, 18, 14, 10),
                               child: _SectionHeader(
-                                title: "YOUR RECENT LOOT",
-                                subtitle: "Tap to review your last drops",
+                                title:
+                                    'capture_dashboard_section_recent_loot_title'
+                                        .tr(),
+                                subtitle:
+                                    'capture_dashboard_section_recent_loot_subtitle'
+                                        .tr(),
                                 accent: const Color(0xFF7C4DFF),
                               ),
                             ),
@@ -419,7 +633,11 @@ class _EnhancedCaptureDashboardScreenState
                                 index,
                               ) {
                                 final capture = _recentCaptures[index];
-                                return _QuestCaptureTile(capture: capture);
+                                return _QuestCaptureTile(
+                                  capture: capture,
+                                  onTap: () =>
+                                      _navigateToCaptureDetail(capture.id),
+                                );
                               }, childCount: _recentCaptures.length),
                             ),
                           ),
@@ -428,15 +646,14 @@ class _EnhancedCaptureDashboardScreenState
                         if (_communityCaptures.isNotEmpty)
                           SliverToBoxAdapter(
                             child: Padding(
-                              padding: const EdgeInsets.fromLTRB(
-                                14,
-                                20,
-                                14,
-                                10,
-                              ),
+                              padding: const EdgeInsets.fromLTRB(14, 20, 14, 10),
                               child: _SectionHeader(
-                                title: "INSPIRATION RUN",
-                                subtitle: "See what other hunters are finding",
+                                title:
+                                    'capture_dashboard_section_inspiration_title'
+                                        .tr(),
+                                subtitle:
+                                    'capture_dashboard_section_inspiration_subtitle'
+                                        .tr(),
                                 accent: const Color(0xFF22D3EE),
                               ),
                             ),
@@ -455,7 +672,11 @@ class _EnhancedCaptureDashboardScreenState
                                 itemCount: _communityCaptures.length,
                                 itemBuilder: (context, index) {
                                   final capture = _communityCaptures[index];
-                                  return _QuestCommunityCard(capture: capture);
+                                  return _QuestCommunityCard(
+                                    capture: capture,
+                                    onTap: () =>
+                                        _navigateToCaptureDetail(capture.id),
+                                  );
                                 },
                               ),
                             ),
@@ -493,11 +714,7 @@ class _QuestAmbientPainter extends CustomPainter {
     // Base dark gradient
     final base = Paint()
       ..shader = const LinearGradient(
-        colors: const [
-          const Color(0xFF07060F),
-          const Color(0xFF0A1330),
-          const Color(0xFF071C18),
-        ],
+        colors: [Color(0xFF07060F), Color(0xFF0A1330), Color(0xFF071C18)],
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
       ).createShader(Offset.zero & size);
@@ -512,7 +729,7 @@ class _QuestAmbientPainter extends CustomPainter {
     final vignette = Paint()
       ..shader = const RadialGradient(
         radius: 1.15,
-        colors: const [Colors.transparent, const Color.fromRGBO(0, 0, 0, 0.55)],
+        colors: [Colors.transparent, Color.fromRGBO(0, 0, 0, 0.55)],
       ).createShader(Offset.zero & size);
     canvas.drawRect(Offset.zero & size, vignette);
   }
@@ -648,7 +865,7 @@ class _QuestHeroCard extends StatelessWidget {
               Row(
                 children: [
                   _TagChip(
-                    text: "PRIMARY QUEST",
+                    text: 'capture_dashboard_tag_primary_quest'.tr(),
                     color: const Color(0xFFFFC857),
                   ),
                   const Spacer(),
@@ -852,19 +1069,25 @@ class _ImpactHud extends StatelessWidget {
   final int totalCaptures;
   final int totalViews;
   final AnimationController loop;
+  final int? userLevel;
+  final int? userXp;
+  final int communityPulse;
 
   const _ImpactHud({
     required this.totalCaptures,
     required this.totalViews,
     required this.loop,
+    this.userLevel,
+    this.userXp,
+    this.communityPulse = 0,
   });
 
   @override
   Widget build(BuildContext context) {
-    // Fake “level” and “xp” vibe derived from stats (presentation only)
-    final level = (1 + (totalCaptures / 5).floor()).clamp(1, 99);
-    final xp = (totalViews % 1000).clamp(0, 1000);
-    final xpProgress = ((xp / 1000.0)).clamp(0.05, 0.98);
+    final resolvedLevel = (userLevel ?? (1 + (totalCaptures / 5).floor()))
+        .clamp(1, 99);
+    final xpValue = userXp ?? totalViews;
+    final xpProgress = ((xpValue % 1000) / 1000).clamp(0.05, 0.98);
 
     return _Glass(
       radius: 20,
@@ -878,7 +1101,7 @@ class _ImpactHud extends StatelessWidget {
                   colors: [Color(0xFFFFC857), Color(0xFFFF3D8D)],
                 ),
                 child: Text(
-                  "LV $level",
+                  "LV $resolvedLevel",
                   style: GoogleFonts.spaceGrotesk(
                     color: Colors.black.withValues(alpha: 0.86),
                     fontWeight: FontWeight.w900,
@@ -913,6 +1136,28 @@ class _ImpactHud extends StatelessWidget {
               ),
             ],
           ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: _MiniStat(
+                  label: 'capture_dashboard_stat_community_xp_label'.tr(),
+                  value: communityPulse.toString(),
+                  accent: const Color(0xFFFFC857),
+                  icon: Icons.bolt_rounded,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _MiniStat(
+                  label: 'capture_dashboard_stat_total_xp_label'.tr(),
+                  value: xpValue.toString(),
+                  accent: const Color(0xFF22D3EE),
+                  icon: Icons.auto_graph_rounded,
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -929,7 +1174,7 @@ class _XpBar extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "XP",
+          'capture_dashboard_label_xp'.tr(),
           style: GoogleFonts.spaceGrotesk(
             color: Colors.white.withValues(alpha: 0.65),
             fontSize: 10.5,
@@ -1103,7 +1348,8 @@ class _SectionHeader extends StatelessWidget {
 
 class _QuestCaptureTile extends StatelessWidget {
   final CaptureModel capture;
-  const _QuestCaptureTile({required this.capture});
+  final VoidCallback onTap;
+  const _QuestCaptureTile({required this.capture, required this.onTap});
 
   Color _statusColor(CaptureStatus status) {
     switch (status) {
@@ -1123,85 +1369,90 @@ class _QuestCaptureTile extends StatelessWidget {
     return _Glass(
       radius: 20,
       padding: EdgeInsets.zero,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            SecureNetworkImage(
-              imageUrl: capture.imageUrl,
-              fit: BoxFit.cover,
-              errorWidget: Container(
-                color: const Color.fromRGBO(255, 255, 255, 0.06),
-                child: const Icon(
-                  Icons.broken_image_rounded,
-                  color: Colors.white54,
-                ),
-              ),
-            ),
-            // bottom fade
-            DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: const [
-                    Colors.transparent,
-                    const Color.fromRGBO(0, 0, 0, 0.78),
-                  ],
-                ),
-              ),
-            ),
-            // status chip + title
-            Positioned(
-              left: 10,
-              right: 10,
-              bottom: 10,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if ((capture.title ?? '').isNotEmpty)
-                    Text(
-                      capture.title!,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.spaceGrotesk(
-                        color: Colors.white.withValues(alpha: 0.95),
-                        fontSize: 12,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                  const SizedBox(height: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: statusColor.withValues(alpha: 0.85),
-                      borderRadius: BorderRadius.circular(999),
-                      boxShadow: [
-                        BoxShadow(
-                          color: statusColor.withValues(alpha: 0.20),
-                          blurRadius: 14,
-                          offset: const Offset(0, 8),
-                        ),
-                      ],
-                    ),
-                    child: Text(
-                      capture.status.value.toUpperCase(),
-                      style: GoogleFonts.spaceGrotesk(
-                        color: Colors.black.withValues(alpha: 0.88),
-                        fontSize: 10,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.7,
-                      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                SecureNetworkImage(
+                  imageUrl: capture.imageUrl,
+                  fit: BoxFit.cover,
+                  errorWidget: Container(
+                    color: const Color.fromRGBO(255, 255, 255, 0.06),
+                    child: const Icon(
+                      Icons.broken_image_rounded,
+                      color: Colors.white54,
                     ),
                   ),
-                ],
-              ),
+                ),
+                const DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        Color.fromRGBO(0, 0, 0, 0.78),
+                      ],
+                    ),
+                  ),
+                ),
+                Positioned(
+                  left: 10,
+                  right: 10,
+                  bottom: 10,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if ((capture.title ?? '').isNotEmpty)
+                        Text(
+                          capture.title!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.spaceGrotesk(
+                            color: Colors.white.withValues(alpha: 0.95),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      const SizedBox(height: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: statusColor.withValues(alpha: 0.85),
+                          borderRadius: BorderRadius.circular(999),
+                          boxShadow: [
+                            BoxShadow(
+                              color: statusColor.withValues(alpha: 0.20),
+                              blurRadius: 14,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        child: Text(
+                          capture.status.value.toUpperCase(),
+                          style: GoogleFonts.spaceGrotesk(
+                            color: Colors.black.withValues(alpha: 0.88),
+                            fontSize: 10,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.7,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -1210,7 +1461,8 @@ class _QuestCaptureTile extends StatelessWidget {
 
 class _QuestCommunityCard extends StatelessWidget {
   final CaptureModel capture;
-  const _QuestCommunityCard({required this.capture});
+  final VoidCallback onTap;
+  const _QuestCommunityCard({required this.capture, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -1220,72 +1472,570 @@ class _QuestCommunityCard extends StatelessWidget {
       child: _Glass(
         radius: 22,
         padding: EdgeInsets.zero,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(22),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              SecureNetworkImage(
-                imageUrl: capture.imageUrl,
-                fit: BoxFit.cover,
-                errorWidget: Container(
-                  color: const Color.fromRGBO(255, 255, 255, 0.06),
-                  child: const Icon(
-                    Icons.broken_image_rounded,
-                    color: Colors.white54,
-                  ),
-                ),
-              ),
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: const [
-                      Colors.transparent,
-                      const Color.fromRGBO(0, 0, 0, 0.80),
-                    ],
-                  ),
-                ),
-              ),
-              Positioned(
-                left: 12,
-                right: 12,
-                bottom: 12,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _TagChip(text: "SPOTTED", color: const Color(0xFF22D3EE)),
-                    const SizedBox(height: 8),
-                    Text(
-                      capture.title ??
-                          'capture_dashboard_community_capture'.tr(),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.spaceGrotesk(
-                        color: Colors.white.withValues(alpha: 0.95),
-                        fontSize: 13,
-                        fontWeight: FontWeight.w900,
-                        height: 1.1,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(22),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(22),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  SecureNetworkImage(
+                    imageUrl: capture.imageUrl,
+                    fit: BoxFit.cover,
+                    errorWidget: Container(
+                      color: const Color.fromRGBO(255, 255, 255, 0.06),
+                      child: const Icon(
+                        Icons.broken_image_rounded,
+                        color: Colors.white54,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                  ),
+                  const DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Color.fromRGBO(0, 0, 0, 0.80),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 12,
+                    right: 12,
+                    bottom: 12,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _TagChip(
+                          text: 'capture_dashboard_tag_spotted'.tr(),
+                          color: const Color(0xFF22D3EE),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          capture.title ??
+                              'capture_dashboard_community_capture'.tr(),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.spaceGrotesk(
+                            color: Colors.white.withValues(alpha: 0.95),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w900,
+                            height: 1.1,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          capture.artistName ??
+                              'capture_dashboard_unknown_artist'.tr(),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.spaceGrotesk(
+                            color: Colors.white.withValues(alpha: 0.70),
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CaptureMissionModel {
+  final String title;
+  final String description;
+  final int xpReward;
+  final IconData icon;
+  final Color accent;
+  final int current;
+  final int target;
+  final VoidCallback onTap;
+
+  const _CaptureMissionModel({
+    required this.title,
+    required this.description,
+    required this.xpReward,
+    required this.icon,
+    required this.accent,
+    required this.current,
+    required this.target,
+    required this.onTap,
+  });
+
+  double get progress {
+    if (target <= 0) {
+      return 1;
+    }
+    return (current / target).clamp(0.0, 1.0);
+  }
+}
+
+class _CaptureMissionList extends StatelessWidget {
+  final List<_CaptureMissionModel> missions;
+  const _CaptureMissionList({required this.missions});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 190,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        itemCount: missions.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 12),
+        itemBuilder: (context, index) =>
+            _CaptureMissionCard(mission: missions[index]),
+      ),
+    );
+  }
+}
+
+class _CaptureMissionCard extends StatelessWidget {
+  final _CaptureMissionModel mission;
+  const _CaptureMissionCard({required this.mission});
+
+  @override
+  Widget build(BuildContext context) {
+    final progress = mission.progress;
+
+    return SizedBox(
+      width: 240,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(22),
+        child: InkWell(
+          onTap: mission.onTap,
+          borderRadius: BorderRadius.circular(22),
+          child: _Glass(
+            radius: 22,
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 42,
+                      height: 42,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        color: mission.accent.withValues(alpha: 0.20),
+                        border: Border.all(
+                          color: mission.accent.withValues(alpha: 0.4),
+                        ),
+                      ),
+                      child: Icon(mission.icon, color: Colors.white, size: 20),
+                    ),
+                    const SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          mission.title,
+                          style: GoogleFonts.spaceGrotesk(
+                            color: Colors.white.withValues(alpha: 0.95),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        Text(
+                          '+${mission.xpReward} XP',
+                          style: GoogleFonts.spaceGrotesk(
+                            color: mission.accent,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  mission.description,
+                  style: GoogleFonts.spaceGrotesk(
+                    color: Colors.white.withValues(alpha: 0.72),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    height: 1.2,
+                  ),
+                ),
+                const Spacer(),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(999),
+                        child: Container(
+                          height: 8,
+                          color: Colors.white.withValues(alpha: 0.08),
+                          child: FractionallySizedBox(
+                            alignment: Alignment.centerLeft,
+                            widthFactor: progress,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    mission.accent,
+                                    mission.accent.withValues(alpha: 0.5),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
                     Text(
-                      capture.artistName ?? 'Unknown Artist',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                      '${mission.current}/${mission.target}',
                       style: GoogleFonts.spaceGrotesk(
-                        color: Colors.white.withValues(alpha: 0.70),
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w700,
+                        color: Colors.white.withValues(alpha: 0.82),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                   ],
                 ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _QuickActionData {
+  final String label;
+  final String subtitle;
+  final IconData icon;
+  final Color accent;
+  final VoidCallback onTap;
+
+  const _QuickActionData({
+    required this.label,
+    required this.subtitle,
+    required this.icon,
+    required this.accent,
+    required this.onTap,
+  });
+}
+
+class _CaptureQuickActions extends StatelessWidget {
+  final List<_QuickActionData> actions;
+  const _CaptureQuickActions({required this.actions});
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.sizeOf(context);
+    final width = size.width < 380 ? size.width - 40 : (size.width - 40) / 2;
+
+    return Wrap(
+      spacing: 12,
+      runSpacing: 12,
+      children: actions
+          .map((action) => _QuickActionChip(data: action, width: width))
+          .toList(),
+    );
+  }
+}
+
+class _QuickActionChip extends StatelessWidget {
+  final _QuickActionData data;
+  final double width;
+
+  const _QuickActionChip({required this.data, required this.width});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: width,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(18),
+        child: InkWell(
+          onTap: data.onTap,
+          borderRadius: BorderRadius.circular(18),
+          child: _Glass(
+            radius: 18,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    color: data.accent.withValues(alpha: 0.18),
+                    border: Border.all(
+                      color: data.accent.withValues(alpha: 0.35),
+                    ),
+                  ),
+                  child: Icon(data.icon, color: Colors.white, size: 20),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        data.label,
+                        style: GoogleFonts.spaceGrotesk(
+                          color: Colors.white.withValues(alpha: 0.92),
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        data.subtitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.spaceGrotesk(
+                          color: Colors.white.withValues(alpha: 0.65),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(
+                  Icons.arrow_outward_rounded,
+                  color: Colors.white54,
+                  size: 18,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CommunityPulse extends StatelessWidget {
+  final int activeHunters;
+  final int newDrops;
+  final int xpPulse;
+  final String trendingLocation;
+  final VoidCallback onExplore;
+
+  const _CommunityPulse({
+    required this.activeHunters,
+    required this.newDrops,
+    required this.xpPulse,
+    required this.trendingLocation,
+    required this.onExplore,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return _Glass(
+      radius: 22,
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                'capture_dashboard_label_community_pulse'.tr(),
+                style: GoogleFonts.spaceGrotesk(
+                  color: Colors.white.withValues(alpha: 0.85),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.2,
+                ),
+              ),
+              const Spacer(),
+              TextButton.icon(
+                onPressed: onExplore,
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                ),
+                icon: const Icon(Icons.play_arrow_rounded, size: 18),
+                label: Text(
+                  'capture_dashboard_button_explore'.tr(),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
+                  ),
+                ),
               ),
             ],
           ),
-        ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _CommunityStat(
+                  label: 'capture_dashboard_stat_active_hunters'.tr(),
+                  value: activeHunters.toString(),
+                  icon: Icons.people_alt_rounded,
+                  accent: const Color(0xFF22D3EE),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _CommunityStat(
+                  label: 'capture_dashboard_stat_new_drops'.tr(),
+                  value: newDrops.toString(),
+                  icon: Icons.camera_roll_rounded,
+                  accent: const Color(0xFF34D399),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _CommunityStat(
+                  label: 'capture_dashboard_stat_xp_shared'.tr(),
+                  value: xpPulse.toString(),
+                  icon: Icons.bolt_rounded,
+                  accent: const Color(0xFFFFC857),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(18),
+              gradient: const LinearGradient(
+                colors: [Color(0xFF0EA5E9), Color(0xFF7C4DFF)],
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withValues(alpha: 0.25),
+                  ),
+                  child: const Icon(
+                    Icons.place_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'capture_dashboard_label_trending_location'.tr(),
+                        style: GoogleFonts.spaceGrotesk(
+                          color: Colors.white.withValues(alpha: 0.85),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      Text(
+                        trendingLocation,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.spaceGrotesk(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CommunityStat extends StatelessWidget {
+  final String label;
+  final String value;
+  final IconData icon;
+  final Color accent;
+
+  const _CommunityStat({
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.accent,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        color: Colors.white.withValues(alpha: 0.04),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              color: accent.withValues(alpha: 0.20),
+              border: Border.all(color: accent.withValues(alpha: 0.35)),
+            ),
+            child: Icon(
+              icon,
+              color: Colors.white.withValues(alpha: 0.9),
+              size: 18,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  value,
+                  style: GoogleFonts.spaceGrotesk(
+                    color: Colors.white.withValues(alpha: 0.95),
+                    fontSize: 15,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.spaceGrotesk(
+                    color: Colors.white.withValues(alpha: 0.65),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -10,7 +10,6 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../services/auth_service.dart';
 import 'package:artbeat_core/artbeat_core.dart' show ArtbeatColors, ArtbeatInput;
-import 'package:artbeat_core/src/utils/color_extensions.dart';
 import '../constants/routes.dart';
 
 /// Login screen with email/password authentication (Quest theme)

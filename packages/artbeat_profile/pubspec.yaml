@@ -10,40 +10,43 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  artbeat_core:
-    path: ../artbeat_core
-  artbeat_auth:
-    path: ../artbeat_auth
-  # artbeat_auth already exists, no need to add again
-  artbeat_art_walk:
-    path: ../artbeat_art_walk
-  artbeat_capture:
-    path: ../artbeat_capture
-  firebase_core: ^4.0.0
-  firebase_auth: ^6.0.1
-  firebase_storage: ^13.0.0
-  firebase_app_check: ^0.4.0
-  provider: ^6.1.1
-  image_picker: ^1.0.4
-  cached_network_image: ^3.2.3
-  artbeat_artwork:
-    path: ../artbeat_artwork
-  artbeat_artist:
-    path: ../artbeat_artist
-  artbeat_community:
-    path: ../artbeat_community
   artbeat_ads:
     path: ../artbeat_ads
+  artbeat_art_walk:
+    path: ../artbeat_art_walk
+  artbeat_artist:
+    path: ../artbeat_artist
+  artbeat_artwork:
+    path: ../artbeat_artwork
+  artbeat_auth:
+    path: ../artbeat_auth
+  artbeat_capture:
+    path: ../artbeat_capture
+  artbeat_community:
+    path: ../artbeat_community
+  artbeat_core:
+    path: ../artbeat_core
+  cached_network_image: ^3.2.3
   cloud_firestore: ^6.0.0
-  geolocator: ^14.0.1
-  intl: ^0.20.2
   easy_localization: ^3.0.7
+  firebase_app_check: ^0.4.0
+  firebase_auth: ^6.0.1
+  firebase_core: ^4.0.0
+  firebase_storage: ^13.0.0
+  geolocator: ^14.0.1
+  image_picker: ^1.0.4
+  intl: ^0.20.2
+  photo_view: ^0.15.0
+  provider: ^6.1.1
 
   # Added for favorite_detail_screen
   url_launcher: ^6.2.6
 
   # Added for celebration animations (matches artbeat_art_walk dependency)
   confetti: ^0.8.0
+
+  # Added for design system typography
+  google_fonts: ^6.1.0
 
 flutter:
   uses-material-design: true

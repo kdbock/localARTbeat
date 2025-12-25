@@ -1,9 +1,13 @@
+import 'dart:ui';
+
+import 'package:artbeat_core/artbeat_core.dart' as core;
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:artbeat_core/artbeat_core.dart';
+
 import '../models/profile_connection_model.dart';
 import '../services/profile_connection_service.dart';
-import 'package:easy_localization/easy_localization.dart';
 
 class ProfileConnectionsScreen extends StatefulWidget {
   const ProfileConnectionsScreen({super.key});
@@ -20,10 +24,14 @@ class _ProfileConnectionsScreenState extends State<ProfileConnectionsScreen>
 
   late TabController _tabController;
   bool _isLoading = true;
+  String? _errorMessage;
   List<ProfileConnectionModel> _mutualConnections = [];
-  List<Map<String, dynamic>> _friendSuggestions = [];
-  List<String> _followers = [];
-  List<String> _following = [];
+  List<ProfileConnectionModel> _friendSuggestions = [];
+  List<core.UserModel> _followers = [];
+  List<core.UserModel> _following = [];
+
+  core.UserService get _userService =>
+      Provider.of<core.UserService>(context, listen: false);
 
   @override
   void initState() {
@@ -39,598 +47,547 @@ class _ProfileConnectionsScreenState extends State<ProfileConnectionsScreen>
   }
 
   Future<void> _loadConnections() async {
-    try {
-      final user = Provider.of<UserService>(context, listen: false).currentUser;
-      if (user != null) {
-        final [
-          mutual,
-          suggestions,
-          followersData,
-          followingData,
-        ] = await Future.wait([
-          _connectionService.getMutualConnections(user.uid, user.uid),
-          _connectionService.getFriendSuggestions(user.uid),
-          _getFollowers(user.uid),
-          _getFollowing(user.uid),
-        ]);
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
 
+    try {
+      final user = _userService.currentUser;
+      if (user == null) {
         setState(() {
-          _mutualConnections = mutual as List<ProfileConnectionModel>;
-          _friendSuggestions = suggestions as List<Map<String, dynamic>>;
-          _followers = followersData as List<String>;
-          _following = followingData as List<String>;
           _isLoading = false;
+          _errorMessage = 'profile_connections_sign_in_required'.tr();
         });
+        return;
       }
-    } catch (e) {
+
+      final results = await Future.wait<dynamic>([
+        _connectionService.getMutualConnections(user.uid, user.uid),
+        _connectionService.getFriendSuggestions(user.uid),
+        _userService.getFollowers(user.uid),
+        _userService.getFollowing(user.uid),
+      ]);
+
+      if (!mounted) return;
+
       setState(() {
+        _mutualConnections = List<ProfileConnectionModel>.from(
+          results[0] as List,
+        );
+        _friendSuggestions = List<ProfileConnectionModel>.from(
+          results[1] as List,
+        );
+        _followers = List<core.UserModel>.from(results[2] as List);
+        _following = List<core.UserModel>.from(results[3] as List);
         _isLoading = false;
       });
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading connections: $e')),
-        );
-      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'Error loading connections';
+      });
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error loading connections: $e')));
     }
   }
 
-  Future<List<String>> _getFollowers(String userId) async {
-    // Placeholder - in real implementation, fetch from Firestore
-    return [];
+  Future<void> _handleFollowAction(String targetUserId) async {
+    final currentUserId = _userService.currentUserId;
+    if (currentUserId == null || targetUserId.isEmpty) return;
+
+    final isFollowing = await _userService.isFollowing(targetUserId);
+    if (isFollowing) {
+      await _userService.unfollowUser(targetUserId);
+    } else {
+      await _userService.followUser(targetUserId);
+    }
+    if (mounted) await _loadConnections();
   }
 
-  Future<List<String>> _getFollowing(String userId) async {
-    // Placeholder - in real implementation, fetch from Firestore
-    return [];
+  Future<void> _dismissSuggestion(ProfileConnectionModel connection) async {
+    final userId = _userService.currentUserId;
+    if (userId == null) return;
+    await _connectionService.dismissConnection(
+      userId,
+      connection.connectedUserId,
+    );
+    if (mounted) await _loadConnections();
+  }
+
+  void _openProfile(String userId) {
+    if (userId.isEmpty) return;
+    Navigator.of(context).pushNamed(
+      '/profile/view',
+      arguments: {
+        'userId': userId,
+        'isCurrentUser': userId == _userService.currentUserId,
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('profile_connections_title'.tr()),
-        bottom: TabBar(
+    return core.MainLayout(
+      currentIndex: -1,
+      child: Scaffold(
+        backgroundColor: const Color(0xFF07060F),
+        body: Stack(
+          children: [
+            _buildWorldBackground(),
+            SafeArea(
+              child: Column(
+                children: [
+                  _buildHudBar(context),
+                  const SizedBox(height: 12),
+                  _buildTabBar(),
+                  const SizedBox(height: 12),
+                  Expanded(
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 250),
+                      child: _isLoading
+                          ? const Center(
+                              child: CircularProgressIndicator(
+                                color: Color(0xFF22D3EE),
+                              ),
+                            )
+                          : _errorMessage != null
+                          ? _buildErrorState()
+                          : TabBarView(
+                              controller: _tabController,
+                              children: [
+                                _buildMutualConnections(),
+                                _buildFriendSuggestions(),
+                                _buildFollowersList(),
+                                _buildFollowingList(),
+                              ],
+                            ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWorldBackground() {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF07060F), Color(0xFF0C1326), Color(0xFF041015)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            top: -80,
+            right: -40,
+            child: Container(
+              width: 220,
+              height: 220,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.tealAccent.withValues(alpha: 0.08),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: -60,
+            left: -30,
+            child: Container(
+              width: 260,
+              height: 260,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.deepPurpleAccent.withValues(alpha: 0.08),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHudBar(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+          child: Container(
+            height: 60,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.06),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
+                  color: Colors.white,
+                  onPressed: () => Navigator.of(context).maybePop(),
+                ),
+                Expanded(
+                  child: Text(
+                    'profile_connections_title'.tr(),
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.spaceGrotesk(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 18,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.refresh_rounded, color: Colors.white),
+                  onPressed: _loadConnections,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabBar() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          color: Colors.white.withValues(alpha: 0.04),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        ),
+        child: TabBar(
           controller: _tabController,
+          isScrollable: true,
+          dividerColor: Colors.transparent,
+          indicator: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            color: const Color(0xFF22D3EE).withValues(alpha: 0.18),
+          ),
+          labelPadding: const EdgeInsets.symmetric(horizontal: 18),
+          labelStyle: GoogleFonts.spaceGrotesk(
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
+          ),
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
           tabs: const [
-            Tab(text: 'Mutual'),
+            Tab(text: 'Mutuals'),
             Tab(text: 'Suggestions'),
             Tab(text: 'Followers'),
             Tab(text: 'Following'),
           ],
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {
-              // Implement search functionality
-              _showSearchDialog();
-            },
+      ),
+    );
+  }
+
+  Widget _buildErrorState() {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.error_outline, color: Colors.white70, size: 48),
+          const SizedBox(height: 12),
+          Text(
+            _errorMessage ?? 'Something went wrong',
+            style: const TextStyle(color: Colors.white70),
           ),
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadConnections,
+          const SizedBox(height: 12),
+          FilledButton(onPressed: _loadConnections, child: const Text('Retry')),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMutualConnections() {
+    return _buildConnectionList(
+      items: _mutualConnections,
+      emptyTitle: 'profile_connections_no_mutuals_title'.tr(),
+      emptySubtitle: 'profile_connections_no_mutuals_subtitle'.tr(),
+    );
+  }
+
+  Widget _buildFriendSuggestions() {
+    return _buildConnectionList(
+      items: _friendSuggestions,
+      emptyTitle: 'profile_connections_no_suggestions_title'.tr(),
+      emptySubtitle: 'profile_connections_no_suggestions_subtitle'.tr(),
+      builder: (connection) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildConnectionTile(connection),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: FilledButton(
+                  onPressed: () =>
+                      _handleFollowAction(connection.connectedUserId),
+                  child: const Text('Connect'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: Colors.white.withValues(alpha: 0.24)),
+                    foregroundColor: Colors.white,
+                  ),
+                  onPressed: () => _dismissSuggestion(connection),
+                  child: const Text('Skip'),
+                ),
+              ),
+            ],
           ),
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : TabBarView(
-              controller: _tabController,
-              children: [
-                _buildMutualConnectionsTab(),
-                _buildSuggestionsTab(),
-                _buildFollowersTab(),
-                _buildFollowingTab(),
-              ],
-            ),
     );
   }
 
-  Widget _buildMutualConnectionsTab() {
-    if (_mutualConnections.isEmpty) {
-      return _buildEmptyState(
-        'No Mutual Connections',
-        'You don\'t have any mutual connections yet. Connect with more artists to see mutual friends.',
-        Icons.people_outline,
-      );
-    }
-
-    return RefreshIndicator(
-      onRefresh: _loadConnections,
-      child: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: _mutualConnections.length,
-        itemBuilder: (context, index) {
-          final connection = _mutualConnections[index];
-          return _buildConnectionCard(connection);
-        },
-      ),
+  Widget _buildFollowersList() {
+    return _buildUserList(
+      users: _followers,
+      emptyTitle: 'profile_connections_no_followers_title'.tr(),
+      emptySubtitle: 'profile_connections_no_followers_subtitle'.tr(),
     );
   }
 
-  Widget _buildSuggestionsTab() {
-    if (_friendSuggestions.isEmpty) {
-      return _buildEmptyState(
-        'No Suggestions Available',
-        'We\'ll suggest new connections based on your activity and interests.',
-        Icons.person_add_outlined,
-      );
-    }
-
-    return RefreshIndicator(
-      onRefresh: _loadConnections,
-      child: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: _friendSuggestions.length,
-        itemBuilder: (context, index) {
-          final suggestion = _friendSuggestions[index];
-          return _buildSuggestionCard(suggestion);
-        },
-      ),
+  Widget _buildFollowingList() {
+    return _buildUserList(
+      users: _following,
+      emptyTitle: 'profile_connections_no_following_title'.tr(),
+      emptySubtitle: 'profile_connections_no_following_subtitle'.tr(),
     );
   }
 
-  Widget _buildFollowersTab() {
-    if (_followers.isEmpty) {
-      return _buildEmptyState(
-        'No Followers Yet',
-        'Share your artwork to attract followers who appreciate your creativity.',
-        Icons.favorite_outline,
-      );
-    }
-
-    return RefreshIndicator(
-      onRefresh: _loadConnections,
-      child: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: _followers.length,
-        itemBuilder: (context, index) {
-          final followerId = _followers[index];
-          return FutureBuilder<Map<String, dynamic>?>(
-            future: _getUserInfo(followerId),
-            builder: (context, snapshot) {
-              final userInfo = snapshot.data;
-              return _buildUserCard(userInfo, followerId, isFollower: true);
-            },
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildFollowingTab() {
-    if (_following.isEmpty) {
-      return _buildEmptyState(
-        'Not Following Anyone',
-        'Discover and follow artists whose work inspires you.',
-        Icons.person_search_outlined,
-      );
-    }
-
-    return RefreshIndicator(
-      onRefresh: _loadConnections,
-      child: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: _following.length,
-        itemBuilder: (context, index) {
-          final followingId = _following[index];
-          return FutureBuilder<Map<String, dynamic>?>(
-            future: _getUserInfo(followingId),
-            builder: (context, snapshot) {
-              final userInfo = snapshot.data;
-              return _buildUserCard(userInfo, followingId, isFollowing: true);
-            },
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildConnectionCard(ProfileConnectionModel connection) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                FutureBuilder<Map<String, dynamic>?>(
-                  future: _getUserInfo(connection.connectedUserId),
-                  builder: (context, snapshot) {
-                    final userInfo = snapshot.data;
-                    return Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 25,
-                          backgroundImage: ImageUrlValidator.safeNetworkImage(
-                            userInfo?['photoURL']?.toString(),
-                          ),
-                          child:
-                              !ImageUrlValidator.isValidImageUrl(
-                                userInfo?['photoURL']?.toString(),
-                              )
-                              ? const Icon(Icons.person, size: 25)
-                              : null,
-                        ),
-                        const SizedBox(width: 12),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              userInfo?['displayName']?.toString() ??
-                                  'Unknown User',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
-                            if (connection.connectionReason != null)
-                              Text(
-                                'Reason: ${connection.connectionReason?['reason'] ?? 'Similar interests'}',
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontSize: 12,
-                                ),
-                              ),
-                          ],
-                        ),
-                      ],
-                    );
-                  },
-                ),
-                const Spacer(),
-                _buildActionButton(connection.connectedUserId),
-              ],
-            ),
-            if (connection.mutualFollowerIds.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Text(
-                '${connection.mutualFollowersCount} mutual connection${connection.mutualFollowersCount == 1 ? '' : 's'}',
-                style: TextStyle(color: Colors.grey[600], fontSize: 12),
-              ),
-              const SizedBox(height: 8),
-              SizedBox(
-                height: 32,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: connection.mutualFollowerIds.take(5).length,
-                  itemBuilder: (context, index) {
-                    final friendId = connection.mutualFollowerIds[index];
-                    return Container(
-                      margin: const EdgeInsets.only(right: 8),
-                      child: FutureBuilder<Map<String, dynamic>?>(
-                        future: _getUserInfo(friendId),
-                        builder: (context, snapshot) {
-                          final friendInfo = snapshot.data;
-                          return CircleAvatar(
-                            radius: 16,
-                            backgroundImage: ImageUrlValidator.safeNetworkImage(
-                              friendInfo?['photoURL']?.toString(),
-                            ),
-                            child:
-                                !ImageUrlValidator.isValidImageUrl(
-                                  friendInfo?['photoURL']?.toString(),
-                                )
-                                ? const Icon(Icons.person, size: 16)
-                                : null,
-                          );
-                        },
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSuggestionCard(Map<String, dynamic> suggestion) {
-    final userId = suggestion['userId']?.toString() ?? '';
-    final score = suggestion['score'] as double? ?? 0.0;
-    final reasons = suggestion['reasons'] as List<dynamic>? ?? [];
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                FutureBuilder<Map<String, dynamic>?>(
-                  future: _getUserInfo(userId),
-                  builder: (context, snapshot) {
-                    final userInfo = snapshot.data;
-                    return Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 25,
-                          backgroundImage: ImageUrlValidator.safeNetworkImage(
-                            userInfo?['photoURL']?.toString(),
-                          ),
-                          child:
-                              !ImageUrlValidator.isValidImageUrl(
-                                userInfo?['photoURL']?.toString(),
-                              )
-                              ? const Icon(Icons.person, size: 25)
-                              : null,
-                        ),
-                        const SizedBox(width: 12),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              userInfo?['displayName']?.toString() ??
-                                  'Unknown User',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Color.fromRGBO(
-                                  (_getScoreColor(score).r * 255).round(),
-                                  (_getScoreColor(score).g * 255).round(),
-                                  (_getScoreColor(score).b * 255).round(),
-                                  0.1,
-                                ),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                '${(score * 100).toStringAsFixed(0)}% match',
-                                style: TextStyle(
-                                  color: _getScoreColor(score),
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    );
-                  },
-                ),
-                const Spacer(),
-                Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.close, color: Colors.grey),
-                      onPressed: () => _dismissSuggestion(userId),
-                    ),
-                    ElevatedButton(
-                      onPressed: () => _sendConnectionRequest(userId),
-                      child: Text('profile_connections_connect'.tr()),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            if (reasons.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                children: reasons
-                    .map(
-                      (reason) => Chip(
-                        label: Text(
-                          reason.toString(),
-                          style: const TextStyle(fontSize: 11),
-                        ),
-                        backgroundColor: Colors.blue.shade50,
-                        labelStyle: TextStyle(color: Colors.blue.shade700),
-                      ),
-                    )
-                    .toList(),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildUserCard(
-    Map<String, dynamic>? userInfo,
-    String userId, {
-    bool isFollower = false,
-    bool isFollowing = false,
+  Widget _buildConnectionList({
+    required List<ProfileConnectionModel> items,
+    required String emptyTitle,
+    required String emptySubtitle,
+    Widget Function(ProfileConnectionModel connection)? builder,
   }) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundImage: ImageUrlValidator.safeNetworkImage(
-            userInfo?['photoURL']?.toString(),
+    if (items.isEmpty) {
+      return _buildEmptyState(
+        icon: Icons.public,
+        title: emptyTitle,
+        subtitle: emptySubtitle,
+      );
+    }
+
+    return ListView.separated(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      itemCount: items.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 16),
+      itemBuilder: (context, index) {
+        final item = items[index];
+        if (builder != null) {
+          return builder(item);
+        }
+        return _buildConnectionTile(item);
+      },
+    );
+  }
+
+  Widget _buildConnectionTile(ProfileConnectionModel connection) {
+    return InkWell(
+      onTap: () => _openProfile(connection.connectedUserId),
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          color: Colors.white.withValues(alpha: 0.04),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            _buildAvatar(
+              connection.connectedUserAvatar,
+              connection.connectedUserName,
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    connection.connectedUserName,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    connection.connectionReasonText,
+                    style: const TextStyle(color: Colors.white70, fontSize: 13),
+                  ),
+                  if (connection.mutualFollowersCount > 0)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: _buildPill(
+                        '${connection.mutualFollowersCount} mutual',
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right, color: Colors.white54),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUserList({
+    required List<core.UserModel> users,
+    required String emptyTitle,
+    required String emptySubtitle,
+  }) {
+    if (users.isEmpty) {
+      return _buildEmptyState(
+        icon: Icons.groups_2,
+        title: emptyTitle,
+        subtitle: emptySubtitle,
+      );
+    }
+
+    return ListView.separated(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      itemCount: users.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 16),
+      itemBuilder: (context, index) {
+        final user = users[index];
+        return InkWell(
+          onTap: () => _openProfile(user.id),
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              color: Colors.white.withValues(alpha: 0.04),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+            ),
+            child: Row(
+              children: [
+                _buildAvatar(user.profileImageUrl, user.fullName),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        user.fullName,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '@${user.username}',
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right, color: Colors.white54),
+              ],
+            ),
           ),
-          child:
-              !ImageUrlValidator.isValidImageUrl(
-                userInfo?['photoURL']?.toString(),
-              )
-              ? const Icon(Icons.person)
-              : null,
-        ),
-        title: Text(userInfo?['displayName']?.toString() ?? 'Unknown User'),
-        subtitle: Text(userInfo?['bio']?.toString() ?? 'No bio available'),
-        trailing: _buildActionButton(
-          userId,
-          isFollower: isFollower,
-          isFollowing: isFollowing,
-        ),
+        );
+      },
+    );
+  }
+
+  Widget _buildAvatar(String? imageUrl, String fallbackName) {
+    final imageProvider = core.ImageUrlValidator.safeNetworkImage(imageUrl);
+    return CircleAvatar(
+      radius: 30,
+      backgroundColor: Colors.white10,
+      backgroundImage: imageProvider,
+      child: imageProvider == null
+          ? Text(
+              fallbackName.isNotEmpty ? fallbackName[0].toUpperCase() : '?',
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            )
+          : null,
+    );
+  }
+
+  Widget _buildPill(String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(999),
+        color: Colors.white.withValues(alpha: 0.08),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(color: Colors.white70, fontSize: 12),
       ),
     );
   }
 
-  Widget _buildActionButton(
-    String userId, {
-    bool isFollower = false,
-    bool isFollowing = false,
+  Widget _buildEmptyState({
+    required IconData icon,
+    required String title,
+    required String subtitle,
   }) {
-    if (isFollowing) {
-      return OutlinedButton(
-        onPressed: () => _unfollowUser(userId),
-        child: const Text('Unfollow'),
-      );
-    } else if (isFollower) {
-      return ElevatedButton(
-        onPressed: () => _followUser(userId),
-        child: const Text('Follow Back'),
-      );
-    } else {
-      return ElevatedButton(
-        onPressed: () => _sendConnectionRequest(userId),
-        child: Text('profile_connections_connect'.tr()),
-      );
-    }
-  }
-
-  Widget _buildEmptyState(String title, String subtitle, IconData icon) {
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 64, color: Colors.grey[400]),
-            const SizedBox(height: 16),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[600],
-              ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: Colors.white30, size: 48),
+          const SizedBox(height: 16),
+          Text(
+            title,
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
             ),
-            const SizedBox(height: 8),
-            Text(
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            width: 240,
+            child: Text(
               subtitle,
-              style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+              style: const TextStyle(color: Colors.white70),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: _loadConnections,
-              child: const Text('Refresh'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Color _getScoreColor(double score) {
-    if (score >= 0.8) return Colors.green;
-    if (score >= 0.6) return Colors.orange;
-    return Colors.red;
-  }
-
-  void _showSearchDialog() {
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Search Connections'),
-        content: TextField(
-          decoration: const InputDecoration(
-            hintText: 'Enter name or username...',
-            prefixIcon: Icon(Icons.search),
           ),
-          onSubmitted: (query) {
-            Navigator.pop(context);
-            _performSearch(query);
-          },
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+          const SizedBox(height: 16),
+          FilledButton.tonal(
+            onPressed: _loadConnections,
+            child: Text('profile_connections_refresh'.tr()),
           ),
         ],
       ),
     );
-  }
-
-  void _performSearch(String query) {
-    // Implement search functionality
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Searching for: $query')));
-  }
-
-  Future<void> _sendConnectionRequest(String userId) async {
-    try {
-      // Implement connection request logic
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('profile_connections_request_sent'.tr())),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error sending request: $e')));
-    }
-  }
-
-  Future<void> _followUser(String userId) async {
-    try {
-      // Implement follow logic
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Now following user!')));
-      _loadConnections(); // Refresh data
-    } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error following user: $e')));
-    }
-  }
-
-  Future<void> _unfollowUser(String userId) async {
-    try {
-      // Implement unfollow logic
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Unfollowed user')));
-      _loadConnections(); // Refresh data
-    } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error unfollowing user: $e')));
-    }
-  }
-
-  Future<void> _dismissSuggestion(String userId) async {
-    try {
-      setState(() {
-        _friendSuggestions.removeWhere(
-          (suggestion) => suggestion['userId'] == userId,
-        );
-      });
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Suggestion dismissed')));
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error dismissing suggestion: $e')),
-      );
-    }
-  }
-
-  Future<Map<String, dynamic>?> _getUserInfo(String userId) async {
-    // In a real implementation, you'd fetch user data from Firestore
-    // For now, return placeholder data
-    return {
-      'displayName': 'User ${userId.substring(0, 8)}...',
-      'photoURL': null,
-      'bio': 'Artist and creator',
-    };
   }
 }

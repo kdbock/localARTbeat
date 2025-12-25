@@ -4,7 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_capture/artbeat_capture.dart';
-import '../widgets/widgets.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:artbeat_profile/widgets/widgets.dart';
 import 'package:artbeat_core/src/services/achievement_service.dart';
 import '../services/profile_connection_service.dart';
 
@@ -246,6 +247,42 @@ class _ProfileViewScreenState extends State<ProfileViewScreen>
     }
   }
 
+  TextStyle get _heroNameStyle => GoogleFonts.spaceGrotesk(
+    fontSize: 22,
+    fontWeight: FontWeight.w800,
+    color: Colors.white,
+  );
+
+  TextStyle get _heroMetaStyle => GoogleFonts.spaceGrotesk(
+    fontSize: 13,
+    fontWeight: FontWeight.w600,
+    color: Colors.white.withValues(alpha: 0.7),
+  );
+
+  TextStyle get _bodyStyle => GoogleFonts.spaceGrotesk(
+    fontSize: 14,
+    fontWeight: FontWeight.w600,
+    color: Colors.white.withValues(alpha: 0.9),
+  );
+
+  TextStyle get _sectionLabelStyle => GoogleFonts.spaceGrotesk(
+    fontSize: 14,
+    letterSpacing: 0.6,
+    fontWeight: FontWeight.w800,
+    color: Colors.white.withValues(alpha: 0.9),
+  );
+
+  TextStyle get _tabLabelStyle => GoogleFonts.spaceGrotesk(
+    fontSize: 13,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 0.4,
+  );
+
+  void _handleEditProfile() {
+    if (!widget.isCurrentUser) return;
+    Navigator.pushNamed(context, '/profile/edit');
+  }
+
   Future<void> _blockUser() async {
     if (currentUser == null) return;
 
@@ -278,244 +315,409 @@ class _ProfileViewScreenState extends State<ProfileViewScreen>
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
+    final view = _isLoading
+        ? const Center(
+            child: CircularProgressIndicator(
+              strokeWidth: 3,
+              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF22D3EE)),
+            ),
+          )
+        : Column(
+            children: [
+              HudTopBar(
+                title: widget.isCurrentUser ? 'My Profile' : name,
+                actions: widget.isCurrentUser
+                    ? [
+                        IconButton(
+                          onPressed: _handleEditProfile,
+                          icon: const Icon(Icons.edit, color: Colors.white),
+                        ),
+                      ]
+                    : [],
+              ),
+              const SizedBox(height: 20),
+              Expanded(child: _buildProfileContent()),
+            ],
+          );
 
     return MainLayout(
       currentIndex: -1,
-      child: Container(
-        decoration: _buildArtisticBackground(),
-        child: SafeArea(child: _buildProfileContent()),
-      ),
-    );
-  }
-
-  BoxDecoration _buildArtisticBackground() {
-    return const BoxDecoration(
-      gradient: LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [
-          Color(0xFFE3F2FD), // Light blue
-          Color(0xFFF8FBFF), // Very light blue/white
-          Color(0xFFE1F5FE), // Light cyan blue
-          Color(0xFFBBDEFB), // Slightly darker blue (darkest corner)
-        ],
-        stops: [0.0, 0.3, 0.7, 1.0],
+      child: WorldBackground(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 350),
+                child: view,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
 
   Widget _buildProfileContent() {
     return ListView(
-      padding: const EdgeInsets.all(16.0),
+      physics: const BouncingScrollPhysics(),
+      padding: EdgeInsets.zero,
       children: [
-        // Profile Header
-        Container(
-          padding: const EdgeInsets.all(20.0),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                ArtbeatColors.primaryPurple,
-                ArtbeatColors.primaryPurple.withValues(alpha: 0.8),
+        _buildHeroCard(),
+        const SizedBox(height: 20),
+        _buildActionRow(),
+        const SizedBox(height: 20),
+        _buildTabSection(),
+      ],
+    );
+  }
+
+  Widget _buildHeroCard() {
+    final level = _userModel?.level ?? 1;
+    return GlassCard(
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 28),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF7C4DFF), Color(0xFF22D3EE)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: OptimizedAvatar(
+                  imageUrl: profileImageUrl,
+                  displayName: name,
+                  radius: 46,
+                  isVerified: false,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(name, style: _heroNameStyle),
+                    const SizedBox(height: 4),
+                    Text('@$username', style: _heroMetaStyle),
+                    const SizedBox(height: 4),
+                    Text(cityState, style: _heroMetaStyle),
+                  ],
+                ),
+              ),
+              GradientBadge(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 8,
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.auto_awesome,
+                      size: 16,
+                      color: Colors.white,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'LEVEL $level',
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          Text(bio, style: _bodyStyle),
+          const SizedBox(height: 20),
+          ContentEngagementBar(
+            contentId: widget.userId,
+            contentType: 'profile',
+            initialStats:
+                _userModel?.engagementStats ??
+                EngagementStats(lastUpdated: DateTime.now()),
+            showSecondaryActions: !widget.isCurrentUser,
+          ),
+          const SizedBox(height: 20),
+          LevelProgressBar(
+            currentXP: _userModel?.experiencePoints ?? 0,
+            level: _userModel?.level ?? 1,
+            showDetails: true,
+          ),
+          const SizedBox(height: 12),
+          StreakDisplay(
+            loginStreak: _loginStreak,
+            challengeStreak: _challengeStreak,
+            categoryStreak: _categoryStreak,
+            categoryName: _categoryName ?? 'Street Art',
+          ),
+          const SizedBox(height: 12),
+          RecentBadgesCarousel(
+            recentBadges: _getRecentBadges(),
+            onViewAll: () => _tabController.animateTo(1),
+          ),
+          const SizedBox(height: 16),
+          EnhancedStatsGrid(
+            posts: postsCount,
+            captures: capturesCount,
+            artWalks: _artwalksCompleted,
+            likes: _userModel?.engagementStats.likeCount ?? 0,
+            shares: _userModel?.engagementStats.shareCount ?? 0,
+            comments: _userModel?.engagementStats.commentCount ?? 0,
+            followers: _userModel?.engagementStats.followCount ?? 0,
+            following: _userModel?.followingCount ?? 0,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionRow() {
+    final buttons = widget.isCurrentUser
+        ? [
+            HudButton(
+              text: 'Edit Profile',
+              icon: Icons.edit_outlined,
+              onPressed: _handleEditProfile,
+              width: 160,
+            ),
+            HudButton(
+              text: 'My Captures',
+              icon: Icons.camera_alt_outlined,
+              onPressed: () => Navigator.pushNamed(context, '/captures'),
+              width: 160,
+            ),
+          ]
+        : [
+            if (!_isUserBlocked)
+              HudButton(
+                text: 'View Captures',
+                icon: Icons.camera_alt_outlined,
+                onPressed: () => Navigator.pushNamed(context, '/captures'),
+                width: 160,
+              ),
+            HudButton(
+              text: _isUserBlocked ? 'User Blocked' : 'Block User',
+              icon: _isUserBlocked ? Icons.block : Icons.block_outlined,
+              isPrimary: false,
+              onPressed: _isUserBlocked ? null : _blockUser,
+              width: 160,
+            ),
+          ];
+
+    return GlassCard(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        spacing: 16,
+        runSpacing: 12,
+        children: buttons,
+      ),
+    );
+  }
+
+  Widget _buildTabSection() {
+    final tabHeight = MediaQuery.of(context).size.height * 0.55;
+    return GlassCard(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Profile Journey', style: _sectionLabelStyle),
+          const SizedBox(height: 12),
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(18),
+              color: Colors.white.withValues(alpha: 0.04),
+            ),
+            child: TabBar(
+              controller: _tabController,
+              indicator: BoxDecoration(
+                borderRadius: BorderRadius.circular(18),
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF7C4DFF), Color(0xFF22D3EE)],
+                ),
+              ),
+              indicatorSize: TabBarIndicatorSize.tab,
+              labelColor: Colors.white,
+              unselectedLabelColor: Colors.white.withValues(alpha: 0.6),
+              labelStyle: _tabLabelStyle,
+              tabs: const [
+                Tab(text: 'CAPTURES'),
+                Tab(text: 'ACHIEVEMENTS'),
+                Tab(text: 'PROGRESS'),
               ],
             ),
-            borderRadius: BorderRadius.circular(16),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          const SizedBox(height: 18),
+          SizedBox(
+            height: tabHeight,
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _buildCapturesTab(),
+                DynamicAchievementsTab(userId: widget.userId),
+                ProgressTab(userId: widget.userId),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCapturesTab() {
+    if (_isLoadingCaptures) {
+      return const Center(
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF22D3EE)),
+        ),
+      );
+    }
+
+    if (_userCaptures.isEmpty) {
+      return _buildEmptyCapturesState();
+    }
+
+    return GridView.builder(
+      padding: const EdgeInsets.only(bottom: 12),
+      physics: const BouncingScrollPhysics(),
+      itemCount: _userCaptures.length,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 14,
+        mainAxisSpacing: 14,
+        childAspectRatio: 0.78,
+      ),
+      itemBuilder: (context, index) => _buildCaptureTile(_userCaptures[index]),
+    );
+  }
+
+  Widget _buildCaptureTile(CaptureModel capture) {
+    final imageProvider = ImageUrlValidator.isValidImageUrl(capture.imageUrl)
+        ? ImageUrlValidator.safeNetworkImage(capture.imageUrl)
+        : null;
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(
+          context,
+          '/capture/detail',
+          arguments: {'captureId': capture.id},
+        );
+      },
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+            color: Colors.white.withValues(alpha: 0.04),
+          ),
+          child: Stack(
             children: [
-              Row(
-                children: [
-                  OptimizedAvatar(
-                    imageUrl: profileImageUrl,
-                    displayName: name,
-                    radius: 40,
-                    isVerified: false,
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          name,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '@$username',
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 14,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          cityState,
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
+              if (imageProvider != null)
+                Positioned.fill(
+                  child: Image(image: imageProvider, fit: BoxFit.cover),
+                ),
+              if (imageProvider == null)
+                Positioned.fill(
+                  child: Center(
+                    child: Icon(
+                      Icons.image_not_supported,
+                      size: 36,
+                      color: Colors.white.withValues(alpha: 0.5),
                     ),
                   ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Text(
-                bio,
-                style: const TextStyle(color: Colors.white, fontSize: 14),
-              ),
-              const SizedBox(height: 16),
-              // Content engagement bar for profile
-              ContentEngagementBar(
-                contentId: widget.userId,
-                contentType: 'profile',
-                initialStats:
-                    _userModel?.engagementStats ??
-                    EngagementStats(lastUpdated: DateTime.now()),
-                showSecondaryActions: !widget.isCurrentUser,
-              ),
-
-              const SizedBox(height: 16),
-
-              // Level Progress Bar
-              LevelProgressBar(
-                currentXP: _userModel?.experiencePoints ?? 0,
-                level: _userModel?.level ?? 1,
-                showDetails: true,
-              ),
-
-              const SizedBox(height: 12),
-
-              // Streak Display
-              StreakDisplay(
-                loginStreak: _loginStreak,
-                challengeStreak: _challengeStreak,
-                categoryStreak: _categoryStreak,
-                categoryName: _categoryName ?? 'Street Art',
-              ),
-
-              const SizedBox(height: 12),
-
-              // Recent Badges Carousel
-              RecentBadgesCarousel(
-                recentBadges: _getRecentBadges(),
-                onViewAll: () {
-                  _tabController.animateTo(1); // Switch to achievements tab
-                },
-              ),
-
-              const SizedBox(height: 12),
-
-              // Enhanced Stats Grid
-              EnhancedStatsGrid(
-                posts: postsCount,
-                captures: capturesCount,
-                artWalks: _artwalksCompleted,
-                likes: _userModel?.engagementStats.likeCount ?? 0,
-                shares: _userModel?.engagementStats.shareCount ?? 0,
-                comments: _userModel?.engagementStats.commentCount ?? 0,
-                followers: _userModel?.engagementStats.followCount ?? 0,
-                following: _userModel?.followingCount ?? 0,
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 20),
-        // Actions Row
-        if (widget.isCurrentUser)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/profile/edit');
-                },
-                icon: const Icon(Icons.edit, size: 18),
-                label: Text('profile_edit_button'.tr()),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: ArtbeatColors.primaryPurple,
-                  foregroundColor: Colors.white,
                 ),
-              ),
-              ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/captures');
-                },
-                icon: const Icon(Icons.camera_alt, size: 18),
-                label: Text('profile_view_captures'.tr()),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: ArtbeatColors.primaryGreen,
-                  foregroundColor: Colors.white,
-                ),
-              ),
-            ],
-          )
-        else
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              if (!_isUserBlocked)
-                ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/captures');
-                  },
-                  icon: const Icon(Icons.camera_alt, size: 18),
-                  label: Text('profile_view_captures'.tr()),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: ArtbeatColors.primaryGreen,
-                    foregroundColor: Colors.white,
+              const Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Colors.transparent, Color(0xAA05030C)],
+                    ),
                   ),
                 ),
-              ElevatedButton.icon(
-                onPressed: _isUserBlocked ? null : _blockUser,
-                icon: Icon(
-                  _isUserBlocked ? Icons.block : Icons.block_outlined,
-                  size: 18,
-                ),
-                label: Text(_isUserBlocked ? 'User Blocked' : 'Block User'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _isUserBlocked ? Colors.grey : Colors.red,
-                  foregroundColor: Colors.white,
+              ),
+              Positioned(
+                left: 14,
+                right: 14,
+                bottom: 14,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      capture.title ?? 'Untitled Capture',
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      capture.locationName ?? capture.artType ?? 'Artbeat',
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white.withValues(alpha: 0.75),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
-        const SizedBox(height: 20),
-        // Tabs
-        TabBar(
-          controller: _tabController,
-          labelColor: ArtbeatColors.primaryPurple,
-          unselectedLabelColor: ArtbeatColors.textSecondary,
-          tabs: const [
-            Tab(text: 'Captures'),
-            Tab(text: 'Achievements'),
-            Tab(text: 'Progress'),
-          ],
         ),
-        // Tab Content
-        SizedBox(
-          height: MediaQuery.of(context).size.height * 0.5,
-          child: TabBarView(
-            controller: _tabController,
-            children: [
-              _buildCapturesTab(),
-              DynamicAchievementsTab(userId: widget.userId),
-              ProgressTab(userId: widget.userId),
-            ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyCapturesState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.camera_alt_outlined,
+            size: 46,
+            color: Colors.white.withValues(alpha: 0.5),
           ),
-        ),
-      ],
+          const SizedBox(height: 12),
+          Text('No captures yet', style: _bodyStyle),
+          const SizedBox(height: 6),
+          Text(
+            'Start capturing to showcase your art trail.',
+            style: _heroMetaStyle,
+            textAlign: TextAlign.center,
+          ),
+          if (widget.isCurrentUser) ...[
+            const SizedBox(height: 16),
+            HudButton(
+              text: 'Launch Capture',
+              icon: Icons.bolt_outlined,
+              onPressed: () => Navigator.pushNamed(context, '/captures'),
+              width: 190,
+            ),
+          ],
+        ],
+      ),
     );
   }
 
@@ -568,142 +770,5 @@ class _ProfileViewScreenState extends State<ProfileViewScreen>
       default:
         return 'Quest';
     }
-  }
-
-  Widget _buildCapturesTab() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          const Row(
-            children: [
-              Icon(
-                Icons.camera_alt_outlined,
-                color: ArtbeatColors.primaryPurple,
-              ),
-              SizedBox(width: 8),
-              Text(
-                'My Captures',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: ArtbeatColors.textPrimary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Expanded(
-            child: _isLoadingCaptures
-                ? const Center(child: CircularProgressIndicator())
-                : _userCaptures.isNotEmpty
-                ? GridView.builder(
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 8,
-                          mainAxisSpacing: 8,
-                          childAspectRatio: 0.8,
-                        ),
-                    itemCount: _userCaptures.length,
-                    itemBuilder: (context, index) {
-                      final capture = _userCaptures[index];
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.pushNamed(
-                            context,
-                            '/capture/detail',
-                            arguments: {'captureId': capture.id},
-                          );
-                        },
-                        child: Card(
-                          elevation: 2,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Expanded(
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: const BorderRadius.vertical(
-                                      top: Radius.circular(12),
-                                    ),
-                                    image:
-                                        ImageUrlValidator.isValidImageUrl(
-                                          capture.imageUrl,
-                                        )
-                                        ? DecorationImage(
-                                            image:
-                                                ImageUrlValidator.safeNetworkImage(
-                                                  capture.imageUrl,
-                                                )!,
-                                            fit: BoxFit.cover,
-                                          )
-                                        : null,
-                                  ),
-                                  child:
-                                      !ImageUrlValidator.isValidImageUrl(
-                                        capture.imageUrl,
-                                      )
-                                      ? const Center(
-                                          child: Icon(
-                                            Icons.image_not_supported,
-                                            size: 48,
-                                            color: Colors.grey,
-                                          ),
-                                        )
-                                      : null,
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(
-                                  capture.title ?? 'Untitled',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  )
-                : const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.camera_alt_outlined,
-                          size: 48,
-                          color: ArtbeatColors.textSecondary,
-                        ),
-                        SizedBox(height: 12),
-                        Text(
-                          'No captures yet',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: ArtbeatColors.textSecondary,
-                          ),
-                        ),
-                        SizedBox(height: 6),
-                        Text(
-                          'Start capturing art to see it here!',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: ArtbeatColors.textSecondary,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-          ),
-        ],
-      ),
-    );
   }
 }

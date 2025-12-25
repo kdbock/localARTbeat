@@ -2,6 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_art_walk/artbeat_art_walk.dart';
 
+// Dummy level system for progress calculation
+const Map<int, Map<String, dynamic>> _levelSystem = {
+  1: {'minXP': 0, 'maxXP': 100, 'title': 'Beginner'},
+  2: {'minXP': 101, 'maxXP': 300, 'title': 'Explorer'},
+  3: {'minXP': 301, 'maxXP': 600, 'title': 'Artist'},
+  4: {'minXP': 601, 'maxXP': 1000, 'title': 'Creator'},
+  5: {'minXP': 1001, 'maxXP': 1500, 'title': 'Master'},
+  // Add more levels as needed
+};
+
 /// Tab showing user's progress including challenges, goals, and streaks
 class ProgressTab extends StatefulWidget {
   final String userId;
@@ -404,8 +414,8 @@ class _ProgressTabState extends State<ProgressTab> {
     // This would use actual user data
     const currentLevel = 5;
     const currentXP = 1750;
-    final levelInfo = RewardsService.levelSystem[currentLevel]!;
-    final nextLevelInfo = RewardsService.levelSystem[currentLevel + 1];
+    final levelInfo = _levelSystem[currentLevel]!;
+    final nextLevelInfo = _levelSystem[currentLevel + 1];
 
     return Card(
       elevation: 2,

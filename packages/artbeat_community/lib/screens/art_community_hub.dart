@@ -98,22 +98,22 @@ class _WorldBackground extends StatelessWidget {
         ),
 
         // Soft blobs
-        Positioned(
+        const Positioned(
           top: -120,
           left: -90,
           child: _BlurBlob(color: _LAB.purple, size: 300, opacity: 0.22),
         ),
-        Positioned(
+        const Positioned(
           top: 120,
           right: -110,
           child: _BlurBlob(color: _LAB.teal, size: 280, opacity: 0.20),
         ),
-        Positioned(
+        const Positioned(
           bottom: -140,
           left: 40,
           child: _BlurBlob(color: _LAB.pink, size: 320, opacity: 0.14),
         ),
-        Positioned(
+        const Positioned(
           bottom: 120,
           right: -120,
           child: _BlurBlob(color: _LAB.green, size: 260, opacity: 0.14),
@@ -303,7 +303,7 @@ class _PillTile extends StatelessWidget {
                       title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: _LAB.textPrimary,
                         fontWeight: FontWeight.w800,
                         fontSize: 14,
@@ -315,7 +315,7 @@ class _PillTile extends StatelessWidget {
                         subtitle!,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: _LAB.textSecondary,
                           fontWeight: FontWeight.w600,
                           fontSize: 12,
@@ -325,7 +325,7 @@ class _PillTile extends StatelessWidget {
                   ],
                 ),
               ),
-              Icon(Icons.chevron_right, color: _LAB.textTertiary),
+              const Icon(Icons.chevron_right, color: _LAB.textTertiary),
             ],
           ),
         ),
@@ -344,7 +344,7 @@ class _SectionHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 18, 16, 6),
       child: Text(
         title.toUpperCase(),
-        style: TextStyle(
+        style: const TextStyle(
           color: _LAB.textTertiary,
           fontSize: 12,
           fontWeight: FontWeight.w900,
@@ -633,7 +633,7 @@ class _CommissionsTabState extends State<CommissionsTab>
                       ],
                     ),
                   ),
-                  Icon(Icons.chevron_right, color: _LAB.textTertiary),
+                  const Icon(Icons.chevron_right, color: _LAB.textTertiary),
                 ],
               ),
             ),
@@ -661,10 +661,10 @@ class _CommissionsTabState extends State<CommissionsTab>
                 children: [
                   const _GradientIconChip(icon: Icons.receipt_long, size: 42),
                   const SizedBox(width: 12),
-                  Expanded(
+                  const Expanded(
                     child: Text(
                       'Commission Details',
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: _LAB.textPrimary,
                         fontWeight: FontWeight.w900,
                         fontSize: 18,
@@ -836,13 +836,13 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
                       color: _LAB.textPrimary,
                       fontWeight: FontWeight.w700,
                     ),
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       hintText: 'Search...',
                       hintStyle: TextStyle(
                         color: _LAB.textTertiary,
                         fontSize: 13,
                       ),
-                      prefixIcon: const Icon(Icons.search, color: _LAB.teal),
+                      prefixIcon: Icon(Icons.search, color: _LAB.teal),
                       border: InputBorder.none,
                     ),
                     onChanged: (value) {
@@ -933,20 +933,20 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
         child: _WorldBackground(
           child: Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+              const Padding(
+                padding: EdgeInsets.fromLTRB(16, 14, 16, 10),
                 child: _Glass(
                   radius: 26,
                   blur: 18,
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(16),
                   child: Row(
                     children: [
-                      const _GradientIconChip(icon: Icons.people, size: 44),
-                      const SizedBox(width: 12),
+                      _GradientIconChip(icon: Icons.people, size: 44),
+                      SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
+                          children: [
                             Text(
                               'Local ARTbeat',
                               style: TextStyle(
@@ -1075,12 +1075,12 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
                   ],
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              const Padding(
+                padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
                 child: _Glass(
                   radius: 18,
                   blur: 14,
-                  padding: const EdgeInsets.symmetric(
+                  padding: EdgeInsets.symmetric(
                     horizontal: 14,
                     vertical: 12,
                   ),
@@ -1091,7 +1091,7 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
                         color: _LAB.textTertiary,
                         size: 18,
                       ),
-                      const SizedBox(width: 10),
+                      SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           'Local ARTbeat Community',
@@ -2057,7 +2057,7 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
                     Switch(
                       value: _showActivities,
                       onChanged: (_) => _toggleActivitiesFilter(),
-                      activeColor: _LAB.teal,
+                      activeThumbColor: _LAB.teal,
                     ),
                   ],
                 ),
@@ -2100,7 +2100,7 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
                     Switch(
                       value: _showActivities,
                       onChanged: (_) => _toggleActivitiesFilter(),
-                      activeColor: _LAB.teal,
+                      activeThumbColor: _LAB.teal,
                     ),
                   ],
                 ),
@@ -2362,12 +2362,12 @@ class _ArtistsGalleryTabState extends State<ArtistsGalleryTab> {
             child: CommissionArtistsBrowser(onCommissionRequest: _loadArtists),
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 10)),
-          SliverToBoxAdapter(
+          const SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: EdgeInsets.symmetric(horizontal: 16),
               child: Text(
                 'All Artists',
-                style: const TextStyle(
+                style: TextStyle(
                   color: _LAB.textPrimary,
                   fontWeight: FontWeight.w900,
                   fontSize: 16,
@@ -2532,14 +2532,14 @@ class _GroupsTabState extends State<GroupsTab> {
               padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
               child: Row(
                 children: [
-                  Expanded(
+                  const Expanded(
                     child: _Glass(
                       radius: 22,
                       blur: 16,
-                      padding: const EdgeInsets.all(14),
+                      padding: EdgeInsets.all(14),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
+                        children: [
                           Text(
                             'Groups',
                             style: TextStyle(
@@ -2802,7 +2802,7 @@ class _GroupGlassCard extends StatelessWidget {
         children: [
           Text(
             value,
-            style: TextStyle(
+            style: const TextStyle(
               color: _LAB.textPrimary,
               fontWeight: FontWeight.w900,
               fontSize: 11,
@@ -2980,10 +2980,10 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
                   color: _LAB.textPrimary,
                   fontWeight: FontWeight.w700,
                 ),
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   counterStyle: TextStyle(color: _LAB.textTertiary),
                   labelText: 'Group Name',
-                  labelStyle: const TextStyle(
+                  labelStyle: TextStyle(
                     color: _LAB.textSecondary,
                     fontWeight: FontWeight.w700,
                   ),
@@ -3006,10 +3006,10 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
                   color: _LAB.textPrimary,
                   fontWeight: FontWeight.w700,
                 ),
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   counterStyle: TextStyle(color: _LAB.textTertiary),
                   labelText: 'Description (optional)',
-                  labelStyle: const TextStyle(
+                  labelStyle: TextStyle(
                     color: _LAB.textSecondary,
                     fontWeight: FontWeight.w700,
                   ),

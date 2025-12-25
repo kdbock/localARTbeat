@@ -5,11 +5,13 @@ import 'package:artbeat_artwork/artbeat_artwork.dart' as artwork;
 import 'package:artbeat_community/artbeat_community.dart'
     show DirectCommissionService, ArtistCommissionSettings;
 import 'package:url_launcher/url_launcher.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../services/subscription_service.dart' as artist_subscription;
 import '../services/analytics_service.dart';
 import '../widgets/commission_badge_widget.dart';
 import '../widgets/top_followers_widget.dart';
 import '../widgets/artist_social_stats_widget.dart';
+import '../widgets/design_system.dart';
 
 /// Screen for viewing an artist's public profile
 class ArtistPublicProfileScreen extends StatefulWidget {
@@ -190,12 +192,11 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(
-        appBar: EnhancedUniversalHeader(
-          title: 'Artist Profile',
-          showLogo: false,
+      return const WorldBackground(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: Center(child: CircularProgressIndicator()),
         ),
-        body: Center(child: CircularProgressIndicator()),
       );
     }
 
@@ -203,235 +204,224 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
     final bool isPremium = artist.subscriptionTier != SubscriptionTier.free;
     final socialLinks = artist.socialLinks;
 
-    return Scaffold(
+    return WorldBackground(
+        child: Scaffold(
+      backgroundColor: Colors.transparent,
       body: CustomScrollView(
         slivers: [
-          // App bar with cover image
-          SliverAppBar(
-            expandedHeight: 200.0,
-            floating: false,
-            pinned: true,
-            flexibleSpace: FlexibleSpaceBar(
-              background: artist.coverImageUrl != null &&
-                      artist.coverImageUrl!.isNotEmpty &&
-                      Uri.tryParse(artist.coverImageUrl!)?.hasScheme == true
-                  ? Image.network(
-                      artist.coverImageUrl!,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          color: Colors.grey[300],
-                          child: const Center(
-                            child: Icon(
-                              Icons.broken_image,
-                              size: 50,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        );
-                      },
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return Container(
-                          color: Colors.grey[300],
-                          child: const Center(
-                            child: CircularProgressIndicator(),
-                          ),
-                        );
-                      },
-                    )
-                  : Container(
-                      color: Colors.grey[300],
-                      child: const Center(
-                        child: Icon(
-                          Icons.image,
-                          size: 50,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ),
+          // Top HUD Bar
+          SliverToBoxAdapter(
+            child: HudTopBar(
+              title: 'artist_artist_public_profile_text_artist_profile'.tr(),
+              onMenu: () => Navigator.pop(context),
             ),
           ),
 
-          // Artist info
+          // Cover image section
           SliverToBoxAdapter(
-            child: Container(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Profile image and follow button
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      UserAvatar(
-                        imageUrl: artist.profileImageUrl,
-                        displayName: artist.displayName,
-                        radius: 40,
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Text(
-                                  artist.displayName,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 24,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(14, 14, 14, 0),
+              child: Container(
+                height: 200,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(24),
+                  image: artist.coverImageUrl != null &&
+                          artist.coverImageUrl!.isNotEmpty &&
+                          Uri.tryParse(artist.coverImageUrl!)?.hasScheme == true
+                      ? DecorationImage(
+                          image: NetworkImage(artist.coverImageUrl!),
+                          fit: BoxFit.cover,
+                        )
+                      : null,
+                  color: Colors.grey[800],
+                ),
+                child: artist.coverImageUrl == null ||
+                        artist.coverImageUrl!.isEmpty ||
+                        Uri.tryParse(artist.coverImageUrl!)?.hasScheme != true
+                    ? const Center(
+                        child: Icon(
+                          Icons.image,
+                          size: 50,
+                          color: Colors.white54,
+                        ),
+                      )
+                    : null,
+              ),
+            ),
+          ),
+
+          // Artist info card
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(14, 14, 14, 0),
+            sliver: SliverToBoxAdapter(
+              child: GlassCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Profile image and follow button
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        UserAvatar(
+                          imageUrl: artist.profileImageUrl,
+                          displayName: artist.displayName,
+                          radius: 40,
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Text(
+                                    artist.displayName,
+                                    style: GoogleFonts.spaceGrotesk(
+                                      color:
+                                          Colors.white.withValues(alpha: 0.95),
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: 22,
+                                      letterSpacing: -0.5,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  if (artist.isVerified)
+                                    const Icon(Icons.verified,
+                                        color: Color(0xFF22D3EE), size: 20),
+                                ],
+                              ),
+                              if (artist.location != null &&
+                                  artist.location!.isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 4.0),
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.location_on,
+                                          size: 16, color: Colors.white70),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        artist.location!,
+                                        style: GoogleFonts.spaceGrotesk(
+                                          color: Colors.white
+                                              .withValues(alpha: 0.7),
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                const SizedBox(width: 8),
-                                if (artist.isVerified)
-                                  const Icon(Icons.verified,
-                                      color: Colors.blue, size: 20),
-                              ],
-                            ),
-                            if (artist.location != null &&
-                                artist.location!.isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 4.0),
-                                child: Row(
-                                  children: [
-                                    const Icon(Icons.location_on,
-                                        size: 16, color: Colors.grey),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      artist.location!,
-                                      style: TextStyle(
-                                        color: Colors.grey[600],
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                              const SizedBox(height: 12),
+                              HudButton(
+                                label: _isFollowing ? 'Following' : 'Follow',
+                                onPressed: _toggleFollow,
+                                height: 44,
+                                radius: 22,
                               ),
-                            const SizedBox(height: 12),
-                            ElevatedButton(
-                              onPressed: _toggleFollow,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: _isFollowing
-                                    ? Colors.grey[200]
-                                    : Theme.of(context).colorScheme.primary,
-                                foregroundColor:
-                                    _isFollowing ? Colors.black : Colors.white,
-                                minimumSize: const Size(double.infinity, 36),
+                              const SizedBox(height: 12),
+                              // Engagement buttons row
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  EngagementButton(
+                                    icon: Icons.card_giftcard,
+                                    label: 'Gift',
+                                    color: const Color(0xFFFFC857),
+                                    onTap: () => _handleGiftAction(),
+                                  ),
+                                  EngagementButton(
+                                    icon: Icons.message,
+                                    label: 'Message',
+                                    color: const Color(0xFF22D3EE),
+                                    onTap: () => _handleMessageAction(),
+                                  ),
+                                  EngagementButton(
+                                    icon: Icons.work,
+                                    label: 'Commission',
+                                    color: const Color(0xFF7C4DFF),
+                                    onTap: () => _handleCommissionAction(),
+                                  ),
+                                ],
                               ),
-                              child: Text(
-                                _isFollowing ? 'Following' : 'Follow',
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            // Engagement buttons row
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                _buildEngagementButton(
-                                  icon: Icons.card_giftcard,
-                                  label: 'Gift',
-                                  color: Colors.amber,
-                                  onTap: () => _handleGiftAction(),
-                                ),
-                                _buildEngagementButton(
-                                  icon: Icons.message,
-                                  label: 'Message',
-                                  color: Colors.blue,
-                                  onTap: () => _handleMessageAction(),
-                                ),
-                                _buildEngagementButton(
-                                  icon: Icons.work,
-                                  label: 'Commission',
-                                  color: Colors.purple,
-                                  onTap: () => _handleCommissionAction(),
-                                ),
-                              ],
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-
-                  // Commission Badge
-                  if (_commissionSettings?.acceptingCommissions ?? false)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 12.0),
-                      child: CommissionBadge(
-                        acceptingCommissions: true,
-                        basePrice: _commissionSettings?.basePrice,
-                        turnaroundDays:
-                            _commissionSettings?.averageTurnaroundDays,
-                      ),
+                      ],
                     ),
 
-                  // Subscription badge
-                  if (isPremium)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 12.0),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: artist.subscriptionTier ==
-                                  SubscriptionTier.creator
-                              ? Colors.amber[100]
-                              : Theme.of(context).colorScheme.primary.withAlpha(
-                                  25), // Changed from withOpacity(0.1)
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.star,
-                              size: 16,
-                              color: artist.subscriptionTier ==
-                                      SubscriptionTier.creator
-                                  ? Colors.amber[800]
-                                  : Theme.of(context).colorScheme.primary,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              artist.userType == UserType.gallery
-                                  ? 'Gallery Business'
-                                  : artist.subscriptionTier ==
-                                          SubscriptionTier.creator
-                                      ? 'Creator Plan'
-                                      : artist.subscriptionTier.displayName,
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: artist.subscriptionTier ==
-                                        SubscriptionTier.creator
-                                    ? Colors.amber[800]
-                                    : Theme.of(context).colorScheme.primary,
-                              ),
-                            ),
-                          ],
+                    // Commission Badge
+                    if (_commissionSettings?.acceptingCommissions ?? false)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 16.0),
+                        child: CommissionBadge(
+                          acceptingCommissions: true,
+                          basePrice: _commissionSettings?.basePrice,
+                          turnaroundDays:
+                              _commissionSettings?.averageTurnaroundDays,
                         ),
                       ),
-                    ),
-                ],
+
+                    // Subscription badge
+                    if (isPremium)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 12.0),
+                        child: GradientBadge(
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.star,
+                                size: 16,
+                                color: Colors.white,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                artist.userType == UserType.gallery
+                                    ? 'Gallery Business'
+                                    : artist.subscriptionTier ==
+                                            SubscriptionTier.creator
+                                        ? 'Creator Plan'
+                                        : artist.subscriptionTier.displayName,
+                                style: GoogleFonts.spaceGrotesk(
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
           ),
 
           // Top Followers Section
           SliverPadding(
-            padding: const EdgeInsets.only(top: 16.0),
+            padding: const EdgeInsets.fromLTRB(14, 14, 14, 0),
             sliver: SliverToBoxAdapter(
-              child: TopFollowersWidget(
-                artistProfileId: _artistProfileId!,
-                artistUserId: widget.userId,
+              child: GlassCard(
+                child: TopFollowersWidget(
+                  artistProfileId: _artistProfileId!,
+                  artistUserId: widget.userId,
+                ),
               ),
             ),
           ),
 
           // Social Stats Section
           SliverToBoxAdapter(
-            child: ArtistSocialStatsWidget(
-              artistProfileId: _artistProfileId!,
-              followerCount: artist.followersCount,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(14, 14, 14, 0),
+              child: GlassCard(
+                child: ArtistSocialStatsWidget(
+                  artistProfileId: _artistProfileId!,
+                  followerCount: artist.followersCount,
+                ),
+              ),
             ),
           ),
 
@@ -448,165 +438,198 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
 
           // Bio Section
           SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            padding: const EdgeInsets.fromLTRB(14, 14, 14, 0),
             sliver: SliverToBoxAdapter(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Bio
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16.0),
-                    child: Text(
-                      artist.bio ?? 'No bio provided',
-                      style: const TextStyle(height: 1.5),
-                    ),
-                  ),
-
-                  // Commission Info Card
-                  if (_commissionSettings?.acceptingCommissions ?? false)
+              child: GlassCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Bio
                     Padding(
-                      padding: const EdgeInsets.only(top: 16.0),
-                      child: CommissionInfoCard(
-                        basePrice: _commissionSettings?.basePrice,
-                        turnaroundDays:
-                            _commissionSettings?.averageTurnaroundDays,
-                        availableTypes: _commissionSettings?.availableTypes
-                            .map((t) => t.displayName)
-                            .toList(),
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: Text(
+                        artist.bio ?? 'No bio provided',
+                        style: GoogleFonts.spaceGrotesk(
+                          color: Colors.white.withValues(alpha: 0.85),
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          height: 1.5,
+                        ),
                       ),
                     ),
 
-                  // Specialties
-                  Padding(
-                    padding: const EdgeInsets.only(top: 16.0),
-                    child: Text(
-                      tr('art_walk_specialties'),
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
+                    // Commission Info Card
+                    if (_commissionSettings?.acceptingCommissions ?? false)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 16.0),
+                        child: CommissionInfoCard(
+                          basePrice: _commissionSettings?.basePrice,
+                          turnaroundDays:
+                              _commissionSettings?.averageTurnaroundDays,
+                          availableTypes: _commissionSettings?.availableTypes
+                              .map((t) => t.displayName)
+                              .toList(),
+                        ),
+                      ),
+
+                    // Specialties
+                    const Padding(
+                      padding: EdgeInsets.only(top: 16.0),
+                      child: SectionHeader(
+                        title: 'Specialties',
+                        accentColor: Color(0xFF34D399),
                       ),
                     ),
-                  ),
 
-                  // Mediums and styles
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        ...artist.mediums.map((medium) => Chip(
-                              label: Text(medium),
-                              backgroundColor:
-                                  Theme.of(context).chipTheme.backgroundColor,
-                            )),
-                        ...artist.styles.map((style) => Chip(
-                              label: Text(style),
-                              backgroundColor: Theme.of(context)
-                                  .colorScheme
-                                  .primary
-                                  .withAlpha(
-                                      25), // Changed from withOpacity(0.1)
-                            )),
-                      ],
-                    ),
-                  ),
-
-                  // Social media and website links
-                  Padding(
-                    padding: const EdgeInsets.only(top: 16.0),
-                    child: Text(
-                      tr('art_walk_connect'),
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
+                    // Mediums and styles
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          ...artist.mediums.map((medium) => Chip(
+                                label: Text(
+                                  medium,
+                                  style: GoogleFonts.spaceGrotesk(
+                                    color: Colors.white.withValues(alpha: 0.9),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                backgroundColor:
+                                    Colors.white.withValues(alpha: 0.08),
+                                side: BorderSide(
+                                  color: Colors.white.withValues(alpha: 0.15),
+                                ),
+                              )),
+                          ...artist.styles.map((style) => Chip(
+                                label: Text(
+                                  style,
+                                  style: GoogleFonts.spaceGrotesk(
+                                    color: Colors.white.withValues(alpha: 0.9),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                backgroundColor: const Color(0xFF22D3EE)
+                                    .withValues(alpha: 0.15),
+                                side: BorderSide(
+                                  color: const Color(0xFF22D3EE)
+                                      .withValues(alpha: 0.3),
+                                ),
+                              )),
+                        ],
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        if (socialLinks['website'] != null &&
-                            socialLinks['website']!.isNotEmpty)
-                          IconButton(
-                            onPressed: () => _launchUrl(socialLinks['website']),
-                            icon: const Icon(Icons.language),
-                            tooltip: 'Website',
-                          ),
-                        if (socialLinks['instagram'] != null &&
-                            socialLinks['instagram']!.isNotEmpty)
-                          IconButton(
-                            onPressed: () => _launchUrl(
-                                'https://instagram.com/${socialLinks['instagram']}'),
-                            icon: const Icon(Icons.camera_alt),
-                            tooltip: 'Instagram',
-                          ),
-                        if (socialLinks['facebook'] != null &&
-                            socialLinks['facebook']!.isNotEmpty)
-                          IconButton(
-                            onPressed: () =>
-                                _launchUrl(socialLinks['facebook']),
-                            icon: const Icon(Icons.facebook),
-                            tooltip: 'Facebook',
-                          ),
-                        if (socialLinks['twitter'] != null &&
-                            socialLinks['twitter']!.isNotEmpty)
-                          IconButton(
-                            onPressed: () => _launchUrl(
-                                'https://twitter.com/${socialLinks['twitter']}'),
-                            icon: const Icon(Icons.email),
-                            tooltip: 'Twitter',
-                          ),
-                        if (socialLinks['etsy'] != null &&
-                            socialLinks['etsy']!.isNotEmpty)
-                          IconButton(
-                            onPressed: () => _launchUrl(socialLinks['etsy']),
-                            icon: const Icon(Icons.shopping_bag),
-                            tooltip: 'Etsy',
-                          ),
-                      ],
+
+                    // Social media and website links
+                    const Padding(
+                      padding: EdgeInsets.only(top: 16.0),
+                      child: SectionHeader(
+                        title: 'Connect',
+                        accentColor: Color(0xFF7C4DFF),
+                      ),
                     ),
-                  ),
-                ],
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          if (socialLinks['website'] != null &&
+                              socialLinks['website']!.isNotEmpty)
+                            IconButton(
+                              onPressed: () =>
+                                  _launchUrl(socialLinks['website']),
+                              icon: const Icon(Icons.language,
+                                  color: Colors.white70),
+                              tooltip: 'Website',
+                            ),
+                          if (socialLinks['instagram'] != null &&
+                              socialLinks['instagram']!.isNotEmpty)
+                            IconButton(
+                              onPressed: () => _launchUrl(
+                                  'https://instagram.com/${socialLinks['instagram']}'),
+                              icon: const Icon(Icons.camera_alt,
+                                  color: Colors.white70),
+                              tooltip: 'Instagram',
+                            ),
+                          if (socialLinks['facebook'] != null &&
+                              socialLinks['facebook']!.isNotEmpty)
+                            IconButton(
+                              onPressed: () =>
+                                  _launchUrl(socialLinks['facebook']),
+                              icon: const Icon(Icons.facebook,
+                                  color: Colors.white70),
+                              tooltip: 'Facebook',
+                            ),
+                          if (socialLinks['twitter'] != null &&
+                              socialLinks['twitter']!.isNotEmpty)
+                            IconButton(
+                              onPressed: () => _launchUrl(
+                                  'https://twitter.com/${socialLinks['twitter']}'),
+                              icon: const Icon(Icons.email,
+                                  color: Colors.white70),
+                              tooltip: 'Twitter',
+                            ),
+                          if (socialLinks['etsy'] != null &&
+                              socialLinks['etsy']!.isNotEmpty)
+                            IconButton(
+                              onPressed: () => _launchUrl(socialLinks['etsy']),
+                              icon: const Icon(Icons.shopping_bag,
+                                  color: Colors.white70),
+                              tooltip: 'Etsy',
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
 
           // Artwork section title
           SliverPadding(
-            padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 16.0),
+            padding: const EdgeInsets.fromLTRB(14, 14, 14, 0),
             sliver: SliverToBoxAdapter(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    tr('art_walk_artwork'),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
+              child: GlassCard(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const SectionHeader(
+                      title: 'Artwork',
+                      accentColor: Color(0xFFFFC857),
                     ),
-                  ),
-                  Text(
-                    '${_artwork.length} pieces',
-                    style: TextStyle(
-                      color: Colors.grey[600],
+                    Text(
+                      '${_artwork.length} pieces',
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.white.withValues(alpha: 0.6),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
 
           // Artwork grid
           SliverPadding(
-            padding: const EdgeInsets.all(16.0),
-            sliver: _artwork.isEmpty
+            padding: const EdgeInsets.fromLTRB(14, 14, 14, 20),
+            sliver: (_artwork.isEmpty
                 ? SliverToBoxAdapter(
-                    child: Center(
-                      child: Text(tr(
-                          'artist_artist_public_profile_text_no_artwork_available')),
+                    child: GlassCard(
+                      child: Center(
+                        child: Text(
+                          'No artwork available',
+                          style: GoogleFonts.spaceGrotesk(
+                            color: Colors.white.withValues(alpha: 0.7),
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
                     ),
                   )
                 : SliverGrid(
@@ -624,11 +647,11 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
                       },
                       childCount: _artwork.length,
                     ),
-                  ),
+                  )),
           ),
         ],
       ),
-    );
+    ));
   }
 
   Widget _buildArtworkItem(artwork.ArtworkModel artwork) {
@@ -640,8 +663,9 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
           arguments: {'artworkId': artwork.id},
         );
       },
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(8),
+      child: GlassCard(
+        radius: 16,
+        padding: EdgeInsets.zero,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -659,29 +683,33 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
                             fit: BoxFit.cover,
                             enableThumbnailFallback: true,
                             errorWidget: Container(
-                              color: Colors.grey[300],
+                              color: Colors.white.withValues(alpha: 0.05),
                               child: const Center(
                                 child: Icon(
                                   Icons.broken_image,
                                   size: 50,
-                                  color: Colors.grey,
+                                  color: Colors.white30,
                                 ),
                               ),
                             ),
                             placeholder: Container(
-                              color: Colors.grey[300],
+                              color: Colors.white.withValues(alpha: 0.05),
                               child: const Center(
-                                child: CircularProgressIndicator(),
+                                child: CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Color(0xFF22D3EE),
+                                  ),
+                                ),
                               ),
                             ),
                           )
                         : Container(
-                            color: Colors.grey[300],
+                            color: Colors.white.withValues(alpha: 0.05),
                             child: const Center(
                               child: Icon(
                                 Icons.image,
                                 size: 50,
-                                color: Colors.grey,
+                                color: Colors.white30,
                               ),
                             ),
                           ),
@@ -692,19 +720,19 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
                     Positioned(
                       top: 8,
                       right: 8,
-                      child: Container(
+                      child: GradientBadge(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.black54,
-                          borderRadius: BorderRadius.circular(12),
+                        radius: 12,
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFFFFC857), Color(0xFFFF3D8D)],
                         ),
                         child: Text(
                           '\$${artwork.price?.toStringAsFixed(2) ?? 'For Sale'}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
+                          style: GoogleFonts.spaceGrotesk(
+                            color: Colors.black.withValues(alpha: 0.85),
+                            fontWeight: FontWeight.w800,
+                            fontSize: 10,
                           ),
                         ),
                       ),
@@ -715,24 +743,27 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
 
             // Artwork info
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(12.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     artwork.title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
+                    style: GoogleFonts.spaceGrotesk(
+                      color: Colors.white.withValues(alpha: 0.95),
+                      fontWeight: FontWeight.w800,
+                      fontSize: 13,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
+                  const SizedBox(height: 4),
                   Text(
                     artwork.medium,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[600],
+                    style: GoogleFonts.spaceGrotesk(
+                      color: Colors.white.withValues(alpha: 0.6),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
@@ -740,43 +771,6 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildEngagementButton({
-    required IconData icon,
-    required String label,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: color.withValues(alpha: 0.3),
-                width: 1,
-              ),
-            ),
-            child: Icon(icon, size: 20, color: color),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: color,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
       ),
     );
   }

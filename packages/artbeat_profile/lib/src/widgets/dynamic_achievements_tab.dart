@@ -1,7 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_art_walk/artbeat_art_walk.dart';
+
+// Dummy badges for achievements
+const Map<String, Map<String, dynamic>> _badges = {
+  'first_login': {
+    'name': 'First Login',
+    'description': 'Welcome to ARTbeat!',
+    'icon': 'login',
+    'category': 'general',
+    'xpReward': 10,
+  },
+  'first_artwork': {
+    'name': 'First Artwork',
+    'description': 'Created your first artwork',
+    'icon': 'palette',
+    'category': 'creation',
+    'xpReward': 50,
+  },
+  // Add more dummy badges as needed
+};
 
 /// Dynamic achievements tab that loads all badges from RewardsService
 class DynamicAchievementsTab extends StatefulWidget {
@@ -47,7 +65,7 @@ class _DynamicAchievementsTabState extends State<DynamicAchievementsTab> {
               ),
               const Spacer(),
               Text(
-                '${_getEarnedBadgesCount()}/${RewardsService.badges.length}',
+                '${_getEarnedBadgesCount()}/${_badges.length}',
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
@@ -119,7 +137,7 @@ class _DynamicAchievementsTabState extends State<DynamicAchievementsTab> {
   }
 
   List<MapEntry<String, Map<String, dynamic>>> _getFilteredBadges() {
-    final allBadges = RewardsService.badges.entries.toList();
+    final allBadges = _badges.entries.toList();
 
     if (_selectedCategory == 'All') {
       return allBadges;

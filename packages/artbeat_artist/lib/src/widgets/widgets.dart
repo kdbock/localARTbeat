@@ -5,3 +5,4 @@ export 'artist_header.dart';
 export 'upcoming_events_row_widget.dart';
 export 'top_followers_widget.dart';
 export 'artist_social_stats_widget.dart';
+export 'design_system.dart';

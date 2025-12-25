@@ -4,4 +4,4 @@
 export 'src/models/models.dart';
 export 'src/services/services.dart';
 export 'src/screens/screens.dart';
-export 'src/widgets/widgets.dart';
+export 'widgets/widgets.dart';

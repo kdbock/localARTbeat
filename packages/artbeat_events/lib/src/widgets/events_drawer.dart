@@ -44,8 +44,10 @@ class _EventsDrawerState extends State<EventsDrawer> {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
-        final userDoc =
-            await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
 
         if (!mounted) return;
 
@@ -73,7 +75,9 @@ class _EventsDrawerState extends State<EventsDrawer> {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
         final userEvents = await _eventService.getEventsByArtist(user.uid);
-        final upcomingEvents = await _eventService.getUpcomingPublicEvents(limit: 5);
+        final upcomingEvents = await _eventService.getUpcomingPublicEvents(
+          limit: 5,
+        );
 
         if (!mounted) return;
         setState(() {
@@ -96,11 +100,7 @@ class _EventsDrawerState extends State<EventsDrawer> {
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [
-                Color(0xFF05060A),
-                Color(0xFF0B1220),
-                Color(0xFF05060A),
-              ],
+              colors: [Color(0xFF05060A), Color(0xFF0B1220), Color(0xFF05060A)],
             ),
           ),
           child: Column(
@@ -111,8 +111,6 @@ class _EventsDrawerState extends State<EventsDrawer> {
                 child: _Glass(
                   radius: 22,
                   blur: 18,
-                  fillAlpha: 0.08,
-                  borderAlpha: 0.14,
                   child: Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(22),
@@ -137,14 +135,16 @@ class _EventsDrawerState extends State<EventsDrawer> {
                   padding: const EdgeInsets.fromLTRB(14, 0, 14, 10),
                   child: _Glass(
                     radius: 22,
-                    blur: 16,
                     fillAlpha: 0.06,
                     borderAlpha: 0.12,
                     shadow: false,
                     child: ListView(
                       padding: const EdgeInsets.fromLTRB(10, 10, 10, 12),
                       children: [
-                        _sectionLabel('events_drawer_section_main'.tr(), fallback: 'Main'),
+                        _sectionLabel(
+                          'events_drawer_section_main'.tr(),
+                          fallback: 'Main',
+                        ),
                         _NavItem(
                           icon: Icons.home,
                           title: 'events_drawer_home'.tr(),
@@ -153,7 +153,8 @@ class _EventsDrawerState extends State<EventsDrawer> {
                         _NavItem(
                           icon: Icons.search,
                           title: 'events_drawer_search'.tr(),
-                          onTap: () => _navigateToScreen(context, '/events/search'),
+                          onTap: () =>
+                              _navigateToScreen(context, '/events/search'),
                         ),
                         _NavItem(
                           icon: Icons.message,
@@ -169,39 +170,56 @@ class _EventsDrawerState extends State<EventsDrawer> {
                         const SizedBox(height: 10),
                         _divider(),
 
-                        _sectionLabel('events_drawer_section_events'.tr(), fallback: 'Events'),
+                        _sectionLabel(
+                          'events_drawer_section_events'.tr(),
+                          fallback: 'Events',
+                        ),
                         _NavItem(
                           icon: Icons.event,
                           title: 'events_drawer_events_dashboard'.tr(),
-                          onTap: () => _navigateToScreen(context, '/events/dashboard'),
+                          onTap: () =>
+                              _navigateToScreen(context, '/events/dashboard'),
                         ),
                         _NavItem(
                           icon: Icons.add_circle,
                           title: 'events_drawer_create_event'.tr(),
-                          onTap: () => _navigateToScreen(context, '/events/create'),
-                          gradient: const [Color(0xFFFF3D8D), Color(0xFF7C4DFF)],
+                          onTap: () =>
+                              _navigateToScreen(context, '/events/create'),
+                          gradient: const [
+                            Color(0xFFFF3D8D),
+                            Color(0xFF7C4DFF),
+                          ],
                         ),
                         _NavItem(
                           icon: Icons.event_note,
                           title: 'events_drawer_my_events'.tr(),
-                          badge: _userEvents.isNotEmpty ? _userEvents.length.toString() : null,
-                          onTap: () => _navigateToScreen(context, '/events/my-events'),
+                          badge: _userEvents.isNotEmpty
+                              ? _userEvents.length.toString()
+                              : null,
+                          onTap: () =>
+                              _navigateToScreen(context, '/events/my-events'),
                         ),
                         _NavItem(
                           icon: Icons.confirmation_number,
                           title: 'events_drawer_my_tickets'.tr(),
-                          onTap: () => _navigateToScreen(context, '/events/my-tickets'),
+                          onTap: () =>
+                              _navigateToScreen(context, '/events/my-tickets'),
                         ),
                         _NavItem(
                           icon: Icons.calendar_today,
                           title: 'events_drawer_calendar'.tr(),
-                          onTap: () => _navigateToScreen(context, '/events/dashboard'),
+                          onTap: () =>
+                              _navigateToScreen(context, '/events/dashboard'),
                         ),
                         _NavItem(
                           icon: Icons.location_on,
                           title: 'events_drawer_nearby_events'.tr(),
-                          onTap: () => _navigateToScreen(context, '/events/discover'),
-                          gradient: const [Color(0xFF34D399), Color(0xFF22D3EE)],
+                          onTap: () =>
+                              _navigateToScreen(context, '/events/discover'),
+                          gradient: const [
+                            Color(0xFF34D399),
+                            Color(0xFF22D3EE),
+                          ],
                         ),
 
                         if (_upcomingEvents.isNotEmpty) ...[
@@ -212,28 +230,36 @@ class _EventsDrawerState extends State<EventsDrawer> {
                             fallback: 'Upcoming',
                           ),
                           const SizedBox(height: 6),
-                          ..._upcomingEvents.take(3).map((e) => _UpcomingEventMini(
-                                title: e.title,
-                                dateText: _formatMiniDate(e.dateTime),
-                                onTap: () {
-                                  Navigator.pop(context);
-                                  Navigator.pushNamed(
-                                    context,
-                                    '/events/detail',
-                                    arguments: {'eventId': e.id},
-                                  );
-                                },
-                              )),
+                          ..._upcomingEvents
+                              .take(3)
+                              .map(
+                                (e) => _UpcomingEventMini(
+                                  title: e.title,
+                                  dateText: _formatMiniDate(e.dateTime),
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                    Navigator.pushNamed(
+                                      context,
+                                      '/events/detail',
+                                      arguments: {'eventId': e.id},
+                                    );
+                                  },
+                                ),
+                              ),
                         ],
 
                         const SizedBox(height: 10),
                         _divider(),
 
-                        _sectionLabel('events_drawer_section_settings'.tr(), fallback: 'Settings'),
+                        _sectionLabel(
+                          'events_drawer_section_settings'.tr(),
+                          fallback: 'Settings',
+                        ),
                         _NavItem(
                           icon: Icons.notifications,
                           title: 'events_drawer_notifications'.tr(),
-                          onTap: () => _navigateToScreen(context, '/notifications'),
+                          onTap: () =>
+                              _navigateToScreen(context, '/notifications'),
                         ),
                         _NavItem(
                           icon: Icons.settings,
@@ -287,7 +313,8 @@ class _EventsDrawerState extends State<EventsDrawer> {
                     Text(
                       _isLoading
                           ? 'events_drawer_loading'.tr()
-                          : (_currentUser?.fullName ?? 'events_drawer_event_attendee'.tr()),
+                          : (_currentUser?.fullName ??
+                                'events_drawer_event_attendee'.tr()),
                       style: const TextStyle(
                         color: Color(0xF2FFFFFF),
                         fontSize: 16,
@@ -376,31 +403,36 @@ class _EventsDrawerState extends State<EventsDrawer> {
                       height: 16,
                       child: CircularProgressIndicator(
                         strokeWidth: 2.2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF22D3EE)),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Color(0xFF22D3EE),
+                        ),
                       ),
                     ),
                   )
-                : (_currentUser?.profileImageUrl != null && _currentUser!.profileImageUrl.isNotEmpty)
-                    ? CachedNetworkImage(
-                        imageUrl: _currentUser!.profileImageUrl,
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) => const Center(
-                          child: SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF22D3EE)),
-                            ),
+                : (_currentUser?.profileImageUrl != null &&
+                      _currentUser!.profileImageUrl.isNotEmpty)
+                ? CachedNetworkImage(
+                    imageUrl: _currentUser!.profileImageUrl,
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) => const Center(
+                      child: SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Color(0xFF22D3EE),
                           ),
                         ),
-                        errorWidget: (_, __, ___) => const Center(
-                          child: Icon(Icons.person, color: Colors.white, size: 26),
-                        ),
-                      )
-                    : const Center(
-                        child: Icon(Icons.person, color: Colors.white, size: 26),
                       ),
+                    ),
+                    errorWidget: (_, __, ___) => const Center(
+                      child: Icon(Icons.person, color: Colors.white, size: 26),
+                    ),
+                  )
+                : const Center(
+                    child: Icon(Icons.person, color: Colors.white, size: 26),
+                  ),
           ),
         ),
       ),
@@ -518,7 +550,10 @@ class _NavItem extends StatelessWidget {
                   const SizedBox(width: 8),
                   _CountBadge(text: badge!),
                 ],
-                Icon(Icons.chevron_right, color: Colors.white.withValues(alpha: 0.35)),
+                Icon(
+                  Icons.chevron_right,
+                  color: Colors.white.withValues(alpha: 0.35),
+                ),
               ],
             ),
           ),
@@ -588,9 +623,9 @@ class _UpcomingEventMini extends StatelessWidget {
           ),
           child: Row(
             children: [
-              _GradientIconChip(
+              const _GradientIconChip(
                 icon: Icons.event,
-                gradient: const [Color(0xFF34D399), Color(0xFF22D3EE)],
+                gradient: [Color(0xFF34D399), Color(0xFF22D3EE)],
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -619,7 +654,10 @@ class _UpcomingEventMini extends StatelessWidget {
                   ],
                 ),
               ),
-              Icon(Icons.chevron_right, color: Colors.white.withValues(alpha: 0.35)),
+              Icon(
+                Icons.chevron_right,
+                color: Colors.white.withValues(alpha: 0.35),
+              ),
             ],
           ),
         ),
@@ -710,12 +748,11 @@ class _GradientDot extends StatelessWidget {
 class _Glass extends StatelessWidget {
   const _Glass({
     required this.child,
-    this.padding,
     this.radius = 20,
     this.blur = 16,
     this.fillAlpha = 0.08,
     this.borderAlpha = 0.14,
-    this.shadow = true,
+    this.shadow = true, this.padding,
   });
 
   final Widget child;
@@ -737,7 +774,9 @@ class _Glass extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: fillAlpha),
             borderRadius: BorderRadius.circular(radius),
-            border: Border.all(color: Colors.white.withValues(alpha: borderAlpha)),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: borderAlpha),
+            ),
             boxShadow: shadow
                 ? [
                     BoxShadow(
@@ -766,7 +805,11 @@ class _GradientIconChip extends StatelessWidget {
       width: 40,
       height: 40,
       decoration: BoxDecoration(
-        gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: gradient),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: gradient,
+        ),
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(

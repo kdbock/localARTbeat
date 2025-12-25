@@ -11,7 +11,6 @@ import '../services/auth_service.dart';
 import '../constants/routes.dart';
 import 'package:artbeat_core/artbeat_core.dart'
     show ArtbeatColors, ArtbeatInput, ArtbeatButton;
-import 'package:artbeat_core/src/utils/color_extensions.dart';
 import 'package:artbeat_core/artbeat_core.dart' show UserService;
 
 /// Registration screen with email/password account creation (Quest theme)
@@ -623,7 +622,7 @@ class _TermsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final link = const Color(0xFF22D3EE);
+    const link = Color(0xFF22D3EE);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(

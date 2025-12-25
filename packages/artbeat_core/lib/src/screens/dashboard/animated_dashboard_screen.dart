@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/src/theme/artbeat_colors.dart';
 
 class AnimatedDashboardScreen extends StatefulWidget {
@@ -40,6 +41,10 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
     _loop.dispose();
     _intro.dispose();
     super.dispose();
+  }
+
+  void _showProfileMenu() {
+    Navigator.of(context).pushNamed('/profile/menu');
   }
 
   @override
@@ -88,7 +93,7 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                       level: _level,
                       xpProgress: _xpProgress,
                       streakDays: _streakDays,
-                      onProfile: () {}, // hook later
+                      onProfile: _showProfileMenu,
                       onSettings: () {}, // hook later
                     ),
                   ),
@@ -98,7 +103,11 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                   _StampFadeIn(
                     intro: _intro,
                     delay: 0.10,
-                    child: _TitleBlock(loop: _loop),
+                    child: _TitleBlock(
+                      loop: _loop,
+                      onTap: () =>
+                          Navigator.pushNamed(context, '/old-dashboard'),
+                    ),
                   ),
 
                   const SizedBox(height: 14),
@@ -116,9 +125,10 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                               loop: _loop,
                               index: 0,
                               width: w,
-                              title: "CAPTURE",
-                              subtitle: "Scan art → upload it to the map",
-                              tag: "DROP A PIN",
+                              title: 'animated_dashboard_capture_title'.tr(),
+                              subtitle: 'animated_dashboard_capture_subtitle'
+                                  .tr(),
+                              tag: 'animated_dashboard_capture_tag'.tr(),
                               icon: Icons.camera_alt_rounded,
                               palette: const _QuestPalette(
                                 base: ArtbeatColors.primaryPurple,
@@ -139,9 +149,10 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                               loop: _loop,
                               index: 1,
                               width: w,
-                              title: "DISCOVER",
-                              subtitle: "Find captured art → earn XP",
-                              tag: "+XP HUNT",
+                              title: 'animated_dashboard_discover_title'.tr(),
+                              subtitle: 'animated_dashboard_discover_subtitle'
+                                  .tr(),
+                              tag: 'animated_dashboard_discover_tag'.tr(),
                               icon: Icons.radar_rounded,
                               palette: const _QuestPalette(
                                 base: ArtbeatColors.primaryBlue,
@@ -150,7 +161,7 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                               ),
                               onTap: () => Navigator.pushNamed(
                                 context,
-                                '/old-dashboard',
+                                '/art-walk/dashboard',
                               ),
                             ),
                           ),
@@ -162,10 +173,11 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                               loop: _loop,
                               index: 2,
                               width: w,
-                              title: "ART WALKS",
-                              subtitle: "Build a walk → complete it for XP",
-                              tag: "QUEST ROUTE",
-                              icon: Icons.route_rounded,
+                              title: 'animated_dashboard_explore_title'.tr(),
+                              subtitle: 'animated_dashboard_explore_subtitle'
+                                  .tr(),
+                              tag: 'animated_dashboard_explore_tag'.tr(),
+                              icon: Icons.explore_rounded,
                               palette: const _QuestPalette(
                                 base: ArtbeatColors.primaryGreen,
                                 neon: ArtbeatColors.accentYellow,
@@ -173,7 +185,7 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                               ),
                               onTap: () => Navigator.pushNamed(
                                 context,
-                                '/art-walk/dashboard',
+                                '/old-dashboard',
                               ),
                             ),
                           ),
@@ -185,9 +197,10 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                               loop: _loop,
                               index: 3,
                               width: w,
-                              title: "CONNECT",
-                              subtitle: "Artists, feed, commissions & events",
-                              tag: "SOCIAL",
+                              title: 'animated_dashboard_connect_title'.tr(),
+                              subtitle: 'animated_dashboard_connect_subtitle'
+                                  .tr(),
+                              tag: 'animated_dashboard_connect_tag'.tr(),
                               icon: Icons.people_alt_rounded,
                               palette: const _QuestPalette(
                                 base: ArtbeatColors.accentOrange,
@@ -277,110 +290,116 @@ class _GameHUD extends StatelessWidget {
 
 class _TitleBlock extends StatelessWidget {
   final AnimationController loop;
-  const _TitleBlock({required this.loop});
+  final VoidCallback? onTap;
+  const _TitleBlock({required this.loop, this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: loop,
-      builder: (_, __) {
-        final t = loop.value;
-        final pulse = 0.65 + 0.35 * (0.5 + 0.5 * math.sin(t * 2 * math.pi));
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(18),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.06),
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(14),
-                      gradient: LinearGradient(
-                        colors: [
-                          ArtbeatColors.secondaryTeal.withValues(alpha: 0.75),
-                          ArtbeatColors.accentOrange.withValues(alpha: 0.65),
-                          ArtbeatColors.accentYellow.withValues(alpha: 0.55),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(
-                            0xFF22D3EE,
-                          ).withValues(alpha: 0.16 * pulse),
-                          blurRadius: 18,
-                          spreadRadius: 1,
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedBuilder(
+        animation: loop,
+        builder: (_, __) {
+          final t = loop.value;
+          final pulse = 0.65 + 0.35 * (0.5 + 0.5 * math.sin(t * 2 * math.pi));
+          return ClipRRect(
+            borderRadius: BorderRadius.circular(18),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.06),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.10),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(14),
+                        gradient: LinearGradient(
+                          colors: [
+                            ArtbeatColors.secondaryTeal.withValues(alpha: 0.75),
+                            ArtbeatColors.accentOrange.withValues(alpha: 0.65),
+                            ArtbeatColors.accentYellow.withValues(alpha: 0.55),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.explore_rounded,
-                      color: Colors.white,
-                      size: 18,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: RichText(
-                      text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: "Local ",
-                            style: GoogleFonts.spaceGrotesk(
-                              color: Colors.white.withValues(alpha: 0.88),
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: -0.4,
-                            ),
-                          ),
-                          TextSpan(
-                            text: "ART",
-                            style: GoogleFonts.dmSerifDisplay(
-                              color: const Color(0xFFFFC857),
-                              fontSize: 20,
-                              fontWeight: FontWeight.w400,
-                              letterSpacing: -0.2,
-                            ),
-                          ),
-                          TextSpan(
-                            text: "beat",
-                            style: GoogleFonts.spaceGrotesk(
-                              color: Colors.white.withValues(alpha: 0.88),
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: -0.4,
-                            ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(
+                              0xFF22D3EE,
+                            ).withValues(alpha: 0.16 * pulse),
+                            blurRadius: 18,
+                            spreadRadius: 1,
                           ),
                         ],
                       ),
+                      child: const Icon(
+                        Icons.explore_rounded,
+                        color: Colors.white,
+                        size: 18,
+                      ),
                     ),
-                  ),
-                  Text(
-                    "QUEST HUB",
-                    style: GoogleFonts.spaceGrotesk(
-                      color: Colors.white.withValues(alpha: 0.62),
-                      fontSize: 11,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 1.3,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: RichText(
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'animated_dashboard_title_local'.tr(),
+                              style: GoogleFonts.spaceGrotesk(
+                                color: Colors.white.withValues(alpha: 0.88),
+                                fontSize: 18,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -0.4,
+                              ),
+                            ),
+                            TextSpan(
+                              text: 'animated_dashboard_title_art'.tr(),
+                              style: GoogleFonts.dmSerifDisplay(
+                                color: const Color(0xFFFFC857),
+                                fontSize: 20,
+                                fontWeight: FontWeight.w400,
+                                letterSpacing: -0.2,
+                              ),
+                            ),
+                            TextSpan(
+                              text: 'animated_dashboard_title_beat'.tr(),
+                              style: GoogleFonts.spaceGrotesk(
+                                color: Colors.white.withValues(alpha: 0.88),
+                                fontSize: 18,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -0.4,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                    Text(
+                      'animated_dashboard_quest_hub'.tr(),
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.white.withValues(alpha: 0.62),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.3,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }
@@ -724,7 +743,7 @@ class _BottomChips extends StatelessWidget {
         Expanded(
           child: _ChipButton(
             icon: Icons.palette_outlined,
-            label: "I’m an Artist",
+            label: 'animated_dashboard_artist_label'.tr(),
             glow: ArtbeatColors.accentYellow,
             onTap: onArtist,
           ),
@@ -733,7 +752,7 @@ class _BottomChips extends StatelessWidget {
         Expanded(
           child: _ChipButton(
             icon: Icons.storefront_outlined,
-            label: "Local Business",
+            label: 'animated_dashboard_business_label'.tr(),
             glow: ArtbeatColors.primaryGreen,
             onTap: onBusiness,
           ),
@@ -925,7 +944,7 @@ class _LevelBadge extends StatelessWidget {
         ),
       ),
       child: Text(
-        "LV $level",
+        '${'animated_dashboard_level_prefix'.tr()}$level',
         style: GoogleFonts.spaceGrotesk(
           color: Colors.black.withValues(alpha: 0.86),
           fontWeight: FontWeight.w900,
@@ -947,7 +966,7 @@ class _XPBar extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "XP",
+          'animated_dashboard_xp_label'.tr(),
           style: GoogleFonts.spaceGrotesk(
             color: Colors.white.withValues(alpha: 0.65),
             fontSize: 10.5,
@@ -1005,7 +1024,7 @@ class _Streak extends StatelessWidget {
           ),
           const SizedBox(width: 6),
           Text(
-            "$streakDays",
+            '$streakDays${'animated_dashboard_streak_suffix'.tr()}',
             style: GoogleFonts.spaceGrotesk(
               color: Colors.white.withValues(alpha: 0.92),
               fontWeight: FontWeight.w900,

@@ -5,7 +5,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_art_walk/artbeat_art_walk.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -302,9 +301,9 @@ class _ArtWalkDrawerState extends State<ArtWalkDrawer>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Mode chip
-                _NeonChip(
+                const _NeonChip(
                   label: "ART WALKS • QUEST MENU",
-                  accent: const Color(0xFF22D3EE),
+                  accent: Color(0xFF22D3EE),
                   icon: Icons.route_rounded,
                 ),
                 const SizedBox(height: 10),
@@ -619,9 +618,9 @@ class _ArtWalkDrawerState extends State<ArtWalkDrawer>
           ),
           child: Row(
             children: [
-              _QuestIconCapsule(
+              const _QuestIconCapsule(
                 icon: Icons.logout_rounded,
-                accent: const Color(0xFFFF3D8D),
+                accent: Color(0xFFFF3D8D),
               ),
               const SizedBox(width: 12),
               Expanded(

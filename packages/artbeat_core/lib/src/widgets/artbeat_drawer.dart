@@ -12,7 +12,6 @@ import 'package:artbeat_art_walk/artbeat_art_walk.dart';
 import 'package:artbeat_messaging/artbeat_messaging.dart';
 
 import '../theme/artbeat_colors.dart';
-import '../theme/artbeat_typography.dart';
 import '../services/user_service.dart';
 import '../models/user_model.dart' as core;
 import 'artbeat_drawer_items.dart';
@@ -399,7 +398,7 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer>
             return Column(
               children: [
                 const SizedBox(height: 8),
-                _QuestDivider(),
+                const _QuestDivider(),
                 const SizedBox(height: 8),
                 _buildDrawerItem(context, item),
               ],
@@ -486,7 +485,7 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer>
                   final user = snapshot.data;
 
                   if (user == null) {
-                    return _HeaderUserBlock(
+                    return const _HeaderUserBlock(
                       displayName: 'Guest User',
                       subtitle: 'Not signed in',
                       role: null,
@@ -623,7 +622,7 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer>
     final bool isMainNavigationRoute = mainRoutes.contains(item.route);
 
     final Color accent = item.color ?? const Color(0xFF7C4DFF);
-    final Color activeAccent = const Color(0xFF34D399);
+    const Color activeAccent = Color(0xFF34D399);
 
     return Builder(
       builder: (snackBarContext) => Padding(

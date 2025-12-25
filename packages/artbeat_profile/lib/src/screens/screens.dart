@@ -11,14 +11,13 @@ export 'profile_view_screen.dart';
 export 'achievements_screen.dart';
 export 'achievement_info_screen.dart';
 export 'profile_picture_viewer_screen.dart';
-export 'discover_screen.dart';
 export 'profile_tab.dart';
 export 'create_profile_screen.dart';
+export 'profile_menu_screen.dart';
+export 'profile_settings_screen.dart';
+export 'blocked_users_screen.dart';
 
 // New profile enhancement screens
-export 'profile_customization_screen.dart';
 export 'profile_activity_screen.dart';
 export 'profile_analytics_screen.dart';
 export 'profile_connections_screen.dart';
-export 'profile_mentions_screen.dart';
-export 'profile_history_screen.dart';

@@ -8,6 +8,7 @@ class ArtistProfileModel {
   final String id;
   final String userId;
   final String displayName;
+  final String username;
   final String? bio;
   final String? profileImageUrl;
   final String? coverImageUrl;
@@ -33,6 +34,7 @@ class ArtistProfileModel {
     required this.id,
     required this.userId,
     required this.displayName,
+    required this.username,
     this.bio,
     this.profileImageUrl,
     this.coverImageUrl,
@@ -73,6 +75,7 @@ class ArtistProfileModel {
       id: doc.id,
       userId: userId,
       displayName: displayName,
+      username: data['username'] as String? ?? '',
       bio: data['bio'] as String?,
       profileImageUrl:
           data['profileImageUrl'] as String? ?? data['avatarUrl'] as String?,
@@ -207,6 +210,7 @@ class ArtistProfileModel {
     String? id,
     String? userId,
     String? displayName,
+    String? username,
     String? bio,
     String? profileImageUrl,
     String? coverImageUrl,
@@ -232,6 +236,7 @@ class ArtistProfileModel {
       id: id ?? this.id,
       userId: userId ?? this.userId,
       displayName: displayName ?? this.displayName,
+      username: username ?? this.username,
       bio: bio ?? this.bio,
       profileImageUrl: profileImageUrl ?? this.profileImageUrl,
       coverImageUrl: coverImageUrl ?? this.coverImageUrl,

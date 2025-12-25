@@ -16,7 +16,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:artbeat_core/artbeat_core.dart';
 import '../models/artbeat_event.dart';
 import '../widgets/events_drawer.dart';
 import 'events_list_screen.dart';
@@ -231,8 +230,6 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
         child: _Glass(
           radius: 22,
           blur: 18,
-          fillAlpha: 0.08,
-          borderAlpha: 0.14,
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(22),
@@ -262,9 +259,9 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
                           ),
                         ),
                         const SizedBox(width: 10),
-                        _GradientIconChip(
+                        const _GradientIconChip(
                           icon: Icons.celebration,
-                          gradient: const [Color(0xFFFF3D8D), Color(0xFF7C4DFF)],
+                          gradient: [Color(0xFFFF3D8D), Color(0xFF7C4DFF)],
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -304,7 +301,6 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
                         radius: 18,
                         blur: 14,
                         fillAlpha: 0.10,
-                        borderAlpha: 0.14,
                         shadow: false,
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                         child: Row(
@@ -530,9 +526,6 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
         width: 290,
         child: _Glass(
           radius: 22,
-          blur: 16,
-          fillAlpha: 0.08,
-          borderAlpha: 0.14,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -950,16 +943,15 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
       padding: const EdgeInsets.all(28),
       child: _Glass(
         radius: 22,
-        blur: 16,
         fillAlpha: 0.06,
         borderAlpha: 0.12,
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
-              _GradientIconChip(
+              const _GradientIconChip(
                 icon: Icons.event_busy,
-                gradient: const [Color(0xFF7C4DFF), Color(0xFFFF3D8D)],
+                gradient: [Color(0xFF7C4DFF), Color(0xFFFF3D8D)],
               ),
               const SizedBox(height: 14),
               Text(
@@ -1052,9 +1044,9 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _GradientIconChip(
+                const _GradientIconChip(
                   icon: Icons.error_outline,
-                  gradient: const [Color(0xFFFF3D8D), Color(0xFFFFC857)],
+                  gradient: [Color(0xFFFF3D8D), Color(0xFFFFC857)],
                 ),
                 const SizedBox(height: 12),
                 Text(
@@ -1109,8 +1101,6 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
         builder: (context, scrollController) => _Glass(
           radius: 24,
           blur: 18,
-          fillAlpha: 0.08,
-          borderAlpha: 0.14,
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(24),
@@ -1139,9 +1129,9 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
                   child: Row(
                     children: [
-                      _GradientIconChip(
+                      const _GradientIconChip(
                         icon: Icons.search,
-                        gradient: const [Color(0xFF22D3EE), Color(0xFF34D399)],
+                        gradient: [Color(0xFF22D3EE), Color(0xFF34D399)],
                       ),
                       const SizedBox(width: 12),
                       Expanded(

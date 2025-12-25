@@ -92,7 +92,7 @@ class _ProfileCreateScreenState extends State<ProfileCreateScreen>
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          _Badge(icon: Icons.person_add_alt_1_rounded),
+                          const _Badge(icon: Icons.person_add_alt_1_rounded),
                           const SizedBox(height: 14),
                           Text(
                             'Sign in required',

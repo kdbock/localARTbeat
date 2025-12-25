@@ -3,7 +3,7 @@
 
 // Export all screens
 export 'admin_art_walk_moderation_screen.dart';
-export 'artbeat_artwalk_dashboard_screen.dart';
+export 'discover_dashboard_screen.dart';
 export 'art_walk_detail_screen.dart';
 export 'art_walk_edit_screen.dart';
 export 'art_walk_list_screen.dart';

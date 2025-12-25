@@ -143,8 +143,16 @@ class CoreRouteHandler implements RouteHandler {
     if (imageUrl == null) {
       return RouteUtils.createErrorRoute('No image URL provided');
     }
+    final userId = RouteUtils.getArgument<String>(settings, 'userId') ??
+        FirebaseAuth.instance.currentUser?.uid;
+    if (userId == null) {
+      return RouteUtils.createErrorRoute('No user ID provided');
+    }
     return RouteUtils.createMainLayoutRoute(
-      child: ProfilePictureViewerScreen(imageUrl: imageUrl),
+      child: ProfilePictureViewerScreen(
+        imageUrl: imageUrl,
+        userId: userId,
+      ),
     );
   }
 
