@@ -16,7 +16,8 @@ class HudTopBar extends StatelessWidget {
     required this.subtitle,
     this.onMenu,
     this.onSearch,
-    this.onProfile, required void Function() onBack,
+    this.onProfile,
+    required void Function() onBack,
   });
 
   @override

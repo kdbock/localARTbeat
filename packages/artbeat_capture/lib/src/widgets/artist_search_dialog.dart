@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:artbeat_core/artbeat_core.dart' show ArtistModel, ArtistService, ImageUrlValidator;
+import 'package:artbeat_core/artbeat_core.dart'
+    show ArtistModel, ArtistService, ImageUrlValidator;
 
 class ArtistSearchDialog extends StatefulWidget {
   final void Function(ArtistModel) onArtistSelected;

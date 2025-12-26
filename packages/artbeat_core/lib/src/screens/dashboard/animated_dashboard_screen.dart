@@ -5,8 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flag/flag.dart';
+import 'package:provider/provider.dart';
 import 'package:artbeat_core/src/theme/artbeat_colors.dart';
+import 'package:artbeat_core/src/widgets/artbeat_drawer.dart';
 import 'package:artbeat_capture/artbeat_capture.dart';
+import 'package:artbeat_art_walk/artbeat_art_walk.dart' as artWalkLib;
+import '../../viewmodels/dashboard_view_model.dart';
 
 class AnimatedDashboardScreen extends StatefulWidget {
   const AnimatedDashboardScreen({super.key});
@@ -20,10 +24,9 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
     with TickerProviderStateMixin {
   late final AnimationController _loop; // world animation
   late final AnimationController _intro; // entrance
-  // Fake HUD values (wire these to your user profile later)
-  final int _level = 7;
-  final double _xpProgress = 0.62; // 0..1
-  final int _streakDays = 4;
+  final artWalkLib.RewardsService _rewardsService = artWalkLib.RewardsService();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  bool _hasRequestedData = false;
   @override
   void initState() {
     super.initState();
@@ -35,6 +38,16 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
       vsync: this,
       duration: const Duration(milliseconds: 900),
     )..forward();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _hasRequestedData) return;
+      final dashboardViewModel = Provider.of<DashboardViewModel>(
+        context,
+        listen: false,
+      );
+      dashboardViewModel.initialize();
+      _hasRequestedData = true;
+    });
     // No need to listen to locale changes here; rebuilds will be triggered by context.locale changes.
   }
 
@@ -49,12 +62,24 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
     Navigator.of(context).pushNamed('/profile/menu');
   }
 
+  void _openDrawer() {
+    _scaffoldKey.currentState?.openDrawer();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final dashboardViewModel = context.watch<DashboardViewModel>();
+    final user = dashboardViewModel.currentUser;
+    final level = user?.level ?? 1;
+    final xp = user?.experiencePoints ?? 0;
+    final xpProgress = _rewardsService.getLevelProgress(xp, level);
+    final streakDays = dashboardViewModel.loginStreak;
     final w = MediaQuery.of(context).size.width;
 
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: ArtbeatColors.backgroundDark,
+      drawer: const ArtbeatDrawer(),
       body: Stack(
         children: [
           // GAME WORLD BACKGROUND
@@ -83,176 +108,341 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
             ),
           ),
 
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(18, 14, 18, 18),
-              child: Column(
-                children: [
-                  _StampFadeIn(
-                    intro: _intro,
-                    delay: 0.0,
-                    child: _GameHUD(
-                      level: _level,
-                      xpProgress: _xpProgress,
-                      streakDays: _streakDays,
-                      onProfile: _showProfileMenu,
-                      onSettings: () {
-                        Navigator.pushNamed(context, '/settings');
-                      },
-                      onLanguageChanged: () {
-                        if (mounted) {
-                          setState(() {});
-                        }
-                      },
-                    ),
-                  ),
+                    SafeArea(
 
-                  const SizedBox(height: 14),
+                      child: SingleChildScrollView(
 
-                  _StampFadeIn(
-                    intro: _intro,
-                    delay: 0.10,
-                    child: _TitleBlock(
-                      loop: _loop,
-                      onTap: () =>
-                          Navigator.pushNamed(context, '/old-dashboard'),
-                    ),
-                  ),
+                        child: Padding(
 
-                  const SizedBox(height: 14),
+                          padding: const EdgeInsets.fromLTRB(18, 14, 18, 28),
 
-                  // The QUEST BUTTONS (focal point)
-                  Expanded(
-                    child: SingleChildScrollView(
-                      physics: const BouncingScrollPhysics(),
-                      child: Column(
-                        children: [
-                          _StampPopIn(
-                            intro: _intro,
-                            index: 0,
-                            child: _QuestButton(
-                              loop: _loop,
-                              index: 0,
-                              width: w,
-                              title: 'animated_dashboard_capture_title'.tr(),
-                              subtitle: 'animated_dashboard_capture_subtitle'
-                                  .tr(),
-                              tag: 'animated_dashboard_capture_tag'.tr(),
-                              icon: Icons.camera_alt_rounded,
-                              palette: const _QuestPalette(
-                                base: ArtbeatColors.primaryPurple,
-                                neon: ArtbeatColors.secondaryTeal,
-                                accent: ArtbeatColors.accentYellow,
-                              ),
-                              onTap: () => Navigator.of(context).push(
-                                MaterialPageRoute<Widget>(
-                                  builder: (context) =>
-                                      const EnhancedCaptureDashboardScreen(),
+                          child: Column(
+
+                            children: [
+
+                              _StampFadeIn(
+
+                                intro: _intro,
+
+                                delay: 0.0,
+
+                                child: _GameHUD(
+
+                                  level: level,
+
+                                  xpProgress: xpProgress,
+
+                                  streakDays: streakDays,
+
+                                  onMenu: _openDrawer,
+
+                                  onProfile: _showProfileMenu,
+
+                                  onSettings: () {
+
+                                    Navigator.pushNamed(context, '/settings');
+
+                                  },
+
+                                  onLanguageChanged: () {
+
+                                    if (mounted) {
+
+                                      setState(() {});
+
+                                    }
+
+                                  },
+
                                 ),
+
                               ),
-                            ),
-                          ),
-                          const SizedBox(height: 14),
-                          _StampPopIn(
-                            intro: _intro,
-                            index: 1,
-                            child: _QuestButton(
-                              loop: _loop,
-                              index: 1,
-                              width: w,
-                              title: 'animated_dashboard_discover_title'.tr(),
-                              subtitle: 'animated_dashboard_discover_subtitle'
-                                  .tr(),
-                              tag: 'animated_dashboard_discover_tag'.tr(),
-                              icon: Icons.radar_rounded,
-                              palette: const _QuestPalette(
-                                base: ArtbeatColors.primaryBlue,
-                                neon: ArtbeatColors.primaryGreen,
-                                accent: ArtbeatColors.accentOrange,
+
+          
+
+                              const SizedBox(height: 14),
+
+          
+
+                              _StampFadeIn(
+
+                                intro: _intro,
+
+                                delay: 0.10,
+
+                                child: _TitleBlock(
+
+                                  loop: _loop,
+
+                                  onTap: () =>
+
+                                      Navigator.pushNamed(context, '/old-dashboard'),
+
+                                ),
+
                               ),
-                              onTap: () => Navigator.pushNamed(
-                                context,
-                                '/art-walk/dashboard',
+
+          
+
+                              const SizedBox(height: 14),
+
+          
+
+                              // The QUEST BUTTONS (focal point)
+
+                              ListView(
+
+                                shrinkWrap: true,
+
+                                physics: const NeverScrollableScrollPhysics(),
+
+                                padding: const EdgeInsets.only(bottom: 50.0),
+
+                                children: [
+
+                                  _StampPopIn(
+
+                                    intro: _intro,
+
+                                    index: 0,
+
+                                    child: _QuestButton(
+
+                                      loop: _loop,
+
+                                      index: 0,
+
+                                      width: w,
+
+                                      title: 'animated_dashboard_capture_title'.tr(),
+
+                                      subtitle:
+
+                                          'animated_dashboard_capture_subtitle'.tr(),
+
+                                      tag: 'animated_dashboard_capture_tag'.tr(),
+
+                                      icon: Icons.camera_alt_rounded,
+
+                                      palette: const _QuestPalette(
+
+                                        base: ArtbeatColors.primaryPurple,
+
+                                        neon: ArtbeatColors.secondaryTeal,
+
+                                        accent: ArtbeatColors.accentYellow,
+
+                                      ),
+
+                                      onTap: () => Navigator.of(context).push(
+
+                                        MaterialPageRoute<Widget>(
+
+                                          builder: (context) =>
+
+                                              const EnhancedCaptureDashboardScreen(),
+
+                                        ),
+
+                                      ),
+
+                                    ),
+
+                                  ),
+
+                                  const SizedBox(height: 14),
+
+                                  _StampPopIn(
+
+                                    intro: _intro,
+
+                                    index: 1,
+
+                                    child: _QuestButton(
+
+                                      loop: _loop,
+
+                                      index: 1,
+
+                                      width: w,
+
+                                      title: 'animated_dashboard_discover_title'.tr(),
+
+                                      subtitle:
+
+                                          'animated_dashboard_discover_subtitle'.tr(),
+
+                                      tag: 'animated_dashboard_discover_tag'.tr(),
+
+                                      icon: Icons.radar_rounded,
+
+                                      palette: const _QuestPalette(
+
+                                        base: ArtbeatColors.primaryBlue,
+
+                                        neon: ArtbeatColors.primaryGreen,
+
+                                        accent: ArtbeatColors.accentOrange,
+
+                                      ),
+
+                                      onTap: () => Navigator.pushNamed(
+
+                                        context,
+
+                                        '/art-walk/dashboard',
+
+                                      ),
+
+                                    ),
+
+                                  ),
+
+                                  const SizedBox(height: 14),
+
+                                  _StampPopIn(
+
+                                    intro: _intro,
+
+                                    index: 2,
+
+                                    child: _QuestButton(
+
+                                      loop: _loop,
+
+                                      index: 2,
+
+                                      width: w,
+
+                                      title: 'animated_dashboard_explore_title'.tr(),
+
+                                      subtitle:
+
+                                          'animated_dashboard_explore_subtitle'.tr(),
+
+                                      tag: 'animated_dashboard_explore_tag'.tr(),
+
+                                      icon: Icons.route_rounded,
+
+                                      palette: const _QuestPalette(
+
+                                        base: ArtbeatColors.primaryGreen,
+
+                                        neon: ArtbeatColors.accentYellow,
+
+                                        accent: ArtbeatColors.secondaryTeal,
+
+                                      ),
+
+                                      onTap: () => Navigator.pushNamed(
+
+                                        context,
+
+                                        '/old-dashboard',
+
+                                      ),
+
+                                    ),
+
+                                  ),
+
+                                  const SizedBox(height: 14),
+
+                                  _StampPopIn(
+
+                                    intro: _intro,
+
+                                    index: 3,
+
+                                    child: _QuestButton(
+
+                                      loop: _loop,
+
+                                      index: 3,
+
+                                      width: w,
+
+                                      title: 'animated_dashboard_connect_title'.tr(),
+
+                                      subtitle:
+
+                                          'animated_dashboard_connect_subtitle'.tr(),
+
+                                      tag: 'animated_dashboard_connect_tag'.tr(),
+
+                                      icon: Icons.people_alt_rounded,
+
+                                      palette: const _QuestPalette(
+
+                                        base: ArtbeatColors.accentOrange,
+
+                                        neon: ArtbeatColors.primaryPurple,
+
+                                        accent: ArtbeatColors.primaryGreen,
+
+                                      ),
+
+                                      onTap: () => Navigator.pushNamed(
+
+                                        context,
+
+                                        '/community/hub',
+
+                                      ),
+
+                                    ),
+
+                                  ),
+
+                                  const SizedBox(height: 18),
+
+          
+
+                                  // Keep your bottom CTAs but make them “game chips”
+
+                                  _StampPopIn(
+
+                                    intro: _intro,
+
+                                    index: 4,
+
+                                    child: _BottomChips(
+
+                                      onArtist: () => Navigator.pushNamed(
+
+                                        context,
+
+                                        '/2025_modern_onboarding',
+
+                                      ),
+
+                                      onBusiness: () =>
+
+                                          Navigator.pushNamed(context, '/iap/ads'),
+
+                                    ),
+
+                                  ),
+
+          
+
+                                  const SizedBox(height: 16),
+
+                                ],
+
                               ),
-                            ),
-                          ),
-                          const SizedBox(height: 14),
-                          _StampPopIn(
-                            intro: _intro,
-                            index: 2,
-                            child: _QuestButton(
-                              loop: _loop,
-                              index: 2,
-                              width: w,
-                              title: 'animated_dashboard_explore_title'.tr(),
-                              subtitle: 'animated_dashboard_explore_subtitle'
-                                  .tr(),
-                              tag: 'animated_dashboard_explore_tag'.tr(),
-                              icon: Icons.route_rounded,
-                              palette: const _QuestPalette(
-                                base: ArtbeatColors.primaryGreen,
-                                neon: ArtbeatColors.accentYellow,
-                                accent: ArtbeatColors.secondaryTeal,
-                              ),
-                              onTap: () => Navigator.pushNamed(
-                                context,
-                                '/old-dashboard',
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 14),
-                          _StampPopIn(
-                            intro: _intro,
-                            index: 3,
-                            child: _QuestButton(
-                              loop: _loop,
-                              index: 3,
-                              width: w,
-                              title: 'animated_dashboard_connect_title'.tr(),
-                              subtitle: 'animated_dashboard_connect_subtitle'
-                                  .tr(),
-                              tag: 'animated_dashboard_connect_tag'.tr(),
-                              icon: Icons.people_alt_rounded,
-                              palette: const _QuestPalette(
-                                base: ArtbeatColors.accentOrange,
-                                neon: ArtbeatColors.primaryPurple,
-                                accent: ArtbeatColors.primaryGreen,
-                              ),
-                              onTap: () => Navigator.pushNamed(
-                                context,
-                                '/community/hub',
-                              ),
-                            ),
+
+                            ],
+
                           ),
 
-                          const SizedBox(height: 18),
+                        ),
 
-                          // Keep your bottom CTAs but make them “game chips”
-                          _StampPopIn(
-                            intro: _intro,
-                            index: 4,
-                            child: _BottomChips(
-                              onArtist: () => Navigator.pushNamed(
-                                context,
-                                '/2025_modern_onboarding',
-                              ),
-                              onBusiness: () =>
-                                  Navigator.pushNamed(context, '/iap/ads'),
-                            ),
-                          ),
-
-                          const SizedBox(height: 26),
-                        ],
                       ),
+
                     ),
-                  ),
-                ],
-              ),
-            ),
-          ),
         ],
-      ),
-    );
+      ),    );
   }
 }
 
@@ -264,6 +454,7 @@ class _GameHUD extends StatelessWidget {
   final int level;
   final double xpProgress;
   final int streakDays;
+  final VoidCallback onMenu;
   final VoidCallback onProfile;
   final VoidCallback onSettings;
   final VoidCallback onLanguageChanged;
@@ -272,6 +463,7 @@ class _GameHUD extends StatelessWidget {
     required this.level,
     required this.xpProgress,
     required this.streakDays,
+    required this.onMenu,
     required this.onProfile,
     required this.onSettings,
     required this.onLanguageChanged,
@@ -281,6 +473,8 @@ class _GameHUD extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
+        _IconPill(icon: Icons.menu_rounded, onTap: onMenu),
+        const SizedBox(width: 10),
         _HUDPill(
           child: Row(
             children: [

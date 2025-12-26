@@ -22,7 +22,7 @@ class CaptureDetailViewerScreen extends StatefulWidget {
 class _CaptureDetailViewerScreenState extends State<CaptureDetailViewerScreen> {
   void _showFullImage() {
     if (_capture == null) return;
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => Dialog(
         backgroundColor: Colors.transparent,
@@ -175,8 +175,8 @@ class _CaptureDetailViewerScreenState extends State<CaptureDetailViewerScreen> {
   @override
   Widget build(BuildContext context) {
     return WorldBackground(
-      child: WillPopScope(
-        onWillPop: () async => true,
+      child: PopScope(
+        canPop: true,
         child: Scaffold(
           backgroundColor: Colors.transparent,
           body: SafeArea(

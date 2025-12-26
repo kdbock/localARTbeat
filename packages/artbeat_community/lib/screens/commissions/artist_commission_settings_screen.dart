@@ -867,9 +867,10 @@ Please contact me with any questions before placing your commission request.
                                 _portfolioImages[index],
                               )
                               ? DecorationImage(
-                                  image: core.ImageUrlValidator.safeNetworkImage(
-                                    _portfolioImages[index],
-                                  )!,
+                                  image:
+                                      core.ImageUrlValidator.safeNetworkImage(
+                                        _portfolioImages[index],
+                                      )!,
                                   fit: BoxFit.cover,
                                 )
                               : null,

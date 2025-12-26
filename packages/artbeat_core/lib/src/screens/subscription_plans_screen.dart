@@ -11,7 +11,8 @@ class SubscriptionPlansScreen extends StatefulWidget {
   const SubscriptionPlansScreen({super.key});
 
   @override
-  State<SubscriptionPlansScreen> createState() => _SubscriptionPlansScreenState();
+  State<SubscriptionPlansScreen> createState() =>
+      _SubscriptionPlansScreenState();
 }
 
 class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
@@ -103,10 +104,15 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
             children: badges
                 .map(
                   (badge) => Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(999),
-                      border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.14),
+                      ),
                       color: Colors.white.withValues(alpha: 0.05),
                     ),
                     child: Text(
@@ -177,7 +183,9 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
               Row(
                 children: [
                   Icon(
-                    selected ? Icons.radio_button_checked : Icons.radio_button_off,
+                    selected
+                        ? Icons.radio_button_checked
+                        : Icons.radio_button_off,
                     color: Colors.white,
                     size: 18,
                   ),
@@ -237,7 +245,9 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
                       end: Alignment.bottomRight,
                     )
                   : null,
-              color: isHighlighted ? null : Colors.white.withValues(alpha: 0.04),
+              color: isHighlighted
+                  ? null
+                  : Colors.white.withValues(alpha: 0.04),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.28),
@@ -251,7 +261,10 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
               children: [
                 if (isHighlighted)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(999),
                       color: Colors.white.withValues(alpha: 0.15),
@@ -275,7 +288,11 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
                         shape: BoxShape.circle,
                         gradient: LinearGradient(colors: colors),
                       ),
-                      child: Icon(_tierIcon(tier), color: Colors.white, size: 28),
+                      child: Icon(
+                        _tierIcon(tier),
+                        color: Colors.white,
+                        size: 28,
+                      ),
                     ),
                     const SizedBox(width: 18),
                     Expanded(
@@ -308,7 +325,9 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
                 Row(
                   children: [
                     Text(
-                      price > 0 ? '\$${price.toStringAsFixed(2)} $cadence' : 'Free forever',
+                      price > 0
+                          ? '\$${price.toStringAsFixed(2)} $cadence'
+                          : 'Free forever',
                       style: GoogleFonts.spaceGrotesk(
                         color: Colors.white,
                         fontSize: 20,
@@ -336,7 +355,11 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(Icons.check_circle, color: Colors.white, size: 18),
+                        const Icon(
+                          Icons.check_circle,
+                          color: Colors.white,
+                          size: 18,
+                        ),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
@@ -548,11 +571,7 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF03050F),
-              Color(0xFF09122B),
-              Color(0xFF021B17),
-            ],
+            colors: [Color(0xFF03050F), Color(0xFF09122B), Color(0xFF021B17)],
           ),
         ),
         child: Stack(
@@ -608,8 +627,5 @@ class _FaqRow {
   final String title;
   final String description;
 
-  const _FaqRow({
-    required this.title,
-    required this.description,
-  });
+  const _FaqRow({required this.title, required this.description});
 }

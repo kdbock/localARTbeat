@@ -99,7 +99,11 @@ class _AdsScreenState extends State<AdsScreen> {
                         colors: [Color(0xFFFFA074), Color(0xFF22D3EE)],
                       ),
                     ),
-                    child: const Icon(Icons.campaign, color: Colors.white, size: 28),
+                    child: const Icon(
+                      Icons.campaign,
+                      color: Colors.white,
+                      size: 28,
+                    ),
                   ),
                   const SizedBox(width: 18),
                   Expanded(
@@ -240,7 +244,9 @@ class _AdsScreenState extends State<AdsScreen> {
     final size = ad['size'] as LocalAdSize;
     final duration = ad['duration'] as LocalAdDuration;
     final price = AdPricingMatrix.getPrice(size, duration) ?? 0.0;
-    final accent = isPopular ? const Color(0xFF22D3EE) : const Color(0xFF7C4DFF);
+    final accent = isPopular
+        ? const Color(0xFF22D3EE)
+        : const Color(0xFF7C4DFF);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
@@ -433,11 +439,7 @@ class _AdsScreenState extends State<AdsScreen> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF05030D),
-              Color(0xFF0B1330),
-              Color(0xFF041C16),
-            ],
+            colors: [Color(0xFF05030D), Color(0xFF0B1330), Color(0xFF041C16)],
           ),
         ),
         child: Stack(

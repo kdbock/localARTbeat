@@ -64,7 +64,10 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
-    _fadeAnimation = CurvedAnimation(parent: _fadeController, curve: Curves.easeOut);
+    _fadeAnimation = CurvedAnimation(
+      parent: _fadeController,
+      curve: Curves.easeOut,
+    );
 
     _loadEvents();
   }
@@ -108,7 +111,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
         _error = '${'events_error_loading'.tr()}${e.toString()}';
         _isLoading = false;
       });
-    } catch (e) {
+    } on Exception catch (_) {
       if (!mounted) return;
       setState(() {
         _error = 'events_error_unknown'.tr();
@@ -122,10 +125,14 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
       _filteredEvents = _events.where((event) {
         final selected = _selectedCategory.toLowerCase();
         final category = event.category.toLowerCase();
-        final guessed = _getCategoryFromDescription(event.description).toLowerCase();
+        final guessed = _getCategoryFromDescription(
+          event.description,
+        ).toLowerCase();
 
         final categoryMatch =
-            _selectedCategory == _allCategory || category == selected || guessed == selected;
+            _selectedCategory == _allCategory ||
+            category == selected ||
+            guessed == selected;
 
         return categoryMatch;
       }).toList();
@@ -134,7 +141,9 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
 
   String _getCategoryFromDescription(String description) {
     final desc = description.toLowerCase();
-    if (desc.contains('business') || desc.contains('exhibition')) return 'Exhibition';
+    if (desc.contains('business') || desc.contains('exhibition')) {
+      return 'Exhibition';
+    }
     if (desc.contains('tour') || desc.contains('walk')) return 'Tour';
     if (desc.contains('music') || desc.contains('concert')) return 'Concert';
     if (desc.contains('workshop') || desc.contains('class')) return 'Workshop';
@@ -154,47 +163,49 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF05060A),
-              Color(0xFF0B1220),
-              Color(0xFF05060A),
-            ],
+            colors: [Color(0xFF05060A), Color(0xFF0B1220), Color(0xFF05060A)],
           ),
         ),
         child: _isLoading
             ? _buildLoadingState()
             : (_error != null)
-                ? _buildErrorState()
-                : FadeTransition(
-                    opacity: _fadeAnimation,
-                    child: CustomScrollView(
-                      slivers: [
-                        _buildHeroHeader(currentUser),
-                        SliverToBoxAdapter(child: _buildStatsSection()),
-                        SliverToBoxAdapter(child: _buildCategoryFilter()),
-                        if (_filteredEvents.isNotEmpty)
-                          SliverToBoxAdapter(child: _buildFeaturedSection()),
-                        SliverToBoxAdapter(child: _buildQuickActionsGrid(currentUser)),
-                        SliverToBoxAdapter(
-                          child: _buildSectionHeader(
-                            'events_upcoming_title'.tr(),
-                            'events_upcoming_subtitle'.tr().replaceAll(
-                              '{count}',
-                              '${_filteredEvents.length}',
-                            ),
-                          ),
-                        ),
-                        _buildEventsList(),
-                        const SliverToBoxAdapter(child: SizedBox(height: 110)),
-                      ],
+            ? _buildErrorState()
+            : FadeTransition(
+                opacity: _fadeAnimation,
+                child: CustomScrollView(
+                  slivers: [
+                    _buildHeroHeader(currentUser),
+                    SliverToBoxAdapter(child: _buildStatsSection()),
+                    SliverToBoxAdapter(child: _buildCategoryFilter()),
+                    if (_filteredEvents.isNotEmpty)
+                      SliverToBoxAdapter(child: _buildFeaturedSection()),
+                    SliverToBoxAdapter(
+                      child: _buildQuickActionsGrid(currentUser),
                     ),
-                  ),
+                    SliverToBoxAdapter(
+                      child: _buildSectionHeader(
+                        'events_upcoming_title'.tr(),
+                        'events_upcoming_subtitle'.tr().replaceAll(
+                          '{count}',
+                          '${_filteredEvents.length}',
+                        ),
+                      ),
+                    ),
+                    _buildEventsList(),
+                    const SliverToBoxAdapter(child: SizedBox(height: 100)),
+                  ],
+                ),
+              ),
       ),
       floatingActionButton: currentUser != null
           ? Container(
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFF7C4DFF), Color(0xFF22D3EE), Color(0xFF34D399)],
+                  colors: [
+                    Color(0xFF7C4DFF),
+                    Color(0xFF22D3EE),
+                    Color(0xFF34D399),
+                  ],
                 ),
                 borderRadius: BorderRadius.circular(28),
                 boxShadow: [
@@ -302,10 +313,17 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
                         blur: 14,
                         fillAlpha: 0.10,
                         shadow: false,
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 12,
+                        ),
                         child: Row(
                           children: [
-                            const Icon(Icons.search, color: Color(0xB3FFFFFF), size: 22),
+                            const Icon(
+                              Icons.search,
+                              color: Color(0xB3FFFFFF),
+                              size: 22,
+                            ),
                             const SizedBox(width: 10),
                             Text(
                               'events_search_placeholder'.tr(),
@@ -316,7 +334,11 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
                               ),
                             ),
                             const Spacer(),
-                            Icon(Icons.tune, color: Colors.white.withValues(alpha: 0.35), size: 18),
+                            Icon(
+                              Icons.tune,
+                              color: Colors.white.withValues(alpha: 0.35),
+                              size: 18,
+                            ),
                           ],
                         ),
                       ),
@@ -344,7 +366,11 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
     final todayEvents = _events.where((e) {
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
-      final eventDate = DateTime(e.dateTime.year, e.dateTime.month, e.dateTime.day);
+      final eventDate = DateTime(
+        e.dateTime.year,
+        e.dateTime.month,
+        e.dateTime.day,
+      );
       return eventDate == today;
     }).length;
 
@@ -411,7 +437,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: _categories.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              separatorBuilder: (_, _) => const SizedBox(width: 8),
               itemBuilder: (context, i) {
                 final category = _categories[i];
                 final selected = _selectedCategory == category;
@@ -424,7 +450,10 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
                   },
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 180),
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(999),
                       color: selected
@@ -439,8 +468,12 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
                     child: Text(
                       category,
                       style: TextStyle(
-                        color: selected ? const Color(0xF2FFFFFF) : const Color(0xB3FFFFFF),
-                        fontWeight: selected ? FontWeight.w900 : FontWeight.w700,
+                        color: selected
+                            ? const Color(0xF2FFFFFF)
+                            : const Color(0xB3FFFFFF),
+                        fontWeight: selected
+                            ? FontWeight.w900
+                            : FontWeight.w700,
                         fontSize: 13,
                       ),
                     ),
@@ -494,7 +527,9 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
                 ),
                 TextButton(
                   onPressed: () => Navigator.pushNamed(context, '/events/all'),
-                  style: TextButton.styleFrom(foregroundColor: const Color(0xFF22D3EE)),
+                  style: TextButton.styleFrom(
+                    foregroundColor: const Color(0xFF22D3EE),
+                  ),
                   child: Text('events_see_all'.tr()),
                 ),
               ],
@@ -506,8 +541,9 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 14),
               itemCount: featured.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 12),
-              itemBuilder: (context, index) => _buildFeaturedEventCard(featured[index]),
+              separatorBuilder: (_, _) => const SizedBox(width: 12),
+              itemBuilder: (context, index) =>
+                  _buildFeaturedEventCard(featured[index]),
             ),
           ),
         ],
@@ -531,7 +567,9 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
             children: [
               // Image
               ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(22),
+                ),
                 child: SizedBox(
                   height: 158,
                   width: double.infinity,
@@ -564,7 +602,8 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
                         top: 12,
                         right: 12,
                         child: _badge(
-                          text: '${event.attendeeIds.length} • ${'events_attending'.tr()}',
+                          text:
+                              '${event.attendeeIds.length} • ${'events_attending'.tr()}',
                           fg: const Color(0xF2FFFFFF),
                           bg: Colors.black.withValues(alpha: 0.45),
                         ),
@@ -606,7 +645,8 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
 
   Widget _eventBanner(ArtbeatEvent event, {double fallbackIconSize = 36}) {
     final url = event.eventBannerUrl;
-    final ok = url.isNotEmpty &&
+    final ok =
+        url.isNotEmpty &&
         !url.contains('placeholder') &&
         (url.startsWith('http://') || url.startsWith('https://'));
 
@@ -632,7 +672,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
     return Image.network(
       url,
       fit: BoxFit.cover,
-      errorBuilder: (_, __, ___) {
+      errorBuilder: (_, _, _) {
         return Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
@@ -783,7 +823,9 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
                       );
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('events_sign_in_to_view_tickets'.tr())),
+                        SnackBar(
+                          content: Text('events_sign_in_to_view_tickets'.tr()),
+                        ),
                       );
                     }
                   },
@@ -829,7 +871,9 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
   // ==================== EVENTS LIST ====================
 
   Widget _buildEventsList() {
-    if (_filteredEvents.isEmpty) return SliverToBoxAdapter(child: _buildEmptyState());
+    if (_filteredEvents.isEmpty) {
+      return SliverToBoxAdapter(child: _buildEmptyState());
+    }
 
     return SliverPadding(
       padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -861,7 +905,9 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
         child: Row(
           children: [
             ClipRRect(
-              borderRadius: const BorderRadius.horizontal(left: Radius.circular(18)),
+              borderRadius: const BorderRadius.horizontal(
+                left: Radius.circular(18),
+              ),
               child: SizedBox(
                 width: 108,
                 height: 108,
@@ -869,9 +915,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
                   fit: StackFit.expand,
                   children: [
                     _eventBanner(event, fallbackIconSize: 34),
-                    Container(
-                      color: Colors.black.withValues(alpha: 0.20),
-                    ),
+                    Container(color: Colors.black.withValues(alpha: 0.20)),
                   ],
                 ),
               ),
@@ -904,7 +948,11 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
                     const SizedBox(height: 6),
                     Row(
                       children: [
-                        const Icon(Icons.people, size: 14, color: Color(0xB3FFFFFF)),
+                        const Icon(
+                          Icons.people,
+                          size: 14,
+                          color: Color(0xB3FFFFFF),
+                        ),
                         const SizedBox(width: 6),
                         Text(
                           'events_attending_count'.tr().replaceAll(
@@ -982,8 +1030,13 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF22D3EE),
                   foregroundColor: const Color(0xFF0B1220),
-                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
                 ),
                 child: Text('events_clear_filters'.tr()),
               ),
@@ -1076,7 +1129,9 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF7C4DFF),
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                   ),
                 ),
               ],
@@ -1290,7 +1345,10 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
                     ],
                   ),
                 ),
-                Icon(Icons.chevron_right, color: Colors.white.withValues(alpha: 0.45)),
+                Icon(
+                  Icons.chevron_right,
+                  color: Colors.white.withValues(alpha: 0.45),
+                ),
               ],
             ),
           ),
@@ -1307,8 +1365,12 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
     final tomorrow = today.add(const Duration(days: 1));
     final eventDate = DateTime(dateTime.year, dateTime.month, dateTime.day);
 
-    if (eventDate == today) return '${'events_time_today'.tr()}, ${_formatTime(dateTime)}';
-    if (eventDate == tomorrow) return '${'events_time_tomorrow'.tr()}, ${_formatTime(dateTime)}';
+    if (eventDate == today) {
+      return '${'events_time_today'.tr()}, ${_formatTime(dateTime)}';
+    }
+    if (eventDate == tomorrow) {
+      return '${'events_time_tomorrow'.tr()}, ${_formatTime(dateTime)}';
+    }
     return '${_formatDate(dateTime)}, ${_formatTime(dateTime)}';
   }
 
@@ -1341,9 +1403,15 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
 
   IconData _getEventIcon(String description) {
     final desc = description.toLowerCase();
-    if (desc.contains('business') || desc.contains('exhibition')) return Icons.museum;
-    if (desc.contains('tour') || desc.contains('walk')) return Icons.directions_walk;
-    if (desc.contains('music') || desc.contains('concert')) return Icons.music_note;
+    if (desc.contains('business') || desc.contains('exhibition')) {
+      return Icons.museum;
+    }
+    if (desc.contains('tour') || desc.contains('walk')) {
+      return Icons.directions_walk;
+    }
+    if (desc.contains('music') || desc.contains('concert')) {
+      return Icons.music_note;
+    }
     if (desc.contains('workshop') || desc.contains('class')) return Icons.build;
     if (desc.contains('art') || desc.contains('paint')) return Icons.palette;
     return Icons.event;
@@ -1382,7 +1450,9 @@ class _Glass extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: fillAlpha),
             borderRadius: BorderRadius.circular(radius),
-            border: Border.all(color: Colors.white.withValues(alpha: borderAlpha)),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: borderAlpha),
+            ),
             boxShadow: shadow
                 ? [
                     BoxShadow(
@@ -1411,7 +1481,11 @@ class _GradientIconChip extends StatelessWidget {
       width: 42,
       height: 42,
       decoration: BoxDecoration(
-        gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: gradient),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: gradient,
+        ),
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
@@ -1476,30 +1550,32 @@ class _StatGlassCard extends StatelessWidget {
       shadow: false,
       child: Padding(
         padding: const EdgeInsets.all(12),
-        child: Column(
-          children: [
-            _GradientIconChip(icon: icon, gradient: gradient),
-            const SizedBox(height: 8),
-            Text(
-              value,
-              style: const TextStyle(
-                color: Color(0xF2FFFFFF),
-                fontSize: 18,
-                fontWeight: FontWeight.w900,
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              _GradientIconChip(icon: icon, gradient: gradient),
+              const SizedBox(height: 8),
+              Text(
+                value,
+                style: const TextStyle(
+                  color: Color(0xF2FFFFFF),
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Color(0x73FFFFFF),
-                fontSize: 11,
-                fontWeight: FontWeight.w800,
-                height: 1.15,
+              const SizedBox(height: 2),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Color(0x73FFFFFF),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  height: 1.15,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -1532,12 +1608,13 @@ class _QuickActionGlass extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         child: Padding(
           padding: const EdgeInsets.all(14),
-          child: Row(
-            children: [
-              _GradientIconChip(icon: icon, gradient: gradient),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _GradientIconChip(icon: icon, gradient: gradient),
+                const SizedBox(width: 10),
+                Text(
                   title,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -1548,8 +1625,8 @@ class _QuickActionGlass extends StatelessWidget {
                     height: 1.15,
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

@@ -63,7 +63,7 @@ class _EventsDrawerState extends State<EventsDrawer> {
         if (!mounted) return;
         setState(() => _isLoading = false);
       }
-    // ignore: avoid_catches_without_on_clauses
+      // ignore: avoid_catches_without_on_clauses
     } catch (e) {
       AppLogger.error('Error loading current user: $e');
       if (!mounted) return;
@@ -86,7 +86,7 @@ class _EventsDrawerState extends State<EventsDrawer> {
           _upcomingEvents = upcomingEvents;
         });
       }
-    // ignore: avoid_catches_without_on_clauses
+      // ignore: avoid_catches_without_on_clauses
     } catch (e) {
       AppLogger.error('Error loading user events: $e');
     }
@@ -754,11 +754,10 @@ class _Glass extends StatelessWidget {
     this.blur = 16,
     this.fillAlpha = 0.08,
     this.borderAlpha = 0.14,
-    this.shadow = true, this.padding,
+    this.shadow = true,
   });
 
   final Widget child;
-  final EdgeInsets? padding;
   final double radius;
   final double blur;
   final double fillAlpha;
@@ -772,7 +771,6 @@ class _Glass extends StatelessWidget {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
         child: Container(
-          padding: padding,
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: fillAlpha),
             borderRadius: BorderRadius.circular(radius),

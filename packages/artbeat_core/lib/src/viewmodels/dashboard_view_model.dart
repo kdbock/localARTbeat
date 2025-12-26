@@ -65,6 +65,7 @@ class DashboardViewModel extends ChangeNotifier {
   int _totalDiscoveries = 0;
   int _currentStreak = 0;
   int _weeklyProgress = 0;
+  int _loginStreak = 0;
 
   DashboardViewModel({
     required eventLib.EventService eventService,
@@ -219,6 +220,7 @@ class DashboardViewModel extends ChangeNotifier {
   int get totalDiscoveries => _totalDiscoveries;
   int get currentStreak => _currentStreak;
   int get weeklyProgress => _weeklyProgress;
+  int get loginStreak => _loginStreak;
   bool get isLoadingUserProgress => _isLoadingUserProgress;
   bool get isLoadingActivities => _isLoadingActivities;
 
@@ -665,11 +667,26 @@ class DashboardViewModel extends ChangeNotifier {
         _totalDiscoveries = 0;
         _currentStreak = 0;
         _weeklyProgress = 0;
+        _loginStreak = 0;
         _isLoadingUserProgress = false;
         return;
       }
 
-      // Import the InstantDiscoveryService
+      // Use RewardsService to get login streak
+      final rewardsService = artWalkLib.RewardsService();
+      final userId = _currentUser?.id;
+      int loginStreak = 0;
+      if (userId != null) {
+        try {
+          final loginResult = await rewardsService.processDailyLogin(userId);
+          loginStreak = (loginResult['streak'] as int?) ?? 0;
+        } catch (e) {
+          AppLogger.error('❌ Error getting login streak: $e');
+        }
+      }
+      _loginStreak = loginStreak;
+
+      // Optionally, still get discovery stats for other dashboard data
       final instantDiscoveryService = artWalkLib.InstantDiscoveryService();
       final stats = await instantDiscoveryService.getUserProgressStats();
 
@@ -678,13 +695,14 @@ class DashboardViewModel extends ChangeNotifier {
       _weeklyProgress = stats['weeklyProgress'] ?? 0;
 
       AppLogger.info(
-        '✅ User progress loaded: $_totalDiscoveries discoveries, $_currentStreak streak, $_weeklyProgress this week',
+        '✅ User progress loaded: $_totalDiscoveries discoveries, $_currentStreak streak, $_weeklyProgress this week, loginStreak: $_loginStreak',
       );
     } catch (e) {
       AppLogger.error('❌ Error loading user progress: $e');
       _totalDiscoveries = 0;
       _currentStreak = 0;
       _weeklyProgress = 0;
+      _loginStreak = 0;
     } finally {
       _isLoadingUserProgress = false;
       _safeNotifyListeners();

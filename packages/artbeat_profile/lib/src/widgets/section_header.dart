@@ -24,14 +24,11 @@ class SectionHeader extends StatelessWidget {
         children: [
           Row(
             children: [
-              if (icon != null) ...[
-                Icon(icon),
-                const SizedBox(width: 8),
-              ],
+              if (icon != null) ...[Icon(icon), const SizedBox(width: 8)],
               Text(title, style: Theme.of(context).textTheme.titleMedium),
             ],
           ),
-          if (trailing != null) 
+          if (trailing != null)
             trailing!
           else if (onViewAll != null)
             TextButton(onPressed: onViewAll, child: const Text('View All')),

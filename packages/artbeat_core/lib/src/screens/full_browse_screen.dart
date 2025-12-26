@@ -76,11 +76,7 @@ class _FullBrowseScreenState extends State<FullBrowseScreen>
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF05030D),
-              Color(0xFF0B1330),
-              Color(0xFF041C16),
-            ],
+            colors: [Color(0xFF05030D), Color(0xFF0B1330), Color(0xFF041C16)],
           ),
         ),
         child: Stack(
@@ -206,124 +202,124 @@ class _FullBrowseScreenState extends State<FullBrowseScreen>
   }
 
   Widget _buildCapturesTab() => _buildTabContent(
-        title: 'Photo Captures',
-        subtitle: 'Discover amazing photo captures from the community',
-        icon: Icons.camera_alt_rounded,
-        accent: ArtbeatColors.primaryBlue,
-        actions: [
-          _buildQuickActionCard(
-            'Nearby Captures',
-            'Find captures near you',
-            Icons.location_on_rounded,
-            () => Navigator.pushNamed(context, '/capture/nearby'),
-          ),
-          _buildQuickActionCard(
-            'Popular Captures',
-            'Most liked captures',
-            Icons.favorite_rounded,
-            () => Navigator.pushNamed(context, '/capture/popular'),
-          ),
-          _buildQuickActionCard(
-            'My Captures',
-            'View your captures',
-            Icons.person_rounded,
-            () => Navigator.pushNamed(context, '/capture/my-captures'),
-          ),
-        ],
-        ctaTitle: 'Browse All Captures',
-        ctaSubtitle: 'Explore the full collection of community captures',
-        onCtaTap: () => Navigator.pushNamed(context, '/capture/browse'),
-      );
+    title: 'Photo Captures',
+    subtitle: 'Discover amazing photo captures from the community',
+    icon: Icons.camera_alt_rounded,
+    accent: ArtbeatColors.primaryBlue,
+    actions: [
+      _buildQuickActionCard(
+        'Nearby Captures',
+        'Find captures near you',
+        Icons.location_on_rounded,
+        () => Navigator.pushNamed(context, '/capture/nearby'),
+      ),
+      _buildQuickActionCard(
+        'Popular Captures',
+        'Most liked captures',
+        Icons.favorite_rounded,
+        () => Navigator.pushNamed(context, '/capture/popular'),
+      ),
+      _buildQuickActionCard(
+        'My Captures',
+        'View your captures',
+        Icons.person_rounded,
+        () => Navigator.pushNamed(context, '/capture/my-captures'),
+      ),
+    ],
+    ctaTitle: 'Browse All Captures',
+    ctaSubtitle: 'Explore the full collection of community captures',
+    onCtaTap: () => Navigator.pushNamed(context, '/capture/browse'),
+  );
 
   Widget _buildArtwalksTab() => _buildTabContent(
-        title: 'Art Walks',
-        subtitle: 'Explore curated art walking experiences',
-        icon: Icons.map_rounded,
-        accent: ArtbeatColors.primaryGreen,
-        actions: [
-          _buildQuickActionCard(
-            'Nearby Walks',
-            'Art walks in your area',
-            Icons.near_me_rounded,
-            () => Navigator.pushNamed(context, '/art-walk/nearby'),
-          ),
-          _buildQuickActionCard(
-            'Featured Walks',
-            'Curated experiences',
-            Icons.star_rounded,
-            () => Navigator.pushNamed(context, '/art-walk/explore'),
-          ),
-          _buildQuickActionCard(
-            'Create Walk',
-            'Design your own walk',
-            Icons.add_location_rounded,
-            () => Navigator.pushNamed(context, '/art-walk/create'),
-          ),
-        ],
-        ctaTitle: 'Browse All Art Walks',
-        ctaSubtitle: 'Discover all available art walking experiences',
-        onCtaTap: () => Navigator.pushNamed(context, '/art-walk/list'),
-      );
+    title: 'Art Walks',
+    subtitle: 'Explore curated art walking experiences',
+    icon: Icons.map_rounded,
+    accent: ArtbeatColors.primaryGreen,
+    actions: [
+      _buildQuickActionCard(
+        'Nearby Walks',
+        'Art walks in your area',
+        Icons.near_me_rounded,
+        () => Navigator.pushNamed(context, '/art-walk/nearby'),
+      ),
+      _buildQuickActionCard(
+        'Featured Walks',
+        'Curated experiences',
+        Icons.star_rounded,
+        () => Navigator.pushNamed(context, '/art-walk/explore'),
+      ),
+      _buildQuickActionCard(
+        'Create Walk',
+        'Design your own walk',
+        Icons.add_location_rounded,
+        () => Navigator.pushNamed(context, '/art-walk/create'),
+      ),
+    ],
+    ctaTitle: 'Browse All Art Walks',
+    ctaSubtitle: 'Discover all available art walking experiences',
+    onCtaTap: () => Navigator.pushNamed(context, '/art-walk/list'),
+  );
 
   Widget _buildArtistsTab() => _buildTabContent(
-        title: 'Artists',
-        subtitle: 'Connect with talented artists in your community',
-        icon: Icons.people_rounded,
-        accent: ArtbeatColors.primaryPurple,
-        actions: [
-          _buildQuickActionCard(
-            'Featured Artists',
-            'Highlighted creators',
-            Icons.star_rounded,
-            () => Navigator.pushNamed(context, '/artist/featured'),
-          ),
-          _buildQuickActionCard(
-            'Local Artists',
-            'Artists near you',
-            Icons.location_on_rounded,
-            () => Navigator.pushNamed(context, '/community/artists'),
-          ),
-          _buildQuickActionCard(
-            'New Artists',
-            'Recently joined',
-            Icons.new_releases_rounded,
-            () => Navigator.pushNamed(context, '/artist/browse'),
-          ),
-        ],
-        ctaTitle: 'Browse All Artists',
-        ctaSubtitle: 'Explore our community of talented artists',
-        onCtaTap: () => Navigator.pushNamed(context, '/artist/browse'),
-      );
+    title: 'Artists',
+    subtitle: 'Connect with talented artists in your community',
+    icon: Icons.people_rounded,
+    accent: ArtbeatColors.primaryPurple,
+    actions: [
+      _buildQuickActionCard(
+        'Featured Artists',
+        'Highlighted creators',
+        Icons.star_rounded,
+        () => Navigator.pushNamed(context, '/artist/featured'),
+      ),
+      _buildQuickActionCard(
+        'Local Artists',
+        'Artists near you',
+        Icons.location_on_rounded,
+        () => Navigator.pushNamed(context, '/community/artists'),
+      ),
+      _buildQuickActionCard(
+        'New Artists',
+        'Recently joined',
+        Icons.new_releases_rounded,
+        () => Navigator.pushNamed(context, '/artist/browse'),
+      ),
+    ],
+    ctaTitle: 'Browse All Artists',
+    ctaSubtitle: 'Explore our community of talented artists',
+    onCtaTap: () => Navigator.pushNamed(context, '/artist/browse'),
+  );
 
   Widget _buildArtworkTab() => _buildTabContent(
-        title: 'Artwork',
-        subtitle: 'Discover beautiful artwork from our community',
-        icon: Icons.image_rounded,
-        accent: ArtbeatColors.accentOrange,
-        actions: [
-          _buildQuickActionCard(
-            'Recent Artwork',
-            'Latest uploads',
-            Icons.schedule_rounded,
-            () => Navigator.pushNamed(context, '/artwork/recent'),
-          ),
-          _buildQuickActionCard(
-            'Trending',
-            'Popular artwork',
-            Icons.trending_up_rounded,
-            () => Navigator.pushNamed(context, '/artwork/trending'),
-          ),
-          _buildQuickActionCard(
-            'Featured',
-            'Curated selections',
-            Icons.star_rounded,
-            () => Navigator.pushNamed(context, '/artwork/featured'),
-          ),
-        ],
-        ctaTitle: 'Browse All Artwork',
-        ctaSubtitle: 'Explore the complete artwork collection',
-        onCtaTap: () => Navigator.pushNamed(context, '/artwork/browse'),
-      );
+    title: 'Artwork',
+    subtitle: 'Discover beautiful artwork from our community',
+    icon: Icons.image_rounded,
+    accent: ArtbeatColors.accentOrange,
+    actions: [
+      _buildQuickActionCard(
+        'Recent Artwork',
+        'Latest uploads',
+        Icons.schedule_rounded,
+        () => Navigator.pushNamed(context, '/artwork/recent'),
+      ),
+      _buildQuickActionCard(
+        'Trending',
+        'Popular artwork',
+        Icons.trending_up_rounded,
+        () => Navigator.pushNamed(context, '/artwork/trending'),
+      ),
+      _buildQuickActionCard(
+        'Featured',
+        'Curated selections',
+        Icons.star_rounded,
+        () => Navigator.pushNamed(context, '/artwork/featured'),
+      ),
+    ],
+    ctaTitle: 'Browse All Artwork',
+    ctaSubtitle: 'Explore the complete artwork collection',
+    onCtaTap: () => Navigator.pushNamed(context, '/artwork/browse'),
+  );
 
   Widget _buildTabContent({
     required String title,
@@ -496,11 +492,7 @@ class _FullBrowseScreenState extends State<FullBrowseScreen>
     );
   }
 
-  Widget _buildBrowseButton(
-    String title,
-    String subtitle,
-    VoidCallback onTap,
-  ) {
+  Widget _buildBrowseButton(String title, String subtitle, VoidCallback onTap) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -513,11 +505,7 @@ class _FullBrowseScreenState extends State<FullBrowseScreen>
             gradient: const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [
-                Color(0xFF7C4DFF),
-                Color(0xFF22D3EE),
-                Color(0xFF34D399),
-              ],
+              colors: [Color(0xFF7C4DFF), Color(0xFF22D3EE), Color(0xFF34D399)],
             ),
             boxShadow: [
               BoxShadow(
@@ -560,7 +548,10 @@ class _FullBrowseScreenState extends State<FullBrowseScreen>
                   shape: BoxShape.circle,
                   color: Colors.white.withValues(alpha: 0.2),
                 ),
-                child: const Icon(Icons.arrow_forward_rounded, color: Colors.white),
+                child: const Icon(
+                  Icons.arrow_forward_rounded,
+                  color: Colors.white,
+                ),
               ),
             ],
           ),

@@ -146,11 +146,20 @@ class _CouponManagementScreenState extends State<CouponManagementScreen> {
 
   Widget _buildHeroSection(List<CouponModel> coupons) {
     final active = coupons.where((c) => c.status == CouponStatus.active).length;
-    final paused = coupons.where((c) => c.status == CouponStatus.inactive).length;
-    final limited = coupons
-        .where((c) => c.status == CouponStatus.expired || c.status == CouponStatus.exhausted)
+    final paused = coupons
+        .where((c) => c.status == CouponStatus.inactive)
         .length;
-    final totalUses = coupons.fold<int>(0, (sum, coupon) => sum + coupon.currentUses);
+    final limited = coupons
+        .where(
+          (c) =>
+              c.status == CouponStatus.expired ||
+              c.status == CouponStatus.exhausted,
+        )
+        .length;
+    final totalUses = coupons.fold<int>(
+      0,
+      (sum, coupon) => sum + coupon.currentUses,
+    );
 
     return _buildGlassPanel(
       padding: const EdgeInsets.all(28),
@@ -273,7 +282,11 @@ class _CouponManagementScreenState extends State<CouponManagementScreen> {
       padding: const EdgeInsets.all(28),
       child: Column(
         children: [
-          const Icon(Icons.confirmation_number_outlined, color: Colors.white70, size: 48),
+          const Icon(
+            Icons.confirmation_number_outlined,
+            color: Colors.white70,
+            size: 48,
+          ),
           const SizedBox(height: 14),
           Text(
             'No coupons yet',
@@ -401,9 +414,9 @@ class _CouponManagementScreenState extends State<CouponManagementScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update coupon: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to update coupon: $e')));
       }
     }
   }
@@ -444,11 +457,7 @@ class _CouponManagementScreenState extends State<CouponManagementScreen> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF03050F),
-              Color(0xFF09122B),
-              Color(0xFF021B17),
-            ],
+            colors: [Color(0xFF03050F), Color(0xFF09122B), Color(0xFF021B17)],
           ),
         ),
         child: Stack(
@@ -517,8 +526,9 @@ class CouponCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final usesLabel = '${coupon.currentUses}/${coupon.maxUses ?? '∞'} uses';
-    final expiresLabel =
-        coupon.expiresAt != null ? 'Expires ${_formatDate(coupon.expiresAt!)}' : null;
+    final expiresLabel = coupon.expiresAt != null
+        ? 'Expires ${_formatDate(coupon.expiresAt!)}'
+        : null;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -546,11 +556,16 @@ class CouponCard extends StatelessWidget {
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(16),
                         color: _statusColor().withValues(alpha: 0.18),
-                        border: Border.all(color: _statusColor().withValues(alpha: 0.5)),
+                        border: Border.all(
+                          color: _statusColor().withValues(alpha: 0.5),
+                        ),
                       ),
                       child: Text(
                         _statusLabel(),
@@ -596,19 +611,10 @@ class CouponCard extends StatelessWidget {
                   spacing: 12,
                   runSpacing: 12,
                   children: [
-                    _buildInfoChip(
-                      Icons.loyalty,
-                      _typeLabel(),
-                    ),
-                    _buildInfoChip(
-                      Icons.repeat,
-                      usesLabel,
-                    ),
+                    _buildInfoChip(Icons.loyalty, _typeLabel()),
+                    _buildInfoChip(Icons.repeat, usesLabel),
                     if (expiresLabel != null)
-                      _buildInfoChip(
-                        Icons.event,
-                        expiresLabel,
-                      ),
+                      _buildInfoChip(Icons.event, expiresLabel),
                   ],
                 ),
                 const SizedBox(height: 18),
@@ -619,7 +625,9 @@ class CouponCard extends StatelessWidget {
                       icon: coupon.status == CouponStatus.active
                           ? Icons.pause_circle
                           : Icons.play_circle,
-                      tooltip: coupon.status == CouponStatus.active ? 'Pause' : 'Activate',
+                      tooltip: coupon.status == CouponStatus.active
+                          ? 'Pause'
+                          : 'Activate',
                       onPressed: onToggleStatus,
                     ),
                     const SizedBox(width: 10),
@@ -759,8 +767,12 @@ class _CreateCouponDialogState extends State<CreateCouponDialog> {
                 TextFormField(
                   controller: _titleController,
                   style: GoogleFonts.spaceGrotesk(color: Colors.white),
-                  decoration: _glassInputDecoration('Title', hint: 'e.g., Beta Access Code'),
-                  validator: (value) => value?.isEmpty ?? true ? 'Title is required' : null,
+                  decoration: _glassInputDecoration(
+                    'Title',
+                    hint: 'e.g., Beta Access Code',
+                  ),
+                  validator: (value) =>
+                      value?.isEmpty ?? true ? 'Title is required' : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -771,7 +783,8 @@ class _CreateCouponDialogState extends State<CreateCouponDialog> {
                     'Description',
                     hint: 'core_coupon_description_hint'.tr(),
                   ),
-                  validator: (value) => value?.isEmpty ?? true ? 'Description is required' : null,
+                  validator: (value) =>
+                      value?.isEmpty ?? true ? 'Description is required' : null,
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<CouponType>(
@@ -786,7 +799,9 @@ class _CreateCouponDialogState extends State<CreateCouponDialog> {
                           value: type,
                           child: Text(
                             _getCouponTypeDisplayName(type),
-                            style: GoogleFonts.spaceGrotesk(color: Colors.white),
+                            style: GoogleFonts.spaceGrotesk(
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       )
@@ -805,15 +820,20 @@ class _CreateCouponDialogState extends State<CreateCouponDialog> {
                   TextFormField(
                     controller: _discountController,
                     style: GoogleFonts.spaceGrotesk(color: Colors.white),
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                     decoration: _glassInputDecoration(
                       _selectedType == CouponType.percentageDiscount
                           ? 'Discount Percentage'
                           : 'Discount Amount',
-                      hint: _selectedType == CouponType.percentageDiscount ? 'e.g., 50' : 'e.g., 9.99',
+                      hint: _selectedType == CouponType.percentageDiscount
+                          ? 'e.g., 50'
+                          : 'e.g., 9.99',
                     ),
                     validator: (value) {
-                      if (value?.isEmpty ?? true) return 'Discount value is required';
+                      if (value?.isEmpty ?? true)
+                        return 'Discount value is required';
                       final parsed = double.tryParse(value!);
                       if (parsed == null) return 'Invalid number';
                       if (_selectedType == CouponType.percentageDiscount) {
@@ -841,7 +861,9 @@ class _CreateCouponDialogState extends State<CreateCouponDialog> {
                 GestureDetector(
                   onTap: _selectExpirationDate,
                   child: InputDecorator(
-                    decoration: _glassInputDecoration('Expiration Date (optional)'),
+                    decoration: _glassInputDecoration(
+                      'Expiration Date (optional)',
+                    ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -851,7 +873,11 @@ class _CreateCouponDialogState extends State<CreateCouponDialog> {
                               : 'No expiration',
                           style: GoogleFonts.spaceGrotesk(color: Colors.white),
                         ),
-                        const Icon(Icons.calendar_today, color: Colors.white70, size: 18),
+                        const Icon(
+                          Icons.calendar_today,
+                          color: Colors.white70,
+                          size: 18,
+                        ),
                       ],
                     ),
                   ),
@@ -947,9 +973,9 @@ class _CreateCouponDialogState extends State<CreateCouponDialog> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to create coupon: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to create coupon: $e')));
       }
     } finally {
       if (mounted) {
@@ -983,7 +1009,9 @@ class _EditCouponDialogState extends State<EditCouponDialog> {
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.coupon.title);
-    _descriptionController = TextEditingController(text: widget.coupon.description);
+    _descriptionController = TextEditingController(
+      text: widget.coupon.description,
+    );
     _maxUsesController = TextEditingController(
       text: widget.coupon.maxUses?.toString() ?? '',
     );
@@ -1071,7 +1099,11 @@ class _EditCouponDialogState extends State<EditCouponDialog> {
                             : 'No expiration',
                         style: GoogleFonts.spaceGrotesk(color: Colors.white),
                       ),
-                      const Icon(Icons.calendar_today, color: Colors.white70, size: 18),
+                      const Icon(
+                        Icons.calendar_today,
+                        color: Colors.white70,
+                        size: 18,
+                      ),
                     ],
                   ),
                 ),
@@ -1143,9 +1175,9 @@ class _EditCouponDialogState extends State<EditCouponDialog> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update coupon: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to update coupon: $e')));
       }
     } finally {
       if (mounted) {

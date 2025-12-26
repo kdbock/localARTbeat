@@ -9,7 +9,8 @@ import '../../services/in_app_purchase_setup.dart';
 
 class SubscriptionsScreen extends StatefulWidget {
   final bool showAppBar;
-  const SubscriptionsScreen({Key? key, this.showAppBar = true}) : super(key: key);
+  const SubscriptionsScreen({Key? key, this.showAppBar = true})
+    : super(key: key);
 
   @override
   State<SubscriptionsScreen> createState() => _SubscriptionsScreenState();
@@ -115,7 +116,11 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
                         colors: [Color(0xFF34D399), Color(0xFF22D3EE)],
                       ),
                     ),
-                    child: const Icon(Icons.workspace_premium, color: Colors.white, size: 28),
+                    child: const Icon(
+                      Icons.workspace_premium,
+                      color: Colors.white,
+                      size: 28,
+                    ),
                   ),
                   const SizedBox(width: 18),
                   Expanded(
@@ -215,9 +220,7 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
       },
     ];
 
-    return Column(
-      children: tiers.map((tier) => _buildTierCard(tier)).toList(),
-    );
+    return Column(children: tiers.map((tier) => _buildTierCard(tier)).toList());
   }
 
   Widget _buildTierCard(Map<String, dynamic> tier) {
@@ -230,7 +233,10 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
         borderColor: isPopular ? accent : Colors.white24,
         gradient: isPopular
             ? LinearGradient(
-                colors: [accent.withValues(alpha: 0.2), Colors.white.withValues(alpha: 0.04)],
+                colors: [
+                  accent.withValues(alpha: 0.2),
+                  Colors.white.withValues(alpha: 0.04),
+                ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               )
@@ -274,7 +280,10 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
                 ),
                 if (isPopular)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: accent,
                       borderRadius: BorderRadius.circular(999),
@@ -296,7 +305,11 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
                 padding: const EdgeInsets.only(bottom: 10),
                 child: Row(
                   children: [
-                    const Icon(Icons.check_circle, color: Colors.white, size: 18),
+                    const Icon(
+                      Icons.check_circle,
+                      color: Colors.white,
+                      size: 18,
+                    ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
@@ -316,9 +329,8 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
               children: [
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () => _handleSubscription(
-                      tier['monthlyProductId'] as String,
-                    ),
+                    onPressed: () =>
+                        _handleSubscription(tier['monthlyProductId'] as String),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
                       foregroundColor: Colors.black,
@@ -329,19 +341,22 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
                     ),
                     child: Text(
                       'Subscribe Monthly',
-                      style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
+                      style: GoogleFonts.spaceGrotesk(
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: () => _handleSubscription(
-                      tier['yearlyProductId'] as String,
-                    ),
+                    onPressed: () =>
+                        _handleSubscription(tier['yearlyProductId'] as String),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.white,
-                      side: BorderSide(color: Colors.white.withValues(alpha: 0.5)),
+                      side: BorderSide(
+                        color: Colors.white.withValues(alpha: 0.5),
+                      ),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(18),
@@ -349,7 +364,9 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
                     ),
                     child: Text(
                       'Subscribe Yearly',
-                      style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
+                      style: GoogleFonts.spaceGrotesk(
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ),
@@ -402,11 +419,7 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF03050F),
-              Color(0xFF09122B),
-              Color(0xFF021B17),
-            ],
+            colors: [Color(0xFF03050F), Color(0xFF09122B), Color(0xFF021B17)],
           ),
         ),
         child: Stack(

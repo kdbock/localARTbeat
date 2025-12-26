@@ -54,7 +54,6 @@ dependencies:
   flag: ^7.0.2
   flutter:
     sdk: flutter
-  google_fonts: ^6.2.1
   flutter_cache_manager: ^3.4.1
   flutter_dotenv: ^5.1.0
   flutter_image_compress: ^2.3.0
@@ -64,6 +63,7 @@ dependencies:
   flutter_svg: ^2.1.0
   geocoding: ^4.0.0
   geolocator: ^14.0.1
+  google_fonts: ^6.2.1
   google_maps_flutter: ^2.5.3
   google_sign_in: ^6.2.1
   http: ^1.4.0

@@ -258,7 +258,9 @@ class _ArtistCard extends StatelessWidget {
                   artist.profileImageUrl,
                 ),
                 child:
-                    !core.ImageUrlValidator.isValidImageUrl(artist.profileImageUrl)
+                    !core.ImageUrlValidator.isValidImageUrl(
+                      artist.profileImageUrl,
+                    )
                     ? const Icon(Icons.person, size: 30)
                     : null,
               ),

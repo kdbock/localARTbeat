@@ -1,7 +1,6 @@
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:flutter/material.dart';
 
-
 /// Universal content card that can display any ARTbeat content type
 /// with consistent engagement actions: Appreciate, Connect, Discuss, Amplify
 class UniversalContentCard extends StatelessWidget {

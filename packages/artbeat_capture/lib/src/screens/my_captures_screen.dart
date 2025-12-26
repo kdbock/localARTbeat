@@ -13,7 +13,6 @@ class MyCapturesScreen extends StatefulWidget {
 class _MyCapturesScreenState extends State<MyCapturesScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  int? _pendingInitialTab;
   bool _initialized = false;
 
   @override

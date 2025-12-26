@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:artbeat_core/artbeat_core.dart' show UserModerationMixin, ImageUrlValidator;
+import 'package:artbeat_core/artbeat_core.dart'
+    show UserModerationMixin, ImageUrlValidator;
 import '../models/artwork_rating_model.dart';
 import '../services/artwork_rating_service.dart';
 import '../services/artwork_comment_service.dart';

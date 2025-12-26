@@ -163,7 +163,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
               _buildStatChip(
                 icon: Icons.trending_up,
                 label: 'Avg Level',
-                value: averageXp != null ? '${(averageXp / 100).round()}' : '--',
+                value: averageXp != null
+                    ? '${(averageXp / 100).round()}'
+                    : '--',
               ),
             ],
           ),
@@ -229,18 +231,26 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
             indicator: BoxDecoration(
               borderRadius: BorderRadius.circular(22),
               gradient: const LinearGradient(
-                colors: [Color(0xFF7C4DFF), Color(0xFF22D3EE), Color(0xFF34D399)],
+                colors: [
+                  Color(0xFF7C4DFF),
+                  Color(0xFF22D3EE),
+                  Color(0xFF34D399),
+                ],
               ),
             ),
             labelColor: Colors.white,
             unselectedLabelColor: Colors.white70,
             labelStyle: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
-            unselectedLabelStyle:
-                GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w600),
+            unselectedLabelStyle: GoogleFonts.spaceGrotesk(
+              fontWeight: FontWeight.w600,
+            ),
             tabs: _categories
                 .map(
                   (category) => Tab(
-                    icon: Text(category.icon, style: const TextStyle(fontSize: 18)),
+                    icon: Text(
+                      category.icon,
+                      style: const TextStyle(fontSize: 18),
+                    ),
                     text: category.displayName,
                   ),
                 )
@@ -282,8 +292,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
           ),
           child: TabBarView(
             controller: _tabController,
-            children:
-                _categories.map((category) => _buildLeaderboardTab(category)).toList(),
+            children: _categories
+                .map((category) => _buildLeaderboardTab(category))
+                .toList(),
           ),
         ),
       ),
@@ -316,10 +327,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
       child: entries.isEmpty
           ? ListView(
               physics: const AlwaysScrollableScrollPhysics(),
-              children: [
-                const SizedBox(height: 160),
-                emptyState,
-              ],
+              children: [const SizedBox(height: 160), emptyState],
             )
           : ListView.builder(
               physics: const AlwaysScrollableScrollPhysics(),
@@ -483,7 +491,10 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                         ),
                       ),
                       if (isCurrentUser)
-                        const Icon(Icons.workspace_premium, color: Colors.white70),
+                        const Icon(
+                          Icons.workspace_premium,
+                          color: Colors.white70,
+                        ),
                     ],
                   ),
                   const SizedBox(height: 4),
@@ -581,11 +592,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF03050F),
-              Color(0xFF09122B),
-              Color(0xFF021B17),
-            ],
+            colors: [Color(0xFF03050F), Color(0xFF09122B), Color(0xFF021B17)],
           ),
         ),
         child: Stack(

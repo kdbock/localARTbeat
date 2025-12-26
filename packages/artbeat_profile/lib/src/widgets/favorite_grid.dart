@@ -17,11 +17,7 @@ class FavoriteGrid extends StatelessWidget {
   final List<FavoriteGridItem> items;
   final void Function(FavoriteGridItem)? onTap;
 
-  const FavoriteGrid({
-    super.key,
-    required this.items,
-    this.onTap,
-  });
+  const FavoriteGrid({super.key, required this.items, this.onTap});
 
   @override
   Widget build(BuildContext context) {

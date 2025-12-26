@@ -40,8 +40,10 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
     _authService = widget.authService ?? AuthService();
     _user = _authService.currentUser;
 
-    _loop = AnimationController(vsync: this, duration: const Duration(seconds: 9))
-      ..repeat();
+    _loop = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 9),
+    )..repeat();
     _intro = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 650),
@@ -87,15 +89,16 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
 
       _showSuccessSnackBar(
         'auth_email_verification_sent_to'.tr().replaceAll(
-              '{email}',
-              _user!.email ?? '',
-            ),
+          '{email}',
+          _user!.email ?? '',
+        ),
       );
       _startResendCooldown();
     } on FirebaseAuthException catch (e) {
       if (mounted) _showErrorSnackBar(_getErrorMessage(e.code));
     } catch (_) {
-      if (mounted) _showErrorSnackBar('auth_email_verification_send_failed'.tr());
+      if (mounted)
+        _showErrorSnackBar('auth_email_verification_send_failed'.tr());
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -251,31 +254,46 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 18,
+                ),
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 560),
                   child: FadeTransition(
-                    opacity: CurvedAnimation(parent: _intro, curve: Curves.easeOut),
+                    opacity: CurvedAnimation(
+                      parent: _intro,
+                      curve: Curves.easeOut,
+                    ),
                     child: SlideTransition(
-                      position: Tween<Offset>(
-                        begin: const Offset(0, 0.04),
-                        end: Offset.zero,
-                      ).animate(
-                        CurvedAnimation(parent: _intro, curve: Curves.easeOutCubic),
-                      ),
+                      position:
+                          Tween<Offset>(
+                            begin: const Offset(0, 0.04),
+                            end: Offset.zero,
+                          ).animate(
+                            CurvedAnimation(
+                              parent: _intro,
+                              curve: Curves.easeOutCubic,
+                            ),
+                          ),
                       child: _GlassCard(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             Row(
                               children: [
-                                _MiniBadge(loop: _loop, icon: Icons.mark_email_read_rounded),
+                                _MiniBadge(
+                                  loop: _loop,
+                                  icon: Icons.mark_email_read_rounded,
+                                ),
                                 const SizedBox(width: 10),
                                 Expanded(
                                   child: Text(
                                     'auth_email_verification_title'.tr(),
                                     style: GoogleFonts.spaceGrotesk(
-                                      color: Colors.white.withValues(alpha: 0.95),
+                                      color: Colors.white.withValues(
+                                        alpha: 0.95,
+                                      ),
                                       fontSize: 22,
                                       fontWeight: FontWeight.w900,
                                       letterSpacing: -0.2,
@@ -283,7 +301,9 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
                                   ),
                                 ),
                                 _CloseIconButton(
-                                  onTap: _isLoading ? null : () => Navigator.pop(context),
+                                  onTap: _isLoading
+                                      ? null
+                                      : () => Navigator.pop(context),
                                 ),
                               ],
                             ),
@@ -329,13 +349,18 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
                                 animation: _loop,
                                 builder: (_, __) {
                                   final t = (_loop.value + 0.10) % 1.0;
-                                  final power =
-                                      (1.0 - (t - 0.55).abs() * 4.5).clamp(0.0, 1.0);
+                                  final power = (1.0 - (t - 0.55).abs() * 4.5)
+                                      .clamp(0.0, 1.0);
                                   final label = _canResendEmail
-                                      ? 'auth_email_verification_resend_button'.tr()
-                                      : 'auth_email_verification_resend_cooldown'.tr(
-                                          namedArgs: {'seconds': _resendCooldown.toString()},
-                                        );
+                                      ? 'auth_email_verification_resend_button'
+                                            .tr()
+                                      : 'auth_email_verification_resend_cooldown'
+                                            .tr(
+                                              namedArgs: {
+                                                'seconds': _resendCooldown
+                                                    .toString(),
+                                              },
+                                            );
 
                                   return _QuestPrimaryButton(
                                     width: w,
@@ -526,7 +551,11 @@ class _InfoLine extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(icon, color: const Color(0xFF22D3EE).withValues(alpha: 0.9), size: 18),
+          Icon(
+            icon,
+            color: const Color(0xFF22D3EE).withValues(alpha: 0.9),
+            size: 18,
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
@@ -567,14 +596,19 @@ class _PulseChip extends StatelessWidget {
     return AnimatedBuilder(
       animation: loop,
       builder: (_, __) {
-        final pulse = 0.55 + 0.45 * (0.5 + 0.5 * math.sin(loop.value * 2 * math.pi));
+        final pulse =
+            0.55 + 0.45 * (0.5 + 0.5 * math.sin(loop.value * 2 * math.pi));
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
-            color: const Color(0xFF22D3EE).withValues(alpha: 0.08 + 0.06 * pulse),
+            color: const Color(
+              0xFF22D3EE,
+            ).withValues(alpha: 0.08 + 0.06 * pulse),
             borderRadius: BorderRadius.circular(999),
             border: Border.all(
-              color: const Color(0xFF22D3EE).withValues(alpha: 0.16 + 0.10 * pulse),
+              color: const Color(
+                0xFF22D3EE,
+              ).withValues(alpha: 0.16 + 0.10 * pulse),
             ),
           ),
           child: Row(
@@ -584,7 +618,9 @@ class _PulseChip extends StatelessWidget {
                 width: 8,
                 height: 8,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF22D3EE).withValues(alpha: 0.6 + 0.35 * pulse),
+                  color: const Color(
+                    0xFF22D3EE,
+                  ).withValues(alpha: 0.6 + 0.35 * pulse),
                   shape: BoxShape.circle,
                 ),
               ),
@@ -688,8 +724,9 @@ class _QuestPrimaryButton extends StatelessWidget {
                           width: 22,
                           child: CircularProgressIndicator(
                             strokeWidth: 2.4,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
                           ),
                         )
                       : Row(
@@ -752,7 +789,9 @@ class _QuestChipButton extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.12),
+                  ),
                   boxShadow: [
                     BoxShadow(
                       color: glow.withValues(alpha: 0.10),
@@ -764,7 +803,11 @@ class _QuestChipButton extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(icon, size: 18, color: Colors.white.withValues(alpha: 0.92)),
+                    Icon(
+                      icon,
+                      size: 18,
+                      color: Colors.white.withValues(alpha: 0.92),
+                    ),
                     const SizedBox(width: 8),
                     Flexible(
                       child: Text(

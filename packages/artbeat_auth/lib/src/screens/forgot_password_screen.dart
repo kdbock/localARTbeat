@@ -7,8 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../services/auth_service.dart';
-import 'package:artbeat_core/artbeat_core.dart'
-  show ArtbeatInput;
+import 'package:artbeat_core/artbeat_core.dart' show ArtbeatInput;
 
 /// Forgot password screen with email reset functionality (Quest theme)
 class ForgotPasswordScreen extends StatefulWidget {
@@ -37,8 +36,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
   void initState() {
     super.initState();
     _authService = widget.authService ?? AuthService();
-    _loop = AnimationController(vsync: this, duration: const Duration(seconds: 9))
-      ..repeat();
+    _loop = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 9),
+    )..repeat();
     _intro = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 650),
@@ -71,7 +72,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
       setState(() => _errorMessage = _getErrorMessage(e));
     } catch (_) {
       if (!mounted) return;
-      setState(() => _errorMessage = 'auth_forgot_password_unexpected_error'.tr());
+      setState(
+        () => _errorMessage = 'auth_forgot_password_unexpected_error'.tr(),
+      );
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -84,7 +87,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
       case 'invalid-email':
         return 'auth_forgot_password_error_invalid_email'.tr();
       default:
-        return 'auth_forgot_password_error_failed'.tr(namedArgs: {'code': e.code});
+        return 'auth_forgot_password_error_failed'.tr(
+          namedArgs: {'code': e.code},
+        );
     }
   }
 
@@ -127,18 +132,28 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 18,
+                ),
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 520),
                   child: FadeTransition(
-                    opacity: CurvedAnimation(parent: _intro, curve: Curves.easeOut),
+                    opacity: CurvedAnimation(
+                      parent: _intro,
+                      curve: Curves.easeOut,
+                    ),
                     child: SlideTransition(
-                      position: Tween<Offset>(
-                        begin: const Offset(0, 0.04),
-                        end: Offset.zero,
-                      ).animate(
-                        CurvedAnimation(parent: _intro, curve: Curves.easeOutCubic),
-                      ),
+                      position:
+                          Tween<Offset>(
+                            begin: const Offset(0, 0.04),
+                            end: Offset.zero,
+                          ).animate(
+                            CurvedAnimation(
+                              parent: _intro,
+                              curve: Curves.easeOutCubic,
+                            ),
+                          ),
                       child: _GlassCard(
                         child: Form(
                           key: _formKey,
@@ -147,20 +162,29 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
                             children: [
                               Row(
                                 children: [
-                                  _MiniBadge(loop: _loop, icon: Icons.lock_reset_rounded),
+                                  _MiniBadge(
+                                    loop: _loop,
+                                    icon: Icons.lock_reset_rounded,
+                                  ),
                                   const SizedBox(width: 10),
                                   Expanded(
                                     child: Text(
                                       'auth_forgot_password_title'.tr(),
                                       style: GoogleFonts.spaceGrotesk(
-                                        color: Colors.white.withValues(alpha: 0.95),
+                                        color: Colors.white.withValues(
+                                          alpha: 0.95,
+                                        ),
                                         fontSize: 22,
                                         fontWeight: FontWeight.w900,
                                         letterSpacing: -0.2,
                                       ),
                                     ),
                                   ),
-                                  _BackIconButton(onTap: _isLoading ? null : () => Navigator.pop(context)),
+                                  _BackIconButton(
+                                    onTap: _isLoading
+                                        ? null
+                                        : () => Navigator.pop(context),
+                                  ),
                                 ],
                               ),
                               const SizedBox(height: 6),
@@ -188,7 +212,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
                                 _Banner(
                                   icon: Icons.check_circle_outline,
                                   color: const Color(0xFF34D399),
-                                  message: 'auth_forgot_password_reset_sent'.tr(),
+                                  message: 'auth_forgot_password_reset_sent'
+                                      .tr(),
                                 ),
                                 const SizedBox(height: 10),
                               ],
@@ -203,10 +228,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
                                   prefixIcon: const Icon(Icons.email_outlined),
                                   validator: (String? value) {
                                     if (value == null || value.isEmpty) {
-                                      return 'auth_forgot_password_email_required'.tr();
+                                      return 'auth_forgot_password_email_required'
+                                          .tr();
                                     }
                                     if (!value.contains('@')) {
-                                      return 'auth_forgot_password_email_invalid'.tr();
+                                      return 'auth_forgot_password_email_invalid'
+                                          .tr();
                                     }
                                     return null;
                                   },
@@ -222,15 +249,17 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
                                   animation: _loop,
                                   builder: (_, __) {
                                     final t = (_loop.value + 0.10) % 1.0;
-                                    final power =
-                                        (1.0 - (t - 0.55).abs() * 4.5).clamp(0.0, 1.0);
+                                    final power = (1.0 - (t - 0.55).abs() * 4.5)
+                                        .clamp(0.0, 1.0);
                                     return _QuestPrimaryButton(
                                       width: w,
                                       power: power,
                                       isLoading: _isLoading,
                                       label: 'auth_forgot_password_button'.tr(),
                                       icon: Icons.restore_outlined,
-                                      onTap: _isLoading ? null : _handleResetPassword,
+                                      onTap: _isLoading
+                                          ? null
+                                          : _handleResetPassword,
                                     );
                                   },
                                 ),
@@ -239,10 +268,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
                               const SizedBox(height: 10),
 
                               _QuestChipButton(
-                                label: 'auth_forgot_password_back_to_login'.tr(),
+                                label: 'auth_forgot_password_back_to_login'
+                                    .tr(),
                                 icon: Icons.arrow_back_rounded,
                                 glow: const Color(0xFF22D3EE),
-                                onTap: _isLoading ? null : () => Navigator.pop(context),
+                                onTap: _isLoading
+                                    ? null
+                                    : () => Navigator.pop(context),
                               ),
                             ],
                           ),
@@ -320,7 +352,9 @@ class _FieldShell extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       child: Theme(
         data: Theme.of(context).copyWith(
-          inputDecorationTheme: const InputDecorationTheme(border: InputBorder.none),
+          inputDecorationTheme: const InputDecorationTheme(
+            border: InputBorder.none,
+          ),
         ),
         child: child,
       ),
@@ -517,7 +551,9 @@ class _QuestPrimaryButton extends StatelessWidget {
                         width: 22,
                         child: CircularProgressIndicator(
                           strokeWidth: 2.4,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
                         ),
                       )
                     : Row(
@@ -575,7 +611,9 @@ class _QuestChipButton extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.12),
+                  ),
                   boxShadow: [
                     BoxShadow(
                       color: glow.withValues(alpha: 0.10),
@@ -587,7 +625,11 @@ class _QuestChipButton extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(icon, size: 18, color: Colors.white.withValues(alpha: 0.92)),
+                    Icon(
+                      icon,
+                      size: 18,
+                      color: Colors.white.withValues(alpha: 0.92),
+                    ),
                     const SizedBox(width: 8),
                     Flexible(
                       child: Text(
@@ -688,5 +730,6 @@ class _AuthWorldPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _AuthWorldPainter oldDelegate) => oldDelegate.t != t;
+  bool shouldRepaint(covariant _AuthWorldPainter oldDelegate) =>
+      oldDelegate.t != t;
 }

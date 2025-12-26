@@ -633,9 +633,10 @@ class _CommissionSetupWizardScreenState
                                     _portfolioImages[index],
                                   )
                                   ? DecorationImage(
-                                      image: core.ImageUrlValidator.safeNetworkImage(
-                                        _portfolioImages[index],
-                                      )!,
+                                      image:
+                                          core.ImageUrlValidator.safeNetworkImage(
+                                            _portfolioImages[index],
+                                          )!,
                                       fit: BoxFit.cover,
                                     )
                                   : null,

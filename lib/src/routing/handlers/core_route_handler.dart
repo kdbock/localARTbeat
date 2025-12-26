@@ -1,6 +1,5 @@
 import 'package:artbeat_auth/artbeat_auth.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
-import 'package:artbeat_core/src/routing/app_routes.dart';
 import 'package:artbeat_profile/artbeat_profile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -13,64 +12,64 @@ class CoreRouteHandler implements RouteHandler {
   bool canHandle(String routeName) => _coreRoutes.contains(routeName);
 
   static final List<String> _coreRoutes = [
-    AppRoutes.splash,
-    AppRoutes.dashboard,
-    AppRoutes.auth,
-    AppRoutes.login,
-    AppRoutes.register,
-    AppRoutes.forgotPassword,
-    AppRoutes.profile,
-    AppRoutes.profileEdit,
-    AppRoutes.profileCreate,
-    AppRoutes.profileDeep,
-    AppRoutes.profilePictureViewer,
-    AppRoutes.favorites,
-    AppRoutes.favoriteDeep,
+    core.AppRoutes.splash,
+    core.AppRoutes.dashboard,
+    core.AppRoutes.auth,
+    core.AppRoutes.login,
+    core.AppRoutes.register,
+    core.AppRoutes.forgotPassword,
+    core.AppRoutes.profile,
+    core.AppRoutes.profileEdit,
+    core.AppRoutes.profileCreate,
+    core.AppRoutes.profileDeep,
+    core.AppRoutes.profilePictureViewer,
+    core.AppRoutes.favorites,
+    core.AppRoutes.favoriteDeep,
   ];
 
   @override
   Route<dynamic>? handleRoute(RouteSettings settings) {
     switch (settings.name) {
-      case AppRoutes.splash:
+      case core.AppRoutes.splash:
         return RouteUtils.createSimpleRoute(child: const core.SplashScreen());
 
-      case AppRoutes.dashboard:
-        return RouteUtils.createSafeRoute(AppRoutes.dashboard, () {
+      case core.AppRoutes.dashboard:
+        return RouteUtils.createSafeRoute(core.AppRoutes.dashboard, () {
           core.AppLogger.info('🏠 Building dashboard screen...');
           return const core.ArtbeatDashboardScreen();
         });
 
-      case AppRoutes.auth:
-      case AppRoutes.login:
+      case core.AppRoutes.auth:
+      case core.AppRoutes.login:
         return RouteUtils.createMainLayoutRoute(child: const LoginScreen());
 
-      case AppRoutes.register:
+      case core.AppRoutes.register:
         return RouteUtils.createMainLayoutRoute(child: const RegisterScreen());
 
-      case AppRoutes.forgotPassword:
+      case core.AppRoutes.forgotPassword:
         return RouteUtils.createMainLayoutRoute(
           child: const ForgotPasswordScreen(),
         );
 
-      case AppRoutes.profile:
+      case core.AppRoutes.profile:
         return _createProfileRoute();
 
-      case AppRoutes.profileEdit:
+      case core.AppRoutes.profileEdit:
         return _createProfileEditRoute();
 
-      case AppRoutes.profileCreate:
+      case core.AppRoutes.profileCreate:
         return _createProfileCreateRoute();
 
-      case AppRoutes.profileDeep:
+      case core.AppRoutes.profileDeep:
         return _createProfileDeepRoute(settings);
 
-      case AppRoutes.profilePictureViewer:
+      case core.AppRoutes.profilePictureViewer:
         return _createProfilePictureViewerRoute(settings);
 
-      case AppRoutes.favorites:
+      case core.AppRoutes.favorites:
         return _createFavoritesRoute();
 
-      case AppRoutes.favoriteDeep:
+      case core.AppRoutes.favoriteDeep:
         return _createFavoriteDeepRoute(settings);
 
       default:

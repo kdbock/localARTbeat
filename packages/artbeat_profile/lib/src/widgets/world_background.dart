@@ -40,11 +40,7 @@ class _WorldBackgroundState extends State<WorldBackground>
         Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [
-                Color(0xFF07060F),
-                Color(0xFF0A1330),
-                Color(0xFF071C18),
-              ],
+              colors: [Color(0xFF07060F), Color(0xFF0A1330), Color(0xFF071C18)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),

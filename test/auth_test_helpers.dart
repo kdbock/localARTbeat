@@ -1,10 +1,14 @@
 // Copyright (c) 2025 ArtBeat. All rights reserved.
 
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:artbeat_auth/artbeat_auth.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'firebase_test_setup.dart';
 
@@ -34,22 +38,23 @@ class _TestAuthScreenWrapperState extends State<TestAuthScreenWrapper> {
   }
 
   Future<void> _initializeFirebase() async {
-    await EasyLocalization.ensureInitialized();
+    SharedPreferences.setMockInitialValues(const {});
     if (widget.mockAuth != null && widget.mockFirestore != null) {
-      // Use provided mocks, assume Firebase is already initialized
+      await EasyLocalization.ensureInitialized();
       if (mounted) {
         setState(() {
           _isInitialized = true;
         });
       }
-    } else {
-      // Initialize Firebase for testing
-      await FirebaseTestSetup.initializeFirebaseForTesting();
-      if (mounted) {
-        setState(() {
-          _isInitialized = true;
-        });
-      }
+      return;
+    }
+
+    await EasyLocalization.ensureInitialized();
+    await FirebaseTestSetup.initializeFirebaseForTesting();
+    if (mounted) {
+      setState(() {
+        _isInitialized = true;
+      });
     }
   }
 
@@ -58,7 +63,14 @@ class _TestAuthScreenWrapperState extends State<TestAuthScreenWrapper> {
     if (!_isInitialized) {
       // Show loading while Firebase initializes
       return const MaterialApp(
-        home: Scaffold(body: Center(child: CircularProgressIndicator())),
+        home: Scaffold(
+          body: Center(
+            child: TickerMode(
+              enabled: false,
+              child: CircularProgressIndicator(),
+            ),
+          ),
+        ),
       );
     }
 
@@ -68,7 +80,15 @@ class _TestAuthScreenWrapperState extends State<TestAuthScreenWrapper> {
       fallbackLocale: const Locale('en'),
       startLocale: const Locale('en'),
       useOnlyLangCode: true,
-      child: MaterialApp(home: widget.child),
+      assetLoader: const _FileAssetLoader(),
+      child: Builder(
+        builder: (BuildContext context) => MaterialApp(
+          locale: context.locale,
+          supportedLocales: context.supportedLocales,
+          localizationsDelegates: context.localizationDelegates,
+          home: widget.child,
+        ),
+      ),
     );
   }
 }
@@ -318,4 +338,25 @@ class _TestSplashScreenState extends State<TestSplashScreen>
       ),
     ),
   );
+}
+
+class _FileAssetLoader extends AssetLoader {
+  const _FileAssetLoader();
+
+  @override
+  Future<Map<String, dynamic>> load(String path, Locale locale) async {
+    final filePath =
+        '${Directory.current.path}/$path/${locale.languageCode}.json';
+    final file = File(filePath);
+    if (!file.existsSync()) {
+      debugPrint('Test localization file missing: $filePath');
+      return const {};
+    }
+    final contents = file.readAsStringSync();
+    final decoded = jsonDecode(contents);
+    if (decoded is Map) {
+      return Map<String, dynamic>.from(decoded);
+    }
+    return const {};
+  }
 }
