@@ -8,7 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../services/auth_service.dart';
 import 'package:artbeat_core/artbeat_core.dart'
-    show ArtbeatColors, ArtbeatInput, ArtbeatButton, ButtonVariant;
+  show ArtbeatInput;
 
 /// Forgot password screen with email reset functionality (Quest theme)
 class ForgotPasswordScreen extends StatefulWidget {

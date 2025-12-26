@@ -5,7 +5,9 @@ import 'package:provider/provider.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../theme/artbeat_colors.dart';
 import '../providers/messaging_provider.dart';
-import 'enhanced_profile_menu.dart';
+// import 'enhanced_profile_menu.dart';
+
+import 'package:artbeat_profile/src/screens/profile_menu_screen.dart';
 
 /// Enhanced Universal Header with improved visual hierarchy and user experience
 ///
@@ -370,17 +372,15 @@ class _EnhancedUniversalHeaderState extends State<EnhancedUniversalHeader>
         Icons.account_circle,
         color: widget.foregroundColor ?? ArtbeatColors.headerText,
       ),
-      onPressed: widget.onProfilePressed ?? () => _showProfileMenu(),
+      onPressed: widget.onProfilePressed ?? () => _goToProfileMenuScreen(),
       tooltip: 'header_tooltip_profile'.tr(),
     );
   }
 
-  void _showProfileMenu() {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => const EnhancedProfileMenu(),
+  void _goToProfileMenuScreen() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const ProfileMenuScreen()),
     );
   }
 

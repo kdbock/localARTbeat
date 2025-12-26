@@ -23,7 +23,7 @@ class CustomSwitchTile extends StatelessWidget {
       subtitle: subtitle != null ? Text(subtitle!) : null,
       value: value,
       onChanged: onChanged,
-      activeColor: ArtbeatColors.primaryPurple,
+      activeThumbColor: ArtbeatColors.primaryPurple,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       tileColor: Colors.white.withOpacity(0.9),

@@ -42,7 +42,14 @@ class _CaptureScreenState extends State<CaptureScreen> {
         if (mounted) {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute<void>(
-              builder: (context) => CaptureDetailScreen(imageFile: imageFile),
+              builder: (context) => CaptureDetailScreen(
+                imageFile: imageFile,
+                title: 'Untitled Capture',
+                description: 'No description provided.',
+                submittedAt: DateTime.now(),
+                xpAwarded: 0,
+                status: 'pending',
+              ),
             ),
           );
         }

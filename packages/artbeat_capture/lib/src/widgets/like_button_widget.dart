@@ -24,7 +24,7 @@ class LikeButtonWidget extends StatefulWidget {
 
 class _LikeButtonWidgetState extends State<LikeButtonWidget> {
   late int _likeCount;
-  late bool _isLiked;
+  bool _isLiked = false;
   bool _isLoading = false;
   final _captureService = CaptureService();
 
@@ -32,6 +32,7 @@ class _LikeButtonWidgetState extends State<LikeButtonWidget> {
   void initState() {
     super.initState();
     _likeCount = widget.initialLikeCount;
+    _isLiked = false; // Ensure initialized before async call
     _checkIfLiked();
   }
 

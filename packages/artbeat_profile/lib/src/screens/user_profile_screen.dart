@@ -108,7 +108,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
 
   Widget _buildFavoritesTab() {
     if (favorites.isEmpty) {
-      return EmptyState(
+      return const EmptyState(
         icon: Icons.favorite_border,
         message: 'No favorites yet.',
       );
@@ -137,7 +137,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
 
   Widget _buildAchievementsTab() {
     if (achievements.isEmpty) {
-      return EmptyState(
+      return const EmptyState(
         icon: Icons.emoji_events_outlined,
         message: 'No achievements unlocked yet.',
       );

@@ -4,7 +4,9 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flag/flag.dart';
 import 'package:artbeat_core/src/theme/artbeat_colors.dart';
+import 'package:artbeat_capture/artbeat_capture.dart';
 
 class AnimatedDashboardScreen extends StatefulWidget {
   const AnimatedDashboardScreen({super.key});
@@ -22,7 +24,6 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
   final int _level = 7;
   final double _xpProgress = 0.62; // 0..1
   final int _streakDays = 4;
-
   @override
   void initState() {
     super.initState();
@@ -34,6 +35,7 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
       vsync: this,
       duration: const Duration(milliseconds: 900),
     )..forward();
+    // No need to listen to locale changes here; rebuilds will be triggered by context.locale changes.
   }
 
   @override
@@ -94,7 +96,9 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                       xpProgress: _xpProgress,
                       streakDays: _streakDays,
                       onProfile: _showProfileMenu,
-                      onSettings: () {}, // hook later
+                      onSettings: () {
+                        Navigator.pushNamed(context, '/settings');
+                      },
                     ),
                   ),
 
@@ -135,9 +139,11 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                                 neon: ArtbeatColors.secondaryTeal,
                                 accent: ArtbeatColors.accentYellow,
                               ),
-                              onTap: () => Navigator.pushNamed(
-                                context,
-                                '/capture/dashboard',
+                              onTap: () => Navigator.of(context).push(
+                                MaterialPageRoute<Widget>(
+                                  builder: (context) =>
+                                      const EnhancedCaptureDashboardScreen(),
+                                ),
                               ),
                             ),
                           ),
@@ -177,7 +183,7 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                               subtitle: 'animated_dashboard_explore_subtitle'
                                   .tr(),
                               tag: 'animated_dashboard_explore_tag'.tr(),
-                              icon: Icons.explore_rounded,
+                              icon: Icons.route_rounded,
                               palette: const _QuestPalette(
                                 base: ArtbeatColors.primaryGreen,
                                 neon: ArtbeatColors.accentYellow,
@@ -276,6 +282,8 @@ class _GameHUD extends StatelessWidget {
               Expanded(child: _XPBar(progress: xpProgress)),
               const SizedBox(width: 10),
               _Streak(streakDays: streakDays),
+              const SizedBox(width: 10),
+              const _LanguageSelector(),
             ],
           ),
         ),
@@ -1034,6 +1042,142 @@ class _Streak extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+/// =======================
+/// Language Selector
+/// =======================
+
+class _LanguageSelector extends StatelessWidget {
+  const _LanguageSelector();
+
+  @override
+  Widget build(BuildContext context) {
+    final currentLocale = context.locale;
+    final String currentLang = currentLocale.languageCode;
+    final String flagCode = _getFlagCode(currentLang);
+
+    return PopupMenuButton<String>(
+      onSelected: (String lang) {
+        context.setLocale(Locale(lang));
+      },
+      itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+        const PopupMenuItem<String>(
+          value: 'en',
+          child: Row(
+            children: [
+              Flag.fromString('US', height: 20, width: 30),
+              SizedBox(width: 8),
+              Text('English'),
+            ],
+          ),
+        ),
+        const PopupMenuItem<String>(
+          value: 'ar',
+          child: Row(
+            children: [
+              Flag.fromString('SA', height: 20, width: 30),
+              SizedBox(width: 8),
+              Text('العربية'),
+            ],
+          ),
+        ),
+        const PopupMenuItem<String>(
+          value: 'de',
+          child: Row(
+            children: [
+              Flag.fromString('DE', height: 20, width: 30),
+              SizedBox(width: 8),
+              Text('Deutsch'),
+            ],
+          ),
+        ),
+        const PopupMenuItem<String>(
+          value: 'es',
+          child: Row(
+            children: [
+              Flag.fromString('ES', height: 20, width: 30),
+              SizedBox(width: 8),
+              Text('Español'),
+            ],
+          ),
+        ),
+        const PopupMenuItem<String>(
+          value: 'fr',
+          child: Row(
+            children: [
+              Flag.fromString('FR', height: 20, width: 30),
+              SizedBox(width: 8),
+              Text('Français'),
+            ],
+          ),
+        ),
+        const PopupMenuItem<String>(
+          value: 'pt',
+          child: Row(
+            children: [
+              Flag.fromString('PT', height: 20, width: 30),
+              SizedBox(width: 8),
+              Text('Português'),
+            ],
+          ),
+        ),
+        const PopupMenuItem<String>(
+          value: 'zh',
+          child: Row(
+            children: [
+              Flag.fromString('CN', height: 20, width: 30),
+              SizedBox(width: 8),
+              Text('中文'),
+            ],
+          ),
+        ),
+      ],
+      child: Container(
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14),
+          color: Colors.white.withValues(alpha: 0.08),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
+        ),
+        child: Stack(
+          children: [
+            Flag.fromString(flagCode, height: 24, width: 32),
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: Icon(
+                Icons.arrow_drop_down,
+                size: 12,
+                color: Colors.white.withValues(alpha: 0.8),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _getFlagCode(String lang) {
+    switch (lang) {
+      case 'en':
+        return 'US';
+      case 'ar':
+        return 'SA';
+      case 'de':
+        return 'DE';
+      case 'es':
+        return 'ES';
+      case 'fr':
+        return 'FR';
+      case 'pt':
+        return 'PT';
+      case 'zh':
+        return 'CN';
+      default:
+        return 'US';
+    }
   }
 }
 

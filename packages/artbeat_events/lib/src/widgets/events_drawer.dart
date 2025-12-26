@@ -63,6 +63,7 @@ class _EventsDrawerState extends State<EventsDrawer> {
         if (!mounted) return;
         setState(() => _isLoading = false);
       }
+    // ignore: avoid_catches_without_on_clauses
     } catch (e) {
       AppLogger.error('Error loading current user: $e');
       if (!mounted) return;
@@ -85,6 +86,7 @@ class _EventsDrawerState extends State<EventsDrawer> {
           _upcomingEvents = upcomingEvents;
         });
       }
+    // ignore: avoid_catches_without_on_clauses
     } catch (e) {
       AppLogger.error('Error loading user events: $e');
     }
@@ -426,7 +428,7 @@ class _EventsDrawerState extends State<EventsDrawer> {
                         ),
                       ),
                     ),
-                    errorWidget: (_, __, ___) => const Center(
+                    errorWidget: (_, _, _) => const Center(
                       child: Icon(Icons.person, color: Colors.white, size: 26),
                     ),
                   )

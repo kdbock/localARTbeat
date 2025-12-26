@@ -4,7 +4,7 @@ import 'package:artbeat_profile/artbeat_profile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import '../app_routes.dart';
+import 'package:artbeat_core/src/routing/app_routes.dart';
 import '../route_utils.dart';
 
 /// Handles core application routes (auth, dashboard, profile)
@@ -12,7 +12,7 @@ class CoreRouteHandler implements RouteHandler {
   @override
   bool canHandle(String routeName) => _coreRoutes.contains(routeName);
 
-  static const List<String> _coreRoutes = [
+  static final List<String> _coreRoutes = [
     AppRoutes.splash,
     AppRoutes.dashboard,
     AppRoutes.auth,
@@ -143,16 +143,14 @@ class CoreRouteHandler implements RouteHandler {
     if (imageUrl == null) {
       return RouteUtils.createErrorRoute('No image URL provided');
     }
-    final userId = RouteUtils.getArgument<String>(settings, 'userId') ??
+    final userId =
+        RouteUtils.getArgument<String>(settings, 'userId') ??
         FirebaseAuth.instance.currentUser?.uid;
     if (userId == null) {
       return RouteUtils.createErrorRoute('No user ID provided');
     }
     return RouteUtils.createMainLayoutRoute(
-      child: ProfilePictureViewerScreen(
-        imageUrl: imageUrl,
-        userId: userId,
-      ),
+      child: ProfilePictureViewerScreen(imageUrl: imageUrl, userId: userId),
     );
   }
 

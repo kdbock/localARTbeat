@@ -9,7 +9,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../services/auth_service.dart';
-import 'package:artbeat_core/artbeat_core.dart' show ArtbeatColors, ArtbeatInput;
+import 'package:artbeat_core/artbeat_core.dart' show ArtbeatInput;
 import '../constants/routes.dart';
 
 /// Login screen with email/password authentication (Quest theme)

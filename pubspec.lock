@@ -580,6 +580,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.3.1"
+  enum_to_string:
+    dependency: transitive
+    description:
+      name: enum_to_string
+      sha256: "93b75963d3b0c9f6a90c095b3af153e1feccb79f6f08282d3274ff8d9eea52bc"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.1"
   equatable:
     dependency: transitive
     description:
@@ -876,6 +884,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.69.2"
+  flag:
+    dependency: "direct main"
+    description:
+      name: flag
+      sha256: "69e3e1d47453349ef72e2ebf4234b88024c0d57f9bcfaa7cc7facec49cd8561f"
+      url: "https://pub.dev"
+    source: hosted
+    version: "7.0.2"
   flex_color_picker:
     dependency: transitive
     description:

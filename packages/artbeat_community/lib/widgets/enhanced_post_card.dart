@@ -86,6 +86,7 @@ class _Glass extends StatelessWidget {
   }
 }
 
+// ignore: unused_element
 class _GradientIconChip extends StatelessWidget {
   const _GradientIconChip({required this.icon, required this.size});
   final IconData icon;

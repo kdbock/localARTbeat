@@ -2,7 +2,7 @@ import 'package:artbeat_events/artbeat_events.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import '../app_routes.dart';
+import 'package:artbeat_core/src/routing/app_routes.dart';
 
 class EventsRouteHandler {
   static Widget handleEventsRoute(String routeName, Object? arguments) {

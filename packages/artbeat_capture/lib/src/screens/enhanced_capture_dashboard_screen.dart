@@ -5,6 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:artbeat_profile/src/screens/profile_menu_screen.dart';
 
 /// Quest-style Capture Dashboard (Local ARTbeat)
 /// - Same services/data/routes as your original
@@ -251,11 +252,8 @@ class _EnhancedCaptureDashboardScreenState
   }
 
   void _showProfileMenu(BuildContext context) {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => const EnhancedProfileMenu(),
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(builder: (context) => const ProfileMenuScreen()),
     );
   }
 
@@ -449,6 +447,7 @@ class _EnhancedCaptureDashboardScreenState
 
     return Scaffold(
       backgroundColor: const Color(0xFF07060F),
+      drawer: const CaptureDrawer(),
       body: Stack(
         children: [
           // Ambient animated background (no heavy overlay blocks)
@@ -461,7 +460,6 @@ class _EnhancedCaptureDashboardScreenState
               ),
             ),
           ),
-
           SafeArea(
             child: _isLoading
                 ? const Center(
@@ -479,106 +477,44 @@ class _EnhancedCaptureDashboardScreenState
                       controller: _scrollController,
                       physics: const BouncingScrollPhysics(),
                       slivers: [
+                        // Wrap _TopHudBar in a Builder to provide context under Scaffold
+                        SliverToBoxAdapter(
+                          child: Builder(
+                            builder: (context) => _TopHudBar(
+                              title: 'capture_dashboard_title'.tr(),
+                              subtitle: 'capture_dashboard_subtitle'.tr(),
+                              onMenu: () => Scaffold.of(context).openDrawer(),
+                              onSearch: () => _showSearchModal(context),
+                              onProfile: () => _showProfileMenu(context),
+                            ),
+                          ),
+                        ),
+                        // Quest tracker section
                         SliverToBoxAdapter(
                           child: Padding(
-                            padding: const EdgeInsets.fromLTRB(14, 10, 14, 0),
+                            padding: const EdgeInsets.fromLTRB(14, 18, 14, 10),
                             child: _StampFadeIn(
                               intro: _intro,
-                              delay: 0.0,
-                              child: _TopHudBar(
-                                title: 'capture_dashboard_title_capture'.tr(),
-                                subtitle:
-                                    'capture_dashboard_subtitle_capture'.tr(),
-                                onMenu: () => Scaffold.of(context).openDrawer(),
-                                onSearch: () => _showSearchModal(context),
-                                onProfile: () => _showProfileMenu(context),
+                              delay: 0.2,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _SectionHeader(
+                                    title:
+                                        'capture_dashboard_section_quest_tracker_title'
+                                            .tr(),
+                                    subtitle:
+                                        'capture_dashboard_section_quest_tracker_subtitle'
+                                            .tr(),
+                                    accent: const Color(0xFF34D399),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  _CaptureMissionList(missions: missionData),
+                                ],
                               ),
                             ),
                           ),
                         ),
-
-                        // Hero / Quest banner
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(14, 14, 14, 0),
-                            child: _StampFadeIn(
-                              intro: _intro,
-                              delay: 0.08,
-                              child: _QuestHeroCard(
-                                username: _currentUser?.username,
-                                onStart: _startCaptureFlow,
-                                loop: _loop,
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        // HUD stats
-                        if (_currentUser != null)
-                          SliverToBoxAdapter(
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(14, 14, 14, 0),
-                              child: _StampFadeIn(
-                                intro: _intro,
-                                delay: 0.14,
-                                child: _ImpactHud(
-                                  totalCaptures: _totalUserCaptures,
-                                  totalViews: _totalCommunityViews,
-                                  loop: _loop,
-                                  userLevel: userLevel,
-                                  userXp: userXp,
-                                  communityPulse: _communityEngagementScore,
-                                ),
-                              ),
-                            ),
-                          ),
-
-                        if (quickActions.isNotEmpty)
-                          SliverToBoxAdapter(
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(14, 14, 14, 0),
-                              child: _StampFadeIn(
-                                intro: _intro,
-                                delay: 0.18,
-                                child: _CaptureQuickActions(
-                                  actions: quickActions,
-                                ),
-                              ),
-                            ),
-                          ),
-
-                        if (missionData.isNotEmpty)
-                          SliverToBoxAdapter(
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(
-                                14,
-                                18,
-                                14,
-                                10,
-                              ),
-                              child: _StampFadeIn(
-                                intro: _intro,
-                                delay: 0.2,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    _SectionHeader(
-                                      title:
-                                          'capture_dashboard_section_quest_tracker_title'
-                                              .tr(),
-                                      subtitle:
-                                          'capture_dashboard_section_quest_tracker_subtitle'
-                                              .tr(),
-                                      accent: const Color(0xFF34D399),
-                                    ),
-                                    const SizedBox(height: 12),
-                                    _CaptureMissionList(missions: missionData),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-
                         if (_communityCaptures.isNotEmpty)
                           SliverToBoxAdapter(
                             child: Padding(
@@ -599,12 +535,16 @@ class _EnhancedCaptureDashboardScreenState
                               ),
                             ),
                           ),
-
                         // Recent (loot grid)
                         if (_recentCaptures.isNotEmpty)
                           SliverToBoxAdapter(
                             child: Padding(
-                              padding: const EdgeInsets.fromLTRB(14, 18, 14, 10),
+                              padding: const EdgeInsets.fromLTRB(
+                                14,
+                                18,
+                                14,
+                                10,
+                              ),
                               child: _SectionHeader(
                                 title:
                                     'capture_dashboard_section_recent_loot_title'
@@ -616,7 +556,6 @@ class _EnhancedCaptureDashboardScreenState
                               ),
                             ),
                           ),
-
                         if (_recentCaptures.isNotEmpty)
                           SliverPadding(
                             padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -641,12 +580,16 @@ class _EnhancedCaptureDashboardScreenState
                               }, childCount: _recentCaptures.length),
                             ),
                           ),
-
                         // Community inspiration
                         if (_communityCaptures.isNotEmpty)
                           SliverToBoxAdapter(
                             child: Padding(
-                              padding: const EdgeInsets.fromLTRB(14, 20, 14, 10),
+                              padding: const EdgeInsets.fromLTRB(
+                                14,
+                                20,
+                                14,
+                                10,
+                              ),
                               child: _SectionHeader(
                                 title:
                                     'capture_dashboard_section_inspiration_title'
@@ -658,7 +601,6 @@ class _EnhancedCaptureDashboardScreenState
                               ),
                             ),
                           ),
-
                         if (_communityCaptures.isNotEmpty)
                           SliverToBoxAdapter(
                             child: SizedBox(
@@ -681,7 +623,6 @@ class _EnhancedCaptureDashboardScreenState
                               ),
                             ),
                           ),
-
                         // Keep your existing artist CTA
                         const SliverToBoxAdapter(
                           child: Padding(
@@ -689,7 +630,6 @@ class _EnhancedCaptureDashboardScreenState
                             child: CompactArtistCTAWidget(),
                           ),
                         ),
-
                         const SliverToBoxAdapter(child: SizedBox(height: 110)),
                       ],
                     ),

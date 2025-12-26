@@ -1,164 +1,157 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:artbeat_core/artbeat_core.dart' as core;
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-/// Read-only screen for viewing existing capture details
+import '../widgets/glass_card.dart';
+import '../widgets/hud_button.dart';
+import '../widgets/hud_top_bar.dart';
+
 class CaptureViewScreen extends StatelessWidget {
-  final core.CaptureModel capture;
+  final File imageFile;
+  final String title;
+  final String description;
 
-  const CaptureViewScreen({Key? key, required this.capture}) : super(key: key);
+  const CaptureViewScreen({
+    super.key,
+    required this.imageFile,
+    required this.title,
+    required this.description,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          capture.title ?? 'capture_detail_viewer_default_title'.tr(),
-        ),
-        backgroundColor: core.ArtbeatColors.primaryPurple,
-        foregroundColor: Colors.white,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Image
-            if (capture.imageUrl.isNotEmpty) ...[
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: core.OptimizedImage(
-                  imageUrl: capture.imageUrl,
-                  width: double.infinity,
-                  height: 300,
-                  fit: BoxFit.cover,
-                ),
+      backgroundColor: const Color(0xFF07060F),
+      body: Stack(
+        children: [
+          // ------------------------
+          // BACKGROUND GRADIENT
+          // ------------------------
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFF07060F),
+                  Color(0xFF0B1222),
+                  Color(0xFF0A1B15),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-              const SizedBox(height: 16),
-            ],
-
-            // Title
-            Text(
-              capture.title ?? 'capture_detail_viewer_untitled'.tr(),
-              style: Theme.of(
-                context,
-              ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
+          ),
 
-            // Artist
-            if (capture.artistName != null) ...[
-              const SizedBox(height: 8),
-              Text(
-                'capture_detail_viewer_by_artist'.tr().replaceAll(
-                  '{artist}',
-                  capture.artistName!,
-                ),
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontStyle: FontStyle.italic,
-                  color: Colors.grey[600],
-                ),
-              ),
-            ],
-
-            // Art Type
-            if (capture.artType != null) ...[
-              const SizedBox(height: 16),
-              _buildInfoRow(
-                context,
-                Icons.palette,
-                'Art Type',
-                capture.artType!,
-              ),
-            ],
-
-            // Art Medium
-            if (capture.artMedium != null) ...[
-              const SizedBox(height: 8),
-              _buildInfoRow(context, Icons.brush, 'Medium', capture.artMedium!),
-            ],
-
-            // Location
-            if (capture.locationName != null) ...[
-              const SizedBox(height: 8),
-              _buildInfoRow(
-                context,
-                Icons.location_on,
-                'Location',
-                capture.locationName!,
-              ),
-            ],
-
-            // Description
-            if (capture.description != null &&
-                capture.description!.isNotEmpty) ...[
-              const SizedBox(height: 16),
-              Text(
-                'capture_detail_viewer_description'.tr(),
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                capture.description!,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ],
-
-            // Created date
-            const SizedBox(height: 16),
-            _buildInfoRow(
-              context,
-              Icons.calendar_today,
-              'Captured',
-              _formatDate(capture.createdAt),
-            ),
-
-            // Privacy status
-            const SizedBox(height: 8),
-            _buildInfoRow(
-              context,
-              capture.isPublic ? Icons.public : Icons.lock,
-              'Visibility',
-              capture.isPublic ? 'Public' : 'Private',
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInfoRow(
-    BuildContext context,
-    IconData icon,
-    String label,
-    String value,
-  ) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, size: 20, color: Colors.grey[600]),
-        const SizedBox(width: 8),
-        Expanded(
-          child: RichText(
-            text: TextSpan(
-              style: Theme.of(context).textTheme.bodyMedium,
+          // ------------------------
+          // CONTENT
+          // ------------------------
+          SafeArea(
+            child: Column(
               children: [
-                TextSpan(
-                  text: '$label: ',
-                  style: const TextStyle(fontWeight: FontWeight.w500),
+                HudTopBar(
+                  title: 'capture_view_title'.tr(),
+                  subtitle: 'capture_view_subtitle'.tr(),
+                  onBack: () => Navigator.pop(context),
                 ),
-                TextSpan(text: value),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(18),
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 520),
+                        child: GlassCard(
+                          radius: 26,
+                          padding: const EdgeInsets.all(18),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // ------------------------
+                              // IMAGE PREVIEW
+                              // ------------------------
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(22),
+                                child: Image.file(
+                                  imageFile,
+                                  width: double.infinity,
+                                  height: 240,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+
+                              const SizedBox(height: 18),
+
+                              // ------------------------
+                              // TITLE
+                              // ------------------------
+                              Text(
+                                title,
+                                style: GoogleFonts.spaceGrotesk(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900,
+                                  color: Colors.white.withAlpha(
+                                    (0.95 * 255).toInt(),
+                                  ),
+                                ),
+                              ),
+
+                              const SizedBox(height: 6),
+
+                              // ------------------------
+                              // DESCRIPTION
+                              // ------------------------
+                              Text(
+                                description,
+                                style: GoogleFonts.spaceGrotesk(
+                                  fontSize: 13.5,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white.withAlpha(
+                                    (0.7 * 255).toInt(),
+                                  ),
+                                ),
+                              ),
+
+                              const SizedBox(height: 24),
+
+                              // ------------------------
+                              // ACTION BUTTONS
+                              // ------------------------
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: HudButton(
+                                      label: 'capture_view_edit'.tr(),
+                                      icon: Icons.edit_rounded,
+                                      onTap: () => Navigator.pop(context),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: HudButton(
+                                      label: 'capture_view_submit'.tr(),
+                                      icon: Icons.cloud_upload_rounded,
+                                      onTap: () {
+                                        // TODO: Trigger final submit logic
+                                        Navigator.popUntil(
+                                          context,
+                                          (route) => route.isFirst,
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
-  }
-
-  String _formatDate(DateTime? date) {
-    if (date == null) return 'Unknown';
-    return '${date.day}/${date.month}/${date.year}';
   }
 }

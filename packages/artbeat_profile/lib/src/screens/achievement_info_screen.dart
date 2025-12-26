@@ -196,7 +196,7 @@ class AchievementInfoScreen extends StatelessWidget {
                 style: GoogleFonts.spaceGrotesk(
                   fontSize: 14,
                   fontWeight: FontWeight.w800,
-                  color: Color(0xFF7C4DFF),
+                  color: const Color(0xFF7C4DFF),
                 ),
               ),
             ],

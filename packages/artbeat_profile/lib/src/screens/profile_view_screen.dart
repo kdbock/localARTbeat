@@ -3,9 +3,18 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_capture/artbeat_capture.dart';
+import 'package:artbeat_capture/artbeat_capture.dart' as capture;
 import 'package:google_fonts/google_fonts.dart';
-import 'package:artbeat_profile/widgets/widgets.dart';
+import 'package:artbeat_profile/src/widgets/design_system.dart';
+import 'package:artbeat_profile/src/widgets/hud_top_bar.dart';
+import 'package:artbeat_profile/src/widgets/glass_card.dart';
+import 'package:artbeat_profile/src/widgets/recent_badges_carousel.dart';
+import 'package:artbeat_profile/src/widgets/dynamic_achievements_tab.dart';
+import 'package:artbeat_profile/src/widgets/progress_tab.dart';
+import 'package:artbeat_profile/src/widgets/enhanced_stats_grid.dart';
+import 'package:artbeat_profile/src/widgets/level_progress_bar.dart';
+import 'package:artbeat_profile/src/widgets/streak_display.dart';
+import 'package:artbeat_profile/src/widgets/world_background.dart';
 import 'package:artbeat_core/src/services/achievement_service.dart';
 import '../services/profile_connection_service.dart';
 
@@ -27,11 +36,11 @@ class _ProfileViewScreenState extends State<ProfileViewScreen>
     with SingleTickerProviderStateMixin {
   final User? currentUser = FirebaseAuth.instance.currentUser;
   final UserService _userService = UserService();
-  final CaptureService _captureService = CaptureService();
-  final AchievementService _achievementService = AchievementService();
+  final capture.CaptureService _captureService = capture.CaptureService();
   final ProfileConnectionService _connectionService =
       ProfileConnectionService();
   late TabController _tabController;
+  final AchievementService _achievementService = AchievementService();
 
   bool _isLoading = true;
   UserModel? _userModel;

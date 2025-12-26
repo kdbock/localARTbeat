@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
-import '../models/models.dart';
-import '../services/settings_service.dart';
+
+import '../widgets/hud_top_bar.dart';
+import '../widgets/settings_category_header.dart';
+import '../widgets/settings_section_card.dart';
+import '../widgets/settings_toggle_row.dart';
 
 class NotificationSettingsScreen extends StatefulWidget {
   const NotificationSettingsScreen({super.key});
@@ -13,353 +15,93 @@ class NotificationSettingsScreen extends StatefulWidget {
 
 class _NotificationSettingsScreenState
     extends State<NotificationSettingsScreen> {
-  final _settingsService = SettingsService();
-  NotificationSettingsModel? _notificationSettings;
-  bool _isLoading = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadNotificationSettings();
-  }
-
-  Future<void> _loadNotificationSettings() async {
-    setState(() => _isLoading = true);
-
-    try {
-      final settings = await _settingsService.getNotificationSettings();
-      if (mounted) {
-        setState(() => _notificationSettings = settings);
-      }
-    } catch (e) {
-      if (mounted) {
-        _showErrorMessage('settings_load_failed'.tr());
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
-  }
-
-  void _showErrorMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.red),
-    );
-  }
-
-  void _showSuccessMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.green),
-    );
-  }
-
-  Future<void> _updateSettings(NotificationSettingsModel settings) async {
-    try {
-      await _settingsService.saveNotificationSettings(settings);
-      if (mounted) {
-        setState(() => _notificationSettings = settings);
-        _showSuccessMessage('settings_updated'.tr());
-      }
-    } catch (e) {
-      if (mounted) {
-        _showErrorMessage('settings_update_failed'.tr());
-      }
-    }
-  }
+  bool captureAlerts = true;
+  bool comments = true;
+  bool tipsAndUpdates = false;
+  bool challenges = true;
 
   @override
   Widget build(BuildContext context) {
-    return _isLoading
-        ? const Center(child: CircularProgressIndicator())
-        : _buildNotificationSettings();
-  }
+    return Scaffold(
+      backgroundColor: const Color(0xFF07060F),
+      body: Stack(
+        children: [
+          // Background
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFF07060F),
+                  Color(0xFF0B1222),
+                  Color(0xFF0A1B15),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+          ),
 
-  Widget _buildNotificationSettings() {
-    if (_notificationSettings == null)
-      return Center(child: Text('settings_no_settings'.tr()));
-
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        _buildEmailSettings(),
-        const SizedBox(height: 24),
-        _buildPushSettings(),
-        const SizedBox(height: 24),
-        _buildInAppSettings(),
-        const SizedBox(height: 24),
-        _buildQuietHoursSettings(),
-      ],
-    );
-  }
-
-  Widget _buildEmailSettings() {
-    final email = _notificationSettings!.email;
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+          SafeArea(
+            child: Column(
               children: [
-                const Icon(Icons.email),
-                const SizedBox(width: 8),
-                Text(
-                  'settings_email_notifications'.tr(),
-                  style: Theme.of(context).textTheme.titleMedium,
+                HudTopBar(
+                  title: 'notification_settings_title',
+                  subtitle: 'notification_settings_subtitle',
+                  onBack: () => Navigator.of(context).maybePop(),
                 ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            SwitchListTile(
-              title: Text('settings_enable_email_notifications'.tr()),
-              subtitle: Text('settings_receive_notifications_email'.tr()),
-              value: email.enabled,
-              onChanged: (value) {
-                final updated = _notificationSettings!.copyWith(
-                  email: email.copyWith(enabled: value),
-                );
-                _updateSettings(updated);
-              },
-            ),
-            if (email.enabled) ...[
-              const Divider(),
-              ListTile(
-                title: Text('settings_frequency'.tr()),
-                subtitle: Text(
-                  'settings_currently'.tr(
-                    namedArgs: {'value': email.frequency},
+
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(top: 8, bottom: 32),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SettingsCategoryHeader(title: 'Notifications'),
+
+                        SettingsSectionCard(
+                          child: Column(
+                            children: [
+                              SettingsToggleRow(
+                                title: 'New Capture Alerts',
+                                subtitle:
+                                    'Get notified when new captures are posted',
+                                value: captureAlerts,
+                                onChanged: (v) =>
+                                    setState(() => captureAlerts = v),
+                              ),
+                              SettingsToggleRow(
+                                title: 'Comments & Replies',
+                                subtitle: 'Activity on your submissions',
+                                value: comments,
+                                onChanged: (v) => setState(() => comments = v),
+                              ),
+                              SettingsToggleRow(
+                                title: 'App Tips & Updates',
+                                subtitle:
+                                    'News, tips, and version announcements',
+                                value: tipsAndUpdates,
+                                onChanged: (v) =>
+                                    setState(() => tipsAndUpdates = v),
+                              ),
+                              SettingsToggleRow(
+                                title: 'Challenges & Events',
+                                subtitle: 'Alerts for upcoming challenges',
+                                value: challenges,
+                                onChanged: (v) =>
+                                    setState(() => challenges = v),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                trailing: DropdownButton<String>(
-                  value: email.frequency,
-                  items: [
-                    DropdownMenuItem(
-                      value: 'immediate',
-                      child: Text('settings_frequency_immediate'.tr()),
-                    ),
-                    DropdownMenuItem(
-                      value: 'daily',
-                      child: Text('settings_frequency_daily'.tr()),
-                    ),
-                    DropdownMenuItem(
-                      value: 'weekly',
-                      child: Text('settings_frequency_weekly'.tr()),
-                    ),
-                    DropdownMenuItem(
-                      value: 'never',
-                      child: Text('settings_never'.tr()),
-                    ),
-                  ],
-                  onChanged: (value) {
-                    if (value != null) {
-                      final updated = _notificationSettings!.copyWith(
-                        email: email.copyWith(frequency: value),
-                      );
-                      _updateSettings(updated);
-                    }
-                  },
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPushSettings() {
-    final push = _notificationSettings!.push;
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.notifications),
-                const SizedBox(width: 8),
-                Text(
-                  'settings_push_notifications'.tr(),
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
               ],
             ),
-            const SizedBox(height: 16),
-            SwitchListTile(
-              title: Text('settings_enable_push_notifications'.tr()),
-              subtitle: Text('settings_receive_notifications_device'.tr()),
-              value: push.enabled,
-              onChanged: (value) {
-                final updated = _notificationSettings!.copyWith(
-                  push: push.copyWith(enabled: value),
-                );
-                _updateSettings(updated);
-              },
-            ),
-            if (push.enabled) ...[
-              const Divider(),
-              SwitchListTile(
-                title: Text('settings_sound'.tr()),
-                subtitle: Text('settings_play_sound_notifications'.tr()),
-                value: push.allowSounds,
-                onChanged: (value) {
-                  final updated = _notificationSettings!.copyWith(
-                    push: push.copyWith(allowSounds: value),
-                  );
-                  _updateSettings(updated);
-                },
-              ),
-              SwitchListTile(
-                title: Text('settings_vibration'.tr()),
-                subtitle: Text('settings_vibrate_notifications'.tr()),
-                value: push.allowVibration,
-                onChanged: (value) {
-                  final updated = _notificationSettings!.copyWith(
-                    push: push.copyWith(allowVibration: value),
-                  );
-                  _updateSettings(updated);
-                },
-              ),
-              SwitchListTile(
-                title: Text('settings_badges'.tr()),
-                subtitle: Text('settings_show_notification_count'.tr()),
-                value: push.allowBadges,
-                onChanged: (value) {
-                  final updated = _notificationSettings!.copyWith(
-                    push: push.copyWith(allowBadges: value),
-                  );
-                  _updateSettings(updated);
-                },
-              ),
-            ],
-          ],
-        ),
+          ),
+        ],
       ),
     );
-  }
-
-  Widget _buildInAppSettings() {
-    final inApp = _notificationSettings!.inApp;
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.notifications_active),
-                const SizedBox(width: 8),
-                Text(
-                  'settings_in_app_notifications'.tr(),
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            SwitchListTile(
-              title: Text('settings_enable_in_app_notifications'.tr()),
-              subtitle: Text('settings_show_notifications_using_app'.tr()),
-              value: inApp.enabled,
-              onChanged: (value) {
-                final updated = _notificationSettings!.copyWith(
-                  inApp: inApp.copyWith(enabled: value),
-                );
-                _updateSettings(updated);
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildQuietHoursSettings() {
-    final quietHours = _notificationSettings!.quietHours;
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.nightlight_round),
-                const SizedBox(width: 8),
-                Text(
-                  'settings_quiet_hours'.tr(),
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            SwitchListTile(
-              title: Text('settings_enable_quiet_hours'.tr()),
-              subtitle: Text('settings_reduce_notifications_hours'.tr()),
-              value: quietHours.enabled,
-              onChanged: (value) {
-                final updated = _notificationSettings!.copyWith(
-                  quietHours: quietHours.copyWith(enabled: value),
-                );
-                _updateSettings(updated);
-              },
-            ),
-            if (quietHours.enabled) ...[
-              const Divider(),
-              ListTile(
-                title: Text('settings_start_time'.tr()),
-                subtitle: Text(quietHours.startTime),
-                trailing: const Icon(Icons.access_time),
-                onTap: () => _selectTime(context, quietHours.startTime, true),
-              ),
-              ListTile(
-                title: Text('settings_end_time'.tr()),
-                subtitle: Text(quietHours.endTime),
-                trailing: const Icon(Icons.access_time),
-                onTap: () => _selectTime(context, quietHours.endTime, false),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _selectTime(
-    BuildContext context,
-    String currentTime,
-    bool isStartTime,
-  ) async {
-    final parts = currentTime.split(':');
-    final initialTime = TimeOfDay(
-      hour: int.parse(parts[0]),
-      minute: int.parse(parts[1]),
-    );
-
-    final selectedTime = await showTimePicker(
-      context: context,
-      initialTime: initialTime,
-    );
-
-    if (selectedTime != null) {
-      final timeString =
-          '${selectedTime.hour.toString().padLeft(2, '0')}:'
-          '${selectedTime.minute.toString().padLeft(2, '0')}';
-
-      final quietHours = _notificationSettings!.quietHours;
-      final updated = _notificationSettings!.copyWith(
-        quietHours: isStartTime
-            ? quietHours.copyWith(startTime: timeString)
-            : quietHours.copyWith(endTime: timeString),
-      );
-      _updateSettings(updated);
-    }
   }
 }

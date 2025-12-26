@@ -2,7 +2,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:artbeat_core/artbeat_core.dart';
 
 class AvatarPicker extends StatefulWidget {
   final String? imageUrl;
@@ -56,7 +55,7 @@ class _AvatarPickerState extends State<AvatarPicker> {
                 : null,
           ),
           Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: Colors.black54,
               shape: BoxShape.circle,
             ),

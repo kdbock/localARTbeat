@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:artbeat_admin/artbeat_admin.dart' as admin;
 import 'package:artbeat_ads/artbeat_ads.dart' as ads;
 import 'package:artbeat_art_walk/artbeat_art_walk.dart' as art_walk;
@@ -23,7 +24,7 @@ import '../screens/about_screen.dart';
 import '../screens/privacy_policy_screen.dart';
 import '../screens/rewards_screen.dart';
 import '../screens/terms_of_service_screen.dart';
-import 'app_routes.dart';
+import 'package:artbeat_core/src/routing/app_routes.dart';
 import 'route_utils.dart';
 
 /// Main application router that handles all route generation
@@ -735,7 +736,29 @@ class AppRouter {
         // Redirect to capture package for captures functionality
         return RouteUtils.createMainLayoutRoute(
           currentIndex: 1,
-          child: const capture.MyCapturesScreen(),
+          child: Builder(
+            builder: (context) {
+              final userId = FirebaseAuth.instance.currentUser?.uid;
+              if (userId == null) {
+                return const Center(
+                  child: Text('Please log in to view your captures'),
+                );
+              }
+              return FutureBuilder<List<capture.CaptureModel>>(
+                future: capture.CaptureService().getCapturesForUser(userId),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return const Center(child: Text('Error loading captures'));
+                  }
+                  final captures = snapshot.data ?? [];
+                  return capture.MyCapturesScreen(captures: captures);
+                },
+              );
+            },
+          ),
         );
 
       case AppRoutes.artWalkCompleted:
@@ -1453,79 +1476,72 @@ class AppRouter {
   Route<dynamic>? _handleCaptureRoutes(RouteSettings settings) {
     switch (settings.name) {
       case AppRoutes.captures:
+      case AppRoutes.captureMyCaptures:
+      case AppRoutes.capturePending:
+      case AppRoutes.captureMap:
+      case AppRoutes.captureApproved:
+      case AppRoutes.captureGallery:
+      case AppRoutes.capturePublic:
         return RouteUtils.createMainLayoutRoute(
-          currentIndex: 2,
-          drawer: const capture.CaptureDrawer(),
-          child: const capture.EnhancedCaptureDashboardScreen(),
+          child: Builder(
+            builder: (context) {
+              final userId = FirebaseAuth.instance.currentUser?.uid;
+              if (userId == null) {
+                return const Center(
+                  child: Text('Please log in to view your captures'),
+                );
+              }
+              return FutureBuilder<List<capture.CaptureModel>>(
+                future: capture.CaptureService().getCapturesForUser(userId),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return const Center(child: Text('Error loading captures'));
+                  }
+                  final captures = snapshot.data ?? [];
+                  switch (settings.name) {
+                    case AppRoutes.captures:
+                    case AppRoutes.capturePending:
+                    case AppRoutes.captureMap:
+                    case AppRoutes.captureApproved:
+                    case AppRoutes.captureGallery:
+                    case AppRoutes.capturePublic:
+                      return capture.CapturesListScreen(captures: captures);
+                    case AppRoutes.captureMyCaptures:
+                      return capture.MyCapturesScreen(captures: captures);
+                    default:
+                      return capture.CapturesListScreen(captures: captures);
+                  }
+                },
+              );
+            },
+          ),
+        );
+      case AppRoutes.captureBrowse:
+        return RouteUtils.createMainLayoutRoute(
+          child: FutureBuilder<List<capture.CaptureModel>>(
+            future: capture.CaptureService().getAllCapturesFresh(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError) {
+                return const Center(
+                  child: Text('Error loading community captures'),
+                );
+              }
+              final captures = snapshot.data ?? [];
+              return capture.CapturesListScreen(captures: captures);
+            },
+          ),
         );
 
+      // The rest of the cases (camera, dashboard, etc.) remain unchanged or do not require 'captures'.
       case AppRoutes.captureCamera:
         return RouteUtils.createMainLayoutRoute(
           child: const capture.CaptureScreen(),
-        );
-
-      case AppRoutes.captureCameraSimple:
-        return RouteUtils.createMainLayoutRoute(
-          child: const capture.CaptureScreen(),
-        );
-
-      case '/capture/smart':
-        return RouteUtils.createMainNavRoute(
-          currentIndex: 2,
-          child: const capture.CaptureScreen(),
-        );
-
-      case AppRoutes.captureDashboard:
-        return RouteUtils.createMainLayoutRoute(
-          currentIndex: 2,
-          drawer: const capture.CaptureDrawer(),
-          child: const capture.EnhancedCaptureDashboardScreen(),
-        );
-
-      case AppRoutes.captureSearch:
-        // Redirect to unified search
-        return RouteUtils.createMainLayoutRoute(
-          child: const core.SearchResultsPage(),
-        );
-
-      case AppRoutes.captureNearby:
-        return RouteUtils.createMainLayoutRoute(
-          child: const capture.CapturesListScreen(),
-        );
-
-      case AppRoutes.capturePopular:
-        return RouteUtils.createMainLayoutRoute(
-          child: const capture.CapturesListScreen(),
-        );
-
-      case AppRoutes.captureMyCaptures:
-        return RouteUtils.createMainLayoutRoute(
-          child: const capture.MyCapturesScreen(),
-        );
-
-      case AppRoutes.capturePending:
-        return RouteUtils.createMainLayoutRoute(
-          child: const capture.MyCapturesScreen(),
-        );
-
-      case AppRoutes.captureMap:
-        return RouteUtils.createMainLayoutRoute(
-          child: const Center(child: Text('Capture Map - Coming Soon')),
-        );
-
-      case AppRoutes.captureBrowse:
-        return RouteUtils.createMainLayoutRoute(
-          child: const capture.CapturesListScreen(),
-        );
-
-      case AppRoutes.captureApproved:
-        return RouteUtils.createMainLayoutRoute(
-          child: const capture.MyCapturesScreen(),
-        );
-
-      case AppRoutes.captureSettings:
-        return RouteUtils.createMainLayoutRoute(
-          child: const Center(child: Text('Capture Settings - Coming Soon')),
         );
 
       case AppRoutes.captureAdminModeration:
@@ -1533,19 +1549,9 @@ class AppRouter {
           child: const capture.AdminContentModerationScreen(),
         );
 
-      case AppRoutes.captureGallery:
-        return RouteUtils.createMainLayoutRoute(
-          child: const capture.CapturesListScreen(),
-        );
-
       case AppRoutes.captureCreate:
         return RouteUtils.createMainLayoutRoute(
           child: const capture.CaptureScreen(),
-        );
-
-      case AppRoutes.capturePublic:
-        return RouteUtils.createMainLayoutRoute(
-          child: const capture.CapturesListScreen(),
         );
 
       case AppRoutes.captureTerms:
@@ -1570,8 +1576,13 @@ class AppRouter {
         if (captureModel == null) {
           return RouteUtils.createErrorRoute('Capture data is required');
         }
+        // Provide required arguments for CaptureEditScreen
         return RouteUtils.createMainLayoutRoute(
-          child: capture.CaptureEditScreen(capture: captureModel),
+          child: capture.CaptureEditScreen(
+            initialImage: File.fromUri(Uri.parse(captureModel.imageUrl)),
+            initialTitle: captureModel.title ?? '',
+            initialDescription: captureModel.description ?? '',
+          ),
         );
 
       default:

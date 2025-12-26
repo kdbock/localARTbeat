@@ -21,7 +21,7 @@ class AchievementsScreen extends StatelessWidget {
       child: SafeArea(
         child: Column(
           children: [
-            HudTopBar(title: 'Achievements', showBackButton: true),
+            const HudTopBar(title: 'Achievements', showBackButton: true),
             Expanded(
               child: achievements.isEmpty
                   ? const EmptyState(

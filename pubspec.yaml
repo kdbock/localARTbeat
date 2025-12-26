@@ -51,6 +51,7 @@ dependencies:
   firebase_data_connect: ^0.2.0+1
   firebase_messaging: ^16.0.0
   firebase_storage: ^13.0.0
+  flag: ^7.0.2
   flutter:
     sdk: flutter
   google_fonts: ^6.2.1

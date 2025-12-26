@@ -35,6 +35,22 @@ export 'src/widgets/like_button_widget.dart';
 export 'src/widgets/comment_item_widget.dart';
 export 'src/widgets/comments_section_widget.dart';
 
+// New widgets
+export 'src/widgets/glass_card.dart';
+export 'src/widgets/hud_top_bar.dart';
+export 'src/widgets/hud_button.dart';
+export 'src/widgets/xp_bar.dart';
+export 'src/widgets/mini_stat_card.dart';
+export 'src/widgets/quest_capture_tile.dart';
+export 'src/widgets/quest_community_card.dart';
+export 'src/widgets/section_header.dart';
+export 'src/widgets/quick_action_chip.dart';
+export 'src/widgets/mission_card.dart';
+export 'src/widgets/drawer_section_header.dart';
+export 'src/widgets/drawer_item_pill.dart';
+export 'src/widgets/glass_input_decoration.dart';
+export 'src/widgets/glass_text_field.dart';
+
 // Models and Utils
 export 'src/models/media_capture.dart';
 export 'src/models/offline_queue_item.dart';

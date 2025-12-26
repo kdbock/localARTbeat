@@ -1,310 +1,149 @@
-import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:artbeat_core/artbeat_core.dart' as core;
 import 'package:artbeat_capture/artbeat_capture.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
 
-/// Screen that displays the current user's art captures
 class MyCapturesScreen extends StatefulWidget {
-  const MyCapturesScreen({super.key});
+  final List<CaptureModel> captures;
+  const MyCapturesScreen({super.key, required this.captures});
 
   @override
   State<MyCapturesScreen> createState() => _MyCapturesScreenState();
 }
 
-class _MyCapturesScreenState extends State<MyCapturesScreen> {
-  final CaptureService _captureService = CaptureService();
-  List<CaptureModel> _myCaptures = [];
-  List<CaptureModel> _filteredCaptures = [];
-  bool _isLoading = true;
-  String? _error;
-  String _searchQuery = '';
+class _MyCapturesScreenState extends State<MyCapturesScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  int? _pendingInitialTab;
+  bool _initialized = false;
 
   @override
-  void initState() {
-    super.initState();
-    _loadMyCaptures();
-  }
-
-  Future<void> _loadMyCaptures() async {
-    setState(() {
-      _isLoading = true;
-      _error = null;
-    });
-
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        final captures = await _captureService.getCapturesForUser(user.uid);
-        if (mounted) {
-          setState(() {
-            _myCaptures = captures;
-            _filteredCaptures = captures;
-            _isLoading = false;
-          });
-        }
-      } else {
-        if (mounted) {
-          setState(() {
-            _error = 'capture_my_captures_user_not_authenticated'.tr();
-            _isLoading = false;
-          });
-        }
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      int initialTab = 0;
+      final args = ModalRoute.of(context)?.settings.arguments;
+      if (args is Map && args['tab'] is int) {
+        initialTab = args['tab'] as int;
       }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _error = 'capture_my_captures_error_loading'.tr().replaceAll(
-            '{error}',
-            e.toString(),
-          );
-          _isLoading = false;
-        });
-      }
+      _tabController = TabController(
+        length: 3,
+        vsync: this,
+        initialIndex: initialTab,
+      );
+      _initialized = true;
     }
   }
 
-  void _filterCaptures(String query) {
-    setState(() {
-      _searchQuery = query.toLowerCase();
-      if (_searchQuery.isEmpty) {
-        _filteredCaptures = _myCaptures;
-      } else {
-        _filteredCaptures = _myCaptures.where((capture) {
-          final title = (capture.title ?? 'Untitled').toLowerCase();
-          final location = (capture.locationName ?? '').toLowerCase();
-          final status = capture.status.value.toLowerCase();
-
-          return title.contains(_searchQuery) ||
-              location.contains(_searchQuery) ||
-              status.contains(_searchQuery);
-        }).toList();
-      }
-    });
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return core.MainLayout(
-      currentIndex:
-          -1, // Not part of main navigation, accessed from profile menu
-      child: Scaffold(
-        appBar: core.EnhancedUniversalHeader(
-          title: 'My Captures',
-          showLogo: false,
-          showBackButton: true,
-          showSearch: true,
-          onSearchPressed: (query) {
-            _filterCaptures(query);
-          },
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: _loadMyCaptures,
-              tooltip: 'Refresh captures',
+    final all = widget.captures;
+    final pending = all.where((c) => c.status == 'pending').toList();
+    final approved = all.where((c) => c.status == 'approved').toList();
+
+    return Scaffold(
+      backgroundColor: const Color(0xFF07060F),
+      body: Stack(
+        children: [
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFF07060F),
+                  Color(0xFF0B1222),
+                  Color(0xFF0A1B15),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
             ),
-            IconButton(
-              icon: const Icon(Icons.camera_alt),
-              onPressed: () {
-                Navigator.pushNamed(context, '/capture/camera');
-              },
-              tooltip: 'Take new capture',
-            ),
-          ],
-          // Use app theme colors instead of custom gradient
-          backgroundColor: core.ArtbeatColors.primaryPurple,
-          foregroundColor: Colors.white,
-        ),
-        body: _isLoading
-            ? const Center(
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    core.ArtbeatColors.primaryPurple,
+          ),
+          SafeArea(
+            child: Column(
+              children: [
+                HudTopBar(
+                  title: 'my_captures_title'.tr(),
+                  subtitle: 'my_captures_subtitle'.tr(),
+                  onBack: () => Navigator.pop(context),
+                ),
+                TabBar(
+                  controller: _tabController,
+                  tabs: [
+                    Tab(text: 'All'),
+                    Tab(text: 'Pending'),
+                    Tab(text: 'Approved'),
+                  ],
+                  labelColor: Colors.white,
+                  unselectedLabelColor: Colors.white54,
+                  indicatorColor: const Color(0xFF34D399),
+                ),
+                Expanded(
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: [
+                      _buildList(all),
+                      _buildList(pending),
+                      _buildList(approved),
+                    ],
                   ),
                 ),
-              )
-            : _error != null
-            ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.error_outline,
-                      size: 64,
-                      color: Colors.red,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      _error!,
-                      style: const TextStyle(fontSize: 16),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: _loadMyCaptures,
-                      child: Text('admin_admin_settings_text_retry'.tr()),
-                    ),
-                  ],
-                ),
-              )
-            : _myCaptures.isEmpty
-            ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.camera_alt, size: 64, color: Colors.grey),
-                    const SizedBox(height: 16),
-                    Text(
-                      'capture_my_captures_no_captures_yet'.tr(),
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'capture_my_captures_start_capturing_description'.tr(),
-                      style: const TextStyle(fontSize: 14, color: Colors.grey),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 24),
-                    ElevatedButton.icon(
-                      icon: const Icon(Icons.camera),
-                      label: Text('capture_my_captures_text_take_photo'.tr()),
-                      onPressed: () {
-                        Navigator.pushNamed(context, '/capture/camera');
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: core.ArtbeatColors.primaryGreen,
-                        foregroundColor: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-              )
-            : _filteredCaptures.isEmpty && _searchQuery.isNotEmpty
-            ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.search_off, size: 64, color: Colors.grey),
-                    const SizedBox(height: 16),
-                    Text(
-                      'capture_my_captures_no_search_results'.tr().replaceAll(
-                        '{query}',
-                        _searchQuery,
-                      ),
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'capture_my_captures_try_different_search'.tr(),
-                      style: const TextStyle(fontSize: 14, color: Colors.grey),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 24),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: core.ArtbeatColors.primaryPurple,
-                        foregroundColor: Colors.white,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _searchQuery = '';
-                          _filteredCaptures = _myCaptures;
-                        });
-                      },
-                      child: Text('capture_my_captures_hint_clear_search'.tr()),
-                    ),
-                  ],
-                ),
-              )
-            : RefreshIndicator(
-                onRefresh: _loadMyCaptures,
-                child: ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: _filteredCaptures.length,
-                  itemBuilder: (context, index) {
-                    final capture = _filteredCaptures[index];
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 16),
-                      child: ListTile(
-                        leading: SizedBox(
-                          width: 60,
-                          height: 60,
-                          child: core.SecureNetworkImage(
-                            imageUrl: capture.imageUrl,
-                            fit: BoxFit.cover,
-                            borderRadius: BorderRadius.circular(8),
-                            errorWidget: Container(
-                              color: Colors.grey[300],
-                              child: const Icon(
-                                Icons.broken_image,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ),
-                        ),
-                        title: Text(
-                          capture.title ?? 'capture_my_captures_untitled'.tr(),
-                          style: const TextStyle(fontWeight: FontWeight.w500),
-                        ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (capture.locationName != null)
-                              Text(
-                                capture.locationName!,
-                                style: const TextStyle(fontSize: 12),
-                              ),
-                            Text(
-                              'capture_my_captures_status'.tr().replaceAll(
-                                '{status}',
-                                capture.status.value,
-                              ),
-                              style: TextStyle(
-                                fontSize: 12,
-                                color:
-                                    capture.status ==
-                                        core.CaptureStatus.approved
-                                    ? Colors.green
-                                    : capture.status ==
-                                          core.CaptureStatus.pending
-                                    ? Colors.orange
-                                    : Colors.red,
-                              ),
-                            ),
-                          ],
-                        ),
-                        trailing: Icon(
-                          capture.status == core.CaptureStatus.approved
-                              ? Icons.check_circle
-                              : capture.status == core.CaptureStatus.pending
-                              ? Icons.pending
-                              : Icons.error,
-                          color: capture.status == core.CaptureStatus.approved
-                              ? Colors.green
-                              : capture.status == core.CaptureStatus.pending
-                              ? Colors.orange
-                              : Colors.red,
-                        ),
-                        onTap: () {
-                          Navigator.pushNamed(
-                            context,
-                            '/capture/detail',
-                            arguments: {'captureId': capture.id},
-                          );
-                        },
-                      ),
-                    );
-                  },
-                ),
-              ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
+
+  Widget _buildList(List<CaptureModel> captures) {
+    if (captures.isEmpty) {
+      return Center(
+        child: Text(
+          'my_captures_empty'.tr(),
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: Colors.white.withAlpha((0.6 * 255).toInt()),
+          ),
+        ),
+      );
+    }
+    return ListView.separated(
+      padding: const EdgeInsets.all(18),
+      itemCount: captures.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        final capture = captures[index];
+        return QuestCaptureTile(
+          capture: capture,
+          onTap: () {
+            Navigator.pushNamed(context, '/capture/detail', arguments: capture);
+          },
+          onEdit: () {
+            Navigator.pushNamed(context, '/capture/edit', arguments: capture);
+          },
+        );
+      },
+    );
+  }
 }
+
+// Dummy model - replace with your actual capture model
+// class CaptureItem {
+//   final String title;
+//   final String description;
+//   final String status;
+//   final dynamic imageFile;
+//
+//   CaptureItem({
+//     required this.title,
+//     required this.description,
+//     required this.status,
+//     required this.imageFile,
+//   });
+// }

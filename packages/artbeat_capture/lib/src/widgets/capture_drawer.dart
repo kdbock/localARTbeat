@@ -6,6 +6,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:artbeat_core/src/routing/app_routes.dart';
 
 /// Capture specific drawer with focused navigation for capture features
 /// Updated to match the new "Quest / Glass / Neon" theme.
@@ -79,14 +80,14 @@ class _CaptureDrawerState extends State<CaptureDrawer>
                         context,
                         'capture_drawer_take_photo'.tr(),
                         Icons.camera_alt_rounded,
-                        '/capture/camera',
+                        AppRoutes.captureCamera,
                         const Color(0xFF34D399), // green
                       ),
                       _buildDrawerItem(
                         context,
                         'capture_drawer_browse_captures'.tr(),
                         Icons.grid_view_rounded,
-                        '/capture/browse',
+                        AppRoutes.captureBrowse,
                         const Color(0xFF22D3EE), // teal
                       ),
 
@@ -99,22 +100,25 @@ class _CaptureDrawerState extends State<CaptureDrawer>
                         context,
                         'capture_drawer_my_captures_item'.tr(),
                         Icons.photo_album_rounded,
-                        '/capture/my-captures',
+                        AppRoutes.captureMyCaptures,
                         const Color(0xFF34D399),
+                        tabIndex: 0,
                       ),
                       _buildDrawerItem(
                         context,
                         'capture_drawer_pending_review'.tr(),
                         Icons.hourglass_top_rounded,
-                        '/capture/pending',
+                        AppRoutes.captureMyCaptures,
                         const Color(0xFFFFC857), // yellow
+                        tabIndex: 1,
                       ),
                       _buildDrawerItem(
                         context,
                         'capture_drawer_approved_captures'.tr(),
                         Icons.verified_rounded,
-                        '/capture/approved',
+                        AppRoutes.captureMyCaptures,
                         const Color(0xFF22D3EE),
+                        tabIndex: 2,
                       ),
 
                       const SizedBox(height: 10),
@@ -126,21 +130,21 @@ class _CaptureDrawerState extends State<CaptureDrawer>
                         context,
                         'capture_drawer_public_captures'.tr(),
                         Icons.public_rounded,
-                        '/capture/public',
+                        AppRoutes.capturePublic,
                         const Color(0xFF7C4DFF), // purple
                       ),
                       _buildDrawerItem(
                         context,
                         'capture_drawer_nearby_art'.tr(),
                         Icons.my_location_rounded,
-                        '/capture/nearby',
+                        AppRoutes.captureNearby,
                         const Color(0xFF22D3EE),
                       ),
                       _buildDrawerItem(
                         context,
                         'capture_drawer_popular_captures'.tr(),
                         Icons.trending_up_rounded,
-                        '/capture/popular',
+                        AppRoutes.capturePopular,
                         const Color(0xFFFF3D8D), // pink
                       ),
 
@@ -153,21 +157,21 @@ class _CaptureDrawerState extends State<CaptureDrawer>
                         context,
                         'capture_drawer_search_captures'.tr(),
                         Icons.search_rounded,
-                        '/capture/search',
+                        AppRoutes.captureSearch,
                         const Color(0xFF34D399),
                       ),
                       _buildDrawerItem(
                         context,
                         'capture_drawer_capture_map'.tr(),
                         Icons.map_rounded,
-                        '/capture/map',
+                        AppRoutes.captureMap,
                         const Color(0xFF7C4DFF),
                       ),
                       _buildDrawerItem(
                         context,
                         'capture_drawer_capture_settings'.tr(),
                         Icons.settings_rounded,
-                        '/capture/settings',
+                        AppRoutes.captureSettings,
                         Colors.white.withValues(alpha: 0.65),
                       ),
 
@@ -181,7 +185,7 @@ class _CaptureDrawerState extends State<CaptureDrawer>
                           context,
                           'capture_drawer_content_moderation'.tr(),
                           Icons.admin_panel_settings_rounded,
-                          '/capture/admin/moderation',
+                          AppRoutes.captureAdminModeration,
                           const Color(0xFFFF3D8D),
                         ),
                       ],
@@ -195,21 +199,21 @@ class _CaptureDrawerState extends State<CaptureDrawer>
                         context,
                         'capture_drawer_main_dashboard'.tr(),
                         Icons.dashboard_rounded,
-                        '/dashboard',
+                        AppRoutes.dashboard,
                         Colors.white.withValues(alpha: 0.65),
                       ),
                       _buildDrawerItem(
                         context,
                         'capture_drawer_art_walk'.tr(),
                         Icons.route_rounded,
-                        '/art-walk/dashboard',
+                        AppRoutes.artWalkDashboard,
                         const Color(0xFF22D3EE),
                       ),
                       _buildDrawerItem(
                         context,
                         'capture_drawer_profile'.tr(),
                         Icons.person_rounded,
-                        '/profile',
+                        AppRoutes.profile,
                         Colors.white.withValues(alpha: 0.65),
                       ),
 
@@ -293,9 +297,11 @@ class _CaptureDrawerState extends State<CaptureDrawer>
                     CircleAvatar(
                       radius: 18,
                       backgroundColor: Colors.white.withValues(alpha: 0.10),
-                      backgroundImage:
-                          ImageUrlValidator.safeNetworkImage(profileImageUrl),
-                      child: (profileImageUrl == null ||
+                      backgroundImage: ImageUrlValidator.safeNetworkImage(
+                        profileImageUrl,
+                      ),
+                      child:
+                          (profileImageUrl == null ||
                               !ImageUrlValidator.isValidImageUrl(
                                 profileImageUrl,
                               ))
@@ -371,8 +377,9 @@ class _CaptureDrawerState extends State<CaptureDrawer>
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color:
-                                const Color(0xFF34D399).withValues(alpha: 0.20),
+                            color: const Color(
+                              0xFF34D399,
+                            ).withValues(alpha: 0.20),
                             blurRadius: 18,
                             offset: const Offset(0, 10),
                           ),
@@ -429,8 +436,9 @@ class _CaptureDrawerState extends State<CaptureDrawer>
     String title,
     IconData icon,
     String route,
-    Color accent,
-  ) {
+    Color accent, {
+    int? tabIndex,
+  }) {
     final currentRoute = ModalRoute.of(context)?.settings.name;
     final isCurrentRoute = currentRoute == route;
 
@@ -440,7 +448,16 @@ class _CaptureDrawerState extends State<CaptureDrawer>
         child: InkWell(
           borderRadius: BorderRadius.circular(18),
           onTap: () async {
-            _navigateToRoute(snackBarContext, route);
+            if (route == AppRoutes.captureMyCaptures && tabIndex != null) {
+              Navigator.pop(snackBarContext);
+              Navigator.pushNamed(
+                snackBarContext,
+                AppRoutes.captureMyCaptures,
+                arguments: {'tab': tabIndex},
+              );
+            } else {
+              _navigateToRoute(snackBarContext, route);
+            }
           },
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 180),
@@ -481,8 +498,9 @@ class _CaptureDrawerState extends State<CaptureDrawer>
                       color: Colors.white.withValues(
                         alpha: isCurrentRoute ? 0.95 : 0.82,
                       ),
-                      fontWeight:
-                          isCurrentRoute ? FontWeight.w900 : FontWeight.w800,
+                      fontWeight: isCurrentRoute
+                          ? FontWeight.w900
+                          : FontWeight.w800,
                       fontSize: 14,
                       letterSpacing: -0.1,
                     ),
@@ -570,9 +588,9 @@ class _CaptureDrawerState extends State<CaptureDrawer>
           SnackBar(
             content: Text(
               'capture_drawer_error_signing_out'.tr().replaceAll(
-                    '{error}',
-                    e.toString(),
-                  ),
+                '{error}',
+                e.toString(),
+              ),
             ),
             backgroundColor: Colors.red,
           ),
@@ -636,11 +654,7 @@ class _QuestIconCapsule extends StatelessWidget {
           ),
         ],
       ),
-      child: Icon(
-        icon,
-        color: Colors.white.withValues(alpha: 0.92),
-        size: 20,
-      ),
+      child: Icon(icon, color: Colors.white.withValues(alpha: 0.92), size: 20),
     );
   }
 }

@@ -4,6 +4,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
 import 'package:share_plus/share_plus.dart';
 import 'package:artbeat_capture/artbeat_capture.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:artbeat_profile/artbeat_profile.dart' show WorldBackground;
+import '../widgets/glass_card.dart';
+import '../widgets/hud_top_bar.dart';
+import '../widgets/hud_button.dart';
 
 /// Screen for viewing existing capture details with likes, comments, and interactions
 class CaptureDetailViewerScreen extends StatefulWidget {
@@ -18,6 +23,31 @@ class CaptureDetailViewerScreen extends StatefulWidget {
 }
 
 class _CaptureDetailViewerScreenState extends State<CaptureDetailViewerScreen> {
+  void _showFullImage() {
+    if (_capture == null) return;
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(12),
+        child: GestureDetector(
+          onTap: () => Navigator.of(context).pop(),
+          child: InteractiveViewer(
+            minScale: 0.5,
+            maxScale: 4.0,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: core.OptimizedImage(
+                imageUrl: _capture!.imageUrl,
+                fit: BoxFit.contain,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   final CaptureService _captureService = CaptureService();
   core.CaptureModel? _capture;
   bool _isLoading = true;
@@ -147,223 +177,288 @@ class _CaptureDetailViewerScreenState extends State<CaptureDetailViewerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          _capture?.title ?? 'capture_detail_viewer_default_title'.tr(),
-        ),
-        backgroundColor: core.ArtbeatColors.primaryPurple,
-        foregroundColor: Colors.white,
-        actions: [
-          if (_isOwner) ...[
-            IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: _editCapture,
-              tooltip: 'Edit capture',
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete),
-              onPressed: _showDeleteConfirmation,
-              tooltip: 'Delete capture',
-            ),
-          ],
-        ],
-      ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _error != null
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(_error!),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: _loadCapture,
-                    child: Text('admin_admin_settings_text_retry'.tr()),
-                  ),
-                ],
-              ),
-            )
-          : _capture == null
-          ? Center(
-              child: Text(
-                'capture_capture_detail_viewer_text_no_capture_found'.tr(),
-              ),
-            )
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Image
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: core.OptimizedImage(
-                      imageUrl: _capture!.imageUrl,
-                      width: double.infinity,
-                      height: 300,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Title
-                  Text(
-                    _capture!.title ?? 'capture_detail_viewer_untitled'.tr(),
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-
-                  // Artist
-                  if (_capture!.artistName != null) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      'capture_detail_viewer_by_artist'.tr().replaceAll(
-                        '{artist}',
-                        _capture!.artistName!,
-                      ),
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontStyle: FontStyle.italic,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ],
-
-                  const SizedBox(height: 16),
-
-                  // Info rows
-                  if (_capture!.artType != null)
-                    _buildInfoRow(
-                      context,
-                      Icons.palette,
-                      'Art Type',
-                      _capture!.artType!,
-                    ),
-
-                  if (_capture!.artMedium != null) ...[
-                    const SizedBox(height: 8),
-                    _buildInfoRow(
-                      context,
-                      Icons.brush,
-                      'Medium',
-                      _capture!.artMedium!,
-                    ),
-                  ],
-
-                  if (_capture!.locationName != null) ...[
-                    const SizedBox(height: 8),
-                    _buildInfoRow(
-                      context,
-                      Icons.location_on,
-                      'Location',
-                      _capture!.locationName!,
-                    ),
-                  ],
-
-                  // Description
-                  if (_capture!.description != null &&
-                      _capture!.description!.isNotEmpty) ...[
-                    const SizedBox(height: 16),
-                    Text(
-                      'capture_detail_viewer_description'.tr(),
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      _capture!.description!,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ],
-
-                  // Status
-                  const SizedBox(height: 16),
-                  _buildInfoRow(
-                    context,
-                    Icons.info,
-                    'Status',
-                    _capture!.status.value,
-                  ),
-
-                  // Date
-                  const SizedBox(height: 8),
-                  _buildInfoRow(
-                    context,
-                    Icons.calendar_today,
-                    'Captured',
-                    _formatDate(_capture!.createdAt),
-                  ),
-
-                  // Visibility
-                  const SizedBox(height: 8),
-                  _buildInfoRow(
-                    context,
-                    _capture!.isPublic ? Icons.public : Icons.lock,
-                    'Visibility',
-                    _capture!.isPublic ? 'Public' : 'Private',
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Action buttons row
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      // Share button
-                      _buildActionButton(
-                        icon: Icons.share,
-                        label: 'Share',
-                        onPressed: _shareCapture,
-                      ),
-                      // Like button with count
-                      LikeButtonWidget(
-                        captureId: widget.captureId,
-                        userId: _currentUserId,
-                        initialLikeCount: _capture!.engagementStats.likeCount,
-                        onLikeChanged: () {
-                          // Refresh capture to update like count
-                          _loadCapture();
-                        },
-                      ),
-                      // Comment count
-                      Column(
+    return WorldBackground(
+      child: WillPopScope(
+        onWillPop: () async => true,
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: SafeArea(
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _error != null
+                ? Center(
+                    child: GlassCard(
+                      child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(
-                            Icons.comment,
-                            color: core.ArtbeatColors.primaryPurple,
-                          ),
-                          const SizedBox(height: 4),
                           Text(
-                            _capture!.engagementStats.commentCount.toString(),
-                            style: Theme.of(context).textTheme.labelSmall,
+                            _error!,
+                            style: GoogleFonts.spaceGrotesk(
+                              color: Colors.white.withValues(alpha: 0.92),
+                              fontWeight: FontWeight.w700,
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          HudButton(
+                            label: 'Retry',
+                            icon: Icons.refresh,
+                            onTap: _loadCapture,
                           ),
                         ],
                       ),
+                    ),
+                  )
+                : _capture == null
+                ? Center(
+                    child: GlassCard(
+                      child: Text(
+                        'capture_capture_detail_viewer_text_no_capture_found'
+                            .tr(),
+                        style: GoogleFonts.spaceGrotesk(
+                          color: Colors.white.withValues(alpha: 0.92),
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  )
+                : Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 8,
+                        ),
+                        child: HudTopBar(
+                          title:
+                              _capture!.title ??
+                              'capture_detail_viewer_default_title'.tr(),
+                          subtitle: _capture!.artistName != null
+                              ? 'capture_detail_viewer_by_artist'
+                                    .tr()
+                                    .replaceAll(
+                                      '{artist}',
+                                      _capture!.artistName!,
+                                    )
+                              : '',
+                          onBack: () => Navigator.of(context).pop(),
+                        ),
+                      ),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 18,
+                            vertical: 10,
+                          ),
+                          child: GlassCard(
+                            padding: const EdgeInsets.all(20),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Image
+                                GestureDetector(
+                                  onTap: _showFullImage,
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(24),
+                                    child: core.OptimizedImage(
+                                      imageUrl: _capture!.imageUrl,
+                                      width: double.infinity,
+                                      height: 300,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 24),
+                                // Title
+                                Text(
+                                  _capture!.title ??
+                                      'capture_detail_viewer_untitled'.tr(),
+                                  style: GoogleFonts.spaceGrotesk(
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 22,
+                                    color: Colors.white.withValues(alpha: 0.92),
+                                  ),
+                                ),
+                                // Artist
+                                if (_capture!.artistName != null) ...[
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'capture_detail_viewer_by_artist'
+                                        .tr()
+                                        .replaceAll(
+                                          '{artist}',
+                                          _capture!.artistName!,
+                                        ),
+                                    style: GoogleFonts.spaceGrotesk(
+                                      fontStyle: FontStyle.italic,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 15,
+                                      color: Colors.white.withValues(
+                                        alpha: 0.7,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                                const SizedBox(height: 16),
+                                // Info rows
+                                if (_capture!.artType != null)
+                                  _buildInfoRow(
+                                    context,
+                                    Icons.palette,
+                                    'Art Type',
+                                    _capture!.artType!,
+                                  ),
+                                if (_capture!.artMedium != null) ...[
+                                  const SizedBox(height: 8),
+                                  _buildInfoRow(
+                                    context,
+                                    Icons.brush,
+                                    'Medium',
+                                    _capture!.artMedium!,
+                                  ),
+                                ],
+                                if (_capture!.locationName != null) ...[
+                                  const SizedBox(height: 8),
+                                  _buildInfoRow(
+                                    context,
+                                    Icons.location_on,
+                                    'Location',
+                                    _capture!.locationName!,
+                                  ),
+                                ],
+                                if (_capture!.description != null &&
+                                    _capture!.description!.isNotEmpty) ...[
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    'capture_detail_viewer_description'.tr(),
+                                    style: GoogleFonts.spaceGrotesk(
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 14,
+                                      color: Colors.white.withValues(
+                                        alpha: 0.92,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    _capture!.description!,
+                                    style: GoogleFonts.spaceGrotesk(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 14,
+                                      color: Colors.white.withValues(
+                                        alpha: 0.92,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                                const SizedBox(height: 16),
+                                _buildInfoRow(
+                                  context,
+                                  Icons.info,
+                                  'Status',
+                                  _capture!.status.value,
+                                ),
+                                const SizedBox(height: 8),
+                                _buildInfoRow(
+                                  context,
+                                  Icons.calendar_today,
+                                  'Captured',
+                                  _formatDate(_capture!.createdAt),
+                                ),
+                                const SizedBox(height: 8),
+                                _buildInfoRow(
+                                  context,
+                                  _capture!.isPublic
+                                      ? Icons.public
+                                      : Icons.lock,
+                                  'Visibility',
+                                  _capture!.isPublic ? 'Public' : 'Private',
+                                ),
+                                const SizedBox(height: 24),
+                                // Action buttons row
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    HudButton(
+                                      label: 'Share',
+                                      icon: Icons.share,
+                                      onTap: _shareCapture,
+                                    ),
+                                    LikeButtonWidget(
+                                      captureId: widget.captureId,
+                                      userId: _currentUserId,
+                                      initialLikeCount:
+                                          _capture!.engagementStats.likeCount,
+                                      onLikeChanged: () {
+                                        _loadCapture();
+                                      },
+                                    ),
+                                    Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(
+                                          Icons.comment,
+                                          color:
+                                              core.ArtbeatColors.primaryPurple,
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          _capture!.engagementStats.commentCount
+                                              .toString(),
+                                          style: GoogleFonts.spaceGrotesk(
+                                            fontWeight: FontWeight.w700,
+                                            fontSize: 13,
+                                            color: Colors.white.withValues(
+                                              alpha: 0.92,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    if (_isOwner) ...[
+                                      HudButton(
+                                        label: 'Edit',
+                                        icon: Icons.edit,
+                                        onTap: _editCapture,
+                                      ),
+                                      HudButton(
+                                        label: 'Delete',
+                                        icon: Icons.delete,
+                                        onTap: _showDeleteConfirmation,
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                                const SizedBox(height: 32),
+                                CommentsSectionWidget(
+                                  captureId: widget.captureId,
+                                  userId: _currentUserId,
+                                  userName:
+                                      FirebaseAuth
+                                          .instance
+                                          .currentUser
+                                          ?.displayName ??
+                                      'Anonymous',
+                                  userAvatar: FirebaseAuth
+                                      .instance
+                                      .currentUser
+                                      ?.photoURL,
+                                  onCommentAdded: () {
+                                    _loadCapture();
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
-
-                  const SizedBox(height: 32),
-
-                  // Comments section
-                  CommentsSectionWidget(
-                    captureId: widget.captureId,
-                    userId: _currentUserId,
-                    userName:
-                        FirebaseAuth.instance.currentUser?.displayName ??
-                        'Anonymous',
-                    userAvatar: FirebaseAuth.instance.currentUser?.photoURL,
-                    onCommentAdded: () {
-                      // Refresh to update comment count
-                      _loadCapture();
-                    },
-                  ),
-                ],
-              ),
-            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -396,22 +491,7 @@ class _CaptureDetailViewerScreenState extends State<CaptureDetailViewerScreen> {
     );
   }
 
-  Widget _buildActionButton({
-    required IconData icon,
-    required String label,
-    required VoidCallback onPressed,
-  }) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        IconButton(
-          icon: Icon(icon, color: core.ArtbeatColors.primaryPurple),
-          onPressed: onPressed,
-        ),
-        Text(label, style: Theme.of(context).textTheme.labelSmall),
-      ],
-    );
-  }
+  // _buildActionButton removed (unused)
 
   String _formatDate(DateTime date) {
     return '${date.month}/${date.day}/${date.year}';

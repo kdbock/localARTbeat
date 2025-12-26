@@ -58,7 +58,7 @@ class MyProfileScreen extends StatelessWidget {
                     height: 160,
                     child: ListView(
                       scrollDirection: Axis.horizontal,
-                      children: [
+                      children: const [
                         AchievementTile(
                           title: 'Art Explorer',
                           description: 'Complete 5 Art Walks',
@@ -96,16 +96,16 @@ class MyProfileScreen extends StatelessWidget {
                   ),
 
                   const SizedBox(height: 12),
-                  GlassCard(
-                    padding: const EdgeInsets.all(16),
+                  const GlassCard(
+                    padding: EdgeInsets.all(16),
                     child: Row(
                       children: [
                         Icon(
                           Icons.image_outlined,
                           color: ArtbeatColors.primaryPurple,
                         ),
-                        const SizedBox(width: 12),
-                        const Text('Favorite artworks, captures and more...'),
+                        SizedBox(width: 12),
+                        Text('Favorite artworks, captures and more...'),
                       ],
                     ),
                   ),

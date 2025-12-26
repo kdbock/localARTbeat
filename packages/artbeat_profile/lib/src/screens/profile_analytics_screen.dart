@@ -50,7 +50,7 @@ class _ProfileAnalyticsScreenState extends State<ProfileAnalyticsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error loading analytics: \$e')));
+        ).showSnackBar(const SnackBar(content: Text('Error loading analytics: \$e')));
       }
     }
   }

@@ -1,356 +1,192 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:artbeat_core/artbeat_core.dart' as core;
-import '../services/capture_service.dart';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-/// Screen for editing capture details
+import '../widgets/glass_card.dart';
+import '../widgets/hud_top_bar.dart';
+import '../widgets/glass_text_field.dart';
+import '../widgets/hud_button.dart';
+
 class CaptureEditScreen extends StatefulWidget {
-  final core.CaptureModel capture;
+  final File initialImage;
+  final String initialTitle;
+  final String initialDescription;
 
-  const CaptureEditScreen({Key? key, required this.capture}) : super(key: key);
+  const CaptureEditScreen({
+    super.key,
+    required this.initialImage,
+    required this.initialTitle,
+    required this.initialDescription,
+  });
 
   @override
   State<CaptureEditScreen> createState() => _CaptureEditScreenState();
 }
 
 class _CaptureEditScreenState extends State<CaptureEditScreen> {
-  final _captureService = CaptureService();
-  final _formKey = GlobalKey<FormState>();
-
   late TextEditingController _titleController;
   late TextEditingController _descriptionController;
-  late TextEditingController _locationController;
-  late String _selectedArtType;
-  late String _selectedMedium;
-  late bool _isPublic;
+  late File _imageFile;
+
   bool _isSaving = false;
-
-  // Art type and medium options
-  static const artTypes = [
-    'Street Art',
-    'Graffiti',
-    'Mural',
-    'Installation',
-    'Sculpture',
-    'Other',
-  ];
-
-  static const mediums = [
-    'Acrylic',
-    'Oil',
-    'Watercolor',
-    'Digital',
-    'Mixed Media',
-    'Spray Paint',
-    'Charcoal',
-    'Pencil',
-    'Other',
-  ];
 
   @override
   void initState() {
     super.initState();
-    _titleController = TextEditingController(text: widget.capture.title ?? '');
+    _titleController = TextEditingController(text: widget.initialTitle);
     _descriptionController = TextEditingController(
-      text: widget.capture.description ?? '',
+      text: widget.initialDescription,
     );
-    _locationController = TextEditingController(
-      text: widget.capture.locationName ?? '',
-    );
-    _selectedArtType = widget.capture.artType ?? 'Other';
-    _selectedMedium = widget.capture.artMedium ?? 'Other';
-    _isPublic = widget.capture.isPublic;
+    _imageFile = widget.initialImage;
   }
 
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _descriptionController.dispose();
-    _locationController.dispose();
-    super.dispose();
+  Future<void> _pickNewImage() async {
+    // TODO: Add your camera/gallery service
   }
 
   Future<void> _saveChanges() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (_titleController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('capture_edit_error_title_required'.tr())),
+      );
+      return;
+    }
 
     setState(() => _isSaving = true);
 
     try {
-      final updates = <String, dynamic>{
-        'title': _titleController.text.trim(),
-        'description': _descriptionController.text.trim(),
-        'locationName': _locationController.text.trim(),
-        'artType': _selectedArtType,
-        'artMedium': _selectedMedium,
-        'isPublic': _isPublic,
-      };
+      // TODO: Update capture in backend
+      // await CaptureService().update(...);
 
-      final success = await _captureService.updateCapture(
-        widget.capture.id,
-        updates,
-      );
-
-      if (success && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'capture_capture_edit_success_capture_updated_successfully'.tr(),
-            ),
-          ),
-        );
-        Navigator.pop(context, true);
-      } else if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('capture_capture_edit_error_failed_to_update'.tr()),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      Navigator.pop(context);
     } catch (e) {
-      core.AppLogger.error('Error saving capture: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'art_walk_art_walk_detail_error_error_etostring'.tr(),
-            ),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('capture_edit_error_generic'.tr())),
+      );
     } finally {
-      if (mounted) {
-        setState(() => _isSaving = false);
-      }
+      setState(() => _isSaving = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('capture_capture_edit_text_edit_capture'.tr()),
-        backgroundColor: core.ArtbeatColors.primaryPurple,
-        foregroundColor: Colors.white,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Title
-              Text(
-                'capture_edit_title'.tr(),
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+      backgroundColor: const Color(0xFF07060F),
+      body: Stack(
+        children: [
+          // World background
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFF07060F),
+                  Color(0xFF0B1222),
+                  Color(0xFF0A1B15),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: _titleController,
-                decoration: InputDecoration(
-                  hintText: 'Enter capture title',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                validator: (value) {
-                  if (value?.isEmpty ?? true) {
-                    return 'Title is required';
-                  }
-                  return null;
-                },
-              ),
-
-              const SizedBox(height: 24),
-
-              // Description
-              Text(
-                'capture_edit_description'.tr(),
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: _descriptionController,
-                decoration: InputDecoration(
-                  hintText: 'Enter capture description',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                minLines: 4,
-                maxLines: 6,
-              ),
-
-              const SizedBox(height: 24),
-
-              // Location
-              Text(
-                'capture_edit_location'.tr(),
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: _locationController,
-                decoration: InputDecoration(
-                  hintText: 'Enter location name',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // Art Type dropdown
-              Text(
-                'capture_edit_art_type'.tr(),
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              DropdownButtonFormField<String>(
-                initialValue: _selectedArtType,
-                items: artTypes.map((type) {
-                  return DropdownMenuItem(value: type, child: Text(type));
-                }).toList(),
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() => _selectedArtType = value);
-                  }
-                },
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // Medium dropdown
-              Text(
-                'capture_edit_medium'.tr(),
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              DropdownButtonFormField<String>(
-                initialValue: _selectedMedium,
-                items: mediums.map((medium) {
-                  return DropdownMenuItem(value: medium, child: Text(medium));
-                }).toList(),
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() => _selectedMedium = value);
-                  }
-                },
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // Visibility toggle
-              Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          _isPublic ? Icons.public : Icons.lock,
-                          color: core.ArtbeatColors.primaryPurple,
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          _isPublic
-                              ? 'capture_edit_public'.tr()
-                              : 'capture_edit_private'.tr(),
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      ],
-                    ),
-                    Switch(
-                      value: _isPublic,
-                      onChanged: (value) {
-                        setState(() => _isPublic = value);
-                      },
-                      activeThumbColor: core.ArtbeatColors.primaryPurple,
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 32),
-
-              // Save button
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _isSaving ? null : _saveChanges,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: core.ArtbeatColors.primaryPurple,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                  child: _isSaving
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              Colors.white,
-                            ),
-                          ),
-                        )
-                      : Text(
-                          'capture_edit_save_changes'.tr(),
-                          style: const TextStyle(fontSize: 16),
-                        ),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              // Cancel button
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(
-                  onPressed: _isSaving ? null : () => Navigator.pop(context),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    side: const BorderSide(color: Colors.grey),
-                  ),
-                  child: Text('admin_admin_payment_text_cancel'.tr()),
-                ),
-              ),
-
-              const SizedBox(height: 32),
-            ],
+            ),
           ),
-        ),
+
+          SafeArea(
+            child: Column(
+              children: [
+                HudTopBar(
+                  title: 'capture_edit_title'.tr(),
+                  subtitle: 'capture_edit_subtitle'.tr(),
+                  onBack: () => Navigator.pop(context),
+                ),
+
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(18),
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 520),
+                        child: GlassCard(
+                          radius: 26,
+                          padding: const EdgeInsets.all(18),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Image
+                              GestureDetector(
+                                onTap: _pickNewImage,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(22),
+                                  child: Stack(
+                                    children: [
+                                      Image.file(
+                                        _imageFile,
+                                        width: double.infinity,
+                                        height: 200,
+                                        fit: BoxFit.cover,
+                                      ),
+                                      Positioned.fill(
+                                        child: Container(
+                                          color: Colors.black.withAlpha(
+                                            (0.3 * 255).toInt(),
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              'capture_edit_tap_replace'.tr(),
+                                              style: GoogleFonts.spaceGrotesk(
+                                                color: Colors.white.withAlpha(
+                                                  (0.9 * 255).toInt(),
+                                                ),
+                                                fontWeight: FontWeight.w700,
+                                                fontSize: 13,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+
+                              const SizedBox(height: 20),
+
+                              // Title
+                              GlassTextField(
+                                label: 'capture_edit_field_title'.tr(),
+                                controller: _titleController,
+                                icon: Icons.title_rounded,
+                              ),
+
+                              const SizedBox(height: 14),
+
+                              // Description
+                              GlassTextField(
+                                label: 'capture_edit_field_description'.tr(),
+                                controller: _descriptionController,
+                                icon: Icons.description_rounded,
+                                keyboardType: TextInputType.multiline,
+                              ),
+
+                              const SizedBox(height: 22),
+
+                              HudButton(
+                                label: _isSaving
+                                    ? 'capture_edit_saving'.tr()
+                                    : 'capture_edit_save'.tr(),
+                                icon: Icons.save_rounded,
+                                onTap: _isSaving ? () {} : _saveChanges,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
