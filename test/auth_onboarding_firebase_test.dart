@@ -67,6 +67,7 @@ void main() {
             fallbackLocale: const Locale('en'),
             child: MaterialApp(
               home: LoginScreen(
+                enableBackgroundAnimation: false,
                 authService: AuthService(
                   auth: FirebaseTestSetup.mockAuth,
                   firestore: FirebaseTestSetup.fakeFirestore,
@@ -104,6 +105,7 @@ void main() {
             fallbackLocale: const Locale('en'),
             child: MaterialApp(
               home: RegisterScreen(
+                enableBackgroundAnimation: false,
                 authService: AuthService(
                   auth: FirebaseTestSetup.mockAuth,
                   firestore: FirebaseTestSetup.fakeFirestore,
@@ -205,6 +207,7 @@ void main() {
               fallbackLocale: const Locale('en'),
               child: MaterialApp(
                 home: LoginScreen(
+                  enableBackgroundAnimation: false,
                   authService: AuthService(
                     auth: FirebaseTestSetup.mockAuth,
                     firestore: FirebaseTestSetup.fakeFirestore,
@@ -241,6 +244,7 @@ void main() {
               fallbackLocale: const Locale('en'),
               child: MaterialApp(
                 home: RegisterScreen(
+                  enableBackgroundAnimation: false,
                   authService: AuthService(
                     auth: FirebaseTestSetup.mockAuth,
                     firestore: FirebaseTestSetup.fakeFirestore,
@@ -272,6 +276,7 @@ void main() {
               fallbackLocale: const Locale('en'),
               child: MaterialApp(
                 home: LoginScreen(
+                  enableBackgroundAnimation: false,
                   authService: AuthService(
                     auth: FirebaseTestSetup.mockAuth,
                     firestore: FirebaseTestSetup.fakeFirestore,
@@ -302,6 +307,7 @@ void main() {
               fallbackLocale: const Locale('en'),
               child: MaterialApp(
                 home: RegisterScreen(
+                  enableBackgroundAnimation: false,
                   authService: AuthService(
                     auth: FirebaseTestSetup.mockAuth,
                     firestore: FirebaseTestSetup.fakeFirestore,

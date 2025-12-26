@@ -1,463 +1,65 @@
-import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import '../models/subscription_tier.dart';
-import '../theme/artbeat_colors.dart';
-import '../widgets/usage_limits_widget.dart';
-import 'subscription_purchase_screen.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'dart:ui';
 
-/// Screen showing all available subscription plans for comparison
-///
-/// This screen allows users to:
-/// - View all subscription tiers side by side
-/// - Compare features between plans
-/// - Select a plan to start the purchase process
-class SubscriptionPlansScreen extends StatelessWidget {
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+import '../models/subscription_tier.dart';
+import 'subscription_purchase_screen.dart';
+
+class SubscriptionPlansScreen extends StatefulWidget {
   const SubscriptionPlansScreen({super.key});
+
+  @override
+  State<SubscriptionPlansScreen> createState() => _SubscriptionPlansScreenState();
+}
+
+class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
+  static const List<SubscriptionTier> _orderedTiers = [
+    SubscriptionTier.creator,
+    SubscriptionTier.business,
+    SubscriptionTier.starter,
+    SubscriptionTier.enterprise,
+    SubscriptionTier.free,
+  ];
+
+  bool _isYearly = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Colors.black,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text('core_subscription_choose_plan'.tr()),
-        backgroundColor: ArtbeatColors.primary,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         elevation: 0,
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header section
-              Card(
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(24.0),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        ArtbeatColors.primary.withValues(alpha: 0.1),
-                        ArtbeatColors.accentOrange.withValues(alpha: 0.1),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Column(
-                    children: [
-                      const Icon(
-                        Icons.palette,
-                        size: 48,
-                        color: ArtbeatColors.primary,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Start Your Artistic Journey',
-                        style: Theme.of(context).textTheme.headlineSmall
-                            ?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: ArtbeatColors.textPrimary,
-                            ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Choose the perfect plan to showcase and sell your art',
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: ArtbeatColors.textSecondary,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // Subscription plans
-              _buildSubscriptionPlans(context),
-
-              const SizedBox(height: 24),
-
-              // Benefits section
-              _buildBenefitsSection(context),
-
-              const SizedBox(height: 24),
-
-              // Usage Limits Widget - Shows current plan limitations
-              _buildUsageLimitsSection(context),
-
-              const SizedBox(height: 24),
-
-              // FAQ section
-              _buildFAQSection(context),
-            ],
+        iconTheme: const IconThemeData(color: Colors.white),
+        title: Text(
+          'subscription_plans_title'.tr(),
+          style: GoogleFonts.spaceGrotesk(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildSubscriptionPlans(BuildContext context) {
-    final plans = [
-      SubscriptionTier.free,
-      SubscriptionTier.starter,
-      SubscriptionTier.creator,
-      SubscriptionTier.business,
-      SubscriptionTier.enterprise,
-    ];
-
-    // For mobile, show as a column
-    return Column(
-      children: plans
-          .map(
-            (plan) => Container(
-              margin: const EdgeInsets.only(bottom: 16),
-              child: _buildPlanCard(context, plan),
-            ),
-          )
-          .toList(),
-    );
-  }
-
-  Widget _buildPlanCard(BuildContext context, SubscriptionTier tier) {
-    final isRecommended = tier == SubscriptionTier.creator;
-    final isFree = tier == SubscriptionTier.free;
-
-    return Card(
-      elevation: isRecommended ? 8 : 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: isRecommended
-              ? ArtbeatColors.primary
-              : Colors.grey.withValues(alpha: 0.2),
-          width: isRecommended ? 2 : 1,
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Recommended badge
-            if (isRecommended) ...[
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: ArtbeatColors.primary,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  'RECOMMENDED',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 10,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-            ],
-
-            // Plan name and price
-            Text(
-              tier.displayName,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: ArtbeatColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
-              children: [
-                Text(
-                  isFree ? 'Free' : '\$${tier.monthlyPrice.toStringAsFixed(0)}',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: ArtbeatColors.primary,
-                  ),
-                ),
-                if (!isFree)
-                  Text(
-                    '/month',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: ArtbeatColors.textSecondary,
-                    ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 20),
-
-            // Features
-            Text(
-              'Features:',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: ArtbeatColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 12),
-            ...tier.features
-                .map(
-                  (feature) => Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Icon(
-                          Icons.check_circle,
-                          size: 16,
-                          color: ArtbeatColors.success,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            feature,
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(color: ArtbeatColors.textSecondary),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-                .toList(),
-            const SizedBox(height: 20),
-
-            // CTA button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => _selectPlan(context, tier),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: isFree
-                      ? Colors.grey[300]
-                      : (isRecommended
-                            ? ArtbeatColors.primary
-                            : ArtbeatColors.primary.withValues(alpha: 0.8)),
-                  foregroundColor: isFree
-                      ? ArtbeatColors.textSecondary
-                      : Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: Text(
-                  isFree ? 'Get Started' : 'Choose Plan',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBenefitsSection(BuildContext context) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Why Choose ARTbeat?',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: ArtbeatColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 16),
-            ..._buildBenefitsList(context),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildUsageLimitsSection(BuildContext context) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Plan Limits & Features',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: ArtbeatColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'See what\'s included in each plan and upgrade when you need more.',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: ArtbeatColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 20),
-            UsageLimitsWidget(
-              userId: FirebaseAuth.instance.currentUser?.uid ?? '',
-              onUpgradePressed: () {
-                // Navigate to subscription upgrade flow
-                Navigator.of(context).pushNamed('/subscription-plans');
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  List<Widget> _buildBenefitsList(BuildContext context) {
-    final benefits = [
-      {
-        'icon': Icons.storefront,
-        'title': 'Professional Storefront',
-        'description':
-            'Showcase your art with a beautiful, customizable profile',
-      },
-      {
-        'icon': Icons.analytics,
-        'title': 'Detailed Analytics',
-        'description': 'Track views, engagement, and sales performance',
-      },
-      {
-        'icon': Icons.payment,
-        'title': 'Secure Payments',
-        'description': 'Built-in payment processing with Stripe integration',
-      },
-      {
-        'icon': Icons.people,
-        'title': 'Artist Community',
-        'description': 'Connect with other artists and art enthusiasts',
-      },
-    ];
-
-    return benefits
-        .map(
-          (benefit) => Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: ArtbeatColors.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    benefit['icon'] as IconData,
-                    color: ArtbeatColors.primary,
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        benefit['title'] as String,
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: ArtbeatColors.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        benefit['description'] as String,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: ArtbeatColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        )
-        .toList();
-  }
-
-  Widget _buildFAQSection(BuildContext context) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Frequently Asked Questions',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: ArtbeatColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 16),
-            _buildFAQItem(
-              context,
-              'Can I change my plan later?',
-              'Yes, you can upgrade or downgrade your plan at any time. Changes will be reflected in your next billing cycle.',
-            ),
-            _buildFAQItem(
-              context,
-              'What payment methods do you accept?',
-              'We accept all major credit cards and PayPal through our secure Stripe payment processing.',
-            ),
-            _buildFAQItem(
-              context,
-              'Is there a free trial?',
-              'Yes! Start with our Free plan and upgrade when you\'re ready to unlock more features.',
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFAQItem(BuildContext context, String question, String answer) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      body: Stack(
         children: [
-          Text(
-            question,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: ArtbeatColors.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            answer,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: ArtbeatColors.textSecondary,
+          _buildWorldBackground(),
+          Positioned.fill(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(16, 120, 16, 32),
+              child: Column(
+                children: [
+                  _buildHeroSection(),
+                  const SizedBox(height: 20),
+                  _buildBillingToggle(),
+                  const SizedBox(height: 20),
+                  ..._orderedTiers.map(_buildPlanCard),
+                  const SizedBox(height: 12),
+                  _buildFaqPanel(),
+                ],
+              ),
             ),
           ),
         ],
@@ -465,17 +67,549 @@ class SubscriptionPlansScreen extends StatelessWidget {
     );
   }
 
-  void _selectPlan(BuildContext context, SubscriptionTier tier) {
-    if (tier == SubscriptionTier.free) {
-      // For free plan, might navigate to artist onboarding
-      Navigator.of(context).pushNamed('/artist/onboarding');
-    } else {
-      // For paid plans, navigate to purchase screen
-      Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (context) => SubscriptionPurchaseScreen(tier: tier),
+  Widget _buildHeroSection() {
+    final badges = [
+      'Promo ads that convert to visibility gifts',
+      'Fan subscriptions with instant boosts',
+      'Unified billing across devices',
+    ];
+
+    return _buildGlassPanel(
+      padding: const EdgeInsets.all(28),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'subscription_plans_title'.tr(),
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white,
+              fontSize: 26,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'subscription_plans_cta'.tr(),
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white.withValues(alpha: 0.78),
+              fontSize: 15,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 18),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: badges
+                .map(
+                  (badge) => Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
+                      color: Colors.white.withValues(alpha: 0.05),
+                    ),
+                    child: Text(
+                      badge,
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                )
+                .toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBillingToggle() {
+    return Row(
+      children: [
+        _buildToggleOption(
+          label: 'Monthly',
+          subtitle: 'Flexible billing',
+          selected: !_isYearly,
+          onTap: () => setState(() => _isYearly = false),
         ),
-      );
+        const SizedBox(width: 12),
+        _buildToggleOption(
+          label: 'Yearly',
+          subtitle: 'Save up to 20%',
+          selected: _isYearly,
+          onTap: () => setState(() => _isYearly = true),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildToggleOption({
+    required String label,
+    required String subtitle,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(26),
+            border: Border.all(
+              color: selected
+                  ? Colors.white.withValues(alpha: 0.5)
+                  : Colors.white.withValues(alpha: 0.12),
+            ),
+            gradient: selected
+                ? const LinearGradient(
+                    colors: [Color(0xFF7C4DFF), Color(0xFF22D3EE)],
+                  )
+                : null,
+            color: selected ? null : Colors.white.withValues(alpha: 0.03),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    selected ? Icons.radio_button_checked : Icons.radio_button_off,
+                    color: Colors.white,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    label,
+                    style: GoogleFonts.spaceGrotesk(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Text(
+                subtitle,
+                style: GoogleFonts.spaceGrotesk(
+                  color: Colors.white.withValues(alpha: 0.75),
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPlanCard(SubscriptionTier tier) {
+    final isHighlighted = tier == SubscriptionTier.creator;
+    final price = _isYearly ? tier.yearlyPrice : tier.monthlyPrice;
+    final cadence = _isYearly ? '/year' : '/month';
+    final savings = (tier.monthlyPrice * 12) - tier.yearlyPrice;
+    final features = tier.features;
+    final preview = features.take(4).toList();
+
+    final colors = _tierAccent(tier);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 18),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(34),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+          child: Container(
+            padding: const EdgeInsets.all(26),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(34),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+              gradient: isHighlighted
+                  ? LinearGradient(
+                      colors: [
+                        colors[0].withValues(alpha: 0.45),
+                        colors[1].withValues(alpha: 0.35),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    )
+                  : null,
+              color: isHighlighted ? null : Colors.white.withValues(alpha: 0.04),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.28),
+                  blurRadius: 34,
+                  offset: const Offset(0, 20),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (isHighlighted)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(999),
+                      color: Colors.white.withValues(alpha: 0.15),
+                    ),
+                    child: Text(
+                      'Most popular',
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                if (isHighlighted) const SizedBox(height: 12),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(18),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(colors: colors),
+                      ),
+                      child: Icon(_tierIcon(tier), color: Colors.white, size: 28),
+                    ),
+                    const SizedBox(width: 18),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            tier.displayName,
+                            style: GoogleFonts.spaceGrotesk(
+                              color: Colors.white,
+                              fontSize: 22,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            _tierSubtitle(tier),
+                            style: GoogleFonts.spaceGrotesk(
+                              color: Colors.white70,
+                              fontSize: 13,
+                              height: 1.3,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 18),
+                Row(
+                  children: [
+                    Text(
+                      price > 0 ? '\$${price.toStringAsFixed(2)} $cadence' : 'Free forever',
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    if (savings > 0 && _isYearly)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 10),
+                        child: Text(
+                          'Save \$${savings.toStringAsFixed(0)}',
+                          style: GoogleFonts.spaceGrotesk(
+                            color: Colors.white70,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 18),
+                ...preview.map(
+                  (feature) => Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.check_circle, color: Colors.white, size: 18),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            feature,
+                            style: GoogleFonts.spaceGrotesk(
+                              color: Colors.white,
+                              fontSize: 13,
+                              height: 1.4,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                if (features.length > preview.length)
+                  Text(
+                    '+ ${features.length - preview.length} more benefits',
+                    style: GoogleFonts.spaceGrotesk(
+                      color: Colors.white70,
+                      fontSize: 12,
+                    ),
+                  ),
+                const SizedBox(height: 20),
+                _buildPlanButton(tier),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPlanButton(SubscriptionTier tier) {
+    final label = tier == SubscriptionTier.free
+        ? 'Stay on Free'
+        : 'Choose ${tier.displayName}';
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(26),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(26),
+        onTap: () => _openPurchase(tier),
+        child: Ink(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(26),
+            gradient: const LinearGradient(
+              colors: [Color(0xFF7C4DFF), Color(0xFF22D3EE), Color(0xFF34D399)],
+            ),
+          ),
+          child: Center(
+            child: Text(
+              label,
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white,
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFaqPanel() {
+    const rows = [
+      _FaqRow(
+        title: 'How do promos and subscriptions connect?',
+        description:
+            'Each plan bundles fan subscriptions, promo ads, and gifting credits so every purchase fuels visibility.',
+      ),
+      _FaqRow(
+        title: 'Can I switch plans later?',
+        description:
+            'Yes. Upgrading or downgrading prorates instantly and your remaining credits roll into the new plan.',
+      ),
+      _FaqRow(
+        title: 'Do team plans support multiple creators?',
+        description:
+            'Business and Enterprise tiers unlock collaboration tools, shared analytics, and consolidated billing.',
+      ),
+    ];
+
+    return _buildGlassPanel(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: rows
+            .map(
+              (row) => Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      row.title,
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      row.description,
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.white70,
+                        fontSize: 13,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+            .toList(),
+      ),
+    );
+  }
+
+  void _openPurchase(SubscriptionTier tier) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => SubscriptionPurchaseScreen(tier: tier),
+      ),
+    );
+  }
+
+  IconData _tierIcon(SubscriptionTier tier) {
+    switch (tier) {
+      case SubscriptionTier.free:
+        return Icons.airline_stops;
+      case SubscriptionTier.starter:
+        return Icons.auto_awesome;
+      case SubscriptionTier.creator:
+        return Icons.palette;
+      case SubscriptionTier.business:
+        return Icons.workspaces;
+      case SubscriptionTier.enterprise:
+        return Icons.public;
     }
   }
+
+  List<Color> _tierAccent(SubscriptionTier tier) {
+    switch (tier) {
+      case SubscriptionTier.free:
+        return const [Color(0xFF374151), Color(0xFF111827)];
+      case SubscriptionTier.starter:
+        return const [Color(0xFF22D3EE), Color(0xFF2DD4BF)];
+      case SubscriptionTier.creator:
+        return const [Color(0xFF7C4DFF), Color(0xFFFF3D8D)];
+      case SubscriptionTier.business:
+        return const [Color(0xFF34D399), Color(0xFF22D3EE)];
+      case SubscriptionTier.enterprise:
+        return const [Color(0xFFFFC857), Color(0xFF7C4DFF)];
+    }
+  }
+
+  String _tierSubtitle(SubscriptionTier tier) {
+    switch (tier) {
+      case SubscriptionTier.free:
+        return 'Explore the world background and publish a few drops.';
+      case SubscriptionTier.starter:
+        return 'Emerging creators ready to showcase more work.';
+      case SubscriptionTier.creator:
+        return 'Full visibility suite with featured placement and events.';
+      case SubscriptionTier.business:
+        return 'Studios and galleries coordinating teams and promos.';
+      case SubscriptionTier.enterprise:
+        return 'Institutions needing white-label, APIs, and dedicated support.';
+    }
+  }
+
+  Widget _buildGlassPanel({
+    required Widget child,
+    EdgeInsetsGeometry padding = const EdgeInsets.all(24),
+  }) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(34),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+        child: Container(
+          width: double.infinity,
+          padding: padding,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(34),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
+            color: Colors.white.withValues(alpha: 0.05),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.3),
+                blurRadius: 34,
+                offset: const Offset(0, 18),
+              ),
+            ],
+          ),
+          child: child,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWorldBackground() {
+    return Positioned.fill(
+      child: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFF03050F),
+              Color(0xFF09122B),
+              Color(0xFF021B17),
+            ],
+          ),
+        ),
+        child: Stack(
+          children: [
+            _buildGlow(const Offset(-140, -60), Colors.purpleAccent),
+            _buildGlow(const Offset(120, 260), Colors.cyanAccent),
+            _buildGlow(const Offset(-20, 420), Colors.pinkAccent),
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    center: Alignment.center,
+                    radius: 1.2,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withValues(alpha: 0.6),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGlow(Offset offset, Color color) {
+    return Positioned(
+      left: offset.dx < 0 ? null : offset.dx,
+      right: offset.dx < 0 ? -offset.dx : null,
+      top: offset.dy,
+      child: Container(
+        width: 220,
+        height: 220,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: color.withValues(alpha: 0.16),
+          boxShadow: [
+            BoxShadow(
+              color: color.withValues(alpha: 0.35),
+              blurRadius: 110,
+              spreadRadius: 18,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FaqRow {
+  final String title;
+  final String description;
+
+  const _FaqRow({
+    required this.title,
+    required this.description,
+  });
 }

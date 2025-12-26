@@ -1016,10 +1016,7 @@ class _ImpactHud extends StatelessWidget {
   const _ImpactHud({
     required this.totalCaptures,
     required this.totalViews,
-    required this.loop,
-    this.userLevel,
-    this.userXp,
-    this.communityPulse = 0,
+    required this.loop, this.userLevel, this.userXp, required this.communityPulse,
   });
 
   @override

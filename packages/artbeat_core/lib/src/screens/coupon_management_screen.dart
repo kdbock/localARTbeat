@@ -1,10 +1,13 @@
+import 'dart:ui';
+
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+
 import '../models/coupon_model.dart';
 import '../services/coupon_service.dart';
-import 'package:easy_localization/easy_localization.dart';
 
-/// Admin screen for managing promotional coupons
 class CouponManagementScreen extends StatefulWidget {
   const CouponManagementScreen({super.key});
 
@@ -17,79 +20,286 @@ class _CouponManagementScreenState extends State<CouponManagementScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Scaffold(
+      backgroundColor: Colors.black,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text('core_coupon_title'.tr()),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
+        title: Text(
+          'core_coupon_title'.tr(),
+          style: GoogleFonts.spaceGrotesk(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
+        ),
         actions: [
           IconButton(
             onPressed: _showCreateCouponDialog,
-            icon: const Icon(Icons.add),
-            tooltip: 'Create Coupon',
+            icon: const Icon(Icons.add_circle_outline),
+            tooltip: 'core_coupon_create'.tr(),
           ),
         ],
       ),
-      body: StreamBuilder<List<CouponModel>>(
-        stream: _couponService.getActiveCoupons(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          }
-
-          final coupons = snapshot.data ?? [];
-
-          if (coupons.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.confirmation_number,
-                    size: 64,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No coupons found',
-                    style: theme.textTheme.headlineSmall,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Create your first coupon to get started',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
+      body: Stack(
+        children: [
+          _buildWorldBackground(),
+          Positioned.fill(
+            child: StreamBuilder<List<CouponModel>>(
+              stream: _couponService.getActiveCoupons(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return _buildStatusState(
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 3,
+                            color: Colors.white70,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Syncing coupons...',
+                          style: GoogleFonts.spaceGrotesk(
+                            color: Colors.white70,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton.icon(
-                    onPressed: _showCreateCouponDialog,
-                    icon: const Icon(Icons.add),
-                    label: Text('core_coupon_create'.tr()),
-                  ),
-                ],
-              ),
-            );
-          }
+                  );
+                }
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: coupons.length,
-            itemBuilder: (context, index) {
-              final coupon = coupons[index];
-              return CouponCard(
-                coupon: coupon,
-                onEdit: () => _showEditCouponDialog(coupon),
-                onDelete: () => _showDeleteConfirmation(coupon),
-                onToggleStatus: () => _toggleCouponStatus(coupon),
-              );
-            },
-          );
-        },
+                if (snapshot.hasError) {
+                  return _buildStatusState(
+                    Text(
+                      'Error: ${snapshot.error}',
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.white70,
+                        fontSize: 14,
+                      ),
+                    ),
+                  );
+                }
+
+                final coupons = snapshot.data ?? [];
+
+                if (coupons.isEmpty) {
+                  return SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(16, 140, 16, 40),
+                    child: Column(
+                      children: [
+                        _buildHeroSection(coupons),
+                        const SizedBox(height: 20),
+                        _buildEmptyState(),
+                      ],
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(16, 120, 16, 40),
+                  itemCount: coupons.length + 1,
+                  itemBuilder: (context, index) {
+                    if (index == 0) {
+                      return Column(
+                        children: [
+                          _buildHeroSection(coupons),
+                          const SizedBox(height: 20),
+                        ],
+                      );
+                    }
+                    final coupon = coupons[index - 1];
+                    return CouponCard(
+                      coupon: coupon,
+                      onEdit: () => _showEditCouponDialog(coupon),
+                      onDelete: () => _showDeleteConfirmation(coupon),
+                      onToggleStatus: () => _toggleCouponStatus(coupon),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatusState(Widget child) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: _buildGlassPanel(
+          padding: const EdgeInsets.all(24),
+          child: child,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeroSection(List<CouponModel> coupons) {
+    final active = coupons.where((c) => c.status == CouponStatus.active).length;
+    final paused = coupons.where((c) => c.status == CouponStatus.inactive).length;
+    final limited = coupons
+        .where((c) => c.status == CouponStatus.expired || c.status == CouponStatus.exhausted)
+        .length;
+    final totalUses = coupons.fold<int>(0, (sum, coupon) => sum + coupon.currentUses);
+
+    return _buildGlassPanel(
+      padding: const EdgeInsets.all(28),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'core_coupon_title'.tr(),
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white,
+              fontSize: 24,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Visibility passes, promo credits, and trials all live here.',
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white.withValues(alpha: 0.78),
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              _buildStatTile(
+                icon: Icons.bolt,
+                label: 'Active',
+                value: active.toString(),
+              ),
+              const SizedBox(width: 12),
+              _buildStatTile(
+                icon: Icons.pause_circle_outline,
+                label: 'Paused',
+                value: paused.toString(),
+              ),
+              const SizedBox(width: 12),
+              _buildStatTile(
+                icon: Icons.event_busy,
+                label: 'Expired',
+                value: limited.toString(),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(22),
+              color: Colors.white.withValues(alpha: 0.04),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.timeline, color: Colors.white70, size: 18),
+                const SizedBox(width: 8),
+                Text(
+                  'Lifetime uses · $totalUses',
+                  style: GoogleFonts.spaceGrotesk(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          _GradientButton(
+            label: 'core_coupon_create'.tr(),
+            icon: Icons.add,
+            onPressed: _showCreateCouponDialog,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatTile({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
+          color: Colors.white.withValues(alpha: 0.04),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: Colors.white70, size: 18),
+            const SizedBox(height: 10),
+            Text(
+              value,
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            Text(
+              label,
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white70,
+                fontSize: 12,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return _buildGlassPanel(
+      padding: const EdgeInsets.all(28),
+      child: Column(
+        children: [
+          const Icon(Icons.confirmation_number_outlined, color: Colors.white70, size: 48),
+          const SizedBox(height: 14),
+          Text(
+            'No coupons yet',
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Create your first code to unlock promo drops, trials, and VIP access.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white70,
+              fontSize: 14,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 20),
+          _GradientButton(
+            label: 'core_coupon_create'.tr(),
+            icon: Icons.add,
+            onPressed: _showCreateCouponDialog,
+          ),
+        ],
       ),
     );
   }
@@ -97,10 +307,10 @@ class _CouponManagementScreenState extends State<CouponManagementScreen> {
   void _showCreateCouponDialog() {
     showDialog<bool>(
       context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.6),
       builder: (context) => const CreateCouponDialog(),
     ).then((result) {
       if (result == true) {
-        // Refresh the list
         setState(() {});
       }
     });
@@ -109,6 +319,7 @@ class _CouponManagementScreenState extends State<CouponManagementScreen> {
   void _showEditCouponDialog(CouponModel coupon) {
     showDialog<bool>(
       context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.6),
       builder: (context) => EditCouponDialog(coupon: coupon),
     ).then((result) {
       if (result == true) {
@@ -117,63 +328,68 @@ class _CouponManagementScreenState extends State<CouponManagementScreen> {
     });
   }
 
-  void _showDeleteConfirmation(CouponModel coupon) {
-    showDialog<bool>(
+  Future<void> _showDeleteConfirmation(CouponModel coupon) async {
+    final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('core_coupon_delete'.tr()),
-        content: Text(
-          'Are you sure you want to delete the coupon "${coupon.title}"? '
-          'This action cannot be undone.',
+      barrierColor: Colors.black.withValues(alpha: 0.6),
+      builder: (context) => _GlassDialog(
+        title: 'core_coupon_delete'.tr(),
+        content: ConstrainedBox(
+          constraints: const BoxConstraints(maxHeight: 200),
+          child: Text(
+            'Are you sure you want to delete the coupon "${coupon.title}"? This action cannot be undone.',
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white70,
+              fontSize: 14,
+              height: 1.4,
+            ),
+          ),
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text('core_coupon_cancel'.tr()),
-          ),
-          TextButton(
-            onPressed: () async {
-              try {
-                await _couponService.deleteCoupon(coupon.id);
-                // ignore: use_build_context_synchronously
-                Navigator.of(context).pop();
-                setState(() {});
-                if (mounted) {
-                  // ignore: use_build_context_synchronously
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('core_coupon_success_deleted'.tr())),
-                  );
-                }
-              } catch (e) {
-                // ignore: use_build_context_synchronously
-                Navigator.of(context).pop();
-                if (mounted) {
-                  // ignore: use_build_context_synchronously
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Failed to delete coupon: $e')),
-                  );
-                }
-              }
-            },
-            style: TextButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.error,
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(
+              'core_coupon_cancel'.tr(),
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white70,
+                fontWeight: FontWeight.w600,
+              ),
             ),
-            child: Text('core_coupon_delete_button'.tr()),
+          ),
+          _GradientButton(
+            label: 'core_coupon_delete_button'.tr(),
+            onPressed: () => Navigator.of(context).pop(true),
           ),
         ],
       ),
     );
+
+    if (confirmed == true) {
+      try {
+        await _couponService.deleteCoupon(coupon.id);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('core_coupon_success_deleted'.tr())),
+          );
+        }
+        setState(() {});
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to delete coupon: $e')),
+          );
+        }
+      }
+    }
   }
 
-  void _toggleCouponStatus(CouponModel coupon) async {
+  Future<void> _toggleCouponStatus(CouponModel coupon) async {
     try {
       final newStatus = coupon.status == CouponStatus.active
           ? CouponStatus.inactive
           : CouponStatus.active;
-
       await _couponService.updateCouponStatus(coupon.id, newStatus);
       setState(() {});
-
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -185,15 +401,105 @@ class _CouponManagementScreenState extends State<CouponManagementScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Failed to update coupon: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update coupon: $e')),
+        );
       }
     }
   }
+
+  Widget _buildGlassPanel({
+    required Widget child,
+    EdgeInsetsGeometry padding = const EdgeInsets.all(24),
+  }) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(34),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
+        child: Container(
+          width: double.infinity,
+          padding: padding,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(34),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
+            color: Colors.white.withValues(alpha: 0.05),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.35),
+                blurRadius: 36,
+                offset: const Offset(0, 22),
+              ),
+            ],
+          ),
+          child: child,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWorldBackground() {
+    return Positioned.fill(
+      child: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFF03050F),
+              Color(0xFF09122B),
+              Color(0xFF021B17),
+            ],
+          ),
+        ),
+        child: Stack(
+          children: [
+            _buildGlow(const Offset(-160, -60), Colors.purpleAccent),
+            _buildGlow(const Offset(140, 260), Colors.cyanAccent),
+            _buildGlow(const Offset(-40, 420), Colors.pinkAccent),
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    center: Alignment.center,
+                    radius: 1.2,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withValues(alpha: 0.6),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGlow(Offset offset, Color color) {
+    return Positioned(
+      left: offset.dx < 0 ? null : offset.dx,
+      right: offset.dx < 0 ? -offset.dx : null,
+      top: offset.dy,
+      child: Container(
+        width: 220,
+        height: 220,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: color.withValues(alpha: 0.16),
+          boxShadow: [
+            BoxShadow(
+              color: color.withValues(alpha: 0.35),
+              blurRadius: 110,
+              spreadRadius: 18,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
-/// Card widget to display coupon information
 class CouponCard extends StatelessWidget {
   final CouponModel coupon;
   final VoidCallback onEdit;
@@ -210,177 +516,200 @@ class CouponCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        coupon.title,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        coupon.code,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontFamily: 'monospace',
-                          color: theme.colorScheme.primary,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                _buildStatusChip(theme),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(coupon.description, style: theme.textTheme.bodyMedium),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                _buildTypeChip(theme),
-                const SizedBox(width: 8),
-                Text(
-                  '${coupon.currentUses}/${coupon.maxUses ?? '∞'} uses',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-            if (coupon.expiresAt != null) ...[
-              const SizedBox(height: 8),
-              Text(
-                'Expires: ${_formatDate(coupon.expiresAt!)}',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                IconButton(
-                  onPressed: onToggleStatus,
-                  icon: Icon(
-                    coupon.status == CouponStatus.active
-                        ? Icons.pause
-                        : Icons.play_arrow,
-                  ),
-                  tooltip: coupon.status == CouponStatus.active
-                      ? 'Deactivate'
-                      : 'Activate',
-                  color: theme.colorScheme.primary,
-                ),
-                IconButton(
-                  onPressed: onEdit,
-                  icon: const Icon(Icons.edit),
-                  tooltip: 'Edit',
-                  color: theme.colorScheme.primary,
-                ),
-                IconButton(
-                  onPressed: onDelete,
-                  icon: const Icon(Icons.delete),
-                  tooltip: 'core_coupon_delete_button'.tr(),
-                  color: theme.colorScheme.error,
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatusChip(ThemeData theme) {
-    Color backgroundColor;
-    Color textColor;
-    String text;
-
-    switch (coupon.status) {
-      case CouponStatus.active:
-        backgroundColor = theme.colorScheme.primaryContainer;
-        textColor = theme.colorScheme.onPrimaryContainer;
-        text = 'Active';
-        break;
-      case CouponStatus.inactive:
-        backgroundColor = theme.colorScheme.surfaceContainerHighest;
-        textColor = theme.colorScheme.onSurfaceVariant;
-        text = 'Inactive';
-        break;
-      case CouponStatus.expired:
-        backgroundColor = theme.colorScheme.errorContainer;
-        textColor = theme.colorScheme.onErrorContainer;
-        text = 'Expired';
-        break;
-      case CouponStatus.exhausted:
-        backgroundColor = theme.colorScheme.errorContainer;
-        textColor = theme.colorScheme.onErrorContainer;
-        text = 'Exhausted';
-        break;
-    }
+    final usesLabel = '${coupon.currentUses}/${coupon.maxUses ?? '∞'} uses';
+    final expiresLabel =
+        coupon.expiresAt != null ? 'Expires ${_formatDate(coupon.expiresAt!)}' : null;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        text,
-        style: theme.textTheme.labelSmall?.copyWith(
-          color: textColor,
-          fontWeight: FontWeight.w500,
+      margin: const EdgeInsets.only(bottom: 16),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(32),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(32),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+              color: Colors.white.withValues(alpha: 0.04),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.3),
+                  blurRadius: 30,
+                  offset: const Offset(0, 18),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        color: _statusColor().withValues(alpha: 0.18),
+                        border: Border.all(color: _statusColor().withValues(alpha: 0.5)),
+                      ),
+                      child: Text(
+                        _statusLabel(),
+                        style: GoogleFonts.spaceGrotesk(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      coupon.code,
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                Text(
+                  coupon.title,
+                  style: GoogleFonts.spaceGrotesk(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  coupon.description,
+                  style: GoogleFonts.spaceGrotesk(
+                    color: Colors.white70,
+                    fontSize: 14,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: [
+                    _buildInfoChip(
+                      Icons.loyalty,
+                      _typeLabel(),
+                    ),
+                    _buildInfoChip(
+                      Icons.repeat,
+                      usesLabel,
+                    ),
+                    if (expiresLabel != null)
+                      _buildInfoChip(
+                        Icons.event,
+                        expiresLabel,
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 18),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    _GlassIconButton(
+                      icon: coupon.status == CouponStatus.active
+                          ? Icons.pause_circle
+                          : Icons.play_circle,
+                      tooltip: coupon.status == CouponStatus.active ? 'Pause' : 'Activate',
+                      onPressed: onToggleStatus,
+                    ),
+                    const SizedBox(width: 10),
+                    _GlassIconButton(
+                      icon: Icons.edit,
+                      tooltip: 'Edit',
+                      onPressed: onEdit,
+                    ),
+                    const SizedBox(width: 10),
+                    _GlassIconButton(
+                      icon: Icons.delete_outline,
+                      tooltip: 'Delete',
+                      color: Colors.redAccent,
+                      onPressed: onDelete,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildTypeChip(ThemeData theme) {
-    String text;
+  Widget _buildInfoChip(IconData icon, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+        color: Colors.white.withValues(alpha: 0.04),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: Colors.white70, size: 16),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _typeLabel() {
     switch (coupon.type) {
       case CouponType.fullAccess:
-        text = 'Full Access';
-        break;
+        return 'Full access';
       case CouponType.percentageDiscount:
-        text = '${coupon.discountPercentage}% Off';
-        break;
+        final percent = coupon.discountPercentage ?? 0;
+        return '$percent% off';
       case CouponType.fixedDiscount:
-        text = '\$${coupon.discountAmount} Off';
-        break;
+        final amount = coupon.discountAmount?.toStringAsFixed(2) ?? '0.00';
+        return '\$${amount} off';
       case CouponType.freeTrial:
-        text = 'Free Trial';
-        break;
+        return 'Free trial';
     }
+  }
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.secondaryContainer,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        text,
-        style: theme.textTheme.labelSmall?.copyWith(
-          color: theme.colorScheme.onSecondaryContainer,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-    );
+  String _statusLabel() {
+    switch (coupon.status) {
+      case CouponStatus.active:
+        return 'Active';
+      case CouponStatus.inactive:
+        return 'Inactive';
+      case CouponStatus.expired:
+        return 'Expired';
+      case CouponStatus.exhausted:
+        return 'Exhausted';
+    }
+  }
+
+  Color _statusColor() {
+    switch (coupon.status) {
+      case CouponStatus.active:
+        return const Color(0xFF34D399);
+      case CouponStatus.inactive:
+        return Colors.white70;
+      case CouponStatus.expired:
+        return const Color(0xFFFF3D8D);
+      case CouponStatus.exhausted:
+        return const Color(0xFFFFC857);
+    }
   }
 
   String _formatDate(DateTime date) {
@@ -388,7 +717,6 @@ class CouponCard extends StatelessWidget {
   }
 }
 
-/// Dialog for creating new coupons
 class CreateCouponDialog extends StatefulWidget {
   const CreateCouponDialog({super.key});
 
@@ -418,130 +746,136 @@ class _CreateCouponDialogState extends State<CreateCouponDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return AlertDialog(
-      title: Text('core_coupon_create'.tr()),
-      content: Form(
-        key: _formKey,
+    return _GlassDialog(
+      title: 'core_coupon_create'.tr(),
+      content: ConstrainedBox(
+        constraints: const BoxConstraints(maxHeight: 520),
         child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextFormField(
-                controller: _titleController,
-                decoration: const InputDecoration(
-                  labelText: 'Title',
-                  hintText: 'e.g., Beta Access Code',
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextFormField(
+                  controller: _titleController,
+                  style: GoogleFonts.spaceGrotesk(color: Colors.white),
+                  decoration: _glassInputDecoration('Title', hint: 'e.g., Beta Access Code'),
+                  validator: (value) => value?.isEmpty ?? true ? 'Title is required' : null,
                 ),
-                validator: (value) =>
-                    value?.isEmpty ?? true ? 'Title is required' : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _descriptionController,
-                decoration: InputDecoration(
-                  labelText: 'Description',
-                  hintText: 'core_coupon_description_hint'.tr(),
-                ),
-                maxLines: 2,
-                validator: (value) =>
-                    value?.isEmpty ?? true ? 'Description is required' : null,
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<CouponType>(
-                initialValue: _selectedType,
-                decoration: const InputDecoration(labelText: 'Coupon Type'),
-                items: CouponType.values.map((type) {
-                  return DropdownMenuItem(
-                    value: type,
-                    child: Text(_getCouponTypeDisplayName(type)),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _selectedType = value!;
-                  });
-                },
-              ),
-              if (_selectedType == CouponType.percentageDiscount ||
-                  _selectedType == CouponType.fixedDiscount) ...[
                 const SizedBox(height: 16),
                 TextFormField(
-                  controller: _discountController,
-                  decoration: InputDecoration(
-                    labelText: _selectedType == CouponType.percentageDiscount
-                        ? 'Discount Percentage'
-                        : 'Discount Amount',
-                    hintText: _selectedType == CouponType.percentageDiscount
-                        ? 'e.g., 50'
-                        : 'e.g., 9.99',
+                  controller: _descriptionController,
+                  style: GoogleFonts.spaceGrotesk(color: Colors.white),
+                  maxLines: 2,
+                  decoration: _glassInputDecoration(
+                    'Description',
+                    hint: 'core_coupon_description_hint'.tr(),
                   ),
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value?.isEmpty ?? true)
-                      return 'Discount value is required';
-                    final numValue = double.tryParse(value!);
-                    if (numValue == null) return 'Invalid number';
-                    if (_selectedType == CouponType.percentageDiscount) {
-                      if (numValue <= 0 || numValue > 100) {
-                        return 'Percentage must be between 1 and 100';
-                      }
-                    } else {
-                      if (numValue <= 0) return 'Amount must be greater than 0';
+                  validator: (value) => value?.isEmpty ?? true ? 'Description is required' : null,
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<CouponType>(
+                  initialValue: _selectedType,
+                  decoration: _glassInputDecoration('Coupon Type'),
+                  dropdownColor: const Color(0xFF050914),
+                  iconEnabledColor: Colors.white,
+                  style: GoogleFonts.spaceGrotesk(color: Colors.white),
+                  items: CouponType.values
+                      .map(
+                        (type) => DropdownMenuItem(
+                          value: type,
+                          child: Text(
+                            _getCouponTypeDisplayName(type),
+                            style: GoogleFonts.spaceGrotesk(color: Colors.white),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() {
+                        _selectedType = value;
+                      });
                     }
-                    return null;
                   },
                 ),
+                if (_selectedType == CouponType.percentageDiscount ||
+                    _selectedType == CouponType.fixedDiscount) ...[
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _discountController,
+                    style: GoogleFonts.spaceGrotesk(color: Colors.white),
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    decoration: _glassInputDecoration(
+                      _selectedType == CouponType.percentageDiscount
+                          ? 'Discount Percentage'
+                          : 'Discount Amount',
+                      hint: _selectedType == CouponType.percentageDiscount ? 'e.g., 50' : 'e.g., 9.99',
+                    ),
+                    validator: (value) {
+                      if (value?.isEmpty ?? true) return 'Discount value is required';
+                      final parsed = double.tryParse(value!);
+                      if (parsed == null) return 'Invalid number';
+                      if (_selectedType == CouponType.percentageDiscount) {
+                        if (parsed <= 0 || parsed > 100) {
+                          return 'Percentage must be between 1 and 100';
+                        }
+                      } else {
+                        if (parsed <= 0) return 'Amount must be greater than 0';
+                      }
+                      return null;
+                    },
+                  ),
+                ],
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _maxUsesController,
+                  style: GoogleFonts.spaceGrotesk(color: Colors.white),
+                  keyboardType: TextInputType.number,
+                  decoration: _glassInputDecoration(
+                    'Maximum Uses (optional)',
+                    hint: 'Leave empty for unlimited',
+                  ),
+                ),
+                const SizedBox(height: 16),
+                GestureDetector(
+                  onTap: _selectExpirationDate,
+                  child: InputDecorator(
+                    decoration: _glassInputDecoration('Expiration Date (optional)'),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          _expiresAt != null
+                              ? '${_expiresAt!.month}/${_expiresAt!.day}/${_expiresAt!.year}'
+                              : 'No expiration',
+                          style: GoogleFonts.spaceGrotesk(color: Colors.white),
+                        ),
+                        const Icon(Icons.calendar_today, color: Colors.white70, size: 18),
+                      ],
+                    ),
+                  ),
+                ),
               ],
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _maxUsesController,
-                decoration: const InputDecoration(
-                  labelText: 'Maximum Uses (optional)',
-                  hintText: 'Leave empty for unlimited',
-                ),
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: 16),
-              InkWell(
-                onTap: _selectExpirationDate,
-                child: InputDecorator(
-                  decoration: const InputDecoration(
-                    labelText: 'Expiration Date (optional)',
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        _expiresAt != null
-                            ? '${_expiresAt!.month}/${_expiresAt!.day}/${_expiresAt!.year}'
-                            : 'No expiration',
-                        style: theme.textTheme.bodyMedium,
-                      ),
-                      const Icon(Icons.calendar_today, size: 20),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
       actions: [
         TextButton(
           onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
-          child: Text('core_coupon_cancel'.tr()),
+          child: Text(
+            'core_coupon_cancel'.tr(),
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white70,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
-        ElevatedButton(
+        _GradientButton(
+          label: 'core_coupon_create_button'.tr(),
+          loading: _isLoading,
           onPressed: _isLoading ? null : _createCoupon,
-          child: _isLoading
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text('core_coupon_create_button'.tr()),
         ),
       ],
     );
@@ -560,7 +894,7 @@ class _CreateCouponDialogState extends State<CreateCouponDialog> {
     }
   }
 
-  void _selectExpirationDate() async {
+  Future<void> _selectExpirationDate() async {
     final picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now().add(const Duration(days: 30)),
@@ -574,8 +908,8 @@ class _CreateCouponDialogState extends State<CreateCouponDialog> {
     }
   }
 
-  void _createCoupon() async {
-    if (!_formKey.currentState!.validate()) return;
+  Future<void> _createCoupon() async {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
 
     setState(() {
       _isLoading = true;
@@ -583,7 +917,6 @@ class _CreateCouponDialogState extends State<CreateCouponDialog> {
 
     try {
       final couponService = context.read<CouponService>();
-
       double? discountAmount;
       int? discountPercentage;
 
@@ -594,7 +927,7 @@ class _CreateCouponDialogState extends State<CreateCouponDialog> {
       }
 
       await couponService.createCoupon(
-        code: '', // Will be auto-generated
+        code: '',
         title: _titleController.text,
         description: _descriptionController.text,
         type: _selectedType,
@@ -614,9 +947,9 @@ class _CreateCouponDialogState extends State<CreateCouponDialog> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Failed to create coupon: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to create coupon: $e')),
+        );
       }
     } finally {
       if (mounted) {
@@ -628,7 +961,6 @@ class _CreateCouponDialogState extends State<CreateCouponDialog> {
   }
 }
 
-/// Dialog for editing existing coupons
 class EditCouponDialog extends StatefulWidget {
   final CouponModel coupon;
 
@@ -651,9 +983,7 @@ class _EditCouponDialogState extends State<EditCouponDialog> {
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.coupon.title);
-    _descriptionController = TextEditingController(
-      text: widget.coupon.description,
-    );
+    _descriptionController = TextEditingController(text: widget.coupon.description);
     _maxUsesController = TextEditingController(
       text: widget.coupon.maxUses?.toString() ?? '',
     );
@@ -671,85 +1001,100 @@ class _EditCouponDialogState extends State<EditCouponDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return AlertDialog(
-      title: const Text('Edit Coupon'),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextFormField(
-              controller: _titleController,
-              decoration: const InputDecoration(labelText: 'Title'),
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _descriptionController,
-              decoration: const InputDecoration(labelText: 'Description'),
-              maxLines: 2,
-            ),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<CouponStatus>(
-              initialValue: _selectedStatus,
-              decoration: const InputDecoration(labelText: 'Status'),
-              items: CouponStatus.values.map((status) {
-                return DropdownMenuItem(
-                  value: status,
-                  child: Text(_getStatusDisplayName(status)),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  _selectedStatus = value!;
-                });
-              },
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _maxUsesController,
-              decoration: const InputDecoration(
-                labelText: 'Maximum Uses',
-                hintText: 'Leave empty for unlimited',
+    return _GlassDialog(
+      title: 'Edit Coupon',
+      content: ConstrainedBox(
+        constraints: const BoxConstraints(maxHeight: 480),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextFormField(
+                controller: _titleController,
+                style: GoogleFonts.spaceGrotesk(color: Colors.white),
+                decoration: _glassInputDecoration('Title'),
               ),
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 16),
-            InkWell(
-              onTap: _selectExpirationDate,
-              child: InputDecorator(
-                decoration: const InputDecoration(labelText: 'Expiration Date'),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      _expiresAt != null
-                          ? '${_expiresAt!.month}/${_expiresAt!.day}/${_expiresAt!.year}'
-                          : 'No expiration',
-                      style: theme.textTheme.bodyMedium,
-                    ),
-                    const Icon(Icons.calendar_today, size: 20),
-                  ],
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _descriptionController,
+                style: GoogleFonts.spaceGrotesk(color: Colors.white),
+                maxLines: 2,
+                decoration: _glassInputDecoration('Description'),
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<CouponStatus>(
+                initialValue: _selectedStatus,
+                decoration: _glassInputDecoration('Status'),
+                dropdownColor: const Color(0xFF050914),
+                iconEnabledColor: Colors.white,
+                style: GoogleFonts.spaceGrotesk(color: Colors.white),
+                items: CouponStatus.values
+                    .map(
+                      (status) => DropdownMenuItem(
+                        value: status,
+                        child: Text(
+                          _getStatusDisplayName(status),
+                          style: GoogleFonts.spaceGrotesk(color: Colors.white),
+                        ),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() {
+                      _selectedStatus = value;
+                    });
+                  }
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _maxUsesController,
+                style: GoogleFonts.spaceGrotesk(color: Colors.white),
+                keyboardType: TextInputType.number,
+                decoration: _glassInputDecoration(
+                  'Maximum Uses',
+                  hint: 'Leave empty for unlimited',
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: 16),
+              GestureDetector(
+                onTap: _selectExpirationDate,
+                child: InputDecorator(
+                  decoration: _glassInputDecoration('Expiration Date'),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        _expiresAt != null
+                            ? '${_expiresAt!.month}/${_expiresAt!.day}/${_expiresAt!.year}'
+                            : 'No expiration',
+                        style: GoogleFonts.spaceGrotesk(color: Colors.white),
+                      ),
+                      const Icon(Icons.calendar_today, color: Colors.white70, size: 18),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
       actions: [
         TextButton(
           onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
-          child: Text('core_coupon_cancel'.tr()),
+          child: Text(
+            'core_coupon_cancel'.tr(),
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white70,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
-        ElevatedButton(
+        _GradientButton(
+          label: 'Update',
+          loading: _isLoading,
           onPressed: _isLoading ? null : _updateCoupon,
-          child: _isLoading
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Text('Update'),
         ),
       ],
     );
@@ -768,7 +1113,7 @@ class _EditCouponDialogState extends State<EditCouponDialog> {
     }
   }
 
-  void _selectExpirationDate() async {
+  Future<void> _selectExpirationDate() async {
     final picked = await showDatePicker(
       context: context,
       initialDate: _expiresAt ?? DateTime.now().add(const Duration(days: 30)),
@@ -782,20 +1127,14 @@ class _EditCouponDialogState extends State<EditCouponDialog> {
     }
   }
 
-  void _updateCoupon() async {
+  Future<void> _updateCoupon() async {
     setState(() {
       _isLoading = true;
     });
 
     try {
       final couponService = context.read<CouponService>();
-
-      // Update basic fields
       await couponService.updateCouponStatus(widget.coupon.id, _selectedStatus);
-
-      // For more complex updates, you might need additional methods in CouponService
-      // For now, we'll just update the status
-
       if (mounted) {
         Navigator.of(context).pop(true);
         ScaffoldMessenger.of(context).showSnackBar(
@@ -804,9 +1143,9 @@ class _EditCouponDialogState extends State<EditCouponDialog> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Failed to update coupon: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update coupon: $e')),
+        );
       }
     } finally {
       if (mounted) {
@@ -816,4 +1155,212 @@ class _EditCouponDialogState extends State<EditCouponDialog> {
       }
     }
   }
+}
+
+class _GlassDialog extends StatelessWidget {
+  final String title;
+  final Widget content;
+  final List<Widget> actions;
+
+  const _GlassDialog({
+    required this.title,
+    required this.content,
+    required this.actions,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(34),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(34),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
+              color: Colors.black.withValues(alpha: 0.65),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.4),
+                  blurRadius: 40,
+                  offset: const Offset(0, 30),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.spaceGrotesk(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 18),
+                content,
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: actions,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _GradientButton extends StatelessWidget {
+  final String label;
+  final VoidCallback? onPressed;
+  final bool loading;
+  final IconData? icon;
+
+  const _GradientButton({
+    required this.label,
+    this.onPressed,
+    this.loading = false,
+    this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDisabled = onPressed == null;
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(28),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(28),
+        onTap: isDisabled || loading ? null : onPressed,
+        child: Ink(
+          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(28),
+            gradient: LinearGradient(
+              colors: isDisabled
+                  ? [
+                      Colors.white.withValues(alpha: 0.2),
+                      Colors.white.withValues(alpha: 0.1),
+                    ]
+                  : const [
+                      Color(0xFF7C4DFF),
+                      Color(0xFF22D3EE),
+                      Color(0xFF34D399),
+                    ],
+            ),
+            boxShadow: isDisabled
+                ? null
+                : [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.35),
+                      blurRadius: 30,
+                      offset: const Offset(0, 18),
+                    ),
+                  ],
+          ),
+          child: Center(
+            child: loading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 3,
+                      valueColor: AlwaysStoppedAnimation(Colors.white),
+                    ),
+                  )
+                : Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (icon != null) ...[
+                        Icon(icon, color: Colors.white, size: 18),
+                        const SizedBox(width: 8),
+                      ],
+                      Text(
+                        label,
+                        style: GoogleFonts.spaceGrotesk(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _GlassIconButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onPressed;
+  final Color? color;
+  final String? tooltip;
+
+  const _GlassIconButton({
+    required this.icon,
+    required this.onPressed,
+    this.color,
+    this.tooltip,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final button = Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(18),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: onPressed,
+        child: Ink(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
+            color: Colors.white.withValues(alpha: 0.04),
+          ),
+          child: Icon(icon, color: color ?? Colors.white, size: 20),
+        ),
+      ),
+    );
+
+    if (tooltip != null) {
+      return Tooltip(message: tooltip!, child: button);
+    }
+    return button;
+  }
+}
+
+InputDecoration _glassInputDecoration(String label, {String? hint}) {
+  return InputDecoration(
+    labelText: label,
+    hintText: hint,
+    labelStyle: GoogleFonts.spaceGrotesk(color: Colors.white70, fontSize: 13),
+    hintStyle: GoogleFonts.spaceGrotesk(color: Colors.white54, fontSize: 13),
+    filled: true,
+    fillColor: Colors.white.withValues(alpha: 0.04),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(22),
+      borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.18)),
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(22),
+      borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.16)),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(22),
+      borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.34)),
+    ),
+    contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+  );
 }

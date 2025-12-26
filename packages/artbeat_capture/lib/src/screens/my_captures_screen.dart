@@ -73,7 +73,7 @@ class _MyCapturesScreenState extends State<MyCapturesScreen>
                 ),
                 TabBar(
                   controller: _tabController,
-                  tabs: [
+                  tabs: const [
                     Tab(text: 'All'),
                     Tab(text: 'Pending'),
                     Tab(text: 'Approved'),

@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:intl/intl.dart' as intl;
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_core/artbeat_core.dart';
@@ -69,13 +70,13 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
                   Icon(
                     Icons.error_outline,
                     size: 64,
-                    color: Colors.white.withOpacity(0.70),
+                    color: Colors.white.withValues(alpha: 0.70),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'error_something_wrong'.tr(),
                     style: GoogleFonts.spaceGrotesk(
-                      color: Colors.white.withOpacity(0.92),
+                      color: Colors.white.withValues(alpha: 0.92),
                       fontSize: 20,
                       fontWeight: FontWeight.w900,
                     ),
@@ -86,7 +87,7 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
                     error,
                     textAlign: TextAlign.center,
                     style: GoogleFonts.spaceGrotesk(
-                      color: Colors.white.withOpacity(0.70),
+                      color: Colors.white.withValues(alpha: 0.70),
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                     ),
@@ -259,14 +260,7 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
                       body: TabBarView(
                         controller: _tabController,
                         children: [
-                          _ForYouTab(
-                            vm: vm,
-                            scrollDepth: _scrollDepth,
-                            onOpenProfileMenu: () => _showProfileMenu(context),
-                            onOpenDrawer: _openDrawer,
-                            onNavigateToArtWalk: () =>
-                                _navigateToArtWalk(context),
-                          ),
+                          _ForYouTab(vm: vm),
                           _ExploreTab(vm: vm),
                           _CommunityTab(vm: vm),
                         ],
@@ -664,16 +658,6 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
         (vm.artworkError != null && vm.artwork.isEmpty);
   }
 
-  String _getErrorMessage(DashboardViewModel vm) {
-    if (vm.eventsError != null)
-      return 'dashboard_error_unable_load_events'.tr();
-    if (vm.artworkError != null)
-      return 'dashboard_error_unable_load_artwork'.tr();
-    if (vm.artistsError != null)
-      return 'dashboard_error_unable_load_artists'.tr();
-    return 'dashboard_error_something_wrong_retry'.tr();
-  }
-
   void _openDrawer() => _scaffoldKey.currentState?.openDrawer();
 
   void _showProfileMenu(BuildContext context) {
@@ -683,14 +667,6 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
       backgroundColor: Colors.transparent,
       builder: (context) => const EnhancedProfileMenu(),
     );
-  }
-
-  Future<void> _navigateToArtWalk(BuildContext context) async {
-    final result = await Navigator.pushNamed(context, '/art-walk/dashboard');
-    if (result == true && context.mounted) {
-      final vm = Provider.of<DashboardViewModel>(context, listen: false);
-      await vm.refresh();
-    }
   }
 
   void _navigateToNotifications(BuildContext context) {
@@ -811,283 +787,941 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
   }
 }
 
-// -----------------------------------------------------------------------------
-// TAB 1: For You (restores hero + activity + engagement + browse/captures)
-// -----------------------------------------------------------------------------
 class _ForYouTab extends StatelessWidget {
-  const _ForYouTab({
-    required this.vm,
-    required this.scrollDepth,
-    required this.onOpenProfileMenu,
-    required this.onOpenDrawer,
-    required this.onNavigateToArtWalk,
-  });
+  const _ForYouTab({required this.vm});
 
   final DashboardViewModel vm;
-  final int scrollDepth;
-  final VoidCallback onOpenProfileMenu;
-  final VoidCallback onOpenDrawer;
-  final VoidCallback onNavigateToArtWalk;
 
   @override
   Widget build(BuildContext context) {
-    final List<CaptureModel> savedCaptures =
-        vm.currentUser?.captures ?? <CaptureModel>[];
-    final List<ArtworkModel> spotlightArtworks = vm.artwork.take(5).toList();
+    final ArtistProfileModel? spotlightArtist =
+        vm.artists.isNotEmpty ? vm.artists.first : null;
+    final ArtworkModel? heroArtwork =
+        vm.artwork.isNotEmpty ? vm.artwork.first : null;
+    final EventModel? heroEvent =
+        vm.events.isNotEmpty ? vm.events.first : null;
+
+    final featuredArtists = vm.artists.take(6).toList();
+    final featuredArtworks = vm.artwork.take(8).toList();
+    final upcomingEvents = vm.events.take(6).toList();
 
     return CustomScrollView(
       physics: const BouncingScrollPhysics(
         parent: AlwaysScrollableScrollPhysics(),
       ),
       slivers: [
-        SliverToBoxAdapter(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(24),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-              child: Container(
-                margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.06),
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.12),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.35),
-                      blurRadius: 28,
-                      offset: const Offset(0, 18),
-                    ),
-                    BoxShadow(
-                      color: const Color(0xFF22D3EE).withValues(alpha: 0.10),
-                      blurRadius: 38,
-                      spreadRadius: 1,
-                    ),
-                  ],
-                ),
-                child: DashboardHeroSection(
-                  viewModel: vm,
-                  onFindArtTap: onNavigateToArtWalk,
-                ),
-              ),
-            ),
-          ),
-        ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-            child: _SmartFiltersBar(
-              onFilterSelected: (query) => Navigator.pushNamed(
-                context,
-                '/search',
-                arguments: {'query': query},
-              ),
-            ),
-          ),
-        ),
-        if (spotlightArtworks.isNotEmpty)
+        if (spotlightArtist != null || heroArtwork != null)
           SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 20, 0, 0),
-              child: _SpotlightCarousel(
-                artworks: spotlightArtworks,
-                onArtworkTap: (artwork) => Navigator.pushNamed(
-                  context,
-                  '/artwork/detail',
-                  arguments: {'artworkId': artwork.id},
-                ),
-              ),
+            child: _ArtistSpotlightHero(
+              artist: spotlightArtist,
+              artwork: heroArtwork,
+              event: heroEvent,
             ),
           ),
-        SliverToBoxAdapter(
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 250),
-            transform: Matrix4.translationValues(0, scrollDepth * -1.6, 0),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-              child: LiveActivityFeed(
-                activities: vm.activities,
-                onTap: () => Navigator.pushNamed(context, '/community/feed'),
-              ),
-            ),
-          ),
-        ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-            child: _ArtWalkSpotlight(
-              challenge: vm.todaysChallenge,
-              onDetailTap: onNavigateToArtWalk,
-            ),
-          ),
-        ),
-        if (!vm.isAuthenticated) SliverToBoxAdapter(child: _AnonymousBanner()),
-        if (vm.isAuthenticated && vm.currentUser != null)
+        if (featuredArtists.isNotEmpty)
           SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(24),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-                  child: Container(
-                    height: 500,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.06),
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.12),
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.35),
-                          blurRadius: 28,
-                          offset: const Offset(0, 18),
-                        ),
-                        BoxShadow(
-                          color: const Color(
-                            0xFF22D3EE,
-                          ).withValues(alpha: 0.10),
-                          blurRadius: 38,
-                          spreadRadius: 1,
-                        ),
-                      ],
-                    ),
-                    child: IntegratedEngagementWidget(
-                      user: vm.currentUser!,
-                      currentStreak: vm.currentStreak,
-                      totalDiscoveries: vm.totalDiscoveries,
-                      weeklyProgress: vm.weeklyProgress,
-                      weeklyGoal: 7,
-                      achievements: vm.achievements,
-                      activities: vm.activities,
-                      onProfileTap: onOpenProfileMenu,
-                      onAchievementsTap: () =>
-                          Navigator.pushNamed(context, '/achievements'),
-                      onWeeklyGoalsTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute<void>(
-                          builder: (_) => const WeeklyGoalsScreen(),
-                        ),
-                      ),
-                      onLeaderboardTap: () =>
-                          Navigator.pushNamed(context, '/leaderboard'),
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            child: _FeaturedArtistGallery(artists: featuredArtists),
           ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
-            child: DashboardBrowseSection(viewModel: vm),
-          ),
-        ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
-            child: DashboardCapturesSection(viewModel: vm),
-          ),
-        ),
-        if (savedCaptures.isNotEmpty)
+        if (featuredArtworks.isNotEmpty)
           SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-              child: _SavedCollectionsGrid(
-                captures: savedCaptures.take(4).toList(),
-                onCaptureTap: (capture) => Navigator.pushNamed(
-                  context,
-                  '/capture/detail',
-                  arguments: {'captureId': capture.id},
-                ),
-              ),
-            ),
+            child: _ArtworkSpotlightRail(artworks: featuredArtworks),
           ),
-        if (!vm.isAuthenticated)
-          const SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.only(top: 8),
-              child: DashboardAppExplanation(),
-            ),
+        if (vm.artwork.length > 4)
+          SliverToBoxAdapter(
+            child: DashboardArtworkSection(viewModel: vm),
           ),
+        if (upcomingEvents.isNotEmpty)
+          SliverToBoxAdapter(
+            child: _ArtistEventsShowcase(events: upcomingEvents),
+          ),
+        SliverToBoxAdapter(
+          child: _ArtistAdSpace(
+            onTap: () => Navigator.pushNamed(context, '/artist/signup'),
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: DashboardArtistCtaSection(viewModel: vm),
+        ),
         const SliverToBoxAdapter(child: SizedBox(height: 110)),
       ],
     );
   }
 }
 
-class _AnonymousBanner extends StatelessWidget {
+class _ArtistSpotlightHero extends StatelessWidget {
+  const _ArtistSpotlightHero({
+    required this.artist,
+    required this.artwork,
+    required this.event,
+  });
+
+  final ArtistProfileModel? artist;
+  final ArtworkModel? artwork;
+  final EventModel? event;
+
   @override
   Widget build(BuildContext context) {
+    if (artist == null && artwork == null) {
+      return const SizedBox.shrink();
+    }
+
     return Container(
+      height: 320,
       margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [ArtbeatColors.primaryPurple, ArtbeatColors.primaryGreen],
-        ),
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
-            color: ArtbeatColors.primaryPurple.withValues(alpha: 0.28),
-            blurRadius: 14,
-            offset: const Offset(0, 6),
+            color: Colors.black.withValues(alpha: 0.4),
+            blurRadius: 30,
+            offset: const Offset(0, 18),
           ),
         ],
       ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.person_add, color: Colors.white, size: 28),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(32),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(32),
+          onTap: artist != null
+              ? () => Navigator.pushNamed(
+                    context,
+                    '/artist/public-profile',
+                    arguments: {'artistId': artist!.userId},
+                  )
+              : () => Navigator.pushNamed(context, '/artist/browse'),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(32),
+            child: Stack(
               children: [
-                Text(
-                  'dashboard_anonymous_title'.tr(),
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
+                Positioned.fill(
+                  child: artwork != null && artwork!.imageUrl.isNotEmpty
+                      ? SecureNetworkImage(
+                          imageUrl: artwork!.imageUrl,
+                          fit: BoxFit.cover,
+                        )
+                      : Container(
+                          decoration: const BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Color(0xFF1B1C2B),
+                                Color(0xFF08070F),
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                          ),
+                        ),
+                ),
+                Positioned.fill(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.black.withValues(alpha: 0.1),
+                          Colors.black.withValues(alpha: 0.85),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'dashboard_anonymous_message'.tr(),
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Colors.white70,
-                    height: 1.3,
+                Padding(
+                  padding: const EdgeInsets.all(28),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const _TagChip(label: 'Artist Spotlight'),
+                      const SizedBox(height: 12),
+                      Text(
+                        artist?.displayName ?? 'Discover Local Artists',
+                        style: GoogleFonts.dmSerifDisplay(
+                          color: Colors.white,
+                          fontSize: 34,
+                        ),
+                      ),
+                      if (artist?.bio != null && artist!.bio!.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Text(
+                            artist!.bio!,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.spaceGrotesk(
+                              color: Colors.white70,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      if (artist?.location != null &&
+                          artist!.location!.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 6),
+                          child: Text(
+                            artist!.location!,
+                            style: GoogleFonts.spaceGrotesk(
+                              color: Colors.white70,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      const Spacer(),
+                      if (event != null) _HeroEventPill(event: event!),
+                      const SizedBox(height: 16),
+                      ElevatedButton.icon(
+                        onPressed: artist != null
+                            ? () => Navigator.pushNamed(
+                                  context,
+                                  '/artist/public-profile',
+                                  arguments: {'artistId': artist!.userId},
+                                )
+                            : () =>
+                                Navigator.pushNamed(context, '/artist/browse'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.black,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 14,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        icon: const Icon(Icons.visibility),
+                        label: const Text('View Artist'),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 10),
-          ElevatedButton(
-            onPressed: () => Navigator.pushNamed(context, '/auth'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: ArtbeatColors.primaryPurple,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+    );
+  }
+}
+
+class _TagChip extends StatelessWidget {
+  const _TagChip({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.2),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w700,
+          fontSize: 12,
+        ),
+      ),
+    );
+  }
+}
+
+class _HeroEventPill extends StatelessWidget {
+  const _HeroEventPill({required this.event});
+
+  final EventModel event;
+
+  @override
+  Widget build(BuildContext context) {
+    final dateLabel = intl.DateFormat('MMM d • h:mm a').format(event.startDate);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Next appearance',
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white70,
+              fontSize: 12,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            event.title.isNotEmpty ? event.title : 'Upcoming event',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              const Icon(Icons.event, size: 14, color: Colors.white70),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  dateLabel,
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (event.location.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                const Icon(Icons.place, size: 14, color: Colors.white70),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    event.location,
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _FeaturedArtistGallery extends StatelessWidget {
+  const _FeaturedArtistGallery({required this.artists});
+
+  final List<ArtistProfileModel> artists;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.04),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _SectionHeader(
+            icon: Icons.auto_awesome,
+            title: 'Featured Artists',
+            subtitle: 'Spotlights curated for you',
+            actionLabel: 'See All',
+            onActionTap: () => Navigator.pushNamed(context, '/artist/browse'),
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            height: 260,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              itemBuilder: (context, index) =>
+                  _ArtistFeatureCard(artist: artists[index]),
+              separatorBuilder: (_, __) => const SizedBox(width: 16),
+              itemCount: artists.length,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({
+    required this.icon,
+    required this.title,
+    this.subtitle,
+    this.actionLabel,
+    this.onActionTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final String? actionLabel;
+  final VoidCallback? onActionTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF7C4DFF), Color(0xFF22D3EE)],
+            ),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Icon(icon, color: Colors.white, size: 20),
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              if (subtitle != null)
+                Text(
+                  subtitle!,
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 13,
+                  ),
+                ),
+            ],
+          ),
+        ),
+        if (actionLabel != null)
+          TextButton(
+            onPressed: onActionTap,
+            child: Text(
+              actionLabel!,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
               ),
             ),
-            child: Text(
-              'dashboard_anonymous_button'.tr(),
-              style: const TextStyle(fontWeight: FontWeight.w800),
+          ),
+      ],
+    );
+  }
+}
+
+class _ArtistFeatureCard extends StatelessWidget {
+  const _ArtistFeatureCard({required this.artist});
+
+  final ArtistProfileModel artist;
+
+  @override
+  Widget build(BuildContext context) {
+    final mediums = artist.mediums.isNotEmpty
+        ? artist.mediums.take(2).join(' • ')
+        : 'Multidisciplinary';
+
+    return SizedBox(
+      width: 180,
+      child: Material(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(22),
+          onTap: () => Navigator.pushNamed(
+            context,
+            '/artist/public-profile',
+            arguments: {'artistId': artist.userId},
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(22)),
+                child: SizedBox(
+                  height: 120,
+                  width: double.infinity,
+                  child: artist.coverImageUrl != null &&
+                          artist.coverImageUrl!.isNotEmpty
+                      ? SecureNetworkImage(
+                          imageUrl: artist.coverImageUrl!,
+                          fit: BoxFit.cover,
+                        )
+                      : Container(
+                          color: ArtbeatColors.backgroundSecondary,
+                          child: const Icon(
+                            Icons.image,
+                            color: ArtbeatColors.textSecondary,
+                          ),
+                        ),
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: ArtbeatColors.backgroundSecondary,
+                            ),
+                            child: ClipOval(
+                              child: artist.profileImageUrl != null &&
+                                      artist.profileImageUrl!.isNotEmpty
+                                  ? SecureNetworkImage(
+                                      imageUrl: artist.profileImageUrl!,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : const Icon(
+                                      Icons.person,
+                                      color: ArtbeatColors.textSecondary,
+                                    ),
+                            ),
+                          ),
+                          if (artist.isVerified)
+                            const Padding(
+                              padding: EdgeInsets.only(left: 6),
+                              child: Icon(
+                                Icons.verified,
+                                color: ArtbeatColors.primaryPurple,
+                                size: 18,
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        artist.displayName,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: ArtbeatColors.textPrimary,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        mediums,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: ArtbeatColors.textSecondary,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const Spacer(),
+                      Text(
+                        '${artist.followersCount} followers',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: ArtbeatColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ArtworkSpotlightRail extends StatelessWidget {
+  const _ArtworkSpotlightRail({required this.artworks});
+
+  final List<ArtworkModel> artworks;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.04),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _SectionHeader(
+            icon: Icons.palette,
+            title: 'Artwork Spotlight',
+            subtitle: 'New drops from local creators',
+            actionLabel: 'Browse Gallery',
+            onActionTap: () => Navigator.pushNamed(context, '/artwork/browse'),
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            height: 250,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              itemBuilder: (context, index) =>
+                  _ArtworkSpotlightCard(artwork: artworks[index]),
+              separatorBuilder: (_, __) => const SizedBox(width: 16),
+              itemCount: artworks.length,
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ArtworkSpotlightCard extends StatelessWidget {
+  const _ArtworkSpotlightCard({required this.artwork});
+
+  final ArtworkModel artwork;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 220,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(26),
+          onTap: () => Navigator.pushNamed(
+            context,
+            '/artwork/detail',
+            arguments: {'artworkId': artwork.id},
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(26),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.18),
+                  blurRadius: 24,
+                  offset: const Offset(0, 14),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(26),
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: artwork.imageUrl.isNotEmpty
+                        ? SecureNetworkImage(
+                            imageUrl: artwork.imageUrl,
+                            fit: BoxFit.cover,
+                          )
+                        : Container(
+                            color: ArtbeatColors.backgroundSecondary,
+                            child: const Icon(
+                              Icons.image,
+                              color: ArtbeatColors.textSecondary,
+                              size: 48,
+                            ),
+                          ),
+                  ),
+                  Positioned.fill(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            Colors.black.withValues(alpha: 0.85),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 18,
+                    right: 18,
+                    bottom: 18,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _TagChip(
+                          label: artwork.medium.isNotEmpty
+                              ? artwork.medium
+                              : 'Artwork',
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          artwork.title.isNotEmpty
+                              ? artwork.title
+                              : 'Untitled',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          artwork.artistName,
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 13,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          artwork.price > 0
+                              ? '\$${artwork.price.toStringAsFixed(0)}'
+                              : 'Available now',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ArtistEventsShowcase extends StatelessWidget {
+  const _ArtistEventsShowcase({required this.events});
+
+  final List<EventModel> events;
+
+  @override
+  Widget build(BuildContext context) {
+    if (events.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.04),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _SectionHeader(
+            icon: Icons.event,
+            title: 'Upcoming Artist Events',
+            subtitle: 'Meet the creators in real life',
+            actionLabel: 'View Calendar',
+            onActionTap: () =>
+                Navigator.pushNamed(context, '/events/discover'),
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            height: 190,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              itemBuilder: (context, index) =>
+                  _ArtistEventCard(event: events[index]),
+              separatorBuilder: (_, __) => const SizedBox(width: 16),
+              itemCount: events.length,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ArtistEventCard extends StatelessWidget {
+  const _ArtistEventCard({required this.event});
+
+  final EventModel event;
+
+  @override
+  Widget build(BuildContext context) {
+    final dateLabel = intl.DateFormat('EEE, MMM d').format(event.startDate);
+    final timeLabel = intl.DateFormat('h:mm a').format(event.startDate);
+
+    return SizedBox(
+      width: 220,
+      child: Material(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(22),
+          onTap: () => Navigator.pushNamed(
+            context,
+            '/events/detail',
+            arguments: {'eventId': event.id},
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _TagChip(label: dateLabel),
+                const SizedBox(height: 10),
+                Text(
+                  event.title.isNotEmpty ? event.title : 'Untitled Event',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: ArtbeatColors.textPrimary,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.schedule,
+                      size: 14,
+                      color: ArtbeatColors.textSecondary,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      timeLabel,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: ArtbeatColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+                if (event.location.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.place,
+                        size: 14,
+                        color: ArtbeatColors.textSecondary,
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          event.location,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: ArtbeatColors.textSecondary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+                const Spacer(),
+                OutlinedButton(
+                  onPressed: () => Navigator.pushNamed(
+                    context,
+                    '/events/detail',
+                    arguments: {'eventId': event.id},
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: ArtbeatColors.primaryPurple,
+                    side: const BorderSide(color: ArtbeatColors.primaryPurple),
+                    minimumSize: const Size.fromHeight(38),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text('View Event'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ArtistAdSpace extends StatelessWidget {
+  const _ArtistAdSpace({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFFC857), Color(0xFFFB7185)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 28,
+            offset: const Offset(0, 18),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Artist Ad Space',
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.black,
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Boost your next drop with premium placement across Local ArtBeat.',
+            style: TextStyle(
+              color: Colors.black87,
+              fontSize: 14,
+              height: 1.4,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: onTap,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.black,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              minimumSize: const Size(double.infinity, 50),
+            ),
+            child: const Text('Reserve Spotlight'),
           ),
         ],
       ),
@@ -1627,231 +2261,6 @@ class _SpotlightCard extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _SavedCollectionsGrid extends StatelessWidget {
-  const _SavedCollectionsGrid({
-    required this.captures,
-    required this.onCaptureTap,
-  });
-
-  final List<CaptureModel> captures;
-  final ValueChanged<CaptureModel> onCaptureTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final preview = captures.take(4).toList();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'drawer_favorites'.tr(),
-          style: GoogleFonts.spaceGrotesk(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w900,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          'artwork_saved_searches'.tr(),
-          style: GoogleFonts.spaceGrotesk(
-            color: Colors.white.withValues(alpha: 0.7),
-            fontSize: 13,
-          ),
-        ),
-        const SizedBox(height: 12),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 10,
-            childAspectRatio: 1.2,
-          ),
-          itemCount: preview.length,
-          itemBuilder: (context, index) {
-            final capture = preview[index];
-            return GestureDetector(
-              onTap: () => onCaptureTap(capture),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(18),
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    SecureNetworkImage(
-                      imageUrl: capture.imageUrl,
-                      fit: BoxFit.cover,
-                    ),
-                    Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.bottomCenter,
-                          end: Alignment.topCenter,
-                          colors: [
-                            Colors.black.withValues(alpha: 0.8),
-                            Colors.transparent,
-                          ],
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            capture.title?.isNotEmpty == true
-                                ? capture.title!
-                                : 'explore_featured_artwork'.tr(),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.spaceGrotesk(
-                              color: Colors.white,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            capture.locationName ??
-                                capture.artistName ??
-                                'art_walk_art_walk_dashboard_text_browse_artwork'
-                                    .tr(),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.spaceGrotesk(
-                              color: Colors.white.withValues(alpha: 0.8),
-                              fontSize: 11,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
-      ],
-    );
-  }
-}
-
-class _ArtWalkSpotlight extends StatelessWidget {
-  const _ArtWalkSpotlight({required this.challenge, required this.onDetailTap});
-
-  final ChallengeModel? challenge;
-  final VoidCallback onDetailTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final progress = challenge != null && challenge!.targetCount > 0
-        ? (challenge!.currentCount / challenge!.targetCount).clamp(0.0, 1.0)
-        : 0.0;
-    final title = challenge?.title.isNotEmpty == true
-        ? challenge!.title
-        : 'art_walk_dashboard_discovery_title'.tr();
-    final description = challenge?.description.isNotEmpty == true
-        ? challenge!.description
-        : 'art_walk_art_walk_dashboard_text_art_events_and'.tr();
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(24),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.06),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.35),
-                blurRadius: 28,
-                offset: const Offset(0, 18),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'art_walk_dashboard_greeting_subtitle'.tr(),
-                style: GoogleFonts.spaceGrotesk(
-                  color: Colors.white.withValues(alpha: 0.7),
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                title,
-                style: GoogleFonts.spaceGrotesk(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                description,
-                style: GoogleFonts.spaceGrotesk(
-                  color: Colors.white.withValues(alpha: 0.85),
-                  fontSize: 13,
-                  height: 1.4,
-                ),
-              ),
-              const SizedBox(height: 12),
-              LinearProgressIndicator(
-                value: progress,
-                minHeight: 6,
-                backgroundColor: Colors.white.withValues(alpha: 0.16),
-                valueColor: const AlwaysStoppedAnimation(Color(0xFF22D3EE)),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                '${challenge?.currentCount ?? 0}/${challenge?.targetCount ?? 0} • ${challenge?.rewardXP ?? 0} XP',
-                style: GoogleFonts.spaceGrotesk(
-                  color: Colors.white.withValues(alpha: 0.85),
-                  fontSize: 12,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  FilledButton(
-                    onPressed: onDetailTap,
-                    style: FilledButton.styleFrom(
-                      backgroundColor: const Color(0xFF22D3EE),
-                      foregroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                    child: Text('art_walk_drawer_saved_walks'.tr()),
-                  ),
-                  const SizedBox(width: 12),
-                  TextButton(
-                    onPressed: () =>
-                        Navigator.pushNamed(context, '/art-walk/list'),
-                    style: TextButton.styleFrom(foregroundColor: Colors.white),
-                    child: Text(
-                      'art_walk_art_walk_dashboard_text_trending'.tr(),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

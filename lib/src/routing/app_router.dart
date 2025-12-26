@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:artbeat_admin/artbeat_admin.dart' as admin;
 import 'package:artbeat_ads/artbeat_ads.dart' as ads;
 import 'package:artbeat_art_walk/artbeat_art_walk.dart' as art_walk;
@@ -8,6 +9,7 @@ import 'package:artbeat_auth/artbeat_auth.dart' as auth;
 import 'package:artbeat_capture/artbeat_capture.dart' as capture;
 import 'package:artbeat_community/artbeat_community.dart' as community;
 import 'package:artbeat_core/artbeat_core.dart' as core;
+import 'package:artbeat_core/src/routing/app_routes.dart';
 import 'package:artbeat_events/artbeat_events.dart' as events;
 import 'package:artbeat_messaging/artbeat_messaging.dart' as messaging;
 import 'package:artbeat_profile/artbeat_profile.dart' as profile;
@@ -24,7 +26,6 @@ import '../screens/about_screen.dart';
 import '../screens/privacy_policy_screen.dart';
 import '../screens/rewards_screen.dart';
 import '../screens/terms_of_service_screen.dart';
-import 'package:artbeat_core/src/routing/app_routes.dart';
 import 'route_utils.dart';
 
 /// Main application router that handles all route generation
@@ -1622,9 +1623,10 @@ class AppRouter {
         );
 
       case AppRoutes.subscriptionPlans:
-        return RouteUtils.createMainLayoutRoute(
-          appBar: RouteUtils.createAppBar('Subscription Plans'),
-          child: const core.SimpleSubscriptionPlansScreen(),
+        return RouteUtils.createSimpleRoute(
+          child: const artist.Modern2025OnboardingScreen(
+            preselectedPlan: 'creator plan',
+          ),
         );
 
       case AppRoutes.paymentMethods:

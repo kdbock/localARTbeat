@@ -1,10 +1,10 @@
 import 'package:artbeat_auth/artbeat_auth.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
+import 'package:artbeat_core/src/routing/app_routes.dart';
 import 'package:artbeat_profile/artbeat_profile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import 'package:artbeat_core/src/routing/app_routes.dart';
 import '../route_utils.dart';
 
 /// Handles core application routes (auth, dashboard, profile)

@@ -16,7 +16,8 @@ import 'package:artbeat_core/artbeat_core.dart' show UserService;
 /// Registration screen with email/password account creation (Quest theme)
 class RegisterScreen extends StatefulWidget {
   final AuthService? authService; // Optional for testing
-  const RegisterScreen({super.key, this.authService});
+  final bool enableBackgroundAnimation;
+  const RegisterScreen({super.key, this.authService, this.enableBackgroundAnimation = true});
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -49,11 +50,39 @@ class _RegisterScreenState extends State<RegisterScreen>
     _loop = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 9),
-    )..repeat();
+    );
+    if (widget.enableBackgroundAnimation) {
+      _loop.repeat();
+    }
     _intro = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 700),
-    )..forward();
+    );
+    if (widget.enableBackgroundAnimation) {
+      _intro.forward();
+    } else {
+      _intro.value = 1;
+    }
+  }
+
+  @override
+  void didUpdateWidget(RegisterScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.enableBackgroundAnimation != widget.enableBackgroundAnimation) {
+      if (widget.enableBackgroundAnimation) {
+        if (!_loop.isAnimating) {
+          _loop.repeat();
+        }
+        if (!_intro.isAnimating && _intro.value != 1) {
+          _intro.forward();
+        }
+      } else {
+        _loop.stop();
+        _loop.reset();
+        _intro.stop();
+        _intro.value = 1;
+      }
+    }
   }
 
   @override

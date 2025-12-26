@@ -7,17 +7,11 @@ design_guide.md /Users/kristybock/artbeat/.zencoder/workflows/design_guide.md
 Screens with the new design:
 
 login_screen
-
 registration_screen
-
 Forgot_password_screen
-
 splash_screen
-
 animated_dashbaord_screen
-
 explore_dashboard_screen - 
-
 enhanced_capture_dashboard_screen 
 discover_dashboard_screen 
 
@@ -30,13 +24,14 @@ Art_Walk
 Artwork
 Artists
 Auth - Done
-Capture - Done except drawer items
+Capture - Done 
 Community
-Core
+Core - Done
 Events
 Messaging
 Profile - Done
 Settings - Done
+
 
 
 checklist for visual updates and language localization and translations ✅
