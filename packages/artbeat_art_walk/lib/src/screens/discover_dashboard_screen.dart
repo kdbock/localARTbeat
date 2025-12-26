@@ -178,11 +178,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF05060A),
-              Color(0xFF0B1220),
-              Color(0xFF05060A),
-            ],
+            colors: [Color(0xFF05060A), Color(0xFF0B1220), Color(0xFF05060A)],
           ),
         ),
         child: Scaffold(
@@ -193,9 +189,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
               Positioned.fill(child: _buildAuroraBackdrop()),
               SafeArea(
                 bottom: false,
-                child: CustomScrollView(
-                  slivers: slivers,
-                ),
+                child: CustomScrollView(slivers: slivers),
               ),
             ],
           ),
@@ -218,10 +212,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
                 gradient: RadialGradient(
                   center: Alignment(-0.6, -0.8),
                   radius: 1.2,
-                  colors: [
-                    Color(0x3322D3EE),
-                    Colors.transparent,
-                  ],
+                  colors: [Color(0x3322D3EE), Colors.transparent],
                 ),
               ),
             ),
@@ -236,10 +227,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
-                    colors: [
-                      Color(0x3325D366),
-                      Colors.transparent,
-                    ],
+                    colors: [Color(0x3325D366), Colors.transparent],
                   ),
                 ),
               ),
@@ -255,10 +243,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
-                    colors: [
-                      Color(0x332947FF),
-                      Colors.transparent,
-                    ],
+                    colors: [Color(0x332947FF), Colors.transparent],
                   ),
                 ),
               ),
@@ -277,11 +262,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
       margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
       radius: 28,
-      colors: const [
-        Color(0x3D7C4DFF),
-        Color(0x3322D3EE),
-        Color(0x1A05060A),
-      ],
+      colors: const [Color(0x3D7C4DFF), Color(0x3322D3EE), Color(0x1A05060A)],
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -298,15 +279,9 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.18),
-              ),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
             ),
-            child: const Icon(
-              Icons.map_rounded,
-              color: Colors.white,
-              size: 22,
-            ),
+            child: const Icon(Icons.map_rounded, color: Colors.white, size: 22),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -342,10 +317,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(24),
       radius: 28,
-      colors: const [
-        Color(0x19090E1F),
-        Color(0x14283A74),
-      ],
+      colors: const [Color(0x19090E1F), Color(0x14283A74)],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -591,10 +563,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
           const SizedBox(height: 6),
           Text(
             description,
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 14,
-            ),
+            style: const TextStyle(color: Colors.white70, fontSize: 14),
           ),
           if (rewardXp > 0) ...[
             const SizedBox(height: 12),
@@ -710,9 +679,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
               decoration: BoxDecoration(
                 color: iconColor.withValues(alpha: 0.14),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: iconColor.withValues(alpha: 0.35),
-                ),
+                border: Border.all(color: iconColor.withValues(alpha: 0.35)),
               ),
               child: Icon(icon, color: iconColor, size: 20),
             ),
@@ -802,10 +769,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: EdgeInsets.zero,
       radius: 30,
-      colors: const [
-        Color(0x19090E1F),
-        Color(0x1910152B),
-      ],
+      colors: const [Color(0x19090E1F), Color(0x1910152B)],
       child: SizedBox(
         height: 400,
         child: ClipRRect(
@@ -1340,7 +1304,8 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
     bool showBorder = true,
     bool elevated = true,
   }) {
-    final gradientColors = colors ??
+    final gradientColors =
+        colors ??
         [
           Colors.white.withValues(alpha: 0.12),
           Colors.white.withValues(alpha: 0.04),
@@ -1628,9 +1593,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
                       Text(
                         'art_walk_dashboard_clusters_artwork_count'.plural(
                           captures.length,
-                          namedArgs: {
-                            'count': captures.length.toString(),
-                          },
+                          namedArgs: {'count': captures.length.toString()},
                         ),
                         style: const TextStyle(
                           color: ArtWalkDashboardColors.textSecondary,
@@ -1818,7 +1781,8 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
               final artTitle = rawTitle != null && rawTitle.isNotEmpty
                   ? rawTitle
                   : 'art_walk_dashboard_snackbar_unknown_art'.tr();
-              final rawDistance = (notification['distanceText'] as String?)?.trim();
+              final rawDistance = (notification['distanceText'] as String?)
+                  ?.trim();
               final distanceText = rawDistance != null && rawDistance.isNotEmpty
                   ? rawDistance
                   : 'art_walk_dashboard_distance_unknown'.tr();
@@ -1827,10 +1791,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
                 SnackBar(
                   content: Text(
                     'art_walk_dashboard_snackbar_art_nearby'.tr(
-                      namedArgs: {
-                        'title': artTitle,
-                        'distance': distanceText,
-                      },
+                      namedArgs: {'title': artTitle, 'distance': distanceText},
                     ),
                   ),
                   duration: const Duration(seconds: 3),
@@ -1925,8 +1886,9 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
 
     for (final capture in _localCaptures) {
       final rawName = capture.locationName?.trim();
-      final locationName =
-          (rawName != null && rawName.isNotEmpty) ? rawName : _unknownLocationKey;
+      final locationName = (rawName != null && rawName.isNotEmpty)
+          ? rawName
+          : _unknownLocationKey;
       if (!clusters.containsKey(locationName)) {
         clusters[locationName] = [];
       }

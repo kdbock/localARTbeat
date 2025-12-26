@@ -52,13 +52,17 @@ class _SplashScreenState extends State<SplashScreen>
 
     _scaleAnimation = TweenSequence<double>([
       TweenSequenceItem(
-        tween: Tween(begin: 1.0, end: 1.06)
-            .chain(CurveTween(curve: Curves.easeOutCubic)),
+        tween: Tween(
+          begin: 1.0,
+          end: 1.06,
+        ).chain(CurveTween(curve: Curves.easeOutCubic)),
         weight: 1,
       ),
       TweenSequenceItem(
-        tween: Tween(begin: 1.06, end: 1.0)
-            .chain(CurveTween(curve: Curves.easeInOutCubic)),
+        tween: Tween(
+          begin: 1.06,
+          end: 1.0,
+        ).chain(CurveTween(curve: Curves.easeInOutCubic)),
         weight: 1,
       ),
     ]).animate(_heartbeatController);
@@ -81,10 +85,9 @@ class _SplashScreenState extends State<SplashScreen>
       if (Firebase.apps.isEmpty) {
         if (!mounted || _hasNavigated) return;
         _hasNavigated = true;
-        Navigator.of(context).pushNamedAndRemoveUntil(
-          '/login',
-          (Route<dynamic> route) => false,
-        );
+        Navigator.of(
+          context,
+        ).pushNamedAndRemoveUntil('/login', (Route<dynamic> route) => false);
         return;
       }
 
@@ -101,26 +104,25 @@ class _SplashScreenState extends State<SplashScreen>
       if (!mounted || _hasNavigated) return;
       _hasNavigated = true;
 
-      Navigator.of(context).pushNamedAndRemoveUntil(
-        route,
-        (Route<dynamic> route) => false,
-      );
+      Navigator.of(
+        context,
+      ).pushNamedAndRemoveUntil(route, (Route<dynamic> route) => false);
     } catch (_) {
       if (!mounted || _hasNavigated) return;
       _hasNavigated = true;
       FocusScope.of(context).unfocus();
-      Navigator.of(context).pushNamedAndRemoveUntil(
-        '/login',
-        (Route<dynamic> route) => false,
-      );
+      Navigator.of(
+        context,
+      ).pushNamedAndRemoveUntil('/login', (Route<dynamic> route) => false);
     }
   }
 
   void _syncUserInBackground() {
     Future.delayed(Duration.zero, () async {
       try {
-        await UserSyncHelper.ensureUserDocumentExists()
-            .timeout(const Duration(seconds: 5));
+        await UserSyncHelper.ensureUserDocumentExists().timeout(
+          const Duration(seconds: 5),
+        );
       } on TimeoutException {
         // ignore
       } catch (_) {
@@ -179,7 +181,10 @@ class _SplashScreenState extends State<SplashScreen>
               children: [
                 // "Glass" halo card with logo
                 AnimatedBuilder(
-                  animation: Listenable.merge([_heartbeatController, _loopController]),
+                  animation: Listenable.merge([
+                    _heartbeatController,
+                    _loopController,
+                  ]),
                   builder: (context, child) {
                     final t = _loopController.value;
                     final pulse =
@@ -207,14 +212,16 @@ class _SplashScreenState extends State<SplashScreen>
                                   offset: const Offset(0, 18),
                                 ),
                                 BoxShadow(
-                                  color: const Color(0xFF22D3EE)
-                                      .withValues(alpha: 0.10 * pulse),
+                                  color: const Color(
+                                    0xFF22D3EE,
+                                  ).withValues(alpha: 0.10 * pulse),
                                   blurRadius: 38,
                                   spreadRadius: 1,
                                 ),
                                 BoxShadow(
-                                  color: const Color(0xFF7C4DFF)
-                                      .withValues(alpha: 0.10 * pulse),
+                                  color: const Color(
+                                    0xFF7C4DFF,
+                                  ).withValues(alpha: 0.10 * pulse),
                                   blurRadius: 38,
                                   spreadRadius: 1,
                                 ),
@@ -233,7 +240,9 @@ class _SplashScreenState extends State<SplashScreen>
                                       return Icon(
                                         Icons.image_not_supported_rounded,
                                         size: 96,
-                                        color: Colors.white.withValues(alpha: 0.55),
+                                        color: Colors.white.withValues(
+                                          alpha: 0.55,
+                                        ),
                                       );
                                     },
                                   ),
@@ -248,7 +257,9 @@ class _SplashScreenState extends State<SplashScreen>
                                       TextSpan(
                                         text: "Local ",
                                         style: GoogleFonts.spaceGrotesk(
-                                          color: Colors.white.withValues(alpha: 0.90),
+                                          color: Colors.white.withValues(
+                                            alpha: 0.90,
+                                          ),
                                           fontSize: 20,
                                           fontWeight: FontWeight.w900,
                                           letterSpacing: -0.4,
@@ -266,7 +277,9 @@ class _SplashScreenState extends State<SplashScreen>
                                       TextSpan(
                                         text: "beat",
                                         style: GoogleFonts.spaceGrotesk(
-                                          color: Colors.white.withValues(alpha: 0.90),
+                                          color: Colors.white.withValues(
+                                            alpha: 0.90,
+                                          ),
                                           fontSize: 20,
                                           fontWeight: FontWeight.w900,
                                           letterSpacing: -0.4,
@@ -302,11 +315,14 @@ class _SplashScreenState extends State<SplashScreen>
                 AnimatedBuilder(
                   animation: _loopController,
                   builder: (_, __) {
-                    final p = 0.35 +
+                    final p =
+                        0.35 +
                         0.65 *
                             (0.5 +
                                 0.5 *
-                                    math.sin(_loopController.value * 2 * math.pi));
+                                    math.sin(
+                                      _loopController.value * 2 * math.pi,
+                                    ));
                     return Opacity(
                       opacity: p,
                       child: Text(

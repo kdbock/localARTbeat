@@ -29,8 +29,10 @@ class _ProfileCreateScreenState extends State<ProfileCreateScreen>
   void initState() {
     super.initState();
     _authService = widget.authService ?? AuthService();
-    _loop = AnimationController(vsync: this, duration: const Duration(seconds: 9))
-      ..repeat();
+    _loop = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 9),
+    )..repeat();
   }
 
   @override
@@ -204,11 +206,7 @@ class _Badge extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         gradient: const LinearGradient(
-          colors: [
-            Color(0xFF7C4DFF),
-            Color(0xFF22D3EE),
-            Color(0xFF34D399),
-          ],
+          colors: [Color(0xFF7C4DFF), Color(0xFF22D3EE), Color(0xFF34D399)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),

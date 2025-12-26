@@ -7,11 +7,7 @@ class AvatarPicker extends StatefulWidget {
   final String? imageUrl;
   final void Function(File? imageFile) onImageSelected;
 
-  const AvatarPicker({
-    super.key,
-    required this.onImageSelected,
-    this.imageUrl,
-  });
+  const AvatarPicker({super.key, required this.onImageSelected, this.imageUrl});
 
   @override
   State<AvatarPicker> createState() => _AvatarPickerState();
@@ -22,8 +18,10 @@ class _AvatarPickerState extends State<AvatarPicker> {
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
-    final pickedFile =
-        await picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
+    final pickedFile = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 80,
+    );
 
     if (pickedFile != null) {
       setState(() {
@@ -38,8 +36,8 @@ class _AvatarPickerState extends State<AvatarPicker> {
     final displayImage = _selectedImage != null
         ? FileImage(_selectedImage!)
         : (widget.imageUrl != null && widget.imageUrl!.isNotEmpty)
-            ? NetworkImage(widget.imageUrl!)
-            : null;
+        ? NetworkImage(widget.imageUrl!)
+        : null;
 
     return GestureDetector(
       onTap: _pickImage,

@@ -9,15 +9,20 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../services/auth_service.dart';
 import '../constants/routes.dart';
-import 'package:artbeat_core/artbeat_core.dart'
-  show ArtbeatInput;
+import 'package:artbeat_core/artbeat_core.dart' show ArtbeatInput;
 import 'package:artbeat_core/artbeat_core.dart' show UserService;
+import 'package:artbeat_core/src/screens/terms_of_service_screen.dart';
+import 'package:artbeat_core/src/screens/privacy_policy_screen.dart';
 
 /// Registration screen with email/password account creation (Quest theme)
 class RegisterScreen extends StatefulWidget {
   final AuthService? authService; // Optional for testing
   final bool enableBackgroundAnimation;
-  const RegisterScreen({super.key, this.authService, this.enableBackgroundAnimation = true});
+  const RegisterScreen({
+    super.key,
+    this.authService,
+    this.enableBackgroundAnimation = true,
+  });
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -68,7 +73,8 @@ class _RegisterScreenState extends State<RegisterScreen>
   @override
   void didUpdateWidget(RegisterScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.enableBackgroundAnimation != widget.enableBackgroundAnimation) {
+    if (oldWidget.enableBackgroundAnimation !=
+        widget.enableBackgroundAnimation) {
       if (widget.enableBackgroundAnimation) {
         if (!_loop.isAnimating) {
           _loop.repeat();
@@ -161,9 +167,17 @@ class _RegisterScreenState extends State<RegisterScreen>
     }
   }
 
-  void _navigateToTerms() => Navigator.pushNamed(context, '/terms-of-service');
-  void _navigateToPrivacyPolicy() =>
-      Navigator.pushNamed(context, '/privacy-policy');
+  void _navigateToTerms() {
+    Navigator.of(context).push(
+      MaterialPageRoute<Widget>(builder: (context) => const TermsOfServiceScreen()),
+    );
+  }
+
+  void _navigateToPrivacyPolicy() {
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute<Widget>(builder: (context) => const PrivacyPolicyScreen()));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -242,7 +256,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                                   const SizedBox(width: 10),
                                   Expanded(
                                     child: Text(
-                                      'auth_register_title'.tr(),
+                                      'Join Local ARTbeat',
                                       style: GoogleFonts.spaceGrotesk(
                                         color: Colors.white.withValues(
                                           alpha: 0.95,

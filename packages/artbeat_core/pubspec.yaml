@@ -78,6 +78,8 @@ dependencies:
     path: ../artbeat_art_walk
   artbeat_artist:
     path: ../artbeat_artist
+  artbeat_capture:
+    path: ../artbeat_capture
   artbeat_artwork:
     path: ../artbeat_artwork
   artbeat_auth:

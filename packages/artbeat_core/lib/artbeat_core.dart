@@ -3,6 +3,9 @@
 /// ARTbeat Core package with shared functionality
 library artbeat_core;
 
+// Export routing
+export 'src/routing/app_routes.dart';
+
 // Export Firebase configuration
 export 'src/firebase/secure_firebase_config.dart';
 
@@ -196,6 +199,8 @@ export 'src/screens/subscription_purchase_screen.dart'
     show SubscriptionPurchaseScreen;
 export 'src/screens/coupon_management_screen.dart' show CouponManagementScreen;
 export 'src/screens/full_browse_screen.dart' show FullBrowseScreen;
+export 'src/screens/terms_of_service_screen.dart' show TermsOfServiceScreen;
+export 'src/screens/privacy_policy_screen.dart' show PrivacyPolicyScreen;
 
 // Export ViewModels
 export 'src/viewmodels/dashboard_view_model.dart' show DashboardViewModel;

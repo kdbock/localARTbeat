@@ -6,7 +6,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_core/src/routing/app_routes.dart';
 
 /// Capture specific drawer with focused navigation for capture features
 /// Updated to match the new "Quest / Glass / Neon" theme.

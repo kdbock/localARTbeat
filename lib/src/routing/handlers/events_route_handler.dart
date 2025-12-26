@@ -1,4 +1,4 @@
-import 'package:artbeat_core/src/routing/app_routes.dart';
+import 'package:artbeat_core/artbeat_core.dart' as core;
 import 'package:artbeat_events/artbeat_events.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -6,21 +6,21 @@ import 'package:flutter/material.dart';
 class EventsRouteHandler {
   static Widget handleEventsRoute(String routeName, Object? arguments) {
     switch (routeName) {
-      case AppRoutes.allEvents:
+      case core.AppRoutes.allEvents:
         return const EventsListScreen();
-      case AppRoutes.artistEvents:
+      case core.AppRoutes.artistEvents:
         return const EventsDashboardScreen();
-      case AppRoutes.myTickets:
+      case core.AppRoutes.myTickets:
         // Get current user ID from Firebase Auth
         final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
         return MyTicketsScreen(userId: userId);
-      case AppRoutes.createEvent:
+      case core.AppRoutes.createEvent:
         return const CreateEventScreen();
-      case AppRoutes.myEvents:
+      case core.AppRoutes.myEvents:
         return const UserEventsDashboardScreen();
-      case AppRoutes.eventsSearch:
+      case core.AppRoutes.eventsSearch:
         return const EventSearchScreen();
-      case AppRoutes.eventsNearby:
+      case core.AppRoutes.eventsNearby:
         // Show events filtered by location - coming soon
         return const EventsListScreen(
           title: 'Events Near Me',

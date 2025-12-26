@@ -9,7 +9,6 @@ import 'package:artbeat_auth/artbeat_auth.dart' as auth;
 import 'package:artbeat_capture/artbeat_capture.dart' as capture;
 import 'package:artbeat_community/artbeat_community.dart' as community;
 import 'package:artbeat_core/artbeat_core.dart' as core;
-import 'package:artbeat_core/src/routing/app_routes.dart';
 import 'package:artbeat_events/artbeat_events.dart' as events;
 import 'package:artbeat_messaging/artbeat_messaging.dart' as messaging;
 import 'package:artbeat_profile/artbeat_profile.dart' as profile;
@@ -53,10 +52,10 @@ class AppRouter {
           appBar: RouteUtils.createAppBar('Artbeat Store'),
           child: const core.ArtbeatStoreScreen(),
         );
-      case AppRoutes.splash:
+      case core.AppRoutes.splash:
         return RouteUtils.createSimpleRoute(child: const core.SplashScreen());
 
-      case AppRoutes.dashboard:
+      case core.AppRoutes.dashboard:
         return RouteUtils.createMainNavRoute(
           currentIndex: 0,
           child: const core.AnimatedDashboardScreen(),
@@ -76,36 +75,36 @@ class AppRouter {
       case '/debug/payment':
         return RouteUtils.createSimpleRoute(child: const PaymentDebugScreen());
 
-      case AppRoutes.login:
+      case core.AppRoutes.login:
         return RouteUtils.createSimpleRoute(child: const auth.LoginScreen());
 
-      case AppRoutes.register:
+      case core.AppRoutes.register:
         return RouteUtils.createSimpleRoute(child: const auth.RegisterScreen());
 
-      case AppRoutes.forgotPassword:
+      case core.AppRoutes.forgotPassword:
         return RouteUtils.createSimpleRoute(
           child: const auth.ForgotPasswordScreen(),
         );
 
       // Profile route is handled in _handleProfileRoutes method
 
-      case AppRoutes.profileEdit:
+      case core.AppRoutes.profileEdit:
         final currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';
         return RouteUtils.createMainNavRoute(
           child: profile.EditProfileScreen(userId: currentUserId),
         );
 
-      case AppRoutes.artistDashboard:
+      case core.AppRoutes.artistDashboard:
         return RouteUtils.createMainNavRoute(
           child: const artist.ArtistDashboardScreen(),
         );
 
-      case AppRoutes.artworkBrowse:
+      case core.AppRoutes.artworkBrowse:
         return RouteUtils.createSimpleRoute(
           child: const artwork.ArtworkBrowseScreen(),
         );
 
-      case AppRoutes.search:
+      case core.AppRoutes.search:
         final args = settings.arguments as Map<String, dynamic>?;
         final query = args?['query'] as String?;
 
@@ -120,7 +119,7 @@ class AppRouter {
           child: core.SearchResultsPage(initialQuery: initialQuery),
         );
 
-      case AppRoutes.searchResults:
+      case core.AppRoutes.searchResults:
         final args = settings.arguments as Map<String, dynamic>?;
         final query = args?['query'] as String?;
 
@@ -128,7 +127,7 @@ class AppRouter {
           child: core.SearchResultsPage(initialQuery: query),
         );
 
-      case AppRoutes.browse:
+      case core.AppRoutes.browse:
         return RouteUtils.createMainNavRoute(
           child: const core.FullBrowseScreen(),
         );
@@ -146,23 +145,23 @@ class AppRouter {
           child: const events.CreateEventScreen(),
         );
 
-      case AppRoutes.artistSearch:
-      case AppRoutes.artistSearchShort:
+      case core.AppRoutes.artistSearch:
+      case core.AppRoutes.artistSearchShort:
         return RouteUtils.createMainNavRoute(
           child: const artist.ArtistBrowseScreen(),
         );
 
-      case AppRoutes.trending:
+      case core.AppRoutes.trending:
         return RouteUtils.createMainNavRoute(
           child: const artist.ArtistBrowseScreen(), // Trending artists
         );
 
-      case AppRoutes.local:
+      case core.AppRoutes.local:
         return RouteUtils.createMainNavRoute(
           child: const events.EventsDashboardScreen(),
         );
 
-      case AppRoutes.inAppPurchaseDemo:
+      case core.AppRoutes.inAppPurchaseDemo:
         return RouteUtils.createMainNavRoute(
           child: const InAppPurchaseDemoScreen(),
         );
@@ -179,24 +178,24 @@ class AppRouter {
   }
 
   bool _isProtectedRoute(String routeName) =>
-      routeName != AppRoutes.splash &&
-      routeName != AppRoutes.dashboard &&
-      routeName != AppRoutes.login &&
-      routeName != AppRoutes.register &&
-      routeName != AppRoutes.forgotPassword &&
-      routeName != AppRoutes.artistSearch &&
-      routeName != AppRoutes.artistSearchShort &&
-      routeName != AppRoutes.artistBrowse &&
-      routeName != AppRoutes.artistFeatured &&
-      routeName != AppRoutes.trending &&
-      routeName != AppRoutes.local &&
-      routeName != AppRoutes.artworkBrowse &&
-      routeName != AppRoutes.artworkFeatured &&
-      routeName != AppRoutes.artworkRecent &&
-      routeName != AppRoutes.artworkTrending &&
-      routeName != AppRoutes.artworkSearch &&
-      routeName != AppRoutes.allEvents &&
-      routeName != AppRoutes.search &&
+      routeName != core.AppRoutes.splash &&
+      routeName != core.AppRoutes.dashboard &&
+      routeName != core.AppRoutes.login &&
+      routeName != core.AppRoutes.register &&
+      routeName != core.AppRoutes.forgotPassword &&
+      routeName != core.AppRoutes.artistSearch &&
+      routeName != core.AppRoutes.artistSearchShort &&
+      routeName != core.AppRoutes.artistBrowse &&
+      routeName != core.AppRoutes.artistFeatured &&
+      routeName != core.AppRoutes.trending &&
+      routeName != core.AppRoutes.local &&
+      routeName != core.AppRoutes.artworkBrowse &&
+      routeName != core.AppRoutes.artworkFeatured &&
+      routeName != core.AppRoutes.artworkRecent &&
+      routeName != core.AppRoutes.artworkTrending &&
+      routeName != core.AppRoutes.artworkSearch &&
+      routeName != core.AppRoutes.allEvents &&
+      routeName != core.AppRoutes.search &&
       // Bottom navigation routes - allow anonymous browsing
       routeName != '/art-walk/map' &&
       routeName != '/art-walk/dashboard' &&
@@ -299,12 +298,12 @@ class AppRouter {
         return RouteUtils.createSimpleRoute(
           child: const artist.Modern2025OnboardingScreen(),
         );
-      case AppRoutes.artistDashboard:
+      case core.AppRoutes.artistDashboard:
         return RouteUtils.createMainNavRoute(
           child: const artist.ArtistDashboardScreen(),
         );
 
-      case AppRoutes.artistOnboarding:
+      case core.AppRoutes.artistOnboarding:
         return AuthGuard.guardRoute(
           settings: settings,
           authenticatedBuilder: () => core.MainLayout(
@@ -333,12 +332,12 @@ class AppRouter {
           ),
         );
 
-      case AppRoutes.artistProfileEdit:
+      case core.AppRoutes.artistProfileEdit:
         return RouteUtils.createMainLayoutRoute(
           child: const artist.ArtistProfileEditScreen(),
         );
 
-      case AppRoutes.artistPublicProfile:
+      case core.AppRoutes.artistPublicProfile:
         final artistId = RouteUtils.getArgument<String>(settings, 'artistId');
         final currentUserId = FirebaseAuth.instance.currentUser?.uid;
         final targetUserId = artistId ?? currentUserId;
@@ -352,17 +351,17 @@ class AppRouter {
           child: artist.ArtistPublicProfileScreen(userId: targetUserId),
         );
 
-      case AppRoutes.artistAnalytics:
+      case core.AppRoutes.artistAnalytics:
         return RouteUtils.createMainLayoutRoute(
           child: const artist.AnalyticsDashboardScreen(),
         );
 
-      case AppRoutes.artistArtwork:
+      case core.AppRoutes.artistArtwork:
         return RouteUtils.createMainLayoutRoute(
           child: const artist.MyArtworkScreen(),
         );
 
-      case AppRoutes.artistFeed:
+      case core.AppRoutes.artistFeed:
         final args = settings.arguments as Map<String, dynamic>?;
         final artistUserId = args?['artistUserId'] as String?;
         if (artistUserId != null) {
@@ -375,18 +374,18 @@ class AppRouter {
           child: const Center(child: Text('Artist not found')),
         );
 
-      case AppRoutes.artistBrowse:
+      case core.AppRoutes.artistBrowse:
         return RouteUtils.createMainLayoutRoute(
           currentIndex: 3,
           child: const artist.ArtistBrowseScreen(),
         );
 
-      case AppRoutes.artistEarnings:
+      case core.AppRoutes.artistEarnings:
         return RouteUtils.createMainLayoutRoute(
           child: const artist.ArtistEarningsDashboard(),
         );
 
-      case AppRoutes.artistPayoutRequest:
+      case core.AppRoutes.artistPayoutRequest:
         final args = settings.arguments as Map<String, dynamic>?;
         final availableBalance = args?['availableBalance'] as double? ?? 0.0;
         final onPayoutRequested = args?['onPayoutRequested'] as VoidCallback?;
@@ -397,18 +396,18 @@ class AppRouter {
           ),
         );
 
-      case AppRoutes.artistPayoutAccounts:
+      case core.AppRoutes.artistPayoutAccounts:
         return RouteUtils.createMainLayoutRoute(
           child: const artist.PayoutAccountsScreen(),
         );
 
-      case AppRoutes.artistFeatured:
+      case core.AppRoutes.artistFeatured:
         return RouteUtils.createMainLayoutRoute(
           currentIndex: 3,
           child: const artist.ArtistBrowseScreen(mode: 'featured'),
         );
 
-      case AppRoutes.artistApprovedAds:
+      case core.AppRoutes.artistApprovedAds:
         return RouteUtils.createComingSoonRoute('Approved Ads');
 
       case '/artist/artwork-detail':
@@ -428,28 +427,28 @@ class AppRouter {
   /// Handles artwork-related routes
   Route<dynamic>? _handleArtworkRoutes(RouteSettings settings) {
     switch (settings.name) {
-      case AppRoutes.artworkUpload:
-      case AppRoutes.artworkUploadChoice:
+      case core.AppRoutes.artworkUpload:
+      case core.AppRoutes.artworkUploadChoice:
         return RouteUtils.createMainLayoutRoute(
           child: const artwork.UploadChoiceScreen(),
         );
 
-      case AppRoutes.artworkUploadVisual:
+      case core.AppRoutes.artworkUploadVisual:
         return RouteUtils.createMainLayoutRoute(
           child: const artwork.EnhancedArtworkUploadScreen(),
         );
 
-      case AppRoutes.artworkUploadWritten:
+      case core.AppRoutes.artworkUploadWritten:
         return RouteUtils.createMainLayoutRoute(
           child: const artwork.WrittenContentUploadScreen(),
         );
 
-      case AppRoutes.artworkBrowse:
+      case core.AppRoutes.artworkBrowse:
         return RouteUtils.createSimpleRoute(
           child: const artwork.ArtworkBrowseScreen(),
         );
 
-      case AppRoutes.artworkEdit:
+      case core.AppRoutes.artworkEdit:
         final artworkId = RouteUtils.getArgument<String>(settings, 'artworkId');
         final artworkModel = RouteUtils.getArgument<artwork.ArtworkModel>(
           settings,
@@ -465,7 +464,7 @@ class AppRouter {
           ),
         );
 
-      case AppRoutes.artworkDetail:
+      case core.AppRoutes.artworkDetail:
         final artworkId = RouteUtils.getArgument<String>(settings, 'artworkId');
         if (artworkId == null) {
           return RouteUtils.createErrorRoute('Artwork not found');
@@ -474,22 +473,22 @@ class AppRouter {
           child: artwork.ArtworkDetailScreen(artworkId: artworkId),
         );
 
-      case AppRoutes.artworkFeatured:
+      case core.AppRoutes.artworkFeatured:
         return RouteUtils.createSimpleRoute(
           child: const artwork.ArtworkFeaturedScreen(),
         );
 
-      case AppRoutes.artworkRecent:
+      case core.AppRoutes.artworkRecent:
         return RouteUtils.createSimpleRoute(
           child: const artwork.ArtworkRecentScreen(),
         );
 
-      case AppRoutes.artworkTrending:
+      case core.AppRoutes.artworkTrending:
         return RouteUtils.createSimpleRoute(
           child: const artwork.ArtworkTrendingScreen(),
         );
 
-      case AppRoutes.artworkSearch:
+      case core.AppRoutes.artworkSearch:
         final searchQuery = RouteUtils.getArgument<String>(settings, 'query');
         return RouteUtils.createSimpleRoute(
           child: artwork.AdvancedArtworkSearchScreen(initialQuery: searchQuery),
@@ -515,12 +514,12 @@ class AppRouter {
   /// Handles gallery-related routes
   Route<dynamic>? _handleGalleryRoutes(RouteSettings settings) {
     switch (settings.name) {
-      case AppRoutes.galleryArtistsManagement:
+      case core.AppRoutes.galleryArtistsManagement:
         return RouteUtils.createMainNavRoute(
           child: const artist.GalleryArtistsManagementScreen(),
         );
 
-      case AppRoutes.galleryAnalytics:
+      case core.AppRoutes.galleryAnalytics:
         return RouteUtils.createMainLayoutRoute(
           child: const artist.GalleryAnalyticsDashboardScreen(),
         );
@@ -533,93 +532,93 @@ class AppRouter {
   /// Handles community-related routes
   Route<dynamic>? _handleCommunityRoutes(RouteSettings settings) {
     switch (settings.name) {
-      case AppRoutes.communityDashboard:
+      case core.AppRoutes.communityDashboard:
         return RouteUtils.createMainNavRoute(
           currentIndex: 3,
           child: const community.ArtCommunityHub(),
         );
 
-      case AppRoutes.communityFeed:
+      case core.AppRoutes.communityFeed:
         // Use createMainNavRoute to ensure proper MainLayout wrapping
         return RouteUtils.createMainNavRoute(
           currentIndex: 3,
           child: const community.ArtCommunityHub(),
         );
 
-      case AppRoutes.communityArtists:
+      case core.AppRoutes.communityArtists:
         return RouteUtils.createMainLayoutRoute(
           child: const community.PortfoliosScreen(),
         );
 
-      case AppRoutes.communitySearch:
+      case core.AppRoutes.communitySearch:
         return RouteUtils.createMainLayoutRoute(
           child: const core.SearchResultsPage(),
         );
 
-      case AppRoutes.communityPosts:
+      case core.AppRoutes.communityPosts:
         return RouteUtils.createMainLayoutRoute(
           child: const community.ArtCommunityHub(),
         );
 
-      case AppRoutes.communityStudios:
+      case core.AppRoutes.communityStudios:
         return RouteUtils.createMainLayoutRoute(
           child: const community.StudiosScreen(),
         );
 
-      case AppRoutes.communityGifts:
+      case core.AppRoutes.communityGifts:
         return RouteUtils.createMainLayoutRoute(
           appBar: RouteUtils.createAppBar('Gift Artists'),
           child: const community.ViewReceivedGiftsScreen(),
         );
 
-      case AppRoutes.communityPortfolios:
+      case core.AppRoutes.communityPortfolios:
         return RouteUtils.createMainLayoutRoute(
           child: const community.PortfoliosScreen(),
         );
 
-      case AppRoutes.communityModeration:
+      case core.AppRoutes.communityModeration:
         return RouteUtils.createMainLayoutRoute(
           child: const community.ModerationQueueScreen(),
         );
 
-      case AppRoutes.communitySponsorships:
+      case core.AppRoutes.communitySponsorships:
         // Sponsorship functionality removed - redirect to gifts
         return RouteUtils.createMainLayoutRoute(
           child: const community.ViewReceivedGiftsScreen(),
         );
 
-      case AppRoutes.communitySettings:
+      case core.AppRoutes.communitySettings:
         return RouteUtils.createMainLayoutRoute(
           child: const community.QuietModeScreen(),
         );
 
-      case AppRoutes.communityCreate:
+      case core.AppRoutes.communityCreate:
         return RouteUtils.createMainLayoutRoute(
           child: const community.CreatePostScreen(),
         );
 
-      case AppRoutes.communityMessaging:
+      case core.AppRoutes.communityMessaging:
         return RouteUtils.createMainLayoutRoute(
           child: const community.StudiosScreen(),
         );
 
-      case AppRoutes.communityTrending:
+      case core.AppRoutes.communityTrending:
         return RouteUtils.createMainLayoutRoute(
           child: const community.TrendingContentScreen(),
         );
 
-      case AppRoutes.communityFeatured:
+      case core.AppRoutes.communityFeatured:
         return RouteUtils.createMainLayoutRoute(
           child: const community.ArtCommunityHub(),
         );
 
-      case AppRoutes.community:
+      case core.AppRoutes.community:
         // Redirect to community dashboard
         return RouteUtils.createSimpleRoute(
           child: const community.ArtCommunityHub(),
         );
 
-      case AppRoutes.artCommunityHub:
+      case core.AppRoutes.artCommunityHub:
         return RouteUtils.createMainNavRoute(
           currentIndex: 3,
           child: const community.ArtCommunityHub(),
@@ -667,23 +666,23 @@ class AppRouter {
   /// Handles art walk-related routes
   Route<dynamic>? _handleArtWalkRoutes(RouteSettings settings) {
     switch (settings.name) {
-      case AppRoutes.artWalkDashboard:
+      case core.AppRoutes.artWalkDashboard:
         return RouteUtils.createSimpleRoute(
           child: const art_walk.DiscoverDashboardScreen(),
         );
 
-      case AppRoutes.artWalkMap:
+      case core.AppRoutes.artWalkMap:
         return RouteUtils.createSimpleRoute(
           child: const art_walk.ArtWalkMapScreen(),
         );
 
-      case AppRoutes.artWalkList:
+      case core.AppRoutes.artWalkList:
         return RouteUtils.createMainLayoutRoute(
           currentIndex: 1,
           child: const art_walk.ArtWalkListScreen(),
         );
 
-      case AppRoutes.artWalkDetail:
+      case core.AppRoutes.artWalkDetail:
         final walkId = RouteUtils.getArgument<String>(settings, 'walkId');
         if (walkId == null) {
           return RouteUtils.createErrorRoute('Art walk not found');
@@ -693,47 +692,47 @@ class AppRouter {
           child: art_walk.ArtWalkDetailScreen(walkId: walkId),
         );
 
-      case AppRoutes.artWalkCreate:
+      case core.AppRoutes.artWalkCreate:
         return RouteUtils.createMainLayoutRoute(
           currentIndex: 1,
           child: const art_walk.EnhancedArtWalkCreateScreen(),
         );
 
-      // Note: AppRoutes.enhancedArtWalkExperience is deprecated and now points to
-      // the same path as AppRoutes.artWalkExperience (/art-walk/experience).
+      // Note: core.AppRoutes.enhancedArtWalkExperience is deprecated and now points to
+      // the same path as core.AppRoutes.artWalkExperience (/art-walk/experience).
       // The route is handled by the art_walk module's route configuration.
 
-      case AppRoutes.artWalkSearch:
+      case core.AppRoutes.artWalkSearch:
         return RouteUtils.createMainLayoutRoute(
           currentIndex: 1,
           child: const Center(child: Text('Art Walk Search - Coming Soon')),
         );
 
-      case AppRoutes.artWalkExplore:
+      case core.AppRoutes.artWalkExplore:
         return RouteUtils.createMainLayoutRoute(
           currentIndex: 1,
           child: const Center(child: Text('Explore Art Walks - Coming Soon')),
         );
 
-      case AppRoutes.artWalkStart:
+      case core.AppRoutes.artWalkStart:
         return RouteUtils.createMainLayoutRoute(
           currentIndex: 1,
           child: const Center(child: Text('Start Art Walk - Coming Soon')),
         );
 
-      case AppRoutes.artWalkNearby:
+      case core.AppRoutes.artWalkNearby:
         return RouteUtils.createMainLayoutRoute(
           currentIndex: 1,
           child: const Center(child: Text('Nearby Art Walks - Coming Soon')),
         );
 
-      case AppRoutes.artWalkMyWalks:
+      case core.AppRoutes.artWalkMyWalks:
         return RouteUtils.createMainLayoutRoute(
           currentIndex: 1,
           child: const art_walk.EnhancedMyArtWalksScreen(),
         );
 
-      case AppRoutes.artWalkMyCaptures:
+      case core.AppRoutes.artWalkMyCaptures:
         // Redirect to capture package for captures functionality
         return RouteUtils.createMainLayoutRoute(
           currentIndex: 1,
@@ -762,25 +761,25 @@ class AppRouter {
           ),
         );
 
-      case AppRoutes.artWalkCompleted:
+      case core.AppRoutes.artWalkCompleted:
         return RouteUtils.createMainLayoutRoute(
           currentIndex: 1,
           child: const Center(child: Text('Completed Art Walks - Coming Soon')),
         );
 
-      case AppRoutes.artWalkSaved:
+      case core.AppRoutes.artWalkSaved:
         return RouteUtils.createMainLayoutRoute(
           currentIndex: 1,
           child: const Center(child: Text('Saved Art Walks - Coming Soon')),
         );
 
-      case AppRoutes.artWalkPopular:
+      case core.AppRoutes.artWalkPopular:
         return RouteUtils.createMainLayoutRoute(
           currentIndex: 1,
           child: const Center(child: Text('Popular Art Walks - Coming Soon')),
         );
 
-      case AppRoutes.artWalkAchievements:
+      case core.AppRoutes.artWalkAchievements:
         return RouteUtils.createMainLayoutRoute(
           currentIndex: 1,
           child: const Center(
@@ -788,13 +787,13 @@ class AppRouter {
           ),
         );
 
-      case AppRoutes.artWalkSettings:
+      case core.AppRoutes.artWalkSettings:
         return RouteUtils.createMainLayoutRoute(
           currentIndex: 1,
           child: const Center(child: Text('Art Walk Settings - Coming Soon')),
         );
 
-      case AppRoutes.artWalkAdminModeration:
+      case core.AppRoutes.artWalkAdminModeration:
         core.AppLogger.info(
           '🔍 AppRouter: Handling artWalkAdminModeration route',
         );
@@ -898,17 +897,17 @@ class AppRouter {
   /// Handles messaging-related routes
   Route<dynamic>? _handleMessagingRoutes(RouteSettings settings) {
     switch (settings.name) {
-      case AppRoutes.messaging:
+      case core.AppRoutes.messaging:
         return RouteUtils.createMainLayoutRoute(
           child: const messaging.ArtisticMessagingScreen(),
         );
 
-      case AppRoutes.messagingNew:
+      case core.AppRoutes.messagingNew:
         return RouteUtils.createMainLayoutRoute(
           child: const messaging.ContactSelectionScreen(),
         );
 
-      case AppRoutes.messagingChat:
+      case core.AppRoutes.messagingChat:
         final args = settings.arguments as Map<String, dynamic>?;
         final chat = args?['chat'] as messaging.ChatModel?;
         if (chat != null) {
@@ -918,7 +917,7 @@ class AppRouter {
         }
         return RouteUtils.createNotFoundRoute('Chat not found');
 
-      case AppRoutes.messagingUserChat:
+      case core.AppRoutes.messagingUserChat:
         final args = settings.arguments as Map<String, dynamic>?;
         final userId = args?['userId'] as String?;
         if (userId != null && userId.isNotEmpty) {
@@ -929,7 +928,7 @@ class AppRouter {
         }
         return RouteUtils.createNotFoundRoute('User chat not found');
 
-      case AppRoutes.messagingThread:
+      case core.AppRoutes.messagingThread:
         final args = settings.arguments as Map<String, dynamic>?;
         final chat = args?['chat'] as messaging.ChatModel?;
         final threadId = args?['threadId'] as String?;
@@ -951,40 +950,40 @@ class AppRouter {
   /// Handles events-related routes
   Route<dynamic>? _handleEventsRoutes(RouteSettings settings) {
     switch (settings.name) {
-      case AppRoutes.events:
-      case AppRoutes.eventsDiscover:
-      case AppRoutes.eventsDashboard:
-      case AppRoutes.eventsArtistDashboard:
+      case core.AppRoutes.events:
+      case core.AppRoutes.eventsDiscover:
+      case core.AppRoutes.eventsDashboard:
+      case core.AppRoutes.eventsArtistDashboard:
         return RouteUtils.createMainLayoutRoute(
           currentIndex: 4,
           drawer: const events.EventsDrawer(),
           child: const events.EventsDashboardScreen(),
         );
 
-      case AppRoutes.eventsCreate:
+      case core.AppRoutes.eventsCreate:
         return RouteUtils.createMainLayoutRoute(
           drawer: const events.EventsDrawer(),
           child: const events.CreateEventScreen(),
         );
 
-      case AppRoutes.eventsSearch:
+      case core.AppRoutes.eventsSearch:
         return RouteUtils.createSimpleRoute(
           child: const events.EventSearchScreen(),
         );
 
-      case AppRoutes.myEvents:
+      case core.AppRoutes.myEvents:
         return RouteUtils.createMainLayoutRoute(
           drawer: const events.EventsDrawer(),
           child: const events.UserEventsDashboardScreen(),
         );
 
-      case AppRoutes.myTickets:
+      case core.AppRoutes.myTickets:
         final currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';
         return RouteUtils.createSimpleRoute(
           child: events.MyTicketsScreen(userId: currentUserId),
         );
 
-      case AppRoutes.eventsDetail:
+      case core.AppRoutes.eventsDetail:
         final args = settings.arguments as Map<String, dynamic>?;
         final eventId = args?['eventId'] as String?;
         if (eventId != null) {
@@ -1003,19 +1002,19 @@ class AppRouter {
   /// Handles ads-related routes
   Route<dynamic>? _handleAdsRoutes(RouteSettings settings) {
     switch (settings.name) {
-      case AppRoutes.adsCreate:
+      case core.AppRoutes.adsCreate:
         return RouteUtils.createMainLayoutRoute(
           appBar: RouteUtils.createAppBar('Create Ad'),
           child: const ads.CreateLocalAdScreen(),
         );
 
-      case AppRoutes.adsManagement:
+      case core.AppRoutes.adsManagement:
         return RouteUtils.createMainLayoutRoute(
           appBar: RouteUtils.createAppBar('Manage Ads'),
           child: const ads.MyAdsScreen(),
         );
 
-      case AppRoutes.adsStatistics:
+      case core.AppRoutes.adsStatistics:
         return RouteUtils.createMainLayoutRoute(
           appBar: RouteUtils.createAppBar('Ad Statistics'),
           child: const ads.LocalAdsListScreen(),
@@ -1033,7 +1032,7 @@ class AppRouter {
           child: const ads.LocalAdsListScreen(),
         );
 
-      case AppRoutes.adPayment:
+      case core.AppRoutes.adPayment:
         return RouteUtils.createMainLayoutRoute(
           appBar: RouteUtils.createAppBar('Ad Payment'),
           child: const ads.CreateLocalAdScreen(),
@@ -1054,7 +1053,7 @@ class AppRouter {
 
     // Fallback for admin routes not handled by the admin package
     switch (settings.name) {
-      case AppRoutes.adminCoupons:
+      case core.AppRoutes.adminCoupons:
         return RouteUtils.createMainLayoutRoute(
           child: const core.CouponManagementScreen(),
         );
@@ -1064,9 +1063,9 @@ class AppRouter {
           child: const admin.AdminArtworkManagementScreen(),
         );
 
-      case AppRoutes.adminCouponManagement:
-      case AppRoutes.adminUsers:
-      case AppRoutes.adminModeration:
+      case core.AppRoutes.adminCouponManagement:
+      case core.AppRoutes.adminUsers:
+      case core.AppRoutes.adminModeration:
       case '/admin/enhanced-dashboard':
       case '/admin/financial-analytics':
       case '/admin/content-management-suite':
@@ -1084,13 +1083,13 @@ class AppRouter {
   /// Handles settings-related routes
   Route<dynamic>? _handleSettingsRoutes(RouteSettings settings) {
     switch (settings.name) {
-      case AppRoutes.settings:
+      case core.AppRoutes.settings:
         return RouteUtils.createMainLayoutRoute(
           appBar: RouteUtils.createAppBar('Settings'),
           child: const settings_pkg.SettingsScreen(),
         );
 
-      case AppRoutes.settingsAccount:
+      case core.AppRoutes.settingsAccount:
         return RouteUtils.createMainLayoutRoute(
           appBar: RouteUtils.createAppBar('Account Settings'),
           child: const settings_pkg.AccountSettingsScreen(
@@ -1098,19 +1097,19 @@ class AppRouter {
           ),
         );
 
-      case AppRoutes.settingsNotifications:
+      case core.AppRoutes.settingsNotifications:
         return RouteUtils.createMainLayoutRoute(
           appBar: RouteUtils.createAppBar('Notification Settings'),
           child: const settings_pkg.NotificationSettingsScreen(),
         );
 
-      case AppRoutes.settingsPrivacy:
+      case core.AppRoutes.settingsPrivacy:
         return RouteUtils.createMainLayoutRoute(
           appBar: RouteUtils.createAppBar('Privacy Settings'),
           child: const settings_pkg.PrivacySettingsScreen(),
         );
 
-      case AppRoutes.securitySettings:
+      case core.AppRoutes.securitySettings:
         return RouteUtils.createMainLayoutRoute(
           appBar: RouteUtils.createAppBar('Security Settings'),
           child: const settings_pkg.SecuritySettingsScreen(
@@ -1118,7 +1117,7 @@ class AppRouter {
           ),
         );
 
-      case AppRoutes.paymentSettings:
+      case core.AppRoutes.paymentSettings:
         return RouteUtils.createMainLayoutRoute(
           appBar: RouteUtils.createAppBar('Payment Settings'),
           child: const artist.PaymentMethodsScreen(),
@@ -1463,7 +1462,7 @@ class AppRouter {
           child: profile.ProfileViewScreen(userId: userId),
         );
 
-      case AppRoutes.profileMenu:
+      case core.AppRoutes.profileMenu:
         return RouteUtils.createSimpleRoute(
           child: const profile.ProfileMenuScreen(),
         );
@@ -1476,13 +1475,13 @@ class AppRouter {
   /// Handles capture-related routes
   Route<dynamic>? _handleCaptureRoutes(RouteSettings settings) {
     switch (settings.name) {
-      case AppRoutes.captures:
-      case AppRoutes.captureMyCaptures:
-      case AppRoutes.capturePending:
-      case AppRoutes.captureMap:
-      case AppRoutes.captureApproved:
-      case AppRoutes.captureGallery:
-      case AppRoutes.capturePublic:
+      case core.AppRoutes.captures:
+      case core.AppRoutes.captureMyCaptures:
+      case core.AppRoutes.capturePending:
+      case core.AppRoutes.captureMap:
+      case core.AppRoutes.captureApproved:
+      case core.AppRoutes.captureGallery:
+      case core.AppRoutes.capturePublic:
         return RouteUtils.createMainLayoutRoute(
           child: Builder(
             builder: (context) {
@@ -1503,14 +1502,14 @@ class AppRouter {
                   }
                   final captures = snapshot.data ?? [];
                   switch (settings.name) {
-                    case AppRoutes.captures:
-                    case AppRoutes.capturePending:
-                    case AppRoutes.captureMap:
-                    case AppRoutes.captureApproved:
-                    case AppRoutes.captureGallery:
-                    case AppRoutes.capturePublic:
+                    case core.AppRoutes.captures:
+                    case core.AppRoutes.capturePending:
+                    case core.AppRoutes.captureMap:
+                    case core.AppRoutes.captureApproved:
+                    case core.AppRoutes.captureGallery:
+                    case core.AppRoutes.capturePublic:
                       return capture.CapturesListScreen(captures: captures);
-                    case AppRoutes.captureMyCaptures:
+                    case core.AppRoutes.captureMyCaptures:
                       return capture.MyCapturesScreen(captures: captures);
                     default:
                       return capture.CapturesListScreen(captures: captures);
@@ -1520,7 +1519,7 @@ class AppRouter {
             },
           ),
         );
-      case AppRoutes.captureBrowse:
+      case core.AppRoutes.captureBrowse:
         return RouteUtils.createMainLayoutRoute(
           child: FutureBuilder<List<capture.CaptureModel>>(
             future: capture.CaptureService().getAllCapturesFresh(),
@@ -1540,27 +1539,27 @@ class AppRouter {
         );
 
       // The rest of the cases (camera, dashboard, etc.) remain unchanged or do not require 'captures'.
-      case AppRoutes.captureCamera:
+      case core.AppRoutes.captureCamera:
         return RouteUtils.createMainLayoutRoute(
           child: const capture.CaptureScreen(),
         );
 
-      case AppRoutes.captureAdminModeration:
+      case core.AppRoutes.captureAdminModeration:
         return RouteUtils.createMainLayoutRoute(
           child: const capture.AdminContentModerationScreen(),
         );
 
-      case AppRoutes.captureCreate:
+      case core.AppRoutes.captureCreate:
         return RouteUtils.createMainLayoutRoute(
           child: const capture.CaptureScreen(),
         );
 
-      case AppRoutes.captureTerms:
+      case core.AppRoutes.captureTerms:
         return RouteUtils.createMainLayoutRoute(
           child: const capture.TermsAndConditionsScreen(),
         );
 
-      case AppRoutes.captureDetail:
+      case core.AppRoutes.captureDetail:
         final captureId = RouteUtils.getArgument<String>(settings, 'captureId');
         if (captureId == null || captureId.isEmpty) {
           return RouteUtils.createErrorRoute('Capture ID is required');
@@ -1569,7 +1568,7 @@ class AppRouter {
           child: capture.CaptureDetailViewerScreen(captureId: captureId),
         );
 
-      case AppRoutes.captureEdit:
+      case core.AppRoutes.captureEdit:
         final captureModel = RouteUtils.getArgument<core.CaptureModel>(
           settings,
           'capture',
@@ -1594,17 +1593,17 @@ class AppRouter {
   /// Handles in-app purchase routes
   Route<dynamic>? _handleIapRoutes(RouteSettings settings) {
     switch (settings.name) {
-      case AppRoutes.subscriptions:
+      case core.AppRoutes.subscriptions:
         return RouteUtils.createMainLayoutRoute(
           child: const core.SubscriptionsScreen(),
         );
 
-      case AppRoutes.gifts:
+      case core.AppRoutes.gifts:
         return RouteUtils.createMainLayoutRoute(
           child: const core.GiftsScreen(),
         );
 
-      case AppRoutes.ads:
+      case core.AppRoutes.ads:
         return RouteUtils.createMainLayoutRoute(child: const core.AdsScreen());
 
       default:
@@ -1615,33 +1614,33 @@ class AppRouter {
   /// Handles subscription-related routes
   Route<dynamic>? _handleSubscriptionRoutes(RouteSettings settings) {
     switch (settings.name) {
-      case AppRoutes.subscriptionComparison:
+      case core.AppRoutes.subscriptionComparison:
         return RouteUtils.createMainLayoutRoute(
           child: const core.SubscriptionPurchaseScreen(
             tier: core.SubscriptionTier.starter,
           ),
         );
 
-      case AppRoutes.subscriptionPlans:
+      case core.AppRoutes.subscriptionPlans:
         return RouteUtils.createSimpleRoute(
           child: const artist.Modern2025OnboardingScreen(
             preselectedPlan: 'creator plan',
           ),
         );
 
-      case AppRoutes.paymentMethods:
+      case core.AppRoutes.paymentMethods:
         return RouteUtils.createMainLayoutRoute(
           appBar: RouteUtils.createAppBar('Payment Methods'),
           child: const artist.PaymentMethodsScreen(),
         );
 
-      case AppRoutes.paymentScreen:
+      case core.AppRoutes.paymentScreen:
         return RouteUtils.createMainLayoutRoute(
           appBar: RouteUtils.createAppBar('Payment Screen'),
           child: const artist.PaymentMethodsScreen(),
         );
 
-      case AppRoutes.paymentRefund:
+      case core.AppRoutes.paymentRefund:
         return RouteUtils.createMainLayoutRoute(
           appBar: RouteUtils.createAppBar('Refunds'),
           child: const Center(child: Text('Refund management coming soon')),
@@ -1655,52 +1654,52 @@ class AppRouter {
   /// Handles miscellaneous routes
   Route<dynamic>? _handleMiscRoutes(RouteSettings settings) {
     switch (settings.name) {
-      case AppRoutes.achievements:
+      case core.AppRoutes.achievements:
         return RouteUtils.createMainLayoutRoute(
           child: const profile.AchievementsScreen(),
         );
 
-      case AppRoutes.achievementsInfo:
+      case core.AppRoutes.achievementsInfo:
         return RouteUtils.createMainLayoutRoute(
           child: const profile.AchievementInfoScreen(),
         );
 
-      case AppRoutes.leaderboard:
+      case core.AppRoutes.leaderboard:
         return RouteUtils.createMainLayoutRoute(
           child: const core.LeaderboardScreen(),
         );
 
-      case AppRoutes.notifications:
+      case core.AppRoutes.notifications:
         return RouteUtils.createSimpleRoute(child: const NotificationsScreen());
 
-      case AppRoutes.search:
+      case core.AppRoutes.search:
         return RouteUtils.createMainLayoutRoute(
           child: const core.SearchResultsPage(),
         );
 
-      case AppRoutes.searchResults:
+      case core.AppRoutes.searchResults:
         final searchArgs = settings.arguments as Map<String, dynamic>?;
         final searchQuery = searchArgs?['query'] as String?;
         return RouteUtils.createMainLayoutRoute(
           child: core.SearchResultsPage(initialQuery: searchQuery),
         );
 
-      case AppRoutes.feedback:
+      case core.AppRoutes.feedback:
         return RouteUtils.createMainLayoutRoute(
           child: const core.FeedbackForm(),
         );
 
-      case AppRoutes.developerFeedbackAdmin:
+      case core.AppRoutes.developerFeedbackAdmin:
         return RouteUtils.createMainLayoutRoute(
           child: const core.DeveloperFeedbackAdminScreen(),
         );
 
-      case AppRoutes.systemInfo:
+      case core.AppRoutes.systemInfo:
         return RouteUtils.createMainLayoutRoute(
           child: const Center(child: Text('System Info - Coming Soon')),
         );
 
-      case AppRoutes.support:
+      case core.AppRoutes.support:
       case '/help':
         return RouteUtils.createMainLayoutRoute(
           child: const core.HelpSupportScreen(),

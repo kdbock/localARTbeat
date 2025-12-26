@@ -313,9 +313,11 @@ class _ArtWalkDrawerState extends State<ArtWalkDrawer>
                     CircleAvatar(
                       radius: 18,
                       backgroundColor: Colors.white.withValues(alpha: 0.10),
-                      backgroundImage:
-                          ImageUrlValidator.safeNetworkImage(profileImageUrl),
-                      child: (profileImageUrl == null ||
+                      backgroundImage: ImageUrlValidator.safeNetworkImage(
+                        profileImageUrl,
+                      ),
+                      child:
+                          (profileImageUrl == null ||
                               !ImageUrlValidator.isValidImageUrl(
                                 profileImageUrl,
                               ))
@@ -391,8 +393,9 @@ class _ArtWalkDrawerState extends State<ArtWalkDrawer>
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color:
-                                const Color(0xFF34D399).withValues(alpha: 0.20),
+                            color: const Color(
+                              0xFF34D399,
+                            ).withValues(alpha: 0.20),
                             blurRadius: 18,
                             offset: const Offset(0, 10),
                           ),
@@ -475,10 +478,15 @@ class _ArtWalkDrawerState extends State<ArtWalkDrawer>
                 route == '/capture/public' ||
                 route == '/quest-history' ||
                 route == '/weekly-goals') {
-              Navigator.of(snackBarContext, rootNavigator: true).pushNamed(route);
+              Navigator.of(
+                snackBarContext,
+                rootNavigator: true,
+              ).pushNamed(route);
             } else {
-              Navigator.of(snackBarContext, rootNavigator: true)
-                  .pushReplacementNamed(route);
+              Navigator.of(
+                snackBarContext,
+                rootNavigator: true,
+              ).pushReplacementNamed(route);
             }
           },
           child: AnimatedContainer(
@@ -520,8 +528,9 @@ class _ArtWalkDrawerState extends State<ArtWalkDrawer>
                       color: Colors.white.withValues(
                         alpha: isCurrentRoute ? 0.95 : 0.82,
                       ),
-                      fontWeight:
-                          isCurrentRoute ? FontWeight.w900 : FontWeight.w800,
+                      fontWeight: isCurrentRoute
+                          ? FontWeight.w900
+                          : FontWeight.w800,
                       fontSize: 14,
                       letterSpacing: -0.1,
                     ),
@@ -553,9 +562,7 @@ class _ArtWalkDrawerState extends State<ArtWalkDrawer>
               backgroundColor: const Color(0xFF0B1026),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(18),
-                side: BorderSide(
-                  color: Colors.white.withValues(alpha: 0.10),
-                ),
+                side: BorderSide(color: Colors.white.withValues(alpha: 0.10)),
               ),
               title: Text(
                 'art_walk_button_sign_out'.tr(),
@@ -700,11 +707,7 @@ class _QuestIconCapsule extends StatelessWidget {
           ),
         ],
       ),
-      child: Icon(
-        icon,
-        color: Colors.white.withValues(alpha: 0.92),
-        size: 20,
-      ),
+      child: Icon(icon, color: Colors.white.withValues(alpha: 0.92), size: 20),
     );
   }
 }

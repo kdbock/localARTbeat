@@ -88,7 +88,11 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                     colors: [Color(0xFF7C4DFF), Color(0xFF22D3EE)],
                   ),
                 ),
-                child: const Icon(Icons.help_outline, color: Colors.white, size: 28),
+                child: const Icon(
+                  Icons.help_outline,
+                  color: Colors.white,
+                  size: 28,
+                ),
               ),
               const SizedBox(width: 18),
               Expanded(
@@ -123,12 +127,15 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
             children: badges
                 .map(
                   (badge) => Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(999),
-                      border:
-                          Border.all(color: Colors.white.withValues(alpha: 0.14)),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.14),
+                      ),
                       color: Colors.white.withValues(alpha: 0.05),
                     ),
                     child: Text(
@@ -219,9 +226,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
       );
     }
 
-    return Column(
-      children: sections.map(_buildSectionCard).toList(),
-    );
+    return Column(children: sections.map(_buildSectionCard).toList());
   }
 
   Widget _buildSearchField() {
@@ -299,8 +304,8 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
     final filteredItems = _searchQuery.isEmpty
         ? section.items
         : section.items
-            .where((item) => item.toLowerCase().contains(_searchQuery))
-            .toList();
+              .where((item) => item.toLowerCase().contains(_searchQuery))
+              .toList();
 
     if (filteredItems.isEmpty) {
       return const SizedBox.shrink();
@@ -387,11 +392,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF03050F),
-              Color(0xFF09122B),
-              Color(0xFF021B17),
-            ],
+            colors: [Color(0xFF03050F), Color(0xFF09122B), Color(0xFF021B17)],
           ),
         ),
         child: Stack(
@@ -595,9 +596,9 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('help_forum_error'.tr())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('help_forum_error'.tr())));
       }
     }
   }

@@ -3,28 +3,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_art_walk/artbeat_art_walk.dart' as artWalkLib;
 
-class DailyChallenge {
-  final String id;
-  final String title;
-  final String description;
-  final int targetCount;
-  final int currentCount;
-  final int rewardXP;
-  final String rewardDescription;
-  final DateTime expiresAt;
-
-  DailyChallenge({
-    required this.id,
-    required this.title,
-    required this.description,
-    required this.targetCount,
-    required this.currentCount,
-    required this.rewardXP,
-    required this.rewardDescription,
-    required this.expiresAt,
-  });
-}
-
 class IntegratedEngagementWidget extends StatefulWidget {
   final UserModel user;
   final int currentStreak;
@@ -62,26 +40,20 @@ class _IntegratedEngagementWidgetState extends State<IntegratedEngagementWidget>
     with TickerProviderStateMixin {
   late TabController _tabController;
   final LeaderboardService _leaderboardService = LeaderboardService();
+  final artWalkLib.ChallengeService _challengeService =
+      artWalkLib.ChallengeService();
   List<LeaderboardEntry> _topUsers = [];
   bool _isLoadingLeaderboard = true;
-
-  late DailyChallenge _testChallenge;
+  artWalkLib.ChallengeModel? _dailyChallenge;
+  bool _isLoadingDailyChallenge = true;
+  String? _dailyChallengeError;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
     _loadTopUsers();
-    _testChallenge = DailyChallenge(
-      id: 'test_daily_challenge',
-      title: 'Art Explorer',
-      description: 'Discover 3 pieces of public art today',
-      targetCount: 3,
-      currentCount: 1,
-      rewardXP: 100,
-      rewardDescription: '🎨 Artist Badge + 100 XP',
-      expiresAt: DateTime.now().add(const Duration(hours: 20)),
-    );
+    _loadDailyChallenge();
   }
 
   Future<void> _loadTopUsers() async {
@@ -99,6 +71,29 @@ class _IntegratedEngagementWidgetState extends State<IntegratedEngagementWidget>
       AppLogger.error('Error loading top users: $e');
       if (!mounted) return;
       setState(() => _isLoadingLeaderboard = false);
+    }
+  }
+
+  Future<void> _loadDailyChallenge() async {
+    setState(() {
+      _isLoadingDailyChallenge = true;
+      _dailyChallengeError = null;
+    });
+
+    try {
+      final challenge = await _challengeService.getTodaysChallenge();
+      if (!mounted) return;
+      setState(() {
+        _dailyChallenge = challenge;
+        _isLoadingDailyChallenge = false;
+      });
+    } catch (e) {
+      AppLogger.error('Error loading daily challenge: $e');
+      if (!mounted) return;
+      setState(() {
+        _dailyChallengeError = 'Unable to load daily quest';
+        _isLoadingDailyChallenge = false;
+      });
     }
   }
 
@@ -478,193 +473,273 @@ class _IntegratedEngagementWidgetState extends State<IntegratedEngagementWidget>
   }
 
   Widget _buildDailyQuestTab() {
-    final progress = _testChallenge.currentCount / _testChallenge.targetCount;
+    if (_isLoadingDailyChallenge) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  ArtbeatColors.primaryPurple,
-                  ArtbeatColors.primaryGreen,
+    if (_dailyChallengeError != null) {
+      return _buildDailyQuestMessage(
+        icon: Icons.error_outline,
+        title: 'common_error'.tr(),
+        subtitle: _dailyChallengeError!,
+        buttonLabel: 'common_retry'.tr(),
+        onPressed: _loadDailyChallenge,
+      );
+    }
+
+    final challenge = _dailyChallenge;
+    if (challenge == null) {
+      return _buildDailyQuestMessage(
+        icon: Icons.explore,
+        title: 'daily_quest_label'.tr(),
+        subtitle: 'Start your first discovery to unlock personalized quests.',
+        buttonLabel: 'dashboard_start_quest'.tr(),
+        onPressed: () => Navigator.pushNamed(context, '/art-walk/dashboard'),
+      );
+    }
+
+    final progress = challenge.progressPercentage;
+    final hoursRemaining = challenge.expiresAt.isBefore(DateTime.now())
+        ? 0
+        : challenge.expiresAt.difference(DateTime.now()).inHours;
+
+    return RefreshIndicator(
+      onRefresh: _loadDailyChallenge,
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    ArtbeatColors.primaryPurple,
+                    ArtbeatColors.primaryGreen,
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: ArtbeatColors.primaryPurple.withValues(alpha: 0.3),
+                    blurRadius: 12,
+                  ),
                 ],
               ),
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: ArtbeatColors.primaryPurple.withValues(alpha: 0.3),
-                  blurRadius: 12,
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(
-                        Icons.assignment,
-                        color: Colors.white,
-                        size: 24,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            _testChallenge.title,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'engagement_expires_in'.tr(
-                              namedArgs: {
-                                'hours': _testChallenge.expiresAt
-                                    .difference(DateTime.now())
-                                    .inHours
-                                    .toString(),
-                              },
-                            ),
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Colors.white70,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  _testChallenge.description,
-                  style: const TextStyle(fontSize: 14, color: Colors.white),
-                ),
-                const SizedBox(height: 16),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: LinearProgressIndicator(
-                    value: progress.clamp(0.0, 1.0),
-                    minHeight: 10,
-                    backgroundColor: Colors.white24,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      Colors.white.withValues(alpha: 0.9),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'engagement_progress_complete'.tr(
-                        namedArgs: {
-                          'current': _testChallenge.currentCount.toString(),
-                          'target': _testChallenge.targetCount.toString(),
-                        },
-                      ),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.white70,
-                      ),
-                    ),
-                    Text(
-                      '${(progress * 100).round()}%',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 20),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.blue.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(
-                    Icons.card_giftcard,
-                    color: Colors.blue,
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
                     children: [
-                      Text(
-                        'engagement_reward'.tr(),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black87,
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(
+                          Icons.assignment,
+                          color: Colors.white,
+                          size: 24,
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _testChallenge.rewardDescription,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.blue,
-                          fontWeight: FontWeight.w600,
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              challenge.title,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'engagement_expires_in'.tr(
+                                namedArgs: {'hours': hoursRemaining.toString()},
+                              ),
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.white70,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
+                  const SizedBox(height: 16),
+                  Text(
+                    challenge.description,
+                    style: const TextStyle(fontSize: 14, color: Colors.white),
+                  ),
+                  const SizedBox(height: 16),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: LinearProgressIndicator(
+                      value: progress.clamp(0.0, 1.0),
+                      minHeight: 10,
+                      backgroundColor: Colors.white24,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Colors.white.withValues(alpha: 0.9),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'engagement_progress_complete'.tr(
+                          namedArgs: {
+                            'current': challenge.currentCount.toString(),
+                            'target': challenge.targetCount.toString(),
+                          },
+                        ),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.white70,
+                        ),
+                      ),
+                      Text(
+                        '${(progress * 100).round()}%',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.blue.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.card_giftcard,
+                      color: Colors.blue,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'engagement_reward'.tr(),
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          challenge.rewardDescription.isNotEmpty
+                              ? challenge.rewardDescription
+                              : '${challenge.rewardXP} XP',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.blue,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              onPressed: () => Navigator.pushNamed(
+                context,
+                '/art-walk/dashboard',
+              ),
+              icon: const Icon(Icons.explore),
+              label: Text('dashboard_start_quest'.tr()),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: ArtbeatColors.primaryPurple,
+                foregroundColor: Colors.white,
+                minimumSize: const Size.fromHeight(48),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDailyQuestMessage({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    String? buttonLabel,
+    VoidCallback? onPressed,
+  }) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 48, color: ArtbeatColors.primaryPurple),
+            const SizedBox(height: 12),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: ArtbeatColors.textPrimary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              subtitle,
+              style: const TextStyle(
+                fontSize: 14,
+                color: ArtbeatColors.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            if (buttonLabel != null && onPressed != null) ...[
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: onPressed,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: ArtbeatColors.primaryPurple,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(160, 44),
                 ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 20),
-          ElevatedButton.icon(
-            onPressed: () {
-              // Navigate to Art Walk Dashboard to start the quest
-              Navigator.pushNamed(context, '/art-walk/dashboard');
-            },
-            icon: const Icon(Icons.explore),
-            label: Text('dashboard_start_quest'.tr()),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: ArtbeatColors.primaryPurple,
-              foregroundColor: Colors.white,
-              minimumSize: const Size.fromHeight(48),
-            ),
-          ),
-        ],
+                child: Text(buttonLabel),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }

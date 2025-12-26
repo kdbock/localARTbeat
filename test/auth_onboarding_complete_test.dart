@@ -34,7 +34,12 @@ void main() {
         final mockAuthService = FirebaseTestSetup.createMockAuthService();
 
         await tester.pumpWidget(
-          MaterialApp(home: LoginScreen(authService: mockAuthService, enableBackgroundAnimation: false)),
+          MaterialApp(
+            home: LoginScreen(
+              authService: mockAuthService,
+              enableBackgroundAnimation: false,
+            ),
+          ),
         );
 
         // Verify login screen loads
@@ -56,7 +61,12 @@ void main() {
         final mockAuthService = FirebaseTestSetup.createMockAuthService();
 
         await tester.pumpWidget(
-          MaterialApp(home: RegisterScreen(authService: mockAuthService, enableBackgroundAnimation: false)),
+          MaterialApp(
+            home: RegisterScreen(
+              authService: mockAuthService,
+              enableBackgroundAnimation: false,
+            ),
+          ),
         );
 
         // Verify registration screen loads
@@ -116,7 +126,12 @@ void main() {
           final mockAuthService = FirebaseTestSetup.createMockAuthService();
 
           await tester.pumpWidget(
-            MaterialApp(home: LoginScreen(authService: mockAuthService, enableBackgroundAnimation: false)),
+            MaterialApp(
+              home: LoginScreen(
+                authService: mockAuthService,
+                enableBackgroundAnimation: false,
+              ),
+            ),
           );
 
           // Find form fields by type since we might not have specific keys
@@ -139,7 +154,12 @@ void main() {
         testWidgets('Registration form accepts text input', (tester) async {
           final mockAuthService = FirebaseTestSetup.createMockAuthService();
           await tester.pumpWidget(
-            MaterialApp(home: RegisterScreen(authService: mockAuthService, enableBackgroundAnimation: false)),
+            MaterialApp(
+              home: RegisterScreen(
+                authService: mockAuthService,
+                enableBackgroundAnimation: false,
+              ),
+            ),
           );
 
           final textFields = find.byType(TextFormField);
@@ -167,10 +187,14 @@ void main() {
             MaterialApp(
               initialRoute: '/login',
               routes: {
-                '/login': (context) =>
-                    LoginScreen(authService: mockAuthService, enableBackgroundAnimation: false),
-                '/register': (context) =>
-                    RegisterScreen(authService: mockAuthService, enableBackgroundAnimation: false),
+                '/login': (context) => LoginScreen(
+                  authService: mockAuthService,
+                  enableBackgroundAnimation: false,
+                ),
+                '/register': (context) => RegisterScreen(
+                  authService: mockAuthService,
+                  enableBackgroundAnimation: false,
+                ),
                 '/forgot-password': (context) =>
                     ForgotPasswordScreen(authService: mockAuthService),
               },
@@ -195,10 +219,14 @@ void main() {
             MaterialApp(
               initialRoute: '/register',
               routes: {
-                '/login': (context) =>
-                    LoginScreen(authService: mockAuthService, enableBackgroundAnimation: false),
-                '/register': (context) =>
-                    RegisterScreen(authService: mockAuthService, enableBackgroundAnimation: false),
+                '/login': (context) => LoginScreen(
+                  authService: mockAuthService,
+                  enableBackgroundAnimation: false,
+                ),
+                '/register': (context) => RegisterScreen(
+                  authService: mockAuthService,
+                  enableBackgroundAnimation: false,
+                ),
               },
             ),
           );
@@ -212,7 +240,12 @@ void main() {
           final mockAuthService = FirebaseTestSetup.createMockAuthService();
 
           await tester.pumpWidget(
-            MaterialApp(home: LoginScreen(authService: mockAuthService, enableBackgroundAnimation: false)),
+            MaterialApp(
+              home: LoginScreen(
+                authService: mockAuthService,
+                enableBackgroundAnimation: false,
+              ),
+            ),
           );
 
           // Find and tap the main action button
@@ -229,7 +262,12 @@ void main() {
         testWidgets('Registration button can be tapped', (tester) async {
           final mockAuthService = FirebaseTestSetup.createMockAuthService();
           await tester.pumpWidget(
-            MaterialApp(home: RegisterScreen(authService: mockAuthService, enableBackgroundAnimation: false)),
+            MaterialApp(
+              home: RegisterScreen(
+                authService: mockAuthService,
+                enableBackgroundAnimation: false,
+              ),
+            ),
           );
 
           final buttons = find.byType(ElevatedButton);
@@ -267,7 +305,12 @@ void main() {
         testWidgets('Password fields have visibility toggle', (tester) async {
           final mockAuthService = FirebaseTestSetup.createMockAuthService();
           await tester.pumpWidget(
-            MaterialApp(home: LoginScreen(authService: mockAuthService, enableBackgroundAnimation: false)),
+            MaterialApp(
+              home: LoginScreen(
+                authService: mockAuthService,
+                enableBackgroundAnimation: false,
+              ),
+            ),
           );
 
           // Look for password visibility icons (usually IconButton with visibility icon)
@@ -286,7 +329,12 @@ void main() {
         testWidgets('Forms have proper validation structure', (tester) async {
           final mockAuthService = FirebaseTestSetup.createMockAuthService();
           await tester.pumpWidget(
-            MaterialApp(home: RegisterScreen(authService: mockAuthService, enableBackgroundAnimation: false)),
+            MaterialApp(
+              home: RegisterScreen(
+                authService: mockAuthService,
+                enableBackgroundAnimation: false,
+              ),
+            ),
           );
 
           // Verify form validation structure exists
@@ -302,7 +350,12 @@ void main() {
         testWidgets('Login screen has proper semantics', (tester) async {
           final mockAuthService = FirebaseTestSetup.createMockAuthService();
           await tester.pumpWidget(
-            MaterialApp(home: LoginScreen(authService: mockAuthService, enableBackgroundAnimation: false)),
+            MaterialApp(
+              home: LoginScreen(
+                authService: mockAuthService,
+                enableBackgroundAnimation: false,
+              ),
+            ),
           );
 
           // Check that screen has proper structure for accessibility
@@ -313,7 +366,12 @@ void main() {
         testWidgets('Registration screen has proper semantics', (tester) async {
           final mockAuthService = FirebaseTestSetup.createMockAuthService();
           await tester.pumpWidget(
-            MaterialApp(home: RegisterScreen(authService: mockAuthService, enableBackgroundAnimation: false)),
+            MaterialApp(
+              home: RegisterScreen(
+                authService: mockAuthService,
+                enableBackgroundAnimation: false,
+              ),
+            ),
           );
 
           expect(find.byType(Scaffold), findsOneWidget);
@@ -325,7 +383,12 @@ void main() {
           final mockAuthService = FirebaseTestSetup.createMockAuthService();
 
           await tester.pumpWidget(
-            MaterialApp(home: LoginScreen(authService: mockAuthService, enableBackgroundAnimation: false)),
+            MaterialApp(
+              home: LoginScreen(
+                authService: mockAuthService,
+                enableBackgroundAnimation: false,
+              ),
+            ),
           );
 
           // Wait for widget to fully build
@@ -362,7 +425,12 @@ void main() {
 
           // Test login screen layout
           await tester.pumpWidget(
-            MaterialApp(home: LoginScreen(authService: mockAuthService, enableBackgroundAnimation: false)),
+            MaterialApp(
+              home: LoginScreen(
+                authService: mockAuthService,
+                enableBackgroundAnimation: false,
+              ),
+            ),
           );
           await tester.pumpAndSettle();
 
@@ -371,7 +439,12 @@ void main() {
 
           // Test registration screen layout separately
           await tester.pumpWidget(
-            MaterialApp(home: RegisterScreen(authService: mockAuthService, enableBackgroundAnimation: false)),
+            MaterialApp(
+              home: RegisterScreen(
+                authService: mockAuthService,
+                enableBackgroundAnimation: false,
+              ),
+            ),
           );
           await tester.pumpAndSettle();
 
@@ -388,10 +461,14 @@ void main() {
               initialRoute: '/',
               routes: {
                 '/': (context) => const SplashScreen(),
-                '/login': (context) =>
-                    LoginScreen(authService: mockAuthService, enableBackgroundAnimation: false),
-                '/register': (context) =>
-                    RegisterScreen(authService: mockAuthService, enableBackgroundAnimation: false),
+                '/login': (context) => LoginScreen(
+                  authService: mockAuthService,
+                  enableBackgroundAnimation: false,
+                ),
+                '/register': (context) => RegisterScreen(
+                  authService: mockAuthService,
+                  enableBackgroundAnimation: false,
+                ),
                 '/dashboard': (context) =>
                     const Scaffold(body: Center(child: Text('Dashboard'))),
               },

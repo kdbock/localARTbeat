@@ -794,12 +794,13 @@ class _ForYouTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ArtistProfileModel? spotlightArtist =
-        vm.artists.isNotEmpty ? vm.artists.first : null;
-    final ArtworkModel? heroArtwork =
-        vm.artwork.isNotEmpty ? vm.artwork.first : null;
-    final EventModel? heroEvent =
-        vm.events.isNotEmpty ? vm.events.first : null;
+    final ArtistProfileModel? spotlightArtist = vm.artists.isNotEmpty
+        ? vm.artists.first
+        : null;
+    final ArtworkModel? heroArtwork = vm.artwork.isNotEmpty
+        ? vm.artwork.first
+        : null;
+    final EventModel? heroEvent = vm.events.isNotEmpty ? vm.events.first : null;
 
     final featuredArtists = vm.artists.take(6).toList();
     final featuredArtworks = vm.artwork.take(8).toList();
@@ -827,9 +828,7 @@ class _ForYouTab extends StatelessWidget {
             child: _ArtworkSpotlightRail(artworks: featuredArtworks),
           ),
         if (vm.artwork.length > 4)
-          SliverToBoxAdapter(
-            child: DashboardArtworkSection(viewModel: vm),
-          ),
+          SliverToBoxAdapter(child: DashboardArtworkSection(viewModel: vm)),
         if (upcomingEvents.isNotEmpty)
           SliverToBoxAdapter(
             child: _ArtistEventsShowcase(events: upcomingEvents),
@@ -839,9 +838,7 @@ class _ForYouTab extends StatelessWidget {
             onTap: () => Navigator.pushNamed(context, '/artist/signup'),
           ),
         ),
-        SliverToBoxAdapter(
-          child: DashboardArtistCtaSection(viewModel: vm),
-        ),
+        SliverToBoxAdapter(child: DashboardArtistCtaSection(viewModel: vm)),
         const SliverToBoxAdapter(child: SizedBox(height: 110)),
       ],
     );
@@ -885,10 +882,10 @@ class _ArtistSpotlightHero extends StatelessWidget {
           borderRadius: BorderRadius.circular(32),
           onTap: artist != null
               ? () => Navigator.pushNamed(
-                    context,
-                    '/artist/public-profile',
-                    arguments: {'artistId': artist!.userId},
-                  )
+                  context,
+                  '/artist/public-profile',
+                  arguments: {'artistId': artist!.userId},
+                )
               : () => Navigator.pushNamed(context, '/artist/browse'),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(32),
@@ -903,10 +900,7 @@ class _ArtistSpotlightHero extends StatelessWidget {
                       : Container(
                           decoration: const BoxDecoration(
                             gradient: LinearGradient(
-                              colors: [
-                                Color(0xFF1B1C2B),
-                                Color(0xFF08070F),
-                              ],
+                              colors: [Color(0xFF1B1C2B), Color(0xFF08070F)],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),
@@ -972,12 +966,14 @@ class _ArtistSpotlightHero extends StatelessWidget {
                       ElevatedButton.icon(
                         onPressed: artist != null
                             ? () => Navigator.pushNamed(
-                                  context,
-                                  '/artist/public-profile',
-                                  arguments: {'artistId': artist!.userId},
-                                )
-                            : () =>
-                                Navigator.pushNamed(context, '/artist/browse'),
+                                context,
+                                '/artist/public-profile',
+                                arguments: {'artistId': artist!.userId},
+                              )
+                            : () => Navigator.pushNamed(
+                                context,
+                                '/artist/browse',
+                              ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
                           foregroundColor: Colors.black,
@@ -1072,10 +1068,7 @@ class _HeroEventPill extends StatelessWidget {
               Expanded(
                 child: Text(
                   dateLabel,
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 12,
-                  ),
+                  style: const TextStyle(color: Colors.white70, fontSize: 12),
                 ),
               ),
             ],
@@ -1089,10 +1082,7 @@ class _HeroEventPill extends StatelessWidget {
                 Expanded(
                   child: Text(
                     event.location,
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 12,
-                    ),
+                    style: const TextStyle(color: Colors.white70, fontSize: 12),
                   ),
                 ),
               ],
@@ -1192,10 +1182,7 @@ class _SectionHeader extends StatelessWidget {
               if (subtitle != null)
                 Text(
                   subtitle!,
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 13,
-                  ),
+                  style: const TextStyle(color: Colors.white70, fontSize: 13),
                 ),
             ],
           ),
@@ -1243,12 +1230,14 @@ class _ArtistFeatureCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ClipRRect(
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(22)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(22),
+                ),
                 child: SizedBox(
                   height: 120,
                   width: double.infinity,
-                  child: artist.coverImageUrl != null &&
+                  child:
+                      artist.coverImageUrl != null &&
                           artist.coverImageUrl!.isNotEmpty
                       ? SecureNetworkImage(
                           imageUrl: artist.coverImageUrl!,
@@ -1265,8 +1254,10 @@ class _ArtistFeatureCard extends StatelessWidget {
               ),
               Expanded(
                 child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -1280,7 +1271,8 @@ class _ArtistFeatureCard extends StatelessWidget {
                               color: ArtbeatColors.backgroundSecondary,
                             ),
                             child: ClipOval(
-                              child: artist.profileImageUrl != null &&
+                              child:
+                                  artist.profileImageUrl != null &&
                                       artist.profileImageUrl!.isNotEmpty
                                   ? SecureNetworkImage(
                                       imageUrl: artist.profileImageUrl!,
@@ -1463,9 +1455,7 @@ class _ArtworkSpotlightCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          artwork.title.isNotEmpty
-                              ? artwork.title
-                              : 'Untitled',
+                          artwork.title.isNotEmpty ? artwork.title : 'Untitled',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 18,
@@ -1535,8 +1525,7 @@ class _ArtistEventsShowcase extends StatelessWidget {
             title: 'Upcoming Artist Events',
             subtitle: 'Meet the creators in real life',
             actionLabel: 'View Calendar',
-            onActionTap: () =>
-                Navigator.pushNamed(context, '/events/discover'),
+            onActionTap: () => Navigator.pushNamed(context, '/events/discover'),
           ),
           const SizedBox(height: 16),
           SizedBox(

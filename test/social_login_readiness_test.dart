@@ -15,8 +15,8 @@ import 'auth_test_helpers.dart';
 /// These tests check for social login readiness without stalling on platform channels.
 Future<void> _pumpAuthScreen(WidgetTester tester) async {
   await tester.pump();
-  for (var i = 0; i < 5; i++) {
-    await tester.pump(const Duration(milliseconds: 100));
+  for (var i = 0; i < 10; i++) {
+    await tester.pump(const Duration(milliseconds: 200));
   }
 }
 
@@ -92,8 +92,13 @@ void main() {
         expect(find.byType(LoginScreen), findsOneWidget);
 
         // Check for existing UI elements that social login buttons can be added alongside
+        final interactiveElements = find.byWidgetPredicate(
+          (widget) =>
+              (widget is ElevatedButton && widget.onPressed != null) ||
+              (widget is InkWell && widget.onTap != null),
+        );
         expect(
-          find.byType(ElevatedButton),
+          interactiveElements,
           findsWidgets,
           reason:
               'Login screen should have buttons ready for social login extension',

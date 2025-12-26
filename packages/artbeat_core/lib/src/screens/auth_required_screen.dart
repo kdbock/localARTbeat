@@ -68,17 +68,23 @@ class AuthRequiredScreen extends StatelessWidget {
       _AuthFeature(
         icon: Icons.favorite_border,
         label: favorites,
-        description: 'auth_required_feature_message'.tr(namedArgs: {'feature': favorites}),
+        description: 'auth_required_feature_message'.tr(
+          namedArgs: {'feature': favorites},
+        ),
       ),
       _AuthFeature(
         icon: Icons.card_giftcard,
         label: gifts,
-        description: 'auth_required_feature_message'.tr(namedArgs: {'feature': gifts}),
+        description: 'auth_required_feature_message'.tr(
+          namedArgs: {'feature': gifts},
+        ),
       ),
       _AuthFeature(
         icon: Icons.workspace_premium_outlined,
         label: plans,
-        description: 'auth_required_feature_message'.tr(namedArgs: {'feature': plans}),
+        description: 'auth_required_feature_message'.tr(
+          namedArgs: {'feature': plans},
+        ),
       ),
     ];
   }
@@ -101,7 +107,11 @@ class AuthRequiredScreen extends StatelessWidget {
                     end: Alignment.bottomRight,
                   ),
                 ),
-                child: const Icon(Icons.lock_outline, color: Colors.white, size: 30),
+                child: const Icon(
+                  Icons.lock_outline,
+                  color: Colors.white,
+                  size: 30,
+                ),
               ),
               const SizedBox(width: 18),
               Expanded(
@@ -137,10 +147,15 @@ class AuthRequiredScreen extends StatelessWidget {
             children: features
                 .map(
                   (feature) => Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(999),
-                      border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.16),
+                      ),
                       color: Colors.white.withValues(alpha: 0.05),
                     ),
                     child: Row(
@@ -295,11 +310,7 @@ class AuthRequiredScreen extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF03050F),
-              Color(0xFF09122B),
-              Color(0xFF021B17),
-            ],
+            colors: [Color(0xFF03050F), Color(0xFF09122B), Color(0xFF021B17)],
           ),
         ),
         child: Stack(

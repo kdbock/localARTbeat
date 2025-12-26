@@ -35,8 +35,9 @@ class _SubscriptionPurchaseScreenState
 
   @override
   Widget build(BuildContext context) {
-    final planPrice =
-        _isYearlyPlan ? widget.tier.yearlyPrice : widget.tier.monthlyPrice;
+    final planPrice = _isYearlyPlan
+        ? widget.tier.yearlyPrice
+        : widget.tier.monthlyPrice;
     final savings = (widget.tier.monthlyPrice * 12) - widget.tier.yearlyPrice;
     final titlePrefix = widget.isUpgrade ? 'Upgrade' : 'Subscribe';
 
@@ -159,12 +160,15 @@ class _SubscriptionPurchaseScreenState
             children: badges
                 .map(
                   (badge) => Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(999),
-                      border:
-                          Border.all(color: Colors.white.withValues(alpha: 0.16)),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.16),
+                      ),
                       color: Colors.white.withValues(alpha: 0.05),
                     ),
                     child: Text(
@@ -231,8 +235,9 @@ class _SubscriptionPurchaseScreenState
                     Icon(
                       selected ? Icons.radio_button_checked : Icons.circle,
                       size: 18,
-                      color:
-                          selected ? Colors.white : Colors.white.withValues(alpha: 0.5),
+                      color: selected
+                          ? Colors.white
+                          : Colors.white.withValues(alpha: 0.5),
                     ),
                     const SizedBox(width: 8),
                     Text(
@@ -297,7 +302,8 @@ class _SubscriptionPurchaseScreenState
               buildOption(
                 selected: _isYearlyPlan,
                 title: 'Yearly',
-                subtitle: 'Saves ${savings > 0 ? '\$${savings.toStringAsFixed(0)} per year' : 'vs monthly'}',
+                subtitle:
+                    'Saves ${savings > 0 ? '\$${savings.toStringAsFixed(0)} per year' : 'vs monthly'}',
                 price: '\$${yearly.toStringAsFixed(2)}',
                 onTap: () {
                   setState(() => _isYearlyPlan = true);
@@ -371,7 +377,10 @@ class _SubscriptionPurchaseScreenState
           const SizedBox(height: 12),
           Row(
             children: [
-              Icon(Icons.lock_outline, color: Colors.white.withValues(alpha: 0.8)),
+              Icon(
+                Icons.lock_outline,
+                color: Colors.white.withValues(alpha: 0.8),
+              ),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
@@ -389,10 +398,13 @@ class _SubscriptionPurchaseScreenState
             children: [
               Expanded(
                 child: OutlinedButton(
-                  onPressed: () => Navigator.pushNamed(context, '/terms-of-service'),
+                  onPressed: () =>
+                      Navigator.pushNamed(context, '/terms-of-service'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.white,
-                    side: BorderSide(color: Colors.white.withValues(alpha: 0.4)),
+                    side: BorderSide(
+                      color: Colors.white.withValues(alpha: 0.4),
+                    ),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(18),
@@ -400,17 +412,22 @@ class _SubscriptionPurchaseScreenState
                   ),
                   child: Text(
                     'Terms of Service',
-                    style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w600),
+                    style: GoogleFonts.spaceGrotesk(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: OutlinedButton(
-                  onPressed: () => Navigator.pushNamed(context, '/privacy-policy'),
+                  onPressed: () =>
+                      Navigator.pushNamed(context, '/privacy-policy'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.white,
-                    side: BorderSide(color: Colors.white.withValues(alpha: 0.4)),
+                    side: BorderSide(
+                      color: Colors.white.withValues(alpha: 0.4),
+                    ),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(18),
@@ -418,7 +435,9 @@ class _SubscriptionPurchaseScreenState
                   ),
                   child: Text(
                     'Privacy Policy',
-                    style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w600),
+                    style: GoogleFonts.spaceGrotesk(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),
@@ -455,7 +474,9 @@ class _SubscriptionPurchaseScreenState
   }
 
   Widget _buildPrimaryCta(double planPrice) {
-    final label = _isYearlyPlan ? 'Activate yearly plan' : 'Activate monthly plan';
+    final label = _isYearlyPlan
+        ? 'Activate yearly plan'
+        : 'Activate monthly plan';
     final priceSuffix = _isYearlyPlan
         ? '\$${planPrice.toStringAsFixed(2)} / year'
         : '\$${planPrice.toStringAsFixed(2)} / month';
@@ -521,7 +542,9 @@ class _SubscriptionPurchaseScreenState
           padding: padding,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(34),
-            border: Border.all(color: borderColor ?? Colors.white.withValues(alpha: 0.14)),
+            border: Border.all(
+              color: borderColor ?? Colors.white.withValues(alpha: 0.14),
+            ),
             color: gradient == null
                 ? Colors.white.withValues(alpha: 0.05)
                 : null,
@@ -547,11 +570,7 @@ class _SubscriptionPurchaseScreenState
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF03050F),
-              Color(0xFF09122B),
-              Color(0xFF021B17),
-            ],
+            colors: [Color(0xFF03050F), Color(0xFF09122B), Color(0xFF021B17)],
           ),
         ),
         child: Stack(

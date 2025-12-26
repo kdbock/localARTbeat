@@ -16,13 +16,18 @@ import '../constants/routes.dart';
 class LoginScreen extends StatefulWidget {
   final AuthService? authService; // Optional for testing
   final bool enableBackgroundAnimation;
-  const LoginScreen({super.key, this.authService, this.enableBackgroundAnimation = true});
+  const LoginScreen({
+    super.key,
+    this.authService,
+    this.enableBackgroundAnimation = true,
+  });
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin {
+class _LoginScreenState extends State<LoginScreen>
+    with TickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -39,11 +44,17 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     super.initState();
     _authService = widget.authService ?? AuthService();
 
-    _loop = AnimationController(vsync: this, duration: const Duration(seconds: 9));
+    _loop = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 9),
+    );
     if (widget.enableBackgroundAnimation) {
       _loop.repeat();
     }
-    _intro = AnimationController(vsync: this, duration: const Duration(milliseconds: 700));
+    _intro = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    );
     if (widget.enableBackgroundAnimation) {
       _intro.forward();
     } else {
@@ -54,7 +65,8 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
   @override
   void didUpdateWidget(LoginScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.enableBackgroundAnimation != widget.enableBackgroundAnimation) {
+    if (oldWidget.enableBackgroundAnimation !=
+        widget.enableBackgroundAnimation) {
       if (widget.enableBackgroundAnimation) {
         if (!_loop.isAnimating) {
           _loop.repeat();
@@ -123,7 +135,10 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'auth_google_signin_failed'.tr().replaceAll('{error}', e.toString()),
+            'auth_google_signin_failed'.tr().replaceAll(
+              '{error}',
+              e.toString(),
+            ),
           ),
           backgroundColor: Colors.red,
         ),
@@ -210,16 +225,28 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 18,
+                ),
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 460),
                   child: FadeTransition(
-                    opacity: CurvedAnimation(parent: _intro, curve: Curves.easeOut),
+                    opacity: CurvedAnimation(
+                      parent: _intro,
+                      curve: Curves.easeOut,
+                    ),
                     child: SlideTransition(
-                      position: Tween<Offset>(
-                        begin: const Offset(0, 0.04),
-                        end: Offset.zero,
-                      ).animate(CurvedAnimation(parent: _intro, curve: Curves.easeOutCubic)),
+                      position:
+                          Tween<Offset>(
+                            begin: const Offset(0, 0.04),
+                            end: Offset.zero,
+                          ).animate(
+                            CurvedAnimation(
+                              parent: _intro,
+                              curve: Curves.easeOutCubic,
+                            ),
+                          ),
                       child: _GlassCard(
                         child: Form(
                           key: _formKey,
@@ -239,7 +266,9 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                           TextSpan(
                                             text: "Local ",
                                             style: GoogleFonts.spaceGrotesk(
-                                              color: Colors.white.withValues(alpha: 0.90),
+                                              color: Colors.white.withValues(
+                                                alpha: 0.90,
+                                              ),
                                               fontSize: 18,
                                               fontWeight: FontWeight.w900,
                                               letterSpacing: -0.4,
@@ -257,7 +286,9 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                           TextSpan(
                                             text: "beat",
                                             style: GoogleFonts.spaceGrotesk(
-                                              color: Colors.white.withValues(alpha: 0.90),
+                                              color: Colors.white.withValues(
+                                                alpha: 0.90,
+                                              ),
                                               fontSize: 18,
                                               fontWeight: FontWeight.w900,
                                               letterSpacing: -0.4,
@@ -324,15 +355,21 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                       _obscurePassword
                                           ? Icons.visibility_off_outlined
                                           : Icons.visibility_outlined,
-                                      color: Colors.white.withValues(alpha: 0.70),
+                                      color: Colors.white.withValues(
+                                        alpha: 0.70,
+                                      ),
                                     ),
                                     onPressed: () {
-                                      setState(() => _obscurePassword = !_obscurePassword);
+                                      setState(
+                                        () => _obscurePassword =
+                                            !_obscurePassword,
+                                      );
                                     },
                                   ),
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
-                                      return 'auth_error_password_required'.tr();
+                                      return 'auth_error_password_required'
+                                          .tr();
                                     }
                                     return null;
                                   },
@@ -348,7 +385,8 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                   animation: _loop,
                                   builder: (_, __) {
                                     final t = (_loop.value + 0.08) % 1.0;
-                                    final power = (1.0 - (t - 0.55).abs() * 4.5).clamp(0.0, 1.0);
+                                    final power = (1.0 - (t - 0.55).abs() * 4.5)
+                                        .clamp(0.0, 1.0);
                                     return _QuestPrimaryButton(
                                       width: w,
                                       power: power,
@@ -372,9 +410,10 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                       glow: const Color(0xFF7C4DFF),
                                       onTap: _isLoading
                                           ? null
-                                          : () => Navigator.of(context).pushReplacementNamed(
-                                                AuthRoutes.register,
-                                              ),
+                                          : () => Navigator.of(context)
+                                                .pushReplacementNamed(
+                                                  AuthRoutes.register,
+                                                ),
                                     ),
                                   ),
                                   const SizedBox(width: 12),
@@ -385,9 +424,10 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                       glow: const Color(0xFF22D3EE),
                                       onTap: _isLoading
                                           ? null
-                                          : () => Navigator.of(context).pushNamed(
-                                                AuthRoutes.forgotPassword,
-                                              ),
+                                          : () =>
+                                                Navigator.of(context).pushNamed(
+                                                  AuthRoutes.forgotPassword,
+                                                ),
                                     ),
                                   ),
                                 ],
@@ -401,15 +441,21 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                   Expanded(
                                     child: Container(
                                       height: 1,
-                                      color: Colors.white.withValues(alpha: 0.10),
+                                      color: Colors.white.withValues(
+                                        alpha: 0.10,
+                                      ),
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                    ),
                                     child: Text(
                                       'common_or'.tr(),
                                       style: GoogleFonts.spaceGrotesk(
-                                        color: Colors.white.withValues(alpha: 0.55),
+                                        color: Colors.white.withValues(
+                                          alpha: 0.55,
+                                        ),
                                         fontWeight: FontWeight.w800,
                                         letterSpacing: 1.2,
                                         fontSize: 11,
@@ -419,7 +465,9 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                   Expanded(
                                     child: Container(
                                       height: 1,
-                                      color: Colors.white.withValues(alpha: 0.10),
+                                      color: Colors.white.withValues(
+                                        alpha: 0.10,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -565,7 +613,11 @@ class _MiniBadge extends StatelessWidget {
               ),
             ],
           ),
-          child: const Icon(Icons.explore_rounded, color: Colors.white, size: 18),
+          child: const Icon(
+            Icons.explore_rounded,
+            color: Colors.white,
+            size: 18,
+          ),
         );
       },
     );
@@ -654,7 +706,9 @@ class _QuestPrimaryButton extends StatelessWidget {
                         width: 22,
                         child: CircularProgressIndicator(
                           strokeWidth: 2.4,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
                         ),
                       )
                     : Text(
@@ -705,7 +759,9 @@ class _QuestChipButton extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.12),
+                  ),
                   boxShadow: [
                     BoxShadow(
                       color: glow.withValues(alpha: 0.10),
@@ -717,7 +773,11 @@ class _QuestChipButton extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(icon, size: 18, color: Colors.white.withValues(alpha: 0.92)),
+                    Icon(
+                      icon,
+                      size: 18,
+                      color: Colors.white.withValues(alpha: 0.92),
+                    ),
                     const SizedBox(width: 8),
                     Flexible(
                       child: Text(
@@ -794,9 +854,14 @@ class _SocialButton extends StatelessWidget {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(14),
                         color: accent.withValues(alpha: 0.14),
-                        border: Border.all(color: accent.withValues(alpha: 0.28)),
+                        border: Border.all(
+                          color: accent.withValues(alpha: 0.28),
+                        ),
                       ),
-                      child: Icon(icon, color: Colors.white.withValues(alpha: 0.92)),
+                      child: Icon(
+                        icon,
+                        color: Colors.white.withValues(alpha: 0.92),
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -930,5 +995,6 @@ class _AuthWorldPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _AuthWorldPainter oldDelegate) => oldDelegate.t != t;
+  bool shouldRepaint(covariant _AuthWorldPainter oldDelegate) =>
+      oldDelegate.t != t;
 }

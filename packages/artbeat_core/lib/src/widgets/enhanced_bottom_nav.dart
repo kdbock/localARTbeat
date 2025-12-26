@@ -71,9 +71,10 @@ class _EnhancedBottomNavState extends State<EnhancedBottomNav>
     );
 
     _animations = _controllers.map((controller) {
-      return Tween<double>(begin: 0.0, end: 1.0).animate(
-        CurvedAnimation(parent: controller, curve: Curves.easeInOut),
-      );
+      return Tween<double>(
+        begin: 0.0,
+        end: 1.0,
+      ).animate(CurvedAnimation(parent: controller, curve: Curves.easeInOut));
     }).toList();
 
     if (widget.currentIndex >= 0 && widget.currentIndex < _controllers.length) {
@@ -155,7 +156,8 @@ class _EnhancedBottomNavState extends State<EnhancedBottomNav>
 
     final activeColor = widget.activeColor ?? const Color(0xFF22D3EE); // neon
     // ignore: deprecated_member_use
-    final inactiveColor = widget.inactiveColor ?? Colors.white.withOpacity(0.55);
+    final inactiveColor =
+        widget.inactiveColor ?? Colors.white.withOpacity(0.55);
 
     return AnimatedBuilder(
       animation: _hudController,
@@ -176,8 +178,8 @@ class _EnhancedBottomNavState extends State<EnhancedBottomNav>
                     Container(
                       height: 76,
                       decoration: BoxDecoration(
-                        color: (widget.backgroundColor ??
-                                const Color(0xFF0A0B14))
+                        color:
+                            (widget.backgroundColor ?? const Color(0xFF0A0B14))
                             // ignore: deprecated_member_use
                             .withOpacity(0.62),
                         borderRadius: BorderRadius.circular(24),
@@ -295,7 +297,8 @@ class _EnhancedBottomNavState extends State<EnhancedBottomNav>
             // Active reticle pulse (each index slightly out of phase)
             final phase = index * 0.18;
             final reticle = isActive
-                ? (0.55 + 0.45 * (0.5 + 0.5 * math.sin((t + phase) * 2 * math.pi)))
+                ? (0.55 +
+                      0.45 * (0.5 + 0.5 * math.sin((t + phase) * 2 * math.pi)))
                 : 0.0;
 
             final iconColor = Color.lerp(inactiveColor, activeColor, anim)!;
@@ -406,75 +409,88 @@ class _EnhancedBottomNavState extends State<EnhancedBottomNav>
             // Rotating attention: scan highlight on the core
             final sweep = (t * 1.0) % 1.0;
 
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Transform.scale(
-                  scale: scale,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      // Outer neon ring
-                      CustomPaint(
-                        painter: _CaptureRingPainter(
-                          t: t,
-                          neon: const Color(0xFFFF3D8D),
-                          cyan: activeColor,
+            return ClipRect(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Transform.scale(
+                    scale: scale,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // Outer neon ring
+                        CustomPaint(
+                          painter: _CaptureRingPainter(
+                            t: t,
+                            neon: const Color(0xFFFF3D8D),
+                            cyan: activeColor,
+                          ),
+                          size: const Size(50, 50),
                         ),
-                        size: const Size(54, 54),
-                      ),
 
-                      // Button body
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(18),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
-                          child: Container(
-                            width: 52,
-                            height: 44,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(18),
-                              gradient: LinearGradient(
-                                colors: [
-                                  ArtbeatColors.primaryPurple.withOpacity(0.95),
-                                  activeColor.withOpacity(0.85),
-                                  ArtbeatColors.primaryGreen.withOpacity(0.70),
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: activeColor.withOpacity(0.22 + 0.10 * anim),
-                                  blurRadius: 18 + 10 * anim,
-                                  spreadRadius: 1,
-                                  offset: const Offset(0, 10),
+                        // Button body
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(18),
+                          child: BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+                            child: Container(
+                              width: 52,
+                              height: 44,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(18),
+                                gradient: LinearGradient(
+                                  colors: [
+                                    ArtbeatColors.primaryPurple.withOpacity(
+                                      0.95,
+                                    ),
+                                    activeColor.withOpacity(0.85),
+                                    ArtbeatColors.primaryGreen.withOpacity(
+                                      0.70,
+                                    ),
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
                                 ),
-                              ],
-                              border: Border.all(
-                                color: Colors.white.withOpacity(0.14),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: activeColor.withOpacity(
+                                      0.22 + 0.10 * anim,
+                                    ),
+                                    blurRadius: 18 + 10 * anim,
+                                    spreadRadius: 1,
+                                    offset: const Offset(0, 10),
+                                  ),
+                                ],
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.14),
+                                ),
                               ),
-                            ),
-                            child: Stack(
-                              children: [
-                                // moving highlight sweep
-                                Positioned.fill(
-                                  child: IgnorePointer(
-                                    child: Opacity(
-                                      opacity: 0.55,
-                                      child: Transform.translate(
-                                        offset: Offset((sweep * 2 - 1) * 40, 0),
-                                        child: Transform.rotate(
-                                          angle: -0.6,
-                                          child: Container(
-                                            decoration: BoxDecoration(
-                                              gradient: LinearGradient(
-                                                colors: [
-                                                  Colors.transparent,
-                                                  Colors.white.withOpacity(0.24),
-                                                  Colors.transparent,
-                                                ],
-                                                stops: const [0.0, 0.5, 1.0],
+                              child: Stack(
+                                children: [
+                                  // moving highlight sweep
+                                  Positioned.fill(
+                                    child: IgnorePointer(
+                                      child: Opacity(
+                                        opacity: 0.55,
+                                        child: Transform.translate(
+                                          offset: Offset(
+                                            (sweep * 2 - 1) * 40,
+                                            0,
+                                          ),
+                                          child: Transform.rotate(
+                                            angle: -0.6,
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                gradient: LinearGradient(
+                                                  colors: [
+                                                    Colors.transparent,
+                                                    Colors.white.withOpacity(
+                                                      0.24,
+                                                    ),
+                                                    Colors.transparent,
+                                                  ],
+                                                  stops: const [0.0, 0.5, 1.0],
+                                                ),
                                               ),
                                             ),
                                           ),
@@ -482,40 +498,40 @@ class _EnhancedBottomNavState extends State<EnhancedBottomNav>
                                       ),
                                     ),
                                   ),
-                                ),
 
-                                // icon
-                                Center(
-                                  child: Icon(
-                                    isActive ? item.activeIcon : item.icon,
-                                    color: Colors.white,
-                                    size: 24 + (anim * 2),
+                                  // icon
+                                  Center(
+                                    child: Icon(
+                                      isActive ? item.activeIcon : item.icon,
+                                      color: Colors.white,
+                                      size: 24 + (anim * 2),
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                if (widget.showLabels) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    item.label.toUpperCase(),
-                    style: GoogleFonts.spaceGrotesk(
-                      fontSize: 10.5,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 1.0,
-                      color: isActive
-                          ? Colors.white.withOpacity(0.92)
-                          : inactiveColor.withOpacity(0.90),
+                      ],
                     ),
                   ),
+
+                  if (widget.showLabels) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      item.label.toUpperCase(),
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.0,
+                        color: isActive
+                            ? Colors.white.withOpacity(0.92)
+                            : inactiveColor.withOpacity(0.90),
+                      ),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             );
           },
         ),
@@ -599,7 +615,13 @@ class _ReticleRingPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..color = color.withOpacity(0.10 + 0.16 * progress);
 
-    canvas.drawArc(Rect.fromCircle(center: center, radius: r), start, sweep, false, paint);
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: r),
+      start,
+      sweep,
+      false,
+      paint,
+    );
 
     // ticks
     final tick = Paint()
@@ -608,8 +630,14 @@ class _ReticleRingPainter extends CustomPainter {
 
     for (int i = 0; i < 8; i++) {
       final a = (i / 8.0) * 2 * math.pi;
-      final p1 = Offset(center.dx + math.cos(a) * (r * 0.78), center.dy + math.sin(a) * (r * 0.78));
-      final p2 = Offset(center.dx + math.cos(a) * (r * 0.92), center.dy + math.sin(a) * (r * 0.92));
+      final p1 = Offset(
+        center.dx + math.cos(a) * (r * 0.78),
+        center.dy + math.sin(a) * (r * 0.78),
+      );
+      final p2 = Offset(
+        center.dx + math.cos(a) * (r * 0.92),
+        center.dy + math.sin(a) * (r * 0.92),
+      );
       canvas.drawLine(p1, p2, tick);
     }
   }
@@ -657,7 +685,13 @@ class _CaptureRingPainter extends CustomPainter {
       ).createShader(Rect.fromCircle(center: center, radius: r));
 
     // partial arcs for "energy"
-    canvas.drawArc(Rect.fromCircle(center: center, radius: r), angle, 2.1, false, arcPaint);
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: r),
+      angle,
+      2.1,
+      false,
+      arcPaint,
+    );
 
     final glow = Paint()
       ..style = PaintingStyle.stroke
@@ -670,7 +704,9 @@ class _CaptureRingPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _CaptureRingPainter oldDelegate) =>
-      oldDelegate.t != t || oldDelegate.neon != neon || oldDelegate.cyan != cyan;
+      oldDelegate.t != t ||
+      oldDelegate.neon != neon ||
+      oldDelegate.cyan != cyan;
 }
 
 /// Data class for bottom navigation items (unchanged)

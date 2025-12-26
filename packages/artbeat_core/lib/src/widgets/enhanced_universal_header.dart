@@ -380,7 +380,9 @@ class _EnhancedUniversalHeaderState extends State<EnhancedUniversalHeader>
   void _goToProfileMenuScreen() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const ProfileMenuScreen()),
+      MaterialPageRoute<Widget>(
+        builder: (context) => const ProfileMenuScreen(),
+      ),
     );
   }
 

@@ -28,6 +28,8 @@ dependencies:
     path: ../artbeat_ads
   artbeat_art_walk:
     path: ../artbeat_art_walk
+  artbeat_profile:
+    path: ../artbeat_profile
   connectivity_plus: ^6.1.4
   package_info_plus: ^8.2.0
   device_info_plus: ^11.5.0

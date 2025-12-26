@@ -344,7 +344,9 @@ class _ProfileConnectionsScreenState extends State<ProfileConnectionsScreen>
               Expanded(
                 child: OutlinedButton(
                   style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: Colors.white.withValues(alpha: 0.24)),
+                    side: BorderSide(
+                      color: Colors.white.withValues(alpha: 0.24),
+                    ),
                     foregroundColor: Colors.white,
                   ),
                   onPressed: () => _dismissSuggestion(connection),

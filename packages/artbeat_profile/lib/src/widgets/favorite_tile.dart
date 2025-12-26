@@ -55,7 +55,9 @@ class FavoriteTile extends StatelessWidget {
           ),
         ),
         title: Text(
-          (title != null && title.toString().isNotEmpty) ? title.toString() : 'Unnamed Favorite',
+          (title != null && title.toString().isNotEmpty)
+              ? title.toString()
+              : 'Unnamed Favorite',
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         subtitle: Text(description?.toString() ?? ''),

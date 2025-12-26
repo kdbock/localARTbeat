@@ -4,8 +4,6 @@ import 'package:artbeat_core/artbeat_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../routing/app_routes.dart';
-
 class ArtbeatStoreScreen extends StatefulWidget {
   const ArtbeatStoreScreen({super.key});
 
@@ -62,22 +60,23 @@ class _ArtbeatStoreScreenState extends State<ArtbeatStoreScreen>
           child: SafeArea(
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final tabSectionHeight = (constraints.maxHeight - 320).clamp(320.0, constraints.maxHeight);
+                final tabSectionHeight = (constraints.maxHeight - 320).clamp(
+                  320.0,
+                  constraints.maxHeight,
+                );
                 return CustomScrollView(
                   slivers: [
                     SliverPadding(
                       padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
                       sliver: SliverList(
-                        delegate: SliverChildListDelegate(
-                          [
-                            _buildHeroSection(context),
-                            const SizedBox(height: 20),
-                            _buildQuickActions(),
-                            const SizedBox(height: 20),
-                            _buildGlassTabBar(),
-                            const SizedBox(height: 16),
-                          ],
-                        ),
+                        delegate: SliverChildListDelegate([
+                          _buildHeroSection(context),
+                          const SizedBox(height: 20),
+                          _buildQuickActions(),
+                          const SizedBox(height: 20),
+                          _buildGlassTabBar(),
+                          const SizedBox(height: 16),
+                        ]),
                       ),
                     ),
                     SliverPadding(
@@ -106,11 +105,7 @@ class _ArtbeatStoreScreenState extends State<ArtbeatStoreScreen>
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF03050F),
-              Color(0xFF09122B),
-              Color(0xFF021B17),
-            ],
+            colors: [Color(0xFF03050F), Color(0xFF09122B), Color(0xFF021B17)],
           ),
         ),
         child: Stack(
@@ -242,10 +237,8 @@ class _ArtbeatStoreScreenState extends State<ArtbeatStoreScreen>
               Align(
                 alignment: Alignment.centerLeft,
                 child: GestureDetector(
-                  onTap: () => Navigator.pushNamed(
-                    context,
-                    AppRoutes.subscriptionPlans,
-                  ),
+                  onTap: () =>
+                      Navigator.pushNamed(context, AppRoutes.subscriptionPlans),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 28,
@@ -362,10 +355,7 @@ class _ArtbeatStoreScreenState extends State<ArtbeatStoreScreen>
                   ],
                 ),
               ),
-              const Icon(
-                Icons.arrow_forward_rounded,
-                color: Colors.white70,
-              ),
+              const Icon(Icons.arrow_forward_rounded, color: Colors.white70),
             ],
           ),
         ),

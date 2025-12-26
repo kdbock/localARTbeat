@@ -76,7 +76,6 @@ class AuthGuard {
 
 /// Wrapper widget that shows auth prompt dialog immediately
 class _AuthPromptWrapper extends StatefulWidget {
-
   const _AuthPromptWrapper({required this.featureName});
   final String featureName;
 
@@ -103,7 +102,8 @@ class _AuthPromptWrapperState extends State<_AuthPromptWrapper> {
   }
 
   @override
-  Widget build(BuildContext context) => const Scaffold(body: Center(child: CircularProgressIndicator()));
+  Widget build(BuildContext context) =>
+      const Scaffold(body: Center(child: CircularProgressIndicator()));
 }
 
 /// Widget to show when authentication is required

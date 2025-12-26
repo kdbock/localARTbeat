@@ -99,11 +99,11 @@ class _GiftsScreenState extends State<GiftsScreen> {
         .where(
           (artist) =>
               artist.fullName.toLowerCase().contains(
-                    _searchQuery.toLowerCase(),
-                  ) ||
+                _searchQuery.toLowerCase(),
+              ) ||
               artist.username.toLowerCase().contains(
-                    _searchQuery.toLowerCase(),
-                  ),
+                _searchQuery.toLowerCase(),
+              ),
         )
         .toList();
   }
@@ -428,7 +428,10 @@ class _GiftsScreenState extends State<GiftsScreen> {
                 });
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 14,
+                ),
                 decoration: BoxDecoration(
                   color: isSelected
                       ? Colors.white.withValues(alpha: 0.08)
@@ -459,9 +462,10 @@ class _GiftsScreenState extends State<GiftsScreen> {
                           artist.profileImageUrl,
                         ),
                         backgroundColor: Colors.white.withValues(alpha: 0.1),
-                        child: !ImageUrlValidator.isValidImageUrl(
-                          artist.profileImageUrl,
-                        )
+                        child:
+                            !ImageUrlValidator.isValidImageUrl(
+                              artist.profileImageUrl,
+                            )
                             ? Text(
                                 artist.fullName.isNotEmpty
                                     ? artist.fullName[0].toUpperCase()
@@ -673,8 +677,9 @@ class _GiftsScreenState extends State<GiftsScreen> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          borderColor:
-              isPopular ? accentColor.withValues(alpha: 0.6) : Colors.white24,
+          borderColor: isPopular
+              ? accentColor.withValues(alpha: 0.6)
+              : Colors.white24,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -686,8 +691,11 @@ class _GiftsScreenState extends State<GiftsScreen> {
                       borderRadius: BorderRadius.circular(20),
                       color: Colors.white.withValues(alpha: 0.15),
                     ),
-                    child: Icon(tier['icon'] as IconData,
-                        color: accentColor, size: 26),
+                    child: Icon(
+                      tier['icon'] as IconData,
+                      color: accentColor,
+                      size: 26,
+                    ),
                   ),
                   const SizedBox(width: 14),
                   Expanded(
@@ -763,15 +771,17 @@ class _GiftsScreenState extends State<GiftsScreen> {
                   onPressed: _selectedArtist == null
                       ? null
                       : () => _purchaseGift(
-                            tier['id'] as String,
-                            tier['name'] as String,
-                            tier['price'] as double,
-                          ),
+                          tier['id'] as String,
+                          tier['name'] as String,
+                          tier['price'] as double,
+                        ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        _selectedArtist == null ? Colors.white12 : accentColor,
-                    foregroundColor:
-                        _selectedArtist == null ? Colors.white38 : Colors.black,
+                    backgroundColor: _selectedArtist == null
+                        ? Colors.white12
+                        : accentColor,
+                    foregroundColor: _selectedArtist == null
+                        ? Colors.white38
+                        : Colors.black,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(18),
@@ -859,11 +869,7 @@ class _GiftsScreenState extends State<GiftsScreen> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF03050F),
-              Color(0xFF09122B),
-              Color(0xFF021B17),
-            ],
+            colors: [Color(0xFF03050F), Color(0xFF09122B), Color(0xFF021B17)],
           ),
         ),
         child: Stack(

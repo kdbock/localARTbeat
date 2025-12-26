@@ -3,7 +3,11 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:artbeat_core/artbeat_core.dart'
-    show EnhancedUniversalHeader, ArtbeatColors, ArtbeatGradientBackground, ImageUrlValidator;
+    show
+        EnhancedUniversalHeader,
+        ArtbeatColors,
+        ArtbeatGradientBackground,
+        ImageUrlValidator;
 import 'package:geolocator/geolocator.dart';
 import '../models/chat_model.dart';
 import '../models/message_model.dart';

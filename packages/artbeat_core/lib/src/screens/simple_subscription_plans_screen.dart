@@ -11,19 +11,21 @@ class SimpleSubscriptionPlansScreen extends StatefulWidget {
   const SimpleSubscriptionPlansScreen({super.key});
 
   @override
-  State<SimpleSubscriptionPlansScreen> createState() => _SimpleSubscriptionPlansScreenState();
+  State<SimpleSubscriptionPlansScreen> createState() =>
+      _SimpleSubscriptionPlansScreenState();
 }
 
-class _SimpleSubscriptionPlansScreenState extends State<SimpleSubscriptionPlansScreen> {
+class _SimpleSubscriptionPlansScreenState
+    extends State<SimpleSubscriptionPlansScreen> {
   bool _isYearly = false;
 
   List<SubscriptionTier> get _tiers => const [
-        SubscriptionTier.starter,
-        SubscriptionTier.creator,
-        SubscriptionTier.business,
-        SubscriptionTier.enterprise,
-        SubscriptionTier.free,
-      ];
+    SubscriptionTier.starter,
+    SubscriptionTier.creator,
+    SubscriptionTier.business,
+    SubscriptionTier.enterprise,
+    SubscriptionTier.free,
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -122,8 +124,16 @@ class _SimpleSubscriptionPlansScreenState extends State<SimpleSubscriptionPlansS
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
       child: Row(
         children: [
-          _buildToggleChip('Monthly', !_isYearly, () => setState(() => _isYearly = false)),
-          _buildToggleChip('Yearly', _isYearly, () => setState(() => _isYearly = true)),
+          _buildToggleChip(
+            'Monthly',
+            !_isYearly,
+            () => setState(() => _isYearly = false),
+          ),
+          _buildToggleChip(
+            'Yearly',
+            _isYearly,
+            () => setState(() => _isYearly = true),
+          ),
         ],
       ),
     );
@@ -164,11 +174,7 @@ class _SimpleSubscriptionPlansScreenState extends State<SimpleSubscriptionPlansS
     return _buildGlassPanel(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
       child: Column(
-        children: _tiers
-            .map(
-              (tier) => _buildCompactRow(tier),
-            )
-            .toList(),
+        children: _tiers.map((tier) => _buildCompactRow(tier)).toList(),
       ),
     );
   }
@@ -188,7 +194,9 @@ class _SimpleSubscriptionPlansScreenState extends State<SimpleSubscriptionPlansS
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24),
           border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
-          color: highlight ? Colors.white.withValues(alpha: 0.08) : Colors.white.withValues(alpha: 0.02),
+          color: highlight
+              ? Colors.white.withValues(alpha: 0.08)
+              : Colors.white.withValues(alpha: 0.02),
         ),
         child: Row(
           children: [
@@ -218,7 +226,11 @@ class _SimpleSubscriptionPlansScreenState extends State<SimpleSubscriptionPlansS
                       if (highlight)
                         const Padding(
                           padding: EdgeInsets.only(left: 6),
-                          child: Icon(Icons.auto_awesome, color: Colors.white, size: 16),
+                          child: Icon(
+                            Icons.auto_awesome,
+                            color: Colors.white,
+                            size: 16,
+                          ),
                         ),
                     ],
                   ),
@@ -316,11 +328,7 @@ class _SimpleSubscriptionPlansScreenState extends State<SimpleSubscriptionPlansS
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF03050F),
-              Color(0xFF09122B),
-              Color(0xFF021B17),
-            ],
+            colors: [Color(0xFF03050F), Color(0xFF09122B), Color(0xFF021B17)],
           ),
         ),
         child: Stack(

@@ -1080,10 +1080,7 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
                 child: _Glass(
                   radius: 18,
                   blur: 14,
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 12,
-                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                   child: Row(
                     children: [
                       Icon(
@@ -1880,6 +1877,8 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
 
       final success = await widget.communityService.toggleLike(post.id);
 
+      if (!mounted) return;
+
       if (!success && postIndex != -1) {
         setState(() {
           final currentLikeCount = posts[postIndex].engagementStats.likeCount;
@@ -1905,6 +1904,7 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
         );
       }
     } catch (_) {
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('community_hub_error_like'.tr())));

@@ -48,9 +48,9 @@ class _ProfileAnalyticsScreenState extends State<ProfileAnalyticsScreen> {
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Error loading analytics: \$e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error loading analytics: \$e')),
+        );
       }
     }
   }
@@ -77,10 +77,8 @@ class _ProfileAnalyticsScreenState extends State<ProfileAnalyticsScreen> {
       Column(
         children: entries
             .map(
-              (entry) => _buildMetricRow(
-                _formatMetricLabel(entry.key),
-                entry.value,
-              ),
+              (entry) =>
+                  _buildMetricRow(_formatMetricLabel(entry.key), entry.value),
             )
             .toList(),
       ),

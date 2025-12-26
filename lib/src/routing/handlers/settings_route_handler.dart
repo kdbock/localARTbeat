@@ -1,17 +1,17 @@
-import 'package:artbeat_core/src/routing/app_routes.dart';
+import 'package:artbeat_core/artbeat_core.dart' as core;
 import 'package:artbeat_settings/artbeat_settings.dart';
 import 'package:flutter/material.dart';
 
 class SettingsRouteHandler {
   static Widget handleSettingsRoute(String routeName, Object? arguments) {
     switch (routeName) {
-      case AppRoutes.accountSettings:
+      case core.AppRoutes.accountSettings:
         return const AccountSettingsScreen();
-      case AppRoutes.notificationSettings:
+      case core.AppRoutes.notificationSettings:
         return const NotificationSettingsScreen();
-      case AppRoutes.privacySettings:
+      case core.AppRoutes.privacySettings:
         return const PrivacySettingsScreen();
-      case AppRoutes.securitySettings:
+      case core.AppRoutes.securitySettings:
         return const SecuritySettingsScreen();
       default:
         return const Center(child: Text('Coming Soon'));

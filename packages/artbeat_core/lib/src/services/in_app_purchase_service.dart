@@ -155,14 +155,14 @@ class InAppPurchaseService {
   void _onPurchaseUpdate(List<PurchaseDetails> purchaseDetailsList) {
     if (kDebugMode) {
       print(
-      '🔔 _onPurchaseUpdate called with ${purchaseDetailsList.length} purchases',
-    );
+        '🔔 _onPurchaseUpdate called with ${purchaseDetailsList.length} purchases',
+      );
     }
     for (final PurchaseDetails purchaseDetails in purchaseDetailsList) {
       if (kDebugMode) {
         print(
-        '   - Product: ${purchaseDetails.productID}, Status: ${purchaseDetails.status}',
-      );
+          '   - Product: ${purchaseDetails.productID}, Status: ${purchaseDetails.status}',
+        );
       }
       _handlePurchaseUpdate(purchaseDetails);
     }
@@ -328,13 +328,13 @@ class InAppPurchaseService {
       if (purchaseType == PurchaseType.consumable) {
         if (kDebugMode) {
           print(
-          '🎁 Consumable restored - this should not happen for consumables',
-        );
+            '🎁 Consumable restored - this should not happen for consumables',
+          );
         }
         if (kDebugMode) {
           print(
-          '   Consumables are one-time purchases and should not be restored',
-        );
+            '   Consumables are one-time purchases and should not be restored',
+          );
         }
 
         // In debug mode, treat restored consumables as successful for testing
@@ -342,8 +342,8 @@ class InAppPurchaseService {
         if (_isDebugMode() && _isGiftProduct(purchaseDetails.productID)) {
           if (kDebugMode) {
             print(
-            '🐛 DEBUG MODE: Treating restored consumable as successful purchase',
-          );
+              '🐛 DEBUG MODE: Treating restored consumable as successful purchase',
+            );
           }
           await _handleSuccessfulPurchase(purchaseDetails);
           return;

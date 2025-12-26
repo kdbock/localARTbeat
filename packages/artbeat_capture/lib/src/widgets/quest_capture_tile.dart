@@ -70,70 +70,71 @@ class QuestCaptureTile extends StatelessWidget {
                   ),
                   Positioned(
                     left: 10,
-                  right: 10,
-                  bottom: 10,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if ((capture.title ?? '').isNotEmpty)
-                        Text(
-                          capture.title!,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.spaceGrotesk(
-                            color: Colors.white.withValues(alpha: 0.95),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                      const SizedBox(height: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: statusColor.withValues(alpha: 0.85),
-                          borderRadius: BorderRadius.circular(999),
-                          boxShadow: [
-                            BoxShadow(
-                              color: statusColor.withValues(alpha: 0.20),
-                              blurRadius: 14,
-                              offset: const Offset(0, 8),
+                    right: 10,
+                    bottom: 10,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if ((capture.title ?? '').isNotEmpty)
+                          Text(
+                            capture.title!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.spaceGrotesk(
+                              color: Colors.white.withValues(alpha: 0.95),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w900,
                             ),
-                          ],
-                        ),
-                        child: Text(
-                          capture.status.value.toUpperCase(),
-                          style: GoogleFonts.spaceGrotesk(
-                            color: Colors.black.withValues(alpha: 0.88),
-                            fontSize: 10,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 0.7,
                           ),
-                        ),
-                      ),
-                      if (onEdit != null)
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: IconButton(
-                            icon: const Icon(
-                              Icons.edit,
-                              size: 18,
-                              color: Colors.white70,
+                        const SizedBox(height: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: statusColor.withValues(alpha: 0.85),
+                            borderRadius: BorderRadius.circular(999),
+                            boxShadow: [
+                              BoxShadow(
+                                color: statusColor.withValues(alpha: 0.20),
+                                blurRadius: 14,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
+                          ),
+                          child: Text(
+                            capture.status.value.toUpperCase(),
+                            style: GoogleFonts.spaceGrotesk(
+                              color: Colors.black.withValues(alpha: 0.88),
+                              fontSize: 10,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.7,
                             ),
-                            tooltip: 'Edit',
-                            onPressed: onEdit,
                           ),
                         ),
-                    ],
+                        if (onEdit != null)
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: IconButton(
+                              icon: const Icon(
+                                Icons.edit,
+                                size: 18,
+                                color: Colors.white70,
+                              ),
+                              tooltip: 'Edit',
+                              onPressed: onEdit,
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
       ),
-    ));
+    );
   }
 }

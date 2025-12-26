@@ -654,7 +654,8 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
                       alpha: 0.8,
                     ),
                   ),
-                  onPressed: () => Navigator.pushNamed(context, '/notifications'),
+                  onPressed: () =>
+                      Navigator.pushNamed(context, '/notifications'),
                 ),
                 // TODO: Add notification badge logic here if needed
               ],
@@ -872,14 +873,18 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
                   gradient: ArtWalkDesignSystem.hudButtonGradient,
                   boxShadow: [
                     BoxShadow(
-                      color: ArtWalkDesignSystem.hudActiveColor.withValues(alpha: 0.3),
+                      color: ArtWalkDesignSystem.hudActiveColor.withValues(
+                        alpha: 0.3,
+                      ),
                       blurRadius: 18,
                       spreadRadius: 1,
                       offset: const Offset(0, 10),
                     ),
                   ],
                   border: Border.all(
-                    color: ArtWalkDesignSystem.hudInactiveColor.withValues(alpha: 0.2),
+                    color: ArtWalkDesignSystem.hudInactiveColor.withValues(
+                      alpha: 0.2,
+                    ),
                     width: 1,
                   ),
                 ),
