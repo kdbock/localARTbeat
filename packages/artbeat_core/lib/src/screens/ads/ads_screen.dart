@@ -1,6 +1,8 @@
-import 'package:flutter/material.dart';
+import 'dart:ui';
+
 import 'package:artbeat_ads/artbeat_ads.dart';
-import '../../theme/artbeat_colors.dart';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AdsScreen extends StatefulWidget {
   const AdsScreen({super.key});
@@ -45,192 +47,173 @@ class _AdsScreenState extends State<AdsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [ArtbeatColors.backgroundPrimary, Color(0xFFF8F9FA)],
+    return Stack(
+      children: [
+        _buildWorldBackground(),
+        Positioned.fill(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(16, 32, 16, 40),
+            child: Column(
+              children: [
+                _buildHeroSection(),
+                const SizedBox(height: 24),
+                _buildAdPackagesSection(),
+              ],
+            ),
+          ),
         ),
-      ),
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Hero Section
-            _buildHeroSection(),
-            const SizedBox(height: 32),
-
-            // Ad Packages Section
-            _buildAdPackagesSection(),
-            const SizedBox(height: 48),
-          ],
-        ),
-      ),
+      ],
     );
   }
 
   Widget _buildHeroSection() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [ArtbeatColors.primary, ArtbeatColors.primaryPurple],
-        ),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(32),
-          bottomRight: Radius.circular(32),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const Icon(
-                  Icons.campaign,
-                  color: Colors.white,
-                  size: 32,
-                ),
-              ),
-              const SizedBox(width: 16),
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Promote Your Business',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      'Reach local art lovers and customers with targeted advertising',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w300,
-                      ),
-                    ),
-                  ],
-                ),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(36),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 26, sigmaY: 26),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(28),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(36),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+            color: Colors.white.withValues(alpha: 0.05),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.28),
+                blurRadius: 36,
+                offset: const Offset(0, 18),
               ),
             ],
           ),
-          const SizedBox(height: 24),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.2),
-                width: 1,
-              ),
-            ),
-            child: const Row(
-              children: [
-                Icon(Icons.lightbulb, color: Colors.white, size: 20),
-                SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'Choose from various ad sizes and durations to fit your business needs',
-                    style: TextStyle(color: Colors.white, fontSize: 14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(18),
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        colors: [Color(0xFFFFA074), Color(0xFF22D3EE)],
+                      ),
+                    ),
+                    child: const Icon(Icons.campaign, color: Colors.white, size: 28),
                   ),
-                ),
-              ],
-            ),
+                  const SizedBox(width: 18),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Turn gifts into promo fuel',
+                          style: GoogleFonts.spaceGrotesk(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Visibility gifts unlock ad credits so artists can feature themselves, their artwork, and events without leaving Artbeat.',
+                          style: GoogleFonts.spaceGrotesk(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white.withValues(alpha: 0.78),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              const Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: [
+                  _HeroBadge(label: 'Story takeovers'),
+                  _HeroBadge(label: 'Discovery banners'),
+                  _HeroBadge(label: 'Event push alerts'),
+                  _HeroBadge(label: 'Neighborhood feed boosts'),
+                ],
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 
   Widget _buildAdPackagesSection() {
     if (!_isInitialized) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(48),
-          child: CircularProgressIndicator(),
+      return _buildGlassPanel(
+        child: Column(
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            Text(
+              'Fetching promo inventory...',
+              style: GoogleFonts.spaceGrotesk(color: Colors.white70),
+            ),
+          ],
         ),
       );
     }
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Choose Your Ad Package',
-            style: Theme.of(
-              context,
-            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Select the perfect package to promote your business',
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
-          ),
-          const SizedBox(height: 24),
-          _buildAdCategory('Small Ads', [
-            {
-              'size': LocalAdSize.small,
-              'duration': LocalAdDuration.oneWeek,
-              'displayDuration': '1 Week',
-              'impressions': '~5,000',
-            },
-            {
-              'size': LocalAdSize.small,
-              'duration': LocalAdDuration.oneMonth,
-              'displayDuration': '1 Month',
-              'impressions': '~20,000',
-              'isPopular': true,
-            },
-            {
-              'size': LocalAdSize.small,
-              'duration': LocalAdDuration.threeMonths,
-              'displayDuration': '3 Months',
-              'impressions': '~60,000',
-            },
-          ]),
-          const SizedBox(height: 24),
-          _buildAdCategory('Large Ads', [
-            {
-              'size': LocalAdSize.big,
-              'duration': LocalAdDuration.oneWeek,
-              'displayDuration': '1 Week',
-              'impressions': '~15,000',
-            },
-            {
-              'size': LocalAdSize.big,
-              'duration': LocalAdDuration.oneMonth,
-              'displayDuration': '1 Month',
-              'impressions': '~60,000',
-              'isPopular': true,
-            },
-            {
-              'size': LocalAdSize.big,
-              'duration': LocalAdDuration.threeMonths,
-              'displayDuration': '3 Months',
-              'impressions': '~180,000',
-            },
-          ]),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader(
+          'Choose your package',
+          'Pick a placement size and duration that fits your launch.',
+        ),
+        const SizedBox(height: 18),
+        _buildAdCategory('Spotlight Ads', [
+          {
+            'size': LocalAdSize.small,
+            'duration': LocalAdDuration.oneWeek,
+            'displayDuration': '1 Week',
+            'impressions': '~5,000',
+          },
+          {
+            'size': LocalAdSize.small,
+            'duration': LocalAdDuration.oneMonth,
+            'displayDuration': '1 Month',
+            'impressions': '~20,000',
+            'isPopular': true,
+          },
+          {
+            'size': LocalAdSize.small,
+            'duration': LocalAdDuration.threeMonths,
+            'displayDuration': '3 Months',
+            'impressions': '~60,000',
+          },
+        ]),
+        const SizedBox(height: 20),
+        _buildAdCategory('Billboard Ads', [
+          {
+            'size': LocalAdSize.big,
+            'duration': LocalAdDuration.oneWeek,
+            'displayDuration': '1 Week',
+            'impressions': '~15,000',
+          },
+          {
+            'size': LocalAdSize.big,
+            'duration': LocalAdDuration.oneMonth,
+            'displayDuration': '1 Month',
+            'impressions': '~60,000',
+            'isPopular': true,
+          },
+          {
+            'size': LocalAdSize.big,
+            'duration': LocalAdDuration.threeMonths,
+            'displayDuration': '3 Months',
+            'impressions': '~180,000',
+          },
+        ]),
+      ],
     );
   }
 
@@ -240,127 +223,268 @@ class _AdsScreenState extends State<AdsScreen> {
       children: [
         Text(
           title,
-          style: Theme.of(
-            context,
-          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+          style: GoogleFonts.spaceGrotesk(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+          ),
         ),
         const SizedBox(height: 12),
-        ...ads.map((ad) {
-          final isPopular = ad['isPopular'] as bool? ?? false;
-          final size = ad['size'] as LocalAdSize;
-          final duration = ad['duration'] as LocalAdDuration;
-          final price = AdPricingMatrix.getPrice(size, duration) ?? 0.0;
+        ...ads.map((ad) => _buildAdCard(ad)).toList(),
+      ],
+    );
+  }
 
-          return Column(
-            children: [
-              Card(
-                elevation: isPopular ? 8 : 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  side: isPopular
-                      ? const BorderSide(color: ArtbeatColors.primary, width: 2)
-                      : BorderSide.none,
+  Widget _buildAdCard(Map<String, dynamic> ad) {
+    final isPopular = ad['isPopular'] as bool? ?? false;
+    final size = ad['size'] as LocalAdSize;
+    final duration = ad['duration'] as LocalAdDuration;
+    final price = AdPricingMatrix.getPrice(size, duration) ?? 0.0;
+    final accent = isPopular ? const Color(0xFF22D3EE) : const Color(0xFF7C4DFF);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: _buildGlassPanel(
+        borderColor: isPopular
+            ? accent.withValues(alpha: 0.8)
+            : Colors.white.withValues(alpha: 0.15),
+        gradient: LinearGradient(
+          colors: [
+            accent.withValues(alpha: 0.18),
+            Colors.white.withValues(alpha: 0.03),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(18),
+                    color: Colors.white.withValues(alpha: 0.12),
+                  ),
+                  child: Icon(Icons.campaign, color: accent, size: 24),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
+                const SizedBox(width: 14),
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  const Icon(
-                                    Icons.campaign,
-                                    color: ArtbeatColors.primary,
-                                    size: 24,
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        ad['displayDuration'] as String,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleMedium
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.black87,
-                                            ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                '\$${price.toStringAsFixed(2)}',
-                                style: Theme.of(context).textTheme.titleLarge
-                                    ?.copyWith(
-                                      color: ArtbeatColors.primary,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                              ),
-                              if (isPopular)
-                                Container(
-                                  margin: const EdgeInsets.only(top: 4),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 2,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: ArtbeatColors.primary,
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: const Text(
-                                    'Popular',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ],
+                      Text(
+                        ad['displayDuration'] as String,
+                        style: GoogleFonts.spaceGrotesk(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
                       ),
-                      const SizedBox(height: 16),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () => _handleAdPurchase(size, duration),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: isPopular
-                                ? ArtbeatColors.primary
-                                : Colors.grey[300],
-                            foregroundColor: isPopular
-                                ? Colors.white
-                                : Colors.black,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                          ),
-                          child: const Text('Create Ad'),
+                      Text(
+                        ad['impressions'] as String,
+                        style: GoogleFonts.spaceGrotesk(
+                          color: Colors.white.withValues(alpha: 0.7),
+                          fontSize: 12,
                         ),
                       ),
                     ],
                   ),
                 ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      '\$${price.toStringAsFixed(2)}',
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                      ),
+                    ),
+                    if (isPopular)
+                      Container(
+                        margin: const EdgeInsets.only(top: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: accent,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          'Popular',
+                          style: GoogleFonts.spaceGrotesk(
+                            color: Colors.black,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 18),
+            Row(
+              children: [
+                Icon(Icons.auto_graph, color: accent, size: 18),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Optimized for artist discovery, story placements, and event pushes.',
+                    style: GoogleFonts.spaceGrotesk(
+                      color: Colors.white.withValues(alpha: 0.8),
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 18),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => _handleAdPurchase(size, duration),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: accent,
+                  foregroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                child: Text(
+                  'Build Promo',
+                  style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
+                ),
               ),
-              const SizedBox(height: 12),
-            ],
-          );
-        }).toList(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title, String subtitle) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: GoogleFonts.spaceGrotesk(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          subtitle,
+          style: GoogleFonts.spaceGrotesk(
+            color: Colors.white.withValues(alpha: 0.7),
+            fontSize: 13,
+          ),
+        ),
       ],
+    );
+  }
+
+  Widget _buildGlassPanel({
+    required Widget child,
+    EdgeInsetsGeometry padding = const EdgeInsets.all(24),
+    Gradient? gradient,
+    Color? borderColor,
+  }) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(30),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+        child: Container(
+          width: double.infinity,
+          padding: padding,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(30),
+            border: Border.all(color: borderColor ?? Colors.white24),
+            color: gradient == null
+                ? Colors.white.withValues(alpha: 0.04)
+                : null,
+            gradient: gradient,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.25),
+                blurRadius: 28,
+                offset: const Offset(0, 18),
+              ),
+            ],
+          ),
+          child: child,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWorldBackground() {
+    return Positioned.fill(
+      child: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFF05030D),
+              Color(0xFF0B1330),
+              Color(0xFF041C16),
+            ],
+          ),
+        ),
+        child: Stack(
+          children: [
+            _buildGlow(const Offset(-120, -60), Colors.orangeAccent),
+            _buildGlow(const Offset(140, 120), Colors.tealAccent),
+            _buildGlow(const Offset(-30, 320), Colors.purpleAccent),
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    center: Alignment.center,
+                    radius: 1.05,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withValues(alpha: 0.55),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGlow(Offset offset, Color color) {
+    return Positioned(
+      left: offset.dx < 0 ? null : offset.dx,
+      right: offset.dx < 0 ? -offset.dx : null,
+      top: offset.dy,
+      child: Container(
+        width: 180,
+        height: 180,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: color.withValues(alpha: 0.16),
+          boxShadow: [
+            BoxShadow(
+              color: color.withValues(alpha: 0.35),
+              blurRadius: 100,
+              spreadRadius: 16,
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -383,5 +507,31 @@ class _AdsScreenState extends State<AdsScreen> {
         );
       }
     }
+  }
+}
+
+class _HeroBadge extends StatelessWidget {
+  final String label;
+
+  const _HeroBadge({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+        color: Colors.white.withValues(alpha: 0.08),
+      ),
+      child: Text(
+        label,
+        style: GoogleFonts.spaceGrotesk(
+          color: Colors.white,
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
   }
 }

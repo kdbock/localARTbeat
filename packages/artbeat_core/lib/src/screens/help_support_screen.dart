@@ -1,10 +1,10 @@
+import 'dart:ui';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../theme/artbeat_colors.dart';
-import '../widgets/enhanced_universal_header.dart';
 
-/// Help & Support Screen - Comprehensive guide for ARTbeat users
 class HelpSupportScreen extends StatefulWidget {
   const HelpSupportScreen({super.key});
 
@@ -24,64 +24,39 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final sections = _buildSectionsData()
+        .where((section) => section.matches(_searchQuery))
+        .toList();
+
     return Scaffold(
-      appBar: EnhancedUniversalHeader(
-        title: 'help_title'.tr(),
-        showLogo: false,
-        showBackButton: true,
-      ),
-      body: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            color: Theme.of(context).colorScheme.surface,
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'help_search_hint'.tr(),
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _searchQuery.isNotEmpty
-                    ? IconButton(
-                        onPressed: () {
-                          _searchController.clear();
-                          setState(() {
-                            _searchQuery = '';
-                          });
-                        },
-                        icon: const Icon(Icons.clear),
-                      )
-                    : null,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                filled: true,
-                fillColor: Theme.of(context).colorScheme.surface,
-              ),
-              onChanged: (value) {
-                setState(() {
-                  _searchQuery = value.toLowerCase();
-                });
-              },
-            ),
+      backgroundColor: Colors.black,
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
+        title: Text(
+          'help_title'.tr(),
+          style: GoogleFonts.spaceGrotesk(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
           ),
-
-          // Content
-          Expanded(
+        ),
+      ),
+      body: Stack(
+        children: [
+          _buildWorldBackground(),
+          Positioned.fill(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(16, 120, 16, 40),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Welcome section
-                  _buildWelcomeSection(),
-                  const SizedBox(height: 24),
-
-                  // Quick actions
-                  _buildQuickActions(),
-                  const SizedBox(height: 24),
-
-                  // Help topics
-                  ..._buildHelpSections(),
+                  _buildHeroSection(),
+                  const SizedBox(height: 20),
+                  _buildAssistHub(),
+                  const SizedBox(height: 20),
+                  _buildSectionList(sections),
                 ],
               ),
             ),
@@ -91,136 +66,228 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
     );
   }
 
-  Widget _buildWelcomeSection() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            ArtbeatColors.primary.withValues(alpha: 0.1),
-            ArtbeatColors.primary.withValues(alpha: 0.05),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: ArtbeatColors.primary.withValues(alpha: 0.2)),
-      ),
+  Widget _buildHeroSection() {
+    final badges = [
+      'Visibility hotline',
+      'Priority support',
+      'Learning library',
+    ];
+
+    return _buildGlassPanel(
+      padding: const EdgeInsets.all(28),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.palette, color: ArtbeatColors.primary, size: 32),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  'help_welcome_title'.tr(),
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: ArtbeatColors.primary,
+              Container(
+                padding: const EdgeInsets.all(18),
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF7C4DFF), Color(0xFF22D3EE)],
                   ),
+                ),
+                child: const Icon(Icons.help_outline, color: Colors.white, size: 28),
+              ),
+              const SizedBox(width: 18),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'help_welcome_title'.tr(),
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'help_welcome_text'.tr(),
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.white.withValues(alpha: 0.78),
+                        fontSize: 15,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          Text(
-            'help_welcome_subtitle'.tr(),
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: ArtbeatColors.textSecondary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'help_welcome_text'.tr(),
-            style: Theme.of(context).textTheme.bodyMedium,
-            textAlign: TextAlign.justify,
+          const SizedBox(height: 18),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: badges
+                .map(
+                  (badge) => Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(999),
+                      border:
+                          Border.all(color: Colors.white.withValues(alpha: 0.14)),
+                      color: Colors.white.withValues(alpha: 0.05),
+                    ),
+                    child: Text(
+                      badge,
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                )
+                .toList(),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildQuickActions() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'help_quick_actions'.tr(),
-          style: Theme.of(
-            context,
-          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _buildActionCard(
-                title: 'help_contact_support'.tr(),
-                icon: Icons.support_agent,
-                onTap: () => _contactSupport(),
-              ),
+  Widget _buildAssistHub() {
+    final quickActions = [
+      _QuickAction(
+        label: 'help_contact_support'.tr(),
+        icon: Icons.support_agent,
+        onTap: _contactSupport,
+      ),
+      _QuickAction(
+        label: 'help_report_issue'.tr(),
+        icon: Icons.bug_report,
+        onTap: _reportIssue,
+      ),
+      _QuickAction(
+        label: 'help_video_tutorials'.tr(),
+        icon: Icons.play_circle_fill,
+        onTap: _openVideoTutorials,
+      ),
+      _QuickAction(
+        label: 'help_community_forum'.tr(),
+        icon: Icons.forum,
+        onTap: _openCommunityForum,
+      ),
+    ];
+
+    return _buildGlassPanel(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'help_quick_actions'.tr(),
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildActionCard(
-                title: 'help_report_issue'.tr(),
-                icon: Icons.bug_report,
-                onTap: () => _reportIssue(),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _buildActionCard(
-                title: 'help_video_tutorials'.tr(),
-                icon: Icons.play_circle_fill,
-                onTap: () => _openVideoTutorials(),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildActionCard(
-                title: 'help_community_forum'.tr(),
-                icon: Icons.forum,
-                onTap: () => _openCommunityForum(),
-              ),
-            ),
-          ],
-        ),
-      ],
+          ),
+          const SizedBox(height: 16),
+          _buildSearchField(),
+          const SizedBox(height: 18),
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: quickActions
+                .map((action) => _buildActionCard(action))
+                .toList(),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildActionCard({
-    required String title,
-    required IconData icon,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.shade300),
-          borderRadius: BorderRadius.circular(8),
-        ),
+  Widget _buildSectionList(List<_HelpSectionData> sections) {
+    if (sections.isEmpty) {
+      return _buildGlassPanel(
         child: Column(
           children: [
-            Icon(icon, size: 32, color: ArtbeatColors.primary),
-            const SizedBox(height: 8),
+            const Icon(Icons.search_off, color: Colors.white70, size: 36),
+            const SizedBox(height: 12),
             Text(
-              title,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+              'No help topics match your search yet.',
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white70,
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      children: sections.map(_buildSectionCard).toList(),
+    );
+  }
+
+  Widget _buildSearchField() {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+        color: Colors.white.withValues(alpha: 0.05),
+      ),
+      child: TextField(
+        controller: _searchController,
+        onChanged: (value) {
+          setState(() {
+            _searchQuery = value.toLowerCase();
+          });
+        },
+        style: GoogleFonts.spaceGrotesk(color: Colors.white),
+        decoration: InputDecoration(
+          hintText: 'help_search_hint'.tr(),
+          hintStyle: GoogleFonts.spaceGrotesk(
+            color: Colors.white.withValues(alpha: 0.55),
+          ),
+          prefixIcon: const Icon(Icons.search, color: Colors.white70),
+          suffixIcon: _searchQuery.isNotEmpty
+              ? IconButton(
+                  onPressed: () {
+                    _searchController.clear();
+                    setState(() {
+                      _searchQuery = '';
+                    });
+                  },
+                  icon: const Icon(Icons.clear, color: Colors.white70),
+                )
+              : null,
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 18),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionCard(_QuickAction action) {
+    return GestureDetector(
+      onTap: action.onTap,
+      child: Container(
+        width: double.infinity,
+        constraints: const BoxConstraints(minWidth: 140),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+          color: Colors.white.withValues(alpha: 0.03),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(action.icon, color: Colors.white, size: 28),
+            const SizedBox(height: 10),
+            Text(
+              action.label,
               textAlign: TextAlign.center,
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+              ),
             ),
           ],
         ),
@@ -228,34 +295,181 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
     );
   }
 
-  List<Widget> _buildHelpSections() {
-    final sections = [
-      _buildSection(
-        'help_section_getting_started'.tr(),
-        'help_section_getting_started_desc'.tr(),
-        Icons.person_add,
-        [
+  Widget _buildSectionCard(_HelpSectionData section) {
+    final filteredItems = _searchQuery.isEmpty
+        ? section.items
+        : section.items
+            .where((item) => item.toLowerCase().contains(_searchQuery))
+            .toList();
+
+    if (filteredItems.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(28),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+          child: ExpansionTile(
+            backgroundColor: Colors.white.withValues(alpha: 0.04),
+            collapsedBackgroundColor: Colors.white.withValues(alpha: 0.02),
+            collapsedIconColor: Colors.white,
+            iconColor: Colors.white,
+            leading: Icon(section.icon, color: Colors.white),
+            title: Text(
+              section.title,
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            subtitle: Text(
+              section.description,
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white70,
+                fontSize: 12,
+              ),
+            ),
+            children: filteredItems
+                .map(
+                  (item) => ListTile(
+                    title: Text(
+                      item,
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.white,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                )
+                .toList(),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGlassPanel({
+    required Widget child,
+    EdgeInsetsGeometry padding = const EdgeInsets.all(24),
+  }) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(34),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+        child: Container(
+          width: double.infinity,
+          padding: padding,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(34),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
+            color: Colors.white.withValues(alpha: 0.05),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.25),
+                blurRadius: 30,
+                offset: const Offset(0, 18),
+              ),
+            ],
+          ),
+          child: child,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWorldBackground() {
+    return Positioned.fill(
+      child: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFF03050F),
+              Color(0xFF09122B),
+              Color(0xFF021B17),
+            ],
+          ),
+        ),
+        child: Stack(
+          children: [
+            _buildGlow(const Offset(-160, -60), Colors.purpleAccent),
+            _buildGlow(const Offset(120, 240), Colors.cyanAccent),
+            _buildGlow(const Offset(-20, 380), Colors.pinkAccent),
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    center: Alignment.center,
+                    radius: 1.2,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withValues(alpha: 0.6),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGlow(Offset offset, Color color) {
+    return Positioned(
+      left: offset.dx < 0 ? null : offset.dx,
+      right: offset.dx < 0 ? -offset.dx : null,
+      top: offset.dy,
+      child: Container(
+        width: 220,
+        height: 220,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: color.withValues(alpha: 0.16),
+          boxShadow: [
+            BoxShadow(
+              color: color.withValues(alpha: 0.35),
+              blurRadius: 110,
+              spreadRadius: 18,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<_HelpSectionData> _buildSectionsData() {
+    return [
+      _HelpSectionData(
+        title: 'help_section_getting_started'.tr(),
+        description: 'help_section_getting_started_desc'.tr(),
+        icon: Icons.person_add,
+        items: [
           'help_registration'.tr(),
           'help_user_types'.tr(),
           'help_profile_creation'.tr(),
         ],
       ),
-      _buildSection(
-        'help_section_discovery'.tr(),
-        'help_section_discovery_desc'.tr(),
-        Icons.explore,
-        [
+      _HelpSectionData(
+        title: 'help_section_discovery'.tr(),
+        description: 'help_section_discovery_desc'.tr(),
+        icon: Icons.explore,
+        items: [
           'help_art_walks'.tr(),
           'help_artwork_browsing'.tr(),
           'help_events'.tr(),
           'help_capturing'.tr(),
         ],
       ),
-      _buildSection(
-        'help_section_artists'.tr(),
-        'help_section_artists_desc'.tr(),
-        Icons.palette,
-        [
+      _HelpSectionData(
+        title: 'help_section_artists'.tr(),
+        description: 'help_section_artists_desc'.tr(),
+        icon: Icons.palette,
+        items: [
           'help_artist_dashboard'.tr(),
           'help_gallery_ops'.tr(),
           'help_earnings'.tr(),
@@ -263,11 +477,11 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
           'help_subscriptions'.tr(),
         ],
       ),
-      _buildSection(
-        'help_section_community'.tr(),
-        'help_section_community_desc'.tr(),
-        Icons.people,
-        [
+      _HelpSectionData(
+        title: 'help_section_community'.tr(),
+        description: 'help_section_community_desc'.tr(),
+        icon: Icons.people,
+        items: [
           'help_community_feed'.tr(),
           'help_direct_commissions'.tr(),
           'help_studio_system'.tr(),
@@ -276,11 +490,11 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
           'help_gifts'.tr(),
         ],
       ),
-      _buildSection(
-        'help_section_ai'.tr(),
-        'help_section_ai_desc'.tr(),
-        Icons.auto_awesome,
-        [
+      _HelpSectionData(
+        title: 'help_section_ai'.tr(),
+        description: 'help_section_ai_desc'.tr(),
+        icon: Icons.auto_awesome,
+        items: [
           'help_smart_cropping'.tr(),
           'help_bg_removal'.tr(),
           'help_auto_tagging'.tr(),
@@ -290,11 +504,11 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
           'help_similar_artwork'.tr(),
         ],
       ),
-      _buildSection(
-        'help_section_settings'.tr(),
-        'help_section_settings_desc'.tr(),
-        Icons.security,
-        [
+      _HelpSectionData(
+        title: 'help_section_settings'.tr(),
+        description: 'help_section_settings_desc'.tr(),
+        icon: Icons.security,
+        items: [
           'help_account_settings'.tr(),
           'help_privacy_controls'.tr(),
           'help_security_settings'.tr(),
@@ -302,11 +516,11 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
           'help_blocked_users'.tr(),
         ],
       ),
-      _buildSection(
-        'help_section_admin'.tr(),
-        'help_section_admin_desc'.tr(),
-        Icons.admin_panel_settings,
-        [
+      _HelpSectionData(
+        title: 'help_section_admin'.tr(),
+        description: 'help_section_admin_desc'.tr(),
+        icon: Icons.admin_panel_settings,
+        items: [
           'help_admin_dashboard'.tr(),
           'help_user_management'.tr(),
           'help_content_moderation'.tr(),
@@ -317,89 +531,6 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
         ],
       ),
     ];
-
-    final List<Widget> filteredSections = [];
-    for (final section in sections) {
-      if (_searchQuery.isEmpty ||
-          section.toString().toLowerCase().contains(_searchQuery)) {
-        filteredSections.add(section);
-      }
-    }
-
-    return filteredSections;
-  }
-
-  Widget _buildSection(
-    String title,
-    String description,
-    IconData icon,
-    List<String> items,
-  ) {
-    // Filter items based on search query
-    List<String> filteredItems = items;
-    if (_searchQuery.isNotEmpty) {
-      filteredItems = items
-          .where((item) => item.toLowerCase().contains(_searchQuery))
-          .toList();
-    }
-
-    // If search is active and no items match, don't show the section
-    if (_searchQuery.isNotEmpty && filteredItems.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      child: ExpansionTile(
-        leading: Icon(icon, color: ArtbeatColors.primary),
-        title: Text(
-          title,
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        subtitle: Text(
-          description,
-          style: Theme.of(
-            context,
-          ).textTheme.bodySmall?.copyWith(color: ArtbeatColors.textSecondary),
-        ),
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-            child: Column(
-              children: filteredItems.map((item) {
-                // Highlight search terms
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        margin: const EdgeInsets.only(top: 6),
-                        width: 6,
-                        height: 6,
-                        decoration: const BoxDecoration(
-                          color: ArtbeatColors.primary,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          item,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   Future<void> _contactSupport() async {
@@ -464,10 +595,44 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('help_forum_error'.tr())));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('help_forum_error'.tr())),
+        );
       }
     }
+  }
+}
+
+class _QuickAction {
+  final String label;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _QuickAction({
+    required this.label,
+    required this.icon,
+    required this.onTap,
+  });
+}
+
+class _HelpSectionData {
+  final String title;
+  final String description;
+  final IconData icon;
+  final List<String> items;
+
+  const _HelpSectionData({
+    required this.title,
+    required this.description,
+    required this.icon,
+    required this.items,
+  });
+
+  bool matches(String query) {
+    if (query.isEmpty) return true;
+    final q = query.toLowerCase();
+    return title.toLowerCase().contains(q) ||
+        description.toLowerCase().contains(q) ||
+        items.any((item) => item.toLowerCase().contains(q));
   }
 }

@@ -34,6 +34,7 @@ class _TestAuthScreenWrapperState extends State<TestAuthScreenWrapper> {
   }
 
   Future<void> _initializeFirebase() async {
+    await EasyLocalization.ensureInitialized();
     if (widget.mockAuth != null && widget.mockFirestore != null) {
       // Use provided mocks, assume Firebase is already initialized
       if (mounted) {
@@ -104,6 +105,7 @@ class AuthTestHelpers {
       mockFirestore: firestore,
       child: LoginScreen(
         authService: AuthService(auth: auth, firestore: firestore),
+        enableBackgroundAnimation: false,
       ),
     );
   }
@@ -121,6 +123,7 @@ class AuthTestHelpers {
       mockFirestore: firestore,
       child: RegisterScreen(
         authService: AuthService(auth: auth, firestore: firestore),
+        enableBackgroundAnimation: false,
       ),
     );
   }

@@ -6,9 +6,6 @@ import 'package:share_plus/share_plus.dart';
 import 'package:artbeat_capture/artbeat_capture.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_profile/artbeat_profile.dart' show WorldBackground;
-import '../widgets/glass_card.dart';
-import '../widgets/hud_top_bar.dart';
-import '../widgets/hud_button.dart';
 
 /// Screen for viewing existing capture details with likes, comments, and interactions
 class CaptureDetailViewerScreen extends StatefulWidget {

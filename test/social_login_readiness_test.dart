@@ -13,6 +13,13 @@ import 'auth_test_helpers.dart';
 ///
 /// **Current Status: TESTING INFRASTRUCTURE READINESS**
 /// These tests check for social login readiness without stalling on platform channels.
+Future<void> _pumpAuthScreen(WidgetTester tester) async {
+  await tester.pump();
+  for (var i = 0; i < 5; i++) {
+    await tester.pump(const Duration(milliseconds: 100));
+  }
+}
+
 void main() {
   group('Social Login Integration Tests', () {
     late MockFirebaseAuth mockAuth;
@@ -79,7 +86,7 @@ void main() {
             mockFirestore: mockFirestore,
           ),
         );
-        await tester.pumpAndSettle();
+        await _pumpAuthScreen(tester);
 
         // Verify LoginScreen exists and is ready for social login buttons
         expect(find.byType(LoginScreen), findsOneWidget);
@@ -102,7 +109,7 @@ void main() {
             mockFirestore: mockFirestore,
           ),
         );
-        await tester.pumpAndSettle();
+        await _pumpAuthScreen(tester);
 
         // ✅ Google Sign-In button should now be present
         final googleButton = find.byKey(const Key('google_sign_in_button'));
@@ -125,7 +132,7 @@ void main() {
             mockFirestore: mockFirestore,
           ),
         );
-        await tester.pumpAndSettle();
+        await _pumpAuthScreen(tester);
 
         // ✅ Apple Sign-In button visibility depends on Platform.isIOS
         // Note: This test runs on all platforms, but Apple button only shows on iOS
@@ -148,7 +155,7 @@ void main() {
             mockFirestore: mockFirestore,
           ),
         );
-        await tester.pumpAndSettle();
+        await _pumpAuthScreen(tester);
 
         // Currently, Apple Sign-In button doesn't exist (as expected)
         final appleButton = find.byKey(const Key('apple_sign_in_button'));

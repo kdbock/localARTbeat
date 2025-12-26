@@ -1,7 +1,11 @@
-import 'package:flutter/material.dart';
+import 'dart:ui';
+
+import 'package:artbeat_art_walk/artbeat_art_walk.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:artbeat_art_walk/artbeat_art_walk.dart';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+
 import '../services/leaderboard_service.dart';
 import '../utils/logger.dart';
 
@@ -72,102 +76,94 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          // App Bar
-          SliverAppBar(
-            expandedHeight: 200.0,
-            floating: false,
-            pinned: true,
-            flexibleSpace: FlexibleSpaceBar(
-              title: Text(
-                'leaderboard_title'.tr(),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              background: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Theme.of(context).primaryColor,
-                      Theme.of(context).primaryColor.withValues(alpha: 0.8),
-                    ],
-                  ),
-                ),
-                child: _stats != null ? _buildStatsOverlay() : null,
+      backgroundColor: Colors.black,
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
+        title: Text(
+          'leaderboard_title'.tr(),
+          style: GoogleFonts.spaceGrotesk(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
+        ),
+        actions: [
+          IconButton(
+            onPressed: _isLoading ? null : _loadLeaderboards,
+            icon: const Icon(Icons.refresh, color: Colors.white70),
+          ),
+        ],
+      ),
+      body: Stack(
+        children: [
+          _buildWorldBackground(),
+          Positioned.fill(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 120, 16, 24),
+              child: Column(
+                children: [
+                  _buildHeroSection(),
+                  const SizedBox(height: 18),
+                  _buildTabSwitcher(),
+                  const SizedBox(height: 16),
+                  Expanded(child: _buildTabContent()),
+                ],
               ),
             ),
-          ),
-
-          // Tab Bar
-          SliverPersistentHeader(
-            pinned: true,
-            delegate: _TabBarDelegate(
-              TabBar(
-                controller: _tabController,
-                isScrollable: true,
-                indicatorColor: Theme.of(context).primaryColor,
-                labelColor: Theme.of(context).primaryColor,
-                unselectedLabelColor: Colors.grey,
-                tabs: _categories
-                    .map(
-                      (category) => Tab(
-                        icon: Text(
-                          category.icon,
-                          style: const TextStyle(fontSize: 20),
-                        ),
-                        text: category.displayName,
-                      ),
-                    )
-                    .toList(),
-              ),
-            ),
-          ),
-
-          // Tab View Content
-          SliverFillRemaining(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : TabBarView(
-                    controller: _tabController,
-                    children: _categories
-                        .map((category) => _buildLeaderboardTab(category))
-                        .toList(),
-                  ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildStatsOverlay() {
-    return Container(
-      padding: const EdgeInsets.only(top: 60, left: 16, right: 16),
+  Widget _buildHeroSection() {
+    final totalUsers = _stats?['totalUsers'] as int?;
+    final totalXp = _stats?['totalXP'] as int?;
+    final averageXp = _stats?['averageXP'] as int?;
+
+    return _buildGlassPanel(
+      padding: const EdgeInsets.all(26),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 40), // Space for title
+          Text(
+            'Global Creator Leaderboard',
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Visibility gifts, promo ads, and fan subscriptions power every rank you see here.',
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white70,
+              fontSize: 13,
+            ),
+          ),
+          const SizedBox(height: 20),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _StatCard(
-                title: 'Total Users',
-                value: '${_stats!['totalUsers']}',
+              _buildStatChip(
                 icon: Icons.people,
+                label: 'Creators',
+                value: totalUsers != null ? _formatNumber(totalUsers) : '--',
               ),
-              _StatCard(
-                title: 'Total XP',
-                value: _formatNumber(_stats!['totalXP'] as int),
+              const SizedBox(width: 12),
+              _buildStatChip(
                 icon: Icons.flash_on,
+                label: 'Total XP',
+                value: totalXp != null ? _formatNumber(totalXp) : '--',
               ),
-              _StatCard(
-                title: 'Avg Level',
-                value: '${(_stats!['averageXP'] / 100).round()}',
+              const SizedBox(width: 12),
+              _buildStatChip(
                 icon: Icons.trending_up,
+                label: 'Avg Level',
+                value: averageXp != null ? '${(averageXp / 100).round()}' : '--',
               ),
             ],
           ),
@@ -176,81 +172,207 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
     );
   }
 
-  Widget _buildLeaderboardTab(LeaderboardCategory category) {
-    final entries = _leaderboards[category] ?? [];
-
-    if (entries.isEmpty) {
-      return const Center(
+  Widget _buildStatChip({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
+          color: Colors.white.withValues(alpha: 0.04),
+        ),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(Icons.emoji_events, size: 64, color: Colors.grey),
-            SizedBox(height: 16),
+            Icon(icon, color: Colors.white70, size: 18),
+            const SizedBox(height: 8),
             Text(
-              'No data available',
-              style: TextStyle(fontSize: 18, color: Colors.grey),
+              value,
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+              ),
             ),
             Text(
-              'Be the first to earn points in this category!',
-              style: TextStyle(color: Colors.grey),
+              label,
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white70,
+                fontSize: 12,
+              ),
             ),
           ],
         ),
-      );
-    }
-
-    return RefreshIndicator(
-      onRefresh: _loadLeaderboards,
-      child: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: entries.length + 2, // +2 for header and your rank
-        itemBuilder: (context, index) {
-          if (index == 0) {
-            return _buildCategoryHeader(category);
-          }
-
-          if (index == 1) {
-            return _buildCurrentUserRank(category);
-          }
-
-          final entry = entries[index - 2];
-          return _buildLeaderboardCard(entry, category);
-        },
       ),
     );
   }
 
-  Widget _buildCategoryHeader(LeaderboardCategory category) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Text(category.icon, style: const TextStyle(fontSize: 24)),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  category.displayName,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  _getCategoryDescription(category),
-                  style: TextStyle(color: Colors.grey[600], fontSize: 14),
-                ),
-              ],
-            ),
+  Widget _buildTabSwitcher() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(28),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
+            color: Colors.white.withValues(alpha: 0.04),
           ),
-        ],
+          child: TabBar(
+            controller: _tabController,
+            isScrollable: true,
+            indicator: BoxDecoration(
+              borderRadius: BorderRadius.circular(22),
+              gradient: const LinearGradient(
+                colors: [Color(0xFF7C4DFF), Color(0xFF22D3EE), Color(0xFF34D399)],
+              ),
+            ),
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.white70,
+            labelStyle: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
+            unselectedLabelStyle:
+                GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w600),
+            tabs: _categories
+                .map(
+                  (category) => Tab(
+                    icon: Text(category.icon, style: const TextStyle(fontSize: 18)),
+                    text: category.displayName,
+                  ),
+                )
+                .toList(),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabContent() {
+    if (_isLoading) {
+      return Center(
+        child: _buildGlassPanel(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const CircularProgressIndicator(color: Colors.white70),
+              const SizedBox(width: 12),
+              Text(
+                'Syncing leaderboards...',
+                style: GoogleFonts.spaceGrotesk(color: Colors.white70),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(34),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(34),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+            color: Colors.white.withValues(alpha: 0.02),
+          ),
+          child: TabBarView(
+            controller: _tabController,
+            children:
+                _categories.map((category) => _buildLeaderboardTab(category)).toList(),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLeaderboardTab(LeaderboardCategory category) {
+    final entries = _leaderboards[category] ?? [];
+
+    final emptyState = Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Icon(Icons.emoji_events, color: Colors.white38, size: 48),
+        const SizedBox(height: 12),
+        Text(
+          'No data available',
+          style: GoogleFonts.spaceGrotesk(color: Colors.white70, fontSize: 14),
+        ),
+        Text(
+          'Be the first to earn points in this category',
+          style: GoogleFonts.spaceGrotesk(color: Colors.white54, fontSize: 12),
+        ),
+      ],
+    );
+
+    return RefreshIndicator(
+      color: Colors.white,
+      backgroundColor: Colors.black,
+      onRefresh: _loadLeaderboards,
+      child: entries.isEmpty
+          ? ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: [
+                const SizedBox(height: 160),
+                emptyState,
+              ],
+            )
+          : ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(16, 18, 16, 32),
+              itemCount: entries.length + 2,
+              itemBuilder: (context, index) {
+                if (index == 0) {
+                  return _buildCategoryHeader(category);
+                }
+                if (index == 1) {
+                  return _buildCurrentUserRank(category);
+                }
+                final entry = entries[index - 2];
+                return _buildLeaderboardCard(entry, category);
+              },
+            ),
+    );
+  }
+
+  Widget _buildCategoryHeader(LeaderboardCategory category) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: _buildGlassPanel(
+        padding: const EdgeInsets.all(20),
+        child: Row(
+          children: [
+            Text(category.icon, style: const TextStyle(fontSize: 28)),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    category.displayName,
+                    style: GoogleFonts.spaceGrotesk(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    _getCategoryDescription(category),
+                    style: GoogleFonts.spaceGrotesk(
+                      color: Colors.white70,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -262,17 +384,12 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
         if (!snapshot.hasData || snapshot.data == null) {
           return const SizedBox.shrink();
         }
-
         final currentUserEntry =
             snapshot.data!['currentUser'] as LeaderboardEntry;
-
-        return Container(
-          margin: const EdgeInsets.only(bottom: 16),
-          child: _buildLeaderboardCard(
-            currentUserEntry,
-            category,
-            isCurrentUser: true,
-          ),
+        return _buildLeaderboardCard(
+          currentUserEntry,
+          category,
+          isCurrentUser: true,
         );
       },
     );
@@ -283,106 +400,131 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
     LeaderboardCategory category, {
     bool isCurrentUser = false,
   }) {
+    final gradient = isCurrentUser
+        ? const [Color(0xFF22D3EE), Color(0xFF34D399)]
+        : _rankGradient(entry.rank);
+
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
-        color: isCurrentUser
-            ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
-            : Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: isCurrentUser
-            ? Border.all(color: Theme.of(context).primaryColor, width: 2)
-            : null,
+        borderRadius: BorderRadius.circular(26),
+        border: Border.all(
+          color: isCurrentUser
+              ? Colors.white.withValues(alpha: 0.6)
+              : Colors.white.withValues(alpha: 0.1),
+        ),
+        gradient: LinearGradient(
+          colors: [
+            gradient[0].withValues(alpha: 0.2),
+            gradient[1].withValues(alpha: 0.08),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 20,
+            offset: const Offset(0, 12),
           ),
         ],
       ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        leading: Row(
-          mainAxisSize: MainAxisSize.min,
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Row(
           children: [
-            // Rank
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: _getRankColor(entry.rank),
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: Text(
-                  '#${entry.rank}',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
+            Column(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(colors: gradient),
+                  ),
+                  child: Center(
+                    child: Text(
+                      '#${entry.rank}',
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            // Profile Image
-            CircleAvatar(
-              radius: 24,
-              backgroundImage: entry.profileImageUrl != null
-                  ? CachedNetworkImageProvider(entry.profileImageUrl!)
-                  : null,
-              child: entry.profileImageUrl == null
-                  ? const Icon(Icons.person, size: 24)
-                  : null,
-            ),
-          ],
-        ),
-        title: Row(
-          children: [
-            Expanded(
-              child: Text(
-                entry.displayName,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: isCurrentUser ? Theme.of(context).primaryColor : null,
+                const SizedBox(height: 10),
+                CircleAvatar(
+                  radius: 22,
+                  backgroundImage: entry.profileImageUrl != null
+                      ? CachedNetworkImageProvider(entry.profileImageUrl!)
+                      : null,
+                  backgroundColor: Colors.white.withValues(alpha: 0.1),
+                  child: entry.profileImageUrl == null
+                      ? const Icon(Icons.person, color: Colors.white)
+                      : null,
                 ),
+              ],
+            ),
+            const SizedBox(width: 18),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          entry.displayName,
+                          style: GoogleFonts.spaceGrotesk(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      if (isCurrentUser)
+                        const Icon(Icons.workspace_premium, color: Colors.white70),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Level ${entry.level} • ${_rewardsService.getLevelTitle(entry.level)}',
+                    style: GoogleFonts.spaceGrotesk(
+                      color: Colors.white70,
+                      fontSize: 12,
+                    ),
+                  ),
+                  if (category != LeaderboardCategory.totalXP &&
+                      category != LeaderboardCategory.level)
+                    Text(
+                      '${entry.experiencePoints} total XP',
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.white54,
+                        fontSize: 11,
+                      ),
+                    ),
+                ],
               ),
             ),
-            if (isCurrentUser)
-              Icon(
-                Icons.person,
-                color: Theme.of(context).primaryColor,
-                size: 16,
-              ),
-          ],
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Level ${entry.level} • ${_rewardsService.getLevelTitle(entry.level)}',
-            ),
-            if (category != LeaderboardCategory.totalXP &&
-                category != LeaderboardCategory.level)
-              Text('${entry.experiencePoints} total XP'),
-          ],
-        ),
-        trailing: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text(
-              _formatValue(entry.value, category),
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).primaryColor,
-              ),
-            ),
-            Text(
-              _getValueLabel(category),
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  _formatValue(entry.value, category),
+                  style: GoogleFonts.spaceGrotesk(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                Text(
+                  _getValueLabel(category),
+                  style: GoogleFonts.spaceGrotesk(
+                    color: Colors.white70,
+                    fontSize: 11,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -390,51 +532,141 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
     );
   }
 
-  Color _getRankColor(int rank) {
+  List<Color> _rankGradient(int rank) {
     switch (rank) {
       case 1:
-        return Colors.amber[600]!; // Gold
+        return const [Color(0xFFFFD700), Color(0xFFFFA726)];
       case 2:
-        return Colors.grey[400]!; // Silver
+        return const [Color(0xFFE0E0E0), Color(0xFFB0BEC5)];
       case 3:
-        return Colors.brown[400]!; // Bronze
+        return const [Color(0xFFBCAAA4), Color(0xFFA1887F)];
       default:
-        return Theme.of(context).primaryColor;
+        return const [Color(0xFFFFFFFF), Color(0xFFFFFFFF)];
     }
+  }
+
+  Widget _buildGlassPanel({
+    required Widget child,
+    EdgeInsetsGeometry padding = const EdgeInsets.all(24),
+  }) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(34),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+        child: Container(
+          width: double.infinity,
+          padding: padding,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(34),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+            color: Colors.white.withValues(alpha: 0.05),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.25),
+                blurRadius: 30,
+                offset: const Offset(0, 18),
+              ),
+            ],
+          ),
+          child: child,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWorldBackground() {
+    return Positioned.fill(
+      child: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFF03050F),
+              Color(0xFF09122B),
+              Color(0xFF021B17),
+            ],
+          ),
+        ),
+        child: Stack(
+          children: [
+            _buildGlow(const Offset(-140, -60), Colors.blueAccent),
+            _buildGlow(const Offset(140, 220), Colors.purpleAccent),
+            _buildGlow(const Offset(-20, 380), Colors.tealAccent),
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    center: Alignment.center,
+                    radius: 1.2,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withValues(alpha: 0.6),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGlow(Offset offset, Color color) {
+    return Positioned(
+      left: offset.dx < 0 ? null : offset.dx,
+      right: offset.dx < 0 ? -offset.dx : null,
+      top: offset.dy,
+      child: Container(
+        width: 220,
+        height: 220,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: color.withValues(alpha: 0.18),
+          boxShadow: [
+            BoxShadow(
+              color: color.withValues(alpha: 0.4),
+              blurRadius: 120,
+              spreadRadius: 20,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   String _getCategoryDescription(LeaderboardCategory category) {
     switch (category) {
       case LeaderboardCategory.totalXP:
-        return 'Total experience points earned across all activities';
+        return 'Total experience across every action';
       case LeaderboardCategory.capturesCreated:
-        return 'Number of art captures created by users';
+        return 'Art captures added to the map';
       case LeaderboardCategory.artWalksCompleted:
-        return 'Number of art walks completed by users';
+        return 'Curated walks fans have finished';
       case LeaderboardCategory.artWalksCreated:
-        return 'Number of public art walks created';
+        return 'Art walks published for the community';
       case LeaderboardCategory.level:
-        return 'Highest level achieved based on experience';
+        return 'Highest verified creator level';
       case LeaderboardCategory.highestRatedCapture:
-        return 'Highest rated art capture (5-star rating system)';
+        return 'Best-rated capture this season';
       case LeaderboardCategory.highestRatedArtWalk:
-        return 'Highest rated art walk (5-star rating system)';
+        return 'Best-rated walk this season';
     }
   }
 
   String _formatValue(int value, LeaderboardCategory category) {
     if (category == LeaderboardCategory.totalXP) {
       return _formatNumber(value);
-    } else if (category == LeaderboardCategory.highestRatedCapture ||
+    }
+    if (category == LeaderboardCategory.highestRatedCapture ||
         category == LeaderboardCategory.highestRatedArtWalk) {
-      // Convert back from scaled integer to rating (if we were storing ratings * 100)
-      // For now, just show the value as stars if it's between 1-5
       if (value >= 1 && value <= 5) {
         return '$value⭐';
-      } else if (value == 0) {
+      }
+      if (value == 0) {
         return 'No rating';
       }
-      return value.toString();
     }
     return value.toString();
   }
@@ -465,71 +697,5 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
       return '${(number / 1000).toStringAsFixed(1)}K';
     }
     return number.toString();
-  }
-}
-
-class _StatCard extends StatelessWidget {
-  final String title;
-  final String value;
-  final IconData icon;
-
-  const _StatCard({
-    required this.title,
-    required this.value,
-    required this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Icon(icon, color: Colors.white, size: 24),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        Text(
-          title,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.8),
-            fontSize: 12,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _TabBarDelegate extends SliverPersistentHeaderDelegate {
-  final TabBar tabBar;
-
-  _TabBarDelegate(this.tabBar);
-
-  @override
-  double get minExtent => tabBar.preferredSize.height;
-
-  @override
-  double get maxExtent => tabBar.preferredSize.height;
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
-    return Container(
-      color: Theme.of(context).scaffoldBackgroundColor,
-      child: tabBar,
-    );
-  }
-
-  @override
-  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) {
-    return false;
   }
 }

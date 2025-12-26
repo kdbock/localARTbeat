@@ -15,7 +15,8 @@ import '../constants/routes.dart';
 /// Login screen with email/password authentication (Quest theme)
 class LoginScreen extends StatefulWidget {
   final AuthService? authService; // Optional for testing
-  const LoginScreen({super.key, this.authService});
+  final bool enableBackgroundAnimation;
+  const LoginScreen({super.key, this.authService, this.enableBackgroundAnimation = true});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -38,10 +39,36 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     super.initState();
     _authService = widget.authService ?? AuthService();
 
-    _loop = AnimationController(vsync: this, duration: const Duration(seconds: 9))
-      ..repeat();
-    _intro = AnimationController(vsync: this, duration: const Duration(milliseconds: 700))
-      ..forward();
+    _loop = AnimationController(vsync: this, duration: const Duration(seconds: 9));
+    if (widget.enableBackgroundAnimation) {
+      _loop.repeat();
+    }
+    _intro = AnimationController(vsync: this, duration: const Duration(milliseconds: 700));
+    if (widget.enableBackgroundAnimation) {
+      _intro.forward();
+    } else {
+      _intro.value = 1;
+    }
+  }
+
+  @override
+  void didUpdateWidget(LoginScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.enableBackgroundAnimation != widget.enableBackgroundAnimation) {
+      if (widget.enableBackgroundAnimation) {
+        if (!_loop.isAnimating) {
+          _loop.repeat();
+        }
+        if (!_intro.isAnimating && _intro.value != 1) {
+          _intro.forward();
+        }
+      } else {
+        _loop.stop();
+        _loop.reset();
+        _intro.stop();
+        _intro.value = 1;
+      }
+    }
   }
 
   @override
@@ -402,6 +429,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
 
                               // Social buttons (glass neon)
                               _SocialButton(
+                                key: const Key('google_sign_in_button'),
                                 label: 'auth_sign_in_with_google'.tr(),
                                 icon: Icons.g_mobiledata,
                                 accent: const Color(0xFFFF3D8D),
@@ -410,6 +438,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                               const SizedBox(height: 10),
                               if (_showApple)
                                 _SocialButton(
+                                  key: const Key('apple_sign_in_button'),
                                   label: 'auth_sign_in_with_apple'.tr(),
                                   icon: Icons.apple,
                                   accent: const Color(0xFFFFC857),
@@ -721,6 +750,7 @@ class _SocialButton extends StatelessWidget {
   final VoidCallback? onTap;
 
   const _SocialButton({
+    super.key,
     required this.label,
     required this.icon,
     required this.accent,

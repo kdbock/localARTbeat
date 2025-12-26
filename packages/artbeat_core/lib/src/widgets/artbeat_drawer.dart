@@ -419,7 +419,7 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer>
   }
 
   Widget _buildDrawerHeader() {
-    final headerHeight = _isCurrentUserAdmin() ? 170.0 : 150.0;
+    final headerHeight = _isCurrentUserAdmin() ? 200.0 : 180.0;
 
     return SizedBox(
       height: headerHeight,
