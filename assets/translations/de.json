@@ -3326,7 +3326,7 @@
   "explore_upcoming_events": "Bevorstehende Veranstaltungen",
   "explore_upcoming_events_subtitle": "Nicht verpassen!",
 
-   "animated_dashboard_level_prefix": "LV ",
+  "animated_dashboard_level_prefix": "LV ",
   "animated_dashboard_xp_label": "XP",
   "animated_dashboard_streak_suffix": "",
   "profile_bin_main_text_artbeat_profile_module": "ARTbeat Profilmodul",
@@ -3369,6 +3369,13 @@
   "animated_dashboard_connect_title": "VERNETZEN",
   "animated_dashboard_connect_subtitle": "Künstler, Feed, Aufträge & Veranstaltungen",
   "animated_dashboard_connect_tag": "SOZIAL",
+
+  "animated_dashboard_title_local": "Lokal ",
+  "animated_dashboard_title_art": "KUNST",
+  "animated_dashboard_title_beat": "beat",
+  "animated_dashboard_quest_hub": "QUEST-HUB",
+  "animated_dashboard_artist_label": "Ich bin Künstler",
+  "animated_dashboard_business_label": "Lokales Unternehmen",
 
   "quest_capture_title": "AUFNEHMEN",
   "quest_capture_subtitle": "Scout → Foto → Auf die Karte hochladen",
