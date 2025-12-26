@@ -99,6 +99,11 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                       onSettings: () {
                         Navigator.pushNamed(context, '/settings');
                       },
+                      onLanguageChanged: () {
+                        if (mounted) {
+                          setState(() {});
+                        }
+                      },
                     ),
                   ),
 
@@ -261,6 +266,7 @@ class _GameHUD extends StatelessWidget {
   final int streakDays;
   final VoidCallback onProfile;
   final VoidCallback onSettings;
+  final VoidCallback onLanguageChanged;
 
   const _GameHUD({
     required this.level,
@@ -268,6 +274,7 @@ class _GameHUD extends StatelessWidget {
     required this.streakDays,
     required this.onProfile,
     required this.onSettings,
+    required this.onLanguageChanged,
   });
 
   @override
@@ -283,7 +290,7 @@ class _GameHUD extends StatelessWidget {
               const SizedBox(width: 10),
               _Streak(streakDays: streakDays),
               const SizedBox(width: 10),
-              const _LanguageSelector(),
+              _LanguageSelector(onLanguageChanged: onLanguageChanged),
             ],
           ),
         ),
@@ -1050,7 +1057,8 @@ class _Streak extends StatelessWidget {
 /// =======================
 
 class _LanguageSelector extends StatelessWidget {
-  const _LanguageSelector();
+  final VoidCallback onLanguageChanged;
+  const _LanguageSelector({required this.onLanguageChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -1059,8 +1067,9 @@ class _LanguageSelector extends StatelessWidget {
     final String flagCode = _getFlagCode(currentLang);
 
     return PopupMenuButton<String>(
-      onSelected: (String lang) {
-        context.setLocale(Locale(lang));
+      onSelected: (String lang) async {
+        await context.setLocale(Locale(lang));
+        onLanguageChanged();
       },
       itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
         const PopupMenuItem<String>(
