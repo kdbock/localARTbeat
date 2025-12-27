@@ -169,14 +169,18 @@ class _RegisterScreenState extends State<RegisterScreen>
 
   void _navigateToTerms() {
     Navigator.of(context).push(
-      MaterialPageRoute<Widget>(builder: (context) => const TermsOfServiceScreen()),
+      MaterialPageRoute<Widget>(
+        builder: (context) => const TermsOfServiceScreen(),
+      ),
     );
   }
 
   void _navigateToPrivacyPolicy() {
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute<Widget>(builder: (context) => const PrivacyPolicyScreen()));
+    Navigator.of(context).push(
+      MaterialPageRoute<Widget>(
+        builder: (context) => const PrivacyPolicyScreen(),
+      ),
+    );
   }
 
   @override

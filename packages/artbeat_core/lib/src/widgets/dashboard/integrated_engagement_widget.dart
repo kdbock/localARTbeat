@@ -675,10 +675,8 @@ class _IntegratedEngagementWidgetState extends State<IntegratedEngagementWidget>
             ),
             const SizedBox(height: 20),
             ElevatedButton.icon(
-              onPressed: () => Navigator.pushNamed(
-                context,
-                '/art-walk/dashboard',
-              ),
+              onPressed: () =>
+                  Navigator.pushNamed(context, '/art-walk/dashboard'),
               icon: const Icon(Icons.explore),
               label: Text('dashboard_start_quest'.tr()),
               style: ElevatedButton.styleFrom(
