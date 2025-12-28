@@ -6,14 +6,16 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_capture/artbeat_capture.dart';
-import '../models/public_art_model.dart';
-import '../widgets/art_walk_drawer.dart';
+import 'package:artbeat_art_walk/src/models/public_art_model.dart';
+import 'package:artbeat_art_walk/src/widgets/art_walk_drawer.dart';
 
-import '../widgets/offline_map_fallback.dart';
-import '../widgets/offline_art_walk_widget.dart';
-import '../theme/art_walk_design_system.dart';
+import 'package:artbeat_art_walk/src/widgets/offline_map_fallback.dart';
+import 'package:artbeat_art_walk/src/widgets/offline_art_walk_widget.dart';
+import 'package:artbeat_art_walk/src/theme/art_walk_design_system.dart';
 
 /// Screen that displays a map with nearby captures and art walks
 class ArtWalkMapScreen extends StatefulWidget {
@@ -25,8 +27,8 @@ class ArtWalkMapScreen extends StatefulWidget {
 
 class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
   // Services
-  final CaptureService _captureService = CaptureService();
-  final UserService _userService = UserService();
+  late final CaptureService _captureService;
+  late final UserService _userService;
 
   // Scaffold key for drawer control
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -42,6 +44,9 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
   bool _hasMapError = false;
   String _mapErrorMessage = '';
   bool _showCapturesSlider = false;
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>?
+      _notificationSubscription;
+  int _unreadNotificationCount = 0;
 
   // Map data
   final Set<Marker> _markers = <Marker>{};
@@ -58,13 +63,17 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
   @override
   void initState() {
     super.initState();
+    _captureService = context.read<CaptureService>();
+    _userService = context.read<UserService>();
     _initializeMapsAndLocation();
+    _listenToNotificationBadge();
   }
 
   @override
   void dispose() {
     _locationUpdateTimer?.cancel();
     _mapController?.dispose();
+    _notificationSubscription?.cancel();
     super.dispose();
   }
 
@@ -184,6 +193,39 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
         setState(() => _isLoading = false);
       }
     }
+  }
+
+  void _listenToNotificationBadge() {
+    final user = FirebaseAuth.instance.currentUser;
+    _notificationSubscription?.cancel();
+
+    if (user == null) {
+      if (mounted && _unreadNotificationCount != 0) {
+        setState(() => _unreadNotificationCount = 0);
+      }
+      return;
+    }
+
+    _notificationSubscription = FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .collection('notifications')
+        .where('read', isEqualTo: false)
+        .limit(50)
+        .snapshots()
+        .listen(
+      (snapshot) {
+        if (!mounted) return;
+        final unreadCount = snapshot.size;
+        if (unreadCount == _unreadNotificationCount) return;
+        setState(() => _unreadNotificationCount = unreadCount);
+      },
+      onError: (Object error, StackTrace stackTrace) {
+        AppLogger.error(
+          'Error listening to notification badge: $error\n$stackTrace',
+        );
+      },
+    );
   }
 
   /// Try to get user's current location with proper error handling
@@ -646,6 +688,7 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
               onPressed: () => Navigator.pushNamed(context, '/messaging'),
             ),
             Stack(
+              clipBehavior: Clip.none,
               children: [
                 IconButton(
                   icon: Icon(
@@ -657,7 +700,35 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
                   onPressed: () =>
                       Navigator.pushNamed(context, '/notifications'),
                 ),
-                // TODO: Add notification badge logic here if needed
+                if (_unreadNotificationCount > 0)
+                  Positioned(
+                    right: 4,
+                    top: 6,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: ArtWalkDesignSystem.hudActiveColor,
+                        borderRadius: BorderRadius.circular(999),
+                        border: Border.all(
+                          color: Colors.black.withValues(alpha: 0.25),
+                          width: 1,
+                        ),
+                      ),
+                      child: Text(
+                        _unreadNotificationCount > 99
+                            ? '99+'
+                            : _unreadNotificationCount.toString(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
               ],
             ),
             IconButton(

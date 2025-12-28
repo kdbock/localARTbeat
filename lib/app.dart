@@ -16,11 +16,13 @@ import 'src/routing/app_router.dart';
 import 'src/services/firebase_initializer.dart';
 import 'src/widgets/error_boundary.dart';
 
+/// Global navigator key for navigation from services
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 class MyApp extends StatelessWidget {
   MyApp({super.key}) {
     _setupGlobalErrorHandling();
   }
-  final navigatorKey = GlobalKey<NavigatorState>();
   final _firebaseInitializer = FirebaseInitializer();
   final _appRouter = AppRouter();
 
@@ -163,6 +165,42 @@ class MyApp extends StatelessWidget {
             ),
             Provider<ArtWalkService>(
               create: (_) => ArtWalkService(),
+              lazy: true,
+            ),
+            Provider<ArtWalkProgressService>(
+              create: (_) => ArtWalkProgressService(),
+              lazy: true,
+            ),
+            Provider<ArtWalkNavigationService>(
+              create: (_) => ArtWalkNavigationService(),
+              lazy: true,
+            ),
+            Provider<AchievementService>(
+              create: (_) => AchievementService(),
+              lazy: true,
+            ),
+            Provider<AudioNavigationService>(
+              create: (_) => AudioNavigationService(),
+              lazy: true,
+            ),
+            Provider<SocialService>(
+              create: (_) => SocialService(),
+              lazy: true,
+            ),
+            Provider<InstantDiscoveryService>(
+              create: (_) => InstantDiscoveryService(),
+              lazy: true,
+            ),
+            Provider<ChallengeService>(
+              create: (_) => ChallengeService(),
+              lazy: true,
+            ),
+            Provider<WeeklyGoalsService>(
+              create: (_) => WeeklyGoalsService(),
+              lazy: true,
+            ),
+            Provider<RewardsService>(
+              create: (_) => RewardsService(),
               lazy: true,
             ),
             Provider<capture.CaptureService>(

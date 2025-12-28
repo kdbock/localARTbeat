@@ -3,10 +3,10 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../widgets/hud_top_bar.dart';
-import '../widgets/glass_card.dart';
-import '../widgets/glass_text_field.dart';
-import '../widgets/hud_button.dart';
+import 'package:artbeat_capture/src/widgets/hud_top_bar.dart';
+import 'package:artbeat_capture/src/widgets/glass_card.dart';
+import 'package:artbeat_capture/src/widgets/glass_text_field.dart';
+import 'package:artbeat_capture/src/widgets/hud_button.dart';
 
 class CaptureUploadScreen extends StatefulWidget {
   const CaptureUploadScreen({super.key});

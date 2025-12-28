@@ -92,8 +92,9 @@ class ArtLocationCluster extends Equatable {
       primaryArtId: data['primaryArtId'] as String? ?? '',
       radius: (data['radius'] as num? ?? 50.0).toDouble(),
       contributorCount: data['contributorCount'] as int? ?? 0,
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
-      updatedAt: (data['updatedAt'] as Timestamp).toDate(),
+      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      updatedAt:
+          (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       artPieceVotes: Map<String, int>.from(data['artPieceVotes'] as Map? ?? {}),
       status: ClusterStatus.values.firstWhere(
         (e) => e.name == data['status'],

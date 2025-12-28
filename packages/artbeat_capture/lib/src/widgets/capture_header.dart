@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:artbeat_core/artbeat_core.dart';
 
 /// Capture Package Specific Header
 ///
@@ -216,7 +217,7 @@ class _CaptureHeaderState extends State<CaptureHeader> {
               title: Text('capture_menu_take_photo'.tr()),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.pushNamed(context, '/capture/camera');
+                Navigator.pushNamed(context, AppRoutes.captureCamera);
               },
             ),
             ListTile(
@@ -224,7 +225,7 @@ class _CaptureHeaderState extends State<CaptureHeader> {
               title: Text('capture_menu_photo_gallery'.tr()),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.pushNamed(context, '/capture/gallery');
+                Navigator.pushNamed(context, AppRoutes.captureGallery);
               },
             ),
             ListTile(
@@ -232,7 +233,7 @@ class _CaptureHeaderState extends State<CaptureHeader> {
               title: Text('capture_menu_edit_photos'.tr()),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.pushNamed(context, '/capture/edit');
+                Navigator.pushNamed(context, AppRoutes.captureEdit);
               },
             ),
             const SizedBox(height: 20),
@@ -243,11 +244,11 @@ class _CaptureHeaderState extends State<CaptureHeader> {
   }
 
   void _navigateToSearch() {
-    Navigator.pushNamed(context, '/search');
+    Navigator.pushNamed(context, AppRoutes.search);
   }
 
   void _openMessaging() {
-    Navigator.pushNamed(context, '/messaging');
+    Navigator.pushNamed(context, AppRoutes.messaging);
   }
 
   void _showDeveloperMenu() {

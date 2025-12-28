@@ -42,11 +42,15 @@ class NotificationService {
   FirebaseFirestore get firestore => _firestore ??= FirebaseFirestore.instance;
   FirebaseAuth get auth => _auth ??= FirebaseAuth.instance;
 
+  /// Callback for navigation when notification is tapped
+  final void Function(String route)? onNavigateToRoute;
+
   NotificationService({
     FirebaseMessaging? messaging,
     FirebaseFirestore? firestore,
     FirebaseAuth? auth,
     SharedPreferences? prefs,
+    this.onNavigateToRoute,
   }) : _messaging = messaging,
        _firestore = firestore,
        _auth = auth,
@@ -634,25 +638,9 @@ class NotificationService {
         '${type.emoji} Handling notification tap - Type: ${type.value}, Route: $route',
       );
 
-      // Route to appropriate screen based on type
-      switch (type) {
-        case NotificationType.message:
-          // Route to messaging screen
-          AppLogger.info('📬 Routing to messaging screen');
-          break;
-        case NotificationType.gift:
-          AppLogger.info('🎁 Routing to gifts screen');
-          // Route would be: /gifts/received
-          break;
-        case NotificationType.commission:
-          AppLogger.info('🎨 Routing to commissions screen');
-          // Route would be: /commissions/requests
-          break;
-        case NotificationType.event:
-          AppLogger.info('📅 Routing to events screen');
-          // Route would be: /events/details
-          break;
-      }
+      // For all notification types, route to notifications screen
+      AppLogger.info('${type.emoji} Routing to notifications screen');
+      onNavigateToRoute?.call('/notifications');
     } catch (e) {
       AppLogger.error('❌ Error handling notification tap: $e');
     }

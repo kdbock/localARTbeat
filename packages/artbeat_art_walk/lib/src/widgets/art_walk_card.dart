@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import '../models/art_walk_model.dart';
+import 'package:artbeat_art_walk/src/models/art_walk_model.dart';
 
 /// Individual art walk card for display in lists and search results
 ///

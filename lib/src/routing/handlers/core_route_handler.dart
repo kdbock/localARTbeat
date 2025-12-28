@@ -36,7 +36,7 @@ class CoreRouteHandler implements RouteHandler {
       case core.AppRoutes.dashboard:
         return RouteUtils.createSafeRoute(core.AppRoutes.dashboard, () {
           core.AppLogger.info('🏠 Building dashboard screen...');
-          return const core.ArtbeatDashboardScreen();
+          return const core.AnimatedDashboardScreen();
         });
 
       case core.AppRoutes.auth:

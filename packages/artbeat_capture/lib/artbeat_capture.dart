@@ -13,6 +13,8 @@ export 'src/screens/capture_detail_viewer_screen.dart';
 export 'src/screens/capture_edit_screen.dart';
 export 'src/screens/admin_content_moderation_screen.dart';
 export 'src/screens/my_captures_screen.dart';
+export 'src/screens/my_captures_pending_screen.dart';
+export 'src/screens/my_captures_approved_screen.dart';
 export 'src/screens/capture_screen.dart';
 export 'src/screens/capture_view_screen.dart';
 export 'src/services/capture_service.dart';

@@ -40,12 +40,8 @@ class ArtWalkCommentModel {
     final data = doc.data() as Map<String, dynamic>;
 
     // Handle server timestamps that might be null for new comments
-    DateTime createdAt;
-    if (data['createdAt'] is Timestamp) {
-      createdAt = (data['createdAt'] as Timestamp).toDate();
-    } else {
-      createdAt = DateTime.now(); // Fallback for new comments
-    }
+    final createdAt =
+        (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now();
 
     return ArtWalkCommentModel(
       id: doc.id,

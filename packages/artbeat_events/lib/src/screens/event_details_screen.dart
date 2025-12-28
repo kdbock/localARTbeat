@@ -9,6 +9,7 @@ import '../models/ticket_type.dart';
 import '../services/event_service.dart';
 import '../services/calendar_integration_service.dart';
 import '../services/event_notification_service.dart';
+import '../widgets/glass_kit.dart';
 import '../widgets/ticket_purchase_sheet.dart';
 import '../utils/event_utils.dart';
 
@@ -36,7 +37,6 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
   bool _isLoading = true;
   String? _error;
   final ScrollController _scrollController = ScrollController();
-  final GlobalKey _ticketsSectionKey = GlobalKey();
   bool _isProcessingAction = false;
 
   @override
@@ -69,529 +69,880 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return MainLayout(
-      currentIndex: 4, // Events index
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(kToolbarHeight + 4),
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Color(0xFFE74C3C), // Red
-                Color(0xFF3498DB), // Light Blue
-              ],
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black26,
-                blurRadius: 8,
-                offset: Offset(0, 2),
-              ),
-            ],
-          ),
-          child: EnhancedUniversalHeader(
-            title: _event?.title ?? 'Event Details',
-            showLogo: false,
-            actions: [
-              if (_event != null) ...[
-                IconButton(
-                  onPressed: _shareEvent,
-                  icon: const Icon(Icons.share),
-                ),
-                PopupMenuButton<String>(
-                  onSelected: _handleMenuAction,
-                  itemBuilder: (context) => [
-                    PopupMenuItem(
-                      value: 'add_to_calendar',
-                      child: ListTile(
-                        leading: const Icon(Icons.calendar_today),
-                        title: Text('events_add_to_calendar'.tr()),
-                        contentPadding: EdgeInsets.zero,
-                      ),
-                    ),
-                    PopupMenuItem(
-                      value: 'set_reminder',
-                      child: ListTile(
-                        leading: const Icon(Icons.notifications),
-                        title: Text('events_set_reminder'.tr()),
-                        contentPadding: EdgeInsets.zero,
-                      ),
-                    ),
-                    PopupMenuItem(
-                      value: 'report',
-                      child: ListTile(
-                        leading: const Icon(Icons.flag),
-                        title: Text('events_report_event'.tr()),
-                        contentPadding: EdgeInsets.zero,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ],
-          ),
+      currentIndex: 4,
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Stack(
+          children: [
+            const WorldBackdrop(),
+            Positioned.fill(child: _buildBody()),
+          ],
         ),
       ),
-      child: _buildBody(),
     );
   }
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(
+        child: CircularProgressIndicator(color: Color(0xFF22D3EE)),
+      );
     }
 
     if (_error != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(_error!, style: const TextStyle(color: Colors.red)),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _loadEvent,
-              child: Text('events_retry'.tr()),
-            ),
-          ],
-        ),
+      return _buildCenteredState(
+        icon: Icons.error_outline,
+        title: _error!,
+        actionLabel: 'events_retry'.tr(),
+        onAction: _loadEvent,
       );
     }
 
     if (_event == null) {
-      return Center(child: Text('event_not_found'.tr()));
+      return _buildCenteredState(
+        icon: Icons.event_busy,
+        title: 'event_not_found'.tr(),
+      );
     }
 
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            ArtbeatColors.primaryPurple.withAlpha(25),
-            ArtbeatColors.backgroundPrimary,
-            ArtbeatColors.primaryGreen.withAlpha(25),
-          ],
-        ),
-      ),
-      child: SingleChildScrollView(
-        controller: _scrollController,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildEventBanner(),
-            _buildEventHeader(),
-            _buildEventInfo(),
-            _buildEventDescription(),
-            _buildTicketTypes(),
-            _buildEventTags(),
-            _buildRefundPolicy(),
-            _buildContactInfo(),
-            const SizedBox(height: 100), // Space for floating action button
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEventBanner() {
-    return SizedBox(
-      height: 250,
-      width: double.infinity,
-      child: _event!.eventBannerUrl.isNotEmpty
-          ? ImageManagementService().getOptimizedImage(
-              imageUrl: _event!.eventBannerUrl,
-              width: double.infinity,
-              height: 250,
-              errorWidget: _buildPlaceholderBanner(),
-            )
-          : _buildPlaceholderBanner(),
-    );
-  }
-
-  Widget _buildPlaceholderBanner() {
-    return Container(
-      color: Colors.grey.shade200,
+    return SafeArea(
+      bottom: false,
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.event, size: 64, color: Colors.grey.shade400),
-          const SizedBox(height: 16),
-          Text(
-            'Event Banner',
-            style: TextStyle(color: Colors.grey.shade400, fontSize: 18),
+          _buildHudBar(),
+          Expanded(
+            child: SingleChildScrollView(
+              controller: _scrollController,
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(18, 0, 18, 120),
+              child: Column(
+                children: [
+                  _buildHeroSection(),
+                  const SizedBox(height: 18),
+                  _buildSummaryCard(),
+                  const SizedBox(height: 16),
+                  _buildActionRow(),
+                  if (_event!.description.trim().isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    _buildDescriptionSection(),
+                  ],
+                  const SizedBox(height: 16),
+                  _buildInfoGrid(),
+                  if (_event!.ticketTypes.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    _buildTicketsSection(),
+                  ],
+                  if (_sanitizedTags.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    _buildTagsSection(),
+                  ],
+                  const SizedBox(height: 16),
+                  _buildRefundSection(),
+                  const SizedBox(height: 16),
+                  _buildContactSection(),
+                  const SizedBox(height: 40),
+                ],
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildEventHeader() {
+  Widget _buildHudBar() {
+    final event = _event;
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(18, 6, 18, 18),
+      child: Row(
+        children: [
+          GlassIconButton(
+            icon: Icons.arrow_back,
+            onTap: () => Navigator.of(context).maybePop(),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'events_event_details'.tr(),
+                  style: const TextStyle(
+                    color: Color(0xF2FFFFFF),
+                    fontWeight: FontWeight.w900,
+                    fontSize: 20,
+                  ),
+                ),
+                if (event != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    event.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.65),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          if (event != null) ...[
+            const SizedBox(width: 12),
+            GlassIconButton(icon: Icons.share, onTap: _shareEvent),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeroSection() {
+    final event = _event!;
+    final bannerUrl = event.eventBannerUrl.isNotEmpty
+        ? event.eventBannerUrl
+        : (event.imageUrls.isNotEmpty ? event.imageUrls.first : '');
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(28),
+      child: SizedBox(
+        height: 260,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            if (bannerUrl.isNotEmpty)
+              OptimizedImage(
+                imageUrl: bannerUrl,
+                width: double.infinity,
+                height: double.infinity,
+              )
+            else
+              _buildHeroFallback(event.category),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withValues(alpha: 0.15),
+                    Colors.black.withValues(alpha: 0.8),
+                  ],
+                ),
+              ),
+            ),
+            Positioned(
+              top: 16,
+              left: 16,
+              child: _buildCategoryChip(event.category),
+            ),
+            Positioned(top: 16, right: 16, child: _buildCapacityChip(event)),
+            Positioned(
+              left: 16,
+              right: 16,
+              bottom: 16,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        EventUtils.formatEventDate(event.dateTime),
+                        style: const TextStyle(
+                          color: Color(0xF2FFFFFF),
+                          fontWeight: FontWeight.w900,
+                          fontSize: 18,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        EventUtils.formatEventTime(event.dateTime),
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.85),
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Text(
+                    EventUtils.getTimeUntilEvent(event.dateTime),
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.75),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeroFallback(String category) {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF7C4DFF), Color(0xFF22D3EE), Color(0xFF34D399)],
+        ),
+      ),
+      child: Icon(
+        _iconForCategory(category),
+        color: Colors.white.withValues(alpha: 0.9),
+        size: 48,
+      ),
+    );
+  }
+
+  Widget _buildCategoryChip(String category) {
+    final label = category.isEmpty ? 'events_event_details'.tr() : category;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.95),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: Color(0xFF0B1220),
+          fontWeight: FontWeight.w800,
+          fontSize: 12,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCapacityChip(ArtbeatEvent event) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.people_alt, color: Color(0xF2FFFFFF), size: 16),
+          const SizedBox(width: 6),
+          Text(
+            '${event.attendeeIds.length}/${event.maxAttendees}',
+            style: const TextStyle(
+              color: Color(0xF2FFFFFF),
+              fontWeight: FontWeight.w700,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryCard() {
+    final event = _event!;
+    final status = EventUtils.getEventStatus(event);
+    final hostName = _hostName;
+
+    return GlassSurface(
+      radius: 28,
+      padding: const EdgeInsets.all(22),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            _event!.title,
-            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            event.title,
+            style: const TextStyle(
+              color: Color(0xF2FFFFFF),
+              fontWeight: FontWeight.w900,
+              fontSize: 22,
+            ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: _getStatusColor().withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: _getStatusColor()),
-                ),
-                child: Text(
-                  EventUtils.getEventStatus(_event!),
-                  style: TextStyle(
-                    color: _getStatusColor(),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
+              _buildStatusChip(status),
               const SizedBox(width: 12),
               Text(
-                EventUtils.getTimeUntilEvent(_event!.dateTime),
-                style: const TextStyle(
-                  color: ArtbeatColors.textSecondary,
-                  fontSize: 14,
+                EventUtils.getTimeUntilEvent(event.dateTime),
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.7),
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
                 ),
               ),
             ],
           ),
+          const SizedBox(height: 16),
+          _buildMetaRow(Icons.location_on_outlined, event.location),
+          const SizedBox(height: 10),
+          _buildMetaRow(
+            Icons.category_outlined,
+            event.category.isEmpty ? 'events_event_tags'.tr() : event.category,
+          ),
+          if (hostName != null) ...[
+            const SizedBox(height: 16),
+            _buildHostRow(hostName),
+          ],
         ],
       ),
     );
   }
 
-  Widget _buildEventInfo() {
+  Widget _buildStatusChip(String status) {
+    final color = _statusColor(status);
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: ArtbeatColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: ArtbeatColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: ArtbeatColors.primaryPurple.withAlpha(26),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: color.withValues(alpha: 0.18),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: color.withValues(alpha: 0.6)),
       ),
-      child: Column(
-        children: [
-          _buildInfoRow(
-            Icons.calendar_today,
-            'Date',
-            EventUtils.formatEventDate(_event!.dateTime),
-          ),
-          const SizedBox(height: 12),
-          _buildInfoRow(
-            Icons.access_time,
-            'Time',
-            EventUtils.formatEventTime(_event!.dateTime),
-          ),
-          const SizedBox(height: 12),
-          _buildInfoRow(Icons.location_on, 'Location', _event!.location),
-          const SizedBox(height: 12),
-          _buildInfoRow(
-            Icons.people,
-            'Capacity',
-            '${_event!.attendeeIds.length} / ${_event!.maxAttendees} attendees',
-          ),
-        ],
+      child: Text(
+        status,
+        style: TextStyle(
+          color: color,
+          fontWeight: FontWeight.w800,
+          fontSize: 12,
+        ),
       ),
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String label, String value) {
+  Widget _buildHostRow(String name) {
+    final event = _event!;
+    final hasImage = ImageUrlValidator.isValidImageUrl(event.artistHeadshotUrl);
+
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 20, color: ArtbeatColors.primaryPurple),
+        CircleAvatar(
+          radius: 20,
+          backgroundColor: Colors.white.withValues(alpha: 0.12),
+          backgroundImage: hasImage
+              ? ImageUrlValidator.safeNetworkImage(event.artistHeadshotUrl)
+              : null,
+          child: hasImage
+              ? null
+              : const Icon(Icons.person, color: Colors.white70, size: 18),
+        ),
         const SizedBox(width: 12),
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: const TextStyle(
-                  color: ArtbeatColors.textSecondary,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: ArtbeatColors.textPrimary,
-                ),
-              ),
-            ],
+          child: Text(
+            name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: Color(0xF2FFFFFF),
+              fontWeight: FontWeight.w700,
+              fontSize: 14,
+            ),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildEventDescription() {
-    return Padding(
-      padding: const EdgeInsets.all(16),
+  Widget _buildInfoGrid() {
+    final event = _event!;
+    return Row(
+      children: [
+        Expanded(
+          child: _buildInfoTile(
+            icon: Icons.calendar_today,
+            label: 'events_date'.tr(),
+            value: EventUtils.formatEventDate(event.dateTime),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildInfoTile(
+            icon: Icons.access_time,
+            label: 'events_time'.tr(),
+            value: EventUtils.formatEventTime(event.dateTime),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildInfoTile(
+            icon: Icons.people_alt,
+            label: 'events_capacity'.tr(),
+            value: '${event.attendeeIds.length}/${event.maxAttendees}',
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInfoTile({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return GlassSurface(
+      radius: 22,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'About This Event',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          Icon(icon, color: Colors.white.withValues(alpha: 0.85), size: 18),
+          const SizedBox(height: 10),
+          Text(
+            label,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.65),
+              fontWeight: FontWeight.w600,
+              fontSize: 12,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: const TextStyle(
+              color: Color(0xF2FFFFFF),
+              fontWeight: FontWeight.w800,
+              fontSize: 14,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionRow() {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildQuickAction(
+            icon: Icons.calendar_month,
+            label: 'events_add_to_calendar'.tr(),
+            onTap: _isProcessingAction
+                ? null
+                : () => _handleMenuAction('add_to_calendar'),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildQuickAction(
+            icon: Icons.notifications_active,
+            label: 'events_set_reminder'.tr(),
+            onTap: _isProcessingAction
+                ? null
+                : () => _handleMenuAction('set_reminder'),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildQuickAction(
+            icon: Icons.flag_outlined,
+            label: 'events_report_event'.tr(),
+            onTap: _showReportDialog,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildQuickAction({
+    required IconData icon,
+    required String label,
+    VoidCallback? onTap,
+  }) {
+    final enabled = onTap != null;
+    return Opacity(
+      opacity: enabled ? 1 : 0.5,
+      child: GestureDetector(
+        onTap: enabled ? onTap : null,
+        child: GlassSurface(
+          radius: 22,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+          fillOpacity: 0.08,
+          borderColor: Colors.white.withValues(alpha: 0.18),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: const Color(0xF2FFFFFF), size: 16),
+              const SizedBox(width: 6),
+              Flexible(
+                child: Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Color(0xF2FFFFFF),
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDescriptionSection() {
+    return GlassSurface(
+      radius: 26,
+      padding: const EdgeInsets.all(22),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'events_about_event'.tr(),
+            style: const TextStyle(
+              color: Color(0xF2FFFFFF),
+              fontWeight: FontWeight.w800,
+              fontSize: 16,
+            ),
           ),
           const SizedBox(height: 12),
           Text(
-            _event!.description,
-            style: const TextStyle(fontSize: 16, height: 1.5),
+            _event!.description.trim(),
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.8),
+              height: 1.5,
+              fontSize: 14,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildTicketTypes() {
-    if (_event!.ticketTypes.isEmpty) return const SizedBox.shrink();
-
-    return Padding(
-      key: _ticketsSectionKey,
-      padding: const EdgeInsets.all(16),
+  Widget _buildTicketsSection() {
+    return GlassSurface(
+      radius: 26,
+      padding: const EdgeInsets.all(22),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Tickets',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          Text(
+            'events_tickets'.tr(),
+            style: const TextStyle(
+              color: Color(0xF2FFFFFF),
+              fontWeight: FontWeight.w800,
+              fontSize: 16,
+            ),
           ),
-          const SizedBox(height: 12),
-          ..._event!.ticketTypes.map(_buildTicketTypeCard),
+          const SizedBox(height: 16),
+          ..._event!.ticketTypes.map(
+            (ticket) => Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: _buildTicketCard(ticket),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildTicketTypeCard(TicketType ticket) {
+  Widget _buildTicketCard(TicketType ticket) {
     final isAvailable = ticket.isAvailable;
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        ticket.name,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      if (ticket.description.isNotEmpty) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          ticket.description,
-                          style: TextStyle(
-                            color: Colors.grey.shade600,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ],
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(22),
+        color: Colors.white.withValues(alpha: 0.05),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+      ),
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  ticket.name,
+                  style: const TextStyle(
+                    color: Color(0xF2FFFFFF),
+                    fontWeight: FontWeight.w800,
+                    fontSize: 16,
                   ),
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      ticket.formattedPrice,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green,
-                      ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    ticket.formattedPrice,
+                    style: const TextStyle(
+                      color: Color(0xFF34D399),
+                      fontWeight: FontWeight.w800,
+                      fontSize: 16,
                     ),
-                    Text(
-                      '${ticket.remainingQuantity} left',
-                      style: TextStyle(
-                        color: Colors.grey.shade600,
-                        fontSize: 12,
+                  ),
+                  Text(
+                    '${ticket.remainingQuantity} ${'events_left'.tr()}',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.6),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          if (ticket.description.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              ticket.description,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.7),
+                fontSize: 13,
+              ),
+            ),
+          ],
+          if (ticket.benefits.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Text(
+              'events_includes'.tr(),
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.8),
+                fontWeight: FontWeight.w700,
+                fontSize: 13,
+              ),
+            ),
+            const SizedBox(height: 6),
+            ...ticket.benefits.map(
+              (benefit) => Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.check_circle,
+                      color: Color(0xFF34D399),
+                      size: 16,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        benefit,
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.8),
+                          fontSize: 13,
+                        ),
                       ),
                     ),
                   ],
                 ),
-              ],
-            ),
-
-            // Benefits for VIP tickets
-            if (ticket.benefits.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              const Text(
-                'Includes:',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-              ),
-              const SizedBox(height: 4),
-              ...ticket.benefits.map(
-                (benefit) => Padding(
-                  padding: const EdgeInsets.only(left: 8, top: 2),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.check, size: 16, color: Colors.green),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          benefit,
-                          style: const TextStyle(fontSize: 13),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: isAvailable
-                    ? () => _showTicketPurchaseSheet(ticket)
-                    : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: isAvailable ? null : Colors.grey.shade300,
-                ),
-                child: Text(
-                  isAvailable ? 'Select Tickets' : 'Sold Out',
-                  style: TextStyle(
-                    color: isAvailable ? null : Colors.grey.shade600,
-                  ),
-                ),
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEventTags() {
-    if (_event!.tags.isEmpty) return const SizedBox.shrink();
-
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Categories',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: _event!.tags.map((tag) {
-              return Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
+          const SizedBox(height: 14),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: isAvailable
+                  ? () => _showTicketPurchaseSheet(ticket)
+                  : null,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: isAvailable
+                    ? const Color(0xFF22D3EE)
+                    : Colors.white.withValues(alpha: 0.1),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18),
                 ),
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.blue.shade200),
+              ),
+              child: Text(
+                isAvailable
+                    ? 'events_select_tickets'.tr()
+                    : 'events_sold_out'.tr(),
+                style: TextStyle(
+                  color: isAvailable
+                      ? Colors.white
+                      : Colors.white.withValues(alpha: 0.6),
+                  fontWeight: FontWeight.w700,
                 ),
-                child: Text(
-                  tag,
-                  style: TextStyle(
-                    color: Colors.blue.shade700,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              );
-            }).toList(),
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildRefundPolicy() {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Row(
-                children: [
-                  Icon(Icons.policy, size: 20),
-                  SizedBox(width: 8),
-                  Text(
-                    'Refund Policy',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                _event!.refundPolicy.fullDescription,
-                style: TextStyle(color: Colors.grey.shade700, fontSize: 14),
-              ),
-            ],
+  Widget _buildTagsSection() {
+    return GlassSurface(
+      radius: 24,
+      padding: const EdgeInsets.all(22),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'events_categories'.tr(),
+            style: const TextStyle(
+              color: Color(0xF2FFFFFF),
+              fontWeight: FontWeight.w800,
+              fontSize: 16,
+            ),
           ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 10,
+            runSpacing: 8,
+            children: _sanitizedTags.map(_buildTagChip).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTagChip(String tag) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(999),
+        color: Colors.white.withValues(alpha: 0.08),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+      ),
+      child: Text(
+        tag,
+        style: const TextStyle(
+          color: Color(0xF2FFFFFF),
+          fontWeight: FontWeight.w600,
+          fontSize: 12,
         ),
       ),
     );
   }
 
-  Widget _buildContactInfo() {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildRefundSection() {
+    return GlassSurface(
+      radius: 24,
+      padding: const EdgeInsets.all(22),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              const Text(
-                'Contact Information',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              const Icon(
+                Icons.policy_outlined,
+                color: Color(0xF2FFFFFF),
+                size: 20,
               ),
-              const SizedBox(height: 12),
-              _buildContactRow(Icons.email, _event!.contactEmail),
-              if (_event!.contactPhone != null &&
-                  _event!.contactPhone!.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                _buildContactRow(Icons.phone, _event!.contactPhone!),
+              const SizedBox(width: 8),
+              Text(
+                'events_refund_policy'.tr(),
+                style: const TextStyle(
+                  color: Color(0xF2FFFFFF),
+                  fontWeight: FontWeight.w800,
+                  fontSize: 16,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            _event!.refundPolicy.fullDescription,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.75),
+              height: 1.4,
+              fontSize: 14,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContactSection() {
+    final event = _event!;
+    return GlassSurface(
+      radius: 24,
+      padding: const EdgeInsets.all(22),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'events_contact_information'.tr(),
+            style: const TextStyle(
+              color: Color(0xF2FFFFFF),
+              fontWeight: FontWeight.w800,
+              fontSize: 16,
+            ),
+          ),
+          const SizedBox(height: 14),
+          _buildMetaRow(Icons.email_outlined, event.contactEmail),
+          if (event.contactPhone != null && event.contactPhone!.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            _buildMetaRow(Icons.phone_outlined, event.contactPhone!),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMetaRow(IconData icon, String value) {
+    return Row(
+      children: [
+        Icon(icon, color: Colors.white.withValues(alpha: 0.7), size: 18),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(
+              color: Color(0xF2FFFFFF),
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCenteredState({
+    required IconData icon,
+    required String title,
+    String? actionLabel,
+    VoidCallback? onAction,
+  }) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: GlassSurface(
+          radius: 26,
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: Colors.white.withValues(alpha: 0.85), size: 46),
+              const SizedBox(height: 16),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Color(0xF2FFFFFF),
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                ),
+              ),
+              if (actionLabel != null && onAction != null) ...[
+                const SizedBox(height: 18),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: onAction,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF22D3EE),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    child: Text(actionLabel),
+                  ),
+                ),
               ],
             ],
           ),
@@ -600,34 +951,51 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
     );
   }
 
-  Widget _buildContactRow(IconData icon, String value) {
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: Colors.grey.shade600),
-        const SizedBox(width: 8),
-        Text(value, style: const TextStyle(fontSize: 14)),
-      ],
-    );
+  List<String> get _sanitizedTags => _event!.tags
+      .map((tag) => tag.trim())
+      .where((tag) => tag.isNotEmpty)
+      .toList(growable: false);
+
+  String? get _hostName {
+    final metadata = _event!.metadata ?? {};
+    final name = metadata['organizerName'] ?? metadata['artistName'];
+    if (name is String && name.trim().isNotEmpty) {
+      return name.trim();
+    }
+    return null;
   }
 
-  Color _getStatusColor() {
-    final status = EventUtils.getEventStatus(_event!);
+  IconData _iconForCategory(String category) {
+    final lower = category.toLowerCase();
+    if (lower.contains('workshop')) return Icons.lightbulb_outline;
+    if (lower.contains('tour')) return Icons.map_outlined;
+    if (lower.contains('concert') || lower.contains('music')) {
+      return Icons.music_note;
+    }
+    if (lower.contains('gallery') || lower.contains('exhibit')) {
+      return Icons.museum_outlined;
+    }
+    return Icons.auto_awesome;
+  }
+
+  Color _statusColor(String status) {
     switch (status) {
       case 'Ended':
         return Colors.grey;
       case 'Sold Out':
-        return Colors.red;
+        return Colors.redAccent;
       case 'Almost Full':
-        return Colors.orange;
+        return Colors.orangeAccent;
       default:
-        return Colors.green;
+        return const Color(0xFF34D399);
     }
   }
 
   void _shareEvent() {
     final eventUrl = 'https://artbeat.app/events/${_event!.id}';
+    final message = 'events_share_text'.tr(namedArgs: {'url': eventUrl});
     // ignore: deprecated_member_use
-    share_plus.Share.share('Check out this event on ARTbeat! $eventUrl');
+    share_plus.Share.share(message);
   }
 
   Future<void> _handleMenuAction(String action) async {

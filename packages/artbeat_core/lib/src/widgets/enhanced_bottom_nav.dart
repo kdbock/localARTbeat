@@ -547,9 +547,7 @@ class _EnhancedBottomNavState extends State<EnhancedBottomNav>
       context.read<CommunityProvider>().markCommunityAsVisited();
     }
 
-    if (index != widget.currentIndex) {
-      widget.onTap(index);
-    }
+    widget.onTap(index);
   }
 }
 

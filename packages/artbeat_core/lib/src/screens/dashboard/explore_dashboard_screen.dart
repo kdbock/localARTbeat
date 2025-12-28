@@ -794,12 +794,31 @@ class _ForYouTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ArtistProfileModel? spotlightArtist = vm.artists.isNotEmpty
-        ? vm.artists.first
-        : null;
-    final ArtworkModel? heroArtwork = vm.artwork.isNotEmpty
-        ? vm.artwork.first
-        : null;
+    // Find artists who have artwork
+    final artistsWithArtwork = vm.artists
+        .where(
+          (artist) =>
+              vm.artwork.any((artwork) => artwork.artistId == artist.userId),
+        )
+        .toList();
+
+    final ArtistProfileModel? spotlightArtist;
+    final ArtworkModel? heroArtwork;
+
+    if (artistsWithArtwork.isNotEmpty) {
+      // Select the first artist who has artwork
+      spotlightArtist = artistsWithArtwork.first;
+      // Find the first artwork by this artist
+      heroArtwork = vm.artwork.firstWhere(
+        (artwork) => artwork.artistId == spotlightArtist!.userId,
+        orElse: () => throw StateError('No artwork found for artist'),
+      );
+    } else {
+      // Fallback to original logic if no matching pairs
+      spotlightArtist = vm.artists.isNotEmpty ? vm.artists.first : null;
+      heroArtwork = vm.artwork.isNotEmpty ? vm.artwork.first : null;
+    }
+
     final EventModel? heroEvent = vm.events.isNotEmpty ? vm.events.first : null;
 
     final featuredArtists = vm.artists.take(6).toList();
@@ -841,6 +860,80 @@ class _ForYouTab extends StatelessWidget {
         SliverToBoxAdapter(child: DashboardArtistCtaSection(viewModel: vm)),
         const SliverToBoxAdapter(child: SizedBox(height: 110)),
       ],
+    );
+  }
+}
+
+class _HeroEventPill extends StatelessWidget {
+  const _HeroEventPill({required this.event});
+
+  final EventModel event;
+
+  @override
+  Widget build(BuildContext context) {
+    final dateLabel = intl.DateFormat('MMM d • h:mm a').format(event.startDate);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Next appearance',
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white70,
+              fontSize: 12,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            event.title.isNotEmpty ? event.title : 'Upcoming event',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              const Icon(Icons.event, size: 14, color: Colors.white70),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  dateLabel,
+                  style: const TextStyle(color: Colors.white70, fontSize: 12),
+                ),
+              ),
+            ],
+          ),
+          ...[
+            if (event.location.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  const Icon(Icons.place, size: 14, color: Colors.white70),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      event.location,
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ],
+        ],
+      ),
     );
   }
 }
@@ -923,72 +1016,78 @@ class _ArtistSpotlightHero extends StatelessWidget {
                 ),
                 Padding(
                   padding: const EdgeInsets.all(28),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const _TagChip(label: 'Artist Spotlight'),
-                      const SizedBox(height: 12),
-                      Text(
-                        artist?.displayName ?? 'Discover Local Artists',
-                        style: GoogleFonts.dmSerifDisplay(
-                          color: Colors.white,
-                          fontSize: 34,
-                        ),
-                      ),
-                      if (artist?.bio != null && artist!.bio!.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8),
-                          child: Text(
-                            artist!.bio!,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.spaceGrotesk(
-                              color: Colors.white70,
-                              fontSize: 13,
-                            ),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const _TagChip(label: 'Artist Spotlight'),
+                        const SizedBox(height: 12),
+                        Text(
+                          artist?.displayName ?? 'Discover Local Artists',
+                          style: GoogleFonts.dmSerifDisplay(
+                            color: Colors.white,
+                            fontSize: 28,
                           ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      if (artist?.location != null &&
-                          artist!.location!.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 6),
-                          child: Text(
-                            artist!.location!,
-                            style: GoogleFonts.spaceGrotesk(
-                              color: Colors.white70,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                      const Spacer(),
-                      if (event != null) _HeroEventPill(event: event!),
-                      const SizedBox(height: 16),
-                      ElevatedButton.icon(
-                        onPressed: artist != null
-                            ? () => Navigator.pushNamed(
-                                context,
-                                '/artist/public-profile',
-                                arguments: {'artistId': artist!.userId},
-                              )
-                            : () => Navigator.pushNamed(
-                                context,
-                                '/artist/browse',
+                        if (artist?.bio != null && artist!.bio!.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Text(
+                              artist!.bio!,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.spaceGrotesk(
+                                color: Colors.white70,
+                                fontSize: 13,
                               ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 14,
+                            ),
                           ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
+                        if (artist?.location != null &&
+                            artist!.location!.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 6),
+                            child: Text(
+                              artist!.location!,
+                              style: GoogleFonts.spaceGrotesk(
+                                color: Colors.white70,
+                                fontSize: 12,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
+                        const SizedBox(height: 16),
+                        if (event != null) _HeroEventPill(event: event!),
+                        const SizedBox(height: 16),
+                        ElevatedButton.icon(
+                          onPressed: artist != null
+                              ? () => Navigator.pushNamed(
+                                  context,
+                                  '/artist/public-profile',
+                                  arguments: {'artistId': artist!.userId},
+                                )
+                              : () => Navigator.pushNamed(
+                                  context,
+                                  '/artist/browse',
+                                ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: Colors.black,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 14,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                          icon: const Icon(Icons.visibility),
+                          label: const Text('View Artist'),
                         ),
-                        icon: const Icon(Icons.visibility),
-                        label: const Text('View Artist'),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -1020,75 +1119,8 @@ class _TagChip extends StatelessWidget {
           fontWeight: FontWeight.w700,
           fontSize: 12,
         ),
-      ),
-    );
-  }
-}
-
-class _HeroEventPill extends StatelessWidget {
-  const _HeroEventPill({required this.event});
-
-  final EventModel event;
-
-  @override
-  Widget build(BuildContext context) {
-    final dateLabel = intl.DateFormat('MMM d • h:mm a').format(event.startDate);
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Next appearance',
-            style: GoogleFonts.spaceGrotesk(
-              color: Colors.white70,
-              fontSize: 12,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            event.title.isNotEmpty ? event.title : 'Upcoming event',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Row(
-            children: [
-              const Icon(Icons.event, size: 14, color: Colors.white70),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  dateLabel,
-                  style: const TextStyle(color: Colors.white70, fontSize: 12),
-                ),
-              ),
-            ],
-          ),
-          if (event.location.isNotEmpty) ...[
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                const Icon(Icons.place, size: 14, color: Colors.white70),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    event.location,
-                    style: const TextStyle(color: Colors.white70, fontSize: 12),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ],
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
       ),
     );
   }
@@ -1256,7 +1288,7 @@ class _ArtistFeatureCard extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 14,
-                    vertical: 12,
+                    vertical: 4,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1568,7 +1600,7 @@ class _ArtistEventCard extends StatelessWidget {
             arguments: {'eventId': event.id},
           ),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(6),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -1577,11 +1609,11 @@ class _ArtistEventCard extends StatelessWidget {
                 Text(
                   event.title.isNotEmpty ? event.title : 'Untitled Event',
                   style: const TextStyle(
-                    fontSize: 16,
+                    fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: ArtbeatColors.textPrimary,
                   ),
-                  maxLines: 2,
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 8),
@@ -1599,33 +1631,36 @@ class _ArtistEventCard extends StatelessWidget {
                         fontSize: 12,
                         color: ArtbeatColors.textSecondary,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
-                if (event.location.isNotEmpty) ...[
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.place,
-                        size: 14,
-                        color: ArtbeatColors.textSecondary,
-                      ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          event.location,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: ArtbeatColors.textSecondary,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                if (event.location.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.place,
+                          size: 14,
+                          color: ArtbeatColors.textSecondary,
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            event.location,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: ArtbeatColors.textSecondary,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
                 const Spacer(),
                 OutlinedButton(
                   onPressed: () => Navigator.pushNamed(
@@ -1931,7 +1966,7 @@ class _PulseCard extends StatelessWidget {
         onTap: data.onTap,
         borderRadius: BorderRadius.circular(18),
         child: Ink(
-          padding: const EdgeInsets.all(14),
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [data.color, data.color.withValues(alpha: 0.6)],
@@ -1952,7 +1987,7 @@ class _PulseCard extends StatelessWidget {
                 data.value,
                 style: GoogleFonts.spaceGrotesk(
                   color: Colors.white,
-                  fontSize: 20,
+                  fontSize: 16,
                   fontWeight: FontWeight.w900,
                 ),
               ),

@@ -9,6 +9,9 @@ class ArtWalkRoutes {
   static const String experience = '/art-walk/experience';
   static const String dashboard = '/art-walk/dashboard';
   static const String enhancedCreate = '/enhanced-create-art-walk';
+  static const String celebration = '/art-walk/celebration';
+  static const String questHistory = '/quest-history';
+  static const String weeklyGoals = '/weekly-goals';
 
   // Deprecated: Use 'experience' instead
   @Deprecated('Use experience instead - both routes point to the same screen')

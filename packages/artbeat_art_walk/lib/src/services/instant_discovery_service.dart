@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import '../models/public_art_model.dart';
+import 'package:artbeat_art_walk/src/models/public_art_model.dart';
 import 'rewards_service.dart';
 import 'challenge_service.dart';
 
@@ -431,7 +431,9 @@ class InstantDiscoveryService {
       // Group discoveries by date (date only, no time)
       final Map<String, bool> discoveryDates = {};
       for (var doc in snapshot.docs) {
-        final discoveredAt = (doc.data()['discoveredAt'] as Timestamp).toDate();
+        final discoveredAtTimestamp = doc.data()['discoveredAt'] as Timestamp?;
+        final discoveredAt =
+            (discoveredAtTimestamp ?? Timestamp.now()).toDate();
         final dateKey =
             '${discoveredAt.year}-${discoveredAt.month.toString().padLeft(2, '0')}-${discoveredAt.day.toString().padLeft(2, '0')}';
         discoveryDates[dateKey] = true;

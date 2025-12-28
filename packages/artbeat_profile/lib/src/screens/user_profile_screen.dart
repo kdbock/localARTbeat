@@ -1,156 +1,173 @@
 import 'package:flutter/material.dart';
-import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_profile/widgets/widgets.dart';
+//
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:artbeat_core/artbeat_core.dart' as core;
+import 'package:artbeat_profile/src/widgets/world_background.dart';
+import 'package:artbeat_profile/src/widgets/glass_card.dart';
+import 'package:artbeat_profile/src/widgets/profile_header.dart';
+import 'package:artbeat_profile/src/widgets/enhanced_stats_grid.dart';
+
+import 'package:artbeat_profile/src/widgets/dynamic_achievements_tab.dart';
+import 'package:artbeat_profile/src/widgets/progress_tab.dart';
+import 'package:artbeat_profile/src/widgets/hud_top_bar.dart';
+import 'package:artbeat_profile/src/widgets/empty_state.dart';
+import 'package:artbeat_profile/src/widgets/follow_button.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class UserProfileScreen extends StatefulWidget {
   final String userId;
-
   const UserProfileScreen({super.key, required this.userId});
 
   @override
   State<UserProfileScreen> createState() => _UserProfileScreenState();
 }
 
-class _UserProfileScreenState extends State<UserProfileScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
-  final UserModel user = UserModel.placeholder();
-  final List<Map<String, dynamic>> favorites = [];
-  final List<Map<String, dynamic>> achievements = [];
+class _UserProfileScreenState extends State<UserProfileScreen> {
+  late Future<core.UserModel?> _userFuture;
+  final _userService = core.UserService();
+  final _currentUser = FirebaseAuth.instance.currentUser;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
-  void _toggleFollow() {
-    // Replace with real follow logic
-    setState(() {
-      user.isFollowing = !user.isFollowing;
-    });
+    _userFuture = _userService.getUserById(widget.userId);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            SliverPadding(
-              padding: const EdgeInsets.all(16),
-              sliver: SliverToBoxAdapter(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ProfileHeader(
-                      avatarUrl: user.avatarUrl,
-                      displayName: user.displayName,
-                      handle: user.handle,
-                      xpLevel: user.level,
-                      badges: user.badges,
-                    ),
-                    const SizedBox(height: 8),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: FollowButton(
-                        isFollowing: user.isFollowing,
-                        onTap: _toggleFollow,
+    return WorldBackground(
+      child: SafeArea(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: FutureBuilder<core.UserModel?>(
+            future: _userFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (!snapshot.hasData || snapshot.data == null) {
+                return EmptyState(
+                  icon: Icons.person_off,
+                  message: 'profile.user_not_found'.tr(),
+                );
+              }
+              final user = snapshot.data!;
+              final isCurrentUser = _currentUser?.uid == user.id;
+              return Column(
+                children: [
+                  HudTopBar(
+                    title: isCurrentUser ? 'My Profile' : user.displayName,
+                    actions: [
+                      if (isCurrentUser)
+                        IconButton(
+                          icon: const Icon(Icons.edit, color: Colors.white),
+                          onPressed: () {
+                            Navigator.of(
+                              context,
+                            ).pushNamed('/edit_profile', arguments: user.id);
+                          },
+                        ),
+                      if (!isCurrentUser)
+                        FollowButton(
+                          isFollowing: user.isFollowing,
+                          onTap: () {
+                            // TODO: Implement follow/unfollow logic
+                          },
+                        ),
+                    ],
+                  ),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 0,
+                        vertical: 8,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          GlassCard(
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            child: ProfileHeader(
+                              avatarUrl: user.avatarUrl,
+                              displayName: user.displayName,
+                              handle: user.handle,
+                              xpLevel: user.level,
+                              badges: user.badges,
+                              userId: user.id,
+                              user: user,
+                            ),
+                          ),
+                          GlassCard(
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            child: EnhancedStatsGrid(
+                              posts: user.posts.length,
+                              captures: user.captures.length,
+                              artWalks: 0, // Not available in UserModel
+                              likes: user.engagementStats.likeCount,
+                              shares: user.engagementStats.shareCount,
+                              comments: user.engagementStats.commentCount,
+                              followers: user.engagementStats.followCount,
+                              following: 0, // Not available in UserModel
+                            ),
+                          ),
+                          // Optionally, add badges or achievements carousel if available in the future
+                          GlassCard(
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            child: DefaultTabController(
+                              length: 3,
+                              child: Column(
+                                children: [
+                                  TabBar(
+                                    labelColor: Colors.deepPurpleAccent,
+                                    unselectedLabelColor: Colors.white70,
+                                    indicatorColor: Colors.deepPurpleAccent,
+                                    tabs: const [
+                                      Tab(text: 'Achievements'),
+                                      Tab(text: 'Progress'),
+                                      Tab(text: 'Favorites'),
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: 320,
+                                    child: TabBarView(
+                                      children: [
+                                        DynamicAchievementsTab(userId: user.id),
+                                        ProgressTab(userId: user.id),
+                                        // TODO: Replace with FavoritesTab or similar
+                                        Center(
+                                          child: Text(
+                                            'Favorites coming soon',
+                                            style: TextStyle(
+                                              color: Colors.white70,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    StatBar(
-                      followers: user.followers,
-                      following: user.following,
-                      favorites: user.favorites,
-                      xp: user.xp,
-                    ),
-                    const SizedBox(height: 12),
-                    XpProgressBar(
-                      currentXp: user.xp,
-                      currentLevel: user.level,
-                      nextLevelXp: user.nextLevelXp,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: TabBar(
-                controller: _tabController,
-                labelColor: ArtbeatColors.primaryPurple,
-                unselectedLabelColor: Colors.grey,
-                indicatorColor: ArtbeatColors.primaryPurple,
-                tabs: const [
-                  Tab(text: 'Favorites'),
-                  Tab(text: 'Achievements'),
+                  ),
                 ],
-              ),
-            ),
-            SliverFillRemaining(
-              child: TabBarView(
-                controller: _tabController,
-                children: [_buildFavoritesTab(), _buildAchievementsTab()],
-              ),
-            ),
-          ],
+              );
+            },
+          ),
         ),
       ),
-    );
-  }
-
-  Widget _buildFavoritesTab() {
-    if (favorites.isEmpty) {
-      return const EmptyState(
-        icon: Icons.favorite_border,
-        message: 'No favorites yet.',
-      );
-    }
-
-    return ListView.separated(
-      padding: const EdgeInsets.all(16),
-      itemCount: favorites.length,
-      itemBuilder: (context, index) {
-        final item = favorites[index];
-        return FavoriteTile(
-          id: (item['id'] ?? '') as String,
-          title: (item['title'] ?? '') as String,
-          description: (item['description'] ?? '') as String,
-          imageUrl: (item['imageUrl'] ?? '') as String,
-          metadata: item['metadata'] as Map<String, dynamic>?,
-          isCurrentUser: false,
-          onTap: () {
-            // Handle favorite tap
-          },
-        );
-      },
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
-    );
-  }
-
-  Widget _buildAchievementsTab() {
-    if (achievements.isEmpty) {
-      return const EmptyState(
-        icon: Icons.emoji_events_outlined,
-        message: 'No achievements unlocked yet.',
-      );
-    }
-
-    return ListView.separated(
-      padding: const EdgeInsets.all(16),
-      itemCount: achievements.length,
-      itemBuilder: (context, index) {
-        final achievement = achievements[index];
-        return AchievementTile(achievement: achievement);
-      },
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
     );
   }
 }

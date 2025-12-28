@@ -31,6 +31,7 @@ export 'src/screens/user_events_dashboard_screen.dart';
 export 'src/screens/advanced_analytics_dashboard_screen.dart';
 export 'src/screens/event_moderation_dashboard_screen.dart';
 export 'src/screens/event_bulk_management_screen.dart';
+export 'src/screens/calendar_screen.dart';
 
 // Widgets - Reusable UI components
 export 'src/widgets/event_card.dart';
@@ -41,6 +42,12 @@ export 'src/widgets/ticket_type_builder.dart';
 export 'src/widgets/events_drawer.dart';
 export 'src/widgets/events_header.dart';
 export 'src/widgets/social_feed_widget.dart';
+
+// Design system widgets
+export 'src/widgets/world_background.dart';
+export 'src/widgets/hud_top_bar.dart';
+export 'src/widgets/glass_card.dart';
+export 'src/widgets/gradient_cta_button.dart';
 
 // Forms - Form builders and validation
 export 'src/forms/event_form_builder.dart';

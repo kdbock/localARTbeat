@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:provider/provider.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import '../models/weekly_goal_model.dart';
-import '../services/weekly_goals_service.dart';
+import 'package:artbeat_art_walk/src/models/weekly_goal_model.dart';
+import 'package:artbeat_art_walk/src/services/weekly_goals_service.dart';
 
 /// Screen to display and manage weekly goals
 class WeeklyGoalsScreen extends StatefulWidget {
@@ -14,7 +15,7 @@ class WeeklyGoalsScreen extends StatefulWidget {
 
 class _WeeklyGoalsScreenState extends State<WeeklyGoalsScreen>
     with SingleTickerProviderStateMixin {
-  final WeeklyGoalsService _goalsService = WeeklyGoalsService();
+  late final WeeklyGoalsService _goalsService;
   List<WeeklyGoalModel> _currentGoals = [];
   Map<String, dynamic> _stats = {};
   bool _isLoading = true;
@@ -23,6 +24,7 @@ class _WeeklyGoalsScreenState extends State<WeeklyGoalsScreen>
   @override
   void initState() {
     super.initState();
+    _goalsService = context.read<WeeklyGoalsService>();
     _tabController = TabController(length: 2, vsync: this);
     _loadData();
   }

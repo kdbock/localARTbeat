@@ -101,23 +101,20 @@ class _CaptureDrawerState extends State<CaptureDrawer>
                         Icons.photo_album_rounded,
                         AppRoutes.captureMyCaptures,
                         const Color(0xFF34D399),
-                        tabIndex: 0,
                       ),
                       _buildDrawerItem(
                         context,
                         'capture_drawer_pending_review'.tr(),
                         Icons.hourglass_top_rounded,
-                        AppRoutes.captureMyCaptures,
+                        AppRoutes.capturePending,
                         const Color(0xFFFFC857), // yellow
-                        tabIndex: 1,
                       ),
                       _buildDrawerItem(
                         context,
                         'capture_drawer_approved_captures'.tr(),
                         Icons.verified_rounded,
-                        AppRoutes.captureMyCaptures,
+                        AppRoutes.captureApproved,
                         const Color(0xFF22D3EE),
-                        tabIndex: 2,
                       ),
 
                       const SizedBox(height: 10),
@@ -158,20 +155,6 @@ class _CaptureDrawerState extends State<CaptureDrawer>
                         Icons.search_rounded,
                         AppRoutes.captureSearch,
                         const Color(0xFF34D399),
-                      ),
-                      _buildDrawerItem(
-                        context,
-                        'capture_drawer_capture_map'.tr(),
-                        Icons.map_rounded,
-                        AppRoutes.captureMap,
-                        const Color(0xFF7C4DFF),
-                      ),
-                      _buildDrawerItem(
-                        context,
-                        'capture_drawer_capture_settings'.tr(),
-                        Icons.settings_rounded,
-                        AppRoutes.captureSettings,
-                        Colors.white.withValues(alpha: 0.65),
                       ),
 
                       // Moderation (admin)
@@ -565,7 +548,7 @@ class _CaptureDrawerState extends State<CaptureDrawer>
     Navigator.pop(context); // Close drawer
 
     // Keep your original behavior
-    const mainRoutes = ['/dashboard', '/profile'];
+    const mainRoutes = [AppRoutes.dashboard, AppRoutes.profile];
     if (mainRoutes.contains(route)) {
       Navigator.pushReplacementNamed(context, route);
     } else {
@@ -578,7 +561,11 @@ class _CaptureDrawerState extends State<CaptureDrawer>
       await FirebaseAuth.instance.signOut();
       if (mounted) {
         // ignore: use_build_context_synchronously
-        Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          AppRoutes.login,
+          (route) => false,
+        );
       }
     } catch (e) {
       if (mounted) {

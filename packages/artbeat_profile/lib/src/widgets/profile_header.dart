@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:artbeat_core/artbeat_core.dart';
 
 /// A widget to display user profile header with avatar, name, handle, level, badges
 class ProfileHeader extends StatelessWidget {
@@ -27,8 +28,12 @@ class ProfileHeader extends StatelessWidget {
       children: [
         CircleAvatar(
           radius: 40,
-          backgroundImage: avatarUrl != null ? NetworkImage(avatarUrl!) : null,
-          child: avatarUrl == null ? const Icon(Icons.person) : null,
+          backgroundImage: ImageUrlValidator.safeNetworkImage(avatarUrl),
+          child:
+              (avatarUrl == null ||
+                  !ImageUrlValidator.isValidImageUrl(avatarUrl))
+              ? const Icon(Icons.person)
+              : null,
         ),
         const SizedBox(width: 16),
         Expanded(

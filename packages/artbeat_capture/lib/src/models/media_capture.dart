@@ -1,4 +1,4 @@
-import '../utils/capture_helper.dart';
+import 'package:artbeat_capture/src/utils/capture_helper.dart';
 
 /// Enum for media types
 enum MediaType { image, video }

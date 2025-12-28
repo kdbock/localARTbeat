@@ -7,11 +7,14 @@ import 'package:artbeat_core/artbeat_core.dart' as core;
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
+import 'package:google_fonts/google_fonts.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../models/artbeat_event.dart';
 import '../models/ticket_type.dart';
 import '../models/refund_policy.dart';
 import '../widgets/ticket_type_builder.dart';
-import 'package:easy_localization/easy_localization.dart';
+import '../widgets/gradient_cta_button.dart';
+import '../widgets/glass_card.dart';
 
 /// Form builder for creating and editing ARTbeat events
 /// Includes all required fields from the specification
@@ -48,6 +51,65 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
   final List<File> _eventImages = [];
   File? _artistHeadshot;
   File? _eventBanner;
+
+  // Helper method for glass input decoration
+  InputDecoration _glassInputDecoration(
+    String label, {
+    String? hint,
+    IconData? icon,
+    String? suffixText,
+  }) {
+    return InputDecoration(
+      labelText: label,
+      hintText: hint,
+      suffixText: suffixText,
+      labelStyle: GoogleFonts.spaceGrotesk(
+        color: Colors.white.withValues(alpha: 0.7),
+        fontWeight: FontWeight.w600,
+      ),
+      hintStyle: GoogleFonts.spaceGrotesk(
+        color: Colors.white.withValues(alpha: 0.45),
+        fontWeight: FontWeight.w500,
+      ),
+      suffixStyle: GoogleFonts.spaceGrotesk(
+        color: Colors.white.withValues(alpha: 0.7),
+        fontWeight: FontWeight.w500,
+      ),
+      filled: true,
+      fillColor: Colors.white.withValues(alpha: 0.06),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(
+          color: Colors.white.withValues(alpha: 0.12),
+          width: 1.5,
+        ),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(
+          color: Colors.white.withValues(alpha: 0.12),
+          width: 1.5,
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: Color(0xFF22D3EE), width: 2),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: Color(0xFFFF3D8D), width: 1.5),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: Color(0xFFFF3D8D), width: 2),
+      ),
+      prefixIcon: icon != null
+          ? Icon(icon, color: const Color(0xFF22D3EE))
+          : null,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+    );
+  }
+
   List<TicketType> _ticketTypes = [];
   RefundPolicy _refundPolicy = RefundPolicy.standard();
   bool _isPublic = true;
@@ -129,169 +191,78 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: widget.useEnhancedUniversalHeader
-          ? PreferredSize(
-              preferredSize: const Size.fromHeight(kToolbarHeight + 4),
-              child: Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      core.ArtbeatColors.primaryPurple,
-                      core.ArtbeatColors.primaryGreen,
-                    ],
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 8,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: core.EnhancedUniversalHeader(
-                  title: widget.initialEvent == null
-                      ? 'Create Event'
-                      : 'Edit Event',
-                  showLogo: false,
-                  showDeveloperTools: true,
-                  showBackButton: true,
-                  onBackPressed: () => Navigator.of(context).pop(),
-                  onSearchPressed: (query) => _showSearchModal(context),
-                  onProfilePressed: () => _showProfileMenu(context),
-                  onDeveloperPressed: () => _showDeveloperTools(context),
-                  backgroundColor: Colors.transparent,
-                  foregroundColor: Colors.white,
-                ),
-              ),
-            )
-          : AppBar(
-              title: Text(
-                widget.initialEvent == null
-                    ? 'events_create_event'.tr()
-                    : 'events_edit_event'.tr(),
-              ),
+    return Form(
+      key: _formKey,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildBasicInfoSection(),
+            const SizedBox(height: 20),
+            _buildImageSection(),
+            const SizedBox(height: 20),
+            _buildDateTimeSection(),
+            const SizedBox(height: 20),
+            _buildLocationSection(),
+            const SizedBox(height: 20),
+            _buildContactSection(),
+            const SizedBox(height: 20),
+            _buildCapacitySection(),
+            const SizedBox(height: 20),
+            _buildTicketTypesSection(),
+            const SizedBox(height: 20),
+            _buildRefundPolicySection(),
+            const SizedBox(height: 20),
+            _buildSettingsSection(),
+            const SizedBox(height: 20),
+            _buildRecurringEventSection(),
+            const SizedBox(height: 20),
+            _buildTagsSection(),
+            const SizedBox(height: 32),
+            // Submit Button
+            GradientCTAButton(
+              text: widget.isLoading
+                  ? 'events_creating'.tr()
+                  : (widget.initialEvent == null
+                        ? 'events_create_event'.tr()
+                        : 'events_update_event'.tr()),
+              onPressed: widget.isLoading ? null : _submitForm,
+              width: double.infinity,
+              height: 56,
             ),
-      body: Container(
-        decoration: widget.useEnhancedUniversalHeader
-            ? BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    core.ArtbeatColors.primaryPurple.withValues(alpha: 0.1),
-                    core.ArtbeatColors.backgroundPrimary,
-                    core.ArtbeatColors.primaryGreen.withValues(alpha: 0.1),
-                  ],
-                ),
-              )
-            : null,
-        child: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildBasicInfoSection(),
-                const SizedBox(height: 20),
-                _buildImageSection(),
-                const SizedBox(height: 20),
-                _buildDateTimeSection(),
-                const SizedBox(height: 20),
-                _buildLocationSection(),
-                const SizedBox(height: 20),
-                _buildContactSection(),
-                const SizedBox(height: 20),
-                _buildCapacitySection(),
-                const SizedBox(height: 20),
-                _buildTicketTypesSection(),
-                const SizedBox(height: 20),
-                _buildRefundPolicySection(),
-                const SizedBox(height: 20),
-                _buildSettingsSection(),
-                const SizedBox(height: 20),
-                _buildRecurringEventSection(),
-                const SizedBox(height: 20),
-                _buildTagsSection(),
-                const SizedBox(height: 32),
-                // Submit Button
-                SizedBox(
-                  width: double.infinity,
-                  height: 56,
-                  child: ElevatedButton(
-                    onPressed: widget.isLoading ? null : _submitForm,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: core.ArtbeatColors.primaryPurple,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 2,
-                    ),
-                    child: widget.isLoading
-                        ? const SizedBox(
-                            height: 24,
-                            width: 24,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
-                            ),
-                          )
-                        : Text(
-                            widget.initialEvent == null
-                                ? 'events_create_event'.tr()
-                                : 'events_update_event'.tr(),
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                  ),
-                ),
-                const SizedBox(height: 32),
-              ],
-            ),
-          ),
+            const SizedBox(height: 32),
+          ],
         ),
       ),
     );
   }
 
   Widget _buildBasicInfoSection() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: core.ArtbeatColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: core.ArtbeatColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: core.ArtbeatColors.primaryPurple.withValues(alpha: 0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+    return GlassCard(
+      margin: const EdgeInsets.only(bottom: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'events_basic_information'.tr(),
-            style: const TextStyle(
+            style: GoogleFonts.spaceGrotesk(
               fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: core.ArtbeatColors.textPrimary,
+              fontWeight: FontWeight.w900,
+              color: Colors.white.withValues(alpha: 0.92),
             ),
           ),
           const SizedBox(height: 16),
           TextFormField(
             controller: _titleController,
-            decoration: InputDecoration(
-              labelText: 'events_event_title'.tr(),
-              hintText: 'events_enter_event_title'.tr(),
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white.withValues(alpha: 0.92),
+              fontWeight: FontWeight.w600,
+            ),
+            cursorColor: const Color(0xFF22D3EE),
+            decoration: _glassInputDecoration(
+              'events_event_title'.tr(),
+              hint: 'events_enter_event_title'.tr(),
             ),
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
@@ -303,9 +274,14 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
           const SizedBox(height: 16),
           TextFormField(
             controller: _descriptionController,
-            decoration: InputDecoration(
-              labelText: 'events_event_description'.tr(),
-              hintText: 'events_describe_event'.tr(),
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white.withValues(alpha: 0.92),
+              fontWeight: FontWeight.w600,
+            ),
+            cursorColor: const Color(0xFF22D3EE),
+            decoration: _glassInputDecoration(
+              'events_event_description'.tr(),
+              hint: 'events_describe_event'.tr(),
             ),
             maxLines: 4,
             validator: (value) {
@@ -321,7 +297,8 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
   }
 
   Widget _buildImageSection() {
-    return Card(
+    return GlassCard(
+      margin: const EdgeInsets.only(bottom: 16),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -329,7 +306,11 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
           children: [
             Text(
               'events_event_images'.tr(),
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 18,
+                fontWeight: FontWeight.w900,
+                color: Colors.white.withValues(alpha: 0.92),
+              ),
             ),
             const SizedBox(height: 16),
 
@@ -350,7 +331,14 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
             const SizedBox(height: 16),
 
             // Additional Event Images
-            Text('events_additional_images'.tr()),
+            Text(
+              'events_additional_images'.tr(),
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: Colors.white.withValues(alpha: 0.85),
+              ),
+            ),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -385,7 +373,14 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title),
+        Text(
+          title,
+          style: GoogleFonts.spaceGrotesk(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: Colors.white.withValues(alpha: 0.85),
+          ),
+        ),
         const SizedBox(height: 8),
         GestureDetector(
           onTap: () async {
@@ -400,23 +395,33 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
             height: 120,
             width: double.infinity,
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey),
-              borderRadius: BorderRadius.circular(8),
+              color: Colors.white.withValues(alpha: 0.06),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.12),
+                width: 1.5,
+              ),
+              borderRadius: BorderRadius.circular(16),
             ),
             child: image != null
                 ? ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(16),
                     child: Image.file(image, fit: BoxFit.cover),
                   )
                 : Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.add_photo_alternate,
                         size: 48,
-                        color: Colors.grey,
+                        color: Colors.white.withValues(alpha: 0.5),
                       ),
-                      Text('events_tap_to_select_image'.tr()),
+                      Text(
+                        'events_tap_to_select_image'.tr(),
+                        style: GoogleFonts.spaceGrotesk(
+                          color: Colors.white.withValues(alpha: 0.7),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ],
                   ),
           ),
@@ -429,7 +434,7 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
     return Stack(
       children: [
         ClipRRect(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(16),
           child: Image.file(image, width: 80, height: 80, fit: BoxFit.cover),
         ),
         Positioned(
@@ -440,7 +445,7 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
             child: Container(
               padding: const EdgeInsets.all(2),
               decoration: const BoxDecoration(
-                color: Colors.red,
+                color: Color(0xFFFF3D8D),
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.close, size: 16, color: Colors.white),
@@ -458,14 +463,25 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
         width: 80,
         height: 80,
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey),
-          borderRadius: BorderRadius.circular(8),
+          color: Colors.white.withValues(alpha: 0.06),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.12),
+            width: 1.5,
+          ),
+          borderRadius: BorderRadius.circular(16),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.add, color: Colors.grey),
-            Text('events_add'.tr(), style: const TextStyle(color: Colors.grey)),
+            Icon(Icons.add, color: Colors.white.withValues(alpha: 0.7)),
+            Text(
+              'events_add'.tr(),
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white.withValues(alpha: 0.7),
+                fontWeight: FontWeight.w500,
+                fontSize: 12,
+              ),
+            ),
           ],
         ),
       ),
@@ -473,336 +489,524 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
   }
 
   Widget _buildDateTimeSection() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Date & Time',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+    return GlassCard(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Date & Time',
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+              color: Colors.white.withValues(alpha: 0.92),
             ),
-            const SizedBox(height: 16),
-            ListTile(
-              leading: const Icon(Icons.calendar_today),
-              title: Text(
-                _selectedDateTime != null
-                    ? DateFormat(
-                        'EEEE, MMMM d, y \'at\' h:mm a',
-                      ).format(_selectedDateTime!)
-                    : 'Select date and time *',
+          ),
+          const SizedBox(height: 16),
+          InkWell(
+            onTap: _selectDateTime,
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.06),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.12),
+                  width: 1.5,
+                ),
               ),
-              onTap: _selectDateTime,
-              contentPadding: EdgeInsets.zero,
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.calendar_today,
+                    color: Color(0xFF22D3EE),
+                    size: 24,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      _selectedDateTime != null
+                          ? DateFormat(
+                              'EEEE, MMMM d, y \'at\' h:mm a',
+                            ).format(_selectedDateTime!)
+                          : 'Select date and time *',
+                      style: GoogleFonts.spaceGrotesk(
+                        color: _selectedDateTime != null
+                            ? Colors.white.withValues(alpha: 0.92)
+                            : Colors.white.withValues(alpha: 0.7),
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    color: Colors.white.withValues(alpha: 0.5),
+                    size: 16,
+                  ),
+                ],
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildLocationSection() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Location',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+    return GlassCard(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Location',
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+              color: Colors.white.withValues(alpha: 0.92),
             ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _locationController,
-              decoration: const InputDecoration(
-                labelText: 'Event Location *',
-                hintText: 'Enter venue address or location',
-                prefixIcon: Icon(Icons.location_on),
-              ),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Please enter event location';
-                }
-                return null;
-              },
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: _locationController,
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white.withValues(alpha: 0.92),
+              fontWeight: FontWeight.w600,
             ),
-          ],
-        ),
+            cursorColor: const Color(0xFF22D3EE),
+            decoration: _glassInputDecoration(
+              'Event Location *',
+              hint: 'Enter venue address or location',
+              icon: Icons.location_on,
+            ),
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Please enter event location';
+              }
+              return null;
+            },
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildContactSection() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Contact Information',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+    return GlassCard(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Contact Information',
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+              color: Colors.white.withValues(alpha: 0.92),
             ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _contactEmailController,
-              decoration: const InputDecoration(
-                labelText: 'Contact Email *',
-                hintText: 'Enter contact email',
-                prefixIcon: Icon(Icons.email),
-              ),
-              keyboardType: TextInputType.emailAddress,
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Please enter contact email';
-                }
-                if (!value.contains('@')) {
-                  return 'Please enter a valid email';
-                }
-                return null;
-              },
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: _contactEmailController,
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white.withValues(alpha: 0.92),
+              fontWeight: FontWeight.w600,
             ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _contactPhoneController,
-              decoration: const InputDecoration(
-                labelText: 'Contact Phone (Optional)',
-                hintText: 'Enter contact phone number',
-                prefixIcon: Icon(Icons.phone),
-              ),
-              keyboardType: TextInputType.phone,
+            cursorColor: const Color(0xFF22D3EE),
+            decoration: _glassInputDecoration(
+              'Contact Email *',
+              hint: 'Enter contact email',
+              icon: Icons.email,
             ),
-          ],
-        ),
+            keyboardType: TextInputType.emailAddress,
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Please enter contact email';
+              }
+              if (!value.contains('@')) {
+                return 'Please enter a valid email';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: _contactPhoneController,
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white.withValues(alpha: 0.92),
+              fontWeight: FontWeight.w600,
+            ),
+            cursorColor: const Color(0xFF22D3EE),
+            decoration: _glassInputDecoration(
+              'Contact Phone (Optional)',
+              hint: 'Enter contact phone number',
+              icon: Icons.phone,
+            ),
+            keyboardType: TextInputType.phone,
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildCapacitySection() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Event Capacity',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+    return GlassCard(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Event Capacity',
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+              color: Colors.white.withValues(alpha: 0.92),
             ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _maxAttendeesController,
-              decoration: const InputDecoration(
-                labelText: 'Maximum Attendees *',
-                hintText: 'Enter maximum number of attendees',
-                prefixIcon: Icon(Icons.people),
-              ),
-              keyboardType: TextInputType.number,
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Please enter maximum attendees';
-                }
-                final number = int.tryParse(value);
-                if (number == null || number <= 0) {
-                  return 'Please enter a valid number';
-                }
-                return null;
-              },
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: _maxAttendeesController,
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white.withValues(alpha: 0.92),
+              fontWeight: FontWeight.w600,
             ),
-          ],
-        ),
+            cursorColor: const Color(0xFF22D3EE),
+            decoration: _glassInputDecoration(
+              'Maximum Attendees *',
+              hint: 'Enter maximum number of attendees',
+              icon: Icons.people,
+            ),
+            keyboardType: TextInputType.number,
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Please enter maximum attendees';
+              }
+              final number = int.tryParse(value);
+              if (number == null || number <= 0) {
+                return 'Please enter a valid number';
+              }
+              return null;
+            },
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildTagsSection() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Event Tags',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+    return GlassCard(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Event Tags',
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+              color: Colors.white.withValues(alpha: 0.92),
             ),
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: _availableTags.map((tag) {
-                final isSelected = _tags.contains(tag);
-                return FilterChip(
-                  label: Text(tag),
-                  selected: isSelected,
-                  onSelected: (selected) {
-                    setState(() {
-                      if (selected) {
-                        _tags.add(tag);
-                      } else {
-                        _tags.remove(tag);
-                      }
-                    });
-                  },
-                );
-              }).toList(),
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _availableTags.map((tag) {
+              final isSelected = _tags.contains(tag);
+              return FilterChip(
+                label: Text(
+                  tag,
+                  style: GoogleFonts.spaceGrotesk(
+                    color: isSelected
+                        ? Colors.white
+                        : Colors.black.withValues(alpha: 0.8),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                selected: isSelected,
+                onSelected: (selected) {
+                  setState(() {
+                    if (selected) {
+                      _tags.add(tag);
+                    } else {
+                      _tags.remove(tag);
+                    }
+                  });
+                },
+                backgroundColor: Colors.white.withValues(alpha: 0.15),
+                selectedColor: const Color(0xFF22D3EE).withValues(alpha: 0.3),
+                checkmarkColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  side: BorderSide(
+                    color: isSelected
+                        ? const Color(0xFF22D3EE)
+                        : Colors.white.withValues(alpha: 0.3),
+                    width: 1.5,
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildTicketTypesSection() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Ticket Types',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+    return GlassCard(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Ticket Types',
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.white.withValues(alpha: 0.92),
                 ),
-                ElevatedButton.icon(
-                  onPressed: _addTicketType,
-                  icon: const Icon(Icons.add),
-                  label: Text('events_add_ticket'.tr()),
+              ),
+              OutlinedButton.icon(
+                onPressed: _addTicketType,
+                icon: const Icon(Icons.add, color: Colors.white),
+                label: Text(
+                  'events_add_ticket'.tr(),
+                  style: GoogleFonts.spaceGrotesk(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            if (_ticketTypes.isEmpty)
-              const Text(
-                'No ticket types added yet. Add at least one ticket type.',
-              )
-            else
-              ..._ticketTypes.asMap().entries.map((entry) {
-                final index = entry.key;
-                final ticket = entry.value;
-                return TicketTypeBuilder(
-                  ticketType: ticket,
-                  onChanged: (updatedTicket) {
-                    setState(() {
-                      _ticketTypes[index] = updatedTicket;
-                    });
-                  },
-                  onRemove: () {
-                    setState(() {
-                      _ticketTypes.removeAt(index);
-                    });
-                  },
-                );
-              }),
-          ],
-        ),
+                style: OutlinedButton.styleFrom(
+                  backgroundColor: const Color(
+                    0xFF22D3EE,
+                  ).withValues(alpha: 0.2),
+                  side: const BorderSide(color: Color(0xFF22D3EE), width: 1.5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          if (_ticketTypes.isEmpty)
+            Text(
+              'No ticket types added yet. Add at least one ticket type.',
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white.withValues(alpha: 0.7),
+                fontWeight: FontWeight.w500,
+              ),
+            )
+          else
+            ..._ticketTypes.asMap().entries.map((entry) {
+              final index = entry.key;
+              final ticket = entry.value;
+              return TicketTypeBuilder(
+                ticketType: ticket,
+                onChanged: (updatedTicket) {
+                  setState(() {
+                    _ticketTypes[index] = updatedTicket;
+                  });
+                },
+                onRemove: () {
+                  setState(() {
+                    _ticketTypes.removeAt(index);
+                  });
+                },
+              );
+            }),
+        ],
       ),
     );
   }
 
   Widget _buildRefundPolicySection() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Refund Policy',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+    return GlassCard(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Refund Policy',
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+              color: Colors.white.withValues(alpha: 0.92),
             ),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              initialValue: _getRefundPolicyKey(),
-              decoration: const InputDecoration(
-                labelText: 'Refund Policy',
-                filled: true,
-                fillColor:
-                    core.ArtbeatColors.backgroundPrimary, // match login_screen
-                border: OutlineInputBorder(),
+          ),
+          const SizedBox(height: 16),
+          DropdownButtonFormField<String>(
+            initialValue: _getRefundPolicyKey(),
+            decoration: InputDecoration(
+              labelText: 'Refund Policy',
+              labelStyle: GoogleFonts.spaceGrotesk(
+                color: Colors.white.withValues(alpha: 0.7),
+                fontWeight: FontWeight.w600,
               ),
-              dropdownColor: core.ArtbeatColors.backgroundPrimary,
-              style: const TextStyle(color: core.ArtbeatColors.textPrimary),
-              items: const [
-                DropdownMenuItem(
-                  value: 'standard',
-                  child: Text(
-                    'Standard (24 hours)',
-                    style: TextStyle(color: core.ArtbeatColors.textPrimary),
-                  ),
+              filled: true,
+              fillColor: Colors.white.withValues(alpha: 0.06),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(
+                  color: Colors.white.withValues(alpha: 0.12),
+                  width: 1.5,
                 ),
-                DropdownMenuItem(
-                  value: 'flexible',
-                  child: Text(
-                    'Flexible (7 days)',
-                    style: TextStyle(color: core.ArtbeatColors.textPrimary),
-                  ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(
+                  color: Colors.white.withValues(alpha: 0.12),
+                  width: 1.5,
                 ),
-                DropdownMenuItem(
-                  value: 'no_refunds',
-                  child: Text(
-                    'No Refunds',
-                    style: TextStyle(color: core.ArtbeatColors.textPrimary),
-                  ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(
+                  color: Color(0xFF22D3EE),
+                  width: 2,
                 ),
-              ],
-              onChanged: (value) {
-                setState(() {
-                  switch (value) {
-                    case 'standard':
-                      _refundPolicy = RefundPolicy.standard();
-                      break;
-                    case 'flexible':
-                      _refundPolicy = RefundPolicy.flexible();
-                      break;
-                    case 'no_refunds':
-                      _refundPolicy = RefundPolicy.noRefunds();
-                      break;
-                  }
-                });
-              },
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 16,
+              ),
             ),
-            const SizedBox(height: 8),
-            Text(
-              _refundPolicy.fullDescription,
-              style: Theme.of(context).textTheme.bodySmall,
+            dropdownColor: Colors.black.withValues(alpha: 0.9),
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white.withValues(alpha: 0.92),
+              fontWeight: FontWeight.w600,
             ),
-          ],
-        ),
+            icon: Icon(
+              Icons.arrow_drop_down,
+              color: Colors.white.withValues(alpha: 0.7),
+            ),
+            items: [
+              DropdownMenuItem(
+                value: 'standard',
+                child: Text(
+                  'Standard (24 hours)',
+                  style: GoogleFonts.spaceGrotesk(
+                    color: Colors.white.withValues(alpha: 0.92),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              DropdownMenuItem(
+                value: 'no_refunds',
+                child: Text(
+                  'No Refunds',
+                  style: GoogleFonts.spaceGrotesk(
+                    color: Colors.white.withValues(alpha: 0.92),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+            onChanged: (String? value) {
+              setState(() {
+                switch (value) {
+                  case 'standard':
+                    _refundPolicy = const RefundPolicy();
+                    break;
+                  case 'flexible':
+                    _refundPolicy = const RefundPolicy(
+                      fullRefundDeadline: Duration(days: 7),
+                      allowPartialRefunds: true,
+                      partialRefundPercentage: 50.0,
+                      terms:
+                          'Full refund available up to 7 days before event. 50% refund available up to 24 hours before event.',
+                    );
+                    break;
+                  case 'no_refunds':
+                    _refundPolicy = const RefundPolicy(
+                      fullRefundDeadline: Duration.zero,
+                      terms: 'No refunds available for this event.',
+                      exceptions: ['All sales are final'],
+                    );
+                    break;
+                  default:
+                    break;
+                }
+              });
+            },
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildSettingsSection() {
-    return Card(
+    return GlassCard(
+      margin: const EdgeInsets.only(bottom: 16),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Event Settings',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 18,
+                fontWeight: FontWeight.w900,
+                color: Colors.white.withValues(alpha: 0.92),
+              ),
             ),
             const SizedBox(height: 16),
             SwitchListTile(
-              title: Text('events_public_event'.tr()),
-              subtitle: Text('events_show_in_feed'.tr()),
+              title: Text(
+                'events_public_event'.tr(),
+                style: GoogleFonts.spaceGrotesk(
+                  color: Colors.white.withValues(alpha: 0.92),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              subtitle: Text(
+                'events_show_in_feed'.tr(),
+                style: GoogleFonts.spaceGrotesk(
+                  color: Colors.white.withValues(alpha: 0.7),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
               value: _isPublic,
               onChanged: (value) => setState(() => _isPublic = value),
               contentPadding: EdgeInsets.zero,
+              activeThumbColor: const Color(0xFF22D3EE),
+              inactiveThumbColor: Colors.white.withValues(alpha: 0.5),
+              inactiveTrackColor: Colors.white.withValues(alpha: 0.2),
             ),
             SwitchListTile(
-              title: Text('events_enable_reminders'.tr()),
-              subtitle: Text('events_send_reminders'.tr()),
+              title: Text(
+                'events_enable_reminders'.tr(),
+                style: GoogleFonts.spaceGrotesk(
+                  color: Colors.white.withValues(alpha: 0.92),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              subtitle: Text(
+                'events_send_reminders'.tr(),
+                style: GoogleFonts.spaceGrotesk(
+                  color: Colors.white.withValues(alpha: 0.7),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
               value: _reminderEnabled,
               onChanged: (value) => setState(() => _reminderEnabled = value),
               contentPadding: EdgeInsets.zero,
+              activeThumbColor: const Color(0xFF22D3EE),
+              inactiveThumbColor: Colors.white.withValues(alpha: 0.5),
+              inactiveTrackColor: Colors.white.withValues(alpha: 0.2),
             ),
           ],
         ),
@@ -811,63 +1015,131 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
   }
 
   Widget _buildRecurringEventSection() {
-    return Card(
+    return GlassCard(
+      margin: const EdgeInsets.only(bottom: 16),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Recurring Event',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 18,
+                fontWeight: FontWeight.w900,
+                color: Colors.white.withValues(alpha: 0.92),
+              ),
             ),
             const SizedBox(height: 16),
             SwitchListTile(
-              title: Text('events_repeat_event'.tr()),
-              subtitle: Text('events_create_recurring'.tr()),
+              title: Text(
+                'events_repeat_event'.tr(),
+                style: GoogleFonts.spaceGrotesk(
+                  color: Colors.white.withValues(alpha: 0.92),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              subtitle: Text(
+                'events_create_recurring'.tr(),
+                style: GoogleFonts.spaceGrotesk(
+                  color: Colors.white.withValues(alpha: 0.7),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
               value: _isRecurring,
               onChanged: (value) => setState(() => _isRecurring = value),
               contentPadding: EdgeInsets.zero,
+              activeThumbColor: const Color(0xFF22D3EE),
+              inactiveThumbColor: Colors.white.withValues(alpha: 0.5),
+              inactiveTrackColor: Colors.white.withValues(alpha: 0.2),
             ),
             if (_isRecurring) ...[
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 initialValue: _recurrencePattern,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Repeat Pattern',
+                  labelStyle: GoogleFonts.spaceGrotesk(
+                    color: Colors.white.withValues(alpha: 0.7),
+                    fontWeight: FontWeight.w600,
+                  ),
                   filled: true,
-                  fillColor: core.ArtbeatColors.backgroundPrimary,
-                  border: OutlineInputBorder(),
+                  fillColor: Colors.white.withValues(alpha: 0.06),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(
+                      color: Colors.white.withValues(alpha: 0.12),
+                      width: 1.5,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(
+                      color: Colors.white.withValues(alpha: 0.12),
+                      width: 1.5,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(
+                      color: Color(0xFF22D3EE),
+                      width: 2,
+                    ),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
+                  ),
                 ),
-                dropdownColor: core.ArtbeatColors.backgroundPrimary,
-                style: const TextStyle(color: core.ArtbeatColors.textPrimary),
-                items: const [
+                dropdownColor: Colors.black.withValues(alpha: 0.9),
+                style: GoogleFonts.spaceGrotesk(
+                  color: Colors.white.withValues(alpha: 0.92),
+                  fontWeight: FontWeight.w600,
+                ),
+                icon: Icon(
+                  Icons.arrow_drop_down,
+                  color: Colors.white.withValues(alpha: 0.7),
+                ),
+                items: [
                   DropdownMenuItem(
                     value: 'daily',
                     child: Text(
                       'Daily',
-                      style: TextStyle(color: core.ArtbeatColors.textPrimary),
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.white.withValues(alpha: 0.92),
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                   DropdownMenuItem(
                     value: 'weekly',
                     child: Text(
                       'Weekly',
-                      style: TextStyle(color: core.ArtbeatColors.textPrimary),
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.white.withValues(alpha: 0.92),
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                   DropdownMenuItem(
                     value: 'monthly',
                     child: Text(
                       'Monthly',
-                      style: TextStyle(color: core.ArtbeatColors.textPrimary),
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.white.withValues(alpha: 0.92),
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                   DropdownMenuItem(
                     value: 'custom',
                     child: Text(
                       'Custom',
-                      style: TextStyle(color: core.ArtbeatColors.textPrimary),
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.white.withValues(alpha: 0.92),
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],
@@ -880,9 +1152,9 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _recurrenceIntervalController,
-                decoration: InputDecoration(
-                  labelText: 'Repeat Every',
-                  hintText: 'Enter interval',
+                decoration: _glassInputDecoration(
+                  'Repeat Every',
+                  hint: 'Enter interval',
                   suffixText: _recurrencePattern == 'daily'
                       ? 'day(s)'
                       : _recurrencePattern == 'weekly'
@@ -890,7 +1162,10 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
                       : _recurrencePattern == 'monthly'
                       ? 'month(s)'
                       : 'unit(s)',
-                  border: const OutlineInputBorder(),
+                ),
+                style: GoogleFonts.spaceGrotesk(
+                  color: Colors.white.withValues(alpha: 0.92),
+                  fontWeight: FontWeight.w600,
                 ),
                 keyboardType: TextInputType.number,
                 validator: (value) {
@@ -907,29 +1182,67 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
                 },
               ),
               const SizedBox(height: 16),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text('events_end_date'.tr()),
-                subtitle: Text(
-                  _recurrenceEndDate != null
-                      ? '${_recurrenceEndDate!.month}/${_recurrenceEndDate!.day}/${_recurrenceEndDate!.year}'
-                      : 'No end date (continues indefinitely)',
-                ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (_recurrenceEndDate != null)
-                      IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          setState(() => _recurrenceEndDate = null);
-                        },
-                      ),
-                    IconButton(
-                      icon: const Icon(Icons.calendar_today),
-                      onPressed: _selectRecurrenceEndDate,
+              InkWell(
+                onTap: _selectRecurrenceEndDate,
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.06),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.12),
+                      width: 1.5,
                     ),
-                  ],
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'events_end_date'.tr(),
+                              style: GoogleFonts.spaceGrotesk(
+                                color: Colors.white.withValues(alpha: 0.92),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              _recurrenceEndDate != null
+                                  ? '${_recurrenceEndDate!.month}/${_recurrenceEndDate!.day}/${_recurrenceEndDate!.year}'
+                                  : 'No end date (continues indefinitely)',
+                              style: GoogleFonts.spaceGrotesk(
+                                color: Colors.white.withValues(alpha: 0.7),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (_recurrenceEndDate != null)
+                            IconButton(
+                              icon: Icon(
+                                Icons.clear,
+                                color: Colors.white.withValues(alpha: 0.7),
+                              ),
+                              onPressed: () {
+                                setState(() => _recurrenceEndDate = null);
+                              },
+                            ),
+                          Icon(
+                            Icons.calendar_today,
+                            color: Colors.white.withValues(alpha: 0.7),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -1299,103 +1612,7 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
     widget.onEventCreated(event);
   }
 
-  void _showSearchModal(BuildContext context) {
-    // Placeholder for search functionality
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('events_search_unavailable'.tr())));
-  }
-
-  void _showProfileMenu(BuildContext context) {
-    // Placeholder for profile menu
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('events_profile_unavailable'.tr())));
-  }
-
-  void _showDeveloperTools(BuildContext context) {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.6,
-        maxChildSize: 0.9,
-        minChildSize: 0.3,
-        builder: (context, scrollController) => Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: Column(
-            children: [
-              // Handle bar
-              Container(
-                width: 40,
-                height: 4,
-                margin: const EdgeInsets.only(top: 12),
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              // Header
-              const Padding(
-                padding: EdgeInsets.all(20),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.developer_mode,
-                      color: core.ArtbeatColors.primaryPurple,
-                    ),
-                    SizedBox(width: 12),
-                    Text(
-                      'Developer Tools',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: core.ArtbeatColors.textPrimary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              // Developer options
-              Expanded(
-                child: ListView(
-                  controller: scrollController,
-                  padding: const EdgeInsets.all(20),
-                  children: [
-                    _buildDeveloperOption(
-                      icon: Icons.bug_report,
-                      title: 'Form Debug Info',
-                      subtitle: 'View current form state',
-                      color: core.ArtbeatColors.primaryPurple,
-                      onTap: () => _showFormDebugInfo(context),
-                    ),
-                    _buildDeveloperOption(
-                      icon: Icons.data_object,
-                      title: 'Event Data Preview',
-                      subtitle: 'Preview event JSON structure',
-                      color: core.ArtbeatColors.primaryGreen,
-                      onTap: () => _showEventDataPreview(context),
-                    ),
-                    _buildDeveloperOption(
-                      icon: Icons.storage,
-                      title: 'Firebase Storage',
-                      subtitle: 'Check image upload paths',
-                      color: core.ArtbeatColors.secondaryTeal,
-                      onTap: () => _showStorageInfo(context),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  // ...existing code...
 
   Widget _buildDeveloperOption({
     required IconData icon,

@@ -4,11 +4,12 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:provider/provider.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import '../models/models.dart';
-import '../constants/routes.dart';
-import '../theme/art_walk_design_system.dart';
-import '../services/art_walk_service.dart';
+import 'package:artbeat_art_walk/src/models/models.dart';
+import 'package:artbeat_art_walk/src/constants/routes.dart';
+import 'package:artbeat_art_walk/src/theme/art_walk_design_system.dart';
+import 'package:artbeat_art_walk/src/services/art_walk_service.dart';
 
 /// Review screen shown after creating an art walk, allows selfie upload before starting
 class ArtWalkReviewScreen extends StatefulWidget {
@@ -28,7 +29,7 @@ class ArtWalkReviewScreen extends StatefulWidget {
 }
 
 class _ArtWalkReviewScreenState extends State<ArtWalkReviewScreen> {
-  final ArtWalkService _artWalkService = ArtWalkService();
+  late final ArtWalkService _artWalkService;
   File? _selfieFile;
   String _startingLocation = 'Current Location';
   bool _isUploading = false;
@@ -36,6 +37,7 @@ class _ArtWalkReviewScreenState extends State<ArtWalkReviewScreen> {
   @override
   void initState() {
     super.initState();
+    _artWalkService = context.read<ArtWalkService>();
     _getCurrentLocationName();
   }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:artbeat_profile/src/widgets/glass_card.dart';
 import 'package:artbeat_profile/src/widgets/xp_progress_bar.dart';
+import 'package:artbeat_art_walk/artbeat_art_walk.dart';
 
 class AchievementTile extends StatelessWidget {
   final String title;
@@ -24,9 +25,51 @@ class AchievementTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (achievement != null) {
-      return Text('Achievement: $achievement');
+    if (achievement != null && achievement is AchievementModel) {
+      final ach = achievement as AchievementModel;
+
+      return GlassCard(
+        padding: const EdgeInsets.all(12),
+        margin: const EdgeInsets.symmetric(vertical: 6),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(Icons.emoji_events, size: 48, color: Colors.amber),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    ach.title,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    ach.description,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.copyWith(color: Colors.white70),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Earned on ${ach.earnedAt.toString().split(' ')[0]}',
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: Colors.white60),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
     }
+
+    // Fallback to old implementation
     return GlassCard(
       padding: const EdgeInsets.all(12),
       margin: const EdgeInsets.symmetric(vertical: 6),

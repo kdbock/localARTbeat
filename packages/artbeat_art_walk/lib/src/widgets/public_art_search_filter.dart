@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/search_criteria_model.dart';
+import 'package:artbeat_art_walk/src/models/search_criteria_model.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 /// Advanced filter widget for public art search

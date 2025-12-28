@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:share_plus/share_plus.dart' as share_plus;
 import 'package:geolocator/geolocator.dart';
+import 'package:provider/provider.dart';
 import 'package:artbeat_art_walk/artbeat_art_walk.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:logger/logger.dart';
@@ -21,8 +22,8 @@ class ArtWalkDetailScreen extends StatefulWidget {
 }
 
 class _ArtWalkDetailScreenState extends State<ArtWalkDetailScreen> {
-  final ArtWalkService _artWalkService = ArtWalkService();
-  final AchievementService _achievementService = AchievementService();
+  late final ArtWalkService _artWalkService;
+  late final AchievementService _achievementService;
   late ArtWalkNavigationService _navigationService;
   bool _isLoading = true;
   bool _isCompletingWalk = false;
@@ -39,7 +40,9 @@ class _ArtWalkDetailScreenState extends State<ArtWalkDetailScreen> {
   @override
   void initState() {
     super.initState();
-    _navigationService = ArtWalkNavigationService();
+    _artWalkService = context.read<ArtWalkService>();
+    _achievementService = context.read<AchievementService>();
+    _navigationService = context.read<ArtWalkNavigationService>();
     _loadArtWalk();
   }
 

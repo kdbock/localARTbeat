@@ -2,12 +2,12 @@
 // This file contains the standardized updates to apply to all remaining screens
 
 import 'package:flutter/material.dart';
-import '../theme/art_walk_design_system.dart';
-import '../widgets/art_walk_drawer.dart';
+import 'package:artbeat_art_walk/src/theme/art_walk_design_system.dart';
+import 'package:artbeat_art_walk/src/widgets/art_walk_drawer.dart';
 
 /// Updates to apply to each screen:
 ///
-/// 1. Add import: import '../theme/art_walk_design_system.dart';
+/// 1. Add import: import 'package:artbeat_art_walk/src/theme/art_walk_design_system.dart';
 ///
 /// 2. Replace AppBar with: ArtWalkDesignSystem.buildAppBar()
 ///

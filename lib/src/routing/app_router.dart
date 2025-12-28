@@ -16,6 +16,7 @@ import 'package:artbeat_settings/artbeat_settings.dart' as settings_pkg;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 
 import '../../screens/in_app_purchase_demo_screen.dart';
 import '../../screens/notifications_screen.dart';
@@ -593,8 +594,17 @@ class AppRouter {
         );
 
       case core.AppRoutes.communityCreate:
+        final args = settings.arguments as Map<String, dynamic>?;
+        final prefilledImageUrl = args?['prefilledImageUrl'] as String?;
+        final prefilledCaption = args?['prefilledCaption'] as String?;
+        final isDiscussionPost = args?['isDiscussionPost'] as bool? ?? false;
+
         return RouteUtils.createMainLayoutRoute(
-          child: const community.CreatePostScreen(),
+          child: community.CreatePostScreen(
+            prefilledImageUrl: prefilledImageUrl,
+            prefilledCaption: prefilledCaption,
+            isDiscussionPost: isDiscussionPost,
+          ),
         );
 
       case core.AppRoutes.communityMessaging:
@@ -703,27 +713,42 @@ class AppRouter {
       // The route is handled by the art_walk module's route configuration.
 
       case core.AppRoutes.artWalkSearch:
+        final args = settings.arguments as Map<String, dynamic>?;
+        final query = args?['query'] as String?;
+        final searchType = args?['searchType'] as String?;
         return RouteUtils.createMainLayoutRoute(
           currentIndex: 1,
-          child: const Center(child: Text('Art Walk Search - Coming Soon')),
+          child: art_walk.SearchResultsScreen(
+            initialQuery: query,
+            searchType: searchType,
+          ),
         );
 
       case core.AppRoutes.artWalkExplore:
         return RouteUtils.createMainLayoutRoute(
           currentIndex: 1,
-          child: const Center(child: Text('Explore Art Walks - Coming Soon')),
+          child: const art_walk.DiscoverDashboardScreen(),
         );
 
       case core.AppRoutes.artWalkStart:
+        final args = settings.arguments as Map<String, dynamic>?;
+        final artWalkId = args?['artWalkId'] as String?;
+        final artWalk = args?['artWalk'] as art_walk.ArtWalkModel?;
+        if (artWalkId == null || artWalk == null) {
+          return RouteUtils.createErrorRoute('Art walk data is required');
+        }
         return RouteUtils.createMainLayoutRoute(
           currentIndex: 1,
-          child: const Center(child: Text('Start Art Walk - Coming Soon')),
+          child: art_walk.EnhancedArtWalkExperienceScreen(
+            artWalkId: artWalkId,
+            artWalk: artWalk,
+          ),
         );
 
       case core.AppRoutes.artWalkNearby:
         return RouteUtils.createMainLayoutRoute(
           currentIndex: 1,
-          child: const Center(child: Text('Nearby Art Walks - Coming Soon')),
+          child: const art_walk.ArtWalkMapScreen(),
         );
 
       case core.AppRoutes.artWalkMyWalks:
@@ -764,33 +789,31 @@ class AppRouter {
       case core.AppRoutes.artWalkCompleted:
         return RouteUtils.createMainLayoutRoute(
           currentIndex: 1,
-          child: const Center(child: Text('Completed Art Walks - Coming Soon')),
+          child: const art_walk.EnhancedMyArtWalksScreen(),
         );
 
       case core.AppRoutes.artWalkSaved:
         return RouteUtils.createMainLayoutRoute(
           currentIndex: 1,
-          child: const Center(child: Text('Saved Art Walks - Coming Soon')),
+          child: const art_walk.EnhancedMyArtWalksScreen(),
         );
 
       case core.AppRoutes.artWalkPopular:
         return RouteUtils.createMainLayoutRoute(
           currentIndex: 1,
-          child: const Center(child: Text('Popular Art Walks - Coming Soon')),
+          child: const art_walk.ArtWalkListScreen(),
         );
 
       case core.AppRoutes.artWalkAchievements:
         return RouteUtils.createMainLayoutRoute(
           currentIndex: 1,
-          child: const Center(
-            child: Text('Art Walk Achievements - Coming Soon'),
-          ),
+          child: const art_walk.QuestHistoryScreen(),
         );
 
       case core.AppRoutes.artWalkSettings:
         return RouteUtils.createMainLayoutRoute(
           currentIndex: 1,
-          child: const Center(child: Text('Art Walk Settings - Coming Soon')),
+          child: const art_walk.WeeklyGoalsScreen(),
         );
 
       case core.AppRoutes.artWalkAdminModeration:
@@ -852,9 +875,19 @@ class AppRouter {
         );
 
       case '/instant-discovery':
+        final args =
+            settings.arguments as Map<String, dynamic>? ??
+            const <String, dynamic>{};
+        final Position? userPosition = args['userPosition'] as Position?;
+        final nearbyArt = (args['initialNearbyArt'] as List<dynamic>?)
+            ?.cast<art_walk.PublicArtModel>();
+
         return RouteUtils.createMainLayoutRoute(
           currentIndex: 1,
-          child: const art_walk.InstantDiscoveryRadarScreen(),
+          child: art_walk.InstantDiscoveryRadarScreen(
+            userPosition: userPosition,
+            initialNearbyArt: nearbyArt,
+          ),
         );
 
       case '/quest-history':
@@ -890,6 +923,12 @@ class AppRouter {
         );
 
       default:
+        final generatedRoute = art_walk.ArtWalkRouteConfig.generateRoute(
+          settings,
+        );
+        if (generatedRoute != null) {
+          return generatedRoute;
+        }
         return RouteUtils.createNotFoundRoute('Art Walk feature');
     }
   }
@@ -951,7 +990,19 @@ class AppRouter {
   Route<dynamic>? _handleEventsRoutes(RouteSettings settings) {
     switch (settings.name) {
       case core.AppRoutes.events:
+        return RouteUtils.createMainLayoutRoute(
+          currentIndex: 4,
+          drawer: const events.EventsDrawer(),
+          child: const events.EventsDashboardScreen(),
+        );
+
       case core.AppRoutes.eventsDiscover:
+        return RouteUtils.createMainLayoutRoute(
+          currentIndex: 4,
+          drawer: const events.EventsDrawer(),
+          child: const events.EventsListScreen(),
+        );
+
       case core.AppRoutes.eventsDashboard:
       case core.AppRoutes.eventsArtistDashboard:
         return RouteUtils.createMainLayoutRoute(
@@ -993,6 +1044,12 @@ class AppRouter {
           );
         }
         return RouteUtils.createNotFoundRoute();
+
+      case core.AppRoutes.eventsCalendar:
+        return RouteUtils.createMainLayoutRoute(
+          drawer: const events.EventsDrawer(),
+          child: const events.CalendarScreen(),
+        );
 
       default:
         return RouteUtils.createComingSoonRoute('Events');
@@ -1503,14 +1560,24 @@ class AppRouter {
                   final captures = snapshot.data ?? [];
                   switch (settings.name) {
                     case core.AppRoutes.captures:
-                    case core.AppRoutes.capturePending:
                     case core.AppRoutes.captureMap:
-                    case core.AppRoutes.captureApproved:
                     case core.AppRoutes.captureGallery:
                     case core.AppRoutes.capturePublic:
                       return capture.CapturesListScreen(captures: captures);
                     case core.AppRoutes.captureMyCaptures:
                       return capture.MyCapturesScreen(captures: captures);
+                    case core.AppRoutes.capturePending:
+                      final pending = captures
+                          .where((c) => c.status == 'pending')
+                          .toList();
+                      return capture.MyCapturesPendingScreen(captures: pending);
+                    case core.AppRoutes.captureApproved:
+                      final approved = captures
+                          .where((c) => c.status == 'approved')
+                          .toList();
+                      return capture.MyCapturesApprovedScreen(
+                        captures: approved,
+                      );
                     default:
                       return capture.CapturesListScreen(captures: captures);
                   }
@@ -1565,7 +1632,18 @@ class AppRouter {
           return RouteUtils.createErrorRoute('Capture ID is required');
         }
         return RouteUtils.createMainLayoutRoute(
-          child: capture.CaptureDetailViewerScreen(captureId: captureId),
+          child: FutureBuilder<core.CaptureModel?>(
+            future: capture.CaptureService().getCaptureById(captureId),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError || snapshot.data == null) {
+                return const Center(child: Text('Error loading capture'));
+              }
+              return capture.CaptureDetailViewerScreen(capture: snapshot.data!);
+            },
+          ),
         );
 
       case core.AppRoutes.captureEdit:
@@ -1583,6 +1661,107 @@ class AppRouter {
             initialTitle: captureModel.title ?? '',
             initialDescription: captureModel.description ?? '',
           ),
+        );
+
+      case core.AppRoutes.captureNearby:
+        return RouteUtils.createMainLayoutRoute(
+          child: FutureBuilder<List<capture.CaptureModel>>(
+            future: capture.CaptureService().getPublicCaptures(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const core.LoadingScreen();
+              }
+              if (snapshot.hasError) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.error, size: 64, color: Colors.red),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Error',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        snapshot.error.toString(),
+                        style: const TextStyle(color: Colors.grey),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () => Navigator.of(
+                          context,
+                        ).pushReplacementNamed(core.AppRoutes.captureNearby),
+                        child: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                );
+              }
+              final captures = snapshot.data ?? [];
+              return capture.CapturesListScreen(captures: captures);
+            },
+          ),
+        );
+
+      case core.AppRoutes.capturePopular:
+        return RouteUtils.createMainLayoutRoute(
+          child: FutureBuilder<List<capture.CaptureModel>>(
+            future: capture.CaptureService().getAllCapturesFresh(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const core.LoadingScreen();
+              }
+              if (snapshot.hasError) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.error, size: 64, color: Colors.red),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Error',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        snapshot.error.toString(),
+                        style: const TextStyle(color: Colors.grey),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () => Navigator.of(
+                          context,
+                        ).pushReplacementNamed(core.AppRoutes.capturePopular),
+                        child: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                );
+              }
+              final captures = snapshot.data ?? [];
+              return capture.CapturesListScreen(captures: captures);
+            },
+          ),
+        );
+
+      case core.AppRoutes.captureSearch:
+        return RouteUtils.createMainLayoutRoute(
+          child: const core.SearchResultsPage(),
+        );
+
+      case core.AppRoutes.captureSettings:
+        // TODO(kristybock): Implement capture settings screen
+        return RouteUtils.createErrorRoute(
+          'Capture settings not yet implemented',
         );
 
       default:
@@ -1670,7 +1849,18 @@ class AppRouter {
         );
 
       case core.AppRoutes.notifications:
-        return RouteUtils.createSimpleRoute(child: const NotificationsScreen());
+        return RouteUtils.createMainLayoutRoute(
+          child: const NotificationsScreen(useScaffold: false),
+          drawer: const events.EventsDrawer(),
+          currentIndex: 4,
+          appBarBuilder: (context) => AppBar(
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            title: const Text('Notifications'),
+          ),
+        );
 
       case core.AppRoutes.search:
         return RouteUtils.createMainLayoutRoute(

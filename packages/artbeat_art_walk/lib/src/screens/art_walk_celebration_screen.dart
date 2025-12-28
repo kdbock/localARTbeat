@@ -3,9 +3,10 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:confetti/confetti.dart';
 import 'package:lottie/lottie.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import '../models/models.dart';
-import '../services/social_service.dart';
+import 'package:artbeat_art_walk/src/models/models.dart';
+import 'package:artbeat_art_walk/src/services/social_service.dart';
 
 /// Celebratory screen shown when an art walk is completed
 class ArtWalkCelebrationScreen extends StatefulWidget {
@@ -595,7 +596,7 @@ class _ArtWalkCelebrationScreenState extends State<ArtWalkCelebrationScreen>
         throw Exception('User not authenticated');
       }
 
-      final socialService = SocialService();
+      final socialService = context.read<SocialService>();
       final distanceMiles = (widget.celebrationData.distanceWalked * 0.621371)
           .toStringAsFixed(1);
 

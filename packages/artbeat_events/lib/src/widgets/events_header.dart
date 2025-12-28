@@ -1,22 +1,22 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-/// Events Package Specific Header
-///
-/// Color: #1cdba0 (28, 219, 160)
-/// Text/Icon Color: #8c52ff
-/// Font: Limelight
-class EventsHeader extends StatefulWidget implements PreferredSizeWidget {
+class EventsHeader extends StatelessWidget implements PreferredSizeWidget {
   final String? title;
   final bool showBackButton;
   final bool showSearch;
   final bool showChat;
   final bool showDeveloper;
+
   final VoidCallback? onMenuPressed;
   final VoidCallback? onBackPressed;
   final VoidCallback? onSearchPressed;
   final VoidCallback? onChatPressed;
   final VoidCallback? onDeveloperPressed;
+
   final List<Widget>? actions;
 
   const EventsHeader({
@@ -35,246 +35,230 @@ class EventsHeader extends StatefulWidget implements PreferredSizeWidget {
   });
 
   @override
-  State<EventsHeader> createState() => _EventsHeaderState();
-
-  @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
-}
 
-class _EventsHeaderState extends State<EventsHeader> {
-  static const Color _headerColor = Color(0xFF1CDBA0); // Events header color
-  static const Color _iconTextColor = Color(0xFF8C52FF); // Text/Icon color
+  static const Color _accentTeal = Color(0xFF1CDBA0);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(color: _headerColor),
-      child: SafeArea(
-        bottom: false,
+    return ClipRRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
         child: Container(
-          height: kToolbarHeight,
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: Row(
-            children: [
-              // Leading: Menu or Back Button
-              _buildLeadingButton(),
-
-              // Title Section
-              Expanded(child: _buildTitleSection()),
-
-              // Action Buttons
-              ..._buildActionButtons(),
-            ],
+          height: kToolbarHeight + 6,
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.06),
+            border: Border(
+              bottom: BorderSide(color: Colors.white.withValues(alpha: 0.14)),
+            ),
+          ),
+          child: SafeArea(
+            bottom: false,
+            child: Row(
+              children: [
+                _buildLeading(context),
+                Expanded(child: _buildTitle()),
+                ..._buildActions(context),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildLeadingButton() {
+  Widget _buildLeading(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(left: 8),
-      child: widget.showBackButton
+      margin: const EdgeInsets.only(right: 4),
+      child: showBackButton
           ? IconButton(
-              icon: const Icon(Icons.arrow_back, color: _iconTextColor),
-              onPressed:
-                  widget.onBackPressed ?? () => Navigator.maybePop(context),
-              tooltip: 'Back',
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: onBackPressed ?? () => Navigator.maybePop(context),
+              tooltip: 'events_back'.tr(),
             )
           : IconButton(
-              icon: const Icon(Icons.menu, color: _iconTextColor),
-              onPressed: widget.onMenuPressed ?? _openDrawer,
-              tooltip: 'Package Drawer',
+              icon: const Icon(Icons.menu, color: Colors.white),
+              onPressed: onMenuPressed ?? () => _openMenu(context),
+              tooltip: 'events_menu'.tr(),
             ),
     );
   }
 
-  Widget _buildTitleSection() {
+  Widget _buildTitle() {
     return Center(
       child: Text(
-        widget.title ?? 'Events',
-        style: const TextStyle(
-          color: _iconTextColor,
-          fontFamily: 'Limelight',
-          fontWeight: FontWeight.normal,
-          fontSize: 20,
-          letterSpacing: 1.2,
+        title ?? 'events_title'.tr(),
+        style: GoogleFonts.spaceGrotesk(
+          fontWeight: FontWeight.w900,
+          fontSize: 18,
+          color: Colors.white,
+          letterSpacing: 0.4,
         ),
-        textAlign: TextAlign.center,
         overflow: TextOverflow.ellipsis,
       ),
     );
   }
 
-  List<Widget> _buildActionButtons() {
-    final actions = <Widget>[];
+  List<Widget> _buildActions(BuildContext context) {
+    final widgets = <Widget>[];
 
-    // Search Icon
-    if (widget.showSearch) {
-      actions.add(
+    if (showSearch) {
+      widgets.add(
         IconButton(
-          icon: Image.asset(
-            'assets/icons/search-icon@1x.png',
-            width: 24,
-            height: 24,
-            color: _iconTextColor,
-            errorBuilder: (context, error, stackTrace) =>
-                const Icon(Icons.search, color: _iconTextColor),
-          ),
-          onPressed: widget.onSearchPressed ?? _navigateToSearch,
-          tooltip: 'Search',
+          icon: const Icon(Icons.search, color: Colors.white),
+          tooltip: 'events_search'.tr(),
+          onPressed:
+              onSearchPressed ?? () => Navigator.pushNamed(context, '/search'),
         ),
       );
     }
 
-    // Chat Icon
-    if (widget.showChat) {
-      actions.add(
+    if (showChat) {
+      widgets.add(
         IconButton(
-          icon: Image.asset(
-            'assets/icons/chat-icon.png',
-            width: 24,
-            height: 24,
-            color: _iconTextColor,
-            errorBuilder: (context, error, stackTrace) =>
-                const Icon(Icons.chat_bubble_outline, color: _iconTextColor),
-          ),
-          onPressed: widget.onChatPressed ?? _openMessaging,
-          tooltip: 'Messages',
+          icon: const Icon(Icons.chat_bubble_outline, color: Colors.white),
+          tooltip: 'events_chat'.tr(),
+          onPressed:
+              onChatPressed ?? () => Navigator.pushNamed(context, '/messaging'),
         ),
       );
     }
 
-    // Developer Icon
-    if (widget.showDeveloper) {
-      actions.add(
+    if (showDeveloper) {
+      widgets.add(
         IconButton(
-          icon: const Icon(Icons.developer_mode, color: _iconTextColor),
-          onPressed: widget.onDeveloperPressed ?? _showDeveloperMenu,
-          tooltip: 'Developer Tools',
+          icon: const Icon(Icons.developer_mode, color: Colors.white),
+          tooltip: 'events_dev'.tr(),
+          onPressed: onDeveloperPressed ?? () => _showDeveloper(context),
         ),
       );
     }
 
-    // Additional custom actions
-    if (widget.actions != null) {
-      actions.addAll(widget.actions!);
-    }
+    if (actions != null) widgets.addAll(actions!);
 
-    return actions;
+    return widgets;
   }
 
-  void _openDrawer() {
-    final scaffoldState = Scaffold.maybeOf(context);
-    if (scaffoldState != null && scaffoldState.hasDrawer) {
-      scaffoldState.openDrawer();
-    } else {
-      // Show package-specific drawer/menu
-      _showPackageMenu();
-    }
-  }
+  // ------- MENUS -------
 
-  void _showPackageMenu() {
+  void _openMenu(BuildContext context) {
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Handle bar
-            Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(top: 12),
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
+      builder: (context) => ClipRRect(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(26)),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+          child: Container(
+            padding: const EdgeInsets.only(bottom: 20),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.08),
+              border: Border(
+                top: BorderSide(color: Colors.white.withValues(alpha: 0.14)),
               ),
             ),
-
-            // Header
-            Container(
-              padding: const EdgeInsets.all(20),
-              child: const Text(
-                'Events Menu',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'Limelight',
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(top: 12),
+                  height: 4,
+                  width: 36,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
-              ),
-            ),
 
-            // Menu items for events package
-            ListTile(
-              leading: const Icon(Icons.event, color: _headerColor),
-              title: Text('events_browse_events'.tr()),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.pushNamed(context, '/events/browse');
-              },
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Text(
+                    'events_menu_header'.tr(),
+                    style: GoogleFonts.spaceGrotesk(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 16,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+
+                _menuItem(
+                  context,
+                  icon: Icons.event,
+                  label: 'events_browse_events'.tr(),
+                  onTap: () => Navigator.pushNamed(context, '/events/browse'),
+                ),
+                _menuItem(
+                  context,
+                  icon: Icons.add_circle,
+                  label: 'events_create_event'.tr(),
+                  onTap: () => Navigator.pushNamed(context, '/events/create'),
+                ),
+                _menuItem(
+                  context,
+                  icon: Icons.confirmation_number,
+                  label: 'events_my_tickets'.tr(),
+                  onTap: () => Navigator.pushNamed(context, '/events/tickets'),
+                ),
+              ],
             ),
-            ListTile(
-              leading: const Icon(Icons.add_circle, color: _headerColor),
-              title: Text('events_create_event'.tr()),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.pushNamed(context, '/events/create');
-              },
-            ),
-            ListTile(
-              leading: const Icon(
-                Icons.confirmation_number,
-                color: _headerColor,
-              ),
-              title: Text('events_my_tickets'.tr()),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.pushNamed(context, '/events/tickets');
-              },
-            ),
-            const SizedBox(height: 20),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  void _navigateToSearch() {
-    Navigator.pushNamed(context, '/search');
+  Widget _menuItem(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      leading: Icon(icon, color: _accentTeal),
+      title: Text(
+        label,
+        style: GoogleFonts.spaceGrotesk(
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      onTap: () {
+        Navigator.pop(context);
+        onTap();
+      },
+    );
   }
 
-  void _openMessaging() {
-    Navigator.pushNamed(context, '/messaging');
-  }
-
-  void _showDeveloperMenu() {
-    // Show developer tools specific to events package
+  void _showDeveloper(BuildContext context) {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('events_developer_tools'.tr()),
+        backgroundColor: const Color(0xFF0C0C16),
+        title: Text(
+          'events_developer_tools'.tr(),
+          style: GoogleFonts.spaceGrotesk(
+            color: Colors.white,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              title: Text('events_test_creation'.tr()),
-              onTap: () {
-                Navigator.pop(context);
-                // Implement event creation testing
-              },
+              title: Text(
+                'events_test_creation'.tr(),
+                style: const TextStyle(color: Colors.white),
+              ),
+              onTap: () => Navigator.pop(context),
             ),
             ListTile(
-              title: Text('events_clear_cache'.tr()),
-              onTap: () {
-                Navigator.pop(context);
-                // Implement events cache clearing
-              },
+              title: Text(
+                'events_clear_cache'.tr(),
+                style: const TextStyle(color: Colors.white),
+              ),
+              onTap: () => Navigator.pop(context),
             ),
           ],
         ),

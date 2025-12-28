@@ -68,7 +68,10 @@ class GoogleMapsErrorHandler {
   }
 
   /// Handle map loading timeout
-  static Future<void> handleMapTimeout(BuildContext context) async {
+  static Future<void> handleMapTimeout(
+    BuildContext context, {
+    VoidCallback? onRetry,
+  }) async {
     final isRunningOnEmulator = await isEmulator();
 
     // ignore: use_build_context_synchronously
@@ -80,17 +83,12 @@ class GoogleMapsErrorHandler {
               : 'Map loading timed out. Check your internet connection.',
         ),
         duration: const Duration(seconds: 5),
-        action: SnackBarAction(
-          label: 'Retry',
-          onPressed: () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute<void>(
-                builder: (context) => Navigator.of(context).widget as Widget,
+        action: onRetry == null
+            ? null
+            : SnackBarAction(
+                label: 'Retry',
+                onPressed: onRetry,
               ),
-            );
-          },
-        ),
       ),
     );
   }

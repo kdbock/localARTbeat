@@ -2336,7 +2336,7 @@
   "profile_menu_profile_analytics_subtitle": "عرض إحصائيات ملفك الشخصي",
   "profile_menu_achievements_rewards": "الإنجازات والمكافآت",
   "profile_menu_achievements": "الإنجازات",
-  "profile_menu_achievements_subtitle": "شاراتك وإنجازاتك",
+  "profile_menu_achievements_subtitle": "تعلم المزيد عن إنجازاتك",
   "profile_menu_rewards": "المكافآت",
   "profile_menu_rewards_subtitle": "استبدل النقاط والقسائم",
   "profile_menu_account_settings": "الحساب والإعدادات",
@@ -2407,7 +2407,7 @@
   "messaging_artistic_messaging_text_see_trending_conversations": "عرض المحادثات الرائجة",
   "messaging_artistic_messaging_text_tips_and_support": "نصائح ودعم للمراسلة",
   "messaging_artistic_messaging_text_view_and_edit": "[View and edit your profile]",
-  "messaging_badges": "الشارات",
+  "messaging_learn_more": "تعلم المزيد",
   "messaging_block_confirm": "هل أنت متأكد من أنك تريد حظر هذا المستخدم؟",
   "messaging_block_user": "حظر المستخدم",
   "messaging_blocked_title": "المستخدمون المحظورون",
@@ -2742,7 +2742,7 @@
   "profile_connections_request_sent": "تم إرسال طلب الاتصال!",
   "profile_connections_title": "الاتصالات",
   "profile_create_title": "إنشاء ملفك الشخصي",
-  "profile_customization_badges": "عرض شارات الإنجاز الخاصة بك",
+  "profile_customization_learn_more": "تعلم المزيد",
   "profile_customization_bio": "عرض قسم السيرة الذاتية في ملفك الشخصي",
   "profile_customization_compact": "مضغوط",
   "profile_customization_location": "عرض موقعك في ملفك الشخصي",
@@ -2837,7 +2837,7 @@
   "settings_backup_codes_desc": "إنشاء رموز احتياطية للوصول في حالات الطوارئ",
   "settings_backup_codes_save": "احفظ رموز النسخ الاحتياطي هذه في مكان آمن:",
   "settings_backup_codes_saved": "[I've Saved Them]",
-  "settings_badges": "الشارات",
+  "settings_learn_more": "تعلم المزيد",
   "settings_basic_info": "[Basic Information]",
   "settings_bio": "السيرة الذاتية",
   "settings_bio_hint": "أخبر الآخرين عن نفسك",
@@ -3130,7 +3130,7 @@
   "engagement_day_streak": "سلسلة الأيام",
   "engagement_weekly_goal_percent": "{percent}% من الهدف الأسبوعي",
   "engagement_discoveries": "الاكتشافات",
-  "engagement_badges": "الشارات",
+  "engagement_learn_more": "تعلم المزيد",
   "engagement_on_fire": "🔥 مشتعل! استمر!",
   "engagement_weekly_goal": "الهدف الأسبوعي",
   "engagement_percent_complete": "{percent}% مكتمل",
@@ -3621,7 +3621,7 @@
 
   "animated_dashboard_explore_title": "استكشف",
   "animated_dashboard_explore_subtitle": "اعثر على فنانين محليين، فن محلي، وفعاليات قادمة",
-  "animated_dashboard_explore_tag": "اكتشاف",
+  "animated_dashboard_explore_tag": "عاشق الفن",
 
   "animated_dashboard_connect_title": "تواصل",
   "animated_dashboard_connect_subtitle": "فنانون، منشورات، طلبات خاصة وفعاليات",

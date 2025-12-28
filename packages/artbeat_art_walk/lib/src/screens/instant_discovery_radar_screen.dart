@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:geolocator/geolocator.dart';
-import '../models/public_art_model.dart';
-import '../widgets/instant_discovery_radar.dart';
-import '../widgets/discovery_capture_modal.dart';
+import 'package:artbeat_art_walk/src/models/public_art_model.dart';
+import 'package:artbeat_art_walk/src/widgets/instant_discovery_radar.dart';
+import 'package:artbeat_art_walk/src/widgets/discovery_capture_modal.dart';
 
 /// Full-screen Instant Discovery Radar
 class InstantDiscoveryRadarScreen extends StatefulWidget {

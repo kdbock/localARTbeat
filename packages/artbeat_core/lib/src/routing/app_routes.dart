@@ -182,6 +182,7 @@ class AppRoutes {
   static const String eventsTickets = '/events/tickets';
   static const String eventsSaved = '/events/saved';
   static const String eventsHistory = '/events/history';
+  static const String eventsCalendar = '/events/calendar';
 
   // Messaging routes
   static const String messaging = '/messaging';

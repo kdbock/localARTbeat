@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:uuid/uuid.dart';
 import 'package:artbeat_core/artbeat_core.dart' show CaptureModel, AppLogger;
-import '../models/offline_queue_item.dart';
+import 'package:artbeat_capture/src/models/offline_queue_item.dart';
 import 'offline_database_service.dart';
 import 'capture_service.dart';
 import 'storage_service.dart';

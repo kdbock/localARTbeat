@@ -48,18 +48,13 @@ class AchievementModel {
     );
 
     // Handle server timestamps
-    DateTime earnedAt;
-    if (data['earnedAt'] is Timestamp) {
-      earnedAt = (data['earnedAt'] as Timestamp).toDate();
-    } else {
-      earnedAt = DateTime.now();
-    }
+    final earnedAtTimestamp = data['earnedAt'] as Timestamp?;
 
     return AchievementModel(
       id: doc.id,
       userId: data['userId'] as String? ?? '',
       type: achievementType,
-      earnedAt: earnedAt,
+      earnedAt: (earnedAtTimestamp ?? Timestamp.now()).toDate(),
       isNew: data['isNew'] as bool? ?? true,
       metadata: data['metadata'] as Map<String, dynamic>? ?? {},
     );

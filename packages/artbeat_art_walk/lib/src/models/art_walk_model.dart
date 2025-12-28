@@ -62,8 +62,8 @@ class ArtWalkModel {
       viewCount: data['viewCount'] as int? ?? 0,
       imageUrls: List<String>.from(data['imageUrls'] as List<dynamic>? ?? []),
       zipCode: data['zipCode'] as String?,
-      estimatedDuration: data['estimatedDuration'] as double?,
-      estimatedDistance: data['estimatedDistance'] as double?,
+      estimatedDuration: (data['estimatedDuration'] as num?)?.toDouble(),
+      estimatedDistance: (data['estimatedDistance'] as num?)?.toDouble(),
       coverImageUrl: (data['coverImageUrl'] as String?)?.isEmpty == true
           ? null
           : data['coverImageUrl'] as String?,

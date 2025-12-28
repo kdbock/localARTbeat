@@ -15,11 +15,12 @@ class RouteUtils {
     required Widget child,
     int currentIndex = -1,
     PreferredSizeWidget? appBar,
+    PreferredSizeWidget? Function(BuildContext)? appBarBuilder,
     Widget? drawer,
   }) => MaterialPageRoute<T>(
-    builder: (_) => core.MainLayout(
+    builder: (context) => core.MainLayout(
       currentIndex: currentIndex,
-      appBar: appBar,
+      appBar: appBarBuilder?.call(context) ?? appBar,
       drawer: drawer,
       child: child,
     ),

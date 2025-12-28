@@ -211,7 +211,7 @@ class _EventsDrawerState extends State<EventsDrawer> {
                           icon: Icons.calendar_today,
                           title: 'events_drawer_calendar'.tr(),
                           onTap: () =>
-                              _navigateToScreen(context, '/events/dashboard'),
+                              _navigateToScreen(context, '/events/calendar'),
                         ),
                         _NavItem(
                           icon: Icons.location_on,

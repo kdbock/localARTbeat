@@ -1322,7 +1322,7 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
 
   PreferredSizeWidget _buildHudAppBar() {
     return PreferredSize(
-      preferredSize: const Size.fromHeight(89),
+      preferredSize: const Size.fromHeight(110),
       child: SafeArea(
         bottom: false,
         child: Padding(
@@ -1386,7 +1386,7 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
 
                 // Tabs strip
                 SizedBox(
-                  height: 39,
+                  height: 48,
                   child: _Glass(
                     radius: 18,
                     blur: 14,

@@ -7,6 +7,7 @@ import '../widgets/world_background.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/section_header.dart';
 import '../widgets/user_avatar_badge.dart';
+import 'user_profile_screen.dart';
 
 class ProfileMenuScreen extends StatefulWidget {
   const ProfileMenuScreen({super.key});
@@ -95,6 +96,23 @@ class _ProfileMenuContent extends StatelessWidget {
           const SectionHeader(title: 'Account'),
           _menuItem(
             context,
+            icon: Icons.person_outline,
+            label: 'User Profile',
+            onTap: () {
+              final user = context
+                  .findAncestorStateOfType<_ProfileMenuScreenState>()!
+                  ._currentUser;
+              if (user != null) {
+                Navigator.of(context).push(
+                  MaterialPageRoute<UserProfileScreen>(
+                    builder: (_) => UserProfileScreen(userId: user.id),
+                  ),
+                );
+              }
+            },
+          ),
+          _menuItem(
+            context,
             icon: Icons.edit,
             label: 'Edit Profile',
             route: '/profile/edit',
@@ -146,8 +164,8 @@ class _ProfileMenuContent extends StatelessWidget {
           _menuItem(
             context,
             icon: Icons.military_tech_outlined,
-            label: 'Badges',
-            route: '/profile/badges',
+            label: 'Learn More',
+            route: '/profile/achievement-info',
           ),
           const SizedBox(height: 24),
           const SectionHeader(title: 'More'),

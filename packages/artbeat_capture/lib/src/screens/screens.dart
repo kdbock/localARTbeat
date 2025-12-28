@@ -8,4 +8,6 @@ export 'admin_content_moderation_screen.dart';
 export 'enhanced_capture_dashboard_screen.dart';
 export 'captures_list_screen.dart';
 export 'my_captures_screen.dart';
+export 'my_captures_pending_screen.dart';
+export 'my_captures_approved_screen.dart';
 export 'capture_screen.dart';

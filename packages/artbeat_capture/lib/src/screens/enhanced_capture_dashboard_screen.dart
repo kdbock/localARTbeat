@@ -5,7 +5,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_profile/src/screens/profile_menu_screen.dart';
 
 /// Quest-style Capture Dashboard (Local ARTbeat)
 /// - Same services/data/routes as your original
@@ -151,14 +150,42 @@ class _EnhancedCaptureDashboardScreenState
 
   Future<void> _refreshData() async => _loadData();
 
+  void _handleNavigation(int index) {
+    switch (index) {
+      case 0:
+        Navigator.of(
+          context,
+        ).pushNamedAndRemoveUntil(AppRoutes.dashboard, (route) => false);
+        break;
+      case 1:
+        Navigator.of(
+          context,
+        ).pushNamedAndRemoveUntil(AppRoutes.artWalkMap, (route) => false);
+        break;
+      case 2:
+        // Already on capture dashboard
+        break;
+      case 3:
+        Navigator.of(
+          context,
+        ).pushNamedAndRemoveUntil(AppRoutes.artCommunityHub, (route) => false);
+        break;
+      case 4:
+        Navigator.of(
+          context,
+        ).pushNamedAndRemoveUntil(AppRoutes.eventsDiscover, (route) => false);
+        break;
+    }
+  }
+
   void _startCaptureFlow() {
-    Navigator.pushNamed(context, '/capture/camera');
+    Navigator.pushNamed(context, AppRoutes.captureCamera);
   }
 
   void _navigateToCaptureDetail(String captureId) {
     Navigator.pushNamed(
       context,
-      '/capture/detail',
+      AppRoutes.captureDetail,
       arguments: {'captureId': captureId},
     );
   }
@@ -183,7 +210,7 @@ class _EnhancedCaptureDashboardScreenState
         accent: const Color(0xFF22D3EE),
         current: math.min(_communityCaptures.length, 5),
         target: 5,
-        onTap: () => Navigator.pushNamed(context, '/capture/popular'),
+        onTap: () => Navigator.pushNamed(context, AppRoutes.capturePopular),
       ),
       _CaptureMissionModel(
         title: 'capture_dashboard_mission_map_block_title'.tr(),
@@ -193,15 +220,13 @@ class _EnhancedCaptureDashboardScreenState
         accent: const Color(0xFFFFC857),
         current: math.min(_uniqueNeighborhoodDrops, 2),
         target: 2,
-        onTap: () => Navigator.pushNamed(context, '/capture/nearby'),
+        onTap: () => Navigator.pushNamed(context, AppRoutes.captureNearby),
       ),
     ];
   }
 
   void _showProfileMenu(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (context) => const ProfileMenuScreen()),
-    );
+    Navigator.pushNamed(context, AppRoutes.profile);
   }
 
   void _showSearchModal(BuildContext context) {
@@ -277,7 +302,7 @@ class _EnhancedCaptureDashboardScreenState
                       color: ArtbeatColors.primaryGreen,
                       onTap: () {
                         Navigator.pop(context);
-                        Navigator.pushNamed(context, '/capture/search');
+                        Navigator.pushNamed(context, AppRoutes.captureSearch);
                       },
                     ),
                     _buildSearchOption(
@@ -287,7 +312,7 @@ class _EnhancedCaptureDashboardScreenState
                       color: ArtbeatColors.primaryPurple,
                       onTap: () {
                         Navigator.pop(context);
-                        Navigator.pushNamed(context, '/capture/nearby');
+                        Navigator.pushNamed(context, AppRoutes.captureNearby);
                       },
                     ),
                     _buildSearchOption(
@@ -298,7 +323,7 @@ class _EnhancedCaptureDashboardScreenState
                       color: ArtbeatColors.secondaryTeal,
                       onTap: () {
                         Navigator.pop(context);
-                        Navigator.pushNamed(context, '/capture/popular');
+                        Navigator.pushNamed(context, AppRoutes.capturePopular);
                       },
                     ),
                     _buildSearchOption(
@@ -308,7 +333,7 @@ class _EnhancedCaptureDashboardScreenState
                       color: ArtbeatColors.accentYellow,
                       onTap: () {
                         Navigator.pop(context);
-                        Navigator.pushNamed(context, '/artist/search');
+                        Navigator.pushNamed(context, AppRoutes.artistSearch);
                       },
                     ),
                   ],
@@ -473,7 +498,7 @@ class _EnhancedCaptureDashboardScreenState
                                   trendingLocation: _trendingCommunityLocation,
                                   onExplore: () => Navigator.pushNamed(
                                     context,
-                                    '/capture/popular',
+                                    AppRoutes.capturePopular,
                                   ),
                                 ),
                               ),
@@ -583,6 +608,10 @@ class _EnhancedCaptureDashboardScreenState
                   ),
           ),
         ],
+      ),
+      bottomNavigationBar: EnhancedBottomNav(
+        currentIndex: 2,
+        onTap: _handleNavigation,
       ),
     );
   }
@@ -1087,32 +1116,40 @@ class _CaptureMissionCard extends StatelessWidget {
                       child: Icon(mission.icon, color: Colors.white, size: 20),
                     ),
                     const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          mission.title,
-                          style: GoogleFonts.spaceGrotesk(
-                            color: Colors.white.withValues(alpha: 0.95),
-                            fontSize: 14,
-                            fontWeight: FontWeight.w900,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            mission.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.spaceGrotesk(
+                              color: Colors.white.withValues(alpha: 0.95),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w900,
+                            ),
                           ),
-                        ),
-                        Text(
-                          '+${mission.xpReward} XP',
-                          style: GoogleFonts.spaceGrotesk(
-                            color: mission.accent,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w800,
+                          Text(
+                            '+${mission.xpReward} XP',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.spaceGrotesk(
+                              color: mission.accent,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w800,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 12),
                 Text(
                   mission.description,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.spaceGrotesk(
                     color: Colors.white.withValues(alpha: 0.72),
                     fontSize: 12,

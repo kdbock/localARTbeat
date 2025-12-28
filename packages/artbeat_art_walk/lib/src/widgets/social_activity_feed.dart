@@ -3,8 +3,8 @@ import 'package:timeago/timeago.dart' as timeago;
 import 'package:geolocator/geolocator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import '../services/social_service.dart';
-import '../theme/art_walk_design_system.dart';
+import 'package:artbeat_art_walk/src/services/social_service.dart';
+import 'package:artbeat_art_walk/src/theme/art_walk_design_system.dart';
 
 /// Widget for displaying a feed of social activities
 class SocialActivityFeed extends StatefulWidget {

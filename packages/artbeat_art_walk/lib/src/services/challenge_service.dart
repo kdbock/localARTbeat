@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../models/challenge_model.dart';
+import 'package:artbeat_art_walk/src/models/challenge_model.dart';
 import 'rewards_service.dart';
 
 /// Service for managing user challenges (daily/weekly goals and rewards)

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import '../models/challenge_model.dart';
-import '../services/challenge_service.dart';
-import '../widgets/daily_quest_card.dart';
+import 'package:provider/provider.dart';
+import 'package:artbeat_art_walk/src/models/challenge_model.dart';
+import 'package:artbeat_art_walk/src/services/challenge_service.dart';
+import 'package:artbeat_art_walk/src/widgets/daily_quest_card.dart';
 
 /// Quest History Screen
 /// Shows all past and current quests with statistics
@@ -15,7 +16,7 @@ class QuestHistoryScreen extends StatefulWidget {
 
 class _QuestHistoryScreenState extends State<QuestHistoryScreen>
     with SingleTickerProviderStateMixin {
-  final ChallengeService _challengeService = ChallengeService();
+  late final ChallengeService _challengeService;
 
   ChallengeModel? _todaysChallenge;
   Map<String, dynamic> _stats = {};
@@ -26,6 +27,7 @@ class _QuestHistoryScreenState extends State<QuestHistoryScreen>
   @override
   void initState() {
     super.initState();
+    _challengeService = context.read<ChallengeService>();
     _tabController = TabController(length: 3, vsync: this);
     _loadData();
   }
@@ -165,7 +167,8 @@ class _QuestHistoryScreenState extends State<QuestHistoryScreen>
   }
 
   Widget _buildStatsTab() {
-    final completionRate = (_stats['completionRate'] as double?) ?? 0.0;
+    final completionRate =
+        (_stats['completionRate'] as num?)?.toDouble() ?? 0.0;
     final completedChallenges = (_stats['completedChallenges'] as int?) ?? 0;
     final totalXP = (_stats['totalXPEarned'] as int?) ?? 0;
     final currentStreak = (_stats['currentStreak'] as int?) ?? 0;

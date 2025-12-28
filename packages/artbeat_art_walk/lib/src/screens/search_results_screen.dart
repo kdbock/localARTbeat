@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../models/search_criteria_model.dart';
-import '../models/art_walk_model.dart';
-import '../models/public_art_model.dart';
-import '../services/art_walk_service.dart';
-import '../widgets/art_walk_search_filter.dart';
-import '../widgets/public_art_search_filter.dart';
-import '../widgets/art_walk_card.dart';
+import 'package:provider/provider.dart';
+import 'package:artbeat_art_walk/src/models/search_criteria_model.dart';
+import 'package:artbeat_art_walk/src/models/art_walk_model.dart';
+import 'package:artbeat_art_walk/src/models/public_art_model.dart';
+import 'package:artbeat_art_walk/src/services/art_walk_service.dart';
+import 'package:artbeat_art_walk/src/widgets/art_walk_search_filter.dart';
+import 'package:artbeat_art_walk/src/widgets/public_art_search_filter.dart';
+import 'package:artbeat_art_walk/src/widgets/art_walk_card.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 
 /// Comprehensive search results screen for both art walks and public art
@@ -30,7 +31,7 @@ class SearchResultsScreen extends StatefulWidget {
 class _SearchResultsScreenState extends State<SearchResultsScreen>
     with TickerProviderStateMixin {
   // Services
-  final ArtWalkService _artWalkService = ArtWalkService();
+  late final ArtWalkService _artWalkService;
 
   // Controllers
   late TabController _tabController;
@@ -62,6 +63,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen>
   void initState() {
     super.initState();
 
+    _artWalkService = context.read<ArtWalkService>();
     _tabController = TabController(length: 2, vsync: this);
 
     // Set initial tab based on search type

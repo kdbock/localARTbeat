@@ -4,6 +4,8 @@ import '../services/event_service.dart';
 import 'event_card.dart';
 import '../screens/event_details_screen.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../widgets/glass_card.dart';
 
 /// Widget that displays upcoming events in the community feed
 class CommunityFeedEventsWidget extends StatefulWidget {
@@ -70,10 +72,8 @@ class _CommunityFeedEventsWidgetState extends State<CommunityFeedEventsWidget> {
         if (widget.showHeader) _buildHeader(),
         if (_isLoading) _buildLoadingState(),
         if (_error != null) _buildErrorState(),
-        if (!_isLoading && _error == null && _events.isEmpty)
-          _buildEmptyState(),
-        if (!_isLoading && _error == null && _events.isNotEmpty)
-          _buildEventsList(),
+        if (!_isLoading && _error == null && _events.isEmpty) _buildEmptyState(),
+        if (!_isLoading && _error == null && _events.isNotEmpty) _buildEventsList(),
       ],
     );
   }
@@ -84,14 +84,24 @@ class _CommunityFeedEventsWidgetState extends State<CommunityFeedEventsWidget> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text(
-            'Upcoming Events',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          Text(
+            'events_upcoming_header'.tr(),
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 20,
+              fontWeight: FontWeight.w900,
+              color: Colors.white.withValues(alpha: 0.92),
+            ),
           ),
           if (widget.onViewAllPressed != null)
             TextButton(
               onPressed: widget.onViewAllPressed,
-              child: Text('events_view_all'.tr()),
+              child: Text(
+                'events_view_all'.tr(),
+                style: GoogleFonts.spaceGrotesk(
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF22D3EE),
+                ),
+              ),
             ),
         ],
       ),
@@ -108,34 +118,40 @@ class _CommunityFeedEventsWidgetState extends State<CommunityFeedEventsWidget> {
   Widget _buildErrorState() {
     return Padding(
       padding: const EdgeInsets.all(16),
-      child: Card(
-        color: Colors.red.shade50,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              const Icon(Icons.error_outline, color: Colors.red, size: 48),
-              const SizedBox(height: 8),
-              Text(
-                'Failed to load events',
-                style: TextStyle(
-                  color: Colors.red.shade700,
-                  fontWeight: FontWeight.bold,
+      child: GlassCard(
+        child: Column(
+          children: [
+            const Icon(Icons.error_outline, color: Colors.red, size: 48),
+            const SizedBox(height: 8),
+            Text(
+              'events_load_failed'.tr(),
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+                color: Colors.red.shade400,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              _error!,
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Colors.red.shade300,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _loadEvents,
+              child: Text(
+                'events_retry'.tr(),
+                style: GoogleFonts.spaceGrotesk(
+                  fontWeight: FontWeight.w700,
                 ),
               ),
-              const SizedBox(height: 4),
-              Text(
-                _error!,
-                style: TextStyle(color: Colors.red.shade600),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: _loadEvents,
-                child: Text('events_retry'.tr()),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -144,26 +160,30 @@ class _CommunityFeedEventsWidgetState extends State<CommunityFeedEventsWidget> {
   Widget _buildEmptyState() {
     return Padding(
       padding: const EdgeInsets.all(16),
-      child: Card(
+      child: GlassCard(
         child: Padding(
           padding: const EdgeInsets.all(32),
           child: Column(
             children: [
-              Icon(Icons.event_busy, size: 64, color: Colors.grey.shade400),
+              Icon(Icons.event_busy, size: 64, color: Colors.white.withValues(alpha: 0.2)),
               const SizedBox(height: 16),
               Text(
-                'No upcoming events',
-                style: TextStyle(
+                'events_none'.tr(),
+                style: GoogleFonts.spaceGrotesk(
                   fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey.shade600,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.white.withOpacity(0.7),
                 ),
               ),
               const SizedBox(height: 8),
               Text(
-                'Check back later for new events from artists in your community.',
+                'events_check_back_later'.tr(),
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey.shade600),
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white.withOpacity(0.65),
+                ),
               ),
             ],
           ),

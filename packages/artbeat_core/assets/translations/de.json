@@ -1982,7 +1982,7 @@
   "events_event_title": "Veranstaltungstitel",
   "events_exhibition": "Ausstellung",
   "events_failed_save": "Fehler beim Speichern der Veranstaltung: ",
-  
+
   "events_interested": "Interessiert",
   "events_list_empty_msg_near_you": "Es finden derzeit keine Veranstaltungen in Ihrer Nähe statt.",
   "events_list_empty_msg_trending": "Es gibt derzeit keine angesagten Veranstaltungen.",
@@ -3287,7 +3287,7 @@
   "capture_dashboard_label_trending_location": "Trend-Ort",
   "capture_dashboard_unknown_artist": "Unbekannter Künstler",
 
-"common_see_all": "Alle anzeigen",
+  "common_see_all": "Alle anzeigen",
 
   "dashboard_search_placeholder": "Suchen...",
   "dashboard_tab_community": "Community",
@@ -3336,7 +3336,7 @@
 
   "animated_dashboard_explore_title": "ERKUNDEN",
   "animated_dashboard_explore_subtitle": "Finde lokale Künstler, Kunstwerke & Events",
-  "animated_dashboard_explore_tag": "ENTDECKEN",
+  "animated_dashboard_explore_tag": "KUNST LIEBHABER",
 
   "animated_dashboard_connect_title": "VERNETZEN",
   "animated_dashboard_connect_subtitle": "Künstler, Feed, Aufträge & Veranstaltungen",

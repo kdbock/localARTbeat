@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:provider/provider.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_capture/artbeat_capture.dart';
 import 'package:artbeat_art_walk/artbeat_art_walk.dart';
@@ -60,13 +61,13 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
   late AnimationController _floatController;
 
   // Services
-  final AchievementService _achievementService = AchievementService();
-  final UserService _userService = UserService();
-  final CaptureService _captureService = CaptureService();
-  final InstantDiscoveryService _discoveryService = InstantDiscoveryService();
-  final ChallengeService _challengeService = ChallengeService();
-  final WeeklyGoalsService _weeklyGoalsService = WeeklyGoalsService();
-  final RewardsService _rewardsService = RewardsService();
+  late final AchievementService _achievementService;
+  late final UserService _userService;
+  late final CaptureService _captureService;
+  late final InstantDiscoveryService _discoveryService;
+  late final ChallengeService _challengeService;
+  late final WeeklyGoalsService _weeklyGoalsService;
+  late final RewardsService _rewardsService;
 
   // Notification monitoring
   StreamSubscription<Map<String, dynamic>>? _notificationSubscription;
@@ -74,6 +75,13 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
   @override
   void initState() {
     super.initState();
+    _achievementService = context.read<AchievementService>();
+    _userService = context.read<UserService>();
+    _captureService = context.read<CaptureService>();
+    _discoveryService = context.read<InstantDiscoveryService>();
+    _challengeService = context.read<ChallengeService>();
+    _weeklyGoalsService = context.read<WeeklyGoalsService>();
+    _rewardsService = context.read<RewardsService>();
     _initializeAnimations();
     _loadAllData();
     _startNotificationMonitoring();
@@ -534,12 +542,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
               ),
               TextButton(
                 onPressed: () {
-                  Navigator.push<void>(
-                    context,
-                    MaterialPageRoute<void>(
-                      builder: (context) => const QuestHistoryScreen(),
-                    ),
-                  );
+                  Navigator.pushNamed(context, ArtWalkRoutes.questHistory);
                 },
                 child: Text(
                   'art_walk_dashboard_hero_mission_cta'.tr(),
@@ -715,12 +718,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
           showTimeRemaining: true,
           showRewardPreview: true,
           onTap: () {
-            Navigator.push<void>(
-              context,
-              MaterialPageRoute<void>(
-                builder: (context) => const QuestHistoryScreen(),
-              ),
-            );
+            Navigator.pushNamed(context, ArtWalkRoutes.questHistory);
           },
         ),
         // View all quests button
@@ -728,12 +726,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: TextButton.icon(
             onPressed: () {
-              Navigator.push<void>(
-                context,
-                MaterialPageRoute<void>(
-                  builder: (context) => const QuestHistoryScreen(),
-                ),
-              );
+              Navigator.pushNamed(context, ArtWalkRoutes.questHistory);
             },
             icon: const Icon(Icons.history),
             label: Text(
@@ -753,12 +746,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
     return WeeklyGoalsCard(
       goals: _weeklyGoals,
       onTap: () {
-        Navigator.push<void>(
-          context,
-          MaterialPageRoute<void>(
-            builder: (context) => const WeeklyGoalsScreen(),
-          ),
-        );
+        Navigator.pushNamed(context, ArtWalkRoutes.weeklyGoals);
       },
     );
   }
@@ -876,7 +864,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
                         children: [
                           Container(
                             width: 80,
-                            height: 80,
+                            height: 85,
                             decoration: BoxDecoration(
                               color: Colors.black.withValues(alpha: 0.35),
                               shape: BoxShape.circle,
@@ -1798,7 +1786,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
                   action: SnackBarAction(
                     label: 'art_walk_dashboard_snackbar_view_action'.tr(),
                     onPressed: () {
-                      Navigator.of(context).pushNamed('/instant-discovery');
+                      _openInstantDiscovery();
                     },
                   ),
                 ),
@@ -1843,14 +1831,13 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
       }
 
       // Navigate to radar screen
-      final result = await Navigator.push(
+      final result = await Navigator.pushNamed(
         context,
-        MaterialPageRoute<dynamic>(
-          builder: (context) => InstantDiscoveryRadarScreen(
-            userPosition: _currentPosition!,
-            initialNearbyArt: nearbyArt,
-          ),
-        ),
+        '/instant-discovery',
+        arguments: {
+          'userPosition': _currentPosition,
+          'initialNearbyArt': nearbyArt,
+        },
       );
 
       // Refresh nearby art count if discoveries were made

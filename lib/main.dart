@@ -252,7 +252,11 @@ void _initializeNonCriticalServices() {
 
     // Initialize messaging notification service
     try {
-      await messaging.NotificationService().initialize();
+      await messaging.NotificationService(
+        onNavigateToRoute: (route) {
+          navigatorKey.currentState?.pushNamed(route);
+        },
+      ).initialize();
       if (kDebugMode) {
         AppLogger.info('✅ Messaging notification service initialized');
       }

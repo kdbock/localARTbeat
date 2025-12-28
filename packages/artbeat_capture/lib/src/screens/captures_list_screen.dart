@@ -1,7 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import '../widgets/hud_top_bar.dart';
-import '../widgets/quest_capture_tile.dart';
+import 'package:artbeat_capture/src/widgets/hud_top_bar.dart';
+import 'package:artbeat_capture/src/widgets/quest_capture_tile.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 
 class CapturesListScreen extends StatelessWidget {
@@ -53,7 +53,7 @@ class CapturesListScreen extends StatelessWidget {
                         onTap: () {
                           Navigator.pushNamed(
                             context,
-                            '/capture/detail',
+                            AppRoutes.captureDetail,
                             arguments: {'captureId': capture.id},
                           );
                         },

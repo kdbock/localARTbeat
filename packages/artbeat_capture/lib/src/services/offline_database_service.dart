@@ -4,7 +4,7 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:artbeat_core/artbeat_core.dart' show CaptureModel, AppLogger;
-import '../models/offline_queue_item.dart';
+import 'package:artbeat_capture/src/models/offline_queue_item.dart';
 
 /// Service for managing offline capture queue using SQLite
 class OfflineDatabaseService {

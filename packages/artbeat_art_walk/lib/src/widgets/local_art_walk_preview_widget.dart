@@ -114,8 +114,8 @@ class _LocalArtWalkPreviewWidgetState extends State<LocalArtWalkPreviewWidget> {
   ) {
     // Get coordinates of the first art point for the center
     final firstPoint = artPoints.first as Map<String, dynamic>;
-    final lat = firstPoint['latitude'] as double;
-    final lng = firstPoint['longitude'] as double;
+    final lat = (firstPoint['latitude'] as num?)?.toDouble() ?? 0.0;
+    final lng = (firstPoint['longitude'] as num?)?.toDouble() ?? 0.0;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -209,8 +209,8 @@ class _LocalArtWalkPreviewWidgetState extends State<LocalArtWalkPreviewWidget> {
           (pointData['id'] as String?) ?? DateTime.now().toString(),
         ),
         position: LatLng(
-          pointData['latitude'] as double,
-          pointData['longitude'] as double,
+          (pointData['latitude'] as num?)?.toDouble() ?? 0.0,
+          (pointData['longitude'] as num?)?.toDouble() ?? 0.0,
         ),
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueViolet),
       );
