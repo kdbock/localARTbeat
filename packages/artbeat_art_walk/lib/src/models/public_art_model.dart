@@ -19,7 +19,7 @@ class PublicArtModel {
   final Timestamp createdAt;
   final Timestamp? updatedAt;
 
-  PublicArtModel({
+  const PublicArtModel({
     required this.id,
     required this.userId,
     required this.title,
@@ -28,12 +28,12 @@ class PublicArtModel {
     this.artistName,
     required this.location,
     this.address,
-    required this.tags,
+    this.tags = const <String>[],
     this.artType,
     this.isVerified = false,
     this.viewCount = 0,
     this.likeCount = 0,
-    required this.usersFavorited,
+    this.usersFavorited = const <String>[],
     required this.createdAt,
     this.updatedAt,
   });
@@ -82,7 +82,7 @@ class PublicArtModel {
       usersFavorited: List<String>.from(
         json['usersFavorited'] as List<dynamic>? ?? [],
       ),
-      createdAt: json['createdAt'] as Timestamp,
+      createdAt: (json['createdAt'] as Timestamp?) ?? Timestamp.now(),
       updatedAt: json['updatedAt'] as Timestamp?,
     );
   }

@@ -265,7 +265,7 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                             subtitle: 'animated_dashboard_explore_subtitle'
                                 .tr(),
 
-                            tag: 'animated_dashboard_explore_tag'.tr(),
+                            tag: 'ART LOVER',
 
                             icon: Icons.route_rounded,
 

@@ -36,12 +36,12 @@ class NavigationStepModel {
       distanceMeters: distance['value'] as int? ?? 0,
       durationSeconds: duration['value'] as int? ?? 0,
       startLocation: LatLng(
-        startLocation['lat'] as double,
-        startLocation['lng'] as double,
+        (startLocation['lat'] as num?)?.toDouble() ?? 0.0,
+        (startLocation['lng'] as num?)?.toDouble() ?? 0.0,
       ),
       endLocation: LatLng(
-        endLocation['lat'] as double,
-        endLocation['lng'] as double,
+        (endLocation['lat'] as num?)?.toDouble() ?? 0.0,
+        (endLocation['lng'] as num?)?.toDouble() ?? 0.0,
       ),
       polylinePoints: decodePolyline(polyline['points'] as String? ?? ''),
       travelMode: step['travel_mode'] as String?,

@@ -398,8 +398,8 @@ class AIMLIntegrationService extends ChangeNotifier {
     Map<String, dynamic> style,
     Map<String, dynamic> medium,
   ) {
-    final styleConf = style['confidence'] as double? ?? 0.0;
-    final mediumConf = medium['confidence'] as double? ?? 0.0;
+    final styleConf = (style['confidence'] as num?)?.toDouble() ?? 0.0;
+    final mediumConf = (medium['confidence'] as num?)?.toDouble() ?? 0.0;
     return (styleConf + mediumConf) / 2;
   }
 

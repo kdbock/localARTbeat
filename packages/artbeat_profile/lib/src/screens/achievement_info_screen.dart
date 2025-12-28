@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_profile/widgets/widgets.dart';
-import 'package:artbeat_profile/src/models/badge_tier.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AchievementInfoScreen extends StatelessWidget {
@@ -9,25 +8,65 @@ class AchievementInfoScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final levelBadges = List.generate(10, (index) => index + 1);
+    final levelSystem = [
+      {'level': 1, 'title': 'Sketcher (Frida Kahlo)', 'xpRange': '0-199 XP'},
+      {
+        'level': 2,
+        'title': 'Color Blender (Jacob Lawrence)',
+        'xpRange': '200-499 XP',
+      },
+      {
+        'level': 3,
+        'title': 'Brush Trailblazer (Yayoi Kusama)',
+        'xpRange': '500-999 XP',
+      },
+      {
+        'level': 4,
+        'title': 'Street Master (Jean-Michel Basquiat)',
+        'xpRange': '1000-1499 XP',
+      },
+      {
+        'level': 5,
+        'title': 'Mural Maven (Faith Ringgold)',
+        'xpRange': '1500-2499 XP',
+      },
+      {
+        'level': 6,
+        'title': 'Avant-Garde Explorer (Zarina Hashmi)',
+        'xpRange': '2500-3999 XP',
+      },
+      {
+        'level': 7,
+        'title': 'Visionary Creator (El Anatsui)',
+        'xpRange': '4000-5999 XP',
+      },
+      {
+        'level': 8,
+        'title': 'Art Legend (Leonardo da Vinci)',
+        'xpRange': '6000-7999 XP',
+      },
+      {
+        'level': 9,
+        'title': 'Cultural Curator (Shirin Neshat)',
+        'xpRange': '8000-9999 XP',
+      },
+      {'level': 10, 'title': 'Art Walk Influencer', 'xpRange': '10000+ XP'},
+    ];
+
     final achievementCategories = [
-      'Explorer Quests',
-      'Creative Milestones',
-      'Community Highlights',
-      'Art Walk Journeys',
+      'First Achievements',
+      'Milestone Achievements',
+      'Creator Achievements',
+      'Explorer Achievements',
+      'Quest Achievements',
+      'Streak Achievements',
     ];
-    final badgeTiers = [
-      BadgeTier('Bronze', color: const Color(0xFFB76935)),
-      BadgeTier('Silver', color: const Color(0xFF9CA3AF)),
-      BadgeTier('Gold', color: const Color(0xFFFBBF24)),
-      BadgeTier('Platinum', color: const Color(0xFF9C27B0)),
-      BadgeTier('Mythic', color: const Color(0xFF2563EB)),
-    ];
+
     final levelPerks = [
-      'Unlock exclusive profile themes',
-      'Feature your best captures on profile',
-      'Access advanced engagement analytics',
-      'Receive invite-only art walk drops',
+      'Level 3: Suggest edits to any public artwork',
+      'Level 5: Moderate reviews (report abuse, vote quality)',
+      'Level 7: Early access to beta features',
+      'Level 10: Become an Art Walk Influencer, post updates, featured profile, community spotlight',
     ];
 
     return WorldBackground(
@@ -63,7 +102,7 @@ class AchievementInfoScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'profile_achievement_intro_subtitle'.tr(),
+                          'Earn XP through art walks, captures, reviews, and community contributions. Level up to unlock exclusive perks and become an Art Walk Influencer!',
                           textAlign: TextAlign.center,
                           style: GoogleFonts.spaceGrotesk(
                             fontSize: 14,
@@ -84,10 +123,14 @@ class AchievementInfoScreen extends StatelessWidget {
                   const SizedBox(height: 24),
                   const SectionHeader(title: 'Level System'),
                   const SizedBox(height: 8),
-                  ...levelBadges.map(
+                  ...levelSystem.map(
                     (level) => Padding(
                       padding: const EdgeInsets.only(bottom: 8),
-                      child: LevelBadge(level: level),
+                      child: LevelBadge(
+                        level: level['level'] as int,
+                        title: level['title'] as String,
+                        xpRange: level['xpRange'] as String,
+                      ),
                     ),
                   ),
 
@@ -100,11 +143,6 @@ class AchievementInfoScreen extends StatelessWidget {
                       child: AchievementCategoryTile(category: cat),
                     ),
                   ),
-
-                  const SizedBox(height: 24),
-                  const SectionHeader(title: 'Badge Tiers'),
-                  const SizedBox(height: 8),
-                  ...badgeTiers.map(_buildTierRow),
 
                   const SizedBox(height: 24),
                   const SectionHeader(title: 'Level Perks'),
@@ -142,8 +180,10 @@ class AchievementInfoScreen extends StatelessWidget {
                         const SizedBox(height: 16),
                         HudButton(
                           text: 'profile_achievement_explore'.tr(),
-                          onPressed: () =>
-                              Navigator.pushNamed(context, '/art-walks'),
+                          onPressed: () => Navigator.pushNamed(
+                            context,
+                            '/art-walk/dashboard',
+                          ),
                         ),
                       ],
                     ),
@@ -161,12 +201,15 @@ class AchievementInfoScreen extends StatelessWidget {
     final entries = [
       ['Complete an Art Walk', '100 XP'],
       ['Create a New Art Walk', '75 XP'],
+      ['Art Capture Created', '25 XP'],
       ['Art Capture Approved', '50 XP'],
-      ['Submit a Review (50+ words)', '30 XP'],
-      ['Walk Used by 5+ Users', '75 XP'],
       ['Visit Individual Artwork', '10 XP'],
+      ['Submit a Review (50+ words)', '30 XP'],
       ['Receive Helpful Vote', '10 XP'],
+      ['Walk Used by 5+ Users', '75 XP'],
       ['Edit/Update Walk', '20 XP'],
+      ['Complete Daily Challenge', 'Varies'],
+      ['Complete Weekly Goal', 'Varies'],
     ];
 
     return Column(
@@ -203,47 +246,6 @@ class AchievementInfoScreen extends StatelessWidget {
           ),
         );
       }).toList(),
-    );
-  }
-
-  Widget _buildTierRow(BadgeTier tier) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 20,
-            backgroundColor: tier.color,
-            child: const Icon(
-              Icons.emoji_events,
-              color: Colors.white,
-              size: 18,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                tier.label,
-                style: GoogleFonts.spaceGrotesk(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w800,
-                  color: Colors.white.withValues(alpha: 0.92),
-                ),
-              ),
-              Text(
-                tier.description,
-                style: GoogleFonts.spaceGrotesk(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white.withValues(alpha: 0.7),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
     );
   }
 }

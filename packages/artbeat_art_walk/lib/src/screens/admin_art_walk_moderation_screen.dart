@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:provider/provider.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import '../models/art_walk_model.dart';
-import '../services/art_walk_service.dart';
+import 'package:artbeat_art_walk/src/models/art_walk_model.dart';
+import 'package:artbeat_art_walk/src/services/art_walk_service.dart';
 
 /// Admin screen for moderating art walks
 class AdminArtWalkModerationScreen extends StatefulWidget {
@@ -25,7 +26,7 @@ class _AdminArtWalkModerationScreenState
     super.initState();
     AppLogger.info('🔍 AdminArtWalkModerationScreen: initState called');
     try {
-      _artWalkService = ArtWalkService();
+      _artWalkService = context.read<ArtWalkService>();
       AppLogger.info(
         '✅ AdminArtWalkModerationScreen: ArtWalkService initialized',
       );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:provider/provider.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_art_walk/artbeat_art_walk.dart';
 
@@ -12,7 +13,7 @@ class ArtWalkListScreen extends StatefulWidget {
 }
 
 class _ArtWalkListScreenState extends State<ArtWalkListScreen> {
-  final ArtWalkService _artWalkService = ArtWalkService();
+  late final ArtWalkService _artWalkService;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   List<ArtWalkModel> _artWalks = [];
@@ -54,6 +55,7 @@ class _ArtWalkListScreenState extends State<ArtWalkListScreen> {
   @override
   void initState() {
     super.initState();
+    _artWalkService = context.read<ArtWalkService>();
     _loadData();
   }
 

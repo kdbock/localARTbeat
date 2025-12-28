@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../models/weekly_goal_model.dart';
+import 'package:artbeat_art_walk/src/models/weekly_goal_model.dart';
 
 /// Widget to display weekly goals in a beautiful card format
 class WeeklyGoalsCard extends StatefulWidget {

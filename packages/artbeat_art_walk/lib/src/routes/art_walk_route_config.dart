@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../constants/routes.dart';
-import '../screens/screens.dart';
-import '../models/models.dart';
+import 'package:artbeat_art_walk/src/constants/routes.dart';
+import 'package:artbeat_art_walk/src/screens/screens.dart';
+import 'package:artbeat_art_walk/src/models/models.dart';
 
 /// Art walk module route configuration
 class ArtWalkRouteConfig {
@@ -9,6 +9,8 @@ class ArtWalkRouteConfig {
     ArtWalkRoutes.map: (_) => const ArtWalkMapScreen(),
     ArtWalkRoutes.list: (_) => const ArtWalkListScreen(),
     ArtWalkRoutes.dashboard: (_) => const DiscoverDashboardScreen(),
+    ArtWalkRoutes.questHistory: (_) => const QuestHistoryScreen(),
+    ArtWalkRoutes.weeklyGoals: (_) => const WeeklyGoalsScreen(),
   };
 
   static Route<dynamic>? generateRoute(RouteSettings settings) {
@@ -63,6 +65,22 @@ class ArtWalkRouteConfig {
           builder: (_) => EnhancedArtWalkCreateScreen(
             artWalkId: args?['artWalkId'] as String?,
             artWalkToEdit: args?['artWalk'] as ArtWalkModel?,
+          ),
+        );
+
+      case ArtWalkRoutes.celebration:
+        final args = settings.arguments as Map<String, dynamic>?;
+        final celebrationData = args?['celebrationData'] as CelebrationData?;
+        if (celebrationData == null) {
+          return MaterialPageRoute(
+            builder: (_) => const Scaffold(
+              body: Center(child: Text('Art walk celebration data missing')),
+            ),
+          );
+        }
+        return MaterialPageRoute(
+          builder: (_) => ArtWalkCelebrationScreen(
+            celebrationData: celebrationData,
           ),
         );
 

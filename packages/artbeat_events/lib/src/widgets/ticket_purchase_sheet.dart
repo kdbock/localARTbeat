@@ -1,12 +1,17 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+
 import '../models/artbeat_event.dart';
 import '../models/ticket_type.dart';
 import '../services/event_service.dart';
 import '../services/event_notification_service.dart';
-import 'package:easy_localization/easy_localization.dart';
 
-/// Bottom sheet for purchasing tickets
+import '../widgets/glass_card.dart';
+import '../widgets/gradient_cta_button.dart';
+
 class TicketPurchaseSheet extends StatefulWidget {
   final ArtbeatEvent event;
   final TicketType ticketType;
@@ -25,8 +30,10 @@ class TicketPurchaseSheet extends StatefulWidget {
 
 class _TicketPurchaseSheetState extends State<TicketPurchaseSheet> {
   final _formKey = GlobalKey<FormState>();
+
   final _emailController = TextEditingController();
   final _nameController = TextEditingController();
+
   final EventService _eventService = EventService();
   final EventNotificationService _notificationService =
       EventNotificationService();
@@ -43,7 +50,7 @@ class _TicketPurchaseSheetState extends State<TicketPurchaseSheet> {
 
   Future<void> _prefillUserInfo() async {
     final user = await UserService().getCurrentUserModel();
-    if (user != null) {
+    if (user != null && mounted) {
       setState(() {
         _emailController.text = user.email;
         _nameController.text = user.fullName;
@@ -65,46 +72,54 @@ class _TicketPurchaseSheetState extends State<TicketPurchaseSheet> {
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
       child: DraggableScrollableSheet(
-        initialChildSize: 0.7,
-        maxChildSize: 0.9,
-        minChildSize: 0.5,
         expand: false,
+        initialChildSize: 0.75,
+        maxChildSize: 0.95,
+        minChildSize: 0.55,
         builder: (context, scrollController) {
-          return Container(
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-            ),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  _buildHandle(),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      controller: scrollController,
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildHeader(),
-                          const SizedBox(height: 24),
-                          _buildTicketInfo(),
-                          const SizedBox(height: 24),
-                          _buildQuantitySelector(),
-                          const SizedBox(height: 24),
-                          _buildUserInfo(),
-                          const SizedBox(height: 24),
-                          _buildOrderSummary(),
-                          const SizedBox(height: 24),
-                          _buildTermsAndConditions(),
-                          const SizedBox(height: 32),
-                        ],
-                      ),
-                    ),
+          return ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0B1220).withValues(alpha: 0.88),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.12),
                   ),
-                  _buildPurchaseButton(),
-                ],
+                ),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      _buildHandle(),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          controller: scrollController,
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildHeader(),
+                              const SizedBox(height: 24),
+                              _buildTicketInfo(),
+                              const SizedBox(height: 24),
+                              _buildQuantitySelector(),
+                              const SizedBox(height: 24),
+                              _buildUserInfo(),
+                              const SizedBox(height: 24),
+                              _buildOrderSummary(),
+                              const SizedBox(height: 24),
+                              _buildTermsAndConditions(),
+                              const SizedBox(height: 32),
+                            ],
+                          ),
+                        ),
+                      ),
+                      _buildPurchaseButton(),
+                    ],
+                  ),
+                ),
               ),
             ),
           );
@@ -115,12 +130,12 @@ class _TicketPurchaseSheetState extends State<TicketPurchaseSheet> {
 
   Widget _buildHandle() {
     return Container(
-      margin: const EdgeInsets.only(top: 8),
-      width: 40,
-      height: 4,
+      margin: const EdgeInsets.only(top: 10, bottom: 12),
+      width: 42,
+      height: 5,
       decoration: BoxDecoration(
-        color: Colors.grey.shade300,
-        borderRadius: BorderRadius.circular(2),
+        color: Colors.white.withValues(alpha: 0.25),
+        borderRadius: BorderRadius.circular(999),
       ),
     );
   }
@@ -130,275 +145,316 @@ class _TicketPurchaseSheetState extends State<TicketPurchaseSheet> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Purchase Tickets',
-          style: Theme.of(
-            context,
-          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+          'events_purchase_title'.tr(),
+          style: GoogleFonts.spaceGrotesk(
+            fontSize: 20,
+            fontWeight: FontWeight.w900,
+            color: Colors.white,
+          ),
         ),
         const SizedBox(height: 8),
         Text(
           widget.event.title,
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(color: Colors.grey.shade600),
+          style: GoogleFonts.spaceGrotesk(
+            fontSize: 14,
+            color: Colors.white.withValues(alpha: 0.75),
+          ),
         ),
       ],
     );
   }
 
   Widget _buildTicketInfo() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.ticketType.name,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      if (widget.ticketType.description.isNotEmpty) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          widget.ticketType.description,
-                          style: TextStyle(
-                            color: Colors.grey.shade600,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                Text(
-                  widget.ticketType.formattedPrice,
-                  style: const TextStyle(
-                    fontSize: 18,
+    return GlassCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  widget.ticketType.name,
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Colors.green,
+                    color: Colors.white,
                   ),
                 ),
-              ],
-            ),
-
-            // Benefits for VIP tickets
-            if (widget.ticketType.benefits.isNotEmpty) ...[
-              const SizedBox(height: 16),
-              const Text(
-                'Includes:',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
               ),
-              const SizedBox(height: 8),
-              ...widget.ticketType.benefits.map(
-                (benefit) => Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.check, size: 16, color: Colors.green),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          benefit,
-                          style: const TextStyle(fontSize: 13),
-                        ),
-                      ),
-                    ],
-                  ),
+              Text(
+                widget.ticketType.formattedPrice,
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.greenAccent.shade400,
                 ),
               ),
             ],
-
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.orange.shade50,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.orange.shade200),
+          ),
+          if (widget.ticketType.description.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Text(
+              widget.ticketType.description,
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 13,
+                color: Colors.white.withValues(alpha: 0.7),
               ),
-              child: Text(
-                '${widget.ticketType.remainingQuantity} tickets remaining',
-                style: TextStyle(
-                  color: Colors.orange.shade700,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
+            ),
+          ],
+          if (widget.ticketType.benefits.isNotEmpty) ...[
+            const SizedBox(height: 14),
+            Text(
+              'events_includes'.tr(),
+              style: GoogleFonts.spaceGrotesk(
+                fontWeight: FontWeight.w700,
+                fontSize: 13,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 6),
+            ...widget.ticketType.benefits.map(
+              (benefit) => Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Row(
+                  children: [
+                    const Icon(Icons.check, size: 16, color: Colors.green),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        benefit,
+                        style: GoogleFonts.spaceGrotesk(
+                          fontSize: 12,
+                          color: Colors.white.withValues(alpha: 0.85),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
           ],
-        ),
+          const SizedBox(height: 14),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.orange.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: Colors.orange.withValues(alpha: 0.28),
+              ),
+            ),
+            child: Text(
+              '${widget.ticketType.remainingQuantity} ${'events_tickets_remaining'.tr()}',
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: Colors.orange.shade300,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildQuantitySelector() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Quantity',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            IconButton(
-              onPressed: _quantity > 1
-                  ? () => setState(() => _quantity--)
-                  : null,
-              icon: const Icon(Icons.remove),
-              style: IconButton.styleFrom(
-                backgroundColor: Colors.grey.shade100,
-              ),
+    return GlassCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'events_quantity'.tr(),
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
             ),
-            const SizedBox(width: 16),
-            Container(
-              width: 60,
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey.shade300),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                _quantity.toString(),
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              IconButton(
+                onPressed: _quantity > 1
+                    ? () => setState(() => _quantity--)
+                    : null,
+                icon: const Icon(Icons.remove),
+                style: IconButton.styleFrom(
+                  minimumSize: const Size(44, 44),
+                  backgroundColor: Colors.white.withValues(alpha: 0.08),
                 ),
-                textAlign: TextAlign.center,
               ),
-            ),
-            const SizedBox(width: 16),
-            IconButton(
-              onPressed: _quantity < widget.ticketType.remainingQuantity
-                  ? () => setState(() => _quantity++)
-                  : null,
-              icon: const Icon(Icons.add),
-              style: IconButton.styleFrom(
-                backgroundColor: Colors.grey.shade100,
+              const SizedBox(width: 16),
+              Container(
+                width: 64,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  border:
+                      Border.all(color: Colors.white.withValues(alpha: 0.18)),
+                ),
+                child: Text(
+                  _quantity.toString(),
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(width: 16),
-            Text(
-              'Max: ${widget.ticketType.remainingQuantity}',
-              style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
-            ),
-          ],
-        ),
-      ],
+              const SizedBox(width: 16),
+              IconButton(
+                onPressed: _quantity < widget.ticketType.remainingQuantity
+                    ? () => setState(() => _quantity++)
+                    : null,
+                icon: const Icon(Icons.add),
+                style: IconButton.styleFrom(
+                  minimumSize: const Size(44, 44),
+                  backgroundColor: Colors.white.withValues(alpha: 0.08),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                '${'events_max'.tr()}: ${widget.ticketType.remainingQuantity}',
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 12,
+                  color: Colors.white.withValues(alpha: 0.65),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildUserInfo() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Your Information',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 12),
-        TextFormField(
-          controller: _nameController,
-          decoration: const InputDecoration(
-            labelText: 'Full Name',
-            border: OutlineInputBorder(),
+    return GlassCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'events_your_info'.tr(),
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+            ),
           ),
-          validator: (value) {
-            if (value == null || value.trim().isEmpty) {
-              return 'Please enter your full name';
-            }
-            return null;
-          },
-        ),
-        const SizedBox(height: 16),
-        TextFormField(
-          controller: _emailController,
-          decoration: const InputDecoration(
-            labelText: 'Email Address',
-            border: OutlineInputBorder(),
+          const SizedBox(height: 14),
+          TextFormField(
+            controller: _nameController,
+            style: GoogleFonts.spaceGrotesk(color: Colors.white),
+            decoration: InputDecoration(
+              labelText: 'events_full_name'.tr(),
+              labelStyle: GoogleFonts.spaceGrotesk(
+                color: Colors.white.withValues(alpha: 0.7),
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'events_name_required'.tr();
+              }
+              return null;
+            },
           ),
-          keyboardType: TextInputType.emailAddress,
-          validator: (value) {
-            if (value == null || value.trim().isEmpty) {
-              return 'Please enter your email address';
-            }
-            if (!value.contains('@')) {
-              return 'Please enter a valid email address';
-            }
-            return null;
-          },
-        ),
-      ],
+          const SizedBox(height: 14),
+          TextFormField(
+            controller: _emailController,
+            keyboardType: TextInputType.emailAddress,
+            style: GoogleFonts.spaceGrotesk(color: Colors.white),
+            decoration: InputDecoration(
+              labelText: 'events_email'.tr(),
+              labelStyle: GoogleFonts.spaceGrotesk(
+                color: Colors.white.withValues(alpha: 0.7),
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'events_email_required'.tr();
+              }
+              if (!value.contains('@')) {
+                return 'events_email_invalid'.tr();
+              }
+              return null;
+            },
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildOrderSummary() {
     final subtotal = widget.ticketType.price * _quantity;
-    final tax = subtotal * 0.08; // 8% tax
+    final tax = subtotal * 0.08;
     final total = subtotal + tax;
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Order Summary',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+    return GlassCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'events_order_summary'.tr(),
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
             ),
-            const SizedBox(height: 12),
+          ),
+          const SizedBox(height: 10),
+          _buildSummaryRow(
+            '${widget.ticketType.name} x$_quantity',
+            '\$${subtotal.toStringAsFixed(2)}',
+          ),
+          if (subtotal > 0) ...[
+            const SizedBox(height: 6),
+            _buildSummaryRow('events_tax'.tr(), '\$${tax.toStringAsFixed(2)}'),
+            const Divider(color: Colors.white24),
             _buildSummaryRow(
-              '${widget.ticketType.name} x$_quantity',
-              '\$${subtotal.toStringAsFixed(2)}',
+              'events_total'.tr(),
+              '\$${total.toStringAsFixed(2)}',
+              isTotal: true,
             ),
-            if (subtotal > 0) ...[
-              const SizedBox(height: 8),
-              _buildSummaryRow('Tax (8%)', '\$${tax.toStringAsFixed(2)}'),
-              const Divider(),
-              _buildSummaryRow(
-                'Total',
-                '\$${total.toStringAsFixed(2)}',
-                isTotal: true,
-              ),
-            ] else ...[
-              const Divider(),
-              _buildSummaryRow('Total', 'Free', isTotal: true),
-            ],
-          ],
-        ),
+          ] else ...[
+            const Divider(color: Colors.white24),
+            _buildSummaryRow('events_total'.tr(), 'events_free'.tr(),
+                isTotal: true),
+          ]
+        ],
       ),
     );
   }
 
-  Widget _buildSummaryRow(String label, String amount, {bool isTotal = false}) {
+  Widget _buildSummaryRow(
+    String label,
+    String amount, {
+    bool isTotal = false,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           label,
-          style: TextStyle(
-            fontSize: isTotal ? 16 : 14,
-            fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
+          style: GoogleFonts.spaceGrotesk(
+            fontSize: isTotal ? 15 : 13,
+            fontWeight: isTotal ? FontWeight.w800 : FontWeight.w500,
+            color: Colors.white,
           ),
         ),
         Text(
           amount,
-          style: TextStyle(
-            fontSize: isTotal ? 16 : 14,
-            fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
-            color: isTotal ? Colors.green : null,
+          style: GoogleFonts.spaceGrotesk(
+            fontSize: isTotal ? 15 : 13,
+            fontWeight: FontWeight.w800,
+            color: isTotal ? Colors.greenAccent.shade400 : Colors.white,
           ),
         ),
       ],
@@ -406,88 +462,58 @@ class _TicketPurchaseSheetState extends State<TicketPurchaseSheet> {
   }
 
   Widget _buildTermsAndConditions() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        CheckboxListTile(
-          value: _agreedToTerms,
-          onChanged: (value) => setState(() => _agreedToTerms = value ?? false),
-          title: const Text(
-            'I agree to the terms and conditions and refund policy',
-            style: TextStyle(fontSize: 14),
-          ),
-          contentPadding: EdgeInsets.zero,
-          controlAffinity: ListTileControlAffinity.leading,
-        ),
-        const SizedBox(height: 8),
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.blue.shade50,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.blue.shade200),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Refund Policy:',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+    return GlassCard(
+      padding: const EdgeInsets.all(14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CheckboxListTile(
+            value: _agreedToTerms,
+            onChanged: (value) =>
+                setState(() => _agreedToTerms = value ?? false),
+            controlAffinity: ListTileControlAffinity.leading,
+            title: Text(
+              'events_terms_confirm'.tr(),
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 13,
+                color: Colors.white,
               ),
-              const SizedBox(height: 4),
-              Text(
-                widget.event.refundPolicy.terms,
-                style: const TextStyle(fontSize: 12),
-              ),
-            ],
+            ),
+            contentPadding: EdgeInsets.zero,
           ),
-        ),
-      ],
+          const SizedBox(height: 8),
+          Text(
+            'events_refund_policy'.tr(),
+            style: GoogleFonts.spaceGrotesk(
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            widget.event.refundPolicy.terms,
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 12,
+              color: Colors.white.withValues(alpha: 0.85),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildPurchaseButton() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.shade300,
-            offset: const Offset(0, -1),
-            blurRadius: 4,
-          ),
-        ],
-      ),
-      child: SafeArea(
-        child: SizedBox(
-          width: double.infinity,
-          height: 48,
-          child: ElevatedButton(
-            onPressed: _canPurchase() ? _purchaseTickets : null,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-              foregroundColor: Colors.white,
-            ),
-            child: _isProcessing
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                  )
-                : Text(
-                    widget.ticketType.isFree
-                        ? 'Reserve Tickets'
-                        : 'Purchase Tickets',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-          ),
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: GradientCTAButton(
+          text: widget.ticketType.isFree
+              ? 'events_reserve'.tr()
+              : 'events_purchase'.tr(),
+          // isLoading: _isProcessing, // Removed invalid parameter
+          onPressed: _canPurchase() ? _purchaseTickets : null,
         ),
       ),
     );
@@ -506,21 +532,20 @@ class _TicketPurchaseSheetState extends State<TicketPurchaseSheet> {
     setState(() => _isProcessing = true);
 
     try {
-      // For paid tickets, you would integrate with Stripe here
       String? paymentIntentId;
+
       if (!widget.ticketType.isFree) {
-        // Process payment with Stripe
         final amount = widget.ticketType.price * _quantity;
-        // This is a placeholder for actual payment integration
+
         await PaymentService.refundPayment(
           paymentId: 'mock_payment_id',
           amount: amount,
           reason: 'Ticket purchase',
         );
+
         paymentIntentId = 'mock_payment_intent_id';
       }
 
-      // Purchase tickets through the service
       final purchaseId = await _eventService.purchaseTickets(
         eventId: widget.event.id,
         ticketTypeId: widget.ticketType.id,
@@ -530,7 +555,6 @@ class _TicketPurchaseSheetState extends State<TicketPurchaseSheet> {
         paymentIntentId: paymentIntentId,
       );
 
-      // Send confirmation notification
       await _notificationService.sendTicketPurchaseConfirmation(
         eventTitle: widget.event.title,
         quantity: _quantity,
@@ -540,7 +564,7 @@ class _TicketPurchaseSheetState extends State<TicketPurchaseSheet> {
       if (mounted) {
         _showSuccessDialog(purchaseId);
       }
-    } on Exception catch (e) {
+    } catch (e) {
       if (mounted) {
         _showErrorDialog(e.toString());
       }
@@ -557,25 +581,16 @@ class _TicketPurchaseSheetState extends State<TicketPurchaseSheet> {
       barrierDismissible: false,
       builder: (context) => AlertDialog(
         title: Text('events_tickets_purchased'.tr()),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'You have successfully purchased $_quantity ticket${_quantity > 1 ? 's' : ''} for ${widget.event.title}.',
-            ),
-            const SizedBox(height: 16),
-            Text('events_confirmation_id'.tr().replaceAll('{id}', purchaseId)),
-            const SizedBox(height: 16),
-            const Text(
-              'A confirmation email has been sent to your email address.',
-            ),
-          ],
+        content: Text(
+          'events_purchase_success'
+              .tr()
+              .replaceAll('{count}', _quantity.toString())
+              .replaceAll('{title}', widget.event.title),
         ),
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.pop(context); // Close dialog
+              Navigator.pop(context);
               widget.onPurchaseComplete();
             },
             child: Text('events_done'.tr()),

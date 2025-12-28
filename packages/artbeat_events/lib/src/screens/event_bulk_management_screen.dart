@@ -1,10 +1,17 @@
+// FULL FILE — paste over existing
+
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:google_fonts/google_fonts.dart';
+
 import '../models/artbeat_event.dart';
 import '../services/event_bulk_management_service.dart';
 
-/// Screen for bulk event management operations
-/// Allows users to perform operations on multiple events at once
+import '../widgets/world_background.dart';
+import '../widgets/glass_card.dart';
+import '../widgets/hud_top_bar.dart';
+import '../widgets/gradient_cta_button.dart';
+
 class EventBulkManagementScreen extends StatefulWidget {
   const EventBulkManagementScreen({super.key});
 
@@ -13,16 +20,17 @@ class EventBulkManagementScreen extends StatefulWidget {
       _EventBulkManagementScreenState();
 }
 
-class _EventBulkManagementScreenState extends State<EventBulkManagementScreen> {
+class _EventBulkManagementScreenState
+    extends State<EventBulkManagementScreen> {
   final EventBulkManagementService _bulkService = EventBulkManagementService();
 
   List<ArtbeatEvent> _events = [];
   final Set<String> _selectedEventIds = <String>{};
+
   bool _isLoading = true;
   bool _isPerformingBulkOperation = false;
   String? _errorMessage;
 
-  // Filters
   String? _selectedCategory;
   String? _selectedStatus;
   DateTime? _startDate;
@@ -50,7 +58,7 @@ class _EventBulkManagementScreenState extends State<EventBulkManagementScreen> {
 
       setState(() {
         _events = events;
-        _selectedEventIds.clear(); // Clear selections when reloading
+        _selectedEventIds.clear();
         _isLoading = false;
       });
     } on Exception catch (e) {
@@ -63,176 +71,94 @@ class _EventBulkManagementScreenState extends State<EventBulkManagementScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('event_bulk_title'.tr()),
-        actions: [
-          if (_selectedEventIds.isNotEmpty)
-            IconButton(
-              icon: Badge(
-                label: Text('${_selectedEventIds.length}'),
-                child: const Icon(Icons.more_vert),
-              ),
-              onPressed: _showBulkActionsMenu,
+    return WorldBackground(
+      child: SafeArea(
+        child: Column(
+          children: [
+            HudTopBar(
+              title: 'event_bulk_title'.tr(),
+              onBack: () => Navigator.pop(context),
             ),
-        ],
-      ),
-      body: Column(
-        children: [
-          _buildFiltersCard(),
-          _buildSelectionHeader(),
-          Expanded(
-            child: _isLoading || _isPerformingBulkOperation
-                ? const Center(child: CircularProgressIndicator())
-                : _errorMessage != null
-                ? _buildErrorWidget()
-                : _buildEventsList(),
-          ),
-        ],
-      ),
-      floatingActionButton: _selectedEventIds.isNotEmpty
-          ? FloatingActionButton.extended(
-              onPressed: _showBulkActionsMenu,
-              icon: const Icon(Icons.settings),
-              label: Text(
-                'event_bulk_selected_label'.tr().replaceFirst(
-                  '{{count}}',
-                  '${_selectedEventIds.length}',
-                ),
+            Expanded(
+              child: Column(
+                children: [
+                  _buildFiltersCard(),
+                  _buildSelectionHeader(),
+                  Expanded(
+                    child: _isLoading || _isPerformingBulkOperation
+                        ? const Center(child: CircularProgressIndicator())
+                        : _errorMessage != null
+                            ? _buildErrorWidget()
+                            : _buildEventsList(),
+                  ),
+                ],
               ),
-            )
-          : null,
+            ),
+          ],
+        ),
+      ),
     );
   }
 
+  // ---------------- Filters -----------------
+
   Widget _buildFiltersCard() {
-    return Card(
-      margin: const EdgeInsets.all(16),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: GlassCard(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'event_bulk_filters'.tr(),
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: GoogleFonts.spaceGrotesk(
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+              ),
             ),
             const SizedBox(height: 12),
+
             Row(
               children: [
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    decoration: InputDecoration(
-                      labelText: 'event_bulk_category_label'.tr(),
-                      border: const OutlineInputBorder(),
-                    ),
-                    initialValue: _selectedCategory,
-                    items: [
-                      DropdownMenuItem(
-                        child: Text('event_bulk_all_categories'.tr()),
-                      ),
-                      DropdownMenuItem(
-                        value: 'art-show',
-                        child: Text('event_bulk_art_show'.tr()),
-                      ),
-                      DropdownMenuItem(
-                        value: 'workshop',
-                        child: Text('event_bulk_workshop'.tr()),
-                      ),
-                      DropdownMenuItem(
-                        value: 'exhibition',
-                        child: Text('event_bulk_exhibition'.tr()),
-                      ),
-                      DropdownMenuItem(
-                        value: 'sale',
-                        child: Text('event_bulk_sale'.tr()),
-                      ),
-                      DropdownMenuItem(
-                        value: 'other',
-                        child: Text('event_bulk_other'.tr()),
-                      ),
-                    ],
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedCategory = value;
-                      });
-                      _loadEvents();
-                    },
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    decoration: InputDecoration(
-                      labelText: 'event_bulk_status_label'.tr(),
-                      border: const OutlineInputBorder(),
-                    ),
-                    initialValue: _selectedStatus,
-                    items: [
-                      DropdownMenuItem(
-                        child: Text('event_bulk_all_statuses'.tr()),
-                      ),
-                      DropdownMenuItem(
-                        value: 'active',
-                        child: Text('event_bulk_active'.tr()),
-                      ),
-                      DropdownMenuItem(
-                        value: 'inactive',
-                        child: Text('event_bulk_inactive'.tr()),
-                      ),
-                      DropdownMenuItem(
-                        value: 'cancelled',
-                        child: Text('event_bulk_cancelled'.tr()),
-                      ),
-                      DropdownMenuItem(
-                        value: 'postponed',
-                        child: Text('event_bulk_postponed'.tr()),
-                      ),
-                      DropdownMenuItem(
-                        value: 'draft',
-                        child: Text('event_bulk_draft'.tr()),
-                      ),
-                    ],
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedStatus = value;
-                      });
-                      _loadEvents();
-                    },
-                  ),
-                ),
+                Expanded(child: _categoryDropdown()),
+                const SizedBox(width: 12),
+                Expanded(child: _statusDropdown()),
               ],
             ),
+
             const SizedBox(height: 12),
+
             Row(
               children: [
                 Expanded(
                   child: TextButton.icon(
                     onPressed: _selectStartDate,
-                    icon: const Icon(Icons.date_range),
+                    icon: const Icon(Icons.date_range, color: Colors.white70),
                     label: Text(
                       _startDate != null
                           ? DateFormat('MMM dd, yyyy').format(_startDate!)
                           : 'event_bulk_start_date'.tr(),
+                      style: GoogleFonts.spaceGrotesk(color: Colors.white70),
                     ),
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 12),
                 Expanded(
                   child: TextButton.icon(
                     onPressed: _selectEndDate,
-                    icon: const Icon(Icons.date_range),
+                    icon: const Icon(Icons.date_range, color: Colors.white70),
                     label: Text(
                       _endDate != null
                           ? DateFormat('MMM dd, yyyy').format(_endDate!)
                           : 'event_bulk_end_date'.tr(),
+                      style: GoogleFonts.spaceGrotesk(color: Colors.white70),
                     ),
                   ),
                 ),
-                const SizedBox(width: 16),
-                ElevatedButton(
+                const SizedBox(width: 12),
+                GradientCTAButton(
+                  text: 'event_bulk_clear'.tr(),
                   onPressed: _clearFilters,
-                  child: Text('event_bulk_clear'.tr()),
                 ),
               ],
             ),
@@ -242,82 +168,148 @@ class _EventBulkManagementScreenState extends State<EventBulkManagementScreen> {
     );
   }
 
+  Widget _categoryDropdown() {
+    return DropdownButtonFormField<String>(
+      initialValue: _selectedCategory,
+      dropdownColor: Colors.black87,
+      decoration: const InputDecoration(
+        border: OutlineInputBorder(),
+        labelText: 'Category',
+      ),
+      items: const [
+        DropdownMenuItem(child: Text('All')),
+        DropdownMenuItem(value: 'art-show', child: Text('Art Show')),
+        DropdownMenuItem(value: 'workshop', child: Text('Workshop')),
+        DropdownMenuItem(value: 'exhibition', child: Text('Exhibition')),
+        DropdownMenuItem(value: 'sale', child: Text('Sale')),
+        DropdownMenuItem(value: 'other', child: Text('Other')),
+      ],
+      onChanged: (value) {
+        setState(() => _selectedCategory = value);
+        _loadEvents();
+      },
+    );
+  }
+
+  Widget _statusDropdown() {
+    return DropdownButtonFormField<String>(
+      initialValue: _selectedStatus,
+      dropdownColor: Colors.black87,
+      decoration: const InputDecoration(
+        border: OutlineInputBorder(),
+        labelText: 'Status',
+      ),
+      items: const [
+        DropdownMenuItem(child: Text('All')),
+        DropdownMenuItem(value: 'active', child: Text('Active')),
+        DropdownMenuItem(value: 'inactive', child: Text('Inactive')),
+        DropdownMenuItem(value: 'cancelled', child: Text('Cancelled')),
+        DropdownMenuItem(value: 'postponed', child: Text('Postponed')),
+        DropdownMenuItem(value: 'draft', child: Text('Draft')),
+      ],
+      onChanged: (value) {
+        setState(() => _selectedStatus = value);
+        _loadEvents();
+      },
+    );
+  }
+
+  // ---------------- Selection Header -----------------
+
   Widget _buildSelectionHeader() {
     if (_events.isEmpty) return const SizedBox.shrink();
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      color: Colors.grey[100],
-      child: Row(
-        children: [
-          Checkbox(
-            value: _selectedEventIds.length == _events.length,
-            tristate:
-                _selectedEventIds.isNotEmpty &&
-                _selectedEventIds.length < _events.length,
-            onChanged: _toggleSelectAll,
-          ),
-          Text(
-            _selectedEventIds.isEmpty
-                ? 'event_bulk_select_events'.tr()
-                : '${'event_bulk_of_selected'.tr().replaceFirst('{{count}}', '${_selectedEventIds.length}')} ${_events.length}',
-            style: TextStyle(
-              color: Colors.grey[700],
-              fontWeight: FontWeight.w500,
+    final total = _events.length;
+    final selected = _selectedEventIds.length;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: GlassCard(
+        child: Row(
+          children: [
+            Checkbox(
+              value: selected == total && total > 0,
+              tristate: selected > 0 && selected < total,
+              onChanged: _toggleSelectAll,
             ),
-          ),
-          const Spacer(),
-          if (_selectedEventIds.isNotEmpty)
-            TextButton(
-              onPressed: () => setState(_selectedEventIds.clear),
-              child: Text('event_bulk_clear_selection'.tr()),
+            Text(
+              selected == 0
+                  ? 'event_bulk_select_events'.tr()
+                  : '${'event_bulk_of_selected'.tr().replaceFirst('{{count}}', '$selected')} $total',
+              style: GoogleFonts.spaceGrotesk(color: Colors.white),
             ),
-        ],
+            const Spacer(),
+            if (selected > 0)
+              TextButton(
+                onPressed: () => setState(_selectedEventIds.clear),
+                child: Text(
+                  'event_bulk_clear_selection'.tr(),
+                  style: GoogleFonts.spaceGrotesk(color: Colors.white70),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
 
+  // ---------------- Error -----------------
+
   Widget _buildErrorWidget() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.error, size: 64, color: Colors.red[400]),
-          const SizedBox(height: 16),
-          Text(
-            'event_bulk_error_loading'.tr(),
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            _errorMessage!,
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.grey[600]),
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: _loadEvents,
-            child: Text('event_bulk_retry'.tr()),
-          ),
-        ],
+      child: GlassCard(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.error, color: Colors.red[300], size: 64),
+            const SizedBox(height: 12),
+            Text(
+              'event_bulk_error_loading'.tr(),
+              style: GoogleFonts.spaceGrotesk(
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              _errorMessage ?? '',
+              style: GoogleFonts.spaceGrotesk(color: Colors.white70),
+            ),
+            const SizedBox(height: 14),
+            GradientCTAButton(
+              text: 'event_bulk_retry'.tr(),
+              onPressed: _loadEvents,
+            ),
+          ],
+        ),
       ),
     );
   }
+
+  // ---------------- List -----------------
 
   Widget _buildEventsList() {
     if (_events.isEmpty) {
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.event_busy, size: 64, color: Colors.grey),
-            const SizedBox(height: 16),
-            Text(
-              'event_bulk_no_events'.tr(),
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            Text('event_bulk_no_events_hint'.tr()),
-          ],
+        child: GlassCard(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.event_busy, color: Colors.white70, size: 56),
+              const SizedBox(height: 10),
+              Text(
+                'event_bulk_no_events'.tr(),
+                style: GoogleFonts.spaceGrotesk(
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                ),
+              ),
+              Text(
+                'event_bulk_no_events_hint'.tr(),
+                style: GoogleFonts.spaceGrotesk(color: Colors.white70),
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -327,9 +319,7 @@ class _EventBulkManagementScreenState extends State<EventBulkManagementScreen> {
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: _events.length,
-        itemBuilder: (context, index) {
-          return _buildEventCard(_events[index]);
-        },
+        itemBuilder: (_, i) => _buildEventCard(_events[i]),
       ),
     );
   }
@@ -337,69 +327,69 @@ class _EventBulkManagementScreenState extends State<EventBulkManagementScreen> {
   Widget _buildEventCard(ArtbeatEvent event) {
     final isSelected = _selectedEventIds.contains(event.id);
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      color: isSelected ? Colors.blue[50] : null,
-      child: ListTile(
-        leading: Checkbox(
-          value: isSelected,
-          onChanged: (selected) => _toggleEventSelection(event.id),
-        ),
-        title: Text(
-          event.title,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              event.description,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                Icon(Icons.location_on, size: 14, color: Colors.grey[600]),
-                const SizedBox(width: 2),
-                Text(
-                  event.location,
-                  style: TextStyle(color: Colors.grey[600], fontSize: 12),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: GlassCard(
+        child: InkWell(
+          onTap: () => _toggleEventSelection(event.id),
+          child: Row(
+            children: [
+              Checkbox(
+                value: isSelected,
+                onChanged: (_) => _toggleEventSelection(event.id),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      event.title,
+                      style: GoogleFonts.spaceGrotesk(
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                      ),
+                    ),
+                    Text(
+                      event.description,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.white70,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
                 ),
-                const Spacer(),
-                Text(
-                  DateFormat('MMM dd, yyyy').format(event.dateTime),
-                  style: TextStyle(color: Colors.grey[600], fontSize: 12),
-                ),
-              ],
-            ),
-          ],
+              ),
+              _buildEventStatusChip(event),
+            ],
+          ),
         ),
-        trailing: _buildEventStatusChip(event),
-        onTap: () => _toggleEventSelection(event.id),
       ),
     );
   }
 
   Widget _buildEventStatusChip(ArtbeatEvent event) {
-    // Since ArtbeatEvent doesn't have status, use isPublic as indicator
     final status = event.isPublic ? 'active' : 'inactive';
     final color = status == 'active' ? Colors.green : Colors.grey;
 
     return Chip(
-      label: Text(status.toUpperCase(), style: const TextStyle(fontSize: 10)),
+      label: Text(
+        status.toUpperCase(),
+        style: GoogleFonts.spaceGrotesk(fontSize: 10),
+      ),
       backgroundColor: color.withValues(alpha: 0.2),
       side: BorderSide(color: color),
     );
   }
 
+  // ---------------- Selection logic -----------------
+
   void _toggleEventSelection(String eventId) {
     setState(() {
-      if (_selectedEventIds.contains(eventId)) {
-        _selectedEventIds.remove(eventId);
-      } else {
-        _selectedEventIds.add(eventId);
-      }
+      _selectedEventIds.contains(eventId)
+          ? _selectedEventIds.remove(eventId)
+          : _selectedEventIds.add(eventId);
     });
   }
 
@@ -413,6 +403,8 @@ class _EventBulkManagementScreenState extends State<EventBulkManagementScreen> {
     });
   }
 
+  // ---------------- Date filters -----------------
+
   Future<void> _selectStartDate() async {
     final date = await showDatePicker(
       context: context,
@@ -422,9 +414,7 @@ class _EventBulkManagementScreenState extends State<EventBulkManagementScreen> {
     );
 
     if (date != null) {
-      setState(() {
-        _startDate = date;
-      });
+      setState(() => _startDate = date);
       _loadEvents();
     }
   }
@@ -432,16 +422,14 @@ class _EventBulkManagementScreenState extends State<EventBulkManagementScreen> {
   Future<void> _selectEndDate() async {
     final date = await showDatePicker(
       context: context,
-      initialDate: _endDate ?? DateTime.now().add(const Duration(days: 30)),
+      initialDate: _endDate ?? DateTime.now(),
       firstDate:
           _startDate ?? DateTime.now().subtract(const Duration(days: 365)),
       lastDate: DateTime.now().add(const Duration(days: 365)),
     );
 
     if (date != null) {
-      setState(() {
-        _endDate = date;
-      });
+      setState(() => _endDate = date);
       _loadEvents();
     }
   }
@@ -453,91 +441,113 @@ class _EventBulkManagementScreenState extends State<EventBulkManagementScreen> {
       _startDate = null;
       _endDate = null;
     });
+
     _loadEvents();
   }
+
+  // ---------------- Bulk actions UI -----------------
 
   void _showBulkActionsMenu() {
     showModalBottomSheet(
       context: context,
-      builder: (context) => _buildBulkActionsSheet(),
-    );
-  }
-
-  Widget _buildBulkActionsSheet() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            'event_bulk_bulk_actions'.tr().replaceFirst(
-              '{{count}}',
-              '${_selectedEventIds.length}',
-            ),
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 16),
-          ListTile(
-            leading: const Icon(Icons.edit, color: Colors.blue),
-            title: Text('event_bulk_update_status'.tr()),
-            onTap: () {
-              Navigator.pop(context);
-              _showStatusUpdateDialog();
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.category, color: Colors.green),
-            title: Text('event_bulk_assign_category'.tr()),
-            onTap: () {
-              Navigator.pop(context);
-              _showCategoryAssignDialog();
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.visibility_off, color: Colors.orange),
-            title: Text('event_bulk_make_private'.tr()),
-            onTap: () {
-              Navigator.pop(context);
-              _performBulkUpdate({'isPublic': false});
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.visibility, color: Colors.blue),
-            title: Text('event_bulk_make_public'.tr()),
-            onTap: () {
-              Navigator.pop(context);
-              _performBulkUpdate({'isPublic': true});
-            },
-          ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.delete, color: Colors.red),
-            title: Text('event_bulk_delete_events'.tr()),
-            onTap: () {
-              Navigator.pop(context);
-              _confirmBulkDelete();
-            },
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('event_bulk_cancel'.tr()),
-          ),
-        ],
+      backgroundColor: Colors.transparent,
+      builder: (_) => GlassCard(
+        child: _buildBulkActionsSheet(),
       ),
     );
   }
 
+  Widget _buildBulkActionsSheet() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          'event_bulk_bulk_actions'
+              .tr()
+              .replaceFirst('{{count}}', '${_selectedEventIds.length}'),
+          style: GoogleFonts.spaceGrotesk(
+            fontWeight: FontWeight.w800,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(height: 10),
+
+        _bulkActionTile(
+          icon: Icons.edit,
+          color: Colors.blue,
+          text: 'event_bulk_update_status'.tr(),
+          onTap: _showStatusUpdateDialog,
+        ),
+
+        _bulkActionTile(
+          icon: Icons.category,
+          color: Colors.green,
+          text: 'event_bulk_assign_category'.tr(),
+          onTap: _showCategoryAssignDialog,
+        ),
+
+        _bulkActionTile(
+          icon: Icons.visibility_off,
+          color: Colors.orange,
+          text: 'event_bulk_make_private'.tr(),
+          onTap: () => _performBulkUpdate({'isPublic': false}),
+        ),
+
+        _bulkActionTile(
+          icon: Icons.visibility,
+          color: Colors.blue,
+          text: 'event_bulk_make_public'.tr(),
+          onTap: () => _performBulkUpdate({'isPublic': true}),
+        ),
+
+        const Divider(color: Colors.white24),
+
+        _bulkActionTile(
+          icon: Icons.delete,
+          color: Colors.red,
+          text: 'event_bulk_delete_events'.tr(),
+          onTap: _confirmBulkDelete,
+        ),
+
+        const SizedBox(height: 10),
+
+        GradientCTAButton(
+          text: 'event_bulk_cancel'.tr(),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ],
+    );
+  }
+
+  Widget _bulkActionTile({
+    required IconData icon,
+    required Color color,
+    required String text,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      leading: Icon(icon, color: color),
+      title: Text(
+        text,
+        style: GoogleFonts.spaceGrotesk(color: Colors.white),
+      ),
+      onTap: () {
+        Navigator.pop(context);
+        onTap();
+      },
+    );
+  }
+
+  // ---------------- Dialogs -----------------
+
   void _showStatusUpdateDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (_) => AlertDialog(
         title: Text('event_bulk_update_status'.tr()),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('event_bulk_select_status'.tr()),
-            const SizedBox(height: 16),
             ...['active', 'inactive', 'cancelled', 'postponed', 'draft'].map(
               (status) => ListTile(
                 title: Text('event_bulk_$status'.tr()),
@@ -556,25 +566,23 @@ class _EventBulkManagementScreenState extends State<EventBulkManagementScreen> {
   void _showCategoryAssignDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (_) => AlertDialog(
         title: Text('event_bulk_assign_category'.tr()),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('event_bulk_select_category'.tr()),
-            const SizedBox(height: 16),
-            ...['art-show', 'workshop', 'exhibition', 'sale', 'other'].map((
-              category,
-            ) {
-              final keyName = category.replaceAll('-', '_');
-              return ListTile(
-                title: Text('event_bulk_$keyName'.tr()),
-                onTap: () {
-                  Navigator.pop(context);
-                  _performBulkCategoryAssign(category);
-                },
-              );
-            }),
+            ...['art-show', 'workshop', 'exhibition', 'sale', 'other'].map(
+              (category) {
+                final keyName = category.replaceAll('-', '_');
+                return ListTile(
+                  title: Text('event_bulk_$keyName'.tr()),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _performBulkCategoryAssign(category);
+                  },
+                );
+              },
+            ),
           ],
         ),
       ),
@@ -584,13 +592,13 @@ class _EventBulkManagementScreenState extends State<EventBulkManagementScreen> {
   void _confirmBulkDelete() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (_) => AlertDialog(
         title: Text('event_bulk_confirm_delete'.tr()),
         content: Text(
           'event_bulk_confirm_delete_message'.tr().replaceFirst(
-            '{{count}}',
-            '${_selectedEventIds.length}',
-          ),
+                '{{count}}',
+                '${_selectedEventIds.length}',
+              ),
         ),
         actions: [
           TextButton(
@@ -610,32 +618,44 @@ class _EventBulkManagementScreenState extends State<EventBulkManagementScreen> {
     );
   }
 
+  // ---------------- Bulk Ops -----------------
+
   Future<void> _performBulkUpdate(Map<String, dynamic> updates) async {
     await _performBulkOperation(
       'Update',
-      () => _bulkService.bulkUpdateEvents(_selectedEventIds.toList(), updates),
+      () => _bulkService.bulkUpdateEvents(
+        _selectedEventIds.toList(),
+        updates,
+      ),
     );
   }
 
   Future<void> _performBulkStatusChange(String status) async {
     await _performBulkOperation(
       'Status change',
-      () => _bulkService.bulkStatusChange(_selectedEventIds.toList(), status),
+      () => _bulkService.bulkStatusChange(
+        _selectedEventIds.toList(),
+        status,
+      ),
     );
   }
 
   Future<void> _performBulkCategoryAssign(String category) async {
     await _performBulkOperation(
       'Category assignment',
-      () =>
-          _bulkService.bulkAssignCategory(_selectedEventIds.toList(), category),
+      () => _bulkService.bulkAssignCategory(
+        _selectedEventIds.toList(),
+        category,
+      ),
     );
   }
 
   Future<void> _performBulkDelete() async {
     await _performBulkOperation(
       'Deletion',
-      () => _bulkService.bulkDeleteEvents(_selectedEventIds.toList()),
+      () => _bulkService.bulkDeleteEvents(
+        _selectedEventIds.toList(),
+      ),
       shouldReload: true,
     );
   }
@@ -645,26 +665,23 @@ class _EventBulkManagementScreenState extends State<EventBulkManagementScreen> {
     Future<void> Function() operation, {
     bool shouldReload = false,
   }) async {
-    setState(() {
-      _isPerformingBulkOperation = true;
-    });
+    setState(() => _isPerformingBulkOperation = true);
 
     try {
       await operation();
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'event_bulk_success'.tr().replaceFirst(
-                '{{operation}}',
-                operationName,
-              ),
-            ),
-            backgroundColor: Colors.green,
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'event_bulk_success'
+                .tr()
+                .replaceFirst('{{operation}}', operationName),
           ),
-        );
-      }
+          backgroundColor: Colors.green,
+        ),
+      );
 
       setState(_selectedEventIds.clear);
 
@@ -672,23 +689,23 @@ class _EventBulkManagementScreenState extends State<EventBulkManagementScreen> {
         await _loadEvents();
       }
     } on Exception catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'event_bulk_error'
-                  .tr()
-                  .replaceAll('{{operation}}', operationName)
-                  .replaceFirst('{{error}}', e.toString()),
-            ),
-            backgroundColor: Colors.red,
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'event_bulk_error'
+                .tr()
+                .replaceAll('{{operation}}', operationName)
+                .replaceFirst('{{error}}', e.toString()),
           ),
-        );
-      }
+          backgroundColor: Colors.red,
+        ),
+      );
     } finally {
-      setState(() {
-        _isPerformingBulkOperation = false;
-      });
+      if (mounted) {
+        setState(() => _isPerformingBulkOperation = false);
+      }
     }
   }
 }

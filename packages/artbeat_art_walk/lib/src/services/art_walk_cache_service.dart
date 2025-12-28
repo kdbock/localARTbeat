@@ -5,8 +5,8 @@ import 'package:flutter/foundation.dart';
 import 'package:geocoding/geocoding.dart';
 
 // Import specific models to avoid conflicts
-import '../models/art_walk_model.dart';
-import '../models/public_art_model.dart';
+import 'package:artbeat_art_walk/src/models/art_walk_model.dart';
+import 'package:artbeat_art_walk/src/models/public_art_model.dart';
 import 'package:artbeat_core/artbeat_core.dart' show ConnectivityUtils;
 import 'package:artbeat_core/artbeat_core.dart' as core;
 

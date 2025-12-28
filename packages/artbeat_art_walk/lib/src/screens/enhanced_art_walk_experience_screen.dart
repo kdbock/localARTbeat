@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:provider/provider.dart';
 import 'package:artbeat_art_walk/artbeat_art_walk.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -43,9 +44,9 @@ class _EnhancedArtWalkExperienceScreenState
 
   // Progress tracking
   ArtWalkProgress? _currentProgress;
-  final ArtWalkProgressService _progressService = ArtWalkProgressService();
-  final AudioNavigationService _audioService = AudioNavigationService();
-  final SocialService _socialService = SocialService();
+  late final ArtWalkProgressService _progressService;
+  late final AudioNavigationService _audioService;
+  late final SocialService _socialService;
 
   // New services for enhanced UX
   SmartOnboardingService? _onboardingService;
@@ -58,7 +59,7 @@ class _EnhancedArtWalkExperienceScreenState
   // Navigation services
   ArtWalkService? _artWalkService;
   ArtWalkService get artWalkService =>
-      _artWalkService ??= widget.artWalkService ?? ArtWalkService();
+      _artWalkService ??= widget.artWalkService ?? context.read<ArtWalkService>();
   late ArtWalkNavigationService _navigationService;
   ArtWalkRouteModel? _currentRoute;
 
@@ -66,7 +67,12 @@ class _EnhancedArtWalkExperienceScreenState
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _navigationService = ArtWalkNavigationService();
+    _progressService = context.read<ArtWalkProgressService>();
+    _audioService = context.read<AudioNavigationService>();
+    _socialService = context.read<SocialService>();
+    _navigationService = context.read<ArtWalkNavigationService>();
+    // Ensure default art walk service is picked up when widget override is absent
+    _artWalkService ??= widget.artWalkService ?? context.read<ArtWalkService>();
     _initializeServices();
     _initializeWalk();
   }
@@ -851,6 +857,7 @@ class _EnhancedArtWalkExperienceScreenState
   Future<void> _completeWalk() async {
     try {
       debugPrint('📊 _completeWalk() - Starting walk completion');
+      final achievementService = context.read<AchievementService>();
 
       // Ensure the final art piece is marked as visited if we're in navigation mode
       if (_isNavigationMode && _currentRoute != null && _artPieces.isNotEmpty) {
@@ -885,7 +892,6 @@ class _EnhancedArtWalkExperienceScreenState
       final userId = FirebaseAuth.instance.currentUser?.uid;
       List<AchievementModel> newAchievements = [];
       if (userId != null) {
-        final achievementService = AchievementService();
         newAchievements = await achievementService.checkForNewAchievements(
           userId: userId,
           walkCompleted: true,
@@ -983,11 +989,9 @@ class _EnhancedArtWalkExperienceScreenState
 
       // Navigate to celebration screen
       if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute<void>(
-            builder: (context) =>
-                ArtWalkCelebrationScreen(celebrationData: celebrationData),
-          ),
+        Navigator.of(context).pushReplacementNamed(
+          ArtWalkRoutes.celebration,
+          arguments: {'celebrationData': celebrationData},
         );
       }
     } catch (e) {

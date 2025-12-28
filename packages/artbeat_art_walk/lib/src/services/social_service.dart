@@ -350,8 +350,12 @@ class SocialService {
       // Filter by exact distance
       final nearbyUsers = snapshot.docs.where((doc) {
         final data = doc.data() as Map<String, dynamic>;
-        final userLat = data['location']['latitude'] as double;
-        final userLng = data['location']['longitude'] as double;
+        final location = data['location'] as Map<String, dynamic>?;
+        final userLat = (location?['latitude'] as num?)?.toDouble();
+        final userLng = (location?['longitude'] as num?)?.toDouble();
+        if (userLat == null || userLng == null) {
+          return false;
+        }
 
         final distance = Geolocator.distanceBetween(
           lat,

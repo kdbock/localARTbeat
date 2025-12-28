@@ -1,9 +1,9 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import '../models/public_art_model.dart';
-import '../services/instant_discovery_service.dart';
-import '../theme/art_walk_design_system.dart';
+import 'package:artbeat_art_walk/src/models/public_art_model.dart';
+import 'package:artbeat_art_walk/src/services/instant_discovery_service.dart';
+import 'package:artbeat_art_walk/src/theme/art_walk_design_system.dart';
 
 /// Particle class for radar background animation
 class RadarParticle {
@@ -1307,7 +1307,7 @@ class EnhancedRadarPainter extends CustomPainter {
     ];
 
     for (var ring in rings) {
-      final ringRadius = radius * (ring['radius'] as double);
+      final ringRadius = radius * ((ring['radius'] as num?)?.toDouble() ?? 0);
       canvas.drawCircle(center, ringRadius, paint);
 
       // Draw distance labels

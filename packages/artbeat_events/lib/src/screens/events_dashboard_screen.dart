@@ -525,12 +525,50 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
                     ],
                   ),
                 ),
-                TextButton(
-                  onPressed: () => Navigator.pushNamed(context, '/events/all'),
-                  style: TextButton.styleFrom(
-                    foregroundColor: const Color(0xFF22D3EE),
+                // Glassy "See All" button
+                _Glass(
+                  radius: 14,
+                  blur: 10,
+                  fillAlpha: 0.10,
+                  shadow: false,
+                  padding: EdgeInsets.zero,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(14),
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const EventsListScreen(
+                            title: 'All Events',
+                            tags: [],
+                          ),
+                        ),
+                      );
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      child: Row(
+                        children: [
+                          Text(
+                            'events_see_all'.tr(),
+                            style: const TextStyle(
+                              color: Color(0xF2FFFFFF),
+                              fontWeight: FontWeight.w900,
+                              fontSize: 13,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(
+                            Icons.chevron_right,
+                            color: Colors.white.withOpacity(0.7),
+                            size: 18,
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                  child: Text('events_see_all'.tr()),
                 ),
               ],
             ),
@@ -614,13 +652,13 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
               ),
 
               Padding(
-                padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+                padding: const EdgeInsets.fromLTRB(14, 8, 14, 10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       event.title,
-                      maxLines: 2,
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         color: Color(0xF2FFFFFF),
@@ -629,9 +667,9 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
                         height: 1.2,
                       ),
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 8),
                     _metaRow(Icons.schedule, _formatEventDate(event.dateTime)),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 4),
                     _metaRow(Icons.location_on, event.location),
                   ],
                 ),

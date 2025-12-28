@@ -3649,7 +3649,7 @@
   "animated_dashboard_explore_title": "الفن والفنانون",
   "animated_dashboard_explore_subtitle": "ابحث عن الفنانين المحليين، أعمالهم، والفعاليات القادمة",
 
-  "animated_dashboard_explore_tag": "محبو الفن",
+  "animated_dashboard_explore_tag": "عاشق الفن",
 
   "animated_dashboard_connect_title": "تواصل",
 
@@ -3658,7 +3658,7 @@
   "animated_dashboard_connect_tag": "اجتماعي",
 
   "animated_dashboard_artist_label": "أنا فنان",
- 
+
   "animated_dashboard_business_label": "عمل محلي",
 
   "animated_dashboard_title_local": "محلي ",
@@ -3666,7 +3666,7 @@
   "animated_dashboard_title_art": "فن",
 
   "animated_dashboard_title_beat": "إيقاع",
-  
+
   "animated_dashboard_quest_hub": "مركز المهام",
 
   "quest_capture_title": "التقاط",
@@ -3676,11 +3676,11 @@
   "quest_capture_tag": "ضع دبوسًا",
 
   "quest_discover_title": "اكتشف",
- 
+
   "quest_discover_subtitle": "ابحث عن الفن الملتقط → اكسب نقاط الخبرة",
-  
+
   "quest_discover_tag": "+بحث عن نقاط الخبرة",
- 
+
   "quest_artwalks_title": "جولات الفن",
 
   "quest_artwalks_subtitle": "أنشئ جولة → أكملها لتحصل على نقاط الخبرة",
@@ -3707,7 +3707,7 @@
 
   "level_prefix": "المستوى ",
   "xp_label": "نقاط الخبرة",
-    "art_walk_achievements_grid_button_learn_more": "اعرف المزيد",
+  "art_walk_achievements_grid_button_learn_more": "اعرف المزيد",
   "capture_list_title": "اللقطات القريبة",
   "capture_list_no_captures_nearby": "لا توجد لقطات قريبة",
   "capture_list_no_captures_within_range": "لا توجد لقطات ضمن النطاق",
@@ -3738,7 +3738,7 @@
   "profile_save_changes": "حفظ التغييرات",
   "profile_achievement_intro_title": "افتح الإنجازات",
   "profile_achievement_intro_subtitle": "تابع رحلتك الفنية",
-   "capture_detail_title": "تفاصيل الالتقاط",
+  "capture_detail_title": "تفاصيل الالتقاط",
   "capture_detail_subtitle": "عرض الإرسال الخاص بك",
   "capture_detail_submitted_on": "تم الإرسال في",
   "capture_detail_status": "الحالة",
@@ -3776,7 +3776,7 @@
   "profile_settings_subtitle": "تعديل معلوماتك العامة",
   "social_links_title": "روابط التواصل الاجتماعي",
   "social_links_subtitle": "أضف روابط إلى حساباتك على الإنترنت",
-   "capture_dashboard_title": "لوحة التقاط",
+  "capture_dashboard_title": "لوحة التقاط",
   "capture_dashboard_subtitle": "فن قريب وعمليات الالتقاط الخاصة بك",
   "capture_comments_section_title": "التعليقات",
   "capture_comments_no_comments": "لا توجد تعليقات حتى الآن",
@@ -3797,13 +3797,76 @@
   "art_walk_please_select_at_least_one_style": "يرجى اختيار نمط واحد على الأقل",
   "art_walk_online_presence": "الوجود على الإنترنت",
   "auth_prompt_browse": "تصفح بدون تسجيل الدخول",
-"auth_prompt_login": "تسجيل الدخول",
-"auth_prompt_no_account": "ليس لديك حساب؟",
-"auth_required_feature_message": "يجب تسجيل الدخول لاستخدام هذه الميزة.",
+  "auth_prompt_login": "تسجيل الدخول",
+  "auth_prompt_no_account": "ليس لديك حساب؟",
+  "auth_required_feature_message": "يجب تسجيل الدخول لاستخدام هذه الميزة.",
 
-"dashboard_anonymous_button": "تسجيل الدخول",
-"dashboard_anonymous_message": "سجّل الدخول للوصول إلى جميع الميزات.",
-"dashboard_anonymous_title": "وصول محدود"
- 
+  "dashboard_anonymous_button": "تسجيل الدخول",
+  "dashboard_anonymous_message": "سجّل الدخول للوصول إلى جميع الميزات.",
+  "dashboard_anonymous_title": "وصول محدود",
+  "events_see_all": "عرض الكل",
+  "tickets_status_active": "نشط",
+  "tickets_quantity_label": "الكمية",
+  "tickets_total_label": "الإجمالي",
+  "tickets_qr_code_button": "عرض رمز الاستجابة السريعة",
+  "tickets_refund_button": "طلب استرداد",
+  "events_drawer_section_upcoming": "الفعاليات القادمة",
+  "user_events_upcoming_section": "الفعاليات القادمة الخاصة بك",
+  "events_view_all": "عرض الجميع",
+  "events_badge_free": "مجاني",
+  "events_event_details": "تفاصيل الفعالية",
+  "events_add_to_calendar": "إضافة إلى التقويم",
+  "events_set_reminder": "تعيين تذكير",
+  "events_report_event": "الإبلاغ عن الفعالية",
+  "events_about_event": "حول الفعالية",
+  "events_capacity": "السعة",
+  "events_tickets": "التذاكر",
+  "events_left": "متبقية",
+  "events_select_tickets": "اختر التذاكر",
+  "events_categories": "الفئات",
+  "events_refund_policy": "سياسة الاسترداد",
+  "events_contact_information": "معلومات الاتصال",
+  "events_share_text": "اطلع على هذه الفعالية!",
+  "events_list_search_hint": "ابحث عن فعاليات...",
+  "events_search_subtitle": "نتائج البحث",
+  "event_calendar_title": "تقويم الفعاليات",
+  "events_list_title_events": "الفعاليات",
+  "events_list_empty_default": "لم يتم العثور على فعاليات",
+  "events_list_empty_msg_default": "لا توجد فعاليات متاحة حالياً. يرجى المحاولة لاحقاً.",
+  "Community Event": "فعالية مجتمعية",
+  "Networking": "شبكات التواصل",
+  "Street Art": "فن الشارع",
+  "Mixed Media": "وسائط متعددة",
+  "Art Exhibition": "معرض فني",
+  "Interactive Art": "فن تفاعلي",
+  "Artist Talk": "حديث الفنان",
+  "Live Performance": "عرض مباشر",
+  "pending_review_title": "قيد المراجعة",
+  "pending_review_subtitle": "المحتوى الذي أرسلته قيد المراجعة.",
+  "no_pending_captures": "لا توجد لقطات قيد المراجعة.",
+  "approved_captures_title": "اللقطات المعتمدة",
+  "approved_captures_subtitle": "تمت الموافقة على هذه اللقطات وهي مرئية.",
+  "no_approved_captures": "لا توجد لقطات معتمدة.",
+  "art_walk_create_progress_start": "يتم بدء الإنشاء...",
+  "art_walk_create_title_label": "العنوان",
+  "art_walk_create_title_hint": "أدخل عنوان جولة الفن",
+  "art_walk_create_description_label": "الوصف",
+  "art_walk_create_description_hint": "أدخل وصفًا",
+  "art_walk_create_submit": "إرسال",
+  "events_purchase_title": "شراء التذاكر",
+  "events_tickets_remaining": "التذاكر المتبقية",
+  "events_quantity": "الكمية",
+  "events_max": "الحد الأقصى المسموح",
+  "events_your_info": "معلوماتك",
+  "events_full_name": "الاسم الكامل",
+  "events_email": "البريد الإلكتروني",
+  "events_order_summary": "ملخص الطلب",
+  "events_total": "الإجمالي",
+  "events_free": "مجاني",
+  "events_terms_confirm": "أوافق على الشروط",
+  "events_reserve": "احجز الآن",
+  "events_purchase_failed": "فشل الشراء",
+  "events_purchase_error": "حدث خطأ أثناء معالجة شراء التذكرة.",
+  "events_ok": "حسنًا"
 
 }

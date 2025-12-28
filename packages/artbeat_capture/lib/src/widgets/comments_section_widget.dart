@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../services/capture_service.dart';
+import 'package:artbeat_capture/src/services/capture_service.dart';
 import 'comment_item_widget.dart';
 import 'package:artbeat_core/artbeat_core.dart'
     show AppLogger, ImageUrlValidator;

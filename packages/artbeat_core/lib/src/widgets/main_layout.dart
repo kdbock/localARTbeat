@@ -38,29 +38,36 @@ class _MainLayoutState extends State<MainLayout> {
             // Home tab - navigate to dashboard
             Navigator.of(
               context,
+              rootNavigator: true,
             ).pushNamedAndRemoveUntil('/dashboard', (route) => false);
             break;
           case 1:
             // Art Walk tab - navigate to art walk map/dashboard
             Navigator.of(
               context,
+              rootNavigator: true,
             ).pushNamedAndRemoveUntil('/art-walk/map', (route) => false);
             break;
           case 2:
             // Capture tab - launch capture sequence
-            Navigator.of(context).pushNamed('/capture/camera');
+            Navigator.of(
+              context,
+              rootNavigator: true,
+            ).pushNamed('/capture/camera');
             break;
           case 3:
             // Community tab - navigate to community hub
             Navigator.of(
               context,
+              rootNavigator: true,
             ).pushNamedAndRemoveUntil('/community/hub', (route) => false);
             break;
           case 4:
-            // Events tab - navigate to events discover
+            // Events tab - navigate to events dashboard
             Navigator.of(
               context,
-            ).pushNamedAndRemoveUntil('/events/discover', (route) => false);
+              rootNavigator: true,
+            ).pushNamedAndRemoveUntil('/events', (route) => false);
             break;
           default:
             // Handle any other indices gracefully - stay on current page

@@ -10,7 +10,9 @@ import 'package:intl/intl.dart' as intl;
 
 /// Basic Notifications Screen for ARTbeat
 class NotificationsScreen extends StatefulWidget {
-  const NotificationsScreen({super.key});
+  const NotificationsScreen({super.key, this.useScaffold = true});
+
+  final bool useScaffold;
 
   @override
   State<NotificationsScreen> createState() => _NotificationsScreenState();
@@ -47,18 +49,27 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      return Scaffold(
-        appBar: EnhancedUniversalHeader(
-          title: 'notifications_title'.tr(),
-          showLogo: false,
-          showSearch: false,
-          showBackButton: true,
-        ),
-        body: Center(child: Text('notifications_login_required'.tr())),
-      );
+      final body = Center(child: Text('notifications_login_required'.tr()));
+      if (widget.useScaffold) {
+        return Scaffold(
+          appBar: EnhancedUniversalHeader(
+            title: 'notifications_title'.tr(),
+            showLogo: false,
+            showSearch: false,
+            showBackButton: true,
+          ),
+          body: body,
+        );
+      } else {
+        return body;
+      }
     }
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         title: Text('notifications_title'.tr()),
         actions: [
           IconButton(

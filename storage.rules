@@ -74,6 +74,11 @@ service firebase.storage {
       allow read, write: if isAuthenticated();
     }
 
+    // Debug uploads with deeper subdirectories (e.g., events/userId/eventId/file.jpg)
+    match /debug_uploads/{allPaths=**} {
+      allow read, write: if isAuthenticated();
+    }
+
     // Artwork images - artists can upload their own artwork
     match /artwork_images/{userId}/{artworkId}/{fileName} {
       allow read: if isAuthenticated();

@@ -21,16 +21,16 @@ class ArtWalkProgress extends Equatable {
     required this.id,
     required this.userId,
     required this.artWalkId,
-    required this.visitedArt,
+    this.visitedArt = const <ArtVisit>[],
     required this.startedAt,
     required this.lastActiveAt,
     this.completedAt,
     required this.status,
     this.lastKnownLocation,
-    required this.currentArtIndex,
-    required this.navigationState,
-    required this.totalArtCount,
-    required this.totalPointsEarned,
+    this.currentArtIndex = 0,
+    this.navigationState = const <String, dynamic>{},
+    this.totalArtCount = 0,
+    this.totalPointsEarned = 0,
   });
 
   /// Progress percentage (0.0 to 1.0)
@@ -73,11 +73,10 @@ class ArtWalkProgress extends Equatable {
               ?.map((item) => ArtVisit.fromMap(item as Map<String, dynamic>))
               .toList() ??
           [],
-      startedAt: (data['startedAt'] as Timestamp).toDate(),
-      lastActiveAt: (data['lastActiveAt'] as Timestamp).toDate(),
-      completedAt: data['completedAt'] != null
-          ? (data['completedAt'] as Timestamp).toDate()
-          : null,
+      startedAt: (data['startedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      lastActiveAt:
+          (data['lastActiveAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      completedAt: (data['completedAt'] as Timestamp?)?.toDate(),
       status: WalkStatus.values.firstWhere(
         (e) => e.name == data['status'],
         orElse: () => WalkStatus.notStarted,
@@ -178,8 +177,8 @@ class ArtVisit extends Equatable {
     required this.artId,
     required this.visitedAt,
     required this.visitLocation,
-    required this.pointsAwarded,
-    required this.wasNearArt,
+    this.pointsAwarded = 0,
+    this.wasNearArt = false,
     this.photoTaken,
     this.distanceFromArt,
     this.timeSpentViewing,
@@ -189,7 +188,7 @@ class ArtVisit extends Equatable {
   factory ArtVisit.fromMap(Map<String, dynamic> data) {
     return ArtVisit(
       artId: data['artId'] as String? ?? '',
-      visitedAt: (data['visitedAt'] as Timestamp).toDate(),
+      visitedAt: (data['visitedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       visitLocation: data['visitLocation'] as GeoPoint,
       pointsAwarded: data['pointsAwarded'] as int? ?? 0,
       wasNearArt: data['wasNearArt'] as bool? ?? false,

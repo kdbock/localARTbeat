@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:artbeat_core/artbeat_core.dart' as core;
-import '../models/ticket_type.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-/// Widget for building and editing individual ticket types
+import '../models/ticket_type.dart';
+import '../widgets/glass_card.dart';
+import '../widgets/glass_input_decoration.dart';
+import '../widgets/gradient_cta_button.dart';
+import '../widgets/glass_chip.dart';
+
 class TicketTypeBuilder extends StatefulWidget {
   final TicketType ticketType;
   final Function(TicketType) onChanged;
@@ -25,13 +30,16 @@ class _TicketTypeBuilderState extends State<TicketTypeBuilder> {
   late TextEditingController _descriptionController;
   late TextEditingController _priceController;
   late TextEditingController _quantityController;
+
   late TicketCategory _selectedCategory;
+
   List<String> _benefits = [];
   final TextEditingController _benefitController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
+
     _nameController = TextEditingController(text: widget.ticketType.name);
     _descriptionController = TextEditingController(
       text: widget.ticketType.description,
@@ -42,10 +50,10 @@ class _TicketTypeBuilderState extends State<TicketTypeBuilder> {
     _quantityController = TextEditingController(
       text: widget.ticketType.quantity.toString(),
     );
+
     _selectedCategory = widget.ticketType.category;
     _benefits = List.from(widget.ticketType.benefits);
 
-    // Listen to changes and update the ticket type
     _nameController.addListener(_updateTicketType);
     _descriptionController.addListener(_updateTicketType);
     _priceController.addListener(_updateTicketType);
@@ -66,7 +74,7 @@ class _TicketTypeBuilderState extends State<TicketTypeBuilder> {
     final price = double.tryParse(_priceController.text) ?? 0.0;
     final quantity = int.tryParse(_quantityController.text) ?? 0;
 
-    final updatedTicket = widget.ticketType.copyWith(
+    final updated = widget.ticketType.copyWith(
       name: _nameController.text,
       description: _descriptionController.text,
       category: _selectedCategory,
@@ -75,270 +83,246 @@ class _TicketTypeBuilderState extends State<TicketTypeBuilder> {
       benefits: _benefits,
     );
 
-    widget.onChanged(updatedTicket);
+    widget.onChanged(updated);
+  }
+
+  void _addBenefit(String benefit) {
+    final clean = benefit.trim();
+    if (clean.isEmpty || _benefits.contains(clean)) return;
+
+    setState(() {
+      _benefits.add(clean);
+      _benefitController.clear();
+    });
+
+    _updateTicketType();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header with remove button
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    'Ticket Type',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+    return GlassCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  tr('tickets.section_title'),
+                  style: GoogleFonts.spaceGrotesk(
+                    fontWeight: FontWeight.w900,
+                    fontSize: 16,
+                    color: Colors.white,
                   ),
                 ),
-                IconButton(
-                  onPressed: widget.onRemove,
-                  icon: const Icon(Icons.delete_outline),
-                  tooltip: 'Remove ticket type',
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // Ticket category selection
-            DropdownButtonFormField<TicketCategory>(
-              initialValue: _selectedCategory,
-              decoration: const InputDecoration(
-                labelText: 'Ticket Category',
-                border: OutlineInputBorder(),
-                filled: true,
-                fillColor: core.ArtbeatColors.backgroundPrimary,
               ),
-              dropdownColor: core.ArtbeatColors.backgroundPrimary,
-              style: const TextStyle(color: core.ArtbeatColors.textPrimary),
-              items: TicketCategory.values.map((category) {
-                return DropdownMenuItem(
-                  value: category,
-                  child: Text(
-                    category.displayName,
-                    style: const TextStyle(
-                      color: core.ArtbeatColors.textPrimary,
+              IconButton(
+                onPressed: widget.onRemove,
+                tooltip: tr('tickets.remove'),
+                icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 16),
+
+          DropdownButtonFormField<TicketCategory>(
+            initialValue: _selectedCategory,
+            dropdownColor: Colors.black,
+            decoration: glassInputDecoration(labelText: tr('tickets.category')),
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
+            onChanged: (value) {
+              if (value == null) return;
+              setState(() {
+                _selectedCategory = value;
+                if (value == TicketCategory.free) {
+                  _priceController.text = '0.0';
+                }
+              });
+              _updateTicketType();
+            },
+            items: TicketCategory.values.map((c) {
+              return DropdownMenuItem(
+                value: c,
+                child: Text(
+                  c.displayName,
+                  style: const TextStyle(color: Colors.white),
+                ),
+              );
+            }).toList(),
+          ),
+
+          const SizedBox(height: 16),
+
+          TextFormField(
+            controller: _nameController,
+            decoration: glassInputDecoration(
+              labelText: tr('tickets.name'),
+              hintText: tr('tickets.name_hint'),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          TextFormField(
+            controller: _descriptionController,
+            maxLines: 2,
+            decoration: glassInputDecoration(
+              labelText: tr('tickets.description'),
+              hintText: tr('tickets.description_hint'),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: _priceController,
+                  enabled: _selectedCategory != TicketCategory.free,
+                  decoration: glassInputDecoration(
+                    labelText: tr('tickets.price'),
+                  ),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(
+                      RegExp(r'^\d*\.?\d{0,2}'),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: TextFormField(
+                  controller: _quantityController,
+                  decoration: glassInputDecoration(
+                    labelText: tr('tickets.quantity'),
+                  ),
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 16),
+
+          if (_selectedCategory == TicketCategory.vip ||
+              _benefits.isNotEmpty) ...[
+            Text(
+              tr('tickets.benefits'),
+              style: GoogleFonts.spaceGrotesk(
+                fontWeight: FontWeight.w800,
+                fontSize: 13,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 8),
+
+            Column(
+              children: _benefits.asMap().entries.map((entry) {
+                final index = entry.key;
+                final benefit = entry.value;
+
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: GlassCard(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.check, color: Colors.green, size: 18),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            benefit,
+                            style: GoogleFonts.spaceGrotesk(
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close, color: Colors.white70),
+                          onPressed: () {
+                            setState(() => _benefits.removeAt(index));
+                            _updateTicketType();
+                          },
+                        ),
+                      ],
                     ),
                   ),
                 );
               }).toList(),
-              onChanged: (category) {
-                if (category != null) {
-                  setState(() {
-                    _selectedCategory = category;
-                    if (category == TicketCategory.free) {
-                      _priceController.text = '0.0';
-                    }
-                  });
-                  _updateTicketType();
-                }
-              },
             ),
-            const SizedBox(height: 16),
 
-            // Ticket name
-            TextFormField(
-              controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'Ticket Name',
-                hintText: 'e.g., General Admission, VIP Access',
-                border: OutlineInputBorder(),
-              ),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Please enter ticket name';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
 
-            // Ticket description
-            TextFormField(
-              controller: _descriptionController,
-              decoration: const InputDecoration(
-                labelText: 'Description (Optional)',
-                hintText: 'Brief description of this ticket type',
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 2,
-            ),
-            const SizedBox(height: 16),
-
-            // Price and quantity row
             Row(
               children: [
-                // Price field
                 Expanded(
                   child: TextFormField(
-                    controller: _priceController,
-                    decoration: InputDecoration(
-                      labelText: r'Price ($)',
-                      border: const OutlineInputBorder(),
-                      enabled: _selectedCategory != TicketCategory.free,
+                    controller: _benefitController,
+                    decoration: glassInputDecoration(
+                      hintText: tr('tickets.add_benefit'),
+                      isDense: true,
                     ),
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(
-                        RegExp(r'^\d*\.?\d{0,2}'),
-                      ),
-                    ],
-                    validator: (value) {
-                      if (_selectedCategory != TicketCategory.free) {
-                        final price = double.tryParse(value ?? '');
-                        if (price == null || price < 0) {
-                          return 'Enter valid price';
-                        }
-                      }
-                      return null;
-                    },
+                    onFieldSubmitted: _addBenefit,
                   ),
                 ),
-                const SizedBox(width: 16),
-
-                // Quantity field
-                Expanded(
-                  child: TextFormField(
-                    controller: _quantityController,
-                    decoration: const InputDecoration(
-                      labelText: 'Quantity',
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    validator: (value) {
-                      final quantity = int.tryParse(value ?? '');
-                      if (quantity == null || quantity <= 0) {
-                        return 'Enter valid quantity';
-                      }
-                      return null;
-                    },
-                  ),
+                const SizedBox(width: 8),
+                GradientCTAButton(
+                  height: 44,
+                  onPressed: () => _addBenefit(_benefitController.text),
+                  text: tr('actions.add'),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+          ],
 
-            // Benefits section (especially for VIP tickets)
-            if (_selectedCategory == TicketCategory.vip ||
-                _benefits.isNotEmpty) ...[
-              Text(
-                'Benefits & Inclusions',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+          if (_selectedCategory == TicketCategory.vip) ...[
+            const SizedBox(height: 12),
+            Text(
+              tr('tickets.quick_add'),
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white60,
+                fontSize: 12,
               ),
-              const SizedBox(height: 8),
+            ),
+            const SizedBox(height: 6),
 
-              // Benefits list
-              if (_benefits.isNotEmpty)
-                Column(
-                  children: _benefits.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final benefit = entry.value;
-                    return ListTile(
-                      dense: true,
-                      leading: const Icon(
-                        Icons.check_circle,
-                        color: Colors.green,
-                        size: 20,
-                      ),
-                      title: Text(benefit),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.close, size: 18),
-                        onPressed: () {
-                          setState(() {
-                            _benefits.removeAt(index);
-                          });
-                          _updateTicketType();
-                        },
-                      ),
-                      contentPadding: EdgeInsets.zero,
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children:
+                  [
+                    'Early entry',
+                    'Meet & greet with artist',
+                    'Complimentary drinks',
+                    'Exclusive merchandise',
+                    'Private viewing area',
+                    'Artist workshop access',
+                  ].map((b) {
+                    return GlassChip(
+                      label: b,
+                      onTap: () {
+                        if (_benefits.contains(b)) return;
+                        setState(() => _benefits.add(b));
+                        _updateTicketType();
+                      },
                     );
                   }).toList(),
-                ),
-
-              // Add benefit field
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      controller: _benefitController,
-                      decoration: const InputDecoration(
-                        hintText: 'Add a benefit or inclusion',
-                        border: OutlineInputBorder(),
-                        isDense: true,
-                      ),
-                      onFieldSubmitted: _addBenefit,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  IconButton(
-                    onPressed: () => _addBenefit(_benefitController.text),
-                    icon: const Icon(Icons.add),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-            ],
-
-            // Quick benefit suggestions for VIP tickets
-            if (_selectedCategory == TicketCategory.vip) ...[
-              const Text(
-                'Quick add:',
-                style: TextStyle(fontSize: 12, color: Colors.grey),
-              ),
-              const SizedBox(height: 4),
-              Wrap(
-                spacing: 8,
-                children:
-                    [
-                      'Early entry',
-                      'Meet & greet with artist',
-                      'Complimentary drinks',
-                      'Exclusive merchandise',
-                      'Private viewing area',
-                      'Artist workshop access',
-                    ].map((benefit) {
-                      return ActionChip(
-                        label: Text(
-                          benefit,
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                        onPressed: () {
-                          if (!_benefits.contains(benefit)) {
-                            setState(() {
-                              _benefits.add(benefit);
-                            });
-                            _updateTicketType();
-                          }
-                        },
-                      );
-                    }).toList(),
-              ),
-            ],
+            ),
           ],
-        ),
+        ],
       ),
     );
-  }
-
-  void _addBenefit(String benefit) {
-    if (benefit.trim().isNotEmpty && !_benefits.contains(benefit.trim())) {
-      setState(() {
-        _benefits.add(benefit.trim());
-        _benefitController.clear();
-      });
-      _updateTicketType();
-    }
   }
 }

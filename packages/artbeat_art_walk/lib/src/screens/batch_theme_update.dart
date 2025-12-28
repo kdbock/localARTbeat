@@ -2,7 +2,7 @@
 // It serves as a reference for the design patterns to be applied
 
 import 'package:flutter/material.dart';
-import '../theme/art_walk_design_system.dart';
+import 'package:artbeat_art_walk/src/theme/art_walk_design_system.dart';
 
 /// Standard screen structure template for all Art Walk screens
 class ArtWalkScreenTemplate {
@@ -180,8 +180,8 @@ class ArtWalkScreenTemplate {
 const String standardImports = '''
 import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import '../theme/art_walk_design_system.dart';
-import '../widgets/art_walk_drawer.dart';
+import 'package:artbeat_art_walk/src/theme/art_walk_design_system.dart';
+import 'package:artbeat_art_walk/src/widgets/art_walk_drawer.dart';
 ''';
 
 /// Standard MainLayout wrapper

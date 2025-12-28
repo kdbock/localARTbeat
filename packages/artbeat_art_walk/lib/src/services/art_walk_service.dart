@@ -17,15 +17,15 @@ import 'package:artbeat_core/src/services/connectivity_service.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
 
 // Local imports
-import '../models/public_art_model.dart';
-import '../models/art_walk_model.dart';
-import '../models/comment_model.dart';
-import '../models/achievement_model.dart';
-import '../models/search_criteria_model.dart';
-import '../services/art_walk_cache_service.dart';
-import '../services/rewards_service.dart';
-import '../services/achievement_service.dart';
-import '../services/art_location_clustering_service.dart';
+import 'package:artbeat_art_walk/src/models/public_art_model.dart';
+import 'package:artbeat_art_walk/src/models/art_walk_model.dart';
+import 'package:artbeat_art_walk/src/models/comment_model.dart';
+import 'package:artbeat_art_walk/src/models/achievement_model.dart';
+import 'package:artbeat_art_walk/src/models/search_criteria_model.dart';
+import 'package:artbeat_art_walk/src/services/art_walk_cache_service.dart';
+import 'package:artbeat_art_walk/src/services/rewards_service.dart';
+import 'package:artbeat_art_walk/src/services/achievement_service.dart';
+import 'package:artbeat_art_walk/src/services/art_location_clustering_service.dart';
 
 /// Service for managing Art Walks and Public Art
 class ArtWalkService {

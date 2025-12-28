@@ -1,0 +1,183 @@
+PART 1: DEVELOPER CHECKLIST
+
+These are written as actionable tasks. Check them off as you go.
+
+ARCHITECTURE AND STRUCTURE
+
+[x] Remove or quarantine the mini-app entrypoint inside art_walk
+[ ] Confirm only the root main.dart initializes Firebase
+[x] Convert all art_walk imports to package imports (no ./relative paths)
+[x] Register all art_walk routes in the global router
+[x] Remove any manual Navigator pushes where named routes exist
+    - [x] Instant Discovery Radar now launched via '/instant-discovery'
+    - [x] Discovery Capture modal now calls AppRoutes.communityCreate
+    - [x] Celebration flow uses ArtWalkRoutes.celebration via pushReplacementNamed
+    - [x] Dashboard quest and goals CTAs use ArtWalkRoutes quest/history routes
+[ ] Ensure art_walk does not depend on profile or app root
+[x] Move any rogue service instantiations into the provider tree
+[ ] Standardize folder layout inside art_walk:
+models / services / widgets / screens / routes / constants / utils / theme
+[ ] Ensure all screens use the new design system
+
+DATA AND FUNCTIONAL INTEGRITY
+
+[x] Replace all Firestore “as double” casts with (num?)?.toDouble()
+[x] Replace direct Timestamp casts with safe nullable parsing
+[x] Add defaults to all model constructors
+[ ] Implement consistent state pattern: loading / success / empty / error
+[x] Remove restart-the-screen logic
+    - [x] GoogleMapsErrorHandler now surfaces retry callback instead of pushReplacement
+[ ] Keep Firebase versions synchronized across packages
+[ ] Move platform permissions setup out of art_walk and into app root
+
+USER EXPERIENCE AND ABILITY
+
+[ ] Reduce number of steps to start a walk
+[ ] Add visual breadcrumb flow indicators
+[ ] Add confirmation feedback after every important action
+[x] Remove dead ends and stuck states
+[x] Surface notification badges on Art Walk map header
+[ ] Surface clear progress indicators for walks
+[ ] Autosave wherever possible
+[ ] Confirm destructive actions
+[ ] Respect accessibility features and text scaling
+
+PART 2: MAP EACH CHANGE TO LIKELY FILE LOCATIONS
+
+Note: filenames may vary slightly. This gives you a starting map.
+
+MINI-APP ENTRYPOINT
+
+Look for:
+artbeat_art_walk/lib/bin/main.dart
+artbeat_art_walk/lib/main.dart
+example or demo folders
+
+Action:
+Comment and label “dev only” or delete.
+
+ROUTING AND IMPORTS
+
+Check:
+artbeat_art_walk/lib/src/routes/art_walk_route_config.dart
+artbeat_art_walk/lib/src/constants/routes.dart
+artbeat_art_walk/lib/src/screens/screens.dart
+
+Look for any:
+./constants
+./screens
+../something
+
+Replace with:
+package:artbeat_art_walk/src/...
+
+Then:
+
+Main app router:
+artbeat/lib/src/routing/app_router.dart
+artbeat/lib/main.dart
+
+Ensure art walk routes are wired into global navigation.
+
+✅ Updates:
+- Search route now renders `SearchResultsScreen` with query + searchType args
+- Explore, Start, Nearby now point to dashboard, enhanced experience, and map respectively
+- Completed/Saved/Popular/Achievements/Settings routes now load EnhancedMyArtWalks, ArtWalkList, QuestHistory, WeeklyGoals
+- Quest History and Weekly Goals routes exported in `ArtWalkRouteConfig`
+
+CIRCULAR DEPENDENCY RISK
+
+Search inside art_walk for:
+import 'package:artbeat_profile'
+import 'package:artbeat'
+
+If found → redesign direction.
+
+CENTRALIZING SERVICES
+
+Search for:
+new AchievementService(
+new ArtWalkService(
+new ProgressService(
+
+Fix where located:
+artbeat/lib/src/app/providers.dart (or similar)
+
+Remove widget-local instantiation.
+
+FIRESTORE MODEL FIXES
+
+Check:
+artbeat_art_walk/lib/src/models/
+
+Search for:
+as double
+as Timestamp
+
+Replace with:
+(num?)?.toDouble()
+(Timestamp?)?.toDate()
+
+ASYNC STATE CONSISTENCY
+
+Check screens:
+artbeat_art_walk/lib/src/screens/
+
+Look for multiple returns like:
+if (snapshot.hasData) ...
+else if (something) ...
+else return Container()
+
+Replace pattern with consistent:
+loading / loaded / empty / error
+
+GOOGLE MAPS / LOCATION RECOVERY
+
+Search:
+handleMapError
+handleMapTimeout
+pushReplacement
+Navigator.of(context).push
+
+Replace “restart screen” strategy with retry logic.
+
+DESIGN SYSTEM INTEGRATION
+
+Search screens for:
+Scaffold(
+AppBar(
+ListTile(
+
+Ensure surfaces switch to glass / theme wrappers.
+
+PART 3: COMMIT-READY TODO COMMENTS
+
+Copy and place these directly above code sections where needed.
+
+// TODO: Remove mini-app behavior. This feature should only run inside the main app.
+
+// TODO: Replace relative import with package import to avoid brittle routing.
+
+// TODO: Ensure this route is registered through the global app router, not locally.
+
+// TODO: This service should be provided at the top level via MultiProvider, not created here.
+
+// TODO: Defensive Firestore parsing. Never assume type. Convert via num? and nullable timestamp.
+
+// TODO: Standardize async UI states (loading / success / empty / error).
+
+// TODO: Avoid restarting screens to solve UI problems. Retry only affected component.
+
+// TODO: Align Firebase versions across packages before adding new features.
+
+// TODO: Move platform permission logic to root app layer. Feature modules should not configure OS behavior.
+
+// TODO: Replace legacy UI with design system surfaces and reusable components.
+
+// TODO: Add feedback banner or toast so users know this saved successfully.
+
+// TODO: Prevent dead-end screen. Add back / cancel / retry paths.
+
+// TODO: Add visible progress indicator for Art Walk flow.
+
+// TODO: Add autosave or restore logic to prevent data loss.

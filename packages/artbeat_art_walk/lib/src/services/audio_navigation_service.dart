@@ -1,6 +1,6 @@
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:logger/logger.dart';
-import '../models/models.dart';
+import 'package:artbeat_art_walk/src/models/models.dart';
 
 /// Settings for audio navigation service
 class AudioNavigationSettings {

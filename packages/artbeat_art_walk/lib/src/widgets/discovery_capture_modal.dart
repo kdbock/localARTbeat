@@ -3,11 +3,11 @@ import 'package:geolocator/geolocator.dart';
 import 'package:confetti/confetti.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:artbeat_community/screens/feed/create_post_screen.dart';
-import '../models/public_art_model.dart';
-import '../services/instant_discovery_service.dart';
-import '../services/social_service.dart';
-import '../theme/art_walk_design_system.dart';
+import 'package:artbeat_core/artbeat_core.dart';
+import 'package:artbeat_art_walk/src/models/public_art_model.dart';
+import 'package:artbeat_art_walk/src/services/instant_discovery_service.dart';
+import 'package:artbeat_art_walk/src/services/social_service.dart';
+import 'package:artbeat_art_walk/src/theme/art_walk_design_system.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 /// Modal for capturing discovered art
@@ -178,15 +178,14 @@ class _DiscoveryCaptureModalState extends State<DiscoveryCaptureModal> {
         );
 
         // Navigate to CreatePostScreen with pre-filled data from discovery
-        await Navigator.push<void>(
+        await Navigator.pushNamed<void>(
           context,
-          MaterialPageRoute<void>(
-            builder: (context) => CreatePostScreen(
-              prefilledImageUrl: widget.art.imageUrl,
-              prefilledCaption: caption,
-              isDiscussionPost: true,
-            ),
-          ),
+          AppRoutes.communityCreate,
+          arguments: {
+            'prefilledImageUrl': widget.art.imageUrl,
+            'prefilledCaption': caption,
+            'isDiscussionPost': true,
+          },
         );
       }
     } catch (e) {

@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logger/logger.dart';
-import '../models/models.dart';
+import 'package:artbeat_art_walk/src/models/models.dart';
 import 'dart:math' as math;
 
 /// Service for managing art location clustering to handle duplicate submissions

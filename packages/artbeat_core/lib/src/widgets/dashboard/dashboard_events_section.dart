@@ -273,181 +273,185 @@ class DashboardEventsSection extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           child: Padding(
             padding: const EdgeInsets.all(8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Event image (if available and valid)
-                if (_isValidImageUrl(event.imageUrl))
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: FadeInImage(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Event image (if available and valid)
+                  if (_isValidImageUrl(event.imageUrl))
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: FadeInImage(
+                        height: 80,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        placeholder: const AssetImage(
+                          'assets/default_profile.png',
+                        ),
+                        image:
+                            ImageUrlValidator.safeNetworkImage(
+                              event.imageUrl,
+                            ) ??
+                            const AssetImage('assets/default_profile.png')
+                                as ImageProvider,
+                        imageErrorBuilder: (context, error, stackTrace) {
+                          AppLogger.error('Error loading event image: $error');
+                          return Container(
+                            height: 80,
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: ArtbeatColors.backgroundSecondary,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(
+                              Icons.event,
+                              color: ArtbeatColors.textSecondary,
+                              size: 32,
+                            ),
+                          );
+                        },
+                      ),
+                    )
+                  else
+                    Container(
                       height: 80,
                       width: double.infinity,
-                      fit: BoxFit.cover,
-                      placeholder: const AssetImage(
-                        'assets/default_profile.png',
+                      decoration: BoxDecoration(
+                        color: ArtbeatColors.backgroundSecondary,
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      image:
-                          ImageUrlValidator.safeNetworkImage(event.imageUrl) ??
-                          const AssetImage('assets/default_profile.png')
-                              as ImageProvider,
-                      imageErrorBuilder: (context, error, stackTrace) {
-                        AppLogger.error('Error loading event image: $error');
-                        return Container(
-                          height: 80,
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: ArtbeatColors.backgroundSecondary,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Icon(
-                            Icons.event,
-                            color: ArtbeatColors.textSecondary,
-                            size: 32,
-                          ),
-                        );
-                      },
-                    ),
-                  )
-                else
-                  Container(
-                    height: 80,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: ArtbeatColors.backgroundSecondary,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(
-                      Icons.event,
-                      color: ArtbeatColors.textSecondary,
-                      size: 32,
-                    ),
-                  ),
-
-                const SizedBox(height: 6),
-
-                // Date badge
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: ArtbeatColors.error.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    _formatEventDate(event.startDate),
-                    style: const TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                      color: ArtbeatColors.error,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 4),
-
-                // Event title
-                Text(
-                  event.title.isNotEmpty ? event.title : 'Untitled Event',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: ArtbeatColors.textPrimary,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-
-                const SizedBox(height: 2),
-
-                // Location
-                if (event.location.isNotEmpty) ...[
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.location_on,
-                        size: 12,
+                      child: const Icon(
+                        Icons.event,
                         color: ArtbeatColors.textSecondary,
+                        size: 32,
                       ),
-                      const SizedBox(width: 2),
-                      Expanded(
-                        child: Text(
-                          event.location,
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: ArtbeatColors.textSecondary,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 2),
-                ],
+                    ),
 
-                // Description
-                if (event.description.isNotEmpty) ...[
-                  Flexible(
+                  const SizedBox(height: 6),
+
+                  // Date badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: ArtbeatColors.error.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
                     child: Text(
-                      event.description,
+                      _formatEventDate(event.startDate),
                       style: const TextStyle(
-                        fontSize: 11,
-                        color: ArtbeatColors.textPrimary,
-                        height: 1.2,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: ArtbeatColors.error,
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                ],
 
-                // Attendees count and price
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
+                  const SizedBox(height: 4),
+
+                  // Event title
+                  Text(
+                    event.title.isNotEmpty ? event.title : 'Untitled Event',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: ArtbeatColors.textPrimary,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+
+                  const SizedBox(height: 2),
+
+                  // Location
+                  if (event.location.isNotEmpty) ...[
                     Row(
                       children: [
                         const Icon(
-                          Icons.people_outline,
+                          Icons.location_on,
                           size: 12,
                           color: ArtbeatColors.textSecondary,
                         ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${event.attendeeIds.length} attending',
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: ArtbeatColors.textSecondary,
+                        const SizedBox(width: 2),
+                        Expanded(
+                          child: Text(
+                            event.location,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: ArtbeatColors.textSecondary,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
                     ),
-                    if (event.price != null && (event.price ?? 0) > 0)
-                      Text(
-                        '\$${(event.price ?? 0).toStringAsFixed(0)}',
+                    const SizedBox(height: 2),
+                  ],
+
+                  // Description
+                  if (event.description.isNotEmpty) ...[
+                    Flexible(
+                      child: Text(
+                        event.description,
                         style: const TextStyle(
                           fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: ArtbeatColors.primaryGreen,
+                          color: ArtbeatColors.textPrimary,
+                          height: 1.2,
                         ),
-                      )
-                    else
-                      const Text(
-                        'Free',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: ArtbeatColors.primaryGreen,
-                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
+                    ),
+                    const SizedBox(height: 4),
                   ],
-                ),
-              ],
+
+                  // Attendees count and price
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.people_outline,
+                            size: 12,
+                            color: ArtbeatColors.textSecondary,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${event.attendeeIds.length} attending',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: ArtbeatColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (event.price != null && (event.price ?? 0) > 0)
+                        Text(
+                          '\$${(event.price ?? 0).toStringAsFixed(0)}',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: ArtbeatColors.primaryGreen,
+                          ),
+                        )
+                      else
+                        const Text(
+                          'Free',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: ArtbeatColors.primaryGreen,
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),

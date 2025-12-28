@@ -28,14 +28,14 @@ class CommentModel {
   });
 
   factory CommentModel.fromJson(Map<String, dynamic> json) {
-    final Timestamp timestamp = json['createdAt'] as Timestamp;
+    final Timestamp? timestamp = json['createdAt'] as Timestamp?;
     final List<dynamic>? repliesJson = json['replies'] as List<dynamic>?;
     return CommentModel(
       id: json['id'] as String,
       userId: json['userId'] as String,
       content: json['content'] as String,
       parentCommentId: json['parentCommentId'] as String?,
-      createdAt: timestamp.toDate(),
+      createdAt: (timestamp ?? Timestamp.now()).toDate(),
       likeCount: json['likeCount'] as int? ?? 0,
       userLikes: List<String>.from(json['userLikes'] as List<dynamic>? ?? []),
       userName: json['userName'] as String? ?? 'Anonymous',

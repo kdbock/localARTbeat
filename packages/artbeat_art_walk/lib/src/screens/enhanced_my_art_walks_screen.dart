@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../models/models.dart';
-import '../services/services.dart';
-import '../widgets/widgets.dart';
-import '../constants/routes.dart';
+import 'package:provider/provider.dart';
+import 'package:artbeat_art_walk/src/models/models.dart';
+import 'package:artbeat_art_walk/src/services/services.dart';
+import 'package:artbeat_art_walk/src/widgets/widgets.dart';
+import 'package:artbeat_art_walk/src/constants/routes.dart';
 
 /// Helper class for empty state configuration
 class _EmptyStateConfig {
@@ -34,8 +35,8 @@ class EnhancedMyArtWalksScreen extends StatefulWidget {
 }
 
 class _EnhancedMyArtWalksScreenState extends State<EnhancedMyArtWalksScreen> {
-  final ArtWalkService _artWalkService = ArtWalkService();
-  final ArtWalkProgressService _progressService = ArtWalkProgressService();
+  late final ArtWalkService _artWalkService;
+  late final ArtWalkProgressService _progressService;
 
   String? _userId;
   bool _isLoading = true;
@@ -52,6 +53,8 @@ class _EnhancedMyArtWalksScreenState extends State<EnhancedMyArtWalksScreen> {
   @override
   void initState() {
     super.initState();
+    _artWalkService = context.read<ArtWalkService>();
+    _progressService = context.read<ArtWalkProgressService>();
     _userId = _artWalkService.getCurrentUserId();
     _loadAllData();
   }

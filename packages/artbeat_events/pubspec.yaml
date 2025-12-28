@@ -51,6 +51,9 @@ dependencies:
   # Localization
   easy_localization: ^3.0.7
 
+  # Fonts
+  google_fonts: ^6.1.0
+
   # Local packages
   artbeat_core:
     path: ../artbeat_core

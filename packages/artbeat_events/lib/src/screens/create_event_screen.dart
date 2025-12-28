@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:logger/logger.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../models/artbeat_event.dart';
 import '../forms/event_form_builder.dart';
 import '../services/event_service.dart';
 import '../services/event_notification_service.dart';
+import '../widgets/world_background.dart';
+import '../widgets/glass_card.dart';
+import '../widgets/gradient_cta_button.dart';
 
 /// Screen for creating new events
 class CreateEventScreen extends StatefulWidget {
@@ -34,18 +38,45 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         }
       },
       child: Scaffold(
-        body: Stack(
-          children: [
-            EventFormBuilder(
-              initialEvent: widget.editEvent,
-              onEventCreated: _handleEventCreated,
-              onCancel: () => Navigator.pop(context),
-              useEnhancedUniversalHeader:
-                  true, // Tell the form builder to use universal header
-              isLoading: _isLoading,
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Navigator.pop(context),
+          ),
+          title: Text(
+            widget.editEvent == null
+                ? 'events_create_event'.tr()
+                : 'events_edit_event'.tr(),
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
             ),
-            if (_isLoading) _buildLoadingOverlay(),
-          ],
+          ),
+        ),
+        body: WorldBackground(
+          child: SafeArea(
+            child: Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: GlassCard(
+                    child: EventFormBuilder(
+                      initialEvent: widget.editEvent,
+                      onEventCreated: _handleEventCreated,
+                      onCancel: () => Navigator.pop(context),
+                      useEnhancedUniversalHeader: true,
+                      isLoading: _isLoading,
+                    ),
+                  ),
+                ),
+                if (_isLoading) _buildLoadingOverlay(),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -53,18 +84,25 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
 
   Widget _buildLoadingOverlay() {
     return Container(
-      color: Colors.black54,
+      color: Colors.black.withValues(alpha: 0.3),
       child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const CircularProgressIndicator(color: Colors.white),
-            const SizedBox(height: 16),
-            Text(
-              'events_creating'.tr(),
-              style: const TextStyle(color: Colors.white, fontSize: 16),
-            ),
-          ],
+        child: GlassCard(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircularProgressIndicator(color: Color(0xFF22D3EE)),
+              const SizedBox(height: 16),
+              Text(
+                'events_creating'.tr(),
+                style: GoogleFonts.spaceGrotesk(
+                  color: Colors.white.withValues(alpha: 0.92),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -137,54 +175,97 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   void _showSuccessDialog(String eventId, bool isEdit) {
     showDialog<void>(
       context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: Text(
-          isEdit ? 'events_updated_title'.tr() : 'events_created_title'.tr(),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              isEdit
-                  ? 'events_updated_success'.tr()
-                  : 'events_created_success'.tr(),
-            ),
-            const SizedBox(height: 16),
-            if (!isEdit) ...[
-              Text('events_next_action'.tr()),
+      barrierColor: Colors.black.withValues(alpha: 0.5),
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: GlassCard(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                isEdit
+                    ? 'events_updated_title'.tr()
+                    : 'events_created_title'.tr(),
+                style: GoogleFonts.spaceGrotesk(
+                  color: Colors.white.withValues(alpha: 0.92),
+                  fontSize: 20,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
               const SizedBox(height: 16),
+              Text(
+                isEdit
+                    ? 'events_updated_success'.tr()
+                    : 'events_created_success'.tr(),
+                style: GoogleFonts.spaceGrotesk(
+                  color: Colors.white.withValues(alpha: 0.7),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 16),
+              if (!isEdit) ...[
+                Text(
+                  'events_next_action'.tr(),
+                  style: GoogleFonts.spaceGrotesk(
+                    color: Colors.white.withValues(alpha: 0.7),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 24),
+              ] else
+                const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  if (!isEdit) ...[
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                        _shareEvent(eventId);
+                      },
+                      child: Text(
+                        'events_share_button'.tr(),
+                        style: GoogleFonts.spaceGrotesk(
+                          color: const Color(0xFF22D3EE),
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                        _viewEvent(eventId);
+                      },
+                      child: Text(
+                        'events_view_button'.tr(),
+                        style: GoogleFonts.spaceGrotesk(
+                          color: const Color(0xFF22D3EE),
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                  ],
+                  GradientCTAButton(
+                    text: 'events_done_button'.tr(),
+                    onPressed: () {
+                      Navigator.pop(context);
+                      Navigator.pop(context);
+                    },
+                    width: 100,
+                  ),
+                ],
+              ),
             ],
-          ],
-        ),
-        actions: [
-          if (!isEdit) ...[
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                Navigator.pop(context);
-                _shareEvent(eventId);
-              },
-              child: Text('events_share_button'.tr()),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                Navigator.pop(context);
-                _viewEvent(eventId);
-              },
-              child: Text('events_view_button'.tr()),
-            ),
-          ],
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.pop(context);
-            },
-            child: Text('events_done_button'.tr()),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -192,15 +273,48 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   void _showErrorDialog(String error) {
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('events_error_title'.tr()),
-        content: Text('${'events_failed_save'.tr()}$error'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+      barrierColor: Colors.black.withValues(alpha: 0.5),
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: GlassCard(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'events_error_title'.tr(),
+                style: GoogleFonts.spaceGrotesk(
+                  color: Colors.white.withValues(alpha: 0.92),
+                  fontSize: 20,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                '${'events_failed_save'.tr()}$error',
+                style: GoogleFonts.spaceGrotesk(
+                  color: Colors.white.withValues(alpha: 0.7),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(
+                    'OK',
+                    style: GoogleFonts.spaceGrotesk(
+                      color: const Color(0xFF22D3EE),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -208,24 +322,65 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   void _showUnsavedChangesDialog() {
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('events_unsaved_changes'.tr()),
-        content: const Text(
-          'You have unsaved changes. Are you sure you want to leave?',
+      barrierColor: Colors.black.withValues(alpha: 0.5),
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: GlassCard(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'events_unsaved_changes'.tr(),
+                style: GoogleFonts.spaceGrotesk(
+                  color: Colors.white.withValues(alpha: 0.92),
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'You have unsaved changes. Are you sure you want to leave?',
+                style: GoogleFonts.spaceGrotesk(
+                  color: Colors.white.withValues(alpha: 0.7),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () =>
+                        Navigator.pop(context), // Close dialog only
+                    child: Text(
+                      'Cancel',
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.white.withValues(alpha: 0.7),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context); // Close dialog
+                      Navigator.pop(context); // Go back
+                    },
+                    child: Text(
+                      'Leave',
+                      style: GoogleFonts.spaceGrotesk(
+                        color: const Color(0xFFFF3D8D),
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context), // Close dialog only
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context); // Close dialog
-              Navigator.pop(context); // Go back
-            },
-            child: const Text('Leave'),
-          ),
-        ],
       ),
     );
   }
@@ -238,6 +393,10 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   }
 
   void _viewEvent(String eventId) {
-    Navigator.pushNamed(context, '/event/$eventId');
+    Navigator.pushNamed(
+      context,
+      '/events/detail',
+      arguments: {'eventId': eventId},
+    );
   }
 }

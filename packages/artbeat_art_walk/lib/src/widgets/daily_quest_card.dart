@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import '../models/challenge_model.dart';
+import 'package:artbeat_art_walk/src/models/challenge_model.dart';
 
 /// Enhanced Daily Quest Card Widget
 /// Displays the current daily challenge with progress, rewards, and time remaining

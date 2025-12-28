@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:artbeat_core/artbeat_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/artbeat_event.dart';
 import '../services/event_service.dart';
 import '../widgets/event_card.dart';
+import '../widgets/glass_kit.dart';
 import '../screens/event_details_screen.dart';
 import '../screens/create_event_screen.dart';
 
 enum EventListMode { all, myEvents, myTickets }
 
-/// Screen for displaying a list of events with filtering and search
 class EventsListScreen extends StatefulWidget {
   final String? title;
-  final String? artistId; // Filter by specific artist
-  final List<String>? tags; // Filter by tags
+  final String? artistId;
+  final List<String>? tags;
   final bool showCreateButton;
   final EventListMode mode;
   final bool showBackButton;
@@ -33,45 +32,42 @@ class EventsListScreen extends StatefulWidget {
   State<EventsListScreen> createState() => _EventsListScreenState();
 }
 
-class _EventsListScreenState extends State<EventsListScreen>
-    with TickerProviderStateMixin {
+class _EventsListScreenState extends State<EventsListScreen> {
   final EventService _eventService = EventService();
   final TextEditingController _searchController = TextEditingController();
   String _selectedCategory = 'All';
-
   List<ArtbeatEvent> _allEvents = [];
   List<ArtbeatEvent> _filteredEvents = [];
   bool _isLoading = true;
   String? _error;
-
-  late TabController _tabController;
   int _currentTabIndex = 0;
-
-  late List<String> _filterTabs;
+  late List<String> _timeFilters;
 
   @override
   void initState() {
     super.initState();
-    _filterTabs = [
-      'events_list_tab_all'.tr(),
-      'events_list_tab_upcoming'.tr(),
-      'events_list_tab_today'.tr(),
-      'events_list_tab_this_week'.tr(),
+    _timeFilters = [
+      'events_list_tabs_all'.tr(),
+      'events_list_tabs_upcoming'.tr(),
+      'events_list_tabs_today'.tr(),
+      'events_list_tabs_week'.tr(),
     ];
-    _tabController = TabController(length: _filterTabs.length, vsync: this);
     _loadEvents();
   }
 
-  Future<void> _refreshEvents() async {
-    await _loadEvents();
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadEvents() async {
-    if (mounted) {
-      setState(() => _isLoading = true);
-    }
-
     try {
+      setState(() {
+        _isLoading = true;
+        _error = null;
+      });
+
       final events = await _eventService.getEvents(
         artistId: widget.artistId,
         tags: widget.tags,
@@ -84,7 +80,6 @@ class _EventsListScreenState extends State<EventsListScreen>
           _allEvents = events;
           _filterEvents();
           _isLoading = false;
-          _error = null;
         });
       }
     } on FirebaseException catch (e) {
@@ -108,17 +103,22 @@ class _EventsListScreenState extends State<EventsListScreen>
     }
   }
 
+  Future<void> _refreshEvents() async {
+    await _loadEvents();
+  }
+
   void _filterEvents() {
     var filtered = List<ArtbeatEvent>.from(_allEvents);
 
-    // Apply category filter
     if (_selectedCategory != 'All') {
       filtered = filtered
-          .where((event) => event.category == _selectedCategory)
+          .where(
+            (event) =>
+                event.category.toLowerCase() == _selectedCategory.toLowerCase(),
+          )
           .toList();
     }
 
-    // Apply search filter
     final searchQuery = _searchController.text.toLowerCase();
     if (searchQuery.isNotEmpty) {
       filtered = filtered
@@ -130,14 +130,13 @@ class _EventsListScreenState extends State<EventsListScreen>
           .toList();
     }
 
-    // Apply tab filter
     switch (_currentTabIndex) {
-      case 1: // Upcoming
+      case 1:
         filtered = filtered
             .where((event) => event.dateTime.isAfter(DateTime.now()))
             .toList();
         break;
-      case 2: // Today
+      case 2:
         final now = DateTime.now();
         filtered = filtered
             .where(
@@ -148,7 +147,7 @@ class _EventsListScreenState extends State<EventsListScreen>
             )
             .toList();
         break;
-      case 3: // This Week
+      case 3:
         final now = DateTime.now();
         final weekEnd = now.add(const Duration(days: 7));
         filtered = filtered
@@ -177,207 +176,218 @@ class _EventsListScreenState extends State<EventsListScreen>
     }
   }
 
-  Widget _buildSearchAndFilter() {
-    final categories = [
-      ('events_list_category_all'.tr(), 'events_list_category_all'),
-      ('events_list_category_art_show'.tr(), 'events_list_category_art_show'),
-      ('events_list_category_workshop'.tr(), 'events_list_category_workshop'),
-      (
-        'events_list_category_exhibition'.tr(),
-        'events_list_category_exhibition',
-      ),
-      (
-        'events_list_category_gallery_opening'.tr(),
-        'events_list_category_gallery_opening',
-      ),
-      ('events_list_category_other'.tr(), 'events_list_category_other'),
-    ];
+  void _selectCategory(String value) {
+    if (mounted) {
+      setState(() {
+        _selectedCategory = value;
+        _filterEvents();
+      });
+    }
+  }
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: Row(
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      floatingActionButton: widget.showCreateButton
+          ? _buildCreateFab(context)
+          : null,
+      body: Stack(
         children: [
-          Expanded(
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'events_list_search_hint'.tr(),
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              onChanged: (_) => _filterEvents(),
+          const WorldBackdrop(),
+          SafeArea(
+            bottom: false,
+            child: Column(
+              children: [
+                _buildHeader(context),
+                Expanded(child: _buildContent()),
+              ],
             ),
-          ),
-          const SizedBox(width: 8),
-          DropdownButton<String>(
-            value: _selectedCategory,
-            items: categories
-                .map(
-                  (category) => DropdownMenuItem(
-                    value: category.$2,
-                    child: Text(category.$1),
-                  ),
-                )
-                .toList(),
-            onChanged: (value) {
-              if (value != null) {
-                setState(() {
-                  _selectedCategory = value;
-                  _filterEvents();
-                });
-              }
-            },
           ),
         ],
       ),
     );
   }
 
-  String _getTitle() {
-    if (widget.title != null) return widget.title!;
-
-    switch (widget.mode) {
-      case EventListMode.all:
-        return 'events_list_title_events'.tr();
-      case EventListMode.myEvents:
-        return 'events_list_title_my_events'.tr();
-      case EventListMode.myTickets:
-        return 'events_list_title_my_tickets'.tr();
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return MainLayout(
-      currentIndex: 4, // Events index
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(kToolbarHeight + 4),
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Color(0xFFE74C3C), // Red
-                Color(0xFF3498DB), // Light Blue
+  Widget _buildHeader(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(18, 4, 18, 14),
+      child: Row(
+        children: [
+          GlassIconButton(
+            icon: widget.showBackButton
+                ? Icons.arrow_back
+                : Icons.explore_outlined,
+            onTap: widget.showBackButton
+                ? () => Navigator.of(context).maybePop()
+                : () => Navigator.pushNamed(context, '/events/discover'),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _getTitle(),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Color(0xF2FFFFFF),
+                    fontSize: 20,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'events_header_subtitle'.tr(),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.6),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ],
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black26,
-                blurRadius: 8,
-                offset: Offset(0, 2),
-              ),
-            ],
           ),
-          child: EnhancedUniversalHeader(
-            title: _getTitle(),
-            showLogo: false,
-            showBackButton: widget.showBackButton,
-            onBackPressed: () => Navigator.of(context).pop(),
-            backgroundColor: Colors.transparent,
-            // Removed foregroundColor to use deep purple default
-            actions: [
-              if (widget.showCreateButton)
-                IconButton(
-                  icon: const Icon(Icons.add),
-                  onPressed: () async {
-                    final result = await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const CreateEventScreen(),
-                        fullscreenDialog: true,
-                      ),
-                    );
-                    if (result == true && mounted) {
-                      _loadEvents();
-                    }
-                  },
-                ),
-            ],
+          const SizedBox(width: 12),
+          GlassIconButton(
+            icon: Icons.search,
+            onTap: () => Navigator.pushNamed(context, '/events/search'),
           ),
-        ),
+        ],
       ),
-      child: Scaffold(backgroundColor: Colors.transparent, body: _buildBody()),
     );
   }
 
-  Widget _buildBody() {
+  Widget _buildContent() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(
+        child: CircularProgressIndicator(color: Color(0xFF22D3EE)),
+      );
     }
 
     if (_error != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(_error!, style: const TextStyle(color: Colors.red)),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _loadEvents,
-              child: Text('events_list_retry'.tr()),
-            ),
-          ],
-        ),
-      );
-    }
-
-    if (_filteredEvents.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _buildEmptyStateIcon(),
-              const SizedBox(height: 24),
-              Text(
-                _getEmptyStateTitle(),
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                _getEmptyStateMessage(),
-                style: const TextStyle(fontSize: 16, color: Colors.grey),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              _buildEmptyStateActions(),
-            ],
-          ),
-        ),
-      );
+      return _buildErrorState();
     }
 
     return RefreshIndicator(
+      color: const Color(0xFF22D3EE),
       onRefresh: _refreshEvents,
+      child: CustomScrollView(
+        physics: const BouncingScrollPhysics(
+          parent: AlwaysScrollableScrollPhysics(),
+        ),
+        slivers: [
+          SliverToBoxAdapter(child: _buildSearchSection()),
+          const SliverToBoxAdapter(child: SizedBox(height: 18)),
+          SliverToBoxAdapter(child: _buildTimeFilters()),
+          if (_filteredEvents.isEmpty)
+            SliverToBoxAdapter(child: _buildEmptyState())
+          else
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(18, 10, 18, 0),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final event = _filteredEvents[index];
+                  return Padding(
+                    padding: EdgeInsets.only(
+                      bottom: index == _filteredEvents.length - 1 ? 0 : 18,
+                    ),
+                    child: EventCard(
+                      event: event,
+                      showTicketInfo: widget.mode == EventListMode.myTickets,
+                      onTap: () => _openEventDetails(event),
+                    ),
+                  );
+                }, childCount: _filteredEvents.length),
+              ),
+            ),
+          const SliverToBoxAdapter(child: SizedBox(height: 120)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchSection() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 18),
       child: Column(
         children: [
-          _buildSearchAndFilter(),
-          TabBar(
-            controller: _tabController,
-            tabs: _filterTabs.map((tab) => Tab(text: tab)).toList(),
-            onTap: _onTabChanged,
+          GlassSurface(
+            radius: 22,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            child: Row(
+              children: [
+                const Icon(Icons.search, color: Color(0xB3FFFFFF), size: 22),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: TextField(
+                    controller: _searchController,
+                    onChanged: (_) => _filterEvents(),
+                    cursorColor: const Color(0xFF22D3EE),
+                    style: const TextStyle(
+                      color: Color(0xF2FFFFFF),
+                      fontWeight: FontWeight.w600,
+                    ),
+                    decoration: InputDecoration(
+                      isCollapsed: true,
+                      border: InputBorder.none,
+                      hintText: 'events_list_search_hint'.tr(),
+                      hintStyle: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.45),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+                if (_searchController.text.isNotEmpty)
+                  IconButton(
+                    icon: const Icon(
+                      Icons.clear,
+                      color: Color(0xB3FFFFFF),
+                      size: 18,
+                    ),
+                    onPressed: () {
+                      _searchController.clear();
+                      _filterEvents();
+                    },
+                  ),
+              ],
+            ),
           ),
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: _filteredEvents.length,
+          const SizedBox(height: 14),
+          SizedBox(
+            height: 42,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: _categoryFilters.length,
+              separatorBuilder: (context, index) => const SizedBox(width: 10),
               itemBuilder: (context, index) {
-                final event = _filteredEvents[index];
-                return EventCard(
-                  event: event,
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => EventDetailsScreen(eventId: event.id),
+                final filter = _categoryFilters[index];
+                final selected = _selectedCategory == filter.value;
+                return GestureDetector(
+                  onTap: () => _selectCategory(filter.value),
+                  child: GlassSurface(
+                    radius: 20,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    fillOpacity: selected ? 0.18 : 0.08,
+                    borderColor: selected
+                        ? const Color(0xFF22D3EE).withValues(alpha: 0.6)
+                        : Colors.white.withValues(alpha: 0.12),
+                    child: Text(
+                      filter.label,
+                      style: TextStyle(
+                        color: selected
+                            ? const Color(0xF2FFFFFF)
+                            : Colors.white.withValues(alpha: 0.75),
+                        fontWeight: FontWeight.w800,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                 );
@@ -389,29 +399,151 @@ class _EventsListScreenState extends State<EventsListScreen>
     );
   }
 
-  /// Build context-appropriate empty state icon
+  Widget _buildTimeFilters() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 18),
+      child: Row(
+        children: List.generate(_timeFilters.length, (index) {
+          final selected = _currentTabIndex == index;
+          return Expanded(
+            child: GestureDetector(
+              onTap: () => _onTabChanged(index),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                margin: EdgeInsets.only(left: index == 0 ? 0 : 10),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(18),
+                  color: selected
+                      ? Colors.white.withValues(alpha: 0.18)
+                      : Colors.white.withValues(alpha: 0.06),
+                  border: Border.all(
+                    color: selected
+                        ? const Color(0xFF22D3EE).withValues(alpha: 0.6)
+                        : Colors.white.withValues(alpha: 0.12),
+                  ),
+                ),
+                child: Text(
+                  _timeFilters[index],
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: selected
+                        ? const Color(0xF2FFFFFF)
+                        : Colors.white.withValues(alpha: 0.7),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(18, 32, 18, 80),
+      child: GlassSurface(
+        radius: 26,
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildEmptyStateIcon(),
+            const SizedBox(height: 18),
+            Text(
+              _getEmptyStateTitle(),
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Color(0xF2FFFFFF),
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              _getEmptyStateMessage(),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.7),
+                fontSize: 14,
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 24),
+            _buildEmptyStateActions(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: GlassSurface(
+          radius: 24,
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.error_outline, color: Colors.white70, size: 48),
+              const SizedBox(height: 12),
+              Text(
+                _error ?? 'Error',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Color(0xF2FFFFFF),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 18),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _loadEvents,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF22D3EE),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                  ),
+                  child: Text('events_list_retry'.tr()),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildEmptyStateIcon() {
     final title = widget.title?.toLowerCase() ?? '';
 
+    IconData icon;
     if (title.contains('near') || title.contains('location')) {
-      return const Icon(Icons.location_on, size: 64, color: Colors.blue);
+      icon = Icons.location_on;
     } else if (title.contains('trending')) {
-      return const Icon(Icons.trending_up, size: 64, color: Colors.orange);
+      icon = Icons.trending_up;
     } else if (title.contains('weekend')) {
-      return const Icon(Icons.calendar_today, size: 64, color: Colors.purple);
+      icon = Icons.calendar_month;
     } else if (title.contains('ticket') ||
         widget.mode == EventListMode.myTickets) {
-      return const Icon(
-        Icons.confirmation_number,
-        size: 64,
-        color: Colors.teal,
-      );
+      icon = Icons.confirmation_number;
     } else {
-      return const Icon(Icons.event_available, size: 64, color: Colors.grey);
+      icon = Icons.event_available;
     }
+
+    return Icon(icon, size: 62, color: Colors.white.withValues(alpha: 0.8));
   }
 
-  /// Get context-appropriate empty state title
   String _getEmptyStateTitle() {
     final title = widget.title?.toLowerCase() ?? '';
 
@@ -429,7 +561,6 @@ class _EventsListScreenState extends State<EventsListScreen>
     }
   }
 
-  /// Get context-appropriate empty state message
   String _getEmptyStateMessage() {
     final title = widget.title?.toLowerCase() ?? '';
 
@@ -447,29 +578,48 @@ class _EventsListScreenState extends State<EventsListScreen>
     }
   }
 
-  /// Build context-appropriate empty state actions
   Widget _buildEmptyStateActions() {
     final title = widget.title?.toLowerCase() ?? '';
 
     if (title.contains('ticket') || widget.mode == EventListMode.myTickets) {
       return Column(
         children: [
-          ElevatedButton.icon(
-            onPressed: () => Navigator.pushReplacementNamed(context, '/events'),
-            icon: const Icon(Icons.explore),
-            label: Text('events_list_discover_events'.tr()),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () =>
+                  Navigator.pushReplacementNamed(context, '/events'),
+              icon: const Icon(Icons.explore),
+              label: Text('events_list_discover_events'.tr()),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF22D3EE),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18),
+                ),
+              ),
             ),
           ),
           const SizedBox(height: 12),
-          OutlinedButton.icon(
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const CreateEventScreen()),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const CreateEventScreen()),
+              ),
+              icon: const Icon(Icons.add),
+              label: Text('events_list_create_event'.tr()),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.white,
+                side: BorderSide(color: Colors.white.withValues(alpha: 0.4)),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18),
+                ),
+              ),
             ),
-            icon: const Icon(Icons.add),
-            label: Text('events_list_create_event'.tr()),
           ),
         ],
       );
@@ -477,28 +627,115 @@ class _EventsListScreenState extends State<EventsListScreen>
       return Column(
         children: [
           if (widget.showCreateButton)
-            ElevatedButton.icon(
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const CreateEventScreen()),
-              ),
-              icon: const Icon(Icons.add),
-              label: Text('events_list_create_event'.tr()),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 12,
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const CreateEventScreen()),
+                ),
+                icon: const Icon(Icons.add),
+                label: Text('events_list_create_event'.tr()),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF7C4DFF),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18),
+                  ),
                 ),
               ),
             ),
-          const SizedBox(height: 12),
-          OutlinedButton.icon(
-            onPressed: () => Navigator.pushReplacementNamed(context, '/events'),
-            icon: const Icon(Icons.refresh),
-            label: Text('events_list_view_all_events'.tr()),
+          if (widget.showCreateButton) const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () =>
+                  Navigator.pushReplacementNamed(context, '/events'),
+              icon: const Icon(Icons.refresh),
+              label: Text('events_list_view_all_events'.tr()),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.white,
+                side: BorderSide(color: Colors.white.withValues(alpha: 0.4)),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18),
+                ),
+              ),
+            ),
           ),
         ],
       );
     }
   }
+
+  Widget _buildCreateFab(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF7C4DFF), Color(0xFF22D3EE), Color(0xFF34D399)],
+        ),
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF7C4DFF).withValues(alpha: 0.3),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: FloatingActionButton.extended(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        icon: const Icon(Icons.add),
+        label: Text('events_create_event'.tr()),
+        onPressed: () async {
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const CreateEventScreen()),
+          );
+          if (result == true) {
+            _loadEvents();
+          }
+        },
+      ),
+    );
+  }
+
+  void _openEventDetails(ArtbeatEvent event) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => EventDetailsScreen(eventId: event.id)),
+    );
+  }
+
+  String _getTitle() {
+    if (widget.title != null) return widget.title!;
+
+    switch (widget.mode) {
+      case EventListMode.all:
+        return 'events_list_title_events'.tr();
+      case EventListMode.myEvents:
+        return 'events_list_title_my_events'.tr();
+      case EventListMode.myTickets:
+        return 'events_list_title_my_tickets'.tr();
+    }
+  }
+
+  List<_CategoryFilter> get _categoryFilters => [
+    _CategoryFilter(value: 'All', label: 'events_all_categories'.tr()),
+    _CategoryFilter(value: 'Exhibition', label: 'events_exhibition'.tr()),
+    _CategoryFilter(value: 'Workshop', label: 'events_workshop'.tr()),
+    _CategoryFilter(value: 'Tour', label: 'events_tour'.tr()),
+    _CategoryFilter(value: 'Concert', label: 'events_concert'.tr()),
+    _CategoryFilter(value: 'Gallery', label: 'events_gallery'.tr()),
+    _CategoryFilter(value: 'Other', label: 'events_other'.tr()),
+  ];
+}
+
+class _CategoryFilter {
+  final String value;
+  final String label;
+
+  const _CategoryFilter({required this.value, required this.label});
 }

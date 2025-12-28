@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:logger/logger.dart';
 import 'package:geolocator/geolocator.dart';
-import '../models/models.dart';
+import 'package:artbeat_art_walk/src/models/models.dart';
 import 'rewards_service.dart';
 
 /// Service for managing art walk progress tracking
