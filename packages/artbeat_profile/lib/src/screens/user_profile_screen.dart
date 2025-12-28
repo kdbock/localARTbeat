@@ -126,11 +126,11 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                               length: 3,
                               child: Column(
                                 children: [
-                                  TabBar(
+                                  const TabBar(
                                     labelColor: Colors.deepPurpleAccent,
                                     unselectedLabelColor: Colors.white70,
                                     indicatorColor: Colors.deepPurpleAccent,
-                                    tabs: const [
+                                    tabs: [
                                       Tab(text: 'Achievements'),
                                       Tab(text: 'Progress'),
                                       Tab(text: 'Favorites'),
@@ -143,7 +143,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                                         DynamicAchievementsTab(userId: user.id),
                                         ProgressTab(userId: user.id),
                                         // TODO: Replace with FavoritesTab or similar
-                                        Center(
+                                        const Center(
                                           child: Text(
                                             'Favorites coming soon',
                                             style: TextStyle(

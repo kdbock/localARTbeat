@@ -14,10 +14,7 @@ import 'event_details_screen.dart';
 class EventDetailsWrapper extends StatefulWidget {
   final String eventId;
 
-  const EventDetailsWrapper({
-    super.key,
-    required this.eventId,
-  });
+  const EventDetailsWrapper({super.key, required this.eventId});
 
   @override
   State<EventDetailsWrapper> createState() => _EventDetailsWrapperState();
@@ -100,16 +97,12 @@ class _EventDetailsWrapperState extends State<EventDetailsWrapper> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error_outline,
-                size: 56, color: Colors.redAccent),
+            const Icon(Icons.error_outline, size: 56, color: Colors.redAccent),
             const SizedBox(height: 14),
             Text(
               _error!,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-              ),
+              style: const TextStyle(color: Colors.white, fontSize: 14),
             ),
             const SizedBox(height: 16),
             TextButton(
@@ -126,16 +119,12 @@ class _EventDetailsWrapperState extends State<EventDetailsWrapper> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.event_busy,
-                size: 56, color: Colors.white70),
+            const Icon(Icons.event_busy, size: 56, color: Colors.white70),
             const SizedBox(height: 14),
             Text(
               'event_wrap_unavailable'.tr(),
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-              ),
+              style: const TextStyle(color: Colors.white, fontSize: 14),
             ),
             const SizedBox(height: 16),
             TextButton(
@@ -166,8 +155,8 @@ class _GlassPanel extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.08),
-            border: Border.all(color: Colors.white.withOpacity(0.14)),
+            color: Colors.white.withValues(alpha: 0.08),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
             borderRadius: BorderRadius.circular(26),
           ),
           child: child,

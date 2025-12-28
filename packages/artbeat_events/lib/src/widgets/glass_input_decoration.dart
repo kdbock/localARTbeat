@@ -10,14 +10,14 @@ InputDecoration glassInputDecoration({
     hintText: hintText,
     isDense: isDense,
     filled: true,
-    fillColor: Colors.white.withOpacity(0.06),
+    fillColor: Colors.white.withValues(alpha: 0.06),
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(22),
-      borderSide: BorderSide(color: Colors.white.withOpacity(0.14)),
+      borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.14)),
     ),
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(22),
-      borderSide: BorderSide(color: Colors.white.withOpacity(0.14)),
+      borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.14)),
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(22),

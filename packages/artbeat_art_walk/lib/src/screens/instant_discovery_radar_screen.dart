@@ -4,8 +4,10 @@ import 'package:geolocator/geolocator.dart';
 import 'package:artbeat_art_walk/src/models/public_art_model.dart';
 import 'package:artbeat_art_walk/src/widgets/instant_discovery_radar.dart';
 import 'package:artbeat_art_walk/src/widgets/discovery_capture_modal.dart';
+import 'package:artbeat_art_walk/src/widgets/world_background.dart';
+import 'package:artbeat_art_walk/src/widgets/hud_top_bar.dart';
 
-/// Full-screen Instant Discovery Radar
+/// Refactored full-screen Instant Discovery Radar with design guide
 class InstantDiscoveryRadarScreen extends StatefulWidget {
   final Position? userPosition;
   final List<PublicArtModel>? initialNearbyArt;
@@ -24,7 +26,7 @@ class InstantDiscoveryRadarScreen extends StatefulWidget {
 class _InstantDiscoveryRadarScreenState
     extends State<InstantDiscoveryRadarScreen> {
   late List<PublicArtModel> _nearbyArt;
-  bool _hasDiscoveries = false;
+  // bool _hasDiscoveries = false;
   Position? _userPosition;
   bool _isLoading = true;
 
@@ -38,16 +40,14 @@ class _InstantDiscoveryRadarScreenState
 
   Future<void> _initializeData() async {
     if (_userPosition == null) {
-      // Get current position if not provided
       try {
         _userPosition = await Geolocator.getCurrentPosition();
       } catch (e) {
-        // Handle location error
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Text(
-                'Unable to get your location. Please check permissions.',
+                'art_walk_instant_discovery_radar_text_location_error'.tr(),
               ),
             ),
           );
@@ -58,8 +58,7 @@ class _InstantDiscoveryRadarScreenState
     }
 
     if (_nearbyArt.isEmpty && _userPosition != null) {
-      // Load nearby art if not provided
-      // This would need the discovery service, but for now we'll keep it empty
+      // Would load from discovery service
     }
 
     if (mounted) {
@@ -86,14 +85,11 @@ class _InstantDiscoveryRadarScreenState
       ),
     );
 
-    // If discovery was captured, remove from list and mark as having discoveries
     if (result == true && mounted) {
       setState(() {
         _nearbyArt.removeWhere((a) => a.id == art.id);
-        _hasDiscoveries = true;
       });
 
-      // If no more art nearby, show message and close
       if (_nearbyArt.isEmpty) {
         await Future<void>.delayed(const Duration(milliseconds: 500));
         if (mounted) {
@@ -106,9 +102,7 @@ class _InstantDiscoveryRadarScreenState
             ),
           );
           await Future<void>.delayed(const Duration(seconds: 2));
-          if (mounted) {
-            Navigator.pop(context, true); // Return true to refresh dashboard
-          }
+          if (mounted) Navigator.pop(context, true);
         }
       }
     }
@@ -120,20 +114,23 @@ class _InstantDiscoveryRadarScreenState
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) async {
-        if (!didPop) {
-          // Return true if discoveries were made to refresh dashboard
-          Navigator.pop(context, _hasDiscoveries);
-        }
-      },
-      child: Scaffold(
-        body: InstantDiscoveryRadar(
-          userPosition: _userPosition!,
-          nearbyArt: _nearbyArt,
-          radiusMeters: 500,
-          onArtTap: _handleArtTap,
+    return WorldBackground(
+      child: SafeArea(
+        child: Stack(
+          children: [
+            InstantDiscoveryRadar(
+              userPosition: _userPosition!,
+              nearbyArt: _nearbyArt,
+              radiusMeters: 500,
+              onArtTap: _handleArtTap,
+            ),
+            const Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: HudTopBar(title: 'art_walk_instant_discovery_radar_title'),
+            ),
+          ],
         ),
       ),
     );

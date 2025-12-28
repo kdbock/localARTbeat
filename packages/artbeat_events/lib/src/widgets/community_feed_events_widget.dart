@@ -72,8 +72,10 @@ class _CommunityFeedEventsWidgetState extends State<CommunityFeedEventsWidget> {
         if (widget.showHeader) _buildHeader(),
         if (_isLoading) _buildLoadingState(),
         if (_error != null) _buildErrorState(),
-        if (!_isLoading && _error == null && _events.isEmpty) _buildEmptyState(),
-        if (!_isLoading && _error == null && _events.isNotEmpty) _buildEventsList(),
+        if (!_isLoading && _error == null && _events.isEmpty)
+          _buildEmptyState(),
+        if (!_isLoading && _error == null && _events.isNotEmpty)
+          _buildEventsList(),
       ],
     );
   }
@@ -146,9 +148,7 @@ class _CommunityFeedEventsWidgetState extends State<CommunityFeedEventsWidget> {
               onPressed: _loadEvents,
               child: Text(
                 'events_retry'.tr(),
-                style: GoogleFonts.spaceGrotesk(
-                  fontWeight: FontWeight.w700,
-                ),
+                style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
               ),
             ),
           ],
@@ -165,14 +165,18 @@ class _CommunityFeedEventsWidgetState extends State<CommunityFeedEventsWidget> {
           padding: const EdgeInsets.all(32),
           child: Column(
             children: [
-              Icon(Icons.event_busy, size: 64, color: Colors.white.withValues(alpha: 0.2)),
+              Icon(
+                Icons.event_busy,
+                size: 64,
+                color: Colors.white.withValues(alpha: 0.2),
+              ),
               const SizedBox(height: 16),
               Text(
                 'events_none'.tr(),
                 style: GoogleFonts.spaceGrotesk(
                   fontSize: 18,
                   fontWeight: FontWeight.w900,
-                  color: Colors.white.withOpacity(0.7),
+                  color: Colors.white.withValues(alpha: 0.7),
                 ),
               ),
               const SizedBox(height: 8),
@@ -182,7 +186,7 @@ class _CommunityFeedEventsWidgetState extends State<CommunityFeedEventsWidget> {
                 style: GoogleFonts.spaceGrotesk(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: Colors.white.withOpacity(0.65),
+                  color: Colors.white.withValues(alpha: 0.65),
                 ),
               ),
             ],

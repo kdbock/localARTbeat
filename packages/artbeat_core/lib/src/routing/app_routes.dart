@@ -186,6 +186,7 @@ class AppRoutes {
 
   // Messaging routes
   static const String messaging = '/messaging';
+  static const String messagingInbox = '/messaging/inbox';
   static const String messagingNew = '/messaging/new';
   static const String messagingChat = '/messaging/chat';
   static const String messagingGroup = '/messaging/group';

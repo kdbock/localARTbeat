@@ -16,17 +16,13 @@ class GlassBottomSheet {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      barrierColor: Colors.black.withOpacity(0.55),
+      barrierColor: Colors.black.withValues(alpha: 0.55),
       builder: (context) {
         final content = Container(
           decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.55),
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(24),
-            ),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.15),
-            ),
+            color: Colors.black.withValues(alpha: 0.55),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
           ),
           child: SafeArea(
             top: false,
@@ -47,11 +43,7 @@ class GlassBottomSheet {
                   ),
 
                   if (isScrollable)
-                    Flexible(
-                      child: SingleChildScrollView(
-                        child: child,
-                      ),
-                    )
+                    Flexible(child: SingleChildScrollView(child: child))
                   else
                     child,
                 ],

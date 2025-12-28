@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 import 'package:artbeat_art_walk/artbeat_art_walk.dart';
-import 'package:artbeat_core/artbeat_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -58,8 +58,8 @@ class _EnhancedArtWalkExperienceScreenState
 
   // Navigation services
   ArtWalkService? _artWalkService;
-  ArtWalkService get artWalkService =>
-      _artWalkService ??= widget.artWalkService ?? context.read<ArtWalkService>();
+  ArtWalkService get artWalkService => _artWalkService ??=
+      widget.artWalkService ?? context.read<ArtWalkService>();
   late ArtWalkNavigationService _navigationService;
   ArtWalkRouteModel? _currentRoute;
 
@@ -1193,30 +1193,10 @@ class _EnhancedArtWalkExperienceScreenState
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return MainLayout(
-        currentIndex: -1,
+      return WorldBackground(
         child: Scaffold(
-          appBar: EnhancedUniversalHeader(
-            title: widget.artWalk.title,
-            showLogo: false,
-            showBackButton: true,
-            backgroundGradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.topRight,
-              colors: [
-                Color(0xFF4FB3BE), // Light Teal
-                Color(0xFFFF9E80), // Light Orange/Peach
-              ],
-            ),
-            titleGradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.topRight,
-              colors: [
-                Color(0xFF4FB3BE), // Light Teal
-                Color(0xFFFF9E80), // Light Orange/Peach
-              ],
-            ),
-          ),
+          backgroundColor: Colors.transparent,
+          appBar: HudTopBar(title: widget.artWalk.title, showBack: true),
           body: const Center(child: CircularProgressIndicator()),
         ),
       );
@@ -1232,195 +1212,162 @@ class _EnhancedArtWalkExperienceScreenState
           Navigator.of(context).pop();
         }
       },
-      child: MainLayout(
-        currentIndex: -1,
+      child: WorldBackground(
         child: Scaffold(
-          appBar:
-              EnhancedUniversalHeader(
-                    title: _buildTitleWithProgress(),
-                    showLogo: false,
-                    showBackButton: true,
-                    backgroundGradient: const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.topRight,
-                      colors: [
-                        Color(0xFF4FB3BE), // Light Teal
-                        Color(0xFFFF9E80), // Light Orange/Peach
-                      ],
+          backgroundColor: Colors.transparent,
+          appBar: HudTopBar(
+            title: _buildTitleWithProgress(),
+            showBack: true,
+            rightAction: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (_isNavigationMode)
+                  IconButton(
+                    icon: Icon(
+                      _showCompactNavigation
+                          ? Icons.expand_more
+                          : Icons.expand_less,
                     ),
-                    titleGradient: const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.topRight,
-                      colors: [
-                        Color(0xFF4FB3BE), // Light Teal
-                        Color(0xFFFF9E80), // Light Orange/Peach
-                      ],
-                    ),
-                    actions: [
-                      if (_isNavigationMode)
-                        IconButton(
-                          icon: Icon(
-                            _showCompactNavigation
-                                ? Icons.expand_more
-                                : Icons.expand_less,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _showCompactNavigation = !_showCompactNavigation;
-                            });
-                          },
+                    onPressed: () {
+                      setState(() {
+                        _showCompactNavigation = !_showCompactNavigation;
+                      });
+                    },
+                  ),
+                IconButton(
+                  icon: const Icon(Icons.info_outline),
+                  onPressed: () {
+                    showDialog<void>(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: Text(
+                          'art_walk_enhanced_art_walk_experience_text_how_to_use'
+                              .tr(),
                         ),
-                      IconButton(
-                        icon: const Icon(Icons.info_outline),
-                        onPressed: () {
-                          showDialog<void>(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: Text(
-                                'art_walk_enhanced_art_walk_experience_text_how_to_use'
-                                    .tr(),
-                              ),
-                              content: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    '• Tap "Start Navigation" for turn-by-turn directions',
-                                  ),
-                                  Text(
-                                    'art_walk_enhanced_art_walk_experience_text_follow_the_blue'
-                                        .tr(),
-                                  ),
-                                  const Text(
-                                    '• Tap markers to view art details',
-                                  ),
-                                  const Text(
-                                    '• Mark art as visited when you reach it',
-                                  ),
-                                  Text(
-                                    'art_walk_enhanced_art_walk_experience_text_green_markers_visited'
-                                        .tr(),
-                                  ),
-                                  const Text(
-                                    '• Orange marker = next destination',
-                                  ),
-                                  Text(
-                                    'art_walk_enhanced_art_walk_experience_text_red_markers_not'
-                                        .tr(),
-                                  ),
-                                  if (_isNavigationMode) ...[
-                                    const SizedBox(height: 8),
-                                    const Text(
-                                      'Navigation Mode:',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const Text(
-                                      '• Follow turn-by-turn instructions',
-                                    ),
-                                    const Text(
-                                      '• Tap expand/collapse button to adjust navigation view',
-                                    ),
-                                  ],
-                                ],
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.of(context).pop(),
-                                  child: Text(
-                                    'art_walk_enhanced_art_walk_experience_text_got_it'
-                                        .tr(),
-                                  ),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('art_walk_info_bullet_1'.tr()),
+                            Text(
+                              'art_walk_enhanced_art_walk_experience_text_follow_the_blue'
+                                  .tr(),
+                            ),
+                            Text('art_walk_info_bullet_3'.tr()),
+                            Text('art_walk_info_bullet_4'.tr()),
+                            Text(
+                              'art_walk_enhanced_art_walk_experience_text_green_markers_visited'
+                                  .tr(),
+                            ),
+                            Text('art_walk_info_bullet_6'.tr()),
+                            Text(
+                              'art_walk_enhanced_art_walk_experience_text_red_markers_not'
+                                  .tr(),
+                            ),
+                            if (_isNavigationMode) ...[
+                              const SizedBox(height: 8),
+                              Text(
+                                'art_walk_navigation_mode_title'.tr(),
+                                style: GoogleFonts.spaceGrotesk(
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.white.withValues(alpha: 0.92),
                                 ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                      PopupMenuButton<String>(
-                        icon: const Icon(Icons.more_vert),
-                        onSelected: _handleMenuAction,
-                        itemBuilder: (context) => [
-                          if (_currentProgress?.status == WalkStatus.inProgress)
-                            PopupMenuItem(
-                              value: 'pause',
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.pause),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'art_walk_enhanced_art_walk_experience_text_pause_walk'
-                                        .tr(),
-                                  ),
-                                ],
                               ),
-                            ),
-                          if (_currentProgress?.status == WalkStatus.paused)
-                            PopupMenuItem(
-                              value: 'resume',
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.play_arrow),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'art_walk_enhanced_art_walk_experience_text_resume_walk'
-                                        .tr(),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          if (_currentProgress?.canComplete == true)
-                            PopupMenuItem(
-                              value: 'complete',
-                              child: Row(
-                                children: [
-                                  const Icon(
-                                    Icons.check_circle,
-                                    color: Colors.green,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'art_walk_enhanced_art_walk_experience_text_complete_walk'
-                                        .tr(),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          PopupMenuItem(
-                            value: 'progress',
-                            child: Row(
-                              children: [
-                                const Icon(Icons.analytics),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'art_walk_enhanced_art_walk_experience_text_view_progress'
-                                      .tr(),
-                                ),
-                              ],
-                            ),
-                          ),
-                          PopupMenuItem(
-                            value: 'abandon',
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.exit_to_app,
-                                  color: Colors.red,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'art_walk_enhanced_art_walk_experience_text_abandon_walk'
-                                      .tr(),
-                                ),
-                              ],
+                              Text('art_walk_navigation_bullet_1'.tr()),
+                              Text('art_walk_navigation_bullet_2'.tr()),
+                            ],
+                          ],
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: Text(
+                              'art_walk_enhanced_art_walk_experience_text_got_it'
+                                  .tr(),
                             ),
                           ),
                         ],
                       ),
-                    ],
-                  )
-                  as PreferredSizeWidget,
+                    );
+                  },
+                ),
+                PopupMenuButton<String>(
+                  icon: const Icon(Icons.more_vert),
+                  onSelected: _handleMenuAction,
+                  itemBuilder: (context) => [
+                    if (_currentProgress?.status == WalkStatus.inProgress)
+                      PopupMenuItem(
+                        value: 'pause',
+                        child: Row(
+                          children: [
+                            const Icon(Icons.pause),
+                            const SizedBox(width: 8),
+                            Text(
+                              'art_walk_enhanced_art_walk_experience_text_pause_walk'
+                                  .tr(),
+                            ),
+                          ],
+                        ),
+                      ),
+                    if (_currentProgress?.status == WalkStatus.paused)
+                      PopupMenuItem(
+                        value: 'resume',
+                        child: Row(
+                          children: [
+                            const Icon(Icons.play_arrow),
+                            const SizedBox(width: 8),
+                            Text(
+                              'art_walk_enhanced_art_walk_experience_text_resume_walk'
+                                  .tr(),
+                            ),
+                          ],
+                        ),
+                      ),
+                    if (_currentProgress?.canComplete == true)
+                      PopupMenuItem(
+                        value: 'complete',
+                        child: Row(
+                          children: [
+                            const Icon(Icons.check_circle, color: Colors.green),
+                            const SizedBox(width: 8),
+                            Text(
+                              'art_walk_enhanced_art_walk_experience_text_complete_walk'
+                                  .tr(),
+                            ),
+                          ],
+                        ),
+                      ),
+                    PopupMenuItem(
+                      value: 'progress',
+                      child: Row(
+                        children: [
+                          const Icon(Icons.analytics),
+                          const SizedBox(width: 8),
+                          Text(
+                            'art_walk_enhanced_art_walk_experience_text_view_progress'
+                                .tr(),
+                          ),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 'abandon',
+                      child: Row(
+                        children: [
+                          const Icon(Icons.exit_to_app, color: Colors.red),
+                          const SizedBox(width: 8),
+                          Text(
+                            'art_walk_enhanced_art_walk_experience_text_abandon_walk'
+                                .tr(),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
           body: Stack(
             children: [
               // Map
@@ -1459,17 +1406,9 @@ class _EnhancedArtWalkExperienceScreenState
                   top: 16,
                   left: 16,
                   right: 16,
-                  child: EnhancedProgressVisualization(
-                    visitedCount: _currentProgress?.visitedArt.length ?? 0,
-                    totalCount:
-                        _currentProgress?.totalArtCount ?? _artPieces.length,
-                    progressPercentage:
-                        _currentProgress?.progressPercentage ?? 0.0,
-                    isNavigationMode: _isNavigationMode,
-                    onTap: () {
-                      // Could expand to show detailed progress or achievements
-                      _hapticService?.buttonPressed();
-                    },
+                  child: ArtProgressCard(
+                    visited: _currentProgress?.visitedArt.length ?? 0,
+                    total: _currentProgress?.totalArtCount ?? _artPieces.length,
                   ),
                 ),
 
@@ -1612,72 +1551,42 @@ class _EnhancedArtWalkExperienceScreenState
                     );
                     debugPrint('🧭 UI State: Building navigation button area');
 
-                    return Container(
-                      color: Colors.red.withValues(
-                        alpha: 0.3,
-                      ), // Temporary debug background
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    return GlassCard(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           if (!_isNavigationMode) ...[
-                            Expanded(
-                              child: ElevatedButton.icon(
-                                onPressed: _isStartingNavigation
-                                    ? null
-                                    : () {
-                                        debugPrint(
-                                          '🧭 Start Navigation button pressed',
-                                        );
-                                        _startNavigation();
-                                      },
-                                icon: _isStartingNavigation
-                                    ? const SizedBox(
-                                        width: 16,
-                                        height: 16,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                                Colors.white,
-                                              ),
-                                        ),
-                                      )
-                                    : const Icon(Icons.navigation),
-                                label: Text(
-                                  _isStartingNavigation
-                                      ? 'Starting...'
-                                      : 'Start Navigation',
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.blue,
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 16,
-                                  ),
-                                ),
-                              ),
+                            GradientCTAButton(
+                              label: _isStartingNavigation
+                                  ? 'art_walk_starting'.tr()
+                                  : 'art_walk_art_walk_detail_text_start_navigation'
+                                        .tr(),
+                              icon: _isStartingNavigation
+                                  ? null
+                                  : Icons.navigation,
+                              onPressed: _isStartingNavigation
+                                  ? null
+                                  : () {
+                                      debugPrint(
+                                        '🧭 Start Navigation button pressed',
+                                      );
+                                      _startNavigation();
+                                    },
+                              loading: _isStartingNavigation,
                             ),
                           ] else ...[
-                            Expanded(
-                              child: ElevatedButton.icon(
-                                onPressed: () {
-                                  debugPrint(
-                                    '🧭 Stop Navigation button pressed',
-                                  );
-                                  _stopNavigation();
-                                },
-                                icon: const Icon(Icons.stop),
-                                label: Text(
+                            GradientCTAButton(
+                              label:
                                   'art_walk_enhanced_art_walk_experience_text_stop_navigation'
                                       .tr(),
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.red,
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 16,
-                                  ),
-                                ),
+                              icon: Icons.stop,
+                              onPressed: () {
+                                debugPrint('🧭 Stop Navigation button pressed');
+                                _stopNavigation();
+                              },
+                              gradient: const LinearGradient(
+                                colors: [Colors.red, Colors.redAccent],
                               ),
                             ),
                           ],
@@ -1698,12 +1607,20 @@ class _EnhancedArtWalkExperienceScreenState
             ],
           ),
           floatingActionButton: _currentPosition != null
-              ? FloatingActionButton(
-                  onPressed: _centerOnUserLocation,
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
-                  tooltip: 'Center on my location',
-                  child: const Icon(Icons.my_location),
+              ? Padding(
+                  padding: const EdgeInsets.only(
+                    bottom: 120,
+                  ), // Above navigation button
+                  child: GlassCard(
+                    borderRadius: 32,
+                    padding: const EdgeInsets.all(12),
+                    child: IconButton(
+                      icon: const Icon(Icons.my_location),
+                      onPressed: _centerOnUserLocation,
+                      iconSize: 28,
+                      color: const Color(0xFF22D3EE), // Teal accent
+                    ),
+                  ),
                 )
               : null,
         ),
@@ -1758,28 +1675,38 @@ class _EnhancedArtWalkExperienceScreenState
 
   Widget _buildWebMapFallback() {
     return Container(
-      color: Colors.grey[100],
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.map_outlined, size: 64, color: Colors.grey[400]),
-            const SizedBox(height: 16),
-            Text(
-              'Enhanced Art Walk',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[600],
+      margin: const EdgeInsets.all(16),
+      child: GlassCard(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.map_outlined,
+                size: 64,
+                color: Colors.white.withValues(alpha: 0.6),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Interactive map features are optimized for mobile devices.\nUse the navigation controls below to explore art pieces.',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, color: Colors.grey[500]),
-            ),
-          ],
+              const SizedBox(height: 16),
+              Text(
+                'art_walk_enhanced_art_walk_experience_title'.tr(),
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.white.withValues(alpha: 0.92),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'art_walk_web_fallback_description'.tr(),
+                textAlign: TextAlign.center,
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white.withValues(alpha: 0.7),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

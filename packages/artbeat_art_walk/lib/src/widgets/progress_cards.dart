@@ -1,11 +1,14 @@
-import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_art_walk/src/models/models.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-/// Card widget for displaying in-progress art walks
+import 'glass_card.dart';
+import 'gradient_cta_button.dart';
+
 class InProgressWalkCard extends StatelessWidget {
   final ArtWalkProgress progress;
   final VoidCallback onResume;
@@ -26,268 +29,98 @@ class InProgressWalkCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      elevation: 2,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    final isPaused = progress.status == WalkStatus.paused;
+    final statusColor = _statusColor(progress.status);
+    final statusLabel = 'art_walk_progress_cards_status_${progress.status.name}'
+        .tr();
+    final primaryLabel = isPaused
+        ? 'art_walk_progress_cards_button_resume'.tr()
+        : 'art_walk_progress_cards_button_pause'.tr();
+    final primaryIcon = isPaused ? Icons.play_arrow : Icons.pause;
+    final piecesLabel = 'art_walk_progress_cards_text_pieces_progress'.tr(
+      namedArgs: {
+        'current': progress.visitedArt.length.toString(),
+        'total': progress.totalArtCount.toString(),
+      },
+    );
+
+    return _WalkCardShell(
+      onTap: onTap,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _HeaderRow(
+            label: statusLabel,
+            color: statusColor,
+            timestamp: _formatLastActive(progress.lastActiveAt),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            (walkTitle?.trim().isNotEmpty ?? false)
+                ? walkTitle!
+                : 'art_walk_progress_cards_text_default_title'.tr(),
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 12),
+          _ProgressSection(
+            label: piecesLabel,
+            progress: progress.progressPercentage,
+            accent: statusColor,
+          ),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
             children: [
-              // Header with status
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _getStatusColor(
-                        progress.status,
-                      ).withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          _getStatusIcon(progress.status),
-                          size: 16,
-                          color: _getStatusColor(progress.status),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          progress.status.displayName,
-                          style: TextStyle(
-                            color: _getStatusColor(progress.status),
-                            fontWeight: FontWeight.w500,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Spacer(),
-                  Text(
-                    _formatLastActive(progress.lastActiveAt),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.onSurface.withValues(alpha: 0.6),
-                    ),
-                  ),
-                ],
+              _InfoChip(
+                icon: Icons.timer,
+                label: _formatDuration(progress.timeSpent),
               ),
-
-              const SizedBox(height: 12),
-
-              // Walk title
-              Text(
-                walkTitle ?? 'Art Walk',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              _InfoChip(
+                icon: Icons.stars,
+                label: 'art_walk_progress_cards_text_points'.tr(
+                  namedArgs: {'points': progress.totalPointsEarned.toString()},
+                ),
               ),
-
-              const SizedBox(height: 8),
-
-              // Progress indicator
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        '${progress.visitedArt.length} of ${progress.totalArtCount} art pieces',
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                      Text(
-                        '${(progress.progressPercentage * 100).round()}%',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  LinearProgressIndicator(
-                    value: progress.progressPercentage,
-                    backgroundColor: Theme.of(
-                      context,
-                    ).colorScheme.surfaceContainerHighest,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      _getStatusColor(progress.status),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 12),
-
-              // Stats row
-              Row(
-                children: [
-                  _buildStatChip(
-                    icon: Icons.timer,
-                    label: _formatDuration(progress.timeSpent),
-                    context: context,
-                  ),
-                  const SizedBox(width: 8),
-                  _buildStatChip(
-                    icon: Icons.stars,
-                    label: '${progress.totalPointsEarned} pts',
-                    context: context,
-                  ),
-                  if (progress.isStale) ...[
-                    const SizedBox(width: 8),
-                    _buildStatChip(
-                      icon: Icons.warning,
-                      label: 'Stale',
-                      context: context,
-                      color: Colors.orange,
-                    ),
-                  ],
-                ],
-              ),
-
-              const SizedBox(height: 16),
-
-              // Action buttons
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: progress.status == WalkStatus.paused
-                          ? onResume
-                          : onPause,
-                      icon: Icon(
-                        progress.status == WalkStatus.paused
-                            ? Icons.play_arrow
-                            : Icons.pause,
-                      ),
-                      label: Text(
-                        progress.status == WalkStatus.paused
-                            ? 'Resume'
-                            : 'Pause',
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _getStatusColor(progress.status),
-                        foregroundColor: Colors.white,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  OutlinedButton.icon(
-                    onPressed: onAbandon,
-                    icon: const Icon(Icons.delete_outline),
-                    label: Text('art_walk_progress_cards_button_abandon'.tr()),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Theme.of(context).colorScheme.error,
-                    ),
-                  ),
-                ],
-              ),
+              if (progress.isStale)
+                _InfoChip(
+                  icon: Icons.warning_amber,
+                  label: 'art_walk_progress_cards_text_stale'.tr(),
+                  color: const Color(0xFFFFC857),
+                ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatChip({
-    required IconData icon,
-    required String label,
-    required BuildContext context,
-    Color? color,
-  }) {
-    final chipColor = color ?? Theme.of(context).colorScheme.primary;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: chipColor.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: chipColor),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: TextStyle(
-              color: chipColor,
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: GradientCTAButton(
+                  label: primaryLabel,
+                  icon: primaryIcon,
+                  onPressed: isPaused ? onResume : onPause,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _OutlinedGlassButton(
+                  label: 'art_walk_progress_cards_button_abandon'.tr(),
+                  icon: Icons.delete_outline,
+                  color: const Color(0xFFFF3D8D),
+                  onPressed: onAbandon,
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
-
-  Color _getStatusColor(WalkStatus status) {
-    switch (status) {
-      case WalkStatus.inProgress:
-        return Colors.green;
-      case WalkStatus.paused:
-        return Colors.orange;
-      case WalkStatus.completed:
-        return Colors.blue;
-      case WalkStatus.abandoned:
-        return Colors.red;
-      case WalkStatus.notStarted:
-        return Colors.grey;
-    }
-  }
-
-  IconData _getStatusIcon(WalkStatus status) {
-    switch (status) {
-      case WalkStatus.inProgress:
-        return Icons.play_circle;
-      case WalkStatus.paused:
-        return Icons.pause_circle;
-      case WalkStatus.completed:
-        return Icons.check_circle;
-      case WalkStatus.abandoned:
-        return Icons.cancel;
-      case WalkStatus.notStarted:
-        return Icons.radio_button_unchecked;
-    }
-  }
-
-  String _formatLastActive(DateTime lastActive) {
-    final now = DateTime.now();
-    final difference = now.difference(lastActive);
-
-    if (difference.inMinutes < 1) {
-      return 'Just now';
-    } else if (difference.inHours < 1) {
-      return '${difference.inMinutes}m ago';
-    } else if (difference.inDays < 1) {
-      return '${difference.inHours}h ago';
-    } else if (difference.inDays < 7) {
-      return '${difference.inDays}d ago';
-    } else {
-      return intl.DateFormat('MMM d').format(lastActive);
-    }
-  }
-
-  String _formatDuration(Duration duration) {
-    if (duration.inHours > 0) {
-      return '${duration.inHours}h ${duration.inMinutes % 60}m';
-    } else {
-      return '${duration.inMinutes}m';
-    }
-  }
 }
 
-/// Card widget for displaying completed art walks
 class CompletedWalkCard extends StatelessWidget {
   final ArtWalkProgress progress;
   final VoidCallback onTap;
@@ -306,195 +139,89 @@ class CompletedWalkCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      elevation: 2,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    final completionDate = progress.completedAt != null
+        ? intl.DateFormat('MMM d, yyyy').format(progress.completedAt!)
+        : '';
+
+    return _WalkCardShell(
+      onTap: onTap,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _HeaderRow(
+            label: 'art_walk_progress_cards_status_completed'.tr(),
+            color: const Color(0xFF34D399),
+            timestamp: completionDate,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            (walkTitle?.trim().isNotEmpty ?? false)
+                ? walkTitle!
+                : 'art_walk_progress_cards_text_default_title'.tr(),
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
             children: [
-              // Header with completion badge
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.green.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.check_circle, size: 16, color: Colors.green),
-                        SizedBox(width: 4),
-                        Text(
-                          'Completed',
-                          style: TextStyle(
-                            color: Colors.green,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Spacer(),
-                  Text(
-                    intl.DateFormat(
-                      'MMM d, yyyy',
-                    ).format(progress.completedAt!),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.onSurface.withValues(alpha: 0.6),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 12),
-
-              // Walk title
-              Text(
-                walkTitle ?? 'Art Walk',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-              ),
-
-              const SizedBox(height: 8),
-
-              // Completion stats
-              Row(
-                children: [
-                  _buildStatChip(
-                    icon: Icons.palette,
-                    label: '${progress.visitedArt.length} pieces',
-                    context: context,
-                  ),
-                  const SizedBox(width: 8),
-                  _buildStatChip(
-                    icon: Icons.timer,
-                    label: _formatDuration(progress.timeSpent),
-                    context: context,
-                  ),
-                  const SizedBox(width: 8),
-                  _buildStatChip(
-                    icon: Icons.stars,
-                    label: '${progress.totalPointsEarned} pts',
-                    context: context,
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 12),
-
-              // Perfect completion indicator
-              if (progress.progressPercentage >= 1.0)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.amber.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: Colors.amber.withValues(alpha: 0.3),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.star, size: 16, color: Colors.amber),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Perfect Walk - All art pieces visited!',
-                        style: TextStyle(
-                          color: Colors.amber.shade700,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
+              _InfoChip(
+                icon: Icons.palette,
+                label: 'art_walk_progress_cards_text_artworks_count'.tr(
+                  namedArgs: {'count': progress.visitedArt.length.toString()},
                 ),
-
-              const SizedBox(height: 16),
-
-              // Action buttons
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: onShare,
-                      icon: const Icon(Icons.share),
-                      label: Text('art_walk_progress_cards_button_share'.tr()),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: onReview,
-                      icon: const Icon(Icons.rate_review),
-                      label: Text('art_walk_progress_cards_button_review'.tr()),
-                    ),
-                  ),
-                ],
+              ),
+              _InfoChip(
+                icon: Icons.timer,
+                label: _formatDuration(progress.timeSpent),
+              ),
+              _InfoChip(
+                icon: Icons.stars,
+                label: 'art_walk_progress_cards_text_points'.tr(
+                  namedArgs: {'points': progress.totalPointsEarned.toString()},
+                ),
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatChip({
-    required IconData icon,
-    required String label,
-    required BuildContext context,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: Theme.of(context).colorScheme.primary),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.primary,
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
+          if (progress.progressPercentage >= 1.0) ...[
+            const SizedBox(height: 12),
+            _InfoBanner(
+              icon: Icons.auto_awesome,
+              color: const Color(0xFFFFC857),
+              label: 'art_walk_progress_cards_text_perfect_walk'.tr(),
             ),
+          ],
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: _OutlinedGlassButton(
+                  label: 'art_walk_progress_cards_button_share'.tr(),
+                  icon: Icons.share,
+                  color: const Color(0xFF22D3EE),
+                  onPressed: onShare,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: GradientCTAButton(
+                  label: 'art_walk_progress_cards_button_review'.tr(),
+                  icon: Icons.rate_review,
+                  onPressed: onReview,
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
-
-  String _formatDuration(Duration duration) {
-    if (duration.inHours > 0) {
-      return '${duration.inHours}h ${duration.inMinutes % 60}m';
-    } else {
-      return '${duration.inMinutes}m';
-    }
-  }
 }
 
-/// Card widget for displaying user-created art walks
 class CreatedWalkCard extends StatelessWidget {
   final ArtWalkModel walk;
   final VoidCallback onTap;
@@ -513,199 +240,111 @@ class CreatedWalkCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      elevation: 2,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    final visibilityLabel = walk.isPublic
+        ? 'art_walk_art_walk_card_chip_public'.tr()
+        : 'art_walk_art_walk_card_chip_private'.tr();
+
+    return _WalkCardShell(
+      onTap: onTap,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              // Header with visibility status
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: walk.isPublic
-                          ? Colors.green.withValues(alpha: 0.1)
-                          : Colors.orange.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          walk.isPublic ? Icons.public : Icons.lock,
-                          size: 16,
-                          color: walk.isPublic ? Colors.green : Colors.orange,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          walk.isPublic ? 'Public' : 'Private',
-                          style: TextStyle(
-                            color: walk.isPublic ? Colors.green : Colors.orange,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Spacer(),
-                  PopupMenuButton<String>(
-                    onSelected: (value) {
-                      switch (value) {
-                        case 'edit':
-                          onEdit();
-                          break;
-                        case 'share':
-                          onShare();
-                          break;
-                        case 'delete':
-                          onDelete();
-                          break;
-                      }
-                    },
-                    itemBuilder: (context) => [
-                      PopupMenuItem(
-                        value: 'edit',
-                        child: Row(
-                          children: [
-                            const Icon(Icons.edit),
-                            const SizedBox(width: 8),
-                            Text('art_walk_progress_cards_text_edit'.tr()),
-                          ],
-                        ),
-                      ),
-                      PopupMenuItem(
-                        value: 'share',
-                        child: Row(
-                          children: [
-                            const Icon(Icons.share),
-                            const SizedBox(width: 8),
-                            Text('art_walk_progress_cards_button_share'.tr()),
-                          ],
-                        ),
-                      ),
-                      const PopupMenuItem(
-                        value: 'delete',
-                        child: Row(
-                          children: [
-                            Icon(Icons.delete, color: Colors.red),
-                            SizedBox(width: 8),
-                            Text('Delete', style: TextStyle(color: Colors.red)),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+              _InfoChip(
+                icon: walk.isPublic ? Icons.public : Icons.lock_outline,
+                label: visibilityLabel,
+                color: walk.isPublic
+                    ? const Color(0xFF34D399)
+                    : const Color(0xFFFFC857),
               ),
-
-              const SizedBox(height: 12),
-
-              // Walk title and description
-              Text(
-                walk.title,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              const Spacer(),
+              _GlassIconButton(
+                icon: Icons.edit,
+                tooltip: 'art_walk_progress_cards_text_edit'.tr(),
+                onTap: onEdit,
               ),
-
-              if (walk.description.isNotEmpty) ...[
-                const SizedBox(height: 4),
-                Text(
-                  walk.description,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onSurface.withValues(alpha: 0.7),
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-
-              const SizedBox(height: 12),
-
-              // Stats
-              Row(
-                children: [
-                  _buildStatChip(
-                    icon: Icons.palette,
-                    label: '${walk.artworkIds.length} pieces',
-                    context: context,
-                  ),
-                  const SizedBox(width: 8),
-                  _buildStatChip(
-                    icon: Icons.people,
-                    label: '${walk.viewCount} views',
-                    context: context,
-                  ),
-                  const SizedBox(width: 8),
-                  FutureBuilder<double>(
-                    future: getAverageRating(walk.id),
-                    builder: (context, snapshot) {
-                      return _buildStatChip(
-                        icon: Icons.star,
-                        label:
-                            snapshot.connectionState == ConnectionState.waiting
-                            ? 'Loading...'
-                            : '${snapshot.data?.toStringAsFixed(1) ?? '0.0'}',
-                        context: context,
-                      );
-                    },
-                  ),
-                ],
+              const SizedBox(width: 8),
+              _GlassIconButton(
+                icon: Icons.share,
+                tooltip: 'art_walk_progress_cards_button_share'.tr(),
+                onTap: onShare,
               ),
-
-              const SizedBox(height: 8),
-
-              // Creation date
-              Text(
-                'Created ${intl.DateFormat('MMM d, yyyy').format(walk.createdAt)}',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.onSurface.withValues(alpha: 0.6),
-                ),
+              const SizedBox(width: 8),
+              _GlassIconButton(
+                icon: Icons.delete_outline,
+                tooltip: 'art_walk_button_delete'.tr(),
+                onTap: onDelete,
+                color: const Color(0xFFFF3D8D),
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatChip({
-    required IconData icon,
-    required String label,
-    required BuildContext context,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: Theme.of(context).colorScheme.primary),
-          const SizedBox(width: 4),
+          const SizedBox(height: 12),
           Text(
-            label,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.primary,
+            walk.title,
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+              color: Colors.white,
+            ),
+          ),
+          if (walk.description.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Text(
+              walk.description,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Colors.white.withValues(alpha: 0.7),
+              ),
+            ),
+          ],
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              _InfoChip(
+                icon: Icons.palette,
+                label: 'art_walk_progress_cards_text_artworks_count'.tr(
+                  namedArgs: {'count': walk.artworkIds.length.toString()},
+                ),
+              ),
+              _InfoChip(
+                icon: Icons.people,
+                label: 'art_walk_progress_cards_text_views'.tr(
+                  namedArgs: {'count': walk.viewCount.toString()},
+                ),
+              ),
+              FutureBuilder<double>(
+                future: getAverageRating(walk.id),
+                builder: (context, snapshot) {
+                  final label =
+                      snapshot.connectionState == ConnectionState.waiting
+                      ? 'art_walk_progress_cards_text_loading'.tr()
+                      : 'art_walk_progress_cards_text_rating'.tr(
+                          namedArgs: {
+                            'rating': (snapshot.data ?? 0.0).toStringAsFixed(1),
+                          },
+                        );
+                  return _InfoChip(icon: Icons.star, label: label);
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'art_walk_progress_cards_text_created_on'.tr(
+              namedArgs: {
+                'date': intl.DateFormat('MMM d, yyyy').format(walk.createdAt),
+              },
+            ),
+            style: GoogleFonts.spaceGrotesk(
               fontSize: 12,
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w600,
+              color: Colors.white.withValues(alpha: 0.6),
             ),
           ),
         ],
@@ -714,7 +353,6 @@ class CreatedWalkCard extends StatelessWidget {
   }
 }
 
-/// Card widget for displaying saved art walks
 class SavedWalkCard extends StatelessWidget {
   final ArtWalkModel walk;
   final VoidCallback onTap;
@@ -731,134 +369,185 @@ class SavedWalkCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      elevation: 2,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return _WalkCardShell(
+      onTap: onTap,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              // Header with bookmark icon
-              Row(
-                children: [
-                  const Icon(Icons.bookmark, color: Colors.blue, size: 20),
-                  const SizedBox(width: 8),
-                  const Text(
-                    'Saved Walk',
-                    style: TextStyle(
-                      color: Colors.blue,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 12,
-                    ),
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    onPressed: onUnsave,
-                    icon: const Icon(Icons.bookmark_remove),
-                    tooltip: 'Remove from saved',
-                  ),
-                ],
-              ),
-
-              // Walk title and description
+              const Icon(Icons.bookmark, color: Color(0xFF22D3EE), size: 20),
+              const SizedBox(width: 8),
               Text(
-                walk.title,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-              ),
-
-              if (walk.description.isNotEmpty) ...[
-                const SizedBox(height: 4),
-                Text(
-                  walk.description,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onSurface.withValues(alpha: 0.7),
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+                'art_walk_progress_cards_text_saved_label'.tr(),
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
                 ),
-              ],
-
-              const SizedBox(height: 12),
-
-              // Stats
-              Row(
-                children: [
-                  _buildStatChip(
-                    icon: Icons.palette,
-                    label: '${walk.artworkIds.length} pieces',
-                    context: context,
-                  ),
-                  const SizedBox(width: 8),
-                  FutureBuilder<double>(
-                    future: getAverageRating(walk.id),
-                    builder: (context, snapshot) {
-                      return _buildStatChip(
-                        icon: Icons.star,
-                        label:
-                            snapshot.connectionState == ConnectionState.waiting
-                            ? 'Loading...'
-                            : '${snapshot.data?.toStringAsFixed(1) ?? '0.0'}',
-                        context: context,
-                      );
-                    },
-                  ),
-                  const SizedBox(width: 8),
-                  _buildStatChip(
-                    icon: Icons.access_time,
-                    label: '${walk.estimatedDuration?.round() ?? 30}min',
-                    context: context,
-                  ),
-                ],
               ),
-
-              const SizedBox(height: 16),
-
-              // Action button
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: onStart,
-                  icon: const Icon(Icons.play_arrow),
-                  label: Text('art_walk_progress_cards_button_start_walk'.tr()),
+              const Spacer(),
+              _GlassIconButton(
+                icon: Icons.bookmark_remove,
+                tooltip: 'art_walk_progress_cards_button_remove_saved'.tr(),
+                onTap: onUnsave,
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            walk.title,
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+              color: Colors.white,
+            ),
+          ),
+          if (walk.description.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Text(
+              walk.description,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Colors.white.withValues(alpha: 0.7),
+              ),
+            ),
+          ],
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              _InfoChip(
+                icon: Icons.palette,
+                label: 'art_walk_progress_cards_text_artworks_count'.tr(
+                  namedArgs: {'count': walk.artworkIds.length.toString()},
+                ),
+              ),
+              FutureBuilder<double>(
+                future: getAverageRating(walk.id),
+                builder: (context, snapshot) {
+                  final label =
+                      snapshot.connectionState == ConnectionState.waiting
+                      ? 'art_walk_progress_cards_text_loading'.tr()
+                      : 'art_walk_progress_cards_text_rating'.tr(
+                          namedArgs: {
+                            'rating': (snapshot.data ?? 0.0).toStringAsFixed(1),
+                          },
+                        );
+                  return _InfoChip(icon: Icons.star, label: label);
+                },
+              ),
+              _InfoChip(
+                icon: Icons.access_time,
+                label: 'art_walk_progress_cards_text_duration_minutes'.tr(
+                  namedArgs: {
+                    'minutes':
+                        walk.estimatedDuration?.round().toString() ?? '30',
+                  },
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 20),
+          GradientCTAButton(
+            label: 'art_walk_progress_cards_button_start_walk'.tr(),
+            icon: Icons.play_arrow,
+            onPressed: onStart,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HeaderRow extends StatelessWidget {
+  final String label;
+  final String timestamp;
+  final Color color;
+
+  const _HeaderRow({
+    required this.label,
+    required this.timestamp,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        _InfoChip(icon: Icons.circle, label: label, color: color),
+        const Spacer(),
+        if (timestamp.isNotEmpty)
+          Text(
+            timestamp,
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: Colors.white.withValues(alpha: 0.6),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _WalkCardShell extends StatelessWidget {
+  final VoidCallback? onTap;
+  final Widget child;
+
+  const _WalkCardShell({this.onTap, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Semantics(
+        button: onTap != null,
+        child: GestureDetector(
+          onTap: onTap,
+          child: GlassCard(
+            borderRadius: 28,
+            padding: const EdgeInsets.all(20),
+            child: child,
           ),
         ),
       ),
     );
   }
+}
 
-  Widget _buildStatChip({
-    required IconData icon,
-    required String label,
-    required BuildContext context,
-  }) {
+class _InfoChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color? color;
+
+  const _InfoChip({required this.icon, required this.label, this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = color ?? Colors.white;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
+        color: accent.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: accent.withValues(alpha: 0.2)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: Theme.of(context).colorScheme.primary),
-          const SizedBox(width: 4),
+          Icon(icon, size: 14, color: accent),
+          const SizedBox(width: 6),
           Text(
             label,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.primary,
+            style: GoogleFonts.spaceGrotesk(
               fontSize: 12,
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w700,
+              color: accent,
             ),
           ),
         ],
@@ -867,7 +556,234 @@ class SavedWalkCard extends StatelessWidget {
   }
 }
 
-// Top-level function to get average rating for a walk
+class _InfoBanner extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+
+  const _InfoBanner({
+    required this.icon,
+    required this.label,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+        color: color.withValues(alpha: 0.12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: color),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProgressSection extends StatelessWidget {
+  final String label;
+  final double progress;
+  final Color accent;
+
+  const _ProgressSection({
+    required this.label,
+    required this.progress,
+    required this.accent,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              label,
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: Colors.white.withValues(alpha: 0.8),
+              ),
+            ),
+            Text(
+              '${(progress * 100).round()}%',
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 13,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: LinearProgressIndicator(
+            value: progress,
+            minHeight: 8,
+            backgroundColor: Colors.white.withValues(alpha: 0.08),
+            valueColor: AlwaysStoppedAnimation<Color>(accent),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _OutlinedGlassButton extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onPressed;
+
+  const _OutlinedGlassButton({
+    required this.label,
+    required this.icon,
+    required this.color,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 52,
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(24),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: color.withValues(alpha: 0.5)),
+            color: Colors.white.withValues(alpha: 0.03),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: color, size: 18),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: color,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _GlassIconButton extends StatelessWidget {
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onTap;
+  final Color? color;
+
+  const _GlassIconButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onTap,
+    this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final tint = color ?? Colors.white;
+    return Tooltip(
+      message: tooltip,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: tint.withValues(alpha: 0.3)),
+            color: tint.withValues(alpha: 0.08),
+          ),
+          child: Icon(icon, size: 18, color: tint),
+        ),
+      ),
+    );
+  }
+}
+
+Color _statusColor(WalkStatus status) {
+  switch (status) {
+    case WalkStatus.inProgress:
+      return const Color(0xFF22D3EE);
+    case WalkStatus.paused:
+      return const Color(0xFFFFC857);
+    case WalkStatus.completed:
+      return const Color(0xFF34D399);
+    case WalkStatus.abandoned:
+      return const Color(0xFFFF3D8D);
+    case WalkStatus.notStarted:
+      return const Color(0xFF94A3B8);
+  }
+}
+
+String _formatLastActive(DateTime lastActive) {
+  final now = DateTime.now();
+  final difference = now.difference(lastActive);
+
+  if (difference.inMinutes < 1) {
+    return 'art_walk_progress_cards_time_just_now'.tr();
+  } else if (difference.inHours < 1) {
+    return 'art_walk_progress_cards_time_minutes_ago'.tr(
+      namedArgs: {'count': difference.inMinutes.toString()},
+    );
+  } else if (difference.inDays < 1) {
+    return 'art_walk_progress_cards_time_hours_ago'.tr(
+      namedArgs: {'count': difference.inHours.toString()},
+    );
+  } else if (difference.inDays < 7) {
+    return 'art_walk_progress_cards_time_days_ago'.tr(
+      namedArgs: {'count': difference.inDays.toString()},
+    );
+  }
+
+  return 'art_walk_progress_cards_time_date'.tr(
+    namedArgs: {'date': intl.DateFormat('MMM d').format(lastActive)},
+  );
+}
+
+String _formatDuration(Duration duration) {
+  if (duration.inHours > 0) {
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes % 60;
+    return 'art_walk_progress_cards_text_duration_hours_minutes'.tr(
+      namedArgs: {'hours': hours.toString(), 'minutes': minutes.toString()},
+    );
+  }
+
+  return 'art_walk_progress_cards_text_duration_minutes'.tr(
+    namedArgs: {'minutes': duration.inMinutes.toString()},
+  );
+}
+
 Future<double> getAverageRating(String walkId) async {
   try {
     final QuerySnapshot snapshot = await FirebaseFirestore.instance

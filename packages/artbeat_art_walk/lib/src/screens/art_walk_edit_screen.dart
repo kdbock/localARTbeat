@@ -1,9 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:artbeat_art_walk/artbeat_art_walk.dart';
+
 import 'package:artbeat_core/artbeat_core.dart';
 
 /// Screen for editing existing art walks
@@ -176,26 +178,49 @@ class _ArtWalkEditScreenState extends State<ArtWalkEditScreen> {
   Future<void> _deleteArtWalk() async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'art_walk_admin_art_walk_moderation_text_delete_art_walk'.tr(),
-        ),
-        content: const Text(
-          'Are you sure you want to delete this art walk? This action cannot be undone.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text('admin_admin_payment_text_cancel'.tr()),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: Text(
-              'admin_modern_unified_admin_dashboard_text_delete'.tr(),
+      builder: (context) => GlassCard(
+        child: AlertDialog(
+          backgroundColor: Colors.transparent,
+          title: Text(
+            'art_walk_admin_art_walk_moderation_text_delete_art_walk'.tr(),
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white.withValues(alpha: 0.92),
+              fontWeight: FontWeight.w900,
+              fontSize: 18,
             ),
           ),
-        ],
+          content: Text(
+            'art_walk_art_walk_edit_delete_confirmation'.tr(),
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white.withValues(alpha: 0.7),
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(
+                'admin_admin_payment_text_cancel'.tr(),
+                style: GoogleFonts.spaceGrotesk(
+                  color: Colors.white.withValues(alpha: 0.92),
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: Text(
+                'admin_modern_unified_admin_dashboard_text_delete'.tr(),
+                style: GoogleFonts.spaceGrotesk(
+                  color: ArtbeatColors.error,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
 
@@ -240,11 +265,9 @@ class _ArtWalkEditScreenState extends State<ArtWalkEditScreen> {
     }
   }
 
-  /// Handle artwork selection from the artwork browse screen
   void _handleArtworkSelection(dynamic selectedArtwork) {
     String artworkId;
 
-    // Handle different return types
     if (selectedArtwork is String) {
       artworkId = selectedArtwork;
     } else if (selectedArtwork is Map<String, dynamic>) {
@@ -252,18 +275,13 @@ class _ArtWalkEditScreenState extends State<ArtWalkEditScreen> {
           (selectedArtwork['id'] ?? selectedArtwork['artworkId'] ?? '')
               as String;
     } else {
-      // debugPrint(
-      //   'Unsupported artwork selection type: ${selectedArtwork.runtimeType}',
-      // );
       return;
     }
 
     if (artworkId.isEmpty) {
-      // debugPrint('No artwork ID provided');
       return;
     }
 
-    // Check if artwork is already in the art walk
     if (_artworkIds.contains(artworkId)) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -274,74 +292,244 @@ class _ArtWalkEditScreenState extends State<ArtWalkEditScreen> {
       return;
     }
 
-    // Add artwork to the art walk
     setState(() {
       _artworkIds.add(artworkId);
     });
 
-    // Show success message
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('art_walk_art_walk_edit_success_artwork_added_to'.tr()),
         duration: const Duration(seconds: 2),
       ),
     );
-
-    // Optional: Save changes immediately
-    _saveChanges();
   }
 
   @override
   Widget build(BuildContext context) {
-    return MainLayout(
-      currentIndex: -1,
-      drawer: const ArtWalkDrawer(),
-      child: Scaffold(
-        appBar: const EnhancedUniversalHeader(
-          title: 'Edit Art Walk',
-          showLogo: false,
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        title: Text(
+          'art_walk_art_walk_edit_text_edit_art_walk'.tr(),
+          style: GoogleFonts.spaceGrotesk(
+            fontWeight: FontWeight.w900,
+            fontSize: 20,
+          ),
         ),
-        body: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : _artWalk == null
-            ? Center(
-                child: Text('art_walk_art_walk_detail_text_art_walk_not'.tr()),
-              )
-            : _buildEditForm(),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
       ),
+      body: WorldBackground(child: SafeArea(child: _buildBody())),
     );
   }
 
-  Widget _buildEditForm() {
+  Widget _buildBody() {
+    if (_isLoading) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(
+                ArtbeatColors.secondaryTeal,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'common_loading'.tr(),
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white.withValues(alpha: 0.92),
+                fontWeight: FontWeight.w700,
+                fontSize: 16,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_artWalk == null) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'art_walk_art_walk_detail_text_art_walk_not'.tr(),
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white.withValues(alpha: 0.92),
+                fontWeight: FontWeight.w900,
+                fontSize: 18,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'art_walk_art_walk_edit_error_error_loading_art'.tr(),
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white.withValues(alpha: 0.7),
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final glassInputDecoration = InputDecoration(
+      filled: true,
+      fillColor: Colors.white.withValues(
+        red: (Colors.white.r * 255.0).round().clamp(0, 255).toDouble(),
+        green: (Colors.white.g * 255.0).round().clamp(0, 255).toDouble(),
+        blue: (Colors.white.b * 255.0).round().clamp(0, 255).toDouble(),
+        alpha: 0.06 * 255,
+      ),
+      labelStyle: GoogleFonts.spaceGrotesk(
+        color: Colors.white.withValues(
+          red: (Colors.white.r * 255.0).round().clamp(0, 255).toDouble(),
+          green: (Colors.white.g * 255.0).round().clamp(0, 255).toDouble(),
+          blue: (Colors.white.b * 255.0).round().clamp(0, 255).toDouble(),
+          alpha: 0.7 * 255,
+        ),
+        fontWeight: FontWeight.w700,
+      ),
+      hintStyle: GoogleFonts.spaceGrotesk(
+        color: Colors.white.withValues(
+          red: (Colors.white.r * 255.0).round().clamp(0, 255).toDouble(),
+          green: (Colors.white.g * 255.0).round().clamp(0, 255).toDouble(),
+          blue: (Colors.white.b * 255.0).round().clamp(0, 255).toDouble(),
+          alpha: 0.45 * 255,
+        ),
+        fontWeight: FontWeight.w600,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(
+          color: Colors.white.withValues(
+            red: (Colors.white.r * 255.0).round().clamp(0, 255).toDouble(),
+            green: (Colors.white.g * 255.0).round().clamp(0, 255).toDouble(),
+            blue: (Colors.white.b * 255.0).round().clamp(0, 255).toDouble(),
+            alpha: 0.1 * 255,
+          ),
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: ArtbeatColors.secondaryTeal),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: ArtbeatColors.error),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: ArtbeatColors.error, width: 2),
+      ),
+    );
+
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      physics: const BouncingScrollPhysics(),
       child: Form(
         key: _formKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Cover image section
             _buildCoverImageSection(),
             const SizedBox(height: 24),
-
-            // Basic information
-            _buildBasicInfoSection(),
+            _buildSectionGlassCard(
+              title: 'art_walk_art_walk_edit_text_basic_information'.tr(),
+              children: [
+                _buildFormField(
+                  decoration: glassInputDecoration,
+                  label: 'art_walk_art_walk_edit_field_title_label'.tr(),
+                  controller: _titleController,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'art_walk_art_walk_edit_error_title_required'.tr();
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                _buildFormField(
+                  decoration: glassInputDecoration,
+                  label: 'art_walk_art_walk_edit_field_description_label'.tr(),
+                  controller: _descriptionController,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'art_walk_art_walk_edit_error_description_required'
+                          .tr();
+                    }
+                    return null;
+                  },
+                  maxLines: 4,
+                ),
+              ],
+            ),
             const SizedBox(height: 24),
-
-            // Location and details
-            _buildLocationAndDetailsSection(),
+            _buildSectionGlassCard(
+              title: 'art_walk_art_walk_edit_text_location_details'.tr(),
+              children: [
+                _buildFormField(
+                  decoration: glassInputDecoration,
+                  label: 'art_walk_art_walk_edit_field_zip_label'.tr(),
+                  hint: 'art_walk_art_walk_edit_field_zip_hint'.tr(),
+                  controller: _zipCodeController,
+                  keyboardType: TextInputType.number,
+                  validator: (value) {
+                    if (value != null && value.isNotEmpty) {
+                      if (value.length != 5 || int.tryParse(value) == null) {
+                        return 'art_walk_art_walk_edit_error_zip_invalid'.tr();
+                      }
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                _buildFormField(
+                  decoration: glassInputDecoration,
+                  label: 'art_walk_art_walk_edit_field_duration_label'.tr(),
+                  hint: 'art_walk_art_walk_edit_field_duration_hint'.tr(),
+                  controller: _estimatedDurationController,
+                  keyboardType: TextInputType.number,
+                  validator: (value) {
+                    if (value != null && value.isNotEmpty) {
+                      final duration = double.tryParse(value);
+                      if (duration == null || duration <= 0) {
+                        return 'art_walk_art_walk_edit_error_duration_invalid'
+                            .tr();
+                      }
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                _buildFormField(
+                  decoration: glassInputDecoration,
+                  label: 'art_walk_art_walk_edit_field_distance_label'.tr(),
+                  hint: 'art_walk_art_walk_edit_field_distance_hint'.tr(),
+                  controller: _estimatedDistanceController,
+                  keyboardType: TextInputType.number,
+                  validator: (value) {
+                    if (value != null && value.isNotEmpty) {
+                      final distance = double.tryParse(value);
+                      if (distance == null || distance <= 0) {
+                        return 'art_walk_art_walk_edit_error_distance_invalid'
+                            .tr();
+                      }
+                    }
+                    return null;
+                  },
+                ),
+              ],
+            ),
             const SizedBox(height: 24),
-
-            // Artwork selection
             _buildArtworkSection(),
             const SizedBox(height: 24),
-
-            // Privacy settings
             _buildPrivacySection(),
             const SizedBox(height: 32),
-
-            // Action buttons
             _buildActionButtons(),
+            const SizedBox(height: 24),
           ],
         ),
       ),
@@ -349,207 +537,168 @@ class _ArtWalkEditScreenState extends State<ArtWalkEditScreen> {
   }
 
   Widget _buildCoverImageSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Cover Image',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 16),
-        Container(
-          height: 200,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade300),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: _newCoverImage != null
-              ? Image.file(_newCoverImage!, fit: BoxFit.cover)
-              : ImageUrlValidator.safeCorrectedNetworkImage(
-                      _artWalk!.coverImageUrl,
-                    ) !=
-                    null
-              ? Image(
-                  image: ImageUrlValidator.safeCorrectedNetworkImage(
-                    _artWalk!.coverImageUrl,
-                  )!,
-                  fit: BoxFit.cover,
-                )
-              : const Icon(Icons.image, size: 64, color: Colors.grey),
-        ),
-        const SizedBox(height: 16),
-        OutlinedButton.icon(
-          onPressed: _pickCoverImage,
-          icon: const Icon(Icons.photo_library),
-          label: Text('art_walk_art_walk_edit_text_change_cover_image'.tr()),
-        ),
-      ],
-    );
-  }
+    final imageWidget = _newCoverImage != null
+        ? Image.file(_newCoverImage!, fit: BoxFit.cover)
+        : ImageUrlValidator.safeCorrectedNetworkImage(
+                _artWalk!.coverImageUrl,
+              ) !=
+              null
+        ? Image(
+            image: ImageUrlValidator.safeCorrectedNetworkImage(
+              _artWalk!.coverImageUrl,
+            )!,
+            fit: BoxFit.cover,
+          )
+        : null;
 
-  Widget _buildBasicInfoSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return _buildSectionGlassCard(
+      title: 'art_walk_art_walk_edit_text_cover_image_label'.tr(),
       children: [
-        const Text(
-          'Basic Information',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: SizedBox(
+            height: 224,
+            width: double.infinity,
+            child: imageWidget ?? _buildImagePlaceholder(),
+          ),
         ),
         const SizedBox(height: 16),
-        TextFormField(
-          controller: _titleController,
-          decoration: const InputDecoration(
-            labelText: 'Title *',
-            border: OutlineInputBorder(),
+        SizedBox(
+          height: 44,
+          child: OutlinedButton.icon(
+            onPressed: _pickCoverImage,
+            icon: const Icon(Icons.photo_library_outlined, size: 20),
+            label: Text(
+              'art_walk_art_walk_edit_text_change_cover_image'.tr(),
+              style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w800),
+            ),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Colors.white.withValues(
+                red: (Colors.white.r * 255.0).round().clamp(0, 255).toDouble(),
+                green: (Colors.white.g * 255.0)
+                    .round()
+                    .clamp(0, 255)
+                    .toDouble(),
+                blue: (Colors.white.b * 255.0).round().clamp(0, 255).toDouble(),
+                alpha: 0.92 * 255,
+              ),
+              side: BorderSide(
+                color: Colors.white.withValues(
+                  red: (Colors.white.r * 255.0)
+                      .round()
+                      .clamp(0, 255)
+                      .toDouble(),
+                  green: (Colors.white.g * 255.0)
+                      .round()
+                      .clamp(0, 255)
+                      .toDouble(),
+                  blue: (Colors.white.b * 255.0)
+                      .round()
+                      .clamp(0, 255)
+                      .toDouble(),
+                  alpha: 0.14 * 255,
+                ),
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(22),
+              ),
+            ),
           ),
-          validator: (value) {
-            if (value == null || value.trim().isEmpty) {
-              return 'Please enter a title';
-            }
-            return null;
-          },
-        ),
-        const SizedBox(height: 16),
-        TextFormField(
-          controller: _descriptionController,
-          decoration: const InputDecoration(
-            labelText: 'Description *',
-            border: OutlineInputBorder(),
-          ),
-          maxLines: 3,
-          validator: (value) {
-            if (value == null || value.trim().isEmpty) {
-              return 'Please enter a description';
-            }
-            return null;
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildLocationAndDetailsSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Location & Details',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 16),
-        TextFormField(
-          controller: _zipCodeController,
-          decoration: const InputDecoration(
-            labelText: 'ZIP Code',
-            hintText: 'e.g., 12345',
-            border: OutlineInputBorder(),
-          ),
-          keyboardType: TextInputType.number,
-          validator: (value) {
-            if (value != null && value.isNotEmpty) {
-              if (value.length != 5 || int.tryParse(value) == null) {
-                return 'Please enter a valid 5-digit ZIP code';
-              }
-            }
-            return null;
-          },
-        ),
-        const SizedBox(height: 16),
-        TextFormField(
-          controller: _estimatedDurationController,
-          decoration: const InputDecoration(
-            labelText: 'Estimated Duration (hours)',
-            hintText: 'e.g., 2.5',
-            border: OutlineInputBorder(),
-          ),
-          keyboardType: TextInputType.number,
-          validator: (value) {
-            if (value != null && value.isNotEmpty) {
-              final duration = double.tryParse(value);
-              if (duration == null || duration <= 0) {
-                return 'Please enter a valid duration';
-              }
-            }
-            return null;
-          },
-        ),
-        const SizedBox(height: 16),
-        TextFormField(
-          controller: _estimatedDistanceController,
-          decoration: const InputDecoration(
-            labelText: 'Estimated Distance (miles)',
-            hintText: 'e.g., 3.2',
-            border: OutlineInputBorder(),
-          ),
-          keyboardType: TextInputType.number,
-          validator: (value) {
-            if (value != null && value.isNotEmpty) {
-              final distance = double.tryParse(value);
-              if (distance == null || distance <= 0) {
-                return 'Please enter a valid distance';
-              }
-            }
-            return null;
-          },
         ),
       ],
     );
   }
 
   Widget _buildArtworkSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return _buildSectionGlassCard(
+      title: 'art_walk_edit_artwork_selection'.tr(),
       children: [
-        const Text(
-          'Artwork Selection',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        Text(
+          'art_walk_edit_selected_artwork'.tr(
+            args: [_artworkIds.length.toString()],
+          ),
+          style: GoogleFonts.spaceGrotesk(
+            color: Colors.white.withValues(
+              red: (Colors.white.r * 255.0).round().clamp(0, 255).toDouble(),
+              green: (Colors.white.g * 255.0).round().clamp(0, 255).toDouble(),
+              blue: (Colors.white.b * 255.0).round().clamp(0, 255).toDouble(),
+              alpha: 0.92 * 255,
+            ),
+            fontWeight: FontWeight.w700,
+            fontSize: 16,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'art_walk_edit_artwork_selection_hint'.tr(),
+          style: GoogleFonts.spaceGrotesk(
+            color: Colors.white.withValues(
+              red: (Colors.white.r * 255.0).round().clamp(0, 255).toDouble(),
+              green: (Colors.white.g * 255.0).round().clamp(0, 255).toDouble(),
+              blue: (Colors.white.b * 255.0).round().clamp(0, 255).toDouble(),
+              alpha: 0.7 * 255,
+            ),
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
+          ),
         ),
         const SizedBox(height: 16),
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade300),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Selected Artwork: ${_artworkIds.length} items',
-                style: const TextStyle(fontWeight: FontWeight.w500),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Use the map or browse features to add artwork to this walk.',
-                style: TextStyle(color: Colors.grey.shade600),
-              ),
-              const SizedBox(height: 16),
-              OutlinedButton.icon(
-                onPressed: () {
-                  // Navigate to artwork selection screen
-                  Navigator.pushNamed(
-                    context,
-                    '/artwork/browse',
-                    arguments: {
-                      'selectionMode': true,
-                      'artWalkId': widget.artWalk?.id,
-                      'onArtworkSelected': (String artworkId) {
-                        // Handle artwork selection
-                        _handleArtworkSelection(artworkId);
-                      },
-                    },
-                  ).then((selectedArtwork) {
-                    // Handle result if artwork was selected
-                    if (selectedArtwork != null) {
-                      _handleArtworkSelection(selectedArtwork);
-                    }
-                  });
+        SizedBox(
+          height: 44,
+          child: OutlinedButton.icon(
+            onPressed: () {
+              Navigator.pushNamed(
+                context,
+                '/artwork/browse',
+                arguments: {
+                  'selectionMode': true,
+                  'artWalkId': widget.artWalk?.id,
+                  'onArtworkSelected': (String artworkId) {
+                    _handleArtworkSelection(artworkId);
+                  },
                 },
-                icon: const Icon(Icons.add),
-                label: Text('art_walk_art_walk_edit_text_add_artwork'.tr()),
+              ).then((selectedArtwork) {
+                if (selectedArtwork != null) {
+                  _handleArtworkSelection(selectedArtwork);
+                }
+              });
+            },
+            icon: const Icon(Icons.add, size: 20),
+            label: Text(
+              'art_walk_art_walk_edit_text_add_artwork'.tr(),
+              style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w800),
+            ),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Colors.white.withValues(
+                red: (Colors.white.r * 255.0).round().clamp(0, 255).toDouble(),
+                green: (Colors.white.g * 255.0)
+                    .round()
+                    .clamp(0, 255)
+                    .toDouble(),
+                blue: (Colors.white.b * 255.0).round().clamp(0, 255).toDouble(),
+                alpha: 0.92 * 255,
               ),
-            ],
+              side: BorderSide(
+                color: Colors.white.withValues(
+                  red: (Colors.white.r * 255.0)
+                      .round()
+                      .clamp(0, 255)
+                      .toDouble(),
+                  green: (Colors.white.g * 255.0)
+                      .round()
+                      .clamp(0, 255)
+                      .toDouble(),
+                  blue: (Colors.white.b * 255.0)
+                      .round()
+                      .clamp(0, 255)
+                      .toDouble(),
+                  alpha: 0.14 * 255,
+                ),
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(22),
+              ),
+            ),
           ),
         ),
       ],
@@ -557,23 +706,47 @@ class _ArtWalkEditScreenState extends State<ArtWalkEditScreen> {
   }
 
   Widget _buildPrivacySection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return _buildSectionGlassCard(
+      title: 'art_walk_edit_privacy_settings'.tr(),
       children: [
-        const Text(
-          'Privacy Settings',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 16),
         SwitchListTile(
-          title: Text('art_walk_art_walk_edit_text_public_art_walk'.tr()),
-          subtitle: Text('art_walk_art_walk_edit_text_make_this_art'.tr()),
+          title: Text(
+            'art_walk_art_walk_edit_text_public_art_walk'.tr(),
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white.withValues(
+                red: (Colors.white.r * 255.0).round().clamp(0, 255).toDouble(),
+                green: (Colors.white.g * 255.0)
+                    .round()
+                    .clamp(0, 255)
+                    .toDouble(),
+                blue: (Colors.white.b * 255.0).round().clamp(0, 255).toDouble(),
+                alpha: 0.92 * 255,
+              ),
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          subtitle: Text(
+            'art_walk_art_walk_edit_text_make_this_art'.tr(),
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white.withValues(
+                red: (Colors.white.r * 255.0).round().clamp(0, 255).toDouble(),
+                green: (Colors.white.g * 255.0)
+                    .round()
+                    .clamp(0, 255)
+                    .toDouble(),
+                blue: (Colors.white.b * 255.0).round().clamp(0, 255).toDouble(),
+                alpha: 0.7 * 255,
+              ),
+            ),
+          ),
           value: _isPublic,
           onChanged: (value) {
             setState(() {
               _isPublic = value;
             });
           },
+          activeThumbColor: ArtbeatColors.secondaryTeal,
+          contentPadding: EdgeInsets.zero,
         ),
       ],
     );
@@ -582,40 +755,128 @@ class _ArtWalkEditScreenState extends State<ArtWalkEditScreen> {
   Widget _buildActionButtons() {
     return Column(
       children: [
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: _isSaving ? null : _saveChanges,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: ArtbeatColors.primary,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-            ),
-            child: _isSaving
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text('admin_admin_user_detail_text_save_changes'.tr()),
-          ),
+        GradientCTAButton(
+          label: 'admin_admin_user_detail_text_save_changes'.tr(),
+          onPressed: _isSaving ? null : _saveChanges,
+          loading: _isSaving,
         ),
         const SizedBox(height: 16),
         SizedBox(
           width: double.infinity,
-          child: OutlinedButton(
+          height: 52,
+          child: TextButton.icon(
             onPressed: _isSaving ? null : _deleteArtWalk,
-            style: OutlinedButton.styleFrom(
-              foregroundColor: Colors.red,
-              side: const BorderSide(color: Colors.red),
-              padding: const EdgeInsets.symmetric(vertical: 16),
-            ),
-            child: Text(
+            icon: const Icon(Icons.delete_outline, color: ArtbeatColors.error),
+            label: Text(
               'art_walk_admin_art_walk_moderation_text_delete_art_walk'.tr(),
+              style: GoogleFonts.spaceGrotesk(
+                color: ArtbeatColors.error,
+                fontWeight: FontWeight.w800,
+                fontSize: 16,
+              ),
+            ),
+            style: TextButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(26),
+              ),
             ),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildImagePlaceholder() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(
+          red: (Colors.black.r * 255.0).round().clamp(0, 255).toDouble(),
+          green: (Colors.black.g * 255.0).round().clamp(0, 255).toDouble(),
+          blue: (Colors.black.b * 255.0).round().clamp(0, 255).toDouble(),
+          alpha: 0.2 * 255,
+        ),
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Center(
+        child: Icon(
+          Icons.image_outlined,
+          color: Colors.white.withValues(
+            red: (Colors.white.r * 255.0).round().clamp(0, 255).toDouble(),
+            green: (Colors.white.g * 255.0).round().clamp(0, 255).toDouble(),
+            blue: (Colors.white.b * 255.0).round().clamp(0, 255).toDouble(),
+            alpha: 0.45 * 255,
+          ),
+          size: 64,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionGlassCard({
+    required String title,
+    required List<Widget> children,
+  }) {
+    return GlassCard(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              title.toUpperCase(),
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 13,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.5,
+                color: Colors.white.withValues(
+                  red: (Colors.white.r * 255.0)
+                      .round()
+                      .clamp(0, 255)
+                      .toDouble(),
+                  green: (Colors.white.g * 255.0)
+                      .round()
+                      .clamp(0, 255)
+                      .toDouble(),
+                  blue: (Colors.white.b * 255.0)
+                      .round()
+                      .clamp(0, 255)
+                      .toDouble(),
+                  alpha: 0.7 * 255,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ...children,
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFormField({
+    required String label,
+    String? hint,
+    required TextEditingController controller,
+    required FormFieldValidator<String> validator,
+    int? maxLines = 1,
+    TextInputType? keyboardType,
+    required InputDecoration decoration,
+  }) {
+    return TextFormField(
+      controller: controller,
+      validator: validator,
+      maxLines: maxLines,
+      keyboardType: keyboardType,
+      style: GoogleFonts.spaceGrotesk(
+        color: Colors.white.withValues(
+          red: (Colors.white.r * 255.0).round().clamp(0, 255).toDouble(),
+          green: (Colors.white.g * 255.0).round().clamp(0, 255).toDouble(),
+          blue: (Colors.white.b * 255.0).round().clamp(0, 255).toDouble(),
+          alpha: 0.92 * 255,
+        ),
+        fontWeight: FontWeight.w600,
+      ),
+      decoration: decoration.copyWith(labelText: label, hintText: hint),
     );
   }
 }

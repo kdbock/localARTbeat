@@ -69,16 +69,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
       child: SafeArea(
         child: Column(
           children: [
-            HudTopBar(
-              title: 'event_calendar_title'.tr(),
-              showBack: true,
-            ),
+            HudTopBar(title: 'event_calendar_title'.tr(), showBack: true),
             Expanded(
               child: _loading
                   ? const Center(child: CircularProgressIndicator())
                   : _error != null
-                      ? _buildError()
-                      : _buildContent(),
+                  ? _buildError()
+                  : _buildContent(),
             ),
           ],
         ),
@@ -182,12 +179,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
   // ---------------- Calendar grid ----------------
 
   Widget _buildCalendarGrid() {
-    final firstOfMonth =
-        DateTime(_focusedMonth.year, _focusedMonth.month);
+    final firstOfMonth = DateTime(_focusedMonth.year, _focusedMonth.month);
 
     final startWeekday = firstOfMonth.weekday;
-    final daysInMonth =
-        DateTime(_focusedMonth.year, _focusedMonth.month + 1, 0).day;
+    final daysInMonth = DateTime(
+      _focusedMonth.year,
+      _focusedMonth.month + 1,
+      0,
+    ).day;
 
     final tiles = <Widget>[];
 
@@ -197,15 +196,17 @@ class _CalendarScreenState extends State<CalendarScreen> {
     }
 
     for (int d = 1; d <= daysInMonth; d++) {
-      final date =
-          DateTime(_focusedMonth.year, _focusedMonth.month, d);
+      final date = DateTime(_focusedMonth.year, _focusedMonth.month, d);
 
-      final hasEvents = _events.any((e) =>
-          e.dateTime.year == date.year &&
-          e.dateTime.month == date.month &&
-          e.dateTime.day == date.day);
+      final hasEvents = _events.any(
+        (e) =>
+            e.dateTime.year == date.year &&
+            e.dateTime.month == date.month &&
+            e.dateTime.day == date.day,
+      );
 
-      final isSelected = _selectedDate != null &&
+      final isSelected =
+          _selectedDate != null &&
           _selectedDate!.year == date.year &&
           _selectedDate!.month == date.month &&
           _selectedDate!.day == date.day;
@@ -306,7 +307,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ),
           ),
           onTap: () {
-            // TODO: navigate to event details if needed
+            Navigator.pushNamed(
+              context,
+              '/events/detail',
+              arguments: {'eventId': event.id},
+            );
           },
         ),
       ),

@@ -1,7 +1,11 @@
-import 'package:flutter/material.dart';
 import 'package:artbeat_art_walk/artbeat_art_walk.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-/// A widget for displaying a single achievement badge
+// ignore: unnecessary_import
+import 'glass_card.dart';
+
 class AchievementBadge extends StatelessWidget {
   final AchievementModel achievement;
   final bool showDetails;
@@ -20,104 +24,197 @@ class AchievementBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final badge = _buildBadge(context);
 
-    final Widget badgeContent = InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(size / 2),
-      child: Stack(
-        clipBehavior: Clip.none,
+    if (!showDetails) return badge;
+
+    return GlassCard(
+      borderRadius: 28,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Badge background
-          Container(
-            width: size,
-            height: size,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: _getBadgeColors(theme),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: theme.colorScheme.primary.withAlpha(76),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Center(
-              child: Icon(
-                _getIconData(),
-                size: size * 0.5,
-                color: Colors.white,
-              ),
+          badge,
+          const SizedBox(height: 12),
+          Text(
+            achievement.title,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
             ),
           ),
-
-          // "New" indicator
-          if (isNew)
-            Positioned(
-              top: -6,
-              right: -6,
-              child: Container(
-                padding: const EdgeInsets.all(4),
-                decoration: const BoxDecoration(
-                  color: Colors.red,
-                  shape: BoxShape.circle,
-                ),
-                child: Text(
-                  '!',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: size / 8,
-                    fontWeight: FontWeight.bold,
-                  ),
+          if (achievement.description.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Text(
+              achievement.description,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Colors.white.withValues(alpha: 0.7),
+              ),
+            ),
+          ],
+          if (achievement.earnedAt.isAfter(
+            DateTime.fromMillisecondsSinceEpoch(0),
+          ))
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                DateFormat('MMM d, yyyy').format(achievement.earnedAt),
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white.withValues(alpha: 0.55),
                 ),
               ),
             ),
         ],
       ),
     );
+  }
 
-    if (!showDetails) {
-      return badgeContent;
-    }
+  Widget _buildBadge(BuildContext context) {
+    final colors = _getBadgeColors();
+    final gradient = LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: colors,
+    );
 
-    // Show with details
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        badgeContent,
-        const SizedBox(height: 8),
-        Text(
-          achievement.title,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-          textAlign: TextAlign.center,
-        ),
-        if (showDetails)
-          Container(
-            margin: const EdgeInsets.only(top: 4),
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Text(
-              achievement.description,
-              style: const TextStyle(fontSize: 12),
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
+    return Semantics(
+      label: achievement.title,
+      button: onTap != null,
+      child: GestureDetector(
+        onTap: onTap,
+        child: SizedBox(
+          width: size,
+          height: size,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeOut,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: gradient,
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.18),
+                    width: 2,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: colors.first.withValues(alpha: 0.35),
+                      blurRadius: 28,
+                      offset: const Offset(0, 12),
+                    ),
+                    BoxShadow(
+                      color: colors.last.withValues(alpha: 0.18),
+                      blurRadius: 40,
+                      spreadRadius: 2,
+                    ),
+                  ],
+                ),
+                child: Stack(
+                  children: [
+                    Center(
+                      child: Icon(
+                        _getIconData(),
+                        size: size * 0.48,
+                        color: Colors.white,
+                      ),
+                    ),
+                    Positioned.fill(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: RadialGradient(
+                            colors: [
+                              Colors.white.withValues(alpha: 0.25),
+                              Colors.transparent,
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (isNew) _buildNewIndicator(),
+            ],
           ),
-      ],
+        ),
+      ),
     );
   }
 
-  /// Get the appropriate icon for this achievement type
-  IconData _getIconData() {
-    final String iconName = achievement.iconName;
+  Positioned _buildNewIndicator() {
+    return Positioned(
+      top: -4,
+      right: -4,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFFFF3D8D), Color(0xFF22D3EE)],
+          ),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0xFFFF3D8D),
+              blurRadius: 12,
+              offset: Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.auto_awesome, size: 14, color: Colors.white),
+            const SizedBox(width: 4),
+            Text(
+              'explore_new'.tr().toUpperCase(),
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 10,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.6,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
-    // Map the string icon name to actual IconData
-    switch (iconName) {
+  List<Color> _getBadgeColors() {
+    switch (achievement.type) {
+      case AchievementType.firstWalk:
+      case AchievementType.artCollector:
+      case AchievementType.photographer:
+      case AchievementType.commentator:
+      case AchievementType.socialButterfly:
+      case AchievementType.curator:
+      case AchievementType.earlyAdopter:
+        return const [Color(0xFFF59E0B), Color(0xFFB45309)];
+      case AchievementType.walkExplorer:
+      case AchievementType.artExpert:
+      case AchievementType.marathonWalker:
+        return const [Color(0xFFCBD5F5), Color(0xFF6B7280)];
+      case AchievementType.walkMaster:
+      case AchievementType.contributor:
+      case AchievementType.masterCurator:
+        return const [Color(0xFF7C4DFF), Color(0xFF22D3EE)];
+    }
+  }
+
+  IconData _getIconData() {
+    switch (achievement.iconName) {
       case 'directions_walk':
         return Icons.directions_walk;
       case 'explore':
@@ -146,33 +243,6 @@ class AchievementBadge extends StatelessWidget {
         return Icons.access_time;
       default:
         return Icons.emoji_events;
-    }
-  }
-
-  /// Get colors for the badge gradient based on achievement type
-  List<Color> _getBadgeColors(ThemeData theme) {
-    switch (achievement.type) {
-      // "First" achievements - bronze
-      case AchievementType.firstWalk:
-      case AchievementType.artCollector:
-      case AchievementType.photographer:
-      case AchievementType.commentator:
-      case AchievementType.socialButterfly:
-      case AchievementType.curator:
-      case AchievementType.earlyAdopter:
-        return [const Color(0xFFCD7F32), const Color(0xFFA05B20)];
-
-      // Mid-level achievements - silver
-      case AchievementType.walkExplorer:
-      case AchievementType.artExpert:
-      case AchievementType.marathonWalker:
-        return [const Color(0xFFC0C0C0), const Color(0xFF8a8a8a)];
-
-      // Advanced achievements - gold
-      case AchievementType.walkMaster:
-      case AchievementType.contributor:
-      case AchievementType.masterCurator:
-        return [const Color(0xFFFFD700), const Color(0xFFB7950B)];
     }
   }
 }

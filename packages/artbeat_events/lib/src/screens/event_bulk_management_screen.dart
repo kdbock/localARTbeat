@@ -20,15 +20,14 @@ class EventBulkManagementScreen extends StatefulWidget {
       _EventBulkManagementScreenState();
 }
 
-class _EventBulkManagementScreenState
-    extends State<EventBulkManagementScreen> {
+class _EventBulkManagementScreenState extends State<EventBulkManagementScreen> {
   final EventBulkManagementService _bulkService = EventBulkManagementService();
 
   List<ArtbeatEvent> _events = [];
   final Set<String> _selectedEventIds = <String>{};
 
   bool _isLoading = true;
-  bool _isPerformingBulkOperation = false;
+  final bool _isPerformingBulkOperation = false;
   String? _errorMessage;
 
   String? _selectedCategory;
@@ -88,8 +87,8 @@ class _EventBulkManagementScreenState
                     child: _isLoading || _isPerformingBulkOperation
                         ? const Center(child: CircularProgressIndicator())
                         : _errorMessage != null
-                            ? _buildErrorWidget()
-                            : _buildEventsList(),
+                        ? _buildErrorWidget()
+                        : _buildEventsList(),
                   ),
                 ],
               ),
@@ -447,265 +446,14 @@ class _EventBulkManagementScreenState
 
   // ---------------- Bulk actions UI -----------------
 
-  void _showBulkActionsMenu() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (_) => GlassCard(
-        child: _buildBulkActionsSheet(),
-      ),
-    );
-  }
-
-  Widget _buildBulkActionsSheet() {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          'event_bulk_bulk_actions'
-              .tr()
-              .replaceFirst('{{count}}', '${_selectedEventIds.length}'),
-          style: GoogleFonts.spaceGrotesk(
-            fontWeight: FontWeight.w800,
-            color: Colors.white,
-          ),
-        ),
-        const SizedBox(height: 10),
-
-        _bulkActionTile(
-          icon: Icons.edit,
-          color: Colors.blue,
-          text: 'event_bulk_update_status'.tr(),
-          onTap: _showStatusUpdateDialog,
-        ),
-
-        _bulkActionTile(
-          icon: Icons.category,
-          color: Colors.green,
-          text: 'event_bulk_assign_category'.tr(),
-          onTap: _showCategoryAssignDialog,
-        ),
-
-        _bulkActionTile(
-          icon: Icons.visibility_off,
-          color: Colors.orange,
-          text: 'event_bulk_make_private'.tr(),
-          onTap: () => _performBulkUpdate({'isPublic': false}),
-        ),
-
-        _bulkActionTile(
-          icon: Icons.visibility,
-          color: Colors.blue,
-          text: 'event_bulk_make_public'.tr(),
-          onTap: () => _performBulkUpdate({'isPublic': true}),
-        ),
-
-        const Divider(color: Colors.white24),
-
-        _bulkActionTile(
-          icon: Icons.delete,
-          color: Colors.red,
-          text: 'event_bulk_delete_events'.tr(),
-          onTap: _confirmBulkDelete,
-        ),
-
-        const SizedBox(height: 10),
-
-        GradientCTAButton(
-          text: 'event_bulk_cancel'.tr(),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ],
-    );
-  }
-
-  Widget _bulkActionTile({
-    required IconData icon,
-    required Color color,
-    required String text,
-    required VoidCallback onTap,
-  }) {
-    return ListTile(
-      leading: Icon(icon, color: color),
-      title: Text(
-        text,
-        style: GoogleFonts.spaceGrotesk(color: Colors.white),
-      ),
-      onTap: () {
-        Navigator.pop(context);
-        onTap();
-      },
-    );
-  }
-
   // ---------------- Dialogs -----------------
 
-  void _showStatusUpdateDialog() {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text('event_bulk_update_status'.tr()),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ...['active', 'inactive', 'cancelled', 'postponed', 'draft'].map(
-              (status) => ListTile(
-                title: Text('event_bulk_$status'.tr()),
-                onTap: () {
-                  Navigator.pop(context);
-                  _performBulkStatusChange(status);
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
-  void _showCategoryAssignDialog() {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text('event_bulk_assign_category'.tr()),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ...['art-show', 'workshop', 'exhibition', 'sale', 'other'].map(
-              (category) {
-                final keyName = category.replaceAll('-', '_');
-                return ListTile(
-                  title: Text('event_bulk_$keyName'.tr()),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _performBulkCategoryAssign(category);
-                  },
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
-  void _confirmBulkDelete() {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text('event_bulk_confirm_delete'.tr()),
-        content: Text(
-          'event_bulk_confirm_delete_message'.tr().replaceFirst(
-                '{{count}}',
-                '${_selectedEventIds.length}',
-              ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('event_bulk_cancel'.tr()),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _performBulkDelete();
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: Text('event_bulk_delete'.tr()),
-          ),
-        ],
-      ),
-    );
-  }
 
   // ---------------- Bulk Ops -----------------
 
-  Future<void> _performBulkUpdate(Map<String, dynamic> updates) async {
-    await _performBulkOperation(
-      'Update',
-      () => _bulkService.bulkUpdateEvents(
-        _selectedEventIds.toList(),
-        updates,
-      ),
-    );
-  }
 
-  Future<void> _performBulkStatusChange(String status) async {
-    await _performBulkOperation(
-      'Status change',
-      () => _bulkService.bulkStatusChange(
-        _selectedEventIds.toList(),
-        status,
-      ),
-    );
-  }
 
-  Future<void> _performBulkCategoryAssign(String category) async {
-    await _performBulkOperation(
-      'Category assignment',
-      () => _bulkService.bulkAssignCategory(
-        _selectedEventIds.toList(),
-        category,
-      ),
-    );
-  }
 
-  Future<void> _performBulkDelete() async {
-    await _performBulkOperation(
-      'Deletion',
-      () => _bulkService.bulkDeleteEvents(
-        _selectedEventIds.toList(),
-      ),
-      shouldReload: true,
-    );
-  }
-
-  Future<void> _performBulkOperation(
-    String operationName,
-    Future<void> Function() operation, {
-    bool shouldReload = false,
-  }) async {
-    setState(() => _isPerformingBulkOperation = true);
-
-    try {
-      await operation();
-
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'event_bulk_success'
-                .tr()
-                .replaceFirst('{{operation}}', operationName),
-          ),
-          backgroundColor: Colors.green,
-        ),
-      );
-
-      setState(_selectedEventIds.clear);
-
-      if (shouldReload) {
-        await _loadEvents();
-      }
-    } on Exception catch (e) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'event_bulk_error'
-                .tr()
-                .replaceAll('{{operation}}', operationName)
-                .replaceFirst('{{error}}', e.toString()),
-          ),
-          backgroundColor: Colors.red,
-        ),
-      );
-    } finally {
-      if (mounted) {
-        setState(() => _isPerformingBulkOperation = false);
-      }
-    }
-  }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_art_walk/artbeat_art_walk.dart';
-import 'package:artbeat_profile/widgets/widgets.dart';
+import 'package:artbeat_art_walk/artbeat_art_walk.dart' as walk;
+import 'package:artbeat_profile/widgets/widgets.dart' as profile_widgets;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
@@ -15,7 +15,7 @@ class AchievementsScreen extends StatefulWidget {
 class _AchievementsScreenState extends State<AchievementsScreen>
     with SingleTickerProviderStateMixin {
   UserModel? _user;
-  List<AchievementModel> _achievements = [];
+  List<walk.AchievementModel> _achievements = [];
   Map<String, dynamic> _userBadges = {};
   List<String> _unviewedBadges = [];
   bool _isLoading = true;
@@ -42,8 +42,8 @@ class _AchievementsScreenState extends State<AchievementsScreen>
 
     try {
       final userService = context.read<UserService>();
-      final achievementService = context.read<AchievementService>();
-      final rewardsService = context.read<RewardsService>();
+      final achievementService = context.read<walk.AchievementService>();
+      final rewardsService = context.read<walk.RewardsService>();
 
       _user = await userService.getCurrentUserModel();
       if (_user != null) {
@@ -64,7 +64,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const WorldBackground(
+      return const profile_widgets.WorldBackground(
         child: SafeArea(child: Center(child: CircularProgressIndicator())),
       );
     }
@@ -73,11 +73,14 @@ class _AchievementsScreenState extends State<AchievementsScreen>
     final achievements = _achievements;
 
     if (user == null) {
-      return const WorldBackground(
+      return const profile_widgets.WorldBackground(
         child: SafeArea(
           child: Column(
             children: [
-              HudTopBar(title: 'Achievements', showBackButton: true),
+              profile_widgets.HudTopBar(
+                title: 'Achievements',
+                showBackButton: true,
+              ),
               Expanded(
                 child: Center(
                   child: Text('Please sign in to view achievements'),
@@ -89,11 +92,14 @@ class _AchievementsScreenState extends State<AchievementsScreen>
       );
     }
 
-    return WorldBackground(
+    return profile_widgets.WorldBackground(
       child: SafeArea(
         child: Column(
           children: [
-            const HudTopBar(title: 'Achievements', showBackButton: true),
+            const profile_widgets.HudTopBar(
+              title: 'Achievements',
+              showBackButton: true,
+            ),
             if (_isInitialized && _tabController != null) ...[
               TabBar(
                 controller: _tabController,
@@ -123,17 +129,17 @@ class _AchievementsScreenState extends State<AchievementsScreen>
 
   Widget _buildAchievementsTab(
     UserModel user,
-    List<AchievementModel> achievements,
+    List<walk.AchievementModel> achievements,
   ) {
     return achievements.isEmpty
-        ? const EmptyState(
+        ? const profile_widgets.EmptyState(
             icon: Icons.emoji_events_outlined,
             message: 'No achievements yet — start exploring art walks!',
           )
         : ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              GlassCard(
+              profile_widgets.GlassCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -147,7 +153,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                       ),
                     ),
                     const SizedBox(height: 12),
-                    XpProgressBar(
+                    profile_widgets.XpProgressBar(
                       currentXp: user.xp,
                       nextLevelXp: user.nextLevelXp,
                     ),
@@ -167,7 +173,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
               ...achievements.map(
                 (a) => Padding(
                   padding: const EdgeInsets.only(bottom: 12),
-                  child: AchievementTile(achievement: a),
+                  child: profile_widgets.AchievementTile(achievement: a),
                 ),
               ),
             ],
@@ -198,9 +204,11 @@ class _AchievementsScreenState extends State<AchievementsScreen>
               mainAxisSpacing: 12,
               childAspectRatio: 0.8,
             ),
-            itemCount: RewardsService.badges.length,
+            itemCount: walk.RewardsService.badges.length,
             itemBuilder: (context, index) {
-              final badgeEntry = RewardsService.badges.entries.elementAt(index);
+              final badgeEntry = walk.RewardsService.badges.entries.elementAt(
+                index,
+              );
               final badgeId = badgeEntry.key;
               final badge = badgeEntry.value;
               final isUnlocked = _userBadges.containsKey(badgeId);

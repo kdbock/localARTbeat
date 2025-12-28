@@ -1,132 +1,202 @@
-import 'package:flutter/material.dart';
 import 'package:artbeat_art_walk/artbeat_art_walk.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
 
-/// Fallback widget displayed when Google Maps cannot be loaded
-///
-/// Features:
-/// - Shows appropriate error message based on connectivity
-/// - Displays cached art pieces count when available offline
-/// - Provides retry functionality to reload the map
-/// - Offers navigation to art walk list when offline data is available
-/// - Visual indicators for offline vs connectivity issues
-///
-/// Usage:
-/// ```dart
-/// OfflineMapFallback(
-///   onRetry: () => _loadMap(),
-///   hasData: _hasCachedData,
-///   errorMessage: 'Map loading failed',
-///   nearbyArt: _cachedArtPieces,
-/// )
-/// ```
 class OfflineMapFallback extends StatelessWidget {
-  /// Callback to retry loading the map
+  static const String _legacyDefaultError = 'Unable to load map';
+
   final VoidCallback onRetry;
-
-  /// Whether cached data is available for offline use
   final bool hasData;
-
-  /// Custom error message to display
   final String errorMessage;
-
-  /// List of nearby art pieces available offline
   final List<PublicArtModel> nearbyArt;
 
   const OfflineMapFallback({
     super.key,
     required this.onRetry,
     this.hasData = false,
-    this.errorMessage = 'Unable to load map',
+    this.errorMessage = _legacyDefaultError,
     this.nearbyArt = const [],
   });
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Use a stack to create a combined map and offline icon
-            SizedBox(
-              height: 64,
-              width: 64,
-              child: Stack(
-                alignment: Alignment.center,
+    final cachedCount = hasData ? nearbyArt.length : 0;
+    final hasCachedArt = hasData && cachedCount > 0;
+    final titleKey = hasCachedArt
+        ? 'art_walk_offline_map_fallback_title_offline'
+        : 'art_walk_offline_map_fallback_title_error';
+    final helperKey = hasCachedArt
+        ? 'art_walk_offline_map_fallback_helper_offline'
+        : 'art_walk_offline_map_fallback_helper_error';
+    final statusChipLabel = hasCachedArt
+        ? 'art_walk_offline_map_fallback_chip_cached_art'.tr(
+            namedArgs: {'count': cachedCount.toString()},
+          )
+        : 'art_walk_offline_map_fallback_chip_empty'.tr();
+    final statusIcon = hasCachedArt ? Icons.offline_pin : Icons.cloud_off;
+    final description = hasCachedArt
+        ? 'art_walk_offline_map_fallback_description_offline'.tr(
+            namedArgs: {'count': cachedCount.toString()},
+          )
+        : _resolveErrorDescription();
+
+    return WorldBackground(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: GlassCard(
+            borderRadius: 32,
+            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const Icon(
-                    Icons.map, // Always show map as the base icon
-                    size: 64,
-                    color: Colors.grey,
+                  _OfflineMapBadge(hasCachedArt: hasCachedArt),
+                  const SizedBox(height: 24),
+                  Text(
+                    titleKey.tr(),
+                    textAlign: TextAlign.center,
+                    style: AppTypography.screenTitle(),
                   ),
-                  if (!hasData)
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: Container(
-                        padding: const EdgeInsets.all(2),
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.signal_wifi_off,
-                          size: 24,
-                          color: Colors.red,
-                        ),
-                      ),
+                  const SizedBox(height: 12),
+                  Text(
+                    description,
+                    textAlign: TextAlign.center,
+                    style: AppTypography.body(
+                      Colors.white.withValues(alpha: 0.85),
                     ),
+                  ),
+                  const SizedBox(height: 16),
+                  _StatusChip(label: statusChipLabel, icon: statusIcon),
+                  const SizedBox(height: 24),
+                  GradientCTAButton(
+                    label: 'art_walk_button_try_again'.tr(),
+                    icon: Icons.refresh,
+                    onPressed: onRetry,
+                  ),
+                  if (hasCachedArt) ...[
+                    const SizedBox(height: 16),
+                    GlassSecondaryButton(
+                      label:
+                          'art_walk_offline_map_fallback_text_view_art_walk_list'
+                              .tr(),
+                      icon: Icons.list_alt,
+                      onTap: () {
+                        Navigator.pushNamed(context, '/art-walk/list');
+                      },
+                    ),
+                  ],
+                  const SizedBox(height: 16),
+                  Text(
+                    helperKey.tr(),
+                    textAlign: TextAlign.center,
+                    style: AppTypography.helper(),
+                  ),
                 ],
               ),
             ),
-            const SizedBox(height: 20),
-            Text(
-              hasData ? 'Map unavailable while offline' : errorMessage,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              hasData && nearbyArt.isNotEmpty
-                  ? 'You have ${nearbyArt.length} cached art pieces available.\nSome features may be limited in offline mode.'
-                  : 'Please check your internet connection and try again.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey[600], fontSize: 14),
-            ),
-            const SizedBox(height: 24),
-            if (hasData && nearbyArt.isNotEmpty) ...[
-              ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/art-walk/list');
-                },
-                icon: const Icon(Icons.list_alt),
-                label: Text(
-                  'art_walk_offline_map_fallback_text_view_art_walk_list'.tr(),
-                ),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-            ],
-            OutlinedButton.icon(
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh),
-              label: Text('art_walk_button_try_again'.tr()),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 12,
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
+      ),
+    );
+  }
+
+  String _resolveErrorDescription() {
+    final trimmed = errorMessage.trim();
+    if (trimmed.isNotEmpty && trimmed != _legacyDefaultError) {
+      return trimmed;
+    }
+    return 'art_walk_offline_map_fallback_description_error'.tr();
+  }
+}
+
+class _OfflineMapBadge extends StatelessWidget {
+  final bool hasCachedArt;
+
+  const _OfflineMapBadge({required this.hasCachedArt});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 96,
+      width: 96,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Container(
+            width: 96,
+            height: 96,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFF7C4DFF), Color(0xFF22D3EE)],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0x5522D3EE),
+                  blurRadius: 32,
+                  offset: Offset(0, 18),
+                ),
+              ],
+            ),
+            child: const Icon(
+              Icons.map_outlined,
+              color: Colors.white,
+              size: 42,
+            ),
+          ),
+          Positioned(
+            bottom: 8,
+            right: 8,
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: hasCachedArt
+                    ? const Color(0xFF34D399)
+                    : Colors.redAccent.withValues(alpha: 0.9),
+                border: Border.all(color: Colors.white, width: 3),
+              ),
+              child: Icon(
+                hasCachedArt ? Icons.offline_pin : Icons.signal_wifi_off,
+                color: Colors.white,
+                size: 20,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatusChip extends StatelessWidget {
+  final String label;
+  final IconData icon;
+
+  const _StatusChip({required this.label, required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: Colors.white, size: 18),
+          const SizedBox(width: 8),
+          Text(label, style: AppTypography.badge()),
+        ],
       ),
     );
   }

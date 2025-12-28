@@ -1,5 +1,9 @@
+import 'package:artbeat_art_walk/src/widgets/glass_card.dart';
+import 'package:artbeat_art_walk/src/widgets/typography.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class CommentTile extends StatelessWidget {
   final String authorName;
@@ -31,127 +35,191 @@ class CommentTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-        left: 16.0,
-        right: 16.0,
-        top: 8.0,
-        bottom: isReply ? 0.0 : 8.0,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+    final body = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _AvatarBadge(photoUrl: authorPhotoUrl, isReply: isReply),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    authorName,
+                    style: GoogleFonts.spaceGrotesk(
+                      fontSize: isReply ? 13 : 15,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Text(
+                    timeAgo,
+                    style: GoogleFonts.spaceGrotesk(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white.withValues(alpha: 0.6),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (onDelete != null)
+              IconButton(
+                onPressed: onDelete,
+                iconSize: 18,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                icon: const Icon(Icons.delete_outline),
+                color: const Color(0xFFFF3D8D),
+              ),
+          ],
+        ),
+        if (rating != null && !isReply) ...[
+          const SizedBox(height: 10),
           Row(
-            children: [
-              // Author avatar
-              CircleAvatar(
-                radius: isReply ? 14.0 : 18.0,
-                backgroundColor: Colors.grey.shade300,
-                backgroundImage: ImageUrlValidator.safeNetworkImage(
-                  authorPhotoUrl,
+            children: List.generate(5, (index) {
+              final filled = rating! >= index + 1;
+              return Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: Icon(
+                  filled ? Icons.star_rounded : Icons.star_border_rounded,
+                  size: 18,
+                  color: const Color(0xFFFFC857),
                 ),
-                child: !ImageUrlValidator.isValidImageUrl(authorPhotoUrl)
-                    ? Icon(
-                        Icons.person,
-                        size: isReply ? 16.0 : 20.0,
-                        color: Colors.grey.shade700,
-                      )
-                    : null,
-              ),
-              const SizedBox(width: 8),
-
-              // Author name and timestamp
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      authorName,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w500,
-                        fontSize: isReply ? 12.0 : 14.0,
-                      ),
-                    ),
-                    Text(
-                      timeAgo,
-                      style: TextStyle(
-                        color: Colors.grey.shade600,
-                        fontSize: isReply ? 10.0 : 12.0,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // Delete option for author
-              if (onDelete != null)
-                IconButton(
-                  icon: const Icon(Icons.delete_outline, size: 18),
-                  onPressed: onDelete,
-                  color: Colors.red,
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
-            ],
-          ),
-
-          // Rating (only for top-level comments)
-          if (rating != null && !isReply)
-            Padding(
-              padding: const EdgeInsets.only(top: 4.0, left: 44.0),
-              child: Row(
-                children: List.generate(5, (index) {
-                  return Icon(
-                    index < rating! ? Icons.star : Icons.star_border,
-                    size: 16,
-                    color: Colors.amber,
-                  );
-                }),
-              ),
-            ),
-
-          // Comment content
-          Padding(
-            padding: const EdgeInsets.only(top: 4.0, left: 44.0),
-            child: Text(content),
-          ),
-
-          // Action buttons
-          Padding(
-            padding: const EdgeInsets.only(top: 4.0, left: 44.0),
-            child: Row(
-              children: [
-                // Like button
-                TextButton.icon(
-                  icon: const Icon(Icons.thumb_up, size: 14),
-                  label: Text(
-                    likeCount > 0 ? likeCount.toString() : 'Like',
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  onPressed: onLike,
-                ),
-
-                // Reply button for top-level comments
-                if (onReply != null && !isReply)
-                  TextButton.icon(
-                    icon: const Icon(Icons.reply, size: 14),
-                    label: const Text('Reply', style: TextStyle(fontSize: 12)),
-                    style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    onPressed: onReply,
-                  ),
-              ],
-            ),
+              );
+            }),
           ),
         ],
+        const SizedBox(height: 10),
+        Text(
+          content,
+          style: AppTypography.body(
+            Colors.white.withValues(alpha: 0.9),
+          ),
+        ),
+        const SizedBox(height: 14),
+        Row(
+          children: [
+            _ActionChip(
+              icon: Icons.thumb_up_alt,
+              label: likeCount > 0
+                  ? likeCount.toString()
+                  : 'art_walk_comment_section_button_like'.tr(),
+              onTap: onLike,
+            ),
+            if (onReply != null && !isReply) ...[
+              const SizedBox(width: 12),
+              _ActionChip(
+                icon: Icons.reply,
+                label: 'art_walk_comment_section_button_reply'.tr(),
+                onTap: onReply!,
+              ),
+            ],
+          ],
+        ),
+      ],
+    );
+
+    if (isReply) {
+      return Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(22),
+          color: Colors.white.withValues(alpha: 0.04),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+        ),
+        padding: const EdgeInsets.all(16),
+        child: body,
+      );
+    }
+
+    return GlassCard(
+      borderRadius: 28,
+      padding: const EdgeInsets.all(18),
+      child: body,
+    );
+  }
+}
+
+class _ActionChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _ActionChip({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            color: Colors.white.withValues(alpha: 0.06),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 16, color: Colors.white.withValues(alpha: 0.85)),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AvatarBadge extends StatelessWidget {
+  final String? photoUrl;
+  final bool isReply;
+
+  const _AvatarBadge({required this.photoUrl, required this.isReply});
+
+  @override
+  Widget build(BuildContext context) {
+    final image = ImageUrlValidator.safeNetworkImage(photoUrl);
+
+    return Container(
+      padding: const EdgeInsets.all(2),
+      decoration: const BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF7C4DFF), Color(0xFF22D3EE)],
+        ),
+      ),
+      child: CircleAvatar(
+        radius: isReply ? 16 : 20,
+        backgroundColor: Colors.black.withValues(alpha: 0.4),
+        backgroundImage: image,
+        child: image == null
+            ? Icon(
+                Icons.person,
+                size: isReply ? 16 : 20,
+                color: Colors.white.withValues(alpha: 0.8),
+              )
+            : null,
       ),
     );
   }

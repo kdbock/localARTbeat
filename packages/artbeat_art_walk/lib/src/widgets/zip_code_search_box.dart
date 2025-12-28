@@ -1,3 +1,9 @@
+import 'package:artbeat_art_walk/src/widgets/glass_card.dart';
+import 'package:artbeat_art_walk/src/widgets/glass_secondary_button.dart';
+import 'package:artbeat_art_walk/src/widgets/gradient_cta_button.dart';
+import 'package:artbeat_art_walk/src/widgets/typography.dart';
+import 'package:artbeat_art_walk/src/widgets/world_background.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -44,69 +50,112 @@ class _ZipCodeSearchBoxState extends State<ZipCodeSearchBox> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: const [
-          BoxShadow(
-            color: Color.fromRGBO(0, 0, 0, 0.1),
-            spreadRadius: 1,
-            blurRadius: 4,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _controller,
-              decoration: InputDecoration(
-                hintText: 'Enter ZIP code',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: widget.isLoading
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                      )
-                    : null,
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 14,
+    return WorldBackground(
+      withBlobs: false,
+      child: GlassCard(
+        borderRadius: 32,
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'art_walk_zip_code_search_box_title'.tr(),
+              style: AppTypography.screenTitle(),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'art_walk_zip_code_search_box_helper'.tr(),
+              style: AppTypography.helper(),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(24),
+                color: const Color(0xFFFFFFFF).withValues(
+                  red: 255.0,
+                  green: 255.0,
+                  blue: 255.0,
+                  alpha: (0.04 * 255),
+                ),
+                border: Border.all(
+                  color: const Color(0xFFFFFFFF).withValues(
+                    red: 255.0,
+                    green: 255.0,
+                    blue: 255.0,
+                    alpha: (0.12 * 255),
+                  ),
                 ),
               ),
-              keyboardType: TextInputType.number,
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-                LengthLimitingTextInputFormatter(5),
-              ],
-              onSubmitted: widget.onZipCodeSubmitted,
-            ),
-          ),
-          if (!widget.isLoading)
-            Container(
-              margin: const EdgeInsets.only(right: 8),
-              child: IconButton(
-                onPressed: () {
-                  if (_controller.text.isNotEmpty) {
-                    widget.onZipCodeSubmitted(_controller.text);
-                    // Navigate to art walk map after submitting zip code
-                    widget.onNavigateToMap?.call();
-                  }
-                },
-                icon: const Icon(Icons.arrow_forward),
-                tooltip: 'Go to Art Walk Map',
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.location_on,
+                    color: Colors.white70,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      controller: _controller,
+                      style: AppTypography.body(),
+                      decoration: InputDecoration(
+                        hintText: 'art_walk_zip_code_search_box_hint'.tr(),
+                        hintStyle: AppTypography.helper(
+                          const Color(0xFFFFFFFF).withValues(
+                            red: 255.0,
+                            green: 255.0,
+                            blue: 255.0,
+                            alpha: (0.7 * 255),
+                          ),
+                        ),
+                        border: InputBorder.none,
+                      ),
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(5),
+                      ],
+                      onSubmitted: (_) => _submit(),
+                    ),
+                  ),
+                  if (widget.isLoading)
+                    const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 3,
+                        valueColor: AlwaysStoppedAnimation(Color(0xFF22D3EE)),
+                      ),
+                    ),
+                ],
               ),
             ),
-        ],
+            const SizedBox(height: 16),
+            GradientCTAButton(
+              label: 'art_walk_zip_code_search_box_button_submit'.tr(),
+              icon: Icons.location_searching,
+              onPressed: widget.isLoading ? null : _submit,
+            ),
+            if (widget.onNavigateToMap != null) ...[
+              const SizedBox(height: 12),
+              GlassSecondaryButton(
+                label: 'art_walk_zip_code_search_box_button_map'.tr(),
+                icon: Icons.map_outlined,
+                onTap: widget.onNavigateToMap!,
+              ),
+            ],
+          ],
+        ),
       ),
     );
+  }
+
+  void _submit() {
+    final zip = _controller.text.trim();
+    if (zip.length == 5) {
+      widget.onZipCodeSubmitted(zip);
+      widget.onNavigateToMap?.call();
+    }
   }
 }

@@ -1,12 +1,16 @@
+// lib/src/widgets/social_activity_feed.dart
+
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:geolocator/geolocator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_art_walk/src/services/social_service.dart';
-import 'package:artbeat_art_walk/src/theme/art_walk_design_system.dart';
+import 'package:artbeat_art_walk/src/widgets/glass_card.dart';
+import 'package:artbeat_art_walk/src/widgets/typography.dart';
 
-/// Widget for displaying a feed of social activities
 class SocialActivityFeed extends StatefulWidget {
   final Position? userPosition;
   final int maxItems;
@@ -50,7 +54,6 @@ class _SocialActivityFeedState extends State<SocialActivityFeed> {
         limit: widget.maxItems,
       );
 
-      // If we have activities, use them
       if (activities.isNotEmpty) {
         if (mounted) {
           setState(() {
@@ -61,40 +64,29 @@ class _SocialActivityFeedState extends State<SocialActivityFeed> {
         return;
       }
 
-      // If no nearby activities, try to get the current user's own activities
-      try {
-        final user = FirebaseAuth.instance.currentUser;
-        if (user != null) {
-          final userActivities = await _socialService.getFriendsActivities(
-            friendIds: [user.uid],
-            limit: widget.maxItems,
-          );
-          if (mounted) {
-            setState(() {
-              _activities = userActivities;
-              _isLoading = false;
-            });
-          }
-        } else {
-          if (mounted) {
-            setState(() => _isLoading = false);
-          }
-        }
-      } catch (e) {
-        AppLogger.error('Error loading user activities', error: e);
+      // Fallback to user's own activities
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final userActivities = await _socialService.getFriendsActivities(
+          friendIds: [user.uid],
+          limit: widget.maxItems,
+        );
         if (mounted) {
-          setState(() => _isLoading = false);
+          setState(() {
+            _activities = userActivities;
+            _isLoading = false;
+          });
         }
+      } else {
+        if (mounted) setState(() => _isLoading = false);
       }
     } catch (e) {
-      AppLogger.error('Error loading social activities', error: e);
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      AppLogger.error('Error loading activities', error: e);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  String _getActivityIcon(SocialActivityType type) {
+  String _getActivityEmoji(SocialActivityType type) {
     switch (type) {
       case SocialActivityType.discovery:
         return '🎨';
@@ -114,84 +106,76 @@ class _SocialActivityFeedState extends State<SocialActivityFeed> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(16),
-          child: CircularProgressIndicator(),
-        ),
+      return const Padding(
+        padding: EdgeInsets.all(16),
+        child: Center(child: CircularProgressIndicator()),
       );
     }
 
     if (_activities.isEmpty) {
-      return Container(
+      return Padding(
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: ArtWalkDesignSystem.cardBackground,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: ArtWalkDesignSystem.primaryTeal.withValues(alpha: 0.2),
-          ),
-        ),
-        child: const Column(
-          children: [
-            Text(
-              '🌟 Be the first to discover art in your area!',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: ArtWalkDesignSystem.textSecondary,
-              ),
+        child: GlassCard(
+          borderRadius: 24,
+          padding: const EdgeInsets.all(24),
+          child: Center(
+            child: Text(
+              'social_feed_empty'.tr(), // Add key to translation JSON
+              style: AppTypography.body(Colors.white70),
               textAlign: TextAlign.center,
             ),
-          ],
+          ),
         ),
       );
     }
 
-    return Container(
-      decoration: BoxDecoration(
-        color: ArtWalkDesignSystem.cardBackground,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: ArtWalkDesignSystem.primaryTeal.withValues(alpha: 0.2),
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: GlassCard(
+        borderRadius: 24,
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHeader(),
+            const SizedBox(height: 8),
+            ..._activities.map(_buildActivityItem).toList(),
+          ],
         ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    );
+  }
+
+  Widget _buildHeader() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: ArtWalkDesignSystem.primaryTeal.withValues(
-                      alpha: 0.2,
-                    ),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(
-                    Icons.timeline,
-                    color: ArtWalkDesignSystem.primaryTeal,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                const Expanded(
-                  child: Text(
-                    'Activity Feed',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: ArtWalkDesignSystem.textPrimary,
-                    ),
-                  ),
-                ),
-              ],
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: const Color(0xFF22D3EE).withValues(
+                red: 34.0,
+                green: 211.0,
+                blue: 238.0,
+                alpha: (0.1 * 255),
+              ),
+              borderRadius: BorderRadius.circular(22),
+            ),
+            child: const Icon(
+              Icons.timeline,
+              color: Color(0xFF22D3EE),
+              size: 20,
             ),
           ),
-          ..._activities.map((activity) => _buildActivityItem(activity)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'social_feed_title'.tr(), // Add key to translation
+              style: AppTypography.screenTitle(),
+            ),
+          ),
         ],
       ),
     );
@@ -203,57 +187,59 @@ class _SocialActivityFeedState extends State<SocialActivityFeed> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Activity icon
+          // Emoji icon
           Container(
-            width: 40,
-            height: 40,
+            width: 44,
+            height: 44,
             decoration: BoxDecoration(
-              color: ArtWalkDesignSystem.primaryTeal.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(20),
+              color: const Color(0xFFFFFFFF).withValues(
+                red: 255.0,
+                green: 255.0,
+                blue: 255.0,
+                alpha: (0.08 * 255),
+              ),
+              borderRadius: BorderRadius.circular(22),
             ),
             child: Center(
               child: Text(
-                _getActivityIcon(activity.type),
-                style: const TextStyle(fontSize: 16),
+                _getActivityEmoji(activity.type),
+                style: const TextStyle(fontSize: 20),
               ),
             ),
           ),
           const SizedBox(width: 12),
 
-          // Activity content
+          // Text content
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // User name and time
+                // Name + time
                 Row(
                   children: [
-                    Text(
-                      activity.userName,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: ArtWalkDesignSystem.textPrimary,
+                    Flexible(
+                      child: Text(
+                        activity.userName,
+                        style: AppTypography.body(Colors.white),
                       ),
                     ),
                     const SizedBox(width: 8),
                     Text(
                       timeago.format(activity.timestamp),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: ArtWalkDesignSystem.textSecondary,
-                      ),
+                      style: AppTypography.helper(Colors.white70),
                     ),
                   ],
                 ),
                 const SizedBox(height: 4),
-
-                // Activity message
                 Text(
                   activity.message,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: ArtWalkDesignSystem.textSecondary,
+                  style: AppTypography.body(
+                    const Color(0xFFFFFFFF).withValues(
+                      red: 255.0,
+                      green: 255.0,
+                      blue: 255.0,
+                      alpha: (0.7 * 255),
+                    ),
                   ),
                 ),
               ],

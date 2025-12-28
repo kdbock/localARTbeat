@@ -1,284 +1,70 @@
-import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart' as intl;
+
 import 'package:artbeat_art_walk/src/models/art_walk_model.dart';
 
-/// Individual art walk card for display in lists and search results
-///
-/// Features:
-/// - Displays art walk title, description, and metadata
-/// - Shows distance, duration, and number of art pieces
-/// - Supports both compact and expanded description modes
-/// - Includes visual indicators for completed walks
-/// - Provides tap interaction for navigation to detail view
-/// - Responsive design for different screen sizes
-///
-/// Usage:
-/// ```dart
-/// ArtWalkCard(
-///   artWalk: myArtWalk,
-///   onTap: () => navigateToDetail(myArtWalk.id),
-///   showFullDescription: true,
-/// )
-/// ```
+import 'glass_card.dart';
+
 class ArtWalkCard extends StatelessWidget {
-  /// The art walk data to display
   final ArtWalkModel artWalk;
-
-  /// Callback when the card is tapped
   final VoidCallback? onTap;
-
-  /// Whether to show the full description or truncate it
   final bool showFullDescription;
 
   const ArtWalkCard({
-    Key? key,
+    super.key,
     required this.artWalk,
     this.onTap,
     this.showFullDescription = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final coverImage = ImageUrlValidator.safeCorrectedNetworkImage(
+      artWalk.coverImageUrl,
+    );
 
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+    return Semantics(
+      button: onTap != null,
+      label: artWalk.title,
+      child: GestureDetector(
         onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
+        child: GlassCard(
+          borderRadius: 28,
+          padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header with title and metadata
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Cover image or placeholder
-                  Container(
-                    width: 60,
-                    height: 60,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      color: Colors.grey.shade200,
-                    ),
-                    child:
-                        ImageUrlValidator.safeCorrectedNetworkImage(
-                              artWalk.coverImageUrl,
-                            ) !=
-                            null
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: Image(
-                              image:
-                                  ImageUrlValidator.safeCorrectedNetworkImage(
-                                    artWalk.coverImageUrl,
-                                  )!,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Container(
-                                  color: Colors.grey.shade300,
-                                  child: Icon(
-                                    Icons.route,
-                                    color: Colors.grey.shade500,
-                                    size: 24,
-                                  ),
-                                );
-                              },
-                            ),
-                          )
-                        : Icon(
-                            Icons.route,
-                            color: Colors.grey.shade400,
-                            size: 24,
-                          ),
-                  ),
-
+                  _CoverThumbnail(imageProvider: coverImage),
                   const SizedBox(width: 16),
-
-                  // Title and metadata
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          artWalk.title,
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-
-                        const SizedBox(height: 4),
-
-                        // Metadata row
-                        Row(
-                          children: [
-                            if (artWalk.difficulty != null) ...[
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: _getDifficultyColor(
-                                    artWalk.difficulty!,
-                                  ).withValues(alpha: 0.2),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: Text(
-                                  artWalk.difficulty!,
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: _getDifficultyColor(
-                                      artWalk.difficulty!,
-                                    ),
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                            ],
-
-                            if (artWalk.isAccessible == true) ...[
-                              Icon(
-                                Icons.accessible,
-                                size: 16,
-                                color: theme.primaryColor,
-                              ),
-                              const SizedBox(width: 8),
-                            ],
-
-                            Icon(
-                              Icons.visibility,
-                              size: 14,
-                              color: Colors.grey.shade500,
-                            ),
-                            const SizedBox(width: 2),
-                            Text(
-                              '${artWalk.viewCount}',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: Colors.grey.shade500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Public indicator
-                  if (artWalk.isPublic)
-                    Icon(Icons.public, size: 16, color: theme.primaryColor),
+                  Expanded(child: _TitleBlock(artWalk: artWalk)),
                 ],
               ),
-
               const SizedBox(height: 12),
-
-              // Description
               Text(
                 artWalk.description,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey.shade700,
+                maxLines: showFullDescription ? null : 3,
+                overflow: showFullDescription
+                    ? TextOverflow.visible
+                    : TextOverflow.ellipsis,
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white.withValues(alpha: 0.78),
                 ),
-                maxLines: showFullDescription ? null : 2,
-                overflow: showFullDescription ? null : TextOverflow.ellipsis,
               ),
-
-              const SizedBox(height: 12),
-
-              // Stats row
-              Row(
-                children: [
-                  if (artWalk.estimatedDuration != null) ...[
-                    Icon(
-                      Icons.access_time,
-                      size: 16,
-                      color: Colors.grey.shade600,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${artWalk.estimatedDuration!.toInt()} min',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                  ],
-
-                  if (artWalk.estimatedDistance != null) ...[
-                    Icon(
-                      Icons.straighten,
-                      size: 16,
-                      color: Colors.grey.shade600,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${artWalk.estimatedDistance!.toStringAsFixed(1)} mi',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                  ],
-
-                  Icon(Icons.palette, size: 16, color: Colors.grey.shade600),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${artWalk.artworkIds.length} artworks',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: Colors.grey.shade600,
-                    ),
-                  ),
-
-                  const Spacer(),
-
-                  if (artWalk.zipCode != null) ...[
-                    Icon(
-                      Icons.location_on,
-                      size: 14,
-                      color: Colors.grey.shade500,
-                    ),
-                    const SizedBox(width: 2),
-                    Text(
-                      artWalk.zipCode!,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: Colors.grey.shade500,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-
-              // Tags if available
+              const SizedBox(height: 16),
+              _MetadataRow(artWalk: artWalk),
+              const SizedBox(height: 16),
+              _StatsWrap(artWalk: artWalk),
               if (artWalk.tags != null && artWalk.tags!.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 4,
-                  runSpacing: 4,
-                  children: artWalk.tags!.take(3).map((tag) {
-                    return Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade200,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        tag,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          fontSize: 10,
-                          color: Colors.grey.shade700,
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
+                const SizedBox(height: 16),
+                _TagWrap(tags: artWalk.tags!),
               ],
             ],
           ),
@@ -286,17 +72,325 @@ class ArtWalkCard extends StatelessWidget {
       ),
     );
   }
+}
 
-  Color _getDifficultyColor(String difficulty) {
-    switch (difficulty.toLowerCase()) {
-      case 'easy':
-        return Colors.green;
-      case 'medium':
-        return Colors.orange;
-      case 'hard':
-        return Colors.red;
-      default:
-        return Colors.grey;
+class _CoverThumbnail extends StatelessWidget {
+  final ImageProvider? imageProvider;
+
+  const _CoverThumbnail({required this.imageProvider});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 72,
+      height: 72,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF7C4DFF), Color(0xFF22D3EE)],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF7C4DFF).withValues(alpha: 0.3),
+            blurRadius: 24,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(22),
+        child: imageProvider != null
+            ? Image(image: imageProvider!, fit: BoxFit.cover)
+            : Container(
+                color: Colors.white.withValues(alpha: 0.05),
+                child: const Icon(Icons.route, color: Colors.white70, size: 28),
+              ),
+      ),
+    );
+  }
+}
+
+class _TitleBlock extends StatelessWidget {
+  final ArtWalkModel artWalk;
+
+  const _TitleBlock({required this.artWalk});
+
+  @override
+  Widget build(BuildContext context) {
+    final viewCount = intl.NumberFormat.compact().format(artWalk.viewCount);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Text(
+                artWalk.title,
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            if (artWalk.isFlagged)
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFF3D8D).withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: const Color(0xFFFF3D8D).withValues(alpha: 0.4),
+                  ),
+                ),
+                child: Icon(
+                  Icons.report_gmailerrorred,
+                  color: Colors.pinkAccent.shade100,
+                  size: 16,
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        Row(
+          children: [
+            _IconLabel(icon: Icons.visibility, label: viewCount),
+            if (artWalk.completionCount != null) ...[
+              const SizedBox(width: 12),
+              _IconLabel(
+                icon: Icons.flag,
+                label: intl.NumberFormat.compact().format(
+                  artWalk.completionCount!,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _MetadataRow extends StatelessWidget {
+  final ArtWalkModel artWalk;
+
+  const _MetadataRow({required this.artWalk});
+
+  @override
+  Widget build(BuildContext context) {
+    final chips = <Widget>[
+      _StatusChip(
+        icon: artWalk.isPublic ? Icons.public : Icons.lock_outline,
+        label: artWalk.isPublic
+            ? 'art_walk_art_walk_card_chip_public'.tr()
+            : 'art_walk_art_walk_card_chip_private'.tr(),
+      ),
+    ];
+
+    if (artWalk.isAccessible == true) {
+      chips.add(
+        _StatusChip(
+          icon: Icons.accessible,
+          label: 'art_walk_art_walk_card_chip_accessible'.tr(),
+        ),
+      );
     }
+
+    if (artWalk.difficulty != null && artWalk.difficulty!.isNotEmpty) {
+      chips.add(
+        _StatusChip(icon: Icons.trending_up, label: artWalk.difficulty!),
+      );
+    }
+
+    return Wrap(spacing: 8, runSpacing: 8, children: chips);
+  }
+}
+
+class _StatsWrap extends StatelessWidget {
+  final ArtWalkModel artWalk;
+
+  const _StatsWrap({required this.artWalk});
+
+  @override
+  Widget build(BuildContext context) {
+    final stats = <Widget>[];
+
+    if (artWalk.estimatedDuration != null) {
+      stats.add(
+        _StatPill(
+          icon: Icons.access_time,
+          label: 'art_walk_art_walk_card_text_duration'.tr(
+            namedArgs: {
+              'minutes': artWalk.estimatedDuration!.toStringAsFixed(0),
+            },
+          ),
+        ),
+      );
+    }
+
+    if (artWalk.estimatedDistance != null) {
+      stats.add(
+        _StatPill(
+          icon: Icons.straighten,
+          label: 'art_walk_art_walk_card_text_distance'.tr(
+            namedArgs: {'miles': artWalk.estimatedDistance!.toStringAsFixed(1)},
+          ),
+        ),
+      );
+    }
+
+    stats.add(
+      _StatPill(
+        icon: Icons.palette,
+        label: 'art_walk_art_walk_card_text_artworks'.tr(
+          namedArgs: {'count': artWalk.artworkIds.length.toString()},
+        ),
+      ),
+    );
+
+    if (artWalk.zipCode != null && artWalk.zipCode!.isNotEmpty) {
+      stats.add(
+        _StatPill(
+          icon: Icons.location_on,
+          label: 'art_walk_art_walk_card_text_zip'.tr(
+            namedArgs: {'zip': artWalk.zipCode!},
+          ),
+        ),
+      );
+    }
+
+    return Wrap(spacing: 8, runSpacing: 8, children: stats);
+  }
+}
+
+class _TagWrap extends StatelessWidget {
+  final List<String> tags;
+
+  const _TagWrap({required this.tags});
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: tags.take(4).map((tag) {
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
+          ),
+          child: Text(
+            tag,
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+}
+
+class _StatusChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+
+  const _StatusChip({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: Colors.white, size: 14),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatPill extends StatelessWidget {
+  final IconData icon;
+  final String label;
+
+  const _StatPill({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        color: Colors.white.withValues(alpha: 0.05),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: Colors.white),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: Colors.white.withValues(alpha: 0.9),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _IconLabel extends StatelessWidget {
+  final IconData icon;
+  final String label;
+
+  const _IconLabel({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, color: Colors.white.withValues(alpha: 0.7), size: 14),
+        const SizedBox(width: 4),
+        Text(
+          label,
+          style: GoogleFonts.spaceGrotesk(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: Colors.white.withValues(alpha: 0.7),
+          ),
+        ),
+      ],
+    );
   }
 }

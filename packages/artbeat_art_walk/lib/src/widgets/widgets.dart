@@ -4,6 +4,7 @@
 export 'achievement_badge.dart';
 export 'achievements_grid.dart';
 export 'art_detail_bottom_sheet.dart';
+export 'art_progress_card.dart';
 export 'art_walk_card.dart';
 export 'art_walk_drawer.dart';
 export 'art_walk_comment_section.dart';
@@ -25,3 +26,10 @@ export 'discovery_capture_modal.dart';
 export 'daily_quest_card.dart';
 export 'social_activity_feed.dart';
 export 'weekly_goals_card.dart';
+export 'glass_card.dart';
+export 'glass_secondary_button.dart';
+export 'gradient_cta_button.dart';
+export 'hud_top_bar.dart';
+export 'typography.dart';
+export 'world_background.dart';
+export 'art_walk_world_scaffold.dart';

@@ -166,7 +166,7 @@ class EventsHeader extends StatelessWidget implements PreferredSizeWidget {
                   height: 4,
                   width: 36,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.3),
+                    color: Colors.white.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),

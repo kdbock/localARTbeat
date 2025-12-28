@@ -1,131 +1,123 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 
-/// Comprehensive Art Walk Design System
-/// Based on the modern dashboard design with glassmorphism and gradient themes
+import '../widgets/art_walk_header.dart';
+import '../widgets/glass_card.dart';
+import '../widgets/gradient_cta_button.dart';
+import '../widgets/world_background.dart';
+import '../widgets/typography.dart';
+
+/// Local ARTbeat aligned design system for the Art Walk module
 class ArtWalkDesignSystem {
   // ==================== COLOR PALETTE ====================
-  // Updated to match main app colors (purple/green scheme)
+  static const Color primaryTeal = Color(0xFF22D3EE);
+  static const Color primaryTealLight = Color(0xFF34D399);
+  static const Color primaryTealDark = Color(0xFF0D9BCF);
 
-  /// Primary color palette - using app's purple/green scheme
-  static const Color primaryTeal = Color(0xFF8C52FF); // Primary Purple
-  static const Color primaryTealLight = Color(0xFF00BF63); // Primary Green
-  static const Color primaryTealDark = Color(0xFF6C3ACC); // Darker Purple
+  static const Color accentOrange = Color(0xFFFFC857);
+  static const Color accentOrangeLight = Color(0xFFFFE3A3);
 
-  /// Accent color palette
-  static const Color accentOrange = Color(0xFF00BFA5); // Secondary Teal
-  static const Color accentOrangeLight = Color(0xFF4DD0BF); // Lighter Teal
+  static const Color backgroundGradientStart = Color(0xFF07060F);
+  static const Color backgroundGradientMid = Color(0xFF0A1330);
+  static const Color backgroundGradientEnd = Color(0xFF071C18);
+  static const Color cardBackground = Color(0x14000000);
 
-  /// Background colors
-  static const Color backgroundGradientStart = Color(0xFFF8F9FA);
-  static const Color backgroundGradientEnd = Color(0xFFFFFFFF);
-  static const Color cardBackground = Color(0xFFFFFFFF);
-
-  /// Text colors
-  static const Color textPrimary = Color(0xFF212529);
-  static const Color textSecondary = Color(0xFF666666);
+  static const Color textPrimary = Color(0xFFEFEFFC);
+  static const Color textSecondary = Color(0xFFB5B4D1);
   static const Color textLight = Colors.white;
 
-  /// Glass effect colors
   static const Color glassBackground = Colors.white;
   static const Color glassBorder = Colors.white;
 
-  /// Enhanced Bottom Navigation colors (dark HUD theme)
-  static const Color hudBackground = Color(0xFF0A0B14); // Dark blue/black
-  static const Color hudActiveColor = Color(0xFF22D3EE); // Neon cyan/teal
-  static const Color hudInactiveColor = Color(0xFFFFFFFF); // White with opacity
-  static const Color hudBorder = Color(0xFFFFFFFF); // White with opacity
+  static const Color hudBackground = Color(0xFF07060F);
+  static const Color hudActiveColor = Color(0xFF22D3EE);
+  static const Color hudInactiveColor = Color(0xCCFFFFFF);
+  static const Color hudBorder = Color(0x33FFFFFF);
 
   // ==================== GRADIENTS ====================
-
-  /// Main background gradient used across all screens
   static const LinearGradient backgroundGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [
-      Color(0xFFFFFFFF), // White
-      Color(0xFFF8F9FA), // Light gray
-      Color(0xFFFFFFFF), // White
+      backgroundGradientStart,
+      backgroundGradientMid,
+      backgroundGradientEnd,
     ],
-    stops: [0.0, 0.5, 1.0],
   );
 
-  /// Header gradient for app bars - purple to green
   static const LinearGradient headerGradient = LinearGradient(
     begin: Alignment.topLeft,
-    end: Alignment.topRight,
-    colors: [primaryTeal, primaryTealLight], // Purple to Green
+    end: Alignment.bottomRight,
+    colors: [Color(0xAA07060F), Color(0x660A1330)],
   );
 
-  /// Title gradient for text
   static const LinearGradient titleGradient = LinearGradient(
     begin: Alignment.topLeft,
-    end: Alignment.topRight,
-    colors: [primaryTeal, primaryTealLight], // Purple to Green
+    end: Alignment.bottomRight,
+    colors: [primaryTeal, primaryTealLight],
   );
 
-  /// Button gradient - purple gradient
   static const LinearGradient buttonGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [primaryTeal, primaryTealDark], // Purple shades
+    colors: [ArtbeatColors.primaryPurple, primaryTeal, primaryTealLight],
   );
 
-  /// Accent button gradient - green gradient
   static const LinearGradient accentButtonGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [primaryTealLight, accentOrange], // Green to teal
+    colors: [accentOrange, primaryTeal],
   );
 
-  /// HUD-style header gradient for dark theme
   static const LinearGradient hudHeaderGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [hudBackground, Color(0xFF1A1B26)], // Dark gradient
+    colors: [hudBackground, Color(0xFF121634)],
   );
 
-  /// HUD button gradient - matching the Capture button style
   static const LinearGradient hudButtonGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [
-      ArtbeatColors.primaryPurple, // Primary Purple
-      hudActiveColor, // Neon cyan
-      ArtbeatColors.primaryGreen, // Primary Green
+      ArtbeatColors.primaryPurple,
+      hudActiveColor,
+      ArtbeatColors.primaryGreen,
     ],
-    stops: [0.0, 0.5, 1.0],
+    stops: [0.0, 0.45, 1.0],
   );
 
   // ==================== DECORATIONS ====================
-
-  /// Glass morphism decoration for cards and containers
   static BoxDecoration glassDecoration({
-    double borderRadius = 20,
-    double alpha = 0.15,
-    double borderAlpha = 0.2,
-    double shadowAlpha = 0.1,
+    double borderRadius = 24,
+    double alpha = 0.12,
+    double borderAlpha = 0.18,
+    double shadowAlpha = 0.45,
   }) {
     return BoxDecoration(
-      color: glassBackground.withValues(alpha: alpha),
+      color: Colors.white.withValues(alpha: alpha),
       borderRadius: BorderRadius.circular(borderRadius),
-      border: Border.all(color: glassBorder.withValues(alpha: borderAlpha)),
+      border: Border.all(color: Colors.white.withValues(alpha: borderAlpha)),
       boxShadow: [
         BoxShadow(
-          color: primaryTeal.withValues(alpha: shadowAlpha),
-          blurRadius: 20,
-          offset: const Offset(0, 10),
+          color: Colors.black.withValues(alpha: shadowAlpha),
+          blurRadius: 34,
+          offset: const Offset(0, 20),
+        ),
+        BoxShadow(
+          color: primaryTeal.withValues(alpha: 0.12),
+          blurRadius: 40,
+          spreadRadius: 2,
         ),
       ],
     );
   }
 
-  /// HUD-style glass morphism decoration for dark theme
   static BoxDecoration hudGlassDecoration({
-    double borderRadius = 20,
+    double borderRadius = 24,
     double alpha = 0.62,
-    double borderAlpha = 0.10,
-    double shadowAlpha = 0.35,
+    double borderAlpha = 0.12,
+    double shadowAlpha = 0.25,
   }) {
     return BoxDecoration(
       color: hudBackground.withValues(alpha: alpha),
@@ -134,50 +126,47 @@ class ArtWalkDesignSystem {
       boxShadow: [
         BoxShadow(
           color: Colors.black.withValues(alpha: shadowAlpha),
-          blurRadius: 26,
-          offset: const Offset(0, 14),
+          blurRadius: 30,
+          offset: const Offset(0, 18),
         ),
         BoxShadow(
-          color: hudActiveColor.withValues(alpha: 0.10),
-          blurRadius: 28,
-          spreadRadius: 1,
+          color: hudActiveColor.withValues(alpha: 0.12),
+          blurRadius: 36,
+          spreadRadius: 2,
         ),
       ],
     );
   }
 
-  /// Card decoration for smaller elements
   static BoxDecoration cardDecoration({
-    double borderRadius = 16,
+    double borderRadius = 20,
     Color? backgroundColor,
-    double alpha = 0.1,
-    double borderAlpha = 0.2,
+    double alpha = 0.12,
+    double borderAlpha = 0.16,
   }) {
     return BoxDecoration(
-      color: (backgroundColor ?? glassBackground).withValues(alpha: alpha),
+      color: (backgroundColor ?? Colors.white).withValues(alpha: alpha),
       borderRadius: BorderRadius.circular(borderRadius),
-      border: Border.all(color: glassBorder.withValues(alpha: borderAlpha)),
+      border: Border.all(color: Colors.white.withValues(alpha: borderAlpha)),
     );
   }
 
-  /// Stat card decoration
   static BoxDecoration statCardDecoration({
-    double borderRadius = 16,
-    double alpha = 0.1,
-    double borderAlpha = 0.2,
+    double borderRadius = 18,
+    double alpha = 0.12,
+    double borderAlpha = 0.16,
   }) {
     return BoxDecoration(
-      color: glassBackground.withValues(alpha: alpha),
+      color: Colors.white.withValues(alpha: alpha),
       borderRadius: BorderRadius.circular(borderRadius),
-      border: Border.all(color: glassBorder.withValues(alpha: borderAlpha)),
+      border: Border.all(color: Colors.white.withValues(alpha: borderAlpha)),
     );
   }
 
-  /// Icon container decoration
   static BoxDecoration iconContainerDecoration({
     required Color color,
-    double borderRadius = 12,
-    double alpha = 0.2,
+    double borderRadius = 16,
+    double alpha = 0.24,
   }) {
     return BoxDecoration(
       color: color.withValues(alpha: alpha),
@@ -185,170 +174,163 @@ class ArtWalkDesignSystem {
     );
   }
 
-  // ==================== TEXT STYLES ====================
-
-  /// Hero title style
-  static const TextStyle heroTitleStyle = TextStyle(
+  // ==================== TYPOGRAPHY ====================
+  static TextStyle heroTitleStyle = GoogleFonts.spaceGrotesk(
     fontSize: 28,
-    fontWeight: FontWeight.w800,
+    fontWeight: FontWeight.w900,
     color: textLight,
     height: 1.2,
   );
 
-  /// Hero subtitle style
-  static TextStyle heroSubtitleStyle = TextStyle(
+  static TextStyle heroSubtitleStyle = GoogleFonts.spaceGrotesk(
     fontSize: 16,
-    color: textLight.withValues(alpha: 0.9),
-    fontWeight: FontWeight.w500,
+    fontWeight: FontWeight.w600,
+    color: textLight.withValues(alpha: 0.85),
   );
 
-  /// Section title style
-  static const TextStyle sectionTitleStyle = TextStyle(
+  static TextStyle sectionTitleStyle = GoogleFonts.spaceGrotesk(
     fontSize: 20,
-    fontWeight: FontWeight.w700,
+    fontWeight: FontWeight.w800,
     color: textLight,
   );
 
-  /// Card title style
-  static const TextStyle cardTitleStyle = TextStyle(
+  static TextStyle cardTitleStyle = GoogleFonts.spaceGrotesk(
     fontSize: 18,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.w700,
     color: textPrimary,
   );
 
-  /// Card subtitle style
-  static const TextStyle cardSubtitleStyle = TextStyle(
+  static TextStyle cardSubtitleStyle = GoogleFonts.spaceGrotesk(
     fontSize: 14,
+    fontWeight: FontWeight.w600,
     color: textSecondary,
-    fontWeight: FontWeight.w500,
   );
 
-  /// Stat value style
-  static const TextStyle statValueStyle = TextStyle(
+  static TextStyle statValueStyle = GoogleFonts.spaceGrotesk(
     fontSize: 24,
+    fontWeight: FontWeight.w800,
+    color: textLight,
+  );
+
+  static TextStyle statLabelStyle = GoogleFonts.spaceGrotesk(
+    fontSize: 12,
+    fontWeight: FontWeight.w600,
+    color: textLight.withValues(alpha: 0.8),
+  );
+
+  static TextStyle buttonTextStyle = GoogleFonts.spaceGrotesk(
+    fontSize: 16,
+    fontWeight: FontWeight.w800,
+    color: textLight,
+  );
+
+  static TextStyle smallButtonTextStyle = GoogleFonts.spaceGrotesk(
+    fontSize: 14,
     fontWeight: FontWeight.w700,
     color: textLight,
   );
 
-  /// Stat label style
-  static TextStyle statLabelStyle = TextStyle(
-    fontSize: 12,
-    color: textLight.withValues(alpha: 0.8),
-    fontWeight: FontWeight.w500,
-  );
-
-  /// Button text style
-  static const TextStyle buttonTextStyle = TextStyle(
-    fontSize: 16,
-    fontWeight: FontWeight.w600,
-    color: textLight,
-  );
-
-  /// Small button text style
-  static const TextStyle smallButtonTextStyle = TextStyle(
-    fontSize: 14,
-    fontWeight: FontWeight.w600,
-    color: textLight,
-  );
-
-  /// HUD-style card title style (for dark theme)
-  static const TextStyle hudCardTitleStyle = TextStyle(
+  static TextStyle hudCardTitleStyle = GoogleFonts.spaceGrotesk(
     fontSize: 18,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.w700,
     color: hudInactiveColor,
   );
 
-  /// HUD-style card subtitle style (for dark theme)
-  static const TextStyle hudCardSubtitleStyle = TextStyle(
+  static TextStyle hudCardSubtitleStyle = GoogleFonts.spaceGrotesk(
     fontSize: 14,
-    color: hudInactiveColor,
-    fontWeight: FontWeight.w500,
+    fontWeight: FontWeight.w600,
+    color: hudInactiveColor.withValues(alpha: 0.7),
   );
 
   // ==================== SPACING ====================
+  static const double paddingXS = 4;
+  static const double paddingS = 8;
+  static const double paddingM = 16;
+  static const double paddingL = 24;
+  static const double paddingXL = 32;
+  static const double paddingXXL = 40;
 
-  /// Standard padding values
-  static const double paddingXS = 4.0;
-  static const double paddingS = 8.0;
-  static const double paddingM = 16.0;
-  static const double paddingL = 20.0;
-  static const double paddingXL = 24.0;
-  static const double paddingXXL = 32.0;
-
-  /// Standard margin values
-  static const double marginXS = 4.0;
-  static const double marginS = 8.0;
-  static const double marginM = 16.0;
-  static const double marginL = 20.0;
-  static const double marginXL = 24.0;
-  static const double marginXXL = 32.0;
-
-  /// Border radius values
-  static const double radiusS = 8.0;
-  static const double radiusM = 12.0;
-  static const double radiusL = 16.0;
-  static const double radiusXL = 20.0;
-  static const double radiusXXL = 24.0;
+  static const double radiusS = 12;
+  static const double radiusM = 16;
+  static const double radiusL = 20;
+  static const double radiusXL = 24;
+  static const double radiusXXL = 28;
 
   // ==================== COMPONENT BUILDERS ====================
-
-  /// Build a standard screen container with background gradient
   static Widget buildScreenContainer({
     required Widget child,
     EdgeInsets? padding,
+    bool scrollable = true,
+  }) {
+    Widget content = Padding(
+      padding:
+          padding ??
+          const EdgeInsets.symmetric(horizontal: paddingXL, vertical: paddingL),
+      child: child,
+    );
+
+    if (scrollable) {
+      content = SingleChildScrollView(
+        padding: EdgeInsets.zero,
+        physics: const BouncingScrollPhysics(),
+        child: content,
+      );
+    }
+
+    return WorldBackground(child: SafeArea(child: content));
+  }
+
+  static Widget buildGlassCard({
+    required Widget child,
+    EdgeInsets? padding,
+    double borderRadius = radiusXXL,
+    EdgeInsets? margin,
   }) {
     return Container(
-      decoration: const BoxDecoration(gradient: backgroundGradient),
-      child: SingleChildScrollView(
-        padding: padding ?? const EdgeInsets.all(paddingM),
+      margin: margin,
+      child: GlassCard(
+        padding: padding ?? const EdgeInsets.all(paddingXL),
+        borderRadius: borderRadius,
+        fillColor: Colors.black.withValues(alpha: 0.3),
         child: child,
       ),
     );
   }
 
-  /// Build a glass card container
-  static Widget buildGlassCard({
-    required Widget child,
-    EdgeInsets? padding,
-    double borderRadius = radiusXL,
-  }) {
-    return Container(
-      decoration: glassDecoration(borderRadius: borderRadius),
-      padding: padding ?? const EdgeInsets.all(paddingXL),
-      child: child,
-    );
-  }
-
-  /// Build a stat card
   static Widget buildStatCard({
     required String title,
     required String value,
     required IconData icon,
-    required Color color,
+    Color color = primaryTeal,
     VoidCallback? onTap,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(paddingM),
-        decoration: statCardDecoration(),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(paddingS),
-              decoration: iconContainerDecoration(color: color),
-              child: Icon(icon, size: 24, color: color),
-            ),
-            const SizedBox(height: paddingS),
-            Text(value, style: statValueStyle),
-            Text(title, style: statLabelStyle),
-          ],
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(radiusXXL),
+        onTap: onTap,
+        child: GlassCard(
+          padding: const EdgeInsets.all(paddingL),
+          borderRadius: radiusXXL,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(paddingS),
+                decoration: iconContainerDecoration(color: color),
+                child: Icon(icon, size: 24, color: color),
+              ),
+              const SizedBox(height: paddingS),
+              Text(value, style: statValueStyle, textAlign: TextAlign.center),
+              const SizedBox(height: paddingXS),
+              Text(title, style: statLabelStyle, textAlign: TextAlign.center),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  /// Build an action button with gradient
   static Widget buildActionButton({
     required String text,
     required VoidCallback onPressed,
@@ -356,51 +338,20 @@ class ArtWalkDesignSystem {
     bool isAccent = false,
     bool isSmall = false,
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: isAccent ? accentButtonGradient : buttonGradient,
-        borderRadius: BorderRadius.circular(radiusM),
-        boxShadow: [
-          BoxShadow(
-            color: (isAccent ? accentOrange : primaryTeal).withValues(
-              alpha: 0.3,
-            ),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onPressed,
-          borderRadius: BorderRadius.circular(radiusM),
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: isSmall ? paddingM : paddingL,
-              vertical: isSmall ? paddingS : paddingM,
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (icon != null) ...[
-                  Icon(icon, color: textLight, size: isSmall ? 18 : 20),
-                  SizedBox(width: isSmall ? paddingXS : paddingS),
-                ],
-                Text(
-                  text,
-                  style: isSmall ? smallButtonTextStyle : buttonTextStyle,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
+    final gradient = isAccent ? accentButtonGradient : buttonGradient;
+    final height = isSmall ? 44.0 : 52.0;
+    final radius = isSmall ? 22.0 : 26.0;
+
+    return GradientCTAButton(
+      label: text,
+      onPressed: onPressed,
+      icon: icon,
+      height: height,
+      borderRadius: radius,
+      gradient: gradient,
     );
   }
 
-  /// Build a section header
   static Widget buildSectionHeader({
     required String title,
     String? subtitle,
@@ -408,14 +359,12 @@ class ArtWalkDesignSystem {
     Widget? action,
   }) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         if (icon != null) ...[
           Container(
             padding: const EdgeInsets.all(paddingS),
-            decoration: iconContainerDecoration(
-              color: primaryTeal,
-              borderRadius: radiusM,
-            ),
+            decoration: iconContainerDecoration(color: primaryTeal),
             child: Icon(icon, size: 20, color: primaryTeal),
           ),
           const SizedBox(width: paddingM),
@@ -424,8 +373,17 @@ class ArtWalkDesignSystem {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: sectionTitleStyle),
-              if (subtitle != null) Text(subtitle, style: heroSubtitleStyle),
+              Text(title, style: AppTypography.sectionLabel()),
+              if (subtitle != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(
+                    subtitle,
+                    style: AppTypography.helper(
+                      Colors.white.withValues(alpha: 0.7),
+                    ),
+                  ),
+                ),
             ],
           ),
         ),
@@ -434,93 +392,70 @@ class ArtWalkDesignSystem {
     );
   }
 
-  /// Build a floating action button with gradient
   static Widget buildFloatingActionButton({
     required VoidCallback onPressed,
     IconData icon = Icons.add,
     String? tooltip,
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: buttonGradient,
-        borderRadius: BorderRadius.circular(28),
-        boxShadow: [
-          BoxShadow(
-            color: primaryTeal.withValues(alpha: 0.4),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(32),
+        onTap: onPressed,
+        child: Ink(
+          height: 64,
+          width: 64,
+          decoration: BoxDecoration(
+            gradient: buttonGradient,
+            borderRadius: BorderRadius.circular(32),
+            boxShadow: [
+              BoxShadow(
+                color: primaryTeal.withValues(alpha: 0.35),
+                blurRadius: 24,
+                offset: const Offset(0, 12),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: FloatingActionButton(
-        onPressed: onPressed,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        tooltip: tooltip,
-        child: Icon(icon, color: textLight, size: 28),
+          child: Tooltip(
+            message: tooltip ?? '',
+            preferBelow: false,
+            child: Icon(icon, color: textLight, size: 24),
+          ),
+        ),
       ),
     );
   }
 
-  /// Build an enhanced app bar
   static PreferredSizeWidget buildAppBar({
     required String title,
     bool showBackButton = true,
     List<Widget>? actions,
     GlobalKey<ScaffoldState>? scaffoldKey,
-    bool useHudStyle = false,
+    bool useHudStyle = true,
   }) {
-    return AppBar(
-      title: Text(
-        title,
-        style: TextStyle(
-          fontSize: 24,
-          fontWeight: FontWeight.w700,
-          color: useHudStyle ? hudInactiveColor : Colors.white,
-        ),
-      ),
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      flexibleSpace: Container(
-        decoration: BoxDecoration(
-          gradient: useHudStyle ? hudHeaderGradient : headerGradient,
-        ),
-      ),
-      leading: showBackButton
-          ? IconButton(
-              icon: Icon(
-                Icons.arrow_back_ios,
-                color: useHudStyle ? hudInactiveColor : textLight,
-              ),
-              onPressed: () {
-                final context = scaffoldKey?.currentContext;
-                if (context != null && Navigator.canPop(context)) {
-                  Navigator.pop(context);
-                }
-              },
-            )
-          : (scaffoldKey != null
-                ? IconButton(
-                    icon: Icon(
-                      Icons.menu,
-                      color: useHudStyle ? hudInactiveColor : textLight,
-                    ),
-                    onPressed: () => scaffoldKey.currentState?.openDrawer(),
-                  )
-                : null),
+    return ArtWalkHeader(
+      title: title,
+      showBackButton: showBackButton,
       actions: actions,
+      onBackPressed: () {
+        final context = scaffoldKey?.currentContext;
+        if (context != null && Navigator.canPop(context)) {
+          Navigator.pop(context);
+        }
+      },
+      onMenuPressed: scaffoldKey != null
+          ? () => scaffoldKey.currentState?.openDrawer()
+          : null,
     );
   }
 }
 
-/// Screen templates for common patterns
+/// Screen templates for fast composition
 class ArtWalkScreenTemplate {
-  /// Build loading state with glass card
   static Widget buildLoadingState({String message = 'Loading...'}) {
     return Center(
-      child: Container(
-        padding: const EdgeInsets.all(ArtWalkDesignSystem.paddingXL),
-        decoration: ArtWalkDesignSystem.glassDecoration(),
+      child: GlassCard(
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 28),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -529,22 +464,14 @@ class ArtWalkScreenTemplate {
                 ArtWalkDesignSystem.primaryTeal,
               ),
             ),
-            const SizedBox(height: ArtWalkDesignSystem.paddingL),
-            Text(
-              message,
-              style: const TextStyle(
-                color: ArtWalkDesignSystem.textPrimary,
-                fontSize: 16,
-              ),
-              textAlign: TextAlign.center,
-            ),
+            const SizedBox(height: ArtWalkDesignSystem.paddingM),
+            Text(message, style: AppTypography.body()),
           ],
         ),
       ),
     );
   }
 
-  /// Build empty state with action
   static Widget buildEmptyState({
     required String title,
     required String subtitle,
@@ -553,42 +480,36 @@ class ArtWalkScreenTemplate {
     VoidCallback? onAction,
   }) {
     return Center(
-      child: Container(
-        padding: const EdgeInsets.all(ArtWalkDesignSystem.paddingXL),
-        decoration: ArtWalkDesignSystem.glassDecoration(),
+      child: GlassCard(
+        padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
-              size: 64,
-              color: ArtWalkDesignSystem.primaryTeal.withValues(alpha: 0.6),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: ArtWalkDesignSystem.iconContainerDecoration(
+                color: ArtWalkDesignSystem.primaryTeal,
+                borderRadius: 22,
+              ),
+              child: Icon(
+                icon,
+                size: 40,
+                color: ArtWalkDesignSystem.primaryTeal,
+              ),
             ),
             const SizedBox(height: ArtWalkDesignSystem.paddingL),
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: ArtWalkDesignSystem.textPrimary,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: ArtWalkDesignSystem.paddingM),
+            Text(title, style: AppTypography.screenTitle()),
+            const SizedBox(height: ArtWalkDesignSystem.paddingS),
             Text(
               subtitle,
-              style: const TextStyle(
-                fontSize: 16,
-                color: ArtWalkDesignSystem.textSecondary,
-              ),
               textAlign: TextAlign.center,
+              style: AppTypography.body(Colors.white.withValues(alpha: 0.7)),
             ),
             if (actionText != null && onAction != null) ...[
               const SizedBox(height: ArtWalkDesignSystem.paddingL),
               ArtWalkDesignSystem.buildActionButton(
                 text: actionText,
                 onPressed: onAction,
-                isAccent: true,
               ),
             ],
           ],
@@ -597,7 +518,6 @@ class ArtWalkScreenTemplate {
     );
   }
 
-  /// Build form field with glass styling
   static Widget buildFormField({
     required String label,
     String? hint,
@@ -607,46 +527,48 @@ class ArtWalkScreenTemplate {
     String? Function(String?)? validator,
     int maxLines = 1,
   }) {
-    return Container(
-      decoration: ArtWalkDesignSystem.glassDecoration(),
-      child: TextFormField(
-        controller: controller,
-        obscureText: obscureText,
-        keyboardType: keyboardType,
-        validator: validator,
-        maxLines: maxLines,
-        style: const TextStyle(color: ArtWalkDesignSystem.textPrimary),
-        decoration: InputDecoration(
-          labelText: label,
-          hintText: hint,
-          labelStyle: const TextStyle(color: ArtWalkDesignSystem.textSecondary),
-          hintStyle: TextStyle(
-            color: ArtWalkDesignSystem.textSecondary.withValues(alpha: 0.7),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: AppTypography.body()),
+        const SizedBox(height: ArtWalkDesignSystem.paddingS),
+        GlassCard(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          borderRadius: ArtWalkDesignSystem.radiusXL,
+          child: TextFormField(
+            controller: controller,
+            obscureText: obscureText,
+            keyboardType: keyboardType,
+            validator: validator,
+            maxLines: maxLines,
+            style: AppTypography.body(),
+            decoration: InputDecoration(
+              hintText: hint,
+              border: InputBorder.none,
+              hintStyle: AppTypography.helper(),
+            ),
           ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(ArtWalkDesignSystem.radiusL),
-            borderSide: BorderSide.none,
-          ),
-          filled: true,
-          fillColor: Colors.transparent,
-          contentPadding: const EdgeInsets.all(ArtWalkDesignSystem.paddingL),
         ),
-      ),
+      ],
     );
   }
 
-  /// Build list item with glass styling
-  static Widget buildListItem({required Widget child, VoidCallback? onTap}) {
+  static Widget buildListItem({
+    required Widget child,
+    VoidCallback? onTap,
+    EdgeInsets? margin,
+  }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: ArtWalkDesignSystem.paddingS),
-      decoration: ArtWalkDesignSystem.glassDecoration(),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(ArtWalkDesignSystem.radiusL),
-          child: Padding(
-            padding: const EdgeInsets.all(ArtWalkDesignSystem.paddingL),
+      margin:
+          margin ?? const EdgeInsets.only(bottom: ArtWalkDesignSystem.paddingS),
+      child: GlassCard(
+        padding: const EdgeInsets.all(ArtWalkDesignSystem.paddingL),
+        borderRadius: ArtWalkDesignSystem.radiusXXL,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(ArtWalkDesignSystem.radiusXXL),
+            onTap: onTap,
             child: child,
           ),
         ),
@@ -655,7 +577,7 @@ class ArtWalkScreenTemplate {
   }
 }
 
-/// Legacy color class for backward compatibility
+/// Legacy color mapping for backwards compatibility
 class ArtWalkColors {
   static const Color primaryTeal = ArtWalkDesignSystem.primaryTeal;
   static const Color primaryTealLight = ArtWalkDesignSystem.primaryTealLight;
