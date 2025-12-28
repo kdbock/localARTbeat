@@ -1,7 +1,11 @@
-import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
-/// Enhanced progress visualization widget with animated indicators
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+import 'glass_card.dart';
+
 class EnhancedProgressVisualization extends StatefulWidget {
   final int visitedCount;
   final int totalCount;
@@ -54,14 +58,12 @@ class _EnhancedProgressVisualizationState
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
 
-    // Start progress animation
     _progressController.forward();
   }
 
   @override
-  void didUpdateWidget(EnhancedProgressVisualization oldWidget) {
+  void didUpdateWidget(covariant EnhancedProgressVisualization oldWidget) {
     super.didUpdateWidget(oldWidget);
-
     if (oldWidget.progressPercentage != widget.progressPercentage) {
       _progressAnimation =
           Tween<double>(
@@ -73,7 +75,6 @@ class _EnhancedProgressVisualizationState
               curve: Curves.easeInOut,
             ),
           );
-
       _progressController
         ..reset()
         ..forward();
@@ -91,84 +92,79 @@ class _EnhancedProgressVisualizationState
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: widget.onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 8,
-              offset: Offset(0, 2),
-            ),
-          ],
-        ),
+      child: GlassCard(
+        borderRadius: 28,
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
           children: [
-            // Header with progress text
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Progress: ${widget.visitedCount}/${widget.totalCount}',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'art_walk_progress_visualization_label_progress'.tr(),
+                        style: GoogleFonts.spaceGrotesk(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white.withValues(alpha: 0.7),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${widget.visitedCount}/${widget.totalCount}',
+                        style: GoogleFonts.spaceGrotesk(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 if (widget.isNavigationMode)
-                  AnimatedBuilder(
-                    animation: _pulseAnimation,
-                    builder: (context, child) {
-                      return Transform.scale(
-                        scale: _pulseAnimation.value,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.blue.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: Colors.blue.withValues(alpha: 0.3),
-                              width: 1,
-                            ),
-                          ),
-                          child: const Text(
-                            'NAV',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.blue,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
+                  ScaleTransition(
+                    scale: _pulseAnimation,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: const Color(0xFF22D3EE).withValues(alpha: 0.5),
                         ),
-                      );
-                    },
+                        color: const Color(0xFF22D3EE).withValues(alpha: 0.12),
+                      ),
+                      child: Text(
+                        'art_walk_progress_visualization_nav_label'.tr(),
+                        style: GoogleFonts.spaceGrotesk(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                          color: const Color(0xFF22D3EE),
+                        ),
+                      ),
+                    ),
                   ),
               ],
             ),
-
-            const SizedBox(height: 12),
-
-            // Enhanced progress bar with animated rings
+            const SizedBox(height: 16),
             SizedBox(
-              height: 60,
+              height: 84,
               child: Row(
                 children: [
-                  // Circular progress indicator
                   SizedBox(
-                    width: 50,
-                    height: 50,
+                    width: 72,
+                    height: 72,
                     child: AnimatedBuilder(
                       animation: _progressAnimation,
                       builder: (context, child) {
                         return CustomPaint(
-                          painter: CircularProgressPainter(
+                          painter: _CircularProgressPainter(
                             progress: _progressAnimation.value,
                             isCompleted: widget.progressPercentage >= 1.0,
                           ),
@@ -176,101 +172,98 @@ class _EnhancedProgressVisualizationState
                       },
                     ),
                   ),
-
-                  const SizedBox(width: 12),
-
-                  // Linear progress bar with gradient
+                  const SizedBox(width: 20),
                   Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        AnimatedBuilder(
-                          animation: _progressAnimation,
-                          builder: (context, child) {
-                            return Container(
-                              height: 8,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(4),
-                                color: Colors.grey[200],
-                              ),
-                              child: FractionallySizedBox(
-                                alignment: Alignment.centerLeft,
-                                widthFactor: _progressAnimation.value,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(4),
-                                    gradient: LinearGradient(
-                                      colors: widget.progressPercentage >= 1.0
-                                          ? [
-                                              Colors.green,
-                                              Colors.green.shade300,
-                                            ]
-                                          : [Colors.blue, Colors.blue.shade300],
-                                    ),
-                                  ),
+                    child: AnimatedBuilder(
+                      animation: _progressAnimation,
+                      builder: (context, child) {
+                        return Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: LinearProgressIndicator(
+                                value: _progressAnimation.value,
+                                minHeight: 10,
+                                backgroundColor: Colors.white.withValues(
+                                  alpha: 0.12,
+                                ),
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  widget.progressPercentage >= 1.0
+                                      ? const Color(0xFF34D399)
+                                      : const Color(0xFF22D3EE),
                                 ),
                               ),
-                            );
-                          },
-                        ),
-
-                        const SizedBox(height: 4),
-
-                        // Progress percentage text
-                        Text(
-                          '${(widget.progressPercentage * 100).round()}% Complete',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'art_walk_progress_visualization_label_momentum'
+                                      .tr(),
+                                  style: GoogleFonts.spaceGrotesk(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white.withValues(alpha: 0.7),
+                                  ),
+                                ),
+                                Text(
+                                  '${(_progressAnimation.value * 100).round()}%',
+                                  style: GoogleFonts.spaceGrotesk(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        );
+                      },
                     ),
                   ),
                 ],
               ),
             ),
-
-            // Achievement indicators
-            if (widget.progressPercentage >= 1.0) ...[
-              const SizedBox(height: 12),
-              Row(
+            const SizedBox(height: 16),
+            AnimatedOpacity(
+              duration: const Duration(milliseconds: 300),
+              opacity: widget.progressPercentage >= 1.0 ? 1.0 : 0.8,
+              child: Row(
                 children: [
-                  const Icon(Icons.check_circle, color: Colors.green, size: 16),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Walk Completed! 🎉',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.green[700],
-                      fontWeight: FontWeight.w500,
+                  Icon(
+                    widget.progressPercentage >= 1.0
+                        ? Icons.celebration
+                        : Icons.local_fire_department,
+                    color: widget.progressPercentage >= 1.0
+                        ? const Color(0xFF34D399)
+                        : const Color(0xFFFFC857),
+                    size: 18,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      widget.progressPercentage >= 1.0
+                          ? 'art_walk_progress_visualization_text_completed'
+                                .tr()
+                          : 'art_walk_progress_visualization_text_discovered'
+                                .tr(
+                                  namedArgs: {
+                                    'count': widget.visitedCount.toString(),
+                                  },
+                                ),
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ],
               ),
-            ] else if (widget.visitedCount > 0) ...[
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  const Icon(
-                    Icons.local_fire_department,
-                    color: Colors.orange,
-                    size: 16,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${widget.visitedCount} art piece${widget.visitedCount == 1 ? '' : 's'} discovered!',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.orange[700],
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+            ),
           ],
         ),
       ),
@@ -278,60 +271,70 @@ class _EnhancedProgressVisualizationState
   }
 }
 
-/// Custom painter for circular progress indicator
-class CircularProgressPainter extends CustomPainter {
+class _CircularProgressPainter extends CustomPainter {
   final double progress;
   final bool isCompleted;
 
-  CircularProgressPainter({required this.progress, this.isCompleted = false});
+  _CircularProgressPainter({required this.progress, required this.isCompleted});
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = math.min(size.width, size.height) / 2 - 2;
+    final radius = math.min(size.width, size.height) / 2 - 4;
 
-    // Background circle
     final backgroundPaint = Paint()
-      ..color = Colors.grey[200]!
+      ..color = Colors.white.withValues(alpha: 0.12)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 4;
+      ..strokeWidth = 6;
 
     canvas.drawCircle(center, radius, backgroundPaint);
 
-    // Progress arc
+    final gradient = SweepGradient(
+      colors: isCompleted
+          ? [const Color(0xFF34D399), const Color(0xFF34D399)]
+          : [
+              const Color(0xFF7C4DFF),
+              const Color(0xFF22D3EE),
+              const Color(0xFF34D399),
+            ],
+      startAngle: -math.pi / 2,
+      endAngle: (-math.pi / 2) + 2 * math.pi,
+    );
+
+    final rect = Rect.fromCircle(center: center, radius: radius);
     final progressPaint = Paint()
-      ..color = isCompleted ? Colors.green : Colors.blue
+      ..shader = gradient.createShader(rect)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 4
+      ..strokeWidth = 6
       ..strokeCap = StrokeCap.round;
 
-    final progressAngle = 2 * math.pi * progress;
     canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius),
-      -math.pi / 2, // Start from top
-      progressAngle,
+      rect,
+      -math.pi / 2,
+      2 * math.pi * progress,
       false,
       progressPaint,
     );
 
-    // Center dot for completed walks
-    if (isCompleted) {
-      final centerDotPaint = Paint()
-        ..color = Colors.green
-        ..style = PaintingStyle.fill;
+    final centerPaint = Paint()
+      ..color = Colors.white.withValues(alpha: isCompleted ? 0.25 : 0.12);
+    canvas.drawCircle(center, radius - 18, centerPaint);
 
-      canvas.drawCircle(center, 6, centerDotPaint);
+    if (isCompleted) {
+      final dotPaint = Paint()
+        ..color = const Color(0xFF34D399)
+        ..style = PaintingStyle.fill;
+      canvas.drawCircle(center, 8, dotPaint);
     }
   }
 
   @override
-  bool shouldRepaint(CircularProgressPainter oldDelegate) {
+  bool shouldRepaint(covariant _CircularProgressPainter oldDelegate) {
     return oldDelegate.progress != progress ||
         oldDelegate.isCompleted != isCompleted;
   }
 }
 
-/// Mini progress indicator for compact views
 class MiniProgressIndicator extends StatelessWidget {
   final int visitedCount;
   final int totalCount;
@@ -346,39 +349,29 @@ class MiniProgressIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.9),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: const [
-          BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 1)),
-        ],
-      ),
+    return GlassCard(
+      borderRadius: 20,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Small circular progress
           SizedBox(
-            width: 24,
-            height: 24,
+            width: 32,
+            height: 32,
             child: CustomPaint(
-              painter: CircularProgressPainter(
+              painter: _CircularProgressPainter(
                 progress: progressPercentage,
                 isCompleted: progressPercentage >= 1.0,
               ),
             ),
           ),
-
-          const SizedBox(width: 8),
-
-          // Progress text
+          const SizedBox(width: 10),
           Text(
             '$visitedCount/$totalCount',
-            style: const TextStyle(
+            style: GoogleFonts.spaceGrotesk(
               fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: Colors.black87,
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
             ),
           ),
         ],

@@ -17,7 +17,7 @@ ARCHITECTURE AND STRUCTURE
 [x] Move any rogue service instantiations into the provider tree
 [ ] Standardize folder layout inside art_walk:
 models / services / widgets / screens / routes / constants / utils / theme
-[ ] Ensure all screens use the new design system
+[x] Ensure all screens use the new design system
 
 DATA AND FUNCTIONAL INTEGRITY
 

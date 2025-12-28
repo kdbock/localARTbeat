@@ -10,6 +10,7 @@ import '../widgets/world_background.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/hud_top_bar.dart';
 import '../widgets/gradient_cta_button.dart';
+// ignore: implementation_imports
 import 'package:artbeat_core/src/theme/artbeat_colors.dart';
 
 class EventModerationDashboardScreen extends StatefulWidget {
@@ -65,6 +66,7 @@ class _EventModerationDashboardScreenState
         _analytics = futures[2] as Map<String, dynamic>;
         _isLoading = false;
       });
+      // ignore: avoid_catches_without_on_clauses
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();
@@ -105,15 +107,15 @@ class _EventModerationDashboardScreenState
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : _errorMessage != null
-                      ? _buildErrorWidget()
-                      : TabBarView(
-                          controller: _tabController,
-                          children: [
-                            _buildFlaggedEventsTab(),
-                            _buildPendingEventsTab(),
-                            _buildAnalyticsTab(),
-                          ],
-                        ),
+                  ? _buildErrorWidget()
+                  : TabBarView(
+                      controller: _tabController,
+                      children: [
+                        _buildFlaggedEventsTab(),
+                        _buildPendingEventsTab(),
+                        _buildAnalyticsTab(),
+                      ],
+                    ),
             ),
           ],
         ),
@@ -261,8 +263,7 @@ class _EventModerationDashboardScreenState
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: _pendingEvents.length,
-        itemBuilder: (context, i) =>
-            _buildPendingEventCard(_pendingEvents[i]),
+        itemBuilder: (context, i) => _buildPendingEventCard(_pendingEvents[i]),
       ),
     );
   }
@@ -287,9 +288,7 @@ class _EventModerationDashboardScreenState
               event.description,
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.spaceGrotesk(
-                color: Colors.white70,
-              ),
+              style: GoogleFonts.spaceGrotesk(color: Colors.white70),
             ),
             const SizedBox(height: 10),
             Row(
@@ -315,8 +314,7 @@ class _EventModerationDashboardScreenState
                   onPressed: () => _reviewEvent(event.id, false),
                   child: Text(
                     'event_mod_reject'.tr(),
-                    style:
-                        GoogleFonts.spaceGrotesk(color: Colors.redAccent),
+                    style: GoogleFonts.spaceGrotesk(color: Colors.redAccent),
                   ),
                 ),
                 const SizedBox(width: 6),
@@ -436,9 +434,7 @@ class _EventModerationDashboardScreenState
             if (subtitle.isNotEmpty)
               Text(
                 subtitle,
-                style: GoogleFonts.spaceGrotesk(
-                  color: Colors.white70,
-                ),
+                style: GoogleFonts.spaceGrotesk(color: Colors.white70),
               ),
           ],
         ),
@@ -446,7 +442,12 @@ class _EventModerationDashboardScreenState
     );
   }
 
-  Widget _analyticsCard(String title, String value, IconData icon, Color color) {
+  Widget _analyticsCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return GlassCard(
       child: Row(
         children: [
@@ -455,9 +456,7 @@ class _EventModerationDashboardScreenState
           Expanded(
             child: Text(
               title,
-              style: GoogleFonts.spaceGrotesk(
-                color: Colors.white70,
-              ),
+              style: GoogleFonts.spaceGrotesk(color: Colors.white70),
             ),
           ),
           Text(
@@ -487,7 +486,8 @@ class _EventModerationDashboardScreenState
         type.replaceAll('_', ' ').toUpperCase(),
         style: GoogleFonts.spaceGrotesk(fontSize: 10),
       ),
-      backgroundColor: colors[type]?.withOpacity(0.25),
+      // ignore: deprecated_member_use
+      backgroundColor: colors[type]?.withValues(alpha: 0.25),
       side: BorderSide(color: colors[type] ?? Colors.grey),
     );
   }
@@ -506,7 +506,7 @@ class _EventModerationDashboardScreenState
         status.toUpperCase(),
         style: GoogleFonts.spaceGrotesk(fontSize: 10),
       ),
-      backgroundColor: colors[status]?.withOpacity(0.25),
+      backgroundColor: colors[status]?.withValues(alpha: 0.25),
       side: BorderSide(color: colors[status] ?? Colors.grey),
     );
   }
@@ -515,6 +515,7 @@ class _EventModerationDashboardScreenState
     try {
       final date = t is DateTime ? t : (t as Timestamp).toDate();
       return DateFormat('MMM dd, yyyy HH:mm').format(date);
+      // ignore: avoid_catches_without_on_clauses
     } catch (_) {
       return 'Unknown';
     }

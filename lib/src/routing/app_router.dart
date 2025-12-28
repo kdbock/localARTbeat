@@ -937,8 +937,13 @@ class AppRouter {
   Route<dynamic>? _handleMessagingRoutes(RouteSettings settings) {
     switch (settings.name) {
       case core.AppRoutes.messaging:
-        return RouteUtils.createMainLayoutRoute(
+        return RouteUtils.createSimpleRoute(
           child: const messaging.ArtisticMessagingScreen(),
+        );
+
+      case core.AppRoutes.messagingInbox:
+        return RouteUtils.createMainLayoutRoute(
+          child: const messaging.MessagingDashboardScreen(),
         );
 
       case core.AppRoutes.messagingNew:

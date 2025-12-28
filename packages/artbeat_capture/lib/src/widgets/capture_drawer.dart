@@ -562,6 +562,7 @@ class _CaptureDrawerState extends State<CaptureDrawer>
       if (mounted) {
         // ignore: use_build_context_synchronously
         Navigator.pushNamedAndRemoveUntil(
+          // ignore: use_build_context_synchronously
           context,
           AppRoutes.login,
           (route) => false,

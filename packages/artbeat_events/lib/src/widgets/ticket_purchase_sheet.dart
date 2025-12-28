@@ -240,9 +240,7 @@ class _TicketPurchaseSheetState extends State<TicketPurchaseSheet> {
             decoration: BoxDecoration(
               color: Colors.orange.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: Colors.orange.withValues(alpha: 0.28),
-              ),
+              border: Border.all(color: Colors.orange.withValues(alpha: 0.28)),
             ),
             child: Text(
               '${widget.ticketType.remainingQuantity} ${'events_tickets_remaining'.tr()}',
@@ -287,12 +285,15 @@ class _TicketPurchaseSheetState extends State<TicketPurchaseSheet> {
               const SizedBox(width: 16),
               Container(
                 width: 64,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
-                  border:
-                      Border.all(color: Colors.white.withValues(alpha: 0.18)),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.18),
+                  ),
                 ),
                 child: Text(
                   _quantity.toString(),
@@ -425,19 +426,18 @@ class _TicketPurchaseSheetState extends State<TicketPurchaseSheet> {
             ),
           ] else ...[
             const Divider(color: Colors.white24),
-            _buildSummaryRow('events_total'.tr(), 'events_free'.tr(),
-                isTotal: true),
-          ]
+            _buildSummaryRow(
+              'events_total'.tr(),
+              'events_free'.tr(),
+              isTotal: true,
+            ),
+          ],
         ],
       ),
     );
   }
 
-  Widget _buildSummaryRow(
-    String label,
-    String amount, {
-    bool isTotal = false,
-  }) {
+  Widget _buildSummaryRow(String label, String amount, {bool isTotal = false}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -564,7 +564,7 @@ class _TicketPurchaseSheetState extends State<TicketPurchaseSheet> {
       if (mounted) {
         _showSuccessDialog(purchaseId);
       }
-    } catch (e) {
+    } on Exception catch (e) {
       if (mounted) {
         _showErrorDialog(e.toString());
       }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart' as share_plus;
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
@@ -25,6 +26,7 @@ class _ArtWalkDetailScreenState extends State<ArtWalkDetailScreen> {
   late final ArtWalkService _artWalkService;
   late final AchievementService _achievementService;
   late ArtWalkNavigationService _navigationService;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool _isLoading = true;
   bool _isCompletingWalk = false;
   bool _hasCompletedWalk = false;
@@ -159,8 +161,14 @@ class _ArtWalkDetailScreenState extends State<ArtWalkDetailScreen> {
             BitmapDescriptor.hueViolet,
           ),
           infoWindow: InfoWindow(
-            title: '${i + 1}. ${art.title}',
-            snippet: art.artistName != null ? 'by ${art.artistName}' : null,
+            title: 'art_walk_art_walk_detail_marker_title'.tr(
+              namedArgs: {'index': '${i + 1}', 'title': art.title},
+            ),
+            snippet: art.artistName != null && art.artistName!.trim().isNotEmpty
+                ? 'art_walk_art_walk_detail_marker_by_artist'.tr(
+                    namedArgs: {'artist': art.artistName!},
+                  )
+                : null,
           ),
         ),
       );
@@ -201,7 +209,7 @@ class _ArtWalkDetailScreenState extends State<ArtWalkDetailScreen> {
       Polyline(
         polylineId: const PolylineId('route'),
         points: points,
-        color: Colors.blue,
+        color: ArtWalkDesignSystem.primaryTeal,
         width: 4,
       ),
     };
@@ -213,7 +221,9 @@ class _ArtWalkDetailScreenState extends State<ArtWalkDetailScreen> {
     try {
       await share_plus.SharePlus.instance.share(
         share_plus.ShareParams(
-          text: 'Check out this Art Walk: "${_walk!.title}" on WordNerd!',
+          text: 'art_walk_art_walk_detail_share_message'.tr(
+            namedArgs: {'title': _walk!.title},
+          ),
         ),
       );
 
@@ -369,7 +379,7 @@ class _ArtWalkDetailScreenState extends State<ArtWalkDetailScreen> {
           SnackBar(
             content: Text('art_walk_art_walk_detail_text_you_earned_new'.tr()),
             action: SnackBarAction(
-              label: 'View All',
+              label: 'art_walk_art_walk_detail_button_view_all'.tr(),
               onPressed: () {
                 if (!mounted) return;
                 Navigator.pushNamed(context, '/achievements');
@@ -439,9 +449,9 @@ class _ArtWalkDetailScreenState extends State<ArtWalkDetailScreen> {
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-            'Navigation started! Follow the turn-by-turn instructions.',
+            'art_walk_art_walk_detail_text_navigation_started'.tr(),
           ),
           backgroundColor: Colors.green,
         ),
@@ -480,462 +490,138 @@ class _ArtWalkDetailScreenState extends State<ArtWalkDetailScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return MainLayout(
-        currentIndex: -1,
-        drawer: const ArtWalkDrawer(),
-        child: Scaffold(
-          key: const ValueKey('loading'),
-          appBar: ArtWalkDesignSystem.buildAppBar(
-            title: 'Art Walk Details',
-            showBackButton: true,
-            actions: [
-              IconButton(
-                icon: const Icon(
-                  Icons.chat,
-                  color: ArtWalkDesignSystem.textLight,
-                ),
-                onPressed: () => Navigator.pushNamed(context, '/messaging'),
-              ),
-            ],
-          ),
-          body: ArtWalkDesignSystem.buildScreenContainer(
-            child: ArtWalkScreenTemplate.buildLoadingState(
-              message: 'Loading art walk details...',
-            ),
-          ),
+      return _buildStatusScaffold(
+        ArtWalkScreenTemplate.buildLoadingState(
+          message: 'art_walk_art_walk_detail_text_loading_art_walk_details'
+              .tr(),
         ),
       );
     }
 
     if (_walk == null) {
-      return MainLayout(
-        currentIndex: -1,
-        drawer: const ArtWalkDrawer(),
-        child: Scaffold(
-          key: const ValueKey('not_found'),
-          appBar: ArtWalkDesignSystem.buildAppBar(
-            title: 'Art Walk Details',
-            showBackButton: true,
-            actions: [
-              IconButton(
-                icon: const Icon(
-                  Icons.chat,
-                  color: ArtWalkDesignSystem.textLight,
-                ),
-                onPressed: () => Navigator.pushNamed(context, '/messaging'),
-              ),
-            ],
-          ),
-          body: ArtWalkDesignSystem.buildScreenContainer(
-            child: ArtWalkScreenTemplate.buildEmptyState(
-              title: 'Art Walk Not Found',
-              subtitle: 'The requested art walk could not be found.',
-              icon: Icons.error_outline,
-              actionText: 'Go Back',
-              onAction: () => Navigator.pop(context),
-            ),
-          ),
+      return _buildStatusScaffold(
+        ArtWalkScreenTemplate.buildEmptyState(
+          title: 'art_walk_art_walk_detail_text_art_walk_not'.tr(),
+          subtitle: 'art_walk_art_walk_detail_text_the_requested_art'.tr(),
+          icon: Icons.error_outline,
+          actionText: 'art_walk_common_go_back'.tr(),
+          onAction: () => Navigator.pop(context),
         ),
       );
     }
 
-    return MainLayout(
-      currentIndex: -1,
+    return ArtWalkWorldScaffold(
+      title: 'art_walk_art_walk_detail_text_art_walk_details',
+      scaffoldKey: _scaffoldKey,
       drawer: const ArtWalkDrawer(),
-      child: Scaffold(
-        key: ValueKey('art_walk_${_walk!.id}'),
-        body: CustomScrollView(
-          key: ValueKey('scroll_view_${_walk!.id}'),
-          slivers: [
-            // App bar with image - using Art Walk colors
-            SliverAppBar(
-              expandedHeight: 200.0,
-              pinned: true,
-              backgroundColor: const Color(
-                0xFF00838F,
-              ), // Art Walk header color - matches Welcome Travel user box teal
-              foregroundColor: Colors.white, // Art Walk text/icon color
-              flexibleSpace: FlexibleSpaceBar(
-                title: Text(
-                  _walk!.title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontFamily: 'Limelight',
-                    fontWeight: FontWeight.normal,
-                  ),
-                ),
-                background: _buildDetailBackground(),
-              ),
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.share, color: Colors.white),
-                  onPressed: _shareArtWalk,
-                ),
-                IconButton(
-                  icon: const Icon(
-                    Icons.chat_bubble_outline,
-                    color: Colors.white,
-                  ),
-                  onPressed: () => Navigator.pushNamed(context, '/messaging'),
-                  tooltip: 'Messages',
-                ),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.ios_share),
+          tooltip: 'art_walk_art_walk_detail_button_share'.tr(),
+          onPressed: _shareArtWalk,
+        ),
+        IconButton(
+          icon: const Icon(Icons.chat_bubble_outline),
+          tooltip: 'art_walk_art_walk_detail_button_messages'.tr(),
+          onPressed: () => Navigator.pushNamed(context, '/messaging'),
+        ),
+      ],
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+          physics: const BouncingScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeroSection(),
+              const SizedBox(height: 24),
+              _buildStatsSection(),
+              const SizedBox(height: 16),
+              _buildStartingPointCard(),
+              const SizedBox(height: 24),
+              _buildPrimaryActions(),
+              if (_showNavigationPanel) ...[
+                const SizedBox(height: 24),
+                _buildNavigationPanelCard(),
               ],
-            ),
+              const SizedBox(height: 24),
+              _buildMapSection(),
+              const SizedBox(height: 24),
+              _buildArtListSection(),
+              const SizedBox(height: 32),
+              ArtWalkCommentSection(
+                artWalkId: widget.walkId,
+                artWalkTitle: _walk!.title,
+              ),
+              const SizedBox(height: 24),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
-            // Content
-            SliverToBoxAdapter(
+  Widget _buildStatusScaffold(Widget child) {
+    return ArtWalkWorldScaffold(
+      title: 'art_walk_art_walk_detail_text_art_walk_details',
+      scaffoldKey: _scaffoldKey,
+      drawer: const ArtWalkDrawer(),
+      body: Padding(padding: const EdgeInsets.all(24), child: child),
+    );
+  }
+
+  Widget _buildHeroSection() {
+    return GlassCard(
+      borderRadius: 32,
+      padding: EdgeInsets.zero,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(32),
+        child: Stack(
+          children: [
+            SizedBox(
+              height: 240,
+              width: double.infinity,
+              child: _buildDetailBackground(),
+            ),
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black.withValues(alpha: 0.1),
+                      Colors.black.withValues(alpha: 0.8),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              left: 24,
+              right: 24,
+              bottom: 24,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Stats and info card
-                  Card(
-                    margin: const EdgeInsets.all(16),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            _walk!.description,
-                            style: const TextStyle(fontSize: 16),
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Stats row
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              _buildStat(
-                                Icons.photo,
-                                '${_artPieces.length}',
-                                'Artworks',
-                              ),
-                              if (_artPieces.length > 1)
-                                _buildStat(
-                                  Icons.straighten,
-                                  '${_calculateTotalDistance().toStringAsFixed(1)} mi',
-                                  'Distance',
-                                ),
-                              if (_walk!.estimatedDuration != null)
-                                _buildStat(
-                                  Icons.access_time,
-                                  '${_walk!.estimatedDuration!.round()} min',
-                                  'Duration',
-                                )
-                              else if (_artPieces.length > 1)
-                                _buildStat(
-                                  Icons.access_time,
-                                  '${(_calculateTotalDistance() * 19).round()} min',
-                                  'Est. Time',
-                                ),
-                            ],
-                          ),
-
-                          const SizedBox(height: 16),
-
-                          // Starting point information
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.blue[50],
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.blue[200]!),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(
-                                      Icons.my_location,
-                                      color: Colors.blue[600],
-                                      size: 20,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      'Starting Point',
-                                      style: TextStyle(
-                                        color: Colors.blue[600],
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Your current location will be used as the starting point. The app will guide you through each art piece in order.',
-                                  style: TextStyle(
-                                    color: Colors.blue[700],
-                                    fontSize: 14,
-                                  ),
-                                ),
-                                if (_artPieces.isNotEmpty) ...[
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    'First stop: ${_artPieces.first.title}',
-                                    style: TextStyle(
-                                      color: Colors.blue[700],
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-
-                          const SizedBox(height: 16),
-
-                          // Start art walk with navigation button
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton.icon(
-                              onPressed: _startNavigation,
-                              icon: const Icon(Icons.navigation),
-                              label: const Text(
-                                'Start Art Walk with Navigation',
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blue,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 16,
-                                ),
-                                textStyle: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ),
-
-                          const SizedBox(height: 8),
-
-                          // Helper text
-                          Text(
-                            'Get turn-by-turn directions to each art piece',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[600],
-                              fontStyle: FontStyle.italic,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-
-                          // Complete art walk button (only show if not already completed)
-                          if (!_hasCompletedWalk) ...[
-                            const SizedBox(height: 12),
-                            SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton.icon(
-                                onPressed: _isCompletingWalk
-                                    ? null
-                                    : _completeArtWalk,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.green,
-                                  foregroundColor: Colors.white,
-                                ),
-                                icon: _isCompletingWalk
-                                    ? const SizedBox(
-                                        width: 16,
-                                        height: 16,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          color: Colors.white,
-                                        ),
-                                      )
-                                    : const Icon(Icons.check_circle),
-                                label: Text(
-                                  _isCompletingWalk
-                                      ? 'Completing...'
-                                      : 'Complete Art Walk',
-                                ),
-                              ),
-                            ),
-                          ],
-                          // Show completed status if walk is completed
-                          if (_hasCompletedWalk) ...[
-                            const SizedBox(height: 12),
-                            Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: Colors.green.shade50,
-                                borderRadius: BorderRadius.circular(4),
-                                border: Border.all(
-                                  color: Colors.green.shade200,
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.check_circle,
-                                    color: Colors.green.shade700,
-                                    size: 20,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'Completed',
-                                    style: TextStyle(
-                                      color: Colors.green.shade700,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
+                  Text(
+                    _walk!.title,
+                    style: GoogleFonts.spaceGrotesk(
+                      fontSize: 28,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
                     ),
                   ),
-
-                  // Turn-by-turn navigation panel (expandable)
-                  if (_showNavigationPanel) ...[
-                    const SizedBox(height: 16),
-                    Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  const Icon(
-                                    Icons.navigation,
-                                    color: Colors.blue,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  const Text(
-                                    'Turn-by-Turn Navigation',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const Spacer(),
-                                  IconButton(
-                                    icon: const Icon(Icons.close),
-                                    onPressed: _stopDetailNavigation,
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-                              // Turn-by-turn navigation widget
-                              if (_isNavigationActive && _currentRoute != null)
-                                TurnByTurnNavigationWidget(
-                                  navigationService: _navigationService,
-                                  isCompact: true,
-                                  onStopNavigation: _stopDetailNavigation,
-                                )
-                              else
-                                Container(
-                                  padding: const EdgeInsets.all(16),
-                                  decoration: BoxDecoration(
-                                    color: Colors.blue.shade50,
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      const Text(
-                                        'Start navigation to see turn-by-turn directions to each art piece.',
-                                        style: TextStyle(fontSize: 14),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                      const SizedBox(height: 12),
-                                      ElevatedButton.icon(
-                                        onPressed: _startDetailNavigation,
-                                        icon: const Icon(Icons.navigation),
-                                        label: Text(
-                                          'art_walk_art_walk_detail_text_start_navigation'
-                                              .tr(),
-                                        ),
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.blue,
-                                          foregroundColor: Colors.white,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-
-                  // Map preview
-                  Container(
-                    height: 250,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: kIsWeb
-                          ? _buildWebMapFallback()
-                          : GoogleMap(
-                              initialCameraPosition: CameraPosition(
-                                target: _markers.isNotEmpty
-                                    ? _markers.first.position
-                                    : const LatLng(
-                                        37.7749,
-                                        -122.4194,
-                                      ), // Default to SF
-                                zoom: 13,
-                              ),
-                              markers: _markers,
-                              polylines: _polylines,
-                              liteModeEnabled: true,
-                              zoomControlsEnabled: false,
-                              scrollGesturesEnabled: false,
-                              rotateGesturesEnabled: false,
-                              zoomGesturesEnabled: false,
-                              tiltGesturesEnabled: false,
-                              myLocationButtonEnabled: false,
-                            ),
-                    ),
-                  ),
-
-                  // Art pieces list
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Art in this Walk',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        ..._artPieces.asMap().entries.map((entry) {
-                          final index = entry.key;
-                          final art = entry.value;
-                          return _buildArtCard(
-                            art,
-                            index,
-                            key: ValueKey('art_${art.id}'),
-                          );
-                        }),
-                      ],
+                  const SizedBox(height: 16),
+                  Text(
+                    _walk!.description,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.body(
+                      Colors.white.withValues(alpha: 0.85),
                     ),
                   ),
                 ],
-              ),
-            ),
-
-            // Comment section
-            SliverToBoxAdapter(
-              child: ArtWalkCommentSection(
-                artWalkId: widget.walkId,
-                artWalkTitle: _walk!.title,
               ),
             ),
           ],
@@ -944,101 +630,318 @@ class _ArtWalkDetailScreenState extends State<ArtWalkDetailScreen> {
     );
   }
 
-  Widget _buildStat(IconData icon, String value, String label) {
+  Widget _buildStatsSection() {
+    final stats = <Widget>[];
+
+    stats.add(
+      _buildStatPill(
+        icon: Icons.photo_outlined,
+        label: 'art_walk_art_walk_detail_stat_artworks'.tr(),
+        value: '${_artPieces.length}',
+      ),
+    );
+
+    final distance = _walk!.estimatedDistance ?? _calculateTotalDistance();
+    if (distance > 0) {
+      stats.add(
+        _buildStatPill(
+          icon: Icons.route_outlined,
+          label: 'art_walk_art_walk_detail_stat_distance'.tr(),
+          value: 'art_walk_art_walk_detail_stat_distance_value'.tr(
+            namedArgs: {'miles': distance.toStringAsFixed(1)},
+          ),
+        ),
+      );
+    }
+
+    final duration = _walk!.estimatedDuration;
+    if (duration != null) {
+      stats.add(
+        _buildStatPill(
+          icon: Icons.access_time,
+          label: 'art_walk_art_walk_detail_stat_duration'.tr(),
+          value: 'art_walk_art_walk_detail_stat_duration_value'.tr(
+            namedArgs: {'minutes': duration.round().toString()},
+          ),
+        ),
+      );
+    } else if (distance > 0) {
+      stats.add(
+        _buildStatPill(
+          icon: Icons.access_time,
+          label: 'art_walk_art_walk_detail_stat_estimated_time'.tr(),
+          value: 'art_walk_art_walk_detail_stat_estimated_time_value'.tr(
+            namedArgs: {'minutes': (distance * 19).round().toString()},
+          ),
+        ),
+      );
+    }
+
+    stats.add(
+      _buildStatPill(
+        icon: Icons.visibility,
+        label: 'art_walk_art_walk_detail_stat_views'.tr(),
+        value: _walk!.viewCount.toString(),
+      ),
+    );
+
+    return GlassCard(
+      borderRadius: 28,
+      padding: const EdgeInsets.all(24),
+      child: Wrap(spacing: 16, runSpacing: 16, children: stats),
+    );
+  }
+
+  Widget _buildStatPill({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minWidth: 120, maxWidth: 180),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          color: Colors.black.withValues(alpha: 0.3),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: ArtWalkDesignSystem.primaryTeal, size: 20),
+            const SizedBox(height: 16),
+            Text(
+              value,
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              style: AppTypography.helper(Colors.white.withValues(alpha: 0.85)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStartingPointCard() {
+    return GlassCard(
+      borderRadius: 28,
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      ArtWalkDesignSystem.primaryTeal,
+                      ArtWalkDesignSystem.primaryTealLight,
+                    ],
+                  ),
+                ),
+                child: const Icon(Icons.my_location, color: Colors.white),
+              ),
+              const SizedBox(width: 16),
+              Text(
+                'art_walk_art_walk_detail_section_starting_point'.tr(),
+                style: AppTypography.screenTitle(),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'art_walk_art_walk_detail_body_starting_point_description'.tr(),
+            style: AppTypography.body(Colors.white.withValues(alpha: 0.85)),
+          ),
+          if (_artPieces.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            Text(
+              'art_walk_art_walk_detail_body_first_stop'.tr(
+                namedArgs: {'title': _artPieces.first.title},
+              ),
+              style: AppTypography.sectionLabel(
+                ArtWalkDesignSystem.primaryTeal,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPrimaryActions() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, color: Colors.blue),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        GradientCTAButton(
+          label: 'art_walk_art_walk_detail_button_start_art_walk_navigation'
+              .tr(),
+          icon: Icons.navigation,
+          onPressed: _startNavigation,
         ),
+        const SizedBox(height: 8),
         Text(
-          label,
-          style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+          'art_walk_art_walk_detail_helper_turn_by_turn'.tr(),
+          style: AppTypography.helper(Colors.white.withValues(alpha: 0.85)),
         ),
+        const SizedBox(height: 24),
+        if (!_hasCompletedWalk)
+          GradientCTAButton(
+            label: _isCompletingWalk
+                ? 'art_walk_art_walk_detail_button_completing'.tr()
+                : 'art_walk_art_walk_detail_button_complete_walk'.tr(),
+            icon: Icons.check_circle,
+            onPressed: _isCompletingWalk ? null : _completeArtWalk,
+          )
+        else
+          GlassCard(
+            borderRadius: 24,
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.celebration,
+                  color: ArtWalkDesignSystem.primaryTeal,
+                ),
+                const SizedBox(width: 16),
+                Text(
+                  'art_walk_art_walk_detail_status_completed'.tr(),
+                  style: AppTypography.body(
+                    Colors.white.withValues(alpha: 0.9),
+                  ),
+                ),
+              ],
+            ),
+          ),
       ],
     );
   }
 
-  Widget _buildArtCard(PublicArtModel art, int index, {Key? key}) {
-    return Card(
-      key: key,
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
+  Widget _buildNavigationPanelCard() {
+    return GlassCard(
+      borderRadius: 28,
+      padding: const EdgeInsets.all(24),
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Index number
-          Container(
-            width: 36,
-            height: 36,
-            margin: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.blue,
-              borderRadius: BorderRadius.circular(18),
-            ),
-            alignment: Alignment.center,
-            child: Text(
-              '${index + 1}',
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withValues(alpha: 0.08),
+                ),
+                child: const Icon(
+                  Icons.navigation,
+                  color: ArtWalkDesignSystem.primaryTeal,
+                ),
               ),
-            ),
-          ),
-
-          // Image
-          ClipRRect(
-            borderRadius: const BorderRadius.only(
-              topRight: Radius.circular(4),
-              bottomRight: Radius.circular(4),
-            ),
-            child: SecureNetworkImage(
-              imageUrl: art.imageUrl,
-              width: 100,
-              height: 100,
-              fit: BoxFit.cover,
-              errorWidget: Container(
-                width: 100,
-                height: 100,
-                color: Colors.grey[300],
-                child: const Icon(Icons.broken_image, color: Colors.grey),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  'art_walk_art_walk_detail_section_navigation'.tr(),
+                  style: AppTypography.sectionLabel(),
+                ),
               ),
-            ),
+              IconButton(
+                icon: const Icon(Icons.close, color: Colors.white),
+                tooltip: 'art_walk_button_cancel'.tr(),
+                onPressed: _stopDetailNavigation,
+              ),
+            ],
           ),
-
-          // Info
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    art.title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
+          const SizedBox(height: 16),
+          if (_isNavigationActive && _currentRoute != null)
+            TurnByTurnNavigationWidget(
+              navigationService: _navigationService,
+              isCompact: true,
+              onStopNavigation: _stopDetailNavigation,
+            )
+          else
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'art_walk_art_walk_detail_body_start_navigation_prompt'.tr(),
+                  style: AppTypography.body(
+                    Colors.white.withValues(alpha: 0.85),
                   ),
-                  if (art.artistName != null) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      'by ${art.artistName}',
-                      style: const TextStyle(color: Colors.blue, fontSize: 14),
-                    ),
-                  ],
-                  const SizedBox(height: 6),
-                  if (art.artType != null)
-                    Text(
-                      art.artType!,
-                      style: TextStyle(
-                        color: Colors.grey.shade700,
-                        fontSize: 13,
-                      ),
-                    ),
-                ],
+                ),
+                const SizedBox(height: 16),
+                GradientCTAButton(
+                  label: 'art_walk_art_walk_detail_text_start_navigation'.tr(),
+                  icon: Icons.navigation,
+                  height: 48,
+                  onPressed: _startDetailNavigation,
+                ),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMapSection() {
+    return GlassCard(
+      borderRadius: 28,
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.map_outlined,
+                color: ArtWalkDesignSystem.primaryTeal,
               ),
+              const SizedBox(width: 16),
+              Text(
+                'art_walk_art_walk_detail_section_map_preview'.tr(),
+                style: AppTypography.sectionLabel(),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(24),
+            child: SizedBox(
+              height: 256,
+              child: kIsWeb
+                  ? _buildWebMapFallback()
+                  : GoogleMap(
+                      initialCameraPosition: CameraPosition(
+                        target: _markers.isNotEmpty
+                            ? _markers.first.position
+                            : const LatLng(37.7749, -122.4194),
+                        zoom: 13,
+                      ),
+                      markers: _markers,
+                      polylines: _polylines,
+                      liteModeEnabled: true,
+                      zoomControlsEnabled: false,
+                      scrollGesturesEnabled: false,
+                      rotateGesturesEnabled: false,
+                      zoomGesturesEnabled: false,
+                      tiltGesturesEnabled: false,
+                      myLocationButtonEnabled: false,
+                    ),
             ),
           ),
         ],
@@ -1046,31 +949,172 @@ class _ArtWalkDetailScreenState extends State<ArtWalkDetailScreen> {
     );
   }
 
+  Widget _buildArtListSection() {
+    if (_artPieces.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'art_walk_art_walk_detail_section_art_in_walk'.tr(),
+          style: AppTypography.sectionLabel(),
+        ),
+        const SizedBox(height: 16),
+        ..._artPieces.asMap().entries.map((entry) {
+          final index = entry.key;
+          final art = entry.value;
+          return Padding(
+            padding: EdgeInsets.only(
+              bottom: index == _artPieces.length - 1 ? 0 : 16,
+            ),
+            child: _buildArtCard(art, index, key: ValueKey('art_${art.id}')),
+          );
+        }),
+      ],
+    );
+  }
+
+  Widget _buildArtCard(PublicArtModel art, int index, {Key? key}) {
+    return Semantics(
+      button: true,
+      label: art.title,
+      child: GestureDetector(
+        key: key,
+        onTap: () => _openArtDetail(art),
+        child: GlassCard(
+          borderRadius: 28,
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      ArtWalkDesignSystem.primaryTeal,
+                      ArtWalkDesignSystem.primaryTealLight,
+                    ],
+                  ),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  '${index + 1}',
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: SecureNetworkImage(
+                  imageUrl: art.imageUrl,
+                  width: 96,
+                  height: 96,
+                  fit: BoxFit.cover,
+                  errorWidget: Container(
+                    width: 96,
+                    height: 96,
+                    color: Colors.black.withValues(alpha: 0.3),
+                    child: const Icon(
+                      Icons.broken_image,
+                      color: Colors.white54,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      art.title,
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                      ),
+                    ),
+                    if (art.artistName != null &&
+                        art.artistName!.trim().isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        'art_walk_art_detail_bottom_sheet_text_by_artist'.tr(
+                          namedArgs: {'artist': art.artistName!},
+                        ),
+                        style: AppTypography.body(
+                          ArtWalkDesignSystem.primaryTeal,
+                        ),
+                      ),
+                    ],
+                    if (art.artType != null &&
+                        art.artType!.trim().isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        art.artType!,
+                        style: AppTypography.helper(
+                          Colors.white.withValues(alpha: 0.85),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Icon(Icons.chevron_right, color: Colors.white, size: 20),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _openArtDetail(PublicArtModel art) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => ArtDetailBottomSheet(art: art),
+    );
+  }
+
   Widget _buildWebMapFallback() {
     return Container(
-      color: const Color(0xFF00838F).withValues(alpha: 0.1), // Art Walk teal
-      child: const Center(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF07060F), Color(0xFF0A1330)],
+        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+      ),
+      child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
+            const Icon(
               Icons.map_outlined,
               size: 48,
-              color: Color(0xFF00838F), // Art Walk teal
+              color: ArtWalkDesignSystem.primaryTeal,
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Text(
-              'Art Walk Map Preview',
-              style: TextStyle(
-                color: Color(0xFF00838F),
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
+              'art_walk_art_walk_detail_text_art_walk_map_preview'.tr(),
+              style: AppTypography.screenTitle(ArtWalkDesignSystem.primaryTeal),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
-              'Interactive map available on mobile devices',
-              style: TextStyle(color: Colors.grey, fontSize: 14),
+              'art_walk_art_walk_detail_text_map_helper'.tr(),
+              style: AppTypography.body(Colors.white.withValues(alpha: 0.75)),
               textAlign: TextAlign.center,
             ),
           ],

@@ -6,25 +6,10 @@ import 'package:provider/provider.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_capture/artbeat_capture.dart';
 import 'package:artbeat_art_walk/artbeat_art_walk.dart';
+import 'package:artbeat_art_walk/src/widgets/glass_card.dart'
+    as art_walk_widgets;
 import 'dart:async';
-import 'dart:ui';
 
-// Clean Dashboard Colors - Aligned with ArtBeat design system
-class ArtWalkDashboardColors {
-  // Use standard ArtBeat colors
-  static const Color primaryPurple = ArtbeatColors.primaryPurple;
-  static const Color primaryGreen = ArtbeatColors.primaryGreen;
-  static const Color primaryBlue = ArtbeatColors.primaryBlue;
-  static const Color accentOrange = ArtbeatColors.accentOrange;
-
-  // Text colors
-  static const Color textPrimary = Color(0xFFE6ECF7);
-  static const Color textSecondary = Color(0xFF97A4C2);
-
-  // Background colors
-  static const Color cardBackground = Color(0xFF101527);
-  static const Color backgroundLight = Color(0xFF05060A);
-}
 
 /// 🎨 ARTbeat ArtWalk Dashboard Screen
 /// Clean, professional design aligned with ArtBeat design system
@@ -48,6 +33,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
   UserModel? _currentUser;
   bool _isDisposed = false;
   bool _hasDiscoveriesMade = false; // Track if discoveries were made
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   // Gamification state
   int _currentStreak = 0;
@@ -140,38 +126,38 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
   Widget build(BuildContext context) {
     final slivers = <Widget>[
       SliverToBoxAdapter(child: _buildHeroSection()),
-      const SliverToBoxAdapter(child: SizedBox(height: 18)),
+      const SliverToBoxAdapter(child: SizedBox(height: ArtWalkDesignSystem.paddingL)),
       SliverToBoxAdapter(child: _buildInstantDiscoveryRadar()),
-      const SliverToBoxAdapter(child: SizedBox(height: 18)),
+      const SliverToBoxAdapter(child: SizedBox(height: ArtWalkDesignSystem.paddingL)),
       SliverToBoxAdapter(child: _buildStatsSection()),
-      const SliverToBoxAdapter(child: SizedBox(height: 18)),
+      const SliverToBoxAdapter(child: SizedBox(height: ArtWalkDesignSystem.paddingL)),
       SliverToBoxAdapter(child: _buildHeroDetailsSection()),
     ];
 
     if (_todaysChallenge != null) {
       slivers.addAll([
-        const SliverToBoxAdapter(child: SizedBox(height: 18)),
+        const SliverToBoxAdapter(child: SizedBox(height: ArtWalkDesignSystem.paddingL)),
         SliverToBoxAdapter(child: _buildDailyChallenge()),
       ]);
     }
 
     if (_weeklyGoals.isNotEmpty) {
       slivers.addAll([
-        const SliverToBoxAdapter(child: SizedBox(height: 18)),
+        const SliverToBoxAdapter(child: SizedBox(height: ArtWalkDesignSystem.paddingL)),
         SliverToBoxAdapter(child: _buildWeeklyGoals()),
       ]);
     }
 
     slivers.addAll([
-      const SliverToBoxAdapter(child: SizedBox(height: 18)),
+      const SliverToBoxAdapter(child: SizedBox(height: ArtWalkDesignSystem.paddingL)),
       SliverToBoxAdapter(child: _buildLiveSocialFeed()),
-      const SliverToBoxAdapter(child: SizedBox(height: 18)),
+      const SliverToBoxAdapter(child: SizedBox(height: ArtWalkDesignSystem.paddingL)),
       SliverToBoxAdapter(child: _buildQuickActionGrid()),
-      const SliverToBoxAdapter(child: SizedBox(height: 18)),
+      const SliverToBoxAdapter(child: SizedBox(height: ArtWalkDesignSystem.paddingL)),
       SliverToBoxAdapter(child: _buildAchievementShowcase()),
-      const SliverToBoxAdapter(child: SizedBox(height: 18)),
+      const SliverToBoxAdapter(child: SizedBox(height: ArtWalkDesignSystem.paddingL)),
       SliverToBoxAdapter(child: _buildNearbyArtClusters()),
-      const SliverToBoxAdapter(child: SizedBox(height: 120)),
+      const SliverToBoxAdapter(child: SizedBox(height: ArtWalkDesignSystem.paddingXXL)),
     ]);
 
     return PopScope(
@@ -181,30 +167,31 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
           Navigator.pop(context, _hasDiscoveriesMade);
         }
       },
-      child: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF05060A), Color(0xFF0B1220), Color(0xFF05060A)],
-          ),
+      child: ArtWalkWorldScaffold(
+        scaffoldKey: _scaffoldKey,
+        drawer: const ArtWalkDrawer(),
+        title: 'art_walk_art_walk_dashboard_text_local_scene',
+        translateTitle: true,
+        showBackButton: false,
+        appBar: const PreferredSize(
+          preferredSize: Size.zero,
+          child: SizedBox.shrink(),
         ),
-        child: Scaffold(
-          backgroundColor: Colors.transparent,
-          drawer: const ArtWalkDrawer(),
-          body: Stack(
-            children: [
-              Positioned.fill(child: _buildAuroraBackdrop()),
-              SafeArea(
-                bottom: false,
-                child: CustomScrollView(slivers: slivers),
+        body: Stack(
+          children: [
+            Positioned.fill(child: _buildAuroraBackdrop()),
+            SafeArea(
+              bottom: false,
+              child: CustomScrollView(
+                physics: const BouncingScrollPhysics(),
+                slivers: slivers,
               ),
-            ],
-          ),
-          bottomNavigationBar: EnhancedBottomNav(
-            currentIndex: 1,
-            onTap: _handleNavigation,
-          ),
+            ),
+          ],
+        ),
+        bottomNavigationBar: EnhancedBottomNav(
+          currentIndex: 1,
+          onTap: _handleNavigation,
         ),
       ),
     );
@@ -267,49 +254,51 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
     final userName = _getExplorerName();
 
     return _glassCard(
-      margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-      radius: 28,
+      margin: const EdgeInsets.fromLTRB(
+        ArtWalkDesignSystem.paddingL,
+        ArtWalkDesignSystem.paddingL,
+        ArtWalkDesignSystem.paddingL,
+        0,
+      ),
+      padding: const EdgeInsets.symmetric(
+        horizontal: ArtWalkDesignSystem.paddingL,
+        vertical: ArtWalkDesignSystem.paddingL,
+      ),
+      radius: ArtWalkDesignSystem.radiusXXL,
       colors: const [Color(0x3D7C4DFF), Color(0x3322D3EE), Color(0x1A05060A)],
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Builder(
-            builder: (context) => _glassIconButton(
-              icon: Icons.menu,
-              tooltip: 'art_walk_dashboard_menu_tooltip'.tr(),
-              onTap: () => Scaffold.of(context).openDrawer(),
-            ),
+          _glassIconButton(
+            icon: Icons.menu,
+            tooltip: 'art_walk_dashboard_menu_tooltip'.tr(),
+            onTap: () => _scaffoldKey.currentState?.openDrawer(),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: ArtWalkDesignSystem.paddingM),
           Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+            padding: const EdgeInsets.all(ArtWalkDesignSystem.paddingS),
+            decoration: ArtWalkDesignSystem.glassDecoration(
+              borderRadius: ArtWalkDesignSystem.radiusM,
+              alpha: 0.12,
+              borderAlpha: 0.22,
+              shadowAlpha: 0.18,
             ),
             child: const Icon(Icons.map_rounded, color: Colors.white, size: 22),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: ArtWalkDesignSystem.paddingM),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   '$greeting, $userName!',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: AppTypography.screenTitle().copyWith(fontSize: 24),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: ArtWalkDesignSystem.paddingS),
                 Text(
                   'art_walk_dashboard_greeting_subtitle'.tr(),
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
-                    fontSize: 14,
+                  style: AppTypography.body(
+                    Colors.white.withValues(alpha: 0.72),
                   ),
                 ),
               ],
@@ -353,11 +342,12 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
     final levelTitle = _rewardsService.getLevelTitle(level);
 
     return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+      padding: const EdgeInsets.all(ArtWalkDesignSystem.paddingM),
+      decoration: ArtWalkDesignSystem.glassDecoration(
+        borderRadius: ArtWalkDesignSystem.radiusXL,
+        alpha: 0.18,
+        borderAlpha: 0.14,
+        shadowAlpha: 0.12,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -365,30 +355,27 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.12),
-                  shape: BoxShape.circle,
+                padding: const EdgeInsets.all(ArtWalkDesignSystem.paddingS),
+                decoration: ArtWalkDesignSystem.iconContainerDecoration(
+                  color: ArtWalkDesignSystem.primaryTeal,
+                  borderRadius: ArtWalkDesignSystem.radiusM,
+                  alpha: 0.18,
                 ),
-                child: const Icon(
-                  Icons.stacked_bar_chart,
-                  color: Colors.white,
-                  size: 20,
-                ),
+                child: const Icon(Icons.stacked_bar_chart,
+                    color: Colors.white, size: 20),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: ArtWalkDesignSystem.paddingM),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'art_walk_dashboard_hero_xp_label'.tr(),
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
+                      style: AppTypography.helper(
+                        Colors.white.withValues(alpha: 0.8),
                       ),
                     ),
+                    const SizedBox(height: ArtWalkDesignSystem.paddingXS),
                     Text(
                       'art_walk_dashboard_hero_level_title'.tr(
                         namedArgs: {
@@ -396,10 +383,10 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
                           'title': levelTitle,
                         },
                       ),
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: AppTypography.body().copyWith(
                         fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
                       ),
                     ),
                   ],
@@ -407,9 +394,9 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: ArtWalkDesignSystem.paddingM),
           ClipRRect(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(ArtWalkDesignSystem.radiusM.toDouble()),
             child: LinearProgressIndicator(
               value: progress,
               minHeight: 8,
@@ -417,7 +404,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
               valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: ArtWalkDesignSystem.paddingS),
           Text(
             isMaxLevel
                 ? 'art_walk_dashboard_hero_xp_max_level'.tr(
@@ -429,10 +416,8 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
                       'remaining': xpToNextLevel.toString(),
                     },
                   ),
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
+            style: AppTypography.body(
+              Colors.white.withValues(alpha: 0.7),
             ),
           ),
         ],
@@ -469,24 +454,24 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
 
   Widget _buildHeroTagChip({required IconData icon, required String label}) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+      padding: const EdgeInsets.symmetric(
+        horizontal: ArtWalkDesignSystem.paddingM,
+        vertical: ArtWalkDesignSystem.paddingS,
+      ),
+      decoration: ArtWalkDesignSystem.glassDecoration(
+        borderRadius: 30,
+        alpha: 0.12,
+        borderAlpha: 0.2,
+        shadowAlpha: 0,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, color: Colors.white, size: 18),
-          const SizedBox(width: 8),
+          const SizedBox(width: ArtWalkDesignSystem.paddingS),
           Text(
             label,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-            ),
+            style: AppTypography.badge(),
           ),
         ],
       ),
@@ -506,11 +491,12 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
     final rewardXp = challenge?.rewardXP ?? 0;
 
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.2),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+      padding: const EdgeInsets.all(ArtWalkDesignSystem.paddingM),
+      decoration: ArtWalkDesignSystem.glassDecoration(
+        borderRadius: ArtWalkDesignSystem.radiusXL,
+        alpha: 0.16,
+        borderAlpha: 0.14,
+        shadowAlpha: 0.08,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -518,10 +504,11 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.12),
-                  shape: BoxShape.circle,
+                padding: const EdgeInsets.all(ArtWalkDesignSystem.paddingS),
+                decoration: ArtWalkDesignSystem.iconContainerDecoration(
+                  color: ArtWalkDesignSystem.primaryTeal,
+                  borderRadius: ArtWalkDesignSystem.radiusM,
+                  alpha: 0.2,
                 ),
                 child: const Icon(
                   Icons.auto_awesome,
@@ -529,14 +516,13 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
                   size: 18,
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: ArtWalkDesignSystem.paddingM),
               Expanded(
                 child: Text(
                   'art_walk_dashboard_hero_mission_title'.tr(),
-                  style: const TextStyle(
+                  style: AppTypography.body().copyWith(
+                    fontWeight: FontWeight.w800,
                     color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
@@ -546,38 +532,35 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
                 },
                 child: Text(
                   'art_walk_dashboard_hero_mission_cta'.tr(),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: AppTypography.body(),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: ArtWalkDesignSystem.paddingM),
           Text(
             title,
-            style: const TextStyle(
-              color: Colors.white,
+            style: AppTypography.body().copyWith(
               fontSize: 18,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: ArtWalkDesignSystem.paddingS),
           Text(
             description,
-            style: const TextStyle(color: Colors.white70, fontSize: 14),
+            style: AppTypography.body(
+              Colors.white.withValues(alpha: 0.75),
+            ),
           ),
           if (rewardXp > 0) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: ArtWalkDesignSystem.paddingM),
             Text(
               'art_walk_dashboard_hero_mission_reward'.tr(
                 namedArgs: {'xp': rewardXp.toString()},
               ),
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
+              style: AppTypography.body().copyWith(
+                fontWeight: FontWeight.w700,
               ),
             ),
           ],
@@ -590,39 +573,20 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
     return Row(
       children: [
         Expanded(
-          child: ElevatedButton.icon(
+          child: GradientCTAButton(
+            label: 'art_walk_dashboard_hero_cta_radar'.tr(),
+            icon: Icons.radar,
             onPressed: _openInstantDiscovery,
-            icon: const Icon(Icons.radar),
-            label: Text('art_walk_dashboard_hero_cta_radar'.tr()),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: ArtWalkDashboardColors.primaryPurple,
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-            ),
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: ArtWalkDesignSystem.paddingM),
         Expanded(
-          child: OutlinedButton.icon(
-            onPressed: () {
+          child: GlassSecondaryButton(
+            label: 'art_walk_dashboard_hero_cta_community'.tr(),
+            icon: Icons.handshake_rounded,
+            onTap: () {
               Navigator.pushNamed(context, '/community/dashboard');
             },
-            icon: const Icon(Icons.handshake_rounded, color: Colors.white),
-            label: Text(
-              'art_walk_dashboard_hero_cta_community'.tr(),
-              textAlign: TextAlign.center,
-            ),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: Colors.white,
-              side: BorderSide(color: Colors.white.withValues(alpha: 0.4)),
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-            ),
           ),
         ),
       ],
@@ -632,26 +596,26 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
   // Stats Section - Clean white cards
   Widget _buildStatsSection() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: ArtWalkDesignSystem.paddingL),
       child: Row(
         children: [
           _buildStatCard(
             icon: Icons.local_fire_department,
-            iconColor: ArtWalkDashboardColors.accentOrange,
+            iconColor: ArtWalkDesignSystem.accentOrange,
             value: '$_currentStreak',
             label: 'art_walk_dashboard_stat_streak'.tr(),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: ArtWalkDesignSystem.paddingM),
           _buildStatCard(
             icon: Icons.explore,
-            iconColor: ArtWalkDashboardColors.primaryGreen,
+            iconColor: ArtWalkDesignSystem.primaryTeal,
             value: '${_localCaptures.length}',
             label: 'art_walk_dashboard_stat_discoveries'.tr(),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: ArtWalkDesignSystem.paddingM),
           _buildStatCard(
             icon: Icons.star,
-            iconColor: ArtWalkDashboardColors.primaryPurple,
+            iconColor: ArtbeatColors.primaryPurple,
             value: '$_level',
             label: 'art_walk_dashboard_stat_level'.tr(),
           ),
@@ -669,8 +633,11 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
     return Expanded(
       child: _glassCard(
         margin: EdgeInsets.zero,
-        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
-        radius: 22,
+        padding: const EdgeInsets.symmetric(
+          vertical: ArtWalkDesignSystem.paddingM,
+          horizontal: ArtWalkDesignSystem.paddingS,
+        ),
+        radius: ArtWalkDesignSystem.radiusXL,
         colors: [
           Colors.white.withValues(alpha: 0.12),
           Colors.white.withValues(alpha: 0.04),
@@ -678,28 +645,23 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
         child: Column(
           children: [
             Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: iconColor.withValues(alpha: 0.14),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: iconColor.withValues(alpha: 0.35)),
+              padding: const EdgeInsets.all(ArtWalkDesignSystem.paddingS),
+              decoration: ArtWalkDesignSystem.iconContainerDecoration(
+                color: iconColor,
+                borderRadius: ArtWalkDesignSystem.radiusM,
+                alpha: 0.2,
               ),
               child: Icon(icon, color: iconColor, size: 20),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: ArtWalkDesignSystem.paddingS),
             Text(
               value,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: ArtWalkDashboardColors.textPrimary,
-              ),
+              style: AppTypography.screenTitle(),
             ),
             Text(
               label,
-              style: const TextStyle(
-                fontSize: 11,
-                color: ArtWalkDashboardColors.textSecondary,
+              style: AppTypography.helper(
+                ArtWalkDesignSystem.textSecondary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -733,7 +695,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
               'art_walk_artbeat_artwalk_dashboard_text_view_quest_history'.tr(),
             ),
             style: TextButton.styleFrom(
-              foregroundColor: ArtWalkDashboardColors.primaryPurple,
+              foregroundColor: ArtbeatColors.primaryPurple,
             ),
           ),
         ),
@@ -791,8 +753,8 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        ArtWalkDashboardColors.primaryPurple,
-                        ArtWalkDashboardColors.primaryBlue,
+                        ArtbeatColors.primaryPurple,
+                        ArtbeatColors.primaryBlue,
                       ],
                     ),
                   ),
@@ -835,17 +797,16 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
                             children: [
                               Text(
                                 'art_walk_dashboard_discovery_title'.tr(),
-                                style: const TextStyle(
-                                  color: Colors.white,
+                                style: AppTypography.body().copyWith(
                                   fontSize: 20,
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.white,
                                 ),
                               ),
                               Text(
                                 'art_walk_dashboard_discovery_subtitle'.tr(),
-                                style: const TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 14,
+                                style: AppTypography.body(
+                                  Colors.white.withValues(alpha: 0.7),
                                 ),
                               ),
                             ],
@@ -875,19 +836,16 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
                                 children: [
                                   Text(
                                     '$_nearbyArtCount',
-                                    style: const TextStyle(
-                                      color: Colors.white,
+                                    style: AppTypography.screenTitle().copyWith(
                                       fontSize: 32,
-                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  const Text(
-                                    'art_walk_dashboard_discovery_nearby',
-                                    style: TextStyle(
-                                      color: Colors.white70,
-                                      fontSize: 12,
+                                  Text(
+                                    'art_walk_dashboard_discovery_nearby'.tr(),
+                                    style: AppTypography.helper(
+                                      Colors.white.withValues(alpha: 0.7),
                                     ),
-                                  ).tr(),
+                                  ),
                                 ],
                               ),
                             ),
@@ -916,28 +874,11 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
                         ],
                       ),
                     ),
-                    const SizedBox(height: 20),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: ElevatedButton(
-                        onPressed: _openInstantDiscovery,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: ArtWalkDashboardColors.primaryPurple,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                        ),
-                        child: Text(
-                          'art_walk_dashboard_discovery_button'.tr(),
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
+                    const SizedBox(height: ArtWalkDesignSystem.paddingL),
+                    GradientCTAButton(
+                      label: 'art_walk_dashboard_discovery_button'.tr(),
+                      icon: Icons.radar,
+                      onPressed: _openInstantDiscovery,
                     ),
                   ],
                 ),
@@ -952,45 +893,43 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
   // Social Feed - Clean community section
   Widget _buildLiveSocialFeed() {
     return _glassCard(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.symmetric(horizontal: ArtWalkDesignSystem.paddingL),
+      padding: const EdgeInsets.all(ArtWalkDesignSystem.paddingL),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: ArtWalkDashboardColors.primaryGreen.withValues(
-                    alpha: 0.15,
-                  ),
-                  borderRadius: BorderRadius.circular(10),
+                padding: const EdgeInsets.all(ArtWalkDesignSystem.paddingS),
+                decoration: ArtWalkDesignSystem.iconContainerDecoration(
+                  color: ArtWalkDesignSystem.primaryTeal,
+                  borderRadius: ArtWalkDesignSystem.radiusM,
+                  alpha: 0.18,
                 ),
                 child: const Icon(
                   Icons.people_rounded,
-                  color: ArtWalkDashboardColors.primaryGreen,
+                  color: Colors.white,
                   size: 20,
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: ArtWalkDesignSystem.paddingM),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'art_walk_dashboard_community_title'.tr(),
-                      style: const TextStyle(
+                      style: AppTypography.body().copyWith(
                         fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: ArtWalkDashboardColors.textPrimary,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
                       ),
                     ),
                     Text(
                       'art_walk_dashboard_community_subtitle'.tr(),
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: ArtWalkDashboardColors.textSecondary,
+                      style: AppTypography.body(
+                        Colors.white.withValues(alpha: 0.7),
                       ),
                     ),
                   ],
@@ -998,29 +937,24 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
               ),
               Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 6,
+                  horizontal: ArtWalkDesignSystem.paddingS,
+                  vertical: ArtWalkDesignSystem.paddingXS,
                 ),
-                decoration: BoxDecoration(
-                  color: ArtWalkDashboardColors.primaryGreen.withValues(
-                    alpha: 0.15,
-                  ),
-                  borderRadius: BorderRadius.circular(12),
+                decoration: ArtWalkDesignSystem.iconContainerDecoration(
+                  color: ArtWalkDesignSystem.primaryTeal,
+                  borderRadius: ArtWalkDesignSystem.radiusM,
+                  alpha: 0.2,
                 ),
                 child: Text(
                   'art_walk_dashboard_community_online'.tr(
                     namedArgs: {'count': _activeWalkersNearby.toString()},
                   ),
-                  style: const TextStyle(
-                    color: ArtWalkDashboardColors.primaryGreen,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: AppTypography.badge(Colors.white),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: ArtWalkDesignSystem.paddingM),
           SocialActivityFeed(userPosition: _currentPosition, maxItems: 2),
         ],
       ),
@@ -1030,45 +964,48 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
   // Quick Action Grid - Clean action cards
   Widget _buildQuickActionGrid() {
     return _glassCard(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
+      margin: const EdgeInsets.symmetric(horizontal: ArtWalkDesignSystem.paddingL),
+      padding: const EdgeInsets.fromLTRB(
+        ArtWalkDesignSystem.paddingL,
+        ArtWalkDesignSystem.paddingM,
+        ArtWalkDesignSystem.paddingL,
+        ArtWalkDesignSystem.paddingXL,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: ArtWalkDashboardColors.primaryBlue.withValues(
-                    alpha: 0.15,
-                  ),
-                  borderRadius: BorderRadius.circular(10),
+                padding: const EdgeInsets.all(ArtWalkDesignSystem.paddingS),
+                decoration: ArtWalkDesignSystem.iconContainerDecoration(
+                  color: ArtWalkDesignSystem.primaryTeal,
+                  borderRadius: ArtWalkDesignSystem.radiusM,
+                  alpha: 0.18,
                 ),
                 child: const Icon(
                   Icons.grid_view_rounded,
-                  color: ArtWalkDashboardColors.primaryBlue,
+                  color: Colors.white,
                   size: 20,
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: ArtWalkDesignSystem.paddingM),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'art_walk_dashboard_quick_actions_title'.tr(),
-                      style: const TextStyle(
+                      style: AppTypography.body().copyWith(
                         fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: ArtWalkDashboardColors.textPrimary,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
                       ),
                     ),
                     Text(
                       'art_walk_dashboard_quick_actions_subtitle'.tr(),
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: ArtWalkDashboardColors.textSecondary,
+                      style: AppTypography.body(
+                        Colors.white.withValues(alpha: 0.7),
                       ),
                     ),
                   ],
@@ -1076,37 +1013,37 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: ArtWalkDesignSystem.paddingM),
           GridView.count(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             crossAxisCount: 2,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
+            crossAxisSpacing: ArtWalkDesignSystem.paddingM,
+            mainAxisSpacing: ArtWalkDesignSystem.paddingM,
             childAspectRatio: 1.3,
             children: [
               _buildActionCard(
                 'art_walk_dashboard_action_create_walk'.tr(),
                 Icons.add_location_rounded,
-                ArtWalkDashboardColors.accentOrange,
+                ArtWalkDesignSystem.accentOrange,
                 () => Navigator.pushNamed(context, '/art-walk/create'),
               ),
               _buildActionCard(
                 'art_walk_dashboard_action_browse_art'.tr(),
                 Icons.palette_rounded,
-                ArtWalkDashboardColors.primaryPurple,
+                ArtbeatColors.primaryPurple,
                 () => Navigator.pushNamed(context, '/artwork/browse'),
               ),
               _buildActionCard(
                 'art_walk_dashboard_action_my_walks'.tr(),
                 Icons.map_rounded,
-                ArtWalkDashboardColors.primaryBlue,
+                ArtWalkDesignSystem.primaryTeal,
                 () => Navigator.pushNamed(context, '/art-walk/list'),
               ),
               _buildActionCard(
                 'art_walk_dashboard_action_achievements'.tr(),
                 Icons.emoji_events_rounded,
-                ArtWalkDashboardColors.primaryGreen,
+                ArtWalkDesignSystem.primaryTealLight,
                 () => Navigator.pushNamed(context, '/achievements'),
               ),
             ],
@@ -1124,38 +1061,29 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
   ) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: ArtWalkDashboardColors.cardBackground,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-          border: Border.all(color: color.withValues(alpha: 0.1), width: 1),
-        ),
+      child: ArtWalkDesignSystem.buildGlassCard(
+        margin: EdgeInsets.zero,
+        padding: const EdgeInsets.all(ArtWalkDesignSystem.paddingM),
+        borderRadius: ArtWalkDesignSystem.radiusXL,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
+              padding: const EdgeInsets.all(ArtWalkDesignSystem.paddingS),
+              decoration: ArtWalkDesignSystem.iconContainerDecoration(
+                color: color,
+                borderRadius: ArtWalkDesignSystem.radiusM,
+                alpha: 0.18,
               ),
               child: Icon(icon, color: color, size: 28),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: ArtWalkDesignSystem.paddingM),
             Text(
               title,
-              style: const TextStyle(
+              style: AppTypography.body().copyWith(
                 fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: ArtWalkDashboardColors.textPrimary,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
               ),
               textAlign: TextAlign.center,
             ),
@@ -1168,45 +1096,43 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
   // Achievement Showcase - Clean achievement display
   Widget _buildAchievementShowcase() {
     return _glassCard(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.symmetric(horizontal: ArtWalkDesignSystem.paddingL),
+      padding: const EdgeInsets.all(ArtWalkDesignSystem.paddingL),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: ArtWalkDashboardColors.accentOrange.withValues(
-                    alpha: 0.15,
-                  ),
-                  borderRadius: BorderRadius.circular(10),
+                padding: const EdgeInsets.all(ArtWalkDesignSystem.paddingS),
+                decoration: ArtWalkDesignSystem.iconContainerDecoration(
+                  color: ArtWalkDesignSystem.accentOrange,
+                  borderRadius: ArtWalkDesignSystem.radiusM,
+                  alpha: 0.18,
                 ),
                 child: const Icon(
                   Icons.emoji_events_rounded,
-                  color: ArtWalkDashboardColors.accentOrange,
+                  color: Colors.white,
                   size: 20,
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: ArtWalkDesignSystem.paddingM),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'art_walk_dashboard_achievements_title'.tr(),
-                      style: const TextStyle(
+                      style: AppTypography.body().copyWith(
                         fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: ArtWalkDashboardColors.textPrimary,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
                       ),
                     ),
                     Text(
                       'art_walk_dashboard_achievements_subtitle'.tr(),
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: ArtWalkDashboardColors.textSecondary,
+                      style: AppTypography.body(
+                        Colors.white.withValues(alpha: 0.7),
                       ),
                     ),
                   ],
@@ -1214,7 +1140,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: ArtWalkDesignSystem.paddingM),
           if (_artWalkAchievements.isEmpty)
             _buildEmptyAchievementsState()
           else
@@ -1227,45 +1153,43 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
   // Nearby Art Clusters - Clean location display
   Widget _buildNearbyArtClusters() {
     return _glassCard(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.symmetric(horizontal: ArtWalkDesignSystem.paddingL),
+      padding: const EdgeInsets.all(ArtWalkDesignSystem.paddingL),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: ArtWalkDashboardColors.primaryPurple.withValues(
-                    alpha: 0.15,
-                  ),
-                  borderRadius: BorderRadius.circular(10),
+                padding: const EdgeInsets.all(ArtWalkDesignSystem.paddingS),
+                decoration: ArtWalkDesignSystem.iconContainerDecoration(
+                  color: ArtbeatColors.primaryPurple,
+                  borderRadius: ArtWalkDesignSystem.radiusM,
+                  alpha: 0.2,
                 ),
                 child: const Icon(
                   Icons.location_on_rounded,
-                  color: ArtWalkDashboardColors.primaryPurple,
+                  color: Colors.white,
                   size: 20,
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: ArtWalkDesignSystem.paddingM),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'art_walk_dashboard_nearby_title'.tr(),
-                      style: const TextStyle(
+                      style: AppTypography.body().copyWith(
                         fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: ArtWalkDashboardColors.textPrimary,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
                       ),
                     ),
                     Text(
                       'art_walk_dashboard_nearby_subtitle'.tr(),
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: ArtWalkDashboardColors.textSecondary,
+                      style: AppTypography.body(
+                        Colors.white.withValues(alpha: 0.7),
                       ),
                     ),
                   ],
@@ -1273,7 +1197,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: ArtWalkDesignSystem.paddingM),
           if (_localCaptures.isEmpty)
             _buildEmptyClustersState()
           else
@@ -1286,53 +1210,36 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
   Widget _glassCard({
     required Widget child,
     EdgeInsets margin = EdgeInsets.zero,
-    EdgeInsets padding = const EdgeInsets.all(20),
-    double radius = 22,
+    EdgeInsets padding = const EdgeInsets.all(ArtWalkDesignSystem.paddingL),
+    double radius = ArtWalkDesignSystem.radiusXXL,
     List<Color>? colors,
-    bool showBorder = true,
-    bool elevated = true,
   }) {
-    final gradientColors =
-        colors ??
-        [
-          Colors.white.withValues(alpha: 0.12),
-          Colors.white.withValues(alpha: 0.04),
-        ];
-
-    return Container(
-      margin: margin,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(radius),
-        boxShadow: elevated
-            ? [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.35),
-                  blurRadius: 24,
-                  offset: const Offset(0, 16),
-                ),
-              ]
-            : null,
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(radius),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-          child: Container(
-            padding: padding,
+    final decoratedChild = colors != null
+        ? DecoratedBox(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(radius),
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: gradientColors,
+                colors: colors,
               ),
-              border: showBorder
-                  ? Border.all(color: Colors.white.withValues(alpha: 0.15))
-                  : null,
             ),
             child: child,
-          ),
+          )
+        : child;
+
+    return Container(
+      margin: margin,
+      child: art_walk_widgets.GlassCard(
+        padding: padding,
+        borderRadius: radius,
+        fillColor: colors != null ? Colors.transparent : null,
+        shadow: BoxShadow(
+          color: Colors.black.withValues(alpha: 0.35),
+          blurRadius: 24,
+          offset: const Offset(0, 16),
         ),
+        child: decoratedChild,
       ),
     );
   }
@@ -1342,20 +1249,21 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
     required VoidCallback onTap,
     String? tooltip,
   }) {
-    final button = ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-        child: Material(
-          color: Colors.white.withValues(alpha: 0.08),
-          child: InkWell(
-            onTap: onTap,
-            child: SizedBox(
-              width: 48,
-              height: 48,
-              child: Icon(icon, color: Colors.white, size: 22),
-            ),
+    final button = Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: onTap,
+        child: Ink(
+          width: 52,
+          height: 52,
+          decoration: ArtWalkDesignSystem.glassDecoration(
+            borderRadius: 20,
+            alpha: 0.18,
+            borderAlpha: 0.22,
+            shadowAlpha: 0.18,
           ),
+          child: Icon(icon, color: Colors.white, size: 22),
         ),
       ),
     );
@@ -1399,34 +1307,35 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
 
   Widget _buildEmptyAchievementsState() {
     return Container(
-      padding: const EdgeInsets.all(32),
-      decoration: BoxDecoration(
-        color: ArtWalkDashboardColors.backgroundLight,
-        borderRadius: BorderRadius.circular(12),
+      padding: const EdgeInsets.all(ArtWalkDesignSystem.paddingXL),
+      decoration: ArtWalkDesignSystem.glassDecoration(
+        borderRadius: ArtWalkDesignSystem.radiusXL,
+        alpha: 0.1,
+        borderAlpha: 0.12,
+        shadowAlpha: 0,
       ),
       child: Column(
         children: [
           Icon(
             Icons.emoji_events_outlined,
-            color: ArtWalkDashboardColors.accentOrange.withValues(alpha: 0.5),
+            color: ArtWalkDesignSystem.accentOrange.withValues(alpha: 0.6),
             size: 48,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: ArtWalkDesignSystem.paddingS),
           Text(
             'art_walk_dashboard_empty_achievements'.tr(),
-            style: const TextStyle(
-              color: ArtWalkDashboardColors.textPrimary,
+            style: AppTypography.body().copyWith(
               fontSize: 16,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: ArtWalkDesignSystem.paddingXS),
           Text(
             'art_walk_dashboard_empty_achievements_subtitle'.tr(),
-            style: const TextStyle(
-              color: ArtWalkDashboardColors.textSecondary,
-              fontSize: 12,
+            style: AppTypography.helper(
+              Colors.white.withValues(alpha: 0.7),
             ),
             textAlign: TextAlign.center,
           ),
@@ -1440,18 +1349,15 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       crossAxisCount: 3,
-      crossAxisSpacing: 8,
-      mainAxisSpacing: 8,
+      crossAxisSpacing: ArtWalkDesignSystem.paddingS,
+      mainAxisSpacing: ArtWalkDesignSystem.paddingS,
       childAspectRatio: 0.8,
       children: _artWalkAchievements.take(6).map((achievement) {
         return GestureDetector(
           onTap: () => Navigator.pushNamed(context, '/achievements'),
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: ArtWalkDashboardColors.backgroundLight,
-              borderRadius: BorderRadius.circular(8),
-            ),
+          child: ArtWalkDesignSystem.buildGlassCard(
+            padding: const EdgeInsets.all(ArtWalkDesignSystem.paddingS),
+            borderRadius: ArtWalkDesignSystem.radiusM,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -1460,7 +1366,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
                   height: 32,
                   decoration: const BoxDecoration(
                     shape: BoxShape.circle,
-                    color: ArtWalkDashboardColors.accentOrange,
+                    gradient: ArtWalkDesignSystem.buttonGradient,
                   ),
                   child: const Icon(
                     Icons.emoji_events,
@@ -1468,13 +1374,13 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
                     size: 16,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: ArtWalkDesignSystem.paddingXS),
                 Text(
                   achievement.title,
-                  style: const TextStyle(
-                    color: ArtWalkDashboardColors.textPrimary,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
+                  style: AppTypography.body().copyWith(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
                   ),
                   textAlign: TextAlign.center,
                   maxLines: 2,
@@ -1490,34 +1396,35 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
 
   Widget _buildEmptyClustersState() {
     return Container(
-      padding: const EdgeInsets.all(32),
-      decoration: BoxDecoration(
-        color: ArtWalkDashboardColors.backgroundLight,
-        borderRadius: BorderRadius.circular(12),
+      padding: const EdgeInsets.all(ArtWalkDesignSystem.paddingXL),
+      decoration: ArtWalkDesignSystem.glassDecoration(
+        borderRadius: ArtWalkDesignSystem.radiusXL,
+        alpha: 0.1,
+        borderAlpha: 0.12,
+        shadowAlpha: 0,
       ),
       child: Column(
         children: [
           Icon(
             Icons.location_searching,
-            color: ArtWalkDashboardColors.primaryPurple.withValues(alpha: 0.5),
+            color: ArtbeatColors.primaryPurple.withValues(alpha: 0.6),
             size: 48,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: ArtWalkDesignSystem.paddingS),
           Text(
             'art_walk_dashboard_empty_clusters'.tr(),
-            style: const TextStyle(
-              color: ArtWalkDashboardColors.textPrimary,
+            style: AppTypography.body().copyWith(
               fontSize: 16,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: ArtWalkDesignSystem.paddingXS),
           Text(
             'art_walk_dashboard_empty_clusters_subtitle'.tr(),
-            style: const TextStyle(
-              color: ArtWalkDashboardColors.textSecondary,
-              fontSize: 12,
+            style: AppTypography.helper(
+              Colors.white.withValues(alpha: 0.7),
             ),
             textAlign: TextAlign.center,
           ),
@@ -1538,44 +1445,39 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
 
         return GestureDetector(
           onTap: () => _navigateToLocation(displayName, captures),
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 8),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: ArtWalkDashboardColors.backgroundLight,
-              borderRadius: BorderRadius.circular(8),
-            ),
+          child: ArtWalkDesignSystem.buildGlassCard(
+            margin: const EdgeInsets.only(bottom: ArtWalkDesignSystem.paddingS),
+            padding: const EdgeInsets.all(ArtWalkDesignSystem.paddingM),
+            borderRadius: ArtWalkDesignSystem.radiusXL,
             child: Row(
               children: [
                 Container(
-                  width: 32,
-                  height: 32,
+                  width: 40,
+                  height: 40,
                   decoration: const BoxDecoration(
                     shape: BoxShape.circle,
-                    color: ArtWalkDashboardColors.primaryPurple,
+                    gradient: ArtWalkDesignSystem.buttonGradient,
                   ),
                   child: Center(
                     child: Text(
                       '${captures.length}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
+                      style: AppTypography.body().copyWith(
                         fontWeight: FontWeight.w800,
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: ArtWalkDesignSystem.paddingM),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         displayName,
-                        style: const TextStyle(
-                          color: ArtWalkDashboardColors.textPrimary,
+                        style: AppTypography.body().copyWith(
                           fontSize: 14,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
                         ),
                       ),
                       Text(
@@ -1583,21 +1485,17 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
                           captures.length,
                           namedArgs: {'count': captures.length.toString()},
                         ),
-                        style: const TextStyle(
-                          color: ArtWalkDashboardColors.textSecondary,
-                          fontSize: 12,
+                        style: AppTypography.helper(
+                          Colors.white.withValues(alpha: 0.7),
                         ),
                       ),
                     ],
                   ),
                 ),
-                IconButton(
-                  onPressed: () => _navigateToLocation(displayName, captures),
-                  icon: const Icon(
-                    Icons.arrow_forward,
-                    color: ArtWalkDashboardColors.primaryPurple,
-                    size: 20,
-                  ),
+                _glassIconButton(
+                  icon: Icons.arrow_forward,
+                  onTap: () => _navigateToLocation(displayName, captures),
+                  tooltip: 'art_walk_dashboard_nearby_title'.tr(),
                 ),
               ],
             ),

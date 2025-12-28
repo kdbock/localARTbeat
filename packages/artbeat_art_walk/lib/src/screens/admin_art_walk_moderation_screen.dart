@@ -4,6 +4,11 @@ import 'package:provider/provider.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_art_walk/src/models/art_walk_model.dart';
 import 'package:artbeat_art_walk/src/services/art_walk_service.dart';
+import 'package:artbeat_art_walk/src/theme/art_walk_design_system.dart';
+import 'package:artbeat_art_walk/src/widgets/art_walk_drawer.dart';
+import 'package:artbeat_art_walk/src/widgets/art_walk_world_scaffold.dart';
+import 'package:artbeat_art_walk/src/widgets/glass_secondary_button.dart';
+import 'package:artbeat_art_walk/src/widgets/typography.dart';
 
 /// Admin screen for moderating art walks
 class AdminArtWalkModerationScreen extends StatefulWidget {
@@ -17,6 +22,7 @@ class AdminArtWalkModerationScreen extends StatefulWidget {
 class _AdminArtWalkModerationScreenState
     extends State<AdminArtWalkModerationScreen> {
   late final ArtWalkService _artWalkService;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   List<ArtWalkModel> _artWalks = [];
   bool _loading = true;
   String _selectedTab = 'all';
@@ -305,198 +311,393 @@ class _AdminArtWalkModerationScreenState
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'art_walk_admin_art_walk_moderation_text_art_walk_moderation'.tr(),
+    return ArtWalkWorldScaffold(
+      scaffoldKey: _scaffoldKey,
+      drawer: const ArtWalkDrawer(),
+      title: 'art_walk_admin_art_walk_moderation_text_art_walk_moderation',
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        child: Column(
+          children: [
+            _buildTabSelector(),
+            const SizedBox(height: 24),
+            if (_loading)
+              Expanded(
+                child: ArtWalkScreenTemplate.buildLoadingState(
+                  message:
+                      'art_walk_admin_art_walk_moderation_text_loading_art_walks'.tr(),
+                ),
+              )
+            else if (_artWalks.isEmpty)
+              Expanded(child: _buildEmptyState())
+            else
+              Expanded(child: _buildArtWalksList()),
+          ],
         ),
-        backgroundColor: ArtbeatColors.primaryPurple,
-        foregroundColor: Colors.white,
       ),
-      body: Column(
+      floatingActionButton: _loading
+          ? null
+          : ArtWalkDesignSystem.buildFloatingActionButton(
+              onPressed: _loadArtWalks,
+              icon: Icons.refresh,
+              tooltip:
+                  'art_walk_admin_art_walk_moderation_text_refresh'.tr(),
+            ),
+    );
+  }
+
+  Widget _buildTabSelector() {
+    return ArtWalkDesignSystem.buildGlassCard(
+      padding: const EdgeInsets.all(12),
+      child: Row(
         children: [
-          // Tab selector
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: SegmentedButton<String>(
-              segments: [
-                ButtonSegment(
-                  value: 'all',
-                  label: Text(
-                    'art_walk_admin_art_walk_moderation_text_all'.tr(),
-                  ),
-                  icon: const Icon(Icons.route),
-                ),
-                ButtonSegment(
-                  value: 'reported',
-                  label: Text(
-                    'art_walk_admin_art_walk_moderation_text_reported'.tr(),
-                  ),
-                  icon: const Icon(Icons.flag),
-                ),
-              ],
-              selected: {_selectedTab},
-              onSelectionChanged: (Set<String> newSelection) {
-                setState(() {
-                  _selectedTab = newSelection.first;
-                });
-                _loadArtWalks();
-              },
+          Expanded(
+            child: _buildTabButton(
+              value: 'all',
+              label: 'art_walk_admin_art_walk_moderation_text_all'.tr(),
+              icon: Icons.route,
             ),
           ),
-
-          // Art walks list
+          const SizedBox(width: 12),
           Expanded(
-            child: _loading
-                ? const Center(child: CircularProgressIndicator())
-                : _artWalks.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          _selectedTab == 'reported'
-                              ? Icons.flag_outlined
-                              : Icons.route_outlined,
-                          size: 64,
-                          color: Colors.grey,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          _selectedTab == 'reported'
-                              ? 'No reported art walks'
-                              : 'No art walks found',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            color: Colors.grey,
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                : RefreshIndicator(
-                    onRefresh: _loadArtWalks,
-                    child: ListView.builder(
-                      itemCount: _artWalks.length,
-                      itemBuilder: (context, index) {
-                        final walk = _artWalks[index];
-                        return Card(
-                          margin: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          child: ListTile(
-                            leading:
-                                walk.coverImageUrl != null &&
-                                    walk.coverImageUrl!.isNotEmpty
-                                ? ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: Image.network(
-                                      walk.coverImageUrl!,
-                                      width: 60,
-                                      height: 60,
-                                      fit: BoxFit.cover,
-                                      errorBuilder:
-                                          (context, error, stackTrace) {
-                                            return Container(
-                                              width: 60,
-                                              height: 60,
-                                              color: Colors.grey[300],
-                                              child: const Icon(Icons.route),
-                                            );
-                                          },
-                                    ),
-                                  )
-                                : Container(
-                                    width: 60,
-                                    height: 60,
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey[300],
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: const Icon(Icons.route),
-                                  ),
-                            title: Row(
-                              children: [
-                                Expanded(child: Text(walk.title)),
-                                if (walk.reportCount > 0)
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.red,
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        const Icon(
-                                          Icons.flag,
-                                          size: 14,
-                                          color: Colors.white,
-                                        ),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          walk.reportCount.toString(),
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                              ],
-                            ),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  walk.description.length > 60
-                                      ? '${walk.description.substring(0, 60)}...'
-                                      : walk.description,
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  '${walk.artworkIds.length} artworks • ${walk.viewCount} views',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey[600],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                if (walk.reportCount > 0)
-                                  IconButton(
-                                    icon: const Icon(
-                                      Icons.flag_outlined,
-                                      color: Colors.blue,
-                                    ),
-                                    tooltip: 'Clear Reports',
-                                    onPressed: () => _clearReports(walk),
-                                  ),
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.delete_outline,
-                                    color: Colors.red,
-                                  ),
-                                  tooltip: 'Delete',
-                                  onPressed: () => _deleteArtWalk(walk),
-                                ),
-                              ],
-                            ),
-                            onTap: () => _showArtWalkDetails(walk),
-                          ),
-                        );
-                      },
-                    ),
+            child: _buildTabButton(
+              value: 'reported',
+              label: 'art_walk_admin_art_walk_moderation_text_reported'.tr(),
+              icon: Icons.flag,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTabButton({
+    required String value,
+    required String label,
+    required IconData icon,
+  }) {
+    final isSelected = _selectedTab == value;
+    return Semantics(
+      selected: isSelected,
+      button: true,
+      child: GestureDetector(
+        onTap: () {
+          if (_selectedTab == value) return;
+          setState(() => _selectedTab = value);
+          _loadArtWalks();
+        },
+        child: Container(
+          height: 48,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(22),
+            color: isSelected
+                ? Colors.white.withValues(alpha: 0.12)
+                : Colors.white.withValues(alpha: 0.04),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: isSelected ? 0.35 : 0.12),
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 18, color: Colors.white),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: AppTypography.body(
+                  isSelected
+                      ? Colors.white
+                      : Colors.white.withValues(alpha: 0.7),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildArtWalksList() {
+    return RefreshIndicator(
+      color: ArtWalkDesignSystem.primaryTeal,
+      backgroundColor: Colors.black87,
+      onRefresh: _loadArtWalks,
+      child: ListView.separated(
+        physics: const AlwaysScrollableScrollPhysics(
+          parent: BouncingScrollPhysics(),
+        ),
+        padding: const EdgeInsets.only(bottom: 32),
+        itemCount: _artWalks.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 18),
+        itemBuilder: (context, index) => _buildArtWalkTile(_artWalks[index]),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    final isReported = _selectedTab == 'reported';
+    final title = isReported
+        ? 'art_walk_admin_art_walk_moderation_text_no_reported_walks'.tr()
+        : 'art_walk_admin_art_walk_moderation_text_no_art_walks'.tr();
+    final subtitle = isReported
+        ? 'art_walk_admin_art_walk_moderation_text_no_reported_walks_subtitle'
+            .tr()
+        : 'art_walk_admin_art_walk_moderation_text_no_art_walks_subtitle'.tr();
+
+    return ArtWalkScreenTemplate.buildEmptyState(
+      title: title,
+      subtitle: subtitle,
+      icon: isReported ? Icons.flag_outlined : Icons.route_outlined,
+      actionText: 'art_walk_admin_art_walk_moderation_text_refresh'.tr(),
+      onAction: _loadArtWalks,
+    );
+  }
+
+  Widget _buildArtWalkTile(ArtWalkModel walk) {
+    final imageProvider = ImageUrlValidator.safeCorrectedNetworkImage(
+      walk.coverImageUrl,
+    );
+
+    return GestureDetector(
+      onTap: () => _showArtWalkDetails(walk),
+      child: ArtWalkDesignSystem.buildGlassCard(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildThumbnail(imageProvider),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(walk.title, style: AppTypography.body()),
+                      const SizedBox(height: 6),
+                      Text(
+                        _formatDate(walk.createdAt),
+                        style: AppTypography.helper(),
+                      ),
+                    ],
                   ),
+                ),
+                if (walk.reportCount > 0)
+                  _buildReportBadge(walk.reportCount),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              walk.description,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: AppTypography.body(
+                Colors.white.withValues(alpha: 0.75),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: _buildMetadataChips(walk),
+            ),
+            const SizedBox(height: 20),
+            _buildActionButtons(walk),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildThumbnail(ImageProvider? image) {
+    return Container(
+      width: 72,
+      height: 72,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        gradient: ArtWalkDesignSystem.buttonGradient,
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(22),
+        child: image != null
+            ? Image(image: image, fit: BoxFit.cover)
+            : Container(
+                color: Colors.white.withValues(alpha: 0.08),
+                child: const Icon(Icons.route, color: Colors.white70),
+              ),
+      ),
+    );
+  }
+
+  List<Widget> _buildMetadataChips(ArtWalkModel walk) {
+    final chips = <Widget>[];
+
+    chips.add(
+      _buildMetadataChip(
+        Icons.visibility,
+        'art_walk_admin_art_walk_moderation_text_views'.tr(
+          namedArgs: {'count': walk.viewCount.toString()},
+        ),
+      ),
+    );
+
+    chips.add(
+      _buildMetadataChip(
+        Icons.palette,
+        'art_walk_art_walk_card_text_artworks'.tr(
+          namedArgs: {'count': walk.artworkIds.length.toString()},
+        ),
+      ),
+    );
+
+    if (walk.estimatedDuration != null) {
+      chips.add(
+        _buildMetadataChip(
+          Icons.access_time,
+          'art_walk_art_walk_card_text_duration'.tr(
+            namedArgs: {
+              'minutes': walk.estimatedDuration!.toStringAsFixed(0),
+            },
+          ),
+        ),
+      );
+    }
+
+    if (walk.estimatedDistance != null) {
+      chips.add(
+        _buildMetadataChip(
+          Icons.straighten,
+          'art_walk_art_walk_card_text_distance'.tr(
+            namedArgs: {
+              'miles': walk.estimatedDistance!.toStringAsFixed(1),
+            },
+          ),
+        ),
+      );
+    }
+
+    if (walk.difficulty?.isNotEmpty == true) {
+      chips.add(_buildMetadataChip(Icons.trending_up, walk.difficulty!));
+    }
+
+    if (walk.isAccessible == true) {
+      chips.add(
+        _buildMetadataChip(
+          Icons.accessible,
+          'art_walk_accessibility_text_accessible'.tr(),
+        ),
+      );
+    }
+
+    return chips;
+  }
+
+  Widget _buildMetadataChip(IconData icon, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        color: Colors.white.withValues(alpha: 0.05),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: Colors.white),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: AppTypography.badge(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButtons(ArtWalkModel walk) {
+    return Row(
+      children: [
+        Expanded(
+          child: GlassSecondaryButton(
+            label: 'art_walk_admin_art_walk_moderation_text_view_details'.tr(),
+            icon: Icons.visibility,
+            onTap: () => _showArtWalkDetails(walk),
+          ),
+        ),
+        const SizedBox(width: 12),
+        if (walk.reportCount > 0) ...[
+          _buildActionChip(
+            icon: Icons.flag_outlined,
+            label: 'art_walk_admin_art_walk_moderation_text_clear_reports'.tr(),
+            color: ArtWalkDesignSystem.accentOrange,
+            onTap: () => _clearReports(walk),
+          ),
+          const SizedBox(width: 12),
+        ],
+        _buildActionChip(
+          icon: Icons.delete_outline,
+          label: 'art_walk_admin_art_walk_moderation_text_delete'.tr(),
+          color: Colors.redAccent,
+          onTap: () => _deleteArtWalk(walk),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionChip({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+    Color? color,
+  }) {
+    final chipColor = color ?? ArtWalkDesignSystem.primaryTeal;
+    return Semantics(
+      button: true,
+      label: label,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          height: 48,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            color: chipColor.withValues(alpha: 0.18),
+            border: Border.all(color: chipColor.withValues(alpha: 0.4)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 18, color: chipColor),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: AppTypography.body(chipColor),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReportBadge(int count) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        color: Colors.pinkAccent.withValues(alpha: 0.15),
+        border: Border.all(color: Colors.pinkAccent.withValues(alpha: 0.4)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.flag, size: 14, color: Colors.pinkAccent),
+          const SizedBox(width: 4),
+          Text(
+            count.toString(),
+            style: AppTypography.body(Colors.pinkAccent),
           ),
         ],
       ),

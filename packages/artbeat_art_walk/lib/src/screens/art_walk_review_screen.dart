@@ -5,11 +5,14 @@ import 'package:image_picker/image_picker.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_art_walk/src/models/models.dart';
 import 'package:artbeat_art_walk/src/constants/routes.dart';
 import 'package:artbeat_art_walk/src/theme/art_walk_design_system.dart';
 import 'package:artbeat_art_walk/src/services/art_walk_service.dart';
+import 'package:artbeat_art_walk/src/widgets/world_background.dart';
+import 'package:artbeat_art_walk/src/widgets/glass_card.dart';
 
 /// Review screen shown after creating an art walk, allows selfie upload before starting
 class ArtWalkReviewScreen extends StatefulWidget {
@@ -95,16 +98,9 @@ class _ArtWalkReviewScreenState extends State<ArtWalkReviewScreen> {
             ],
           ),
         ),
-        body: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Color(0xFF1A1A2E), Color(0xFF16213E), Color(0xFF0F3460)],
-            ),
-          ),
+        body: WorldBackground(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -115,7 +111,7 @@ class _ArtWalkReviewScreenState extends State<ArtWalkReviewScreen> {
                 _buildSelfieSection(),
                 const SizedBox(height: 32),
                 _buildStartWalkButton(),
-                const SizedBox(height: 20),
+                const SizedBox(height: 24),
               ],
             ),
           ),
@@ -125,35 +121,26 @@ class _ArtWalkReviewScreenState extends State<ArtWalkReviewScreen> {
   }
 
   Widget _buildHeroSection() {
-    return Container(
+    return GlassCard(
       padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF6C63FF), Color(0xFF4ECDC4), Color(0xFF45B7D1)],
-        ),
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF6C63FF).withValues(alpha: 0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(16),
+                  color: ArtWalkDesignSystem.hudActiveColor.withValues(
+                    alpha: 0.15,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Icon(Icons.explore, color: Colors.white, size: 32),
+                child: const Icon(
+                  Icons.explore,
+                  color: ArtWalkDesignSystem.hudActiveColor,
+                  size: 32,
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -161,20 +148,22 @@ class _ArtWalkReviewScreenState extends State<ArtWalkReviewScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Ready for Adventure?',
-                      style: TextStyle(
+                      'art_walk_art_walk_review_text_ready_for_adventure'.tr(),
+                      style: GoogleFonts.spaceGrotesk(
                         fontSize: 16,
-                        color: Colors.white.withValues(alpha: 0.9),
-                        fontWeight: FontWeight.w500,
+                        color: ArtWalkDesignSystem.hudInactiveColor.withValues(
+                          alpha: 0.9,
+                        ),
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 8),
                     Text(
                       widget.artWalk.title,
-                      style: const TextStyle(
+                      style: GoogleFonts.spaceGrotesk(
                         fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        fontWeight: FontWeight.w900,
+                        color: ArtWalkDesignSystem.hudInactiveColor,
                         height: 1.2,
                       ),
                     ),
@@ -183,20 +172,25 @@ class _ArtWalkReviewScreenState extends State<ArtWalkReviewScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.15),
+              color: ArtWalkDesignSystem.hudBackground.withValues(alpha: 0.6),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+              border: Border.all(
+                color: ArtWalkDesignSystem.hudBorder.withValues(alpha: 0.3),
+              ),
             ),
             child: Text(
               widget.artWalk.description,
-              style: TextStyle(
+              style: GoogleFonts.spaceGrotesk(
                 fontSize: 16,
-                color: Colors.white.withValues(alpha: 0.95),
+                color: ArtWalkDesignSystem.hudInactiveColor.withValues(
+                  alpha: 0.92,
+                ),
                 height: 1.4,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ),
@@ -219,11 +213,13 @@ class _ArtWalkReviewScreenState extends State<ArtWalkReviewScreen> {
         Padding(
           padding: const EdgeInsets.only(left: 4, bottom: 16),
           child: Text(
-            'Your Journey at a Glance',
-            style: TextStyle(
+            'art_walk_art_walk_review_text_your_journey_glance'.tr(),
+            style: GoogleFonts.spaceGrotesk(
               fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.white.withValues(alpha: 0.9),
+              fontWeight: FontWeight.w900,
+              color: ArtWalkDesignSystem.hudInactiveColor.withValues(
+                alpha: 0.92,
+              ),
             ),
           ),
         ),
@@ -232,18 +228,19 @@ class _ArtWalkReviewScreenState extends State<ArtWalkReviewScreen> {
             Expanded(
               child: _buildModernStatCard(
                 icon: Icons.location_on,
-                label: 'Starting from',
+                label: 'art_walk_art_walk_review_text_starting_from'.tr(),
                 value: _startingLocation,
-                color: const Color(0xFF4ECDC4),
+                color: ArtWalkDesignSystem.primaryTeal,
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 16),
             Expanded(
               child: _buildModernStatCard(
                 icon: Icons.palette,
-                label: 'Art Pieces',
-                value: '$artworkCount stops',
-                color: const Color(0xFF6C63FF),
+                label: 'art_walk_art_walk_review_text_art_pieces'.tr(),
+                value:
+                    '${artworkCount} ${'art_walk_art_walk_review_text_stops'.tr()}',
+                color: ArtWalkDesignSystem.primaryTeal,
               ),
             ),
           ],
@@ -254,18 +251,20 @@ class _ArtWalkReviewScreenState extends State<ArtWalkReviewScreen> {
             Expanded(
               child: _buildModernStatCard(
                 icon: Icons.directions_walk,
-                label: 'Distance',
-                value: '${estimatedDistance.toStringAsFixed(1)} miles',
-                color: const Color(0xFF45B7D1),
+                label: 'art_walk_art_walk_review_text_distance'.tr(),
+                value:
+                    '${estimatedDistance.toStringAsFixed(1)} ${'art_walk_art_walk_review_text_miles'.tr()}',
+                color: ArtWalkDesignSystem.primaryTealLight,
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 16),
             Expanded(
               child: _buildModernStatCard(
                 icon: Icons.access_time,
-                label: 'Duration',
-                value: '${estimatedDuration.round()} min',
-                color: const Color(0xFF96CEB4),
+                label: 'art_walk_art_walk_review_text_duration'.tr(),
+                value:
+                    '${estimatedDuration.round()} ${'art_walk_art_walk_review_text_min'.tr()}',
+                color: ArtWalkDesignSystem.primaryTealDark,
               ),
             ),
           ],
@@ -274,10 +273,10 @@ class _ArtWalkReviewScreenState extends State<ArtWalkReviewScreen> {
         // XP Reward Card
         _buildModernStatCard(
           icon: Icons.stars,
-          label: 'Potential XP',
-          value: '$potentialXP points',
-          color: const Color(0xFFFFB74D),
-          subtitle: 'Level up your art journey!',
+          label: 'art_walk_art_walk_review_text_potential_xp'.tr(),
+          value: '$potentialXP ${'art_walk_art_walk_review_text_points'.tr()}',
+          color: ArtWalkDesignSystem.accentOrange,
+          subtitle: 'art_walk_art_walk_review_text_level_up_your'.tr(),
           isFullWidth: true,
         ),
         const SizedBox(height: 16),
@@ -305,18 +304,24 @@ class _ArtWalkReviewScreenState extends State<ArtWalkReviewScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Round Trip Journey',
-                      style: TextStyle(
+                      'art_walk_art_walk_review_text_round_trip_journey'.tr(),
+                      style: GoogleFonts.spaceGrotesk(
                         fontSize: 14,
-                        color: Colors.white.withValues(alpha: 0.9),
-                        fontWeight: FontWeight.w500,
+                        color: ArtWalkDesignSystem.hudInactiveColor.withValues(
+                          alpha: 0.9,
+                        ),
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     Text(
-                      'You\'ll return to your starting point',
-                      style: TextStyle(
+                      'art_walk_art_walk_review_text_return_starting_point'
+                          .tr(),
+                      style: GoogleFonts.spaceGrotesk(
                         fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.7),
+                        color: ArtWalkDesignSystem.hudInactiveColor.withValues(
+                          alpha: 0.7,
+                        ),
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
@@ -400,28 +405,31 @@ class _ArtWalkReviewScreenState extends State<ArtWalkReviewScreen> {
                     children: [
                       Text(
                         label,
-                        style: TextStyle(
+                        style: GoogleFonts.spaceGrotesk(
                           fontSize: 14,
-                          color: Colors.white.withValues(alpha: 0.8),
-                          fontWeight: FontWeight.w500,
+                          color: ArtWalkDesignSystem.hudInactiveColor
+                              .withValues(alpha: 0.8),
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         value,
-                        style: const TextStyle(
+                        style: GoogleFonts.spaceGrotesk(
                           fontSize: 20,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
+                          color: ArtWalkDesignSystem.hudInactiveColor,
+                          fontWeight: FontWeight.w900,
                         ),
                       ),
                       if (subtitle != null) ...[
                         const SizedBox(height: 2),
                         Text(
                           subtitle,
-                          style: TextStyle(
+                          style: GoogleFonts.spaceGrotesk(
                             fontSize: 12,
-                            color: Colors.white.withValues(alpha: 0.7),
+                            color: ArtWalkDesignSystem.hudInactiveColor
+                                .withValues(alpha: 0.7),
+                            fontWeight: FontWeight.w500,
                             fontStyle: FontStyle.italic,
                           ),
                         ),
@@ -445,19 +453,21 @@ class _ArtWalkReviewScreenState extends State<ArtWalkReviewScreen> {
                 const SizedBox(height: 12),
                 Text(
                   label,
-                  style: TextStyle(
+                  style: GoogleFonts.spaceGrotesk(
                     fontSize: 12,
-                    color: Colors.white.withValues(alpha: 0.8),
-                    fontWeight: FontWeight.w500,
+                    color: ArtWalkDesignSystem.hudInactiveColor.withValues(
+                      alpha: 0.8,
+                    ),
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   value,
-                  style: const TextStyle(
+                  style: GoogleFonts.spaceGrotesk(
                     fontSize: 16,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+                    color: ArtWalkDesignSystem.hudInactiveColor,
+                    fontWeight: FontWeight.w900,
                   ),
                 ),
               ],
@@ -466,41 +476,24 @@ class _ArtWalkReviewScreenState extends State<ArtWalkReviewScreen> {
   }
 
   Widget _buildSelfieSection() {
-    return Container(
+    return GlassCard(
       padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            const Color(0xFFFF6B6B).withValues(alpha: 0.8),
-            const Color(0xFFFFE66D).withValues(alpha: 0.8),
-            const Color(0xFF4ECDC4).withValues(alpha: 0.8),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFFFF6B6B).withValues(alpha: 0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(16),
+                  color: ArtWalkDesignSystem.hudActiveColor.withValues(
+                    alpha: 0.15,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Icon(
                   Icons.camera_enhance,
-                  color: Colors.white,
+                  color: ArtWalkDesignSystem.hudActiveColor,
                   size: 28,
                 ),
               ),
@@ -509,20 +502,24 @@ class _ArtWalkReviewScreenState extends State<ArtWalkReviewScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      '📸 Capture the Moment',
-                      style: TextStyle(
+                    Text(
+                      'art_walk_art_walk_review_text_capture_moment'.tr(),
+                      style: GoogleFonts.spaceGrotesk(
                         fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        fontWeight: FontWeight.w900,
+                        color: ArtWalkDesignSystem.hudInactiveColor,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 8),
                     Text(
-                      'Start your adventure with a smile!',
-                      style: TextStyle(
+                      'art_walk_art_walk_review_text_start_adventure_smile'
+                          .tr(),
+                      style: GoogleFonts.spaceGrotesk(
                         fontSize: 14,
-                        color: Colors.white.withValues(alpha: 0.9),
+                        color: ArtWalkDesignSystem.hudInactiveColor.withValues(
+                          alpha: 0.9,
+                        ),
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
@@ -530,7 +527,7 @@ class _ArtWalkReviewScreenState extends State<ArtWalkReviewScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
           _buildSelfieUploadArea(),
         ],
       ),
@@ -595,7 +592,7 @@ class _ArtWalkReviewScreenState extends State<ArtWalkReviewScreen> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: const Text(
-                        '✨ Looking great!',
+                        'art_walk_art_walk_review_text_looking_great',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 12,
@@ -623,19 +620,25 @@ class _ArtWalkReviewScreenState extends State<ArtWalkReviewScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Tap to Take Your Selfie',
-                    style: TextStyle(
+                    'art_walk_art_walk_review_text_tap_take_selfie'.tr(),
+                    style: GoogleFonts.spaceGrotesk(
                       fontSize: 18,
-                      color: Colors.white.withValues(alpha: 0.9),
+                      color: ArtWalkDesignSystem.hudInactiveColor.withValues(
+                        alpha: 0.9,
+                      ),
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
                   Text(
-                    'Optional • Show your excitement! 🎨',
-                    style: TextStyle(
+                    'art_walk_art_walk_review_text_optional_show_excitement'
+                        .tr(),
+                    style: GoogleFonts.spaceGrotesk(
                       fontSize: 13,
-                      color: Colors.white.withValues(alpha: 0.7),
+                      color: ArtWalkDesignSystem.hudInactiveColor.withValues(
+                        alpha: 0.7,
+                      ),
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],
@@ -646,21 +649,19 @@ class _ArtWalkReviewScreenState extends State<ArtWalkReviewScreen> {
 
   Widget _buildStartWalkButton() {
     return Container(
+      width: double.infinity,
+      height: 56,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF667eea), Color(0xFF764ba2), Color(0xFF6B73FF)],
-        ),
-        borderRadius: BorderRadius.circular(25),
+        gradient: ArtWalkDesignSystem.buttonGradient,
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF667eea).withValues(alpha: 0.4),
+            color: ArtWalkDesignSystem.primaryTeal.withValues(alpha: 0.4),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
           BoxShadow(
-            color: const Color(0xFF764ba2).withValues(alpha: 0.2),
+            color: ArtWalkDesignSystem.primaryTeal.withValues(alpha: 0.2),
             blurRadius: 40,
             offset: const Offset(0, 20),
           ),
@@ -670,30 +671,30 @@ class _ArtWalkReviewScreenState extends State<ArtWalkReviewScreen> {
         color: Colors.transparent,
         child: InkWell(
           onTap: _isUploading ? null : _startArtWalk,
-          borderRadius: BorderRadius.circular(25),
+          borderRadius: BorderRadius.circular(24),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             child: _isUploading
-                ? const Row(
+                ? Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      SizedBox(
+                      const SizedBox(
                         width: 24,
                         height: 24,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
                           valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.white,
+                            ArtWalkDesignSystem.hudInactiveColor,
                           ),
                         ),
                       ),
-                      SizedBox(width: 16),
+                      const SizedBox(width: 16),
                       Text(
-                        'Uploading selfie...',
-                        style: TextStyle(
-                          color: Colors.white,
+                        'art_walk_art_walk_review_text_uploading_selfie'.tr(),
+                        style: GoogleFonts.spaceGrotesk(
+                          color: ArtWalkDesignSystem.hudInactiveColor,
                           fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ],
@@ -702,14 +703,15 @@ class _ArtWalkReviewScreenState extends State<ArtWalkReviewScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(8),
+                        padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(12),
+                          color: ArtWalkDesignSystem.hudInactiveColor
+                              .withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(16),
                         ),
                         child: const Icon(
                           Icons.explore,
-                          color: Colors.white,
+                          color: ArtWalkDesignSystem.hudInactiveColor,
                           size: 24,
                         ),
                       ),
@@ -718,34 +720,38 @@ class _ArtWalkReviewScreenState extends State<ArtWalkReviewScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Text(
-                            'Start My Art Walk',
-                            style: TextStyle(
-                              color: Colors.white,
+                          Text(
+                            'art_walk_art_walk_review_text_start_my_art_walk'
+                                .tr(),
+                            style: GoogleFonts.spaceGrotesk(
+                              color: ArtWalkDesignSystem.hudInactiveColor,
                               fontSize: 20,
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w900,
                             ),
                           ),
                           Text(
-                            'Let the adventure begin! 🚀',
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.8),
+                            'art_walk_art_walk_review_text_let_adventure_begin'
+                                .tr(),
+                            style: GoogleFonts.spaceGrotesk(
+                              color: ArtWalkDesignSystem.hudInactiveColor
+                                  .withValues(alpha: 0.8),
                               fontSize: 14,
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(width: 16),
                       Container(
-                        padding: const EdgeInsets.all(4),
+                        padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(20),
+                          color: ArtWalkDesignSystem.hudInactiveColor
+                              .withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(24),
                         ),
                         child: const Icon(
                           Icons.arrow_forward,
-                          color: Colors.white,
+                          color: ArtWalkDesignSystem.hudInactiveColor,
                           size: 20,
                         ),
                       ),

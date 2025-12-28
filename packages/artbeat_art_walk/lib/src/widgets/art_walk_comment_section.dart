@@ -1,11 +1,15 @@
-import 'package:artbeat_core/artbeat_core.dart';
+import 'package:artbeat_art_walk/src/models/comment_model.dart';
+import 'package:artbeat_art_walk/src/services/art_walk_service.dart';
+import 'package:artbeat_art_walk/src/widgets/comment_tile.dart';
+import 'package:artbeat_art_walk/src/widgets/glass_card.dart';
+import 'package:artbeat_art_walk/src/widgets/gradient_cta_button.dart';
+import 'package:artbeat_art_walk/src/widgets/typography.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:artbeat_art_walk/src/services/art_walk_service.dart';
-import 'package:artbeat_art_walk/src/models/comment_model.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:timeago/timeago.dart' as timeago;
-import 'package:easy_localization/easy_localization.dart';
 
 class ArtWalkCommentSection extends StatefulWidget {
   final String artWalkId;
@@ -27,7 +31,9 @@ class _ArtWalkCommentSectionState extends State<ArtWalkCommentSection> {
   ArtWalkService? _artWalkService;
   ArtWalkService get artWalkService =>
       _artWalkService ??= widget.artWalkService ?? ArtWalkService();
+
   final TextEditingController _commentController = TextEditingController();
+  final FocusNode _inputFocusNode = FocusNode();
   final _formKey = GlobalKey<FormState>();
 
   bool _isLoading = false;
@@ -37,11 +43,6 @@ class _ArtWalkCommentSectionState extends State<ArtWalkCommentSection> {
   double? _selectedRating;
   List<CommentModel> _comments = [];
   bool _hasLoadedComments = false;
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   void didChangeDependencies() {
@@ -55,6 +56,7 @@ class _ArtWalkCommentSectionState extends State<ArtWalkCommentSection> {
   @override
   void dispose() {
     _commentController.dispose();
+    _inputFocusNode.dispose();
     super.dispose();
   }
 
@@ -62,30 +64,26 @@ class _ArtWalkCommentSectionState extends State<ArtWalkCommentSection> {
     setState(() => _isLoading = true);
 
     try {
-      final comments = await artWalkService.getArtWalkComments(
-        widget.artWalkId,
-      );
+      final comments = await artWalkService.getArtWalkComments(widget.artWalkId);
       setState(() {
         _comments = comments;
         _isLoading = false;
       });
     } catch (e) {
       setState(() => _isLoading = false);
-      if (mounted) {
-        SchedulerBinding.instance.addPostFrameCallback((_) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  'art_walk_art_walk_comment_section_error_error_loading_comments'
-                      .tr()
-                      .replaceAll('{error}', e.toString()),
-                ),
-              ),
-            );
-          }
-        });
-      }
+      if (!mounted) return;
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'art_walk_art_walk_comment_section_error_error_loading_comments'
+                  .tr()
+                  .replaceAll('{error}', e.toString()),
+            ),
+          ),
+        );
+      });
     }
   }
 
@@ -113,12 +111,9 @@ class _ArtWalkCommentSectionState extends State<ArtWalkCommentSection> {
         artWalkId: widget.artWalkId,
         content: content,
         parentCommentId: _parentCommentId,
-        rating: _isReplying
-            ? null
-            : _selectedRating, // Only include rating for top-level comments
+        rating: _isReplying ? null : _selectedRating,
       );
 
-      // Reset the form
       _commentController.clear();
       setState(() {
         _isReplying = false;
@@ -127,7 +122,6 @@ class _ArtWalkCommentSectionState extends State<ArtWalkCommentSection> {
         _selectedRating = null;
       });
 
-      // Reload comments
       await _loadComments();
     } catch (e) {
       if (mounted) {
@@ -142,9 +136,7 @@ class _ArtWalkCommentSectionState extends State<ArtWalkCommentSection> {
         );
       }
     } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -155,7 +147,7 @@ class _ArtWalkCommentSectionState extends State<ArtWalkCommentSection> {
       _parentCommentAuthor = authorName;
     });
     _commentController.text = '';
-    FocusScope.of(context).requestFocus(FocusNode());
+    _inputFocusNode.requestFocus();
   }
 
   void _cancelReply() {
@@ -165,27 +157,51 @@ class _ArtWalkCommentSectionState extends State<ArtWalkCommentSection> {
       _parentCommentAuthor = null;
     });
     _commentController.text = '';
+    _inputFocusNode.unfocus();
   }
 
   Future<void> _deleteComment(String commentId) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: const Color(0xFF0B1026),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(color: Colors.white.withValues(alpha: 0.12)),
+        ),
         title: Text(
           'art_walk_art_walk_comment_section_text_delete_comment'.tr(),
+          style: AppTypography.screenTitle(
+            Colors.white.withValues(alpha: 0.92),
+          ),
         ),
         content: Text(
           'art_walk_art_walk_comment_section_text_are_you_sure_you_want_to_delete_this_comment'
               .tr(),
+          style: AppTypography.body(
+            Colors.white.withValues(alpha: 0.75),
+          ),
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text('art_walk_button_cancel'.tr()),
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(
+              'art_walk_button_cancel'.tr(),
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white.withValues(alpha: 0.75),
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           ),
           TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(
+              'art_walk_button_delete'.tr(),
+              style: GoogleFonts.spaceGrotesk(
+                color: const Color(0xFFFF3D8D),
+                fontWeight: FontWeight.w800,
+              ),
+            ),
           ),
         ],
       ),
@@ -214,9 +230,7 @@ class _ArtWalkCommentSectionState extends State<ArtWalkCommentSection> {
         );
       }
     } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -262,367 +276,344 @@ class _ArtWalkCommentSectionState extends State<ArtWalkCommentSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: Text(
-            'Comments & Reviews',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
+        Text(
+          'art_walk_comment_section_title'.tr(),
+          style: AppTypography.screenTitle(),
         ),
-
-        // Comment form
-        Padding(
-          padding: const EdgeInsets.all(16.0),
+        const SizedBox(height: 16),
+        GlassCard(
+          borderRadius: 30,
+          padding: const EdgeInsets.all(20),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Rating selector (only for top-level comments)
-                if (!_isReplying)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Rate this art walk:',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w500,
-                            fontSize: 14,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: List.generate(5, (index) {
-                            final rating = index + 1.0;
-                            return IconButton(
-                              icon: Icon(
-                                rating <= (_selectedRating ?? 0)
-                                    ? Icons.star
-                                    : Icons.star_border,
-                                color: rating <= (_selectedRating ?? 0)
-                                    ? Colors.amber
-                                    : Colors.grey,
-                                size: 28,
-                              ),
-                              onPressed: () {
-                                setState(() => _selectedRating = rating);
-                              },
-                            );
-                          }),
-                        ),
-                      ],
-                    ),
+                if (!_isReplying) _RatingSelector(
+                  selectedRating: _selectedRating,
+                  onSelect: (rating) => setState(() => _selectedRating = rating),
+                ),
+                if (_isReplying) ...[
+                  _ReplyBanner(
+                    authorName: _parentCommentAuthor ?? '',
+                    onCancel: _cancelReply,
                   ),
-
-                // Reply status bar
-                if (_isReplying)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12.0,
-                      vertical: 8.0,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            'Replying to $_parentCommentAuthor',
-                            style: const TextStyle(
-                              fontStyle: FontStyle.italic,
-                              color: Colors.blue,
-                            ),
-                          ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.close, size: 16),
-                          onPressed: _cancelReply,
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                const SizedBox(height: 8),
-
-                // Comment text field
-                TextFormField(
+                  const SizedBox(height: 12),
+                ],
+                _CommentInputField(
                   controller: _commentController,
-                  decoration: InputDecoration(
-                    hintText: _isReplying
-                        ? 'Write a reply...'
-                        : 'Write a comment or review...',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    contentPadding: const EdgeInsets.all(12.0),
-                    suffixIcon: IconButton(
-                      icon: const Icon(Icons.send),
-                      onPressed: _submitComment,
-                    ),
-                  ),
-                  maxLines: 3,
-                  minLines: 1,
-                  textInputAction: TextInputAction.newline,
+                  focusNode: _inputFocusNode,
+                  isReplying: _isReplying,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Comment cannot be empty';
+                      return 'art_walk_comment_section_error_empty_comment'.tr();
                     }
                     return null;
                   },
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    if (_isReplying) ...[
+                      Expanded(
+                        child: _GlassOutlineButton(
+                          icon: Icons.close,
+                          label:
+                              'art_walk_comment_section_button_cancel_reply'.tr(),
+                          onTap: _cancelReply,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                    ],
+                    Expanded(
+                      flex: 2,
+                      child: GradientCTAButton(
+                        label: _isReplying
+                            ? 'art_walk_comment_section_button_reply_submit'.tr()
+                            : 'art_walk_comment_section_button_post'.tr(),
+                        icon: Icons.send,
+                        onPressed: _submitComment,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
         ),
-
-        // Comments list
-        _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : _comments.isEmpty
-            ? const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text(
-                    'No comments yet. Be the first to comment!',
-                    style: TextStyle(
-                      fontStyle: FontStyle.italic,
-                      color: Colors.grey,
-                    ),
+        const SizedBox(height: 24),
+        if (_isLoading)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 24),
+            child: Center(child: CircularProgressIndicator()),
+          )
+        else if (_comments.isEmpty)
+          GlassCard(
+            borderRadius: 28,
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.chat_bubble_outline,
+                    color: Colors.white.withValues(alpha: 0.7)),
+                const SizedBox(height: 12),
+                Text(
+                  'art_walk_comment_section_empty_state'.tr(),
+                  style: AppTypography.body(
+                    Colors.white.withValues(alpha: 0.85),
                   ),
                 ),
-              )
-            : ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: _comments.length,
-                itemBuilder: (context, index) {
-                  final comment = _comments[index];
-                  final timeAgo = timeago.format(comment.createdAt);
+              ],
+            ),
+          )
+        else
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: _comments.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 16),
+            itemBuilder: (context, index) {
+              final comment = _comments[index];
+              final replies = comment.replies ?? [];
+              final timeAgo = timeago.format(comment.createdAt);
+              final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+              final isAuthor = comment.userId == currentUserId;
 
-                  final currentUserId = FirebaseAuth.instance.currentUser?.uid;
-                  final isAuthor = comment.userId == currentUserId;
-
-                  // Get replies
-                  final replies = comment.replies ?? [];
-
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Main comment
-                      CommentTile(
-                        authorName: comment.userName,
-                        authorPhotoUrl: comment.userPhotoUrl,
-                        content: comment.content,
-                        timeAgo: timeAgo,
-                        likeCount: comment.likeCount,
-                        rating: comment.rating,
-                        isAuthor: isAuthor,
-                        onReply: () =>
-                            _replyToComment(comment.id, comment.userName),
-                        onDelete: isAuthor
-                            ? () => _deleteComment(comment.id)
-                            : null,
-                        onLike: () => _toggleCommentLike(comment.id),
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CommentTile(
+                    authorName: comment.userName,
+                    authorPhotoUrl: comment.userPhotoUrl,
+                    content: comment.content,
+                    timeAgo: timeAgo,
+                    likeCount: comment.likeCount,
+                    rating: comment.rating,
+                    isAuthor: isAuthor,
+                    onReply: () =>
+                        _replyToComment(comment.id, comment.userName),
+                    onDelete: isAuthor ? () => _deleteComment(comment.id) : null,
+                    onLike: () => _toggleCommentLike(comment.id),
+                  ),
+                  if (replies.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 28, top: 12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: replies.map((reply) {
+                          final replyTimeAgo = timeago.format(reply.createdAt);
+                          final isReplyAuthor = reply.userId == currentUserId;
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 10),
+                            child: CommentTile(
+                              authorName: reply.userName,
+                              authorPhotoUrl: reply.userPhotoUrl,
+                              content: reply.content,
+                              timeAgo: replyTimeAgo,
+                              likeCount: reply.likeCount,
+                              isAuthor: isReplyAuthor,
+                              isReply: true,
+                              onDelete: isReplyAuthor
+                                  ? () => _deleteComment(reply.id)
+                                  : null,
+                              onLike: () => _toggleCommentLike(reply.id),
+                            ),
+                          );
+                        }).toList(),
                       ),
-
-                      // Replies
-                      if (replies.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(left: 32.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: replies.map<Widget>((reply) {
-                              final replyTimeAgo = timeago.format(
-                                reply.createdAt,
-                              );
-                              final isReplyAuthor =
-                                  reply.userId == currentUserId;
-
-                              return CommentTile(
-                                authorName: reply.userName,
-                                authorPhotoUrl: reply.userPhotoUrl,
-                                content: reply.content,
-                                timeAgo: replyTimeAgo,
-                                likeCount: reply.likeCount,
-                                isAuthor: isReplyAuthor,
-                                isReply: true,
-                                onDelete: isReplyAuthor
-                                    ? () => _deleteComment(reply.id)
-                                    : null,
-                                onLike: () => _toggleCommentLike(reply.id),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-
-                      const Divider(),
-                    ],
-                  );
-                },
-              ),
+                    ),
+                ],
+              );
+            },
+          ),
       ],
     );
   }
 }
 
-class CommentTile extends StatelessWidget {
-  final String authorName;
-  final String? authorPhotoUrl;
-  final String content;
-  final String timeAgo;
-  final int likeCount;
-  final double? rating;
-  final bool isAuthor;
-  final bool isReply;
-  final VoidCallback? onReply;
-  final VoidCallback? onDelete;
-  final VoidCallback onLike;
+class _RatingSelector extends StatelessWidget {
+  final double? selectedRating;
+  final ValueChanged<double> onSelect;
 
-  const CommentTile({
-    super.key,
-    required this.authorName,
-    this.authorPhotoUrl,
-    required this.content,
-    required this.timeAgo,
-    required this.likeCount,
-    this.rating,
-    this.isAuthor = false,
-    this.isReply = false,
-    this.onReply,
-    this.onDelete,
-    required this.onLike,
+  const _RatingSelector({
+    required this.selectedRating,
+    required this.onSelect,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-        left: 16.0,
-        right: 16.0,
-        top: 8.0,
-        bottom: isReply ? 0.0 : 8.0,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'art_walk_comment_section_rate_label'.tr(),
+          style: AppTypography.sectionLabel(
+            Colors.white.withValues(alpha: 0.75),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: List.generate(5, (index) {
+            final value = (index + 1).toDouble();
+            final isActive = (selectedRating ?? 0) >= value;
+            return Padding(
+              padding: EdgeInsets.only(right: index == 4 ? 0 : 10),
+              child: GestureDetector(
+                onTap: () => onSelect(value),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    color: isActive
+                        ? const Color(0xFFFFC857).withValues(alpha: 0.22)
+                        : Colors.white.withValues(alpha: 0.04),
+                    border: Border.all(
+                      color: isActive
+                          ? const Color(0xFFFFC857).withValues(alpha: 0.6)
+                          : Colors.white.withValues(alpha: 0.1),
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.star_rounded,
+                    color: isActive
+                        ? const Color(0xFFFFC857)
+                        : Colors.white.withValues(alpha: 0.4),
+                  ),
+                ),
+              ),
+            );
+          }),
+        ),
+      ],
+    );
+  }
+}
+
+class _ReplyBanner extends StatelessWidget {
+  final String authorName;
+  final VoidCallback onCancel;
+
+  const _ReplyBanner({required this.authorName, required this.onCancel});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        color: Colors.white.withValues(alpha: 0.05),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Row(
-            children: [
-              // Author avatar
-              CircleAvatar(
-                radius: isReply ? 14.0 : 18.0,
-                backgroundColor: Colors.grey.shade300,
-                backgroundImage: ImageUrlValidator.safeNetworkImage(
-                  authorPhotoUrl,
-                ),
-                child: !ImageUrlValidator.isValidImageUrl(authorPhotoUrl)
-                    ? Icon(
-                        Icons.person,
-                        size: isReply ? 16.0 : 20.0,
-                        color: Colors.grey.shade700,
-                      )
-                    : null,
+          Icon(Icons.reply, color: Colors.white.withValues(alpha: 0.8), size: 18),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'art_walk_comment_section_replying_to'.tr(
+                namedArgs: {'author': authorName},
               ),
-              const SizedBox(width: 8),
-
-              // Author name and timestamp
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      authorName,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w500,
-                        fontSize: isReply ? 12.0 : 14.0,
-                      ),
-                    ),
-                    Text(
-                      timeAgo,
-                      style: TextStyle(
-                        color: Colors.grey,
-                        fontSize: isReply ? 10.0 : 12.0,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // Delete option for author
-              if (onDelete != null)
-                IconButton(
-                  icon: const Icon(Icons.delete_outline, size: 18),
-                  onPressed: onDelete,
-                  color: Colors.red,
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
-            ],
-          ),
-
-          // Rating (only for top-level comments)
-          if (rating != null && !isReply)
-            Padding(
-              padding: const EdgeInsets.only(top: 4.0, left: 44.0),
-              child: Row(
-                children: List.generate(5, (index) {
-                  return Icon(
-                    index < rating! ? Icons.star : Icons.star_border,
-                    size: 16,
-                    color: Colors.amber,
-                  );
-                }),
+              style: AppTypography.body(
+                Colors.white.withValues(alpha: 0.8),
               ),
             ),
-
-          // Comment content
-          Padding(
-            padding: const EdgeInsets.only(top: 4.0, left: 44.0),
-            child: Text(content),
           ),
-
-          // Action buttons
-          Padding(
-            padding: const EdgeInsets.only(top: 4.0, left: 44.0),
-            child: Row(
-              children: [
-                // Like button
-                TextButton.icon(
-                  icon: const Icon(Icons.thumb_up, size: 14),
-                  label: Text(
-                    likeCount > 0 ? likeCount.toString() : 'Like',
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  onPressed: onLike,
-                ),
-
-                // Reply button for top-level comments
-                if (onReply != null && !isReply)
-                  TextButton.icon(
-                    icon: const Icon(Icons.reply, size: 14),
-                    label: const Text('Reply', style: TextStyle(fontSize: 12)),
-                    style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    onPressed: onReply,
-                  ),
-              ],
-            ),
+          IconButton(
+            onPressed: onCancel,
+            icon: const Icon(Icons.close, size: 18),
+            color: Colors.white.withValues(alpha: 0.7),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _CommentInputField extends StatelessWidget {
+  final TextEditingController controller;
+  final FocusNode focusNode;
+  final bool isReplying;
+  final String? Function(String?)? validator;
+
+  const _CommentInputField({
+    required this.controller,
+    required this.focusNode,
+    required this.isReplying,
+    this.validator,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      controller: controller,
+      focusNode: focusNode,
+      validator: validator,
+      style: AppTypography.body(),
+      minLines: 1,
+      maxLines: 4,
+      textInputAction: TextInputAction.newline,
+      decoration: InputDecoration(
+        hintText: isReplying
+            ? 'art_walk_comment_section_input_reply_hint'.tr()
+            : 'art_walk_comment_section_input_comment_hint'.tr(),
+        hintStyle: GoogleFonts.spaceGrotesk(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: Colors.white.withValues(alpha: 0.6),
+        ),
+        filled: true,
+        fillColor: Colors.white.withValues(alpha: 0.05),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(22),
+          borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(22),
+          borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(22),
+          borderSide: const BorderSide(color: Color(0xFF22D3EE)),
+        ),
+      ),
+    );
+  }
+}
+
+class _GlassOutlineButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _GlassOutlineButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 52,
+      child: OutlinedButton.icon(
+        icon: Icon(icon, color: Colors.white, size: 18),
+        label: Text(
+          label,
+          style: GoogleFonts.spaceGrotesk(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
+        ),
+        style: OutlinedButton.styleFrom(
+          side: BorderSide(color: Colors.white.withValues(alpha: 0.18)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          backgroundColor: Colors.white.withValues(alpha: 0.04),
+        ),
+        onPressed: onTap,
       ),
     );
   }

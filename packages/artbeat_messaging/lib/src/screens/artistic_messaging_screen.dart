@@ -453,6 +453,8 @@ class _ArtisticMessagingScreenState extends State<ArtisticMessagingScreen>
             showSearch: true,
             showBackButton: true,
             showDeveloperTools: false,
+            onBackPressed: () =>
+                Navigator.of(context, rootNavigator: true).pop(),
             onSearchPressed: (String query) => _showSearchModal(context),
             onProfilePressed: () => _showProfileMenu(context),
             backgroundColor: Colors.transparent,

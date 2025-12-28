@@ -8,6 +8,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_capture/artbeat_capture.dart';
 import 'package:artbeat_art_walk/src/models/public_art_model.dart';
@@ -45,7 +46,7 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
   String _mapErrorMessage = '';
   bool _showCapturesSlider = false;
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>>?
-      _notificationSubscription;
+  _notificationSubscription;
   int _unreadNotificationCount = 0;
 
   // Map data
@@ -214,18 +215,18 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
         .limit(50)
         .snapshots()
         .listen(
-      (snapshot) {
-        if (!mounted) return;
-        final unreadCount = snapshot.size;
-        if (unreadCount == _unreadNotificationCount) return;
-        setState(() => _unreadNotificationCount = unreadCount);
-      },
-      onError: (Object error, StackTrace stackTrace) {
-        AppLogger.error(
-          'Error listening to notification badge: $error\n$stackTrace',
+          (snapshot) {
+            if (!mounted) return;
+            final unreadCount = snapshot.size;
+            if (unreadCount == _unreadNotificationCount) return;
+            setState(() => _unreadNotificationCount = unreadCount);
+          },
+          onError: (Object error, StackTrace stackTrace) {
+            AppLogger.error(
+              'Error listening to notification badge: $error\n$stackTrace',
+            );
+          },
         );
-      },
-    );
   }
 
   /// Try to get user's current location with proper error handling
@@ -747,7 +748,17 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
             // Google Map
             kIsWeb
                 ? Container(
-                    color: Colors.grey[100],
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Color(0xFF07060F),
+                          Color(0xFF0A1330),
+                          Color(0xFF071C18),
+                        ],
+                      ),
+                    ),
                     child: Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -760,9 +771,9 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
                           const SizedBox(height: 16),
                           Text(
                             'art_walk_art_walk_map_text_interactive_map'.tr(),
-                            style: TextStyle(
+                            style: GoogleFonts.spaceGrotesk(
                               fontSize: 20,
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w700,
                               color: Colors.grey[600],
                             ),
                           ),
@@ -771,8 +782,9 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
                             'art_walk_art_walk_map_text_map_features_mobile'
                                 .tr(),
                             textAlign: TextAlign.center,
-                            style: TextStyle(
+                            style: GoogleFonts.spaceGrotesk(
                               fontSize: 14,
+                              fontWeight: FontWeight.w500,
                               color: Colors.grey[500],
                             ),
                           ),
@@ -815,8 +827,9 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
                         const SizedBox(height: ArtWalkDesignSystem.paddingM),
                         Text(
                           _isSearchingZip
-                              ? 'Searching location...'
-                              : 'Loading map...',
+                              ? 'art_walk_art_walk_map_text_searching_location'
+                                    .tr()
+                              : 'art_walk_art_walk_map_text_loading_map'.tr(),
                           style: ArtWalkDesignSystem.hudCardTitleStyle,
                         ),
                       ],
@@ -847,15 +860,25 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
                 padding: const EdgeInsets.symmetric(
                   horizontal: ArtWalkDesignSystem.paddingM,
                 ),
-                decoration: ArtWalkDesignSystem.hudGlassDecoration(
-                  borderRadius: ArtWalkDesignSystem.radiusM,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(
+                    ArtWalkDesignSystem.radiusM,
+                  ),
+                  color: Colors.white.withValues(alpha: 0.06),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.12),
+                    width: 1,
+                  ),
                 ),
                 child: TextField(
-                  style: ArtWalkDesignSystem.hudCardTitleStyle,
+                  style: ArtWalkDesignSystem.hudCardTitleStyle.copyWith(
+                    color: Colors.black,
+                  ),
                   decoration: InputDecoration(
                     hintText: _currentZipCode.isEmpty
-                        ? 'Enter ZIP code'
-                        : 'Enter ZIP code (current: $_currentZipCode)',
+                        ? 'art_walk_art_walk_map_text_enter_zip_code'.tr()
+                        : 'art_walk_art_walk_map_text_enter_zip_code_current'
+                              .tr(namedArgs: {'zipCode': _currentZipCode}),
                     hintStyle: ArtWalkDesignSystem.hudCardSubtitleStyle
                         .copyWith(
                           color: ArtWalkDesignSystem.hudInactiveColor
@@ -884,7 +907,8 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
                               await _loadNearbyCaptures(35.23838, -77.52658);
                               await _updateUserZipCode('28501');
                               _showSnackBar(
-                                '✅ Reset to default location: Kinston, NC (28501)',
+                                'art_walk_art_walk_map_text_reset_default_location'
+                                    .tr(),
                               );
                             },
                           ),
@@ -900,7 +924,11 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
                       setState(() => _isSearchingZip = true);
 
                       // Show loading message
-                      _showSnackBar('Searching for ZIP code $zipCode...');
+                      _showSnackBar(
+                        'art_walk_art_walk_map_text_searching_zip_code'.tr(
+                          namedArgs: {'zipCode': zipCode},
+                        ),
+                      );
 
                       final coordinates = await _getCoordinatesFromZipCode(
                         zipCode.trim(),
@@ -918,15 +946,23 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
                         );
                         await _updateUserZipCode(zipCode.trim());
                         setState(() => _currentZipCode = zipCode.trim());
-                        _showSnackBar('✅ Location updated to $zipCode');
+                        _showSnackBar(
+                          'art_walk_art_walk_map_text_location_updated'.tr(
+                            namedArgs: {'zipCode': zipCode},
+                          ),
+                        );
                       } else {
                         _showSnackBar(
-                          '❌ ZIP code $zipCode not found. Try: 28501, 90210, 10001, 60601, or 94102',
+                          'art_walk_art_walk_map_text_zip_code_not_found'.tr(
+                            namedArgs: {'zipCode': zipCode},
+                          ),
                         );
                       }
                       setState(() => _isSearchingZip = false);
                     } else {
-                      _showSnackBar('Please enter a valid ZIP code (5 digits)');
+                      _showSnackBar(
+                        'art_walk_art_walk_map_text_enter_valid_zip'.tr(),
+                      );
                     }
                   },
                 ),
@@ -941,23 +977,23 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(25),
-                  gradient: ArtWalkDesignSystem.hudButtonGradient,
+                  color: ArtWalkDesignSystem.hudBackground.withValues(
+                    alpha: 0.8,
+                  ),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.12),
+                    width: 1,
+                  ),
                   boxShadow: [
                     BoxShadow(
                       color: ArtWalkDesignSystem.hudActiveColor.withValues(
-                        alpha: 0.3,
+                        alpha: 0.15,
                       ),
                       blurRadius: 18,
                       spreadRadius: 1,
                       offset: const Offset(0, 10),
                     ),
                   ],
-                  border: Border.all(
-                    color: ArtWalkDesignSystem.hudInactiveColor.withValues(
-                      alpha: 0.2,
-                    ),
-                    width: 1,
-                  ),
                 ),
                 child: ElevatedButton.icon(
                   onPressed: () {
@@ -1079,14 +1115,10 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
                 child: Container(
                   height: 200,
                   decoration: BoxDecoration(
-                    color: ArtWalkDesignSystem.hudBackground.withValues(
-                      alpha: 0.9,
-                    ),
+                    color: Colors.white.withValues(alpha: 0.06),
                     border: Border(
                       top: BorderSide(
-                        color: ArtWalkDesignSystem.hudBorder.withValues(
-                          alpha: 0.3,
-                        ),
+                        color: Colors.white.withValues(alpha: 0.12),
                         width: 1,
                       ),
                     ),
@@ -1152,30 +1184,46 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 2.0),
-        child: ElevatedButton(
-          onPressed: () => _changeFilter(filter),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: isSelected
-                ? ArtWalkDesignSystem.hudActiveColor.withValues(alpha: 0.2)
-                : ArtWalkDesignSystem.hudBackground.withValues(alpha: 0.3),
-            foregroundColor: isSelected
-                ? ArtWalkDesignSystem.hudActiveColor
-                : ArtWalkDesignSystem.hudInactiveColor.withValues(alpha: 0.8),
-            elevation: isSelected ? 2 : 0,
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-            minimumSize: const Size(0, 32),
-            textStyle: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
-            side: BorderSide(
+        child: GestureDetector(
+          onTap: () => _changeFilter(filter),
+          child: Container(
+            height: 48, // Ensure touch target is ≥44px
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
               color: isSelected
-                  ? ArtWalkDesignSystem.hudActiveColor.withValues(alpha: 0.5)
-                  : ArtWalkDesignSystem.hudBorder.withValues(alpha: 0.3),
-              width: 1,
+                  ? ArtWalkDesignSystem.hudActiveColor.withValues(alpha: 0.15)
+                  : Colors.white.withValues(alpha: 0.06),
+              border: Border.all(
+                color: isSelected
+                    ? ArtWalkDesignSystem.hudActiveColor.withValues(alpha: 0.5)
+                    : Colors.white.withValues(alpha: 0.12),
+                width: 1,
+              ),
+              boxShadow: isSelected
+                  ? [
+                      BoxShadow(
+                        color: ArtWalkDesignSystem.hudActiveColor.withValues(
+                          alpha: 0.25,
+                        ),
+                        blurRadius: 18,
+                        spreadRadius: 1,
+                      ),
+                    ]
+                  : null,
+            ),
+            child: Center(
+              child: Text(
+                label,
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: isSelected
+                      ? ArtWalkDesignSystem.hudActiveColor
+                      : Colors.white.withValues(alpha: 0.92),
+                ),
+              ),
             ),
           ),
-          child: Text(label),
         ),
       ),
     );
@@ -1185,14 +1233,22 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
     return Container(
       width: 120,
       margin: const EdgeInsets.symmetric(horizontal: 8),
-      child: Card(
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          color: Colors.white.withValues(alpha: 0.06),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.12),
+            width: 1,
+          ),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               child: ClipRRect(
                 borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(4),
+                  top: Radius.circular(24),
                 ),
                 child: OptimizedImage(
                   imageUrl: capture.thumbnailUrl ?? capture.imageUrl,
@@ -1203,25 +1259,36 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     capture.title ?? 'Untitled',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
+                    style: GoogleFonts.spaceGrotesk(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: ArtWalkDesignSystem.hudInactiveColor.withValues(
+                        alpha: 0.92,
+                      ),
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   if (capture.artistName != null)
-                    Text(
-                      capture.artistName!,
-                      style: const TextStyle(fontSize: 10),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        capture.artistName!,
+                        style: GoogleFonts.spaceGrotesk(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: ArtWalkDesignSystem.hudInactiveColor
+                              .withValues(alpha: 0.7),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                 ],
               ),
@@ -1244,8 +1311,12 @@ class CaptureDetailBottomSheet extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(24),
+        color: ArtWalkDesignSystem.hudBackground.withValues(alpha: 0.95),
+        border: Border.all(
+          color: ArtWalkDesignSystem.hudBorder.withValues(alpha: 0.3),
+          width: 1,
+        ),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -1254,9 +1325,11 @@ class CaptureDetailBottomSheet extends StatelessWidget {
           Container(
             width: 40,
             height: 4,
-            margin: const EdgeInsets.symmetric(vertical: 8),
+            margin: const EdgeInsets.symmetric(vertical: 12),
             decoration: BoxDecoration(
-              color: Colors.grey[300],
+              color: ArtWalkDesignSystem.hudInactiveColor.withValues(
+                alpha: 0.3,
+              ),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -1265,7 +1338,7 @@ class CaptureDetailBottomSheet extends StatelessWidget {
           if (capture.imageUrl.isNotEmpty)
             ClipRRect(
               borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(16),
+                top: Radius.circular(24),
               ),
               child: OptimizedImage(
                 imageUrl: capture.imageUrl,
@@ -1277,20 +1350,31 @@ class CaptureDetailBottomSheet extends StatelessWidget {
 
           // Content
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   capture.title ?? 'Untitled',
-                  style: Theme.of(context).textTheme.headlineSmall,
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: ArtWalkDesignSystem.hudInactiveColor.withValues(
+                      alpha: 0.92,
+                    ),
+                  ),
                 ),
                 if (capture.artistName != null) ...[
                   const SizedBox(height: 8),
                   Text(
                     'by ${capture.artistName}',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    style: GoogleFonts.spaceGrotesk(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
                       fontStyle: FontStyle.italic,
+                      color: ArtWalkDesignSystem.hudInactiveColor.withValues(
+                        alpha: 0.7,
+                      ),
                     ),
                   ),
                 ],
@@ -1298,31 +1382,63 @@ class CaptureDetailBottomSheet extends StatelessWidget {
                   const SizedBox(height: 16),
                   Text(
                     capture.description!,
-                    style: Theme.of(context).textTheme.bodyMedium,
+                    style: GoogleFonts.spaceGrotesk(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: ArtWalkDesignSystem.hudInactiveColor.withValues(
+                        alpha: 0.85,
+                      ),
+                    ),
                   ),
                 ],
                 if (capture.locationName != null) ...[
                   const SizedBox(height: 16),
                   Row(
                     children: [
-                      const Icon(Icons.location_on, size: 16),
-                      const SizedBox(width: 4),
+                      const Icon(
+                        Icons.location_on,
+                        size: 16,
+                        color: ArtWalkDesignSystem.hudActiveColor,
+                      ),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           capture.locationName!,
-                          style: Theme.of(context).textTheme.bodySmall,
+                          style: GoogleFonts.spaceGrotesk(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: ArtWalkDesignSystem.hudInactiveColor
+                                .withValues(alpha: 0.7),
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ],
-                const SizedBox(height: 16),
+                const SizedBox(height: 24),
                 // Close button centered since we removed the redundant "View Details" button
                 // The bottom sheet already shows all capture details
                 Center(
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text('admin_admin_payment_text_close'.tr()),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: ArtWalkDesignSystem.hudActiveColor,
+                        foregroundColor: ArtWalkDesignSystem.hudInactiveColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                      ),
+                      child: Text(
+                        'art_walk_art_walk_map_text_close'.tr(),
+                        style: GoogleFonts.spaceGrotesk(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ],

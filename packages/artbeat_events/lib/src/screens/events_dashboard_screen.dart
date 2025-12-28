@@ -562,7 +562,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
                           const SizedBox(width: 4),
                           Icon(
                             Icons.chevron_right,
-                            color: Colors.white.withOpacity(0.7),
+                            color: Colors.white.withValues(alpha: 0.7),
                             size: 18,
                           ),
                         ],

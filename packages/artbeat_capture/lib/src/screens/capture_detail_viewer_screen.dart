@@ -34,9 +34,12 @@ class CaptureDetailViewerScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.share_rounded),
             onPressed: () {
-              Share.share(
-                '${capture.title ?? ''}\n\n${capture.description ?? ''}\n\nShared via ArtBeat App',
-                subject: 'Check out this capture!',
+              SharePlus.instance.share(
+                ShareParams(
+                  text:
+                      '${capture.title ?? ''}\n\n${capture.description ?? ''}\n\nShared via ArtBeat App',
+                  subject: 'Check out this capture!',
+                ),
               );
             },
           ),

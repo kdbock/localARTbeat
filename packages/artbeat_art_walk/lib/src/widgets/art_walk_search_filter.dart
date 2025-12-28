@@ -1,8 +1,11 @@
-import 'package:flutter/material.dart';
 import 'package:artbeat_art_walk/src/models/search_criteria_model.dart';
+import 'package:artbeat_art_walk/src/widgets/glass_card.dart';
+import 'package:artbeat_art_walk/src/widgets/gradient_cta_button.dart';
+import 'package:artbeat_art_walk/src/widgets/typography.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-/// Advanced filter widget for art walk search
 class ArtWalkSearchFilter extends StatefulWidget {
   final ArtWalkSearchCriteria initialCriteria;
   final ValueChanged<ArtWalkSearchCriteria> onCriteriaChanged;
@@ -11,13 +14,13 @@ class ArtWalkSearchFilter extends StatefulWidget {
   final List<String> availableZipCodes;
 
   const ArtWalkSearchFilter({
-    Key? key,
+    super.key,
     required this.initialCriteria,
     required this.onCriteriaChanged,
     this.onClearFilters,
     this.availableTags = const [],
     this.availableZipCodes = const [],
-  }) : super(key: key);
+  });
 
   @override
   State<ArtWalkSearchFilter> createState() => _ArtWalkSearchFilterState();
@@ -28,16 +31,38 @@ class _ArtWalkSearchFilterState extends State<ArtWalkSearchFilter> {
   final TextEditingController _searchController = TextEditingController();
   final TextEditingController _zipCodeController = TextEditingController();
 
-  // Difficulty options
-  final List<String> _difficultyLevels = ['Easy', 'Medium', 'Hard'];
+  final Map<String, String> _difficultyLabelKeys = const {
+    'Easy': 'art_walk_art_walk_search_filter_difficulty_easy',
+    'Medium': 'art_walk_art_walk_search_filter_difficulty_medium',
+    'Hard': 'art_walk_art_walk_search_filter_difficulty_hard',
+  };
 
-  // Sort options
-  final List<MapEntry<String, String>> _sortOptions = [
-    const MapEntry('popular', 'Most Popular'),
-    const MapEntry('newest', 'Newest First'),
-    const MapEntry('title', 'Alphabetical'),
-    const MapEntry('duration', 'Duration'),
-    const MapEntry('distance', 'Distance'),
+  final List<_SortOption> _sortOptions = const [
+    _SortOption(
+      value: 'popular',
+      labelKey: 'art_walk_art_walk_search_filter_sort_popular',
+      icon: Icons.auto_awesome,
+    ),
+    _SortOption(
+      value: 'newest',
+      labelKey: 'art_walk_art_walk_search_filter_sort_newest',
+      icon: Icons.fiber_new,
+    ),
+    _SortOption(
+      value: 'title',
+      labelKey: 'art_walk_art_walk_search_filter_sort_title',
+      icon: Icons.sort_by_alpha,
+    ),
+    _SortOption(
+      value: 'duration',
+      labelKey: 'art_walk_art_walk_search_filter_sort_duration',
+      icon: Icons.schedule,
+    ),
+    _SortOption(
+      value: 'distance',
+      labelKey: 'art_walk_art_walk_search_filter_sort_distance',
+      icon: Icons.route,
+    ),
   ];
 
   @override
@@ -94,392 +119,761 @@ class _ArtWalkSearchFilterState extends State<ArtWalkSearchFilter> {
     });
 
     widget.onCriteriaChanged(_criteria);
-    if (widget.onClearFilters != null) {
-      widget.onClearFilters!();
-    }
+    widget.onClearFilters?.call();
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final mergedTags = <String>{
+      ...widget.availableTags,
+      ...?_criteria.tags,
+    }.toList()..sort();
+    final zipSuggestions = widget.availableZipCodes.take(6).toList();
 
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+    return GlassCard(
+      borderRadius: 28,
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildHeader(),
+          const SizedBox(height: 24),
+          _buildInputField(
+            controller: _searchController,
+            hint: 'art_walk_art_walk_list_hint_search_art_walks'.tr(),
+            icon: Icons.search,
+            onChanged: (value) => _updateCriteria(searchQuery: value),
+          ),
+          const SizedBox(height: 16),
+          _buildInputField(
+            controller: _zipCodeController,
+            hint: 'art_walk_art_walk_search_filter_hint_zip'.tr(),
+            icon: Icons.location_on,
+            keyboardType: TextInputType.number,
+            onChanged: (value) => _updateCriteria(zipCode: value),
+          ),
+          if (zipSuggestions.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: zipSuggestions
+                    .map(
+                      (zip) => Padding(
+                        padding: const EdgeInsets.only(right: 16),
+                        child: _SelectablePill(
+                          label: 'art_walk_art_walk_card_text_zip'.tr(
+                            namedArgs: {'zip': zip},
+                          ),
+                          icon: Icons.push_pin,
+                          selected: _criteria.zipCode == zip,
+                          onTap: () {
+                            _zipCodeController.text = zip;
+                            _updateCriteria(zipCode: zip);
+                          },
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
+            ),
+          ],
+          if (mergedTags.isNotEmpty) ...[
+            const SizedBox(height: 24),
+            _buildSectionTitle(
+              'art_walk_art_walk_search_filter_section_tags'.tr(),
+            ),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 16,
+              runSpacing: 16,
+              children: mergedTags.map((tag) {
+                final currentTags = List<String>.from(_criteria.tags ?? []);
+                final isSelected = currentTags.contains(tag);
+                return _SelectablePill(
+                  label: tag,
+                  icon: Icons.local_offer,
+                  selected: isSelected,
+                  onTap: () {
+                    if (isSelected) {
+                      currentTags.remove(tag);
+                    } else {
+                      currentTags.add(tag);
+                    }
+                    _updateCriteria(
+                      tags: currentTags.isEmpty ? null : currentTags,
+                    );
+                  },
+                );
+              }).toList(),
+            ),
+          ],
+          const SizedBox(height: 24),
+          _buildSectionTitle(
+            'art_walk_art_walk_search_filter_section_difficulty'.tr(),
+          ),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 16,
+            runSpacing: 16,
+            children: _difficultyLabelKeys.entries.map((entry) {
+              final selected = _criteria.difficulty == entry.key;
+              return _SelectablePill(
+                label: entry.value.tr(),
+                icon: Icons.trending_up,
+                selected: selected,
+                onTap: () =>
+                    _updateCriteria(difficulty: selected ? null : entry.key),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 24),
+          _buildSectionTitle(
+            'art_walk_art_walk_search_filter_section_options'.tr(),
+          ),
+          const SizedBox(height: 16),
+          _ToggleTile(
+            icon: Icons.accessible_forward,
+            title: 'art_walk_art_walk_search_filter_text_accessible'.tr(),
+            subtitle:
+                'art_walk_art_walk_search_filter_text_wheelchair_accessible_walks'
+                    .tr(),
+            value: _criteria.isAccessible ?? false,
+            onToggle: (value) => _updateCriteria(isAccessible: value),
+          ),
+          const SizedBox(height: 16),
+          _ToggleTile(
+            icon: Icons.public,
+            title: 'art_walk_art_walk_search_filter_text_public_walks_only'
+                .tr(),
+            subtitle:
+                'art_walk_art_walk_search_filter_text_show_only_public_art_walks'
+                    .tr(),
+            value: _criteria.isPublic ?? false,
+            onToggle: (value) => _updateCriteria(isPublic: value),
+          ),
+          const SizedBox(height: 24),
+          _buildSectionTitle(
+            'art_walk_art_walk_search_filter_section_limits'.tr(),
+          ),
+          const SizedBox(height: 16),
+          _buildSliderCard(
+            icon: Icons.route,
+            label: 'art_walk_art_walk_search_filter_label_max_distance'.tr(
+              namedArgs: {
+                'miles': (_criteria.maxDistance ?? 10.0).toStringAsFixed(1),
+              },
+            ),
+            value: _criteria.maxDistance ?? 10.0,
+            min: 0.5,
+            max: 20.0,
+            divisions: 39,
+            onChanged: (value) => _updateCriteria(maxDistance: value),
+          ),
+          const SizedBox(height: 16),
+          _buildSliderCard(
+            icon: Icons.timer,
+            label: 'art_walk_art_walk_search_filter_label_max_duration'.tr(
+              namedArgs: {
+                'minutes': (_criteria.maxDuration ?? 120).toInt().toString(),
+              },
+            ),
+            value: _criteria.maxDuration ?? 120.0,
+            min: 15.0,
+            max: 300.0,
+            divisions: 19,
+            onChanged: (value) => _updateCriteria(maxDuration: value),
+          ),
+          const SizedBox(height: 24),
+          _buildSectionTitle(
+            'art_walk_art_walk_search_filter_section_sort'.tr(),
+          ),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 16,
+            runSpacing: 16,
+            children: _sortOptions.map((option) {
+              final selected = _criteria.sortBy == option.value;
+              return _SelectablePill(
+                label: option.labelKey.tr(),
+                icon: option.icon,
+                selected: selected,
+                onTap: () =>
+                    _updateCriteria(sortBy: selected ? null : option.value),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _SelectablePill(
+                  label: 'art_walk_text_ascending'.tr(),
+                  icon: Icons.arrow_upward,
+                  selected: (_criteria.sortDescending ?? true) == false,
+                  onTap: () => _updateCriteria(sortDescending: false),
+                  fullWidth: true,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _SelectablePill(
+                  label: 'art_walk_text_descending'.tr(),
+                  icon: Icons.arrow_downward,
+                  selected: _criteria.sortDescending ?? true,
+                  onTap: () => _updateCriteria(sortDescending: true),
+                  fullWidth: true,
+                ),
+              ),
+            ],
+          ),
+          if (_criteria.hasActiveFilters) ...[
+            const SizedBox(height: 24),
+            _buildSectionTitle(
+              'art_walk_art_walk_search_filter_section_active_filters'.tr(),
+            ),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 16,
+              runSpacing: 16,
+              children: _buildActiveFilterChips(),
+            ),
+          ],
+          const SizedBox(height: 24),
+          GradientCTAButton(
+            label: 'art_walk_art_walk_search_filter_button_apply'.tr(),
+            icon: Icons.check,
+            onPressed: () => widget.onCriteriaChanged(_criteria),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    final hasActiveFilters = _criteria.hasActiveFilters;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Container(
+          height: 48,
+          width: 48,
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF7C4DFF), Color(0xFF22D3EE)],
+            ),
+          ),
+          child: const Icon(Icons.filter_alt, color: Colors.white),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'art_walk_art_walk_search_filter_title'.tr(),
+                style: AppTypography.screenTitle(),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'art_walk_art_walk_search_filter_section_location'.tr(),
+                style: AppTypography.helper(),
+              ),
+            ],
+          ),
+        ),
+        if (hasActiveFilters) ...[
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(18),
+              color: Colors.white.withValues(alpha: 0.1),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+            ),
+            child: Text(
+              'art_walk_art_walk_search_filter_badge_active'.tr(),
+              style: AppTypography.badge(),
+            ),
+          ),
+          const SizedBox(width: 16),
+          _GlassActionChip(
+            icon: Icons.restart_alt,
+            label: 'art_walk_button_clear_all'.tr(),
+            onTap: _clearAllFilters,
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildInputField({
+    required TextEditingController controller,
+    required String hint,
+    required IconData icon,
+    TextInputType keyboardType = TextInputType.text,
+    ValueChanged<String>? onChanged,
+  }) {
+    return SizedBox(
+      height: 56,
+      child: TextField(
+        controller: controller,
+        keyboardType: keyboardType,
+        style: AppTypography.body(),
+        onChanged: onChanged,
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: Colors.white.withValues(alpha: 0.05),
+          hintText: hint,
+          hintStyle: GoogleFonts.spaceGrotesk(
+            color: Colors.white.withValues(alpha: 0.5),
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+          ),
+          prefixIcon: Icon(icon, color: Colors.white.withValues(alpha: 0.7)),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(24),
+            borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.16)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(24),
+            borderSide: const BorderSide(color: Color(0xFF22D3EE), width: 1.5),
+          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSliderCard({
+    required IconData icon,
+    required String label,
+    required double value,
+    required double min,
+    required double max,
+    required int divisions,
+    required ValueChanged<double> onChanged,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        color: Colors.white.withValues(alpha: 0.05),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header with clear button
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Icon(Icons.filter_list, color: theme.primaryColor, size: 20),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Search Filters',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  if (_criteria.hasActiveFilters) ...[
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: theme.primaryColor,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        'Active',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: Colors.white,
-                          fontSize: 10,
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-              if (_criteria.hasActiveFilters)
-                TextButton.icon(
-                  onPressed: _clearAllFilters,
-                  icon: const Icon(Icons.clear, size: 16),
-                  label: Text('art_walk_button_clear_all'.tr()),
-                  style: TextButton.styleFrom(
-                    foregroundColor: theme.colorScheme.error,
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                  ),
-                ),
+              Icon(icon, color: Colors.white, size: 20),
+              const SizedBox(width: 12),
+              Expanded(child: Text(label, style: AppTypography.body())),
             ],
           ),
-
-          const SizedBox(height: 16),
-
-          // Search query
-          TextField(
-            controller: _searchController,
-            decoration: InputDecoration(
-              hintText: 'Search art walks...',
-              prefixIcon: const Icon(Icons.search),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: Colors.grey.shade300),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: theme.primaryColor),
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 12,
-              ),
+          SliderTheme(
+            data: SliderTheme.of(context).copyWith(
+              activeTrackColor: const Color(0xFF22D3EE),
+              inactiveTrackColor: Colors.white.withValues(alpha: 0.1),
+              thumbColor: const Color(0xFF7C4DFF),
             ),
-            onChanged: (value) => _updateCriteria(searchQuery: value),
-          ),
-
-          const SizedBox(height: 16),
-
-          // Location filter
-          TextField(
-            controller: _zipCodeController,
-            decoration: InputDecoration(
-              hintText: 'ZIP code (e.g., 28204)',
-              prefixIcon: const Icon(Icons.location_on),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: Colors.grey.shade300),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: theme.primaryColor),
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 12,
-              ),
-            ),
-            keyboardType: TextInputType.number,
-            onChanged: (value) => _updateCriteria(zipCode: value),
-          ),
-
-          const SizedBox(height: 16),
-
-          // Difficulty Level
-          _buildFilterSection(
-            title: 'Difficulty Level',
-            icon: Icons.trending_up,
-            child: Wrap(
-              spacing: 8,
-              children: _difficultyLevels.map((difficulty) {
-                final isSelected = _criteria.difficulty == difficulty;
-                return FilterChip(
-                  label: Text(difficulty),
-                  selected: isSelected,
-                  onSelected: (selected) {
-                    _updateCriteria(difficulty: selected ? difficulty : null);
-                  },
-                  selectedColor: theme.primaryColor.withValues(alpha: 0.2),
-                  checkmarkColor: theme.primaryColor,
-                );
-              }).toList(),
+            child: Slider(
+              value: value,
+              min: min,
+              max: max,
+              divisions: divisions,
+              label: value.toStringAsFixed(1),
+              onChanged: onChanged,
             ),
           ),
-
-          const SizedBox(height: 16),
-
-          // Accessibility & Public filters
-          _buildFilterSection(
-            title: 'Options',
-            icon: Icons.settings,
-            child: Column(
-              children: [
-                CheckboxListTile(
-                  title: Text(
-                    'art_walk_art_walk_search_filter_text_accessible'.tr(),
-                  ),
-                  subtitle: Text(
-                    'art_walk_art_walk_search_filter_text_wheelchair_accessible_walks'
-                        .tr(),
-                  ),
-                  value: _criteria.isAccessible ?? false,
-                  onChanged: (value) => _updateCriteria(isAccessible: value),
-                  controlAffinity: ListTileControlAffinity.leading,
-                  contentPadding: EdgeInsets.zero,
-                ),
-                CheckboxListTile(
-                  title: Text(
-                    'art_walk_art_walk_search_filter_text_public_walks_only'
-                        .tr(),
-                  ),
-                  subtitle: Text(
-                    'art_walk_art_walk_search_filter_text_show_only_public_art_walks'
-                        .tr(),
-                  ),
-                  value: _criteria.isPublic ?? false,
-                  onChanged: (value) => _updateCriteria(isPublic: value),
-                  controlAffinity: ListTileControlAffinity.leading,
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
-          // Distance & Duration filters
-          _buildFilterSection(
-            title: 'Limits',
-            icon: Icons.timer,
-            child: Column(
-              children: [
-                // Max Distance
-                Row(
-                  children: [
-                    const Icon(Icons.route, size: 20),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Max Distance: ${_criteria.maxDistance?.toStringAsFixed(1) ?? "Any"} miles',
-                            style: theme.textTheme.bodyMedium,
-                          ),
-                          Slider(
-                            value: _criteria.maxDistance ?? 10.0,
-                            min: 0.5,
-                            max: 20.0,
-                            divisions: 39,
-                            label:
-                                '${(_criteria.maxDistance ?? 10.0).toStringAsFixed(1)} mi',
-                            onChanged: (value) =>
-                                _updateCriteria(maxDistance: value),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-
-                // Max Duration
-                Row(
-                  children: [
-                    const Icon(Icons.access_time, size: 20),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Max Duration: ${_criteria.maxDuration?.toInt() ?? "Any"} minutes',
-                            style: theme.textTheme.bodyMedium,
-                          ),
-                          Slider(
-                            value: _criteria.maxDuration ?? 120.0,
-                            min: 15.0,
-                            max: 300.0,
-                            divisions: 19,
-                            label:
-                                '${(_criteria.maxDuration ?? 120.0).toInt()} min',
-                            onChanged: (value) =>
-                                _updateCriteria(maxDuration: value),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
-          // Sort options
-          _buildFilterSection(
-            title: 'Sort By',
-            icon: Icons.sort,
-            child: Column(
-              children: [
-                DropdownButtonFormField<String>(
-                  initialValue: _criteria.sortBy,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                  ),
-                  items: _sortOptions.map((option) {
-                    return DropdownMenuItem<String>(
-                      value: option.key,
-                      child: Text(option.value),
-                    );
-                  }).toList(),
-                  onChanged: (value) => _updateCriteria(sortBy: value),
-                ),
-
-                const SizedBox(height: 8),
-
-                Row(
-                  children: [
-                    Text('art_walk_text_order'.tr()),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: SegmentedButton<bool>(
-                        segments: [
-                          ButtonSegment<bool>(
-                            value: false,
-                            label: Text('art_walk_text_ascending'.tr()),
-                            icon: const Icon(Icons.arrow_upward, size: 16),
-                          ),
-                          ButtonSegment<bool>(
-                            value: true,
-                            label: Text('art_walk_text_descending'.tr()),
-                            icon: const Icon(Icons.arrow_downward, size: 16),
-                          ),
-                        ],
-                        selected: {_criteria.sortDescending ?? true},
-                        onSelectionChanged: (Set<bool> selection) {
-                          _updateCriteria(sortDescending: selection.first);
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
-          // Active filters summary
-          if (_criteria.hasActiveFilters) ...[
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: theme.primaryColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: theme.primaryColor.withValues(alpha: 0.3),
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.info_outline,
-                        color: theme.primaryColor,
-                        size: 16,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        'Active Filters',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: theme.primaryColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    _criteria.filterSummary,
-                    style: theme.textTheme.bodySmall,
-                  ),
-                ],
-              ),
-            ),
-          ],
         ],
       ),
     );
   }
 
-  Widget _buildFilterSection({
-    required String title,
-    required IconData icon,
-    required Widget child,
-  }) {
-    final theme = Theme.of(context);
+  Widget _buildSectionTitle(String title) {
+    return Text(title, style: AppTypography.sectionLabel());
+  }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  List<Widget> _buildActiveFilterChips() {
+    final chips = <Widget>[];
+
+    if (_criteria.searchQuery?.isNotEmpty ?? false) {
+      chips.add(
+        _ActiveFilterChip(
+          icon: Icons.search,
+          label: '"${_criteria.searchQuery}"',
+        ),
+      );
+    }
+
+    if (_criteria.difficulty != null) {
+      final key = _difficultyLabelKeys[_criteria.difficulty!];
+      chips.add(
+        _ActiveFilterChip(
+          icon: Icons.trending_up,
+          label: key != null ? key.tr() : _criteria.difficulty!,
+        ),
+      );
+    }
+
+    if (_criteria.isAccessible == true) {
+      chips.add(
+        _ActiveFilterChip(
+          icon: Icons.accessible_forward,
+          label: 'art_walk_art_walk_search_filter_text_accessible'.tr(),
+        ),
+      );
+    }
+
+    if (_criteria.isPublic == true) {
+      chips.add(
+        _ActiveFilterChip(
+          icon: Icons.public,
+          label: 'art_walk_art_walk_search_filter_text_public_walks_only'.tr(),
+        ),
+      );
+    }
+
+    if (_criteria.maxDistance != null) {
+      chips.add(
+        _ActiveFilterChip(
+          icon: Icons.route,
+          label: 'art_walk_art_walk_search_filter_chip_distance'.tr(
+            namedArgs: {'miles': _criteria.maxDistance!.toStringAsFixed(1)},
+          ),
+        ),
+      );
+    }
+
+    if (_criteria.maxDuration != null) {
+      chips.add(
+        _ActiveFilterChip(
+          icon: Icons.timer,
+          label: 'art_walk_art_walk_search_filter_chip_duration'.tr(
+            namedArgs: {'minutes': _criteria.maxDuration!.toInt().toString()},
+          ),
+        ),
+      );
+    }
+
+    if (_criteria.tags?.isNotEmpty ?? false) {
+      for (final tag in _criteria.tags!) {
+        chips.add(_ActiveFilterChip(icon: Icons.local_offer, label: tag));
+      }
+    }
+
+    if (_criteria.zipCode?.isNotEmpty ?? false) {
+      chips.add(
+        _ActiveFilterChip(
+          icon: Icons.push_pin,
+          label: 'art_walk_art_walk_card_text_zip'.tr(
+            namedArgs: {'zip': _criteria.zipCode!},
+          ),
+        ),
+      );
+    }
+
+    return chips;
+  }
+}
+
+class _ToggleTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final bool value;
+  final ValueChanged<bool> onToggle;
+
+  const _ToggleTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.value,
+    required this.onToggle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      toggled: value,
+      label: title,
+      child: GestureDetector(
+        onTap: () => onToggle(!value),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            color: value
+                ? Colors.white.withValues(alpha: 0.1)
+                : Colors.white.withValues(alpha: 0.05),
+            border: Border.all(
+              color: value
+                  ? const Color(0xFF22D3EE)
+                  : Colors.white.withValues(alpha: 0.12),
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                height: 48,
+                width: 48,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: value
+                      ? const Color(0xFF22D3EE).withValues(alpha: 0.2)
+                      : Colors.white.withValues(alpha: 0.08),
+                ),
+                child: Icon(icon, color: Colors.white),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: AppTypography.body()),
+                    const SizedBox(height: 8),
+                    Text(subtitle, style: AppTypography.helper()),
+                  ],
+                ),
+              ),
+              _GlassToggle(value: value, onChanged: onToggle),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SelectablePill extends StatelessWidget {
+  final bool selected;
+  final String label;
+  final IconData? icon;
+  final VoidCallback? onTap;
+  final bool fullWidth;
+
+  const _SelectablePill({
+    required this.selected,
+    required this.label,
+    this.icon,
+    this.onTap,
+    this.fullWidth = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final content = Row(
+      mainAxisAlignment: fullWidth
+          ? MainAxisAlignment.center
+          : MainAxisAlignment.start,
+      mainAxisSize: fullWidth ? MainAxisSize.max : MainAxisSize.min,
       children: [
-        Row(
+        if (icon != null) ...[
+          Icon(icon, color: Colors.white, size: 18),
+          const SizedBox(width: 8),
+        ],
+        Flexible(
+          child: Text(
+            label,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+      ],
+    );
+
+    final decorated = AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      constraints: const BoxConstraints(minHeight: 48),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        gradient: selected
+            ? const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFF7C4DFF), Color(0xFF22D3EE)],
+              )
+            : null,
+        color: selected ? null : Colors.white.withValues(alpha: 0.06),
+        border: Border.all(
+          color: selected
+              ? Colors.transparent
+              : Colors.white.withValues(alpha: 0.14),
+        ),
+        boxShadow: selected
+            ? [
+                BoxShadow(
+                  color: const Color(0xFF22D3EE).withValues(alpha: 0.4),
+                  blurRadius: 24,
+                  offset: const Offset(0, 12),
+                ),
+              ]
+            : [],
+      ),
+      child: content,
+    );
+
+    final child = fullWidth
+        ? SizedBox(width: double.infinity, child: decorated)
+        : decorated;
+
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: label,
+      child: GestureDetector(onTap: onTap, child: child),
+    );
+  }
+}
+
+class _GlassActionChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _GlassActionChip({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          color: Colors.white.withValues(alpha: 0.08),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 18, color: theme.primaryColor),
-            const SizedBox(width: 6),
+            Icon(icon, color: Colors.white, size: 18),
+            const SizedBox(width: 8),
             Text(
-              title,
-              style: theme.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
+              label,
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 8),
-        child,
-      ],
+      ),
     );
   }
+}
+
+class _ActiveFilterChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+
+  const _ActiveFilterChip({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        color: Colors.white.withValues(alpha: 0.08),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: Colors.white, size: 16),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GlassToggle extends StatelessWidget {
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  const _GlassToggle({required this.value, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      toggled: value,
+      child: GestureDetector(
+        onTap: () => onChanged(!value),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          width: 64,
+          height: 32,
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            color: value
+                ? const Color(0xFF22D3EE).withValues(alpha: 0.3)
+                : Colors.white.withValues(alpha: 0.12),
+            border: Border.all(
+              color: value
+                  ? const Color(0xFF22D3EE)
+                  : Colors.white.withValues(alpha: 0.2),
+            ),
+          ),
+          child: AnimatedAlign(
+            alignment: value ? Alignment.centerRight : Alignment.centerLeft,
+            duration: const Duration(milliseconds: 200),
+            child: Container(
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SortOption {
+  final String value;
+  final String labelKey;
+  final IconData icon;
+
+  const _SortOption({
+    required this.value,
+    required this.labelKey,
+    required this.icon,
+  });
 }
