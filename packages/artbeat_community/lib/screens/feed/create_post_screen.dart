@@ -12,6 +12,7 @@ import 'package:easy_localization/easy_localization.dart';
 import '../../services/art_community_service.dart';
 import '../../services/firebase_storage_service.dart';
 import '../../services/moderation_service.dart';
+import '../../models/post_model.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 
 /// Enhanced create post screen with multimedia support and AI moderation
@@ -25,11 +26,15 @@ class CreatePostScreen extends StatefulWidget {
   /// Optional: Flag indicating this is from a discovery
   final bool isDiscussionPost;
 
+  /// Optional: Post to edit
+  final PostModel? postToEdit;
+
   const CreatePostScreen({
     super.key,
     this.prefilledImageUrl,
     this.prefilledCaption,
     this.isDiscussionPost = false,
+    this.postToEdit,
   });
 
   @override
@@ -80,7 +85,12 @@ class _CreatePostScreenState extends State<CreatePostScreen>
     _animationController.forward();
 
     // Load pre-filled data if provided
-    if (widget.prefilledCaption != null) {
+    if (widget.postToEdit != null) {
+      _contentController.text = widget.postToEdit!.content;
+      _tagsController.text = widget.postToEdit!.tags.join(', ');
+      // For editing, we keep existing images/videos/audio
+      // Users can add more but can't remove existing ones in this simple implementation
+    } else if (widget.prefilledCaption != null) {
       _contentController.text = widget.prefilledCaption!;
     }
 
@@ -380,6 +390,23 @@ class _CreatePostScreenState extends State<CreatePostScreen>
       return;
     }
 
+    // Extra debug: print file paths, existence, and size before upload
+    if (_selectedImages.isNotEmpty) {
+      for (int i = 0; i < _selectedImages.length; i++) {
+        final file = _selectedImages[i];
+        debugPrint('DEBUG: [UI] Image $i path: \\${file.path}');
+        debugPrint('DEBUG: [UI] Image $i exists: \\${file.existsSync()}');
+        debugPrint(
+          'DEBUG: [UI] Image $i size: \\${file.existsSync() ? file.lengthSync() : 'N/A'} bytes',
+        );
+        if (!file.existsSync() || file.lengthSync() == 0) {
+          debugPrint(
+            'WARNING: [UI] Image $i is missing or empty and will be skipped.',
+          );
+        }
+      }
+    }
+
     setState(() => _isLoading = true);
 
     try {
@@ -440,6 +467,9 @@ class _CreatePostScreenState extends State<CreatePostScreen>
         imageUrls.insert(0, _prefilledImageUrl!);
       }
 
+      // Extra debug: print imageUrls before post creation
+      debugPrint('DEBUG: [UI] Final imageUrls to be saved in post: $imageUrls');
+
       if (_selectedVideo != null) {
         debugPrint('DEBUG: Uploading video file: ${_selectedVideo!.path}');
         try {
@@ -497,23 +527,34 @@ class _CreatePostScreenState extends State<CreatePostScreen>
           .where((tag) => tag.isNotEmpty)
           .toList();
 
-      // Create the post
-      final postId = await _communityService.createEnhancedPost(
-        content: _contentController.text.trim(),
-        imageUrls: imageUrls,
-        videoUrl: videoUrl,
-        audioUrl: audioUrl,
-        tags: tags,
-        isArtistPost: _isArtistPost,
-        moderationStatus: moderationResult.status,
-      );
+      bool success;
+      if (widget.postToEdit != null) {
+        // Update existing post
+        success = await _communityService.updatePost(
+          widget.postToEdit!.id,
+          content: _contentController.text.trim(),
+          tags: tags,
+        );
+      } else {
+        // Create new post
+        final postId = await _communityService.createEnhancedPost(
+          content: _contentController.text.trim(),
+          imageUrls: imageUrls,
+          videoUrl: videoUrl,
+          audioUrl: audioUrl,
+          tags: tags,
+          isArtistPost: _isArtistPost,
+          moderationStatus: moderationResult.status,
+        );
+        success = postId != null;
+      }
 
       if (!mounted) return;
 
-      if (postId != null) {
+      if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Post created successfully!'),
+          SnackBar(
+            content: Text(widget.postToEdit != null ? 'Post updated successfully!' : 'Post created successfully!'),
             backgroundColor: Colors.green,
           ),
         );
@@ -567,7 +608,7 @@ class _CreatePostScreenState extends State<CreatePostScreen>
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
         title: Text(
-          'screen_title_create_post'.tr(),
+          widget.postToEdit != null ? 'Edit Post' : 'screen_title_create_post'.tr(),
           style: const TextStyle(fontWeight: FontWeight.w600),
         ),
         backgroundColor: ArtbeatColors.primaryPurple,
@@ -594,9 +635,9 @@ class _CreatePostScreenState extends State<CreatePostScreen>
                       height: 16,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text(
-                      'Post',
-                      style: TextStyle(fontWeight: FontWeight.w600),
+                  : Text(
+                      widget.postToEdit != null ? 'Update' : 'Post',
+                      style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
             ),
           ),
@@ -726,6 +767,7 @@ class _CreatePostScreenState extends State<CreatePostScreen>
       child: TextField(
         controller: _contentController,
         maxLines: 6,
+        enableInteractiveSelection: false,
         decoration: InputDecoration(
           hintText: 'Share your thoughts, artwork, or creative process...',
           hintStyle: TextStyle(color: Colors.grey[500], fontSize: 16),
@@ -1061,6 +1103,7 @@ class _CreatePostScreenState extends State<CreatePostScreen>
       ),
       child: TextField(
         controller: _tagsController,
+        enableInteractiveSelection: false,
         decoration: InputDecoration(
           labelText: 'Tags',
           hintText: 'art, digital, painting, creative (separate by comma)',

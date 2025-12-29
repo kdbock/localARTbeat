@@ -13,6 +13,8 @@ class UserActionMenu extends StatefulWidget {
   final String? userName;
   final VoidCallback? onReportSubmitted;
   final VoidCallback? onBlockStatusChanged;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
 
   const UserActionMenu({
     super.key,
@@ -22,6 +24,8 @@ class UserActionMenu extends StatefulWidget {
     this.userName,
     this.onReportSubmitted,
     this.onBlockStatusChanged,
+    this.onEdit,
+    this.onDelete,
   });
 
   @override
@@ -248,32 +252,102 @@ class _UserActionMenuState extends State<UserActionMenu> {
     );
   }
 
+  Future<void> _showDeleteConfirmation() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Delete Post'),
+        content: const Text('Are you sure you want to delete this post? This action cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && widget.onDelete != null) {
+      widget.onDelete!();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isOwner = currentUser?.uid == widget.userId;
+    final isPost = widget.contentType == 'post';
+
     return PopupMenuButton<String>(
       onSelected: (String value) {
-        if (value == 'report') {
-          _showReportDialog();
+        if (value == 'edit' && widget.onEdit != null) {
+          widget.onEdit!();
+        } else if (value == 'delete' && widget.onDelete != null) {
+          _showDeleteConfirmation();
+        } else if (value == 'report') {
+          if (isOwner) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('You cannot report your own post')),
+            );
+          } else {
+            _showReportDialog();
+          }
         } else if (value == 'block') {
-          _handleBlockUserSelection();
+          if (isOwner) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('You cannot block yourself')),
+            );
+          } else {
+            _handleBlockUserSelection();
+          }
         }
       },
-      itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-        PopupMenuItem<String>(
-          value: 'report',
-          child: ListTile(
-            leading: const Icon(Icons.flag),
-            title: Text('art_walk_user_action_report'.tr()),
+      itemBuilder: (BuildContext context) {
+        final items = <PopupMenuEntry<String>>[];
+
+        if (isOwner && isPost) {
+          items.addAll([
+            PopupMenuItem<String>(
+              value: 'edit',
+              child: ListTile(
+                leading: const Icon(Icons.edit),
+                title: const Text('Edit post'),
+              ),
+            ),
+            PopupMenuItem<String>(
+              value: 'delete',
+              child: ListTile(
+                leading: const Icon(Icons.delete, color: Colors.red),
+                title: const Text('Delete post'),
+              ),
+            ),
+          ]);
+        }
+
+        items.addAll([
+          PopupMenuItem<String>(
+            value: 'report',
+            child: ListTile(
+              leading: const Icon(Icons.flag),
+              title: Text('art_walk_user_action_report'.tr()),
+            ),
           ),
-        ),
-        PopupMenuItem<String>(
-          value: 'block',
-          child: ListTile(
-            leading: Icon(_isBlocked ? Icons.person_add : Icons.block),
-            title: Text(_isBlocked ? 'Unblock user' : 'Block user'),
-          ),
-        ),
-      ],
+          if (!isOwner) // Don't show block for self
+            PopupMenuItem<String>(
+              value: 'block',
+              child: ListTile(
+                leading: Icon(_isBlocked ? Icons.person_add : Icons.block),
+                title: Text(_isBlocked ? 'Unblock user' : 'Block user'),
+              ),
+            ),
+        ]);
+
+        return items;
+      },
       icon: const Icon(Icons.more_vert),
     );
   }

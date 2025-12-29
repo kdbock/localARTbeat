@@ -1,6 +1,11 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
+    // TEMPORARY: Allow all authenticated users to read and write anywhere (for development/testing only)
+    match /{allPaths=**} {
+      allow read, write: if request.auth != null;
+    }
+
     // Helper functions for access control
     function isDebugMode() {
       // Set to true only if you want to completely bypass App Check

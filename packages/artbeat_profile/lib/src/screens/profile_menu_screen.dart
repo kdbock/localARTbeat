@@ -103,11 +103,9 @@ class _ProfileMenuContent extends StatelessWidget {
                   .findAncestorStateOfType<_ProfileMenuScreenState>()!
                   ._currentUser;
               if (user != null) {
-                Navigator.of(context).push(
-                  MaterialPageRoute<UserProfileScreen>(
-                    builder: (_) => UserProfileScreen(userId: user.id),
-                  ),
-                );
+                Navigator.of(
+                  context,
+                ).pushNamed('/profile', arguments: {'userId': user.id});
               }
             },
           ),

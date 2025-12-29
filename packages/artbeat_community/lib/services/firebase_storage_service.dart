@@ -9,47 +9,12 @@ import 'package:artbeat_core/artbeat_core.dart' as core;
 
 /// Service for handling Firebase Storage operations
 class FirebaseStorageService {
-  FirebaseStorage? _debugStorage;
   final FirebaseStorage _storage = FirebaseStorage.instance;
   final _uuid = const Uuid();
 
   /// Get the appropriate storage instance (with or without App Check)
   FirebaseStorage get _effectiveStorage {
-    if (kDebugMode && _debugStorage != null) {
-      return _debugStorage!;
-    }
     return _storage;
-  }
-
-  /// Initialize a debug storage instance without App Check
-  Future<void> _ensureDebugStorage() async {
-    if (!kDebugMode || _debugStorage != null) return;
-
-    try {
-      core.AppLogger.debug(
-        'Creating debug Firebase Storage instance without App Check',
-        logger: 'FirebaseStorageService',
-      );
-
-      // Create a secondary Firebase app for storage operations
-      final debugApp = await Firebase.initializeApp(
-        name: 'debug-storage',
-        options: Firebase.app().options,
-      );
-
-      _debugStorage = FirebaseStorage.instanceFor(app: debugApp);
-
-      core.AppLogger.debug(
-        'Debug storage instance created successfully',
-        logger: 'FirebaseStorageService',
-      );
-    } catch (e) {
-      core.AppLogger.warning(
-        'Failed to create debug storage instance, using default: $e',
-        logger: 'FirebaseStorageService',
-      );
-      // Fall back to default storage if debug instance fails
-    }
   }
 
   /// Upload a single image file to Firebase Storage
@@ -69,9 +34,6 @@ class FirebaseStorageService {
         'User authenticated: ${user.uid}',
         logger: 'FirebaseStorageService',
       );
-
-      // Ensure debug storage is available in debug mode
-      await _ensureDebugStorage();
 
       // Generate unique filename
       final fileName = '${_uuid.v4()}.jpg';
@@ -129,6 +91,8 @@ class FirebaseStorageService {
         'Error type: ${e.runtimeType}',
         logger: 'FirebaseStorageService',
       );
+      debugPrint('UPLOAD ERROR (uploadImage): $e');
+      debugPrint('UPLOAD ERROR TYPE: ${e.runtimeType}');
       throw Exception('Failed to upload image: $e');
     }
   }
@@ -154,18 +118,27 @@ class FirebaseStorageService {
     for (int i = 0; i < imageFiles.length; i++) {
       final imageFile = imageFiles[i];
       try {
+        final exists = await imageFile.exists();
+        final size = exists ? await imageFile.length() : 0;
         core.AppLogger.debug(
-          'Uploading image $i: ${imageFile.path}',
+          '[Service] Image $i path: ${imageFile.path}',
           logger: 'FirebaseStorageService',
         );
         core.AppLogger.debug(
-          'File exists: ${await imageFile.exists()}',
+          '[Service] Image $i exists: $exists',
           logger: 'FirebaseStorageService',
         );
         core.AppLogger.debug(
-          'File size: ${await imageFile.length()} bytes',
+          '[Service] Image $i size: $size bytes',
           logger: 'FirebaseStorageService',
         );
+        if (!exists || size == 0) {
+          core.AppLogger.error(
+            '[Service] WARNING: Image $i is missing or empty and will be skipped.',
+            logger: 'FirebaseStorageService',
+          );
+          continue;
+        }
 
         final downloadUrl = await uploadImage(
           imageFile,
@@ -271,9 +244,6 @@ class FirebaseStorageService {
         );
         throw Exception('User must be authenticated to upload videos');
       }
-
-      // Ensure debug storage is available in debug mode
-      await _ensureDebugStorage();
 
       // Generate unique filename
       final fileName = '${_uuid.v4()}.mp4';
@@ -497,9 +467,6 @@ class FirebaseStorageService {
         );
         throw Exception('User must be authenticated to upload audio');
       }
-
-      // Ensure debug storage is available in debug mode
-      await _ensureDebugStorage();
 
       // Generate unique filename
       final fileName = '${_uuid.v4()}.mp3';

@@ -126,6 +126,8 @@ class EnhancedPostCard extends StatefulWidget {
   final VoidCallback? onShare;
   final void Function(String imageUrl, int index)? onImageTap;
   final VoidCallback? onBlockStatusChanged;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
 
   const EnhancedPostCard({
     super.key,
@@ -136,6 +138,8 @@ class EnhancedPostCard extends StatefulWidget {
     this.onShare,
     this.onImageTap,
     this.onBlockStatusChanged,
+    this.onEdit,
+    this.onDelete,
   });
 
   @override
@@ -347,6 +351,8 @@ class _EnhancedPostCardState extends State<EnhancedPostCard> {
             contentType: 'post',
             userName: widget.post.userName,
             onBlockStatusChanged: widget.onBlockStatusChanged,
+            onEdit: widget.onEdit,
+            onDelete: widget.onDelete,
           ),
         ],
       ),

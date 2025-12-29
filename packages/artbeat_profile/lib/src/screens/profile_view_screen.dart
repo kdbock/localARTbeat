@@ -324,30 +324,22 @@ class _ProfileViewScreenState extends State<ProfileViewScreen>
 
   @override
   Widget build(BuildContext context) {
-    final view = _isLoading
-        ? const Center(
-            child: CircularProgressIndicator(
-              strokeWidth: 3,
-              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF22D3EE)),
-            ),
-          )
-        : Column(
-            children: [
-              HudTopBar(
-                title: widget.isCurrentUser ? 'My Profile' : name,
-                actions: widget.isCurrentUser
-                    ? [
-                        IconButton(
-                          onPressed: _handleEditProfile,
-                          icon: const Icon(Icons.edit, color: Colors.white),
-                        ),
-                      ]
-                    : [],
+    if (_isLoading) {
+      return MainLayout(
+        currentIndex: -1,
+        child: WorldBackground(
+          child: Scaffold(
+            backgroundColor: Colors.transparent,
+            body: const Center(
+              child: CircularProgressIndicator(
+                strokeWidth: 3,
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF22D3EE)),
               ),
-              const SizedBox(height: 20),
-              Expanded(child: _buildProfileContent()),
-            ],
-          );
+            ),
+          ),
+        ),
+      );
+    }
 
     return MainLayout(
       currentIndex: -1,
@@ -357,10 +349,7 @@ class _ProfileViewScreenState extends State<ProfileViewScreen>
           body: SafeArea(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 350),
-                child: view,
-              ),
+              child: _buildProfileContent(),
             ),
           ),
         ),

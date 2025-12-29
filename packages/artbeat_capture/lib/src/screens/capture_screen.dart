@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'capture_detail_screen.dart';
+import 'capture_upload_screen.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 
 /// Capture screen that goes straight to camera
@@ -38,18 +38,12 @@ class _CaptureScreenState extends State<CaptureScreen> {
 
       if (photo != null) {
         final imageFile = File(photo.path);
-        // Automatically proceed to capture detail screen
+        // Automatically proceed to capture upload screen
         if (mounted) {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute<void>(
-              builder: (context) => CaptureDetailScreen(
-                imageFile: imageFile,
-                title: 'Untitled Capture',
-                description: 'No description provided.',
-                submittedAt: DateTime.now(),
-                xpAwarded: 0,
-                status: 'pending',
-              ),
+              builder: (context) =>
+                  CaptureUploadScreen(initialImage: imageFile),
             ),
           );
         }

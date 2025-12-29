@@ -1329,6 +1329,14 @@ service cloud.firestore {
       );
     }
 
+    // User posts collection for easy user post retrieval
+    match /user_posts/{userId}/posts/{postId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      allow update: if isAuthenticated() && request.auth.uid == userId;
+      allow delete: if isAuthenticated() && request.auth.uid == userId;
+    }
+
     // Admin collections
     match /admin/{document=**} {
       allow read, write: if isAuthenticated() && isAdmin(request.auth.uid);

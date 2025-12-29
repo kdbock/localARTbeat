@@ -62,12 +62,22 @@ class _QuestHistoryScreenState extends State<QuestHistoryScreen>
     return WorldBackground(
       child: Column(
         children: [
-          HudTopBar(title: 'art_walk_quest_history_title'.tr()),
+          HudTopBar(
+            title: 'art_walk_quest_history_title'.tr(),
+            showBack: true,
+            onBack: () => Navigator.of(context).pop(),
+          ),
+
           TabBar(
             controller: _tabController,
             indicatorColor: ArtbeatColors.primaryPurple,
             labelColor: ArtbeatColors.primaryPurple,
-            unselectedLabelColor: Colors.grey,
+            unselectedLabelColor: const Color.fromARGB(
+              115,
+              255,
+              255,
+              255,
+            ), // ~45% alpha
             tabs: [
               Tab(text: 'art_walk_quest_tab_current'.tr()),
               Tab(text: 'art_walk_quest_tab_stats'.tr()),
@@ -80,9 +90,18 @@ class _QuestHistoryScreenState extends State<QuestHistoryScreen>
                 : TabBarView(
                     controller: _tabController,
                     children: [
-                      _buildCurrentQuestTab(),
-                      _buildStatsTab(),
-                      _buildAllQuestsTab(),
+                      Container(
+                        color: Colors.transparent,
+                        child: _buildCurrentQuestTab(),
+                      ),
+                      Container(
+                        color: Colors.transparent,
+                        child: _buildStatsTab(),
+                      ),
+                      Container(
+                        color: Colors.transparent,
+                        child: _buildAllQuestsTab(),
+                      ),
                     ],
                   ),
           ),
@@ -99,10 +118,14 @@ class _QuestHistoryScreenState extends State<QuestHistoryScreen>
         children: [
           const SizedBox(height: 16),
           if (_todaysChallenge != null)
-            DailyQuestCard(
-              challenge: _todaysChallenge,
-              showTimeRemaining: true,
-              showRewardPreview: true,
+            GlassCard(
+              padding: const EdgeInsets.all(16),
+              fillColor: const Color.fromARGB(18, 255, 255, 255), // ~7% alpha
+              child: DailyQuestCard(
+                challenge: _todaysChallenge,
+                showTimeRemaining: true,
+                showRewardPreview: true,
+              ),
             ),
           const SizedBox(height: 24),
           Text(
@@ -135,7 +158,11 @@ class _QuestHistoryScreenState extends State<QuestHistoryScreen>
             ],
           ),
           const SizedBox(height: 24),
-          _buildQuestTips(),
+          GlassCard(
+            padding: const EdgeInsets.all(16),
+            fillColor: const Color.fromARGB(18, 255, 255, 255),
+            child: _buildQuestTips(),
+          ),
           const SizedBox(height: 100),
         ],
       ),
@@ -151,6 +178,7 @@ class _QuestHistoryScreenState extends State<QuestHistoryScreen>
     return Expanded(
       child: GlassCard(
         padding: const EdgeInsets.all(16),
+        fillColor: const Color.fromARGB(18, 255, 255, 255),
         child: Column(
           children: [
             Icon(icon, color: color, size: 28),
@@ -181,21 +209,7 @@ class _QuestHistoryScreenState extends State<QuestHistoryScreen>
         children: [
           GlassCard(
             padding: const EdgeInsets.all(24),
-            fillColor: ArtbeatColors.primaryPurple.withValues(
-              red: (ArtbeatColors.primaryPurple.r * 255.0)
-                  .round()
-                  .clamp(0, 255)
-                  .toDouble(),
-              green: (ArtbeatColors.primaryPurple.g * 255.0)
-                  .round()
-                  .clamp(0, 255)
-                  .toDouble(),
-              blue: (ArtbeatColors.primaryPurple.b * 255.0)
-                  .round()
-                  .clamp(0, 255)
-                  .toDouble(),
-              alpha: (0.85 * 255),
-            ),
+            fillColor: const Color.fromARGB(216, 124, 77, 255), // 85% alpha
             child: Column(
               children: [
                 Text(
@@ -247,6 +261,7 @@ class _QuestHistoryScreenState extends State<QuestHistoryScreen>
       padding: const EdgeInsets.only(bottom: 12),
       child: GlassCard(
         padding: const EdgeInsets.all(16),
+        fillColor: const Color.fromARGB(18, 255, 255, 255),
         child: Row(
           children: [
             Icon(icon, color: ArtbeatColors.primaryPurple, size: 24),
@@ -270,6 +285,7 @@ class _QuestHistoryScreenState extends State<QuestHistoryScreen>
           padding: const EdgeInsets.only(bottom: 12),
           child: GlassCard(
             padding: const EdgeInsets.all(16),
+            fillColor: const Color.fromARGB(18, 255, 255, 255),
             child: Row(
               children: [
                 const Icon(
@@ -322,7 +338,14 @@ class _QuestHistoryScreenState extends State<QuestHistoryScreen>
                   size: 20,
                 ),
                 const SizedBox(width: 8),
-                Expanded(child: Text(key.tr(), style: AppTextStyles.body)),
+                Expanded(
+                  child: Text(
+                    key.tr(),
+                    style: AppTextStyles.body.copyWith(
+                      color: const Color.fromARGB(235, 255, 255, 255),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),

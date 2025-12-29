@@ -100,7 +100,10 @@ class _ArtWalkDrawerState extends State<ArtWalkDrawer> {
     if (!mounted) return;
 
     AppLogger.info('ArtWalkDrawer: navigate to ${item.route}');
-    if (_shouldPush(item.route)) {
+    // Use pushReplacementNamed for Quest History and Weekly Goals to avoid duplicate stacking
+    if (item.route == '/quest-history' || item.route == '/weekly-goals') {
+      navigator.pushReplacementNamed(item.route);
+    } else if (_shouldPush(item.route)) {
       navigator.pushNamed(item.route);
     } else {
       navigator.pushReplacementNamed(item.route);
@@ -165,7 +168,8 @@ class _ArtWalkDrawerState extends State<ArtWalkDrawer> {
     return route.startsWith('/art-walk/') ||
         route == '/capture/public' ||
         route == '/quest-history' ||
-        route == '/weekly-goals';
+        route == '/weekly-goals' ||
+        route == '/profile';
   }
 }
 
@@ -597,12 +601,6 @@ const _drawerSections = <_DrawerSectionConfig>[
     titleKey: 'art_walk_drawer_discover',
     items: [
       _DrawerNavItem(
-        titleKey: 'art_walk_drawer_nearby_art',
-        icon: Icons.my_location_rounded,
-        route: '/art-walk/nearby',
-        accent: Color(0xFFFFC857),
-      ),
-      _DrawerNavItem(
         titleKey: 'art_walk_drawer_instant_discovery',
         icon: Icons.radar_rounded,
         route: '/instant-discovery',
@@ -619,40 +617,6 @@ const _drawerSections = <_DrawerSectionConfig>[
         icon: Icons.emoji_events_rounded,
         route: '/art-walk/achievements',
         accent: Color(0xFFFFC857),
-      ),
-    ],
-  ),
-  _DrawerSectionConfig(
-    titleKey: 'art_walk_drawer_gamification',
-    items: [
-      _DrawerNavItem(
-        titleKey: 'art_walk_drawer_quest_history',
-        icon: Icons.assignment_turned_in_rounded,
-        route: '/quest-history',
-        accent: Color(0xFF22D3EE),
-      ),
-      _DrawerNavItem(
-        titleKey: 'art_walk_drawer_weekly_goals',
-        icon: Icons.flag_rounded,
-        route: '/weekly-goals',
-        accent: Color(0xFFFFC857),
-      ),
-    ],
-  ),
-  _DrawerSectionConfig(
-    titleKey: 'art_walk_drawer_tools',
-    items: [
-      _DrawerNavItem(
-        titleKey: 'art_walk_drawer_my_captures',
-        icon: Icons.camera_alt_rounded,
-        route: '/art-walk/my-captures',
-        accent: Color(0xFF34D399),
-      ),
-      _DrawerNavItem(
-        titleKey: 'art_walk_drawer_art_walk_settings',
-        icon: Icons.settings_rounded,
-        route: '/art-walk/settings',
-        accent: Color(0xFF7C7E91),
       ),
     ],
   ),
