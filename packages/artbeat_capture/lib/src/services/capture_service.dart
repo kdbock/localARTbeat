@@ -325,6 +325,10 @@ class CaptureService implements CaptureServiceInterface {
       final docRef = await _capturesRef.add(captureData);
       final newCapture = capture.copyWith(id: docRef.id);
 
+      // Clear caches to ensure new capture appears immediately
+      clearAllCapturesCache();
+      clearCapturesCache();
+
       // OPTIMIZATION: Run all secondary operations in the background
       // This allows the UI to respond immediately while these complete asynchronously
       _processPostCaptureOperations(newCapture);

@@ -444,6 +444,73 @@ class ArtCommunityService extends ChangeNotifier {
     }
   }
 
+  /// Update an existing post
+  Future<bool> updatePost(String postId, {
+    String? content,
+    List<String>? imageUrls,
+    List<String>? videoUrls,
+    List<String>? audioUrls,
+    List<String>? tags,
+  }) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        AppLogger.error('User not authenticated');
+        return false;
+      }
+
+      final updateData = <String, dynamic>{
+        'lastUpdated': FieldValue.serverTimestamp(),
+      };
+
+      if (content != null) updateData['content'] = content;
+      if (imageUrls != null) updateData['imageUrls'] = imageUrls;
+      if (videoUrls != null) updateData['videoUrls'] = videoUrls;
+      if (audioUrls != null) updateData['audioUrls'] = audioUrls;
+      if (tags != null) updateData['tags'] = tags;
+
+      await _firestore.collection('posts').doc(postId).update(updateData);
+
+      AppLogger.info('Post updated successfully: $postId');
+      return true;
+    } catch (e) {
+      AppLogger.error('Error updating post: $e');
+      return false;
+    }
+  }
+
+  /// Delete a post
+  Future<bool> deletePost(String postId) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        AppLogger.error('User not authenticated');
+        return false;
+      }
+
+      // First verify the user owns the post
+      final postDoc = await _firestore.collection('posts').doc(postId).get();
+      if (!postDoc.exists) {
+        AppLogger.error('Post not found: $postId');
+        return false;
+      }
+
+      final postData = postDoc.data();
+      if (postData?['userId'] != user.uid) {
+        AppLogger.error('User does not own post: $postId');
+        return false;
+      }
+
+      await _firestore.collection('posts').doc(postId).delete();
+
+      AppLogger.info('Post deleted successfully: $postId');
+      return true;
+    } catch (e) {
+      AppLogger.error('Error deleting post: $e');
+      return false;
+    }
+  }
+
   /// Like/unlike a post
   Future<bool> toggleLike(String postId) async {
     try {

@@ -1230,6 +1230,39 @@
         { "fieldPath": "isPublic", "order": "ASCENDING" },
         { "fieldPath": "viewCount", "order": "DESCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "users",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userType", "order": "ASCENDING" },
+        { "fieldPath": "fullName", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "gifts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "purchaseDate", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "artistProfileViews",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "artistProfileId", "order": "ASCENDING" },
+        { "fieldPath": "viewerId", "order": "ASCENDING" },
+        { "fieldPath": "viewedAt", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "token_transactions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "timestamp", "order": "DESCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

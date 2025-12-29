@@ -650,7 +650,7 @@ class _ArtWalkReviewScreenState extends State<ArtWalkReviewScreen> {
   Widget _buildStartWalkButton() {
     return Container(
       width: double.infinity,
-      height: 56,
+      height: 100,
       decoration: BoxDecoration(
         gradient: ArtWalkDesignSystem.buttonGradient,
         borderRadius: BorderRadius.circular(24),

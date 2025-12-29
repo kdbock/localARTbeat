@@ -7,6 +7,27 @@ import 'rewards_service.dart';
 
 /// Service for managing user challenges (daily/weekly goals and rewards)
 class ChallengeService {
+  /// Get all completed challenges for the current user
+  Future<List<ChallengeModel>> getCompletedChallenges() async {
+    final user = _auth.currentUser;
+    if (user == null) return [];
+    try {
+      final query = await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('dailyChallenges')
+          .where('isCompleted', isEqualTo: true)
+          .orderBy('completedAt', descending: true)
+          .get();
+      return query.docs
+          .map((doc) => ChallengeModel.fromMap(doc.data()))
+          .toList();
+    } catch (e) {
+      AppLogger.error('Error fetching completed challenges: $e');
+      return [];
+    }
+  }
+
   static final ChallengeService _instance = ChallengeService._internal();
 
   factory ChallengeService() => _instance;

@@ -832,6 +832,7 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: TextField(
                     controller: _searchController,
+                    enableInteractiveSelection: false,
                     style: const TextStyle(
                       color: _LAB.textPrimary,
                       fontWeight: FontWeight.w700,
@@ -1986,6 +1987,48 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
     }
   }
 
+  void _handleEdit(PostModel post) {
+    // Navigate to create post screen with post to edit
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => CreatePostScreen(
+          postToEdit: post,
+        ),
+      ),
+    );
+  }
+
+  void _handleDelete(PostModel post) async {
+    try {
+      final success = await widget.communityService.deletePost(post.id);
+      if (success) {
+        // Remove from local list
+        setState(() {
+          posts.removeWhere((p) => p.id == post.id);
+          filteredPosts.removeWhere((p) => p.id == post.id);
+          _feedItems.removeWhere((item) => item is PostModel && item.id == post.id);
+        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Post deleted successfully')),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Failed to delete post')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error deleting post')),
+        );
+      }
+    }
+  }
+
   void _showFullscreenImage(
     String imageUrl,
     int initialIndex,
@@ -2130,6 +2173,8 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
                           ),
                       onBlockStatusChanged: () =>
                           loadPosts(widget.communityService),
+                      onEdit: () => _handleEdit(item),
+                      onDelete: () => _handleDelete(item),
                     ),
                   );
                 } else if (item is art_walk.SocialActivity) {
@@ -2976,6 +3021,7 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
               child: TextField(
                 controller: _nameController,
                 maxLength: 50,
+                enableInteractiveSelection: false,
                 style: const TextStyle(
                   color: _LAB.textPrimary,
                   fontWeight: FontWeight.w700,
@@ -3002,6 +3048,7 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
                 controller: _descriptionController,
                 maxLength: 200,
                 maxLines: 3,
+                enableInteractiveSelection: false,
                 style: const TextStyle(
                   color: _LAB.textPrimary,
                   fontWeight: FontWeight.w700,
