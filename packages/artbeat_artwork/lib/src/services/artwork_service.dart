@@ -288,6 +288,11 @@ class ArtworkService {
     int? yearCreated,
     String? externalLink,
     bool? isPublic,
+    // Auction fields
+    bool? auctionEnabled,
+    DateTime? auctionEnd,
+    double? startingPrice,
+    double? reservePrice,
   }) async {
     final userId = getCurrentUserId();
     if (userId == null) {
@@ -324,6 +329,11 @@ class ArtworkService {
       if (yearCreated != null) updateData['yearCreated'] = yearCreated;
       if (externalLink != null) updateData['externalLink'] = externalLink;
       if (isPublic != null) updateData['isPublic'] = isPublic;
+      if (auctionEnabled != null) updateData['auctionEnabled'] = auctionEnabled;
+      if (auctionEnd != null)
+        updateData['auctionEnd'] = Timestamp.fromDate(auctionEnd);
+      if (startingPrice != null) updateData['startingPrice'] = startingPrice;
+      if (reservePrice != null) updateData['reservePrice'] = reservePrice;
 
       // Update Firestore document
       await _artworkCollection.doc(artworkId).update(updateData);

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:artbeat_community/widgets/glass_card.dart';
 // Using ArtistProfileModel from artbeat_core to avoid conflicts
 import '../screens/feed/artist_community_feed_screen.dart';
 
@@ -121,19 +124,23 @@ class _ArtistListWidgetState extends State<ArtistListWidget>
   }
 
   Widget _buildLoadingState() {
-    return const Center(
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(
+          const CircularProgressIndicator(
             valueColor: AlwaysStoppedAnimation<Color>(
               ArtbeatColors.primaryPurple,
             ),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Text(
-            'Loading artists...',
-            style: TextStyle(fontSize: 16, color: ArtbeatColors.textSecondary),
+            tr('artist_list_loading_artists'),
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 16,
+              fontWeight: FontWeight.w400,
+              color: ArtbeatColors.textSecondary,
+            ),
           ),
         ],
       ),
@@ -152,9 +159,10 @@ class _ArtistListWidgetState extends State<ArtistListWidget>
           ),
           const SizedBox(height: 16),
           Text(
-            _errorMessage ?? 'Something went wrong',
-            style: const TextStyle(
+            _errorMessage ?? tr('artist_list_error_generic'),
+            style: GoogleFonts.spaceGrotesk(
               fontSize: 16,
+              fontWeight: FontWeight.w400,
               color: ArtbeatColors.textSecondary,
             ),
             textAlign: TextAlign.center,
@@ -162,7 +170,7 @@ class _ArtistListWidgetState extends State<ArtistListWidget>
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: _loadArtists,
-            child: const Text('Try Again'),
+            child: Text(tr('artist_list_try_again')),
           ),
         ],
       ),
@@ -170,24 +178,32 @@ class _ArtistListWidgetState extends State<ArtistListWidget>
   }
 
   Widget _buildEmptyState() {
-    return const Center(
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.palette, size: 64, color: ArtbeatColors.textSecondary),
-          SizedBox(height: 16),
+          const Icon(
+            Icons.palette,
+            size: 64,
+            color: ArtbeatColors.textSecondary,
+          ),
+          const SizedBox(height: 16),
           Text(
-            'No Artists Found',
-            style: TextStyle(
+            tr('artist_list_no_artists_title'),
+            style: GoogleFonts.spaceGrotesk(
               fontSize: 18,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
               color: ArtbeatColors.textPrimary,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
-            'Check back later for new artists!',
-            style: TextStyle(fontSize: 14, color: ArtbeatColors.textSecondary),
+            tr('artist_list_no_artists_subtitle'),
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 14,
+              fontWeight: FontWeight.w400,
+              color: ArtbeatColors.textSecondary,
+            ),
           ),
         ],
       ),
@@ -195,13 +211,12 @@ class _ArtistListWidgetState extends State<ArtistListWidget>
   }
 
   Widget _buildArtistCard(ArtistProfileModel artist) {
-    return Card(
-      elevation: 2,
+    return GlassCard(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      borderRadius: 24,
       child: InkWell(
         onTap: () => _navigateToArtistFeed(artist),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(24),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -229,9 +244,9 @@ class _ArtistListWidgetState extends State<ArtistListWidget>
                         Expanded(
                           child: Text(
                             artist.displayName,
-                            style: const TextStyle(
+                            style: GoogleFonts.spaceGrotesk(
                               fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w900,
                               color: ArtbeatColors.textPrimary,
                             ),
                             overflow: TextOverflow.ellipsis,
@@ -258,11 +273,11 @@ class _ArtistListWidgetState extends State<ArtistListWidget>
                               ),
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Text(
-                              'FEATURED',
-                              style: TextStyle(
+                            child: Text(
+                              tr('artist_list_featured'),
+                              style: GoogleFonts.spaceGrotesk(
                                 fontSize: 10,
-                                fontWeight: FontWeight.bold,
+                                fontWeight: FontWeight.w700,
                                 color: ArtbeatColors.accentYellow,
                               ),
                             ),
@@ -283,8 +298,9 @@ class _ArtistListWidgetState extends State<ArtistListWidget>
                           Expanded(
                             child: Text(
                               artist.location ?? '',
-                              style: const TextStyle(
+                              style: GoogleFonts.spaceGrotesk(
                                 fontSize: 14,
+                                fontWeight: FontWeight.w400,
                                 color: ArtbeatColors.textSecondary,
                               ),
                               overflow: TextOverflow.ellipsis,
@@ -297,8 +313,9 @@ class _ArtistListWidgetState extends State<ArtistListWidget>
                     if (artist.bio?.isNotEmpty == true) ...[
                       Text(
                         artist.bio!,
-                        style: const TextStyle(
+                        style: GoogleFonts.spaceGrotesk(
                           fontSize: 14,
+                          fontWeight: FontWeight.w400,
                           color: ArtbeatColors.textSecondary,
                         ),
                         maxLines: 2,
@@ -318,11 +335,18 @@ class _ArtistListWidgetState extends State<ArtistListWidget>
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            '${_formatFollowerCount(_followerCounts[artist.id]!)} followers',
-                            style: const TextStyle(
+                            tr(
+                              'artist_list_followers_count',
+                              args: [
+                                _formatFollowerCount(
+                                  _followerCounts[artist.id]!,
+                                ),
+                              ],
+                            ),
+                            style: GoogleFonts.spaceGrotesk(
                               fontSize: 14,
-                              color: ArtbeatColors.primaryPurple,
                               fontWeight: FontWeight.w600,
+                              color: ArtbeatColors.primaryPurple,
                             ),
                           ),
                         ],
@@ -388,9 +412,9 @@ class _ArtistListWidgetState extends State<ArtistListWidget>
       ),
       child: Text(
         text,
-        style: TextStyle(
+        style: GoogleFonts.spaceGrotesk(
           fontSize: 10,
-          fontWeight: FontWeight.w500,
+          fontWeight: FontWeight.w600,
           color: color,
         ),
       ),

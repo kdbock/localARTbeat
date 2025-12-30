@@ -5,6 +5,7 @@ import 'package:artbeat_core/artbeat_core.dart' as core;
 import '../models/artwork_model.dart';
 import '../services/artwork_service.dart';
 import '../widgets/artwork_grid_widget.dart';
+import 'auction_management_modal.dart';
 
 /// Consolidated screen for artists to manage their artwork
 /// Replaces the duplicate MyArtworkScreen from artbeat_artist
@@ -133,6 +134,18 @@ class _ArtistArtworkManagementScreenState
     }
   }
 
+  Future<void> _manageAuction(ArtworkModel artwork) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AuctionManagementModal(artwork: artwork),
+    );
+
+    if (result == true && mounted) {
+      // Refresh the artwork list
+      await _refreshArtwork();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return core.MainLayout(
@@ -252,6 +265,7 @@ class _ArtistArtworkManagementScreenState
             onArtworkTap: _navigateToArtworkDetail,
             onArtworkEdit: _navigateToEdit,
             onArtworkDelete: _deleteArtwork,
+            onArtworkAuctionManage: _manageAuction,
             onRefresh: _refreshArtwork,
             showManagementActions:
                 true, // Show edit/delete for artist's own artwork

@@ -13,7 +13,6 @@
 // NOTE: This file assumes `ArtbeatColors` still exists, but we purposely
 // anchor the new look with local constants below to avoid relying on old palette.
 
-import 'dart:ui';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -30,7 +29,12 @@ import '../widgets/mini_artist_card.dart';
 import '../widgets/comments_modal.dart';
 import '../widgets/commission_artists_browser.dart';
 import '../widgets/fullscreen_image_viewer.dart';
+import '../widgets/world_background.dart';
+import '../widgets/glass_card.dart';
+import '../widgets/hud_button.dart';
+import '../widgets/drawer_section.dart' as lab_drawer;
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'artist_onboarding_screen.dart';
 import 'artist_feed_screen.dart';
@@ -53,8 +57,6 @@ import '../services/direct_commission_service.dart';
 class _LAB {
   // World
   static const Color world0 = Color(0xFF07060F);
-  static const Color world1 = Color(0xFF0A1330);
-  static const Color world2 = Color(0xFF071C18);
 
   // Accents
   static const Color teal = Color(0xFF22D3EE);
@@ -84,87 +86,7 @@ class _WorldBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        // Base gradient
-        Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [_LAB.world0, _LAB.world1, _LAB.world2],
-            ),
-          ),
-        ),
-
-        // Soft blobs
-        const Positioned(
-          top: -120,
-          left: -90,
-          child: _BlurBlob(color: _LAB.purple, size: 300, opacity: 0.22),
-        ),
-        const Positioned(
-          top: 120,
-          right: -110,
-          child: _BlurBlob(color: _LAB.teal, size: 280, opacity: 0.20),
-        ),
-        const Positioned(
-          bottom: -140,
-          left: 40,
-          child: _BlurBlob(color: _LAB.pink, size: 320, opacity: 0.14),
-        ),
-        const Positioned(
-          bottom: 120,
-          right: -120,
-          child: _BlurBlob(color: _LAB.green, size: 260, opacity: 0.14),
-        ),
-
-        // Vignette
-        IgnorePointer(
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: RadialGradient(
-                center: Alignment.center,
-                radius: 1.0,
-                colors: [
-                  Colors.transparent,
-                  Colors.black.withValues(alpha: 0.55),
-                ],
-                stops: const [0.55, 1.0],
-              ),
-            ),
-          ),
-        ),
-
-        child,
-      ],
-    );
-  }
-}
-
-class _BlurBlob extends StatelessWidget {
-  const _BlurBlob({
-    required this.color,
-    required this.size,
-    required this.opacity,
-  });
-  final Color color;
-  final double size;
-  final double opacity;
-
-  @override
-  Widget build(BuildContext context) {
-    return ImageFiltered(
-      imageFilter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: opacity),
-          shape: BoxShape.circle,
-        ),
-      ),
-    );
+    return WorldBackground(child: child);
   }
 }
 
@@ -187,31 +109,29 @@ class _Glass extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(radius),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-        child: Container(
-          padding: padding,
-          decoration: BoxDecoration(
-            color: _LAB.glassFill(fillAlpha),
-            borderRadius: BorderRadius.circular(radius),
-            border: Border.all(color: _LAB.glassBorder(borderAlpha)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.45),
-                blurRadius: 30,
-                offset: const Offset(0, 16),
-              ),
-              BoxShadow(
-                color: _LAB.teal.withValues(alpha: 0.08),
-                blurRadius: 40,
-                offset: const Offset(0, 10),
-              ),
-            ],
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(radius),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.45),
+            blurRadius: 30,
+            offset: const Offset(0, 16),
           ),
-          child: child,
-        ),
+          BoxShadow(
+            color: _LAB.teal.withValues(alpha: 0.08),
+            blurRadius: 40,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: GlassCard(
+        padding: padding ?? const EdgeInsets.all(16),
+        borderRadius: radius,
+        blurSigma: blur,
+        glassOpacity: fillAlpha,
+        borderOpacity: borderAlpha,
+        child: child,
       ),
     );
   }
@@ -328,27 +248,6 @@ class _PillTile extends StatelessWidget {
               const Icon(Icons.chevron_right, color: _LAB.textTertiary),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader(this.title);
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 18, 16, 6),
-      child: Text(
-        title.toUpperCase(),
-        style: const TextStyle(
-          color: _LAB.textTertiary,
-          fontSize: 12,
-          fontWeight: FontWeight.w900,
-          letterSpacing: 0.8,
         ),
       ),
     );
@@ -661,10 +560,10 @@ class _CommissionsTabState extends State<CommissionsTab>
                 children: [
                   const _GradientIconChip(icon: Icons.receipt_long, size: 42),
                   const SizedBox(width: 12),
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'Commission Details',
-                      style: TextStyle(
+                      'community_hub_commission_dialog_title'.tr(),
+                      style: const TextStyle(
                         color: _LAB.textPrimary,
                         fontWeight: FontWeight.w900,
                         fontSize: 18,
@@ -678,29 +577,49 @@ class _CommissionsTabState extends State<CommissionsTab>
                 ],
               ),
               const SizedBox(height: 12),
-              _detailRow('Commission ID', commission.id),
-              _detailRow('Title', commission.title),
-              _detailRow('Client', commission.clientName),
-              _detailRow('Artist', commission.artistName),
-              _detailRow('Type', commission.type.displayName),
               _detailRow(
-                'Total Price',
+                'community_hub_commission_detail_id'.tr(),
+                commission.id,
+              ),
+              _detailRow(
+                'community_hub_commission_detail_title'.tr(),
+                commission.title,
+              ),
+              _detailRow(
+                'community_hub_commission_detail_client'.tr(),
+                commission.clientName,
+              ),
+              _detailRow(
+                'community_hub_commission_detail_artist'.tr(),
+                commission.artistName,
+              ),
+              _detailRow(
+                'community_hub_commission_detail_type'.tr(),
+                commission.type.displayName,
+              ),
+              _detailRow(
+                'community_hub_commission_detail_total'.tr(),
                 '\$${commission.totalPrice.toStringAsFixed(2)}',
               ),
-              _detailRow('Status', commission.status.displayName),
-              _detailRow('Requested', commission.requestedAt.toString()),
+              _detailRow(
+                'community_hub_commission_detail_status'.tr(),
+                commission.status.displayName,
+              ),
+              _detailRow(
+                'community_hub_commission_detail_requested'.tr(),
+                commission.requestedAt.toString(),
+              ),
               if (commission.deadline != null)
-                _detailRow('Deadline', commission.deadline.toString()),
+                _detailRow(
+                  'community_hub_commission_detail_deadline'.tr(),
+                  commission.deadline.toString(),
+                ),
               const SizedBox(height: 10),
               Align(
                 alignment: Alignment.centerRight,
-                child: TextButton(
-                  style: TextButton.styleFrom(
-                    foregroundColor: _LAB.teal,
-                    textStyle: const TextStyle(fontWeight: FontWeight.w900),
-                  ),
+                child: HudButton.secondary(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('Close'),
+                  text: 'common_close'.tr(),
                 ),
               ),
             ],
@@ -762,7 +681,7 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
     _communityService = ArtCommunityService();
     _checkAuthStatus();
   }
@@ -785,11 +704,13 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
 
   void _showSearchDialog() {
     final currentTab = _tabController.index;
-    final tabName = currentTab == 0
-        ? 'Feed'
-        : currentTab == 1
-        ? 'Artists'
-        : 'Topics';
+    final tabLabels = [
+      'community_hub_tab_feed'.tr(),
+      'community_hub_tab_art_battle'.tr(),
+      'community_hub_tab_artists'.tr(),
+      'community_hub_tab_commissions'.tr(),
+    ];
+    final tabName = tabLabels[currentTab];
 
     showDialog<void>(
       context: context,
@@ -811,7 +732,7 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        'Search $tabName',
+                        'community_hub_search_title'.tr(args: [tabName]),
                         style: const TextStyle(
                           color: _LAB.textPrimary,
                           fontWeight: FontWeight.w900,
@@ -837,13 +758,13 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
                       color: _LAB.textPrimary,
                       fontWeight: FontWeight.w700,
                     ),
-                    decoration: const InputDecoration(
-                      hintText: 'Search...',
-                      hintStyle: TextStyle(
+                    decoration: InputDecoration(
+                      hintText: 'community_hub_search_hint'.tr(),
+                      hintStyle: const TextStyle(
                         color: _LAB.textTertiary,
                         fontSize: 13,
                       ),
-                      prefixIcon: Icon(Icons.search, color: _LAB.teal),
+                      prefixIcon: const Icon(Icons.search, color: _LAB.teal),
                       border: InputBorder.none,
                     ),
                     onChanged: (value) {
@@ -855,7 +776,7 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'Searching in: $tabName',
+                    'community_hub_search_scope'.tr(args: [tabName]),
                     style: const TextStyle(
                       color: _LAB.textSecondary,
                       fontWeight: FontWeight.w600,
@@ -867,54 +788,20 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
                 Row(
                   children: [
                     Expanded(
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          foregroundColor: _LAB.textSecondary,
-                          textStyle: const TextStyle(
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
+                      child: HudButton.secondary(
                         onPressed: () {
                           _searchController.clear();
                           setState(() => _searchQuery = '');
                           Navigator.of(context).pop();
                         },
-                        child: const Text('Clear'),
+                        text: 'community_hub_search_clear'.tr(),
                       ),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
-                      child: Container(
-                        height: 46,
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [_LAB.purple, _LAB.teal, _LAB.green],
-                          ),
-                          borderRadius: BorderRadius.circular(18),
-                          boxShadow: [
-                            BoxShadow(
-                              color: _LAB.purple.withValues(alpha: 0.22),
-                              blurRadius: 18,
-                              offset: const Offset(0, 10),
-                            ),
-                          ],
-                        ),
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(18),
-                            onTap: () => Navigator.of(context).pop(),
-                            child: const Center(
-                              child: Text(
-                                'Search',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w900,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
+                      child: HudButton.primary(
+                        onPressed: () => Navigator.of(context).pop(),
+                        text: 'community_hub_search_cta'.tr(),
                       ),
                     ),
                   ],
@@ -927,39 +814,47 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
     );
   }
 
+  void _closeDrawerAnd(VoidCallback action) {
+    Navigator.pop(context);
+    Future.delayed(const Duration(milliseconds: 220), action);
+  }
+
   Widget _buildDrawer() {
+    final footerTitle = 'community_hub_drawer_footer_title'.tr();
+    final footerVersion = 'community_hub_drawer_version'.tr(args: ['v2.0.5']);
+
     return Drawer(
       backgroundColor: _LAB.world0,
       child: SafeArea(
         child: _WorldBackground(
           child: Column(
             children: [
-              const Padding(
-                padding: EdgeInsets.fromLTRB(16, 14, 16, 10),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
                 child: _Glass(
                   radius: 26,
                   blur: 18,
-                  padding: EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(16),
                   child: Row(
                     children: [
-                      _GradientIconChip(icon: Icons.people, size: 44),
-                      SizedBox(width: 12),
+                      const _GradientIconChip(icon: Icons.people, size: 44),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Local ARTbeat',
-                              style: TextStyle(
+                              'community_hub_drawer_brand_title'.tr(),
+                              style: const TextStyle(
                                 color: _LAB.textPrimary,
                                 fontWeight: FontWeight.w900,
                                 fontSize: 18,
                               ),
                             ),
-                            SizedBox(height: 2),
+                            const SizedBox(height: 2),
                             Text(
-                              'Explore • create • connect',
-                              style: TextStyle(
+                              'community_hub_drawer_brand_tagline'.tr(),
+                              style: const TextStyle(
                                 color: _LAB.textSecondary,
                                 fontWeight: FontWeight.w700,
                                 fontSize: 12,
@@ -976,99 +871,112 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
                 child: ListView(
                   padding: const EdgeInsets.only(bottom: 18),
                   children: [
-                    const _SectionHeader('Main Feeds'),
+                    lab_drawer.DrawerSection(
+                      title: 'community_hub_drawer_section_main_feeds'.tr(),
+                    ),
                     _PillTile(
                       icon: Icons.feed,
-                      title: 'Community Feed',
-                      subtitle: 'Latest posts from artists',
+                      title: 'community_hub_drawer_item_feed_title'.tr(),
+                      subtitle: 'community_hub_drawer_item_feed_subtitle'.tr(),
                       selected: _tabController.index == 0,
                       accent: _LAB.teal,
-                      onTap: () {
-                        Navigator.pop(context);
-                        _tabController.animateTo(0);
-                      },
+                      onTap: () =>
+                          _closeDrawerAnd(() => _tabController.animateTo(0)),
                     ),
                     _PillTile(
                       icon: Icons.trending_up,
-                      title: 'Trending Content',
-                      subtitle: 'Popular and trending posts',
+                      title: 'community_hub_drawer_item_trending_title'.tr(),
+                      subtitle: 'community_hub_drawer_item_trending_subtitle'
+                          .tr(),
                       accent: _LAB.yellow,
                       onTap: () => _navigateToScreen('TrendingContentScreen'),
                     ),
-                    _PillTile(
-                      icon: Icons.group,
-                      title: 'Artist Community',
-                      subtitle: 'Connect with fellow artists',
-                      accent: _LAB.green,
-                      onTap: () =>
-                          _navigateToScreen('ArtistCommunityFeedScreen'),
+                    lab_drawer.DrawerSection(
+                      title: 'community_hub_drawer_section_create'.tr(),
                     ),
-                    const _SectionHeader('Create & Share'),
                     _PillTile(
                       icon: Icons.add_circle,
-                      title: 'Create Post',
-                      subtitle: 'Share your art with the community',
+                      title: 'community_hub_drawer_item_create_post_title'.tr(),
+                      subtitle: 'community_hub_drawer_item_create_post_subtitle'
+                          .tr(),
                       accent: _LAB.pink,
                       onTap: () => _navigateToScreen('CreatePostScreen'),
                     ),
                     _PillTile(
                       icon: Icons.group_add,
-                      title: 'Create Group Post',
-                      subtitle: 'Post to artist groups',
+                      title: 'community_hub_drawer_item_create_group_title'
+                          .tr(),
+                      subtitle:
+                          'community_hub_drawer_item_create_group_subtitle'
+                              .tr(),
                       accent: _LAB.purple,
-                      onTap: _showGroupPostDialog,
+                      onTap: () => _closeDrawerAnd(_showGroupPostDialog),
                     ),
-                    const _SectionHeader('Artists'),
+                    lab_drawer.DrawerSection(
+                      title: 'community_hub_drawer_section_artists'.tr(),
+                    ),
                     _PillTile(
                       icon: Icons.palette,
-                      title: 'Artists Gallery',
-                      subtitle: 'Discover amazing artists',
+                      title: 'community_hub_drawer_item_artists_gallery_title'
+                          .tr(),
+                      subtitle:
+                          'community_hub_drawer_item_artists_gallery_subtitle'
+                              .tr(),
                       selected: _tabController.index == 1,
                       accent: _LAB.purple,
-                      onTap: () {
-                        Navigator.pop(context);
-                        _tabController.animateTo(1);
-                      },
+                      onTap: () =>
+                          _closeDrawerAnd(() => _tabController.animateTo(1)),
                     ),
                     _PillTile(
                       icon: Icons.person_add,
-                      title: 'Artist Onboarding',
-                      subtitle: 'Join the artist community',
+                      title: 'community_hub_drawer_item_artist_onboarding_title'
+                          .tr(),
+                      subtitle:
+                          'community_hub_drawer_item_artist_onboarding_subtitle'
+                              .tr(),
                       accent: _LAB.teal,
                       onTap: () => _navigateToScreen('ArtistOnboardingScreen'),
                     ),
-                    const _SectionHeader('Discover'),
+                    lab_drawer.DrawerSection(
+                      title: 'community_hub_drawer_section_discover'.tr(),
+                    ),
                     _PillTile(
                       icon: Icons.topic,
-                      title: 'Topics',
-                      subtitle: 'Browse by categories',
+                      title: 'community_hub_drawer_item_topics_title'.tr(),
+                      subtitle: 'community_hub_drawer_item_topics_subtitle'
+                          .tr(),
                       selected: _tabController.index == 2,
                       accent: _LAB.green,
-                      onTap: () {
-                        Navigator.pop(context);
-                        _tabController.animateTo(2);
-                      },
+                      onTap: () =>
+                          _closeDrawerAnd(() => _tabController.animateTo(2)),
                     ),
-                    const _SectionHeader('My Content'),
+                    lab_drawer.DrawerSection(
+                      title: 'community_hub_drawer_section_my_content'.tr(),
+                    ),
                     _PillTile(
                       icon: Icons.person,
-                      title: 'My Posts',
-                      subtitle: 'View your posts and activity',
+                      title: 'community_hub_drawer_item_my_posts_title'.tr(),
+                      subtitle: 'community_hub_drawer_item_my_posts_subtitle'
+                          .tr(),
                       accent: _LAB.teal,
                       onTap: () => _navigateToScreen('UserPostsScreen'),
                     ),
-                    const _SectionHeader('Tools'),
+                    lab_drawer.DrawerSection(
+                      title: 'community_hub_drawer_section_tools'.tr(),
+                    ),
                     _PillTile(
                       icon: Icons.settings,
-                      title: 'Quiet Mode',
-                      subtitle: 'Manage notifications',
+                      title: 'community_hub_drawer_item_quiet_mode_title'.tr(),
+                      subtitle: 'community_hub_drawer_item_quiet_mode_subtitle'
+                          .tr(),
                       accent: _LAB.yellow,
                       onTap: () => _navigateToScreen('QuietModeScreen'),
                     ),
                     _PillTile(
                       icon: Icons.analytics,
-                      title: 'Social Engagement',
-                      subtitle: 'View engagement analytics',
+                      title: 'community_hub_drawer_item_social_title'.tr(),
+                      subtitle: 'community_hub_drawer_item_social_subtitle'
+                          .tr(),
                       accent: _LAB.pink,
                       onTap: () =>
                           _navigateToScreen('SocialEngagementDemoScreen'),
@@ -1076,36 +984,44 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
                   ],
                 ),
               ),
-              const Padding(
-                padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 child: _Glass(
                   radius: 18,
                   blur: 14,
-                  padding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
                   child: Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.info_outline,
                         color: _LAB.textTertiary,
                         size: 18,
                       ),
-                      SizedBox(width: 10),
+                      const SizedBox(width: 10),
                       Expanded(
                         child: Text(
-                          'Local ARTbeat Community',
-                          style: TextStyle(
+                          footerTitle,
+                          style: const TextStyle(
                             color: _LAB.textSecondary,
                             fontWeight: FontWeight.w700,
                             fontSize: 12,
                           ),
                         ),
                       ),
-                      Text(
-                        'v2.0.5',
-                        style: TextStyle(
-                          color: _LAB.textTertiary,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 11,
+                      Flexible(
+                        child: Text(
+                          footerVersion,
+                          textAlign: TextAlign.right,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: _LAB.textTertiary,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 11,
+                          ),
                         ),
                       ),
                     ],
@@ -1120,7 +1036,9 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
   }
 
   void _navigateToScreen(String screenClassName) {
-    Navigator.pop(context);
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    navigator.pop();
 
     Widget? screen;
     switch (screenClassName) {
@@ -1142,23 +1060,25 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
       case 'CreatePostScreen':
         screen = const CreatePostScreen();
         break;
-      case 'ArtistCommunityFeedScreen':
-        _showArtistSelectionDialog();
-        return;
       default:
-        ScaffoldMessenger.of(context).showSnackBar(
+        messenger.showSnackBar(
           SnackBar(
-            content: Text('$screenClassName navigation not yet implemented'),
+            content: Text(
+              'community_hub_navigation_unavailable'.tr(
+                args: [screenClassName],
+              ),
+            ),
             duration: const Duration(seconds: 2),
           ),
         );
         return;
     }
 
-    Navigator.push<Widget>(
-      context,
-      MaterialPageRoute<Widget>(builder: (context) => screen!),
-    );
+    Future.delayed(const Duration(milliseconds: 220), () {
+      navigator.push<Widget>(
+        MaterialPageRoute<Widget>(builder: (context) => screen!),
+      );
+    });
   }
 
   void _showGroupPostDialog() {
@@ -1178,10 +1098,10 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
                 children: [
                   const _GradientIconChip(icon: Icons.group_add, size: 42),
                   const SizedBox(width: 12),
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'Create Group Post',
-                      style: TextStyle(
+                      'community_hub_group_post_title'.tr(),
+                      style: const TextStyle(
                         color: _LAB.textPrimary,
                         fontWeight: FontWeight.w900,
                         fontSize: 18,
@@ -1195,9 +1115,9 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
                 ],
               ),
               const SizedBox(height: 10),
-              const Text(
-                'Select the type of group post you want to create:',
-                style: TextStyle(
+              Text(
+                'community_hub_group_post_prompt'.tr(),
+                style: const TextStyle(
                   color: _LAB.textSecondary,
                   fontWeight: FontWeight.w700,
                 ),
@@ -1206,113 +1126,27 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
               Row(
                 children: [
                   Expanded(
-                    child: TextButton(
-                      style: TextButton.styleFrom(
-                        foregroundColor: _LAB.textSecondary,
-                        textStyle: const TextStyle(fontWeight: FontWeight.w900),
-                      ),
+                    child: HudButton.secondary(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('Cancel'),
+                      text: 'common_cancel'.tr(),
                     ),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
-                    child: Container(
-                      height: 46,
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [_LAB.purple, _LAB.teal, _LAB.green],
-                        ),
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(18),
-                          onTap: () {
-                            Navigator.pop(context);
-                            Navigator.push<void>(
-                              context,
-                              MaterialPageRoute<void>(
-                                builder: (context) => const CreatePostScreen(),
-                              ),
-                            );
-                          },
-                          child: const Center(
-                            child: Text(
-                              'Group Post',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
+                    child: HudButton.primary(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.push<void>(
+                          context,
+                          MaterialPageRoute<void>(
+                            builder: (context) => const CreatePostScreen(),
                           ),
-                        ),
-                      ),
+                        );
+                      },
+                      text: 'community_hub_group_post_cta'.tr(),
                     ),
                   ),
                 ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showArtistSelectionDialog() {
-    showDialog<void>(
-      context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.7),
-      builder: (context) => Dialog(
-        backgroundColor: Colors.transparent,
-        child: _Glass(
-          radius: 26,
-          blur: 18,
-          padding: const EdgeInsets.all(18),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                children: [
-                  const _GradientIconChip(icon: Icons.palette, size: 42),
-                  const SizedBox(width: 12),
-                  const Expanded(
-                    child: Text(
-                      'Select Artist',
-                      style: TextStyle(
-                        color: _LAB.textPrimary,
-                        fontWeight: FontWeight.w900,
-                        fontSize: 18,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close, color: _LAB.textSecondary),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              const Text(
-                'Artist selection will be implemented soon.\nFor now, this feature requires selecting a specific artist.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: _LAB.textSecondary,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 14),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  style: TextButton.styleFrom(
-                    foregroundColor: _LAB.teal,
-                    textStyle: const TextStyle(fontWeight: FontWeight.w900),
-                  ),
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('OK'),
-                ),
               ),
             ],
           ),
@@ -1416,12 +1250,16 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
                           icon: const Icon(Icons.feed, size: 16),
                         ),
                         Tab(
+                          text: 'community_hub_tab_art_battle'.tr(),
+                          icon: const Icon(Icons.sports_kabaddi, size: 16),
+                        ),
+                        Tab(
                           text: 'community_hub_tab_artists'.tr(),
                           icon: const Icon(Icons.palette, size: 16),
                         ),
                         Tab(
-                          text: 'community_hub_tab_groups'.tr(),
-                          icon: const Icon(Icons.group, size: 16),
+                          text: 'community_hub_tab_commissions'.tr(),
+                          icon: const Icon(Icons.work, size: 16),
                         ),
                       ],
                     ),
@@ -1468,30 +1306,36 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _LAB.world0,
-      appBar: _buildHudAppBar(),
-      drawer: _buildDrawer(),
-      body: _WorldBackground(
-        child: TabBarView(
-          controller: _tabController,
-          children: [
-            CommunityFeedTab(
-              communityService: _communityService,
-              searchQuery: _searchQuery,
-            ),
-            ArtistsGalleryTab(
-              communityService: _communityService,
-              searchQuery: _searchQuery,
-            ),
-            GroupsTab(
-              communityService: _communityService,
-              searchQuery: _searchQuery,
-            ),
-          ],
+    final baseTheme = Theme.of(context);
+    final hubTheme = baseTheme.copyWith(
+      textTheme: GoogleFonts.spaceGroteskTextTheme(baseTheme.textTheme),
+    );
+
+    return Theme(
+      data: hubTheme,
+      child: Scaffold(
+        backgroundColor: _LAB.world0,
+        appBar: _buildHudAppBar(),
+        drawer: _buildDrawer(),
+        body: _WorldBackground(
+          child: TabBarView(
+            controller: _tabController,
+            children: [
+              CommunityFeedTab(
+                communityService: _communityService,
+                searchQuery: _searchQuery,
+              ),
+              ArtBattleTab(),
+              ArtistsGalleryTab(
+                communityService: _communityService,
+                searchQuery: _searchQuery,
+              ),
+              const CommissionsTab(),
+            ],
+          ),
         ),
+        floatingActionButton: _buildFab(),
       ),
-      floatingActionButton: _buildFab(),
     );
   }
 }
@@ -1990,10 +1834,8 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
   void _handleEdit(PostModel post) {
     // Navigate to create post screen with post to edit
     Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => CreatePostScreen(
-          postToEdit: post,
-        ),
+      MaterialPageRoute<Widget>(
+        builder: (context) => CreatePostScreen(postToEdit: post),
       ),
     );
   }
@@ -2006,7 +1848,9 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
         setState(() {
           posts.removeWhere((p) => p.id == post.id);
           filteredPosts.removeWhere((p) => p.id == post.id);
-          _feedItems.removeWhere((item) => item is PostModel && item.id == post.id);
+          _feedItems.removeWhere(
+            (item) => item is PostModel && item.id == post.id,
+          );
         });
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -2022,9 +1866,9 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error deleting post')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Error deleting post')));
       }
     }
   }
@@ -2294,10 +2138,10 @@ class _ArtistsGalleryTabState extends State<ArtistsGalleryTab> {
       if (!success) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to update follow state'),
+          SnackBar(
+            content: Text('community_hub_artists_follow_error'.tr()),
             backgroundColor: Colors.red,
-            duration: Duration(seconds: 2),
+            duration: const Duration(seconds: 2),
           ),
         );
         _loadArtists();
@@ -2305,10 +2149,10 @@ class _ArtistsGalleryTabState extends State<ArtistsGalleryTab> {
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Error updating follow state'),
+        SnackBar(
+          content: Text('community_hub_artists_follow_error'.tr()),
           backgroundColor: Colors.red,
-          duration: Duration(seconds: 2),
+          duration: const Duration(seconds: 2),
         ),
       );
       _loadArtists();
@@ -2338,18 +2182,18 @@ class _ArtistsGalleryTabState extends State<ArtistsGalleryTab> {
               children: [
                 const _GradientIconChip(icon: Icons.people_outline, size: 52),
                 const SizedBox(height: 14),
-                const Text(
-                  'No artists yet',
-                  style: TextStyle(
+                Text(
+                  'community_hub_artists_empty_title'.tr(),
+                  style: const TextStyle(
                     color: _LAB.textPrimary,
                     fontWeight: FontWeight.w900,
                     fontSize: 18,
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'Artists will appear here as they join the community',
-                  style: TextStyle(
+                Text(
+                  'community_hub_artists_empty_subtitle'.tr(),
+                  style: const TextStyle(
                     color: _LAB.textSecondary,
                     fontWeight: FontWeight.w700,
                     height: 1.4,
@@ -2357,39 +2201,17 @@ class _ArtistsGalleryTabState extends State<ArtistsGalleryTab> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 14),
-                Container(
-                  height: 48,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [_LAB.purple, _LAB.teal, _LAB.green],
-                    ),
-                    borderRadius: BorderRadius.circular(22),
-                  ),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(22),
-                      onTap: () async {
-                        final result = await Navigator.push<bool>(
-                          context,
-                          MaterialPageRoute<bool>(
-                            builder: (context) =>
-                                const ArtistOnboardingScreen(),
-                          ),
-                        );
-                        if (result == true && mounted) _loadArtists();
-                      },
-                      child: const Center(
-                        child: Text(
-                          'Become an Artist',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
+                HudButton.primary(
+                  onPressed: () async {
+                    final result = await Navigator.push<bool>(
+                      context,
+                      MaterialPageRoute<bool>(
+                        builder: (context) => const ArtistOnboardingScreen(),
                       ),
-                    ),
-                  ),
+                    );
+                    if (result == true && mounted) _loadArtists();
+                  },
+                  text: 'community_hub_artists_empty_cta'.tr(),
                 ),
               ],
             ),
@@ -3123,6 +2945,98 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// ------------------------------------------------------------
+/// Art Battle tab – dedicated space for artwork battles
+/// ------------------------------------------------------------
+class ArtBattleTab extends StatefulWidget {
+  const ArtBattleTab({super.key});
+
+  @override
+  State<ArtBattleTab> createState() => _ArtBattleTabState();
+}
+
+class _ArtBattleTabState extends State<ArtBattleTab> {
+  @override
+  Widget build(BuildContext context) {
+    return CustomScrollView(
+      slivers: [
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: _Glass(
+              radius: 18,
+              blur: 14,
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const _GradientIconChip(
+                        icon: Icons.sports_kabaddi,
+                        size: 40,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Art Battle',
+                              style: const TextStyle(
+                                color: _LAB.textPrimary,
+                                fontWeight: FontWeight.w900,
+                                fontSize: 18,
+                              ),
+                            ),
+                            Text(
+                              'Vote on head-to-head artwork battles',
+                              style: const TextStyle(
+                                color: _LAB.textSecondary,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      ElevatedButton(
+                        onPressed: () =>
+                            Navigator.pushNamed(context, '/art-battle'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _LAB.teal,
+                          foregroundColor: Colors.white,
+                        ),
+                        child: const Text('Start Battle'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        // Add current battles list here
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          sliver: SliverToBoxAdapter(
+            child: _Glass(
+              radius: 18,
+              blur: 14,
+              padding: const EdgeInsets.all(16),
+              child: const Center(
+                child: Text(
+                  'Current battles will be displayed here',
+                  style: TextStyle(color: _LAB.textSecondary),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

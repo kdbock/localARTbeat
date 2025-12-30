@@ -16,4 +16,5 @@ class ArtWalkRoutes {
   // Deprecated: Use 'experience' instead
   @Deprecated('Use experience instead - both routes point to the same screen')
   static const String enhancedExperience = '/art-walk/experience';
+  static const String instantDiscovery = '/instant-discovery';
 }

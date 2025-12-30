@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../models/art_models.dart';
 import '../services/art_community_service.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:artbeat_community/widgets/glass_card.dart';
 
 /// Gallery-style post card focused on beautiful image display
 class ArtPostCard extends StatefulWidget {
@@ -103,13 +106,12 @@ class _ArtPostCardState extends State<ArtPostCard>
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
+    return GlassCard(
       margin: const EdgeInsets.all(4),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      borderRadius: 24,
       child: InkWell(
         onTap: widget.onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -119,7 +121,7 @@ class _ArtPostCardState extends State<ArtPostCard>
                 flex: 3,
                 child: ClipRRect(
                   borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(16),
+                    top: Radius.circular(24),
                   ),
                   child: SecureNetworkImage(
                     imageUrl: widget.post.imageUrls.first,
@@ -146,7 +148,7 @@ class _ArtPostCardState extends State<ArtPostCard>
             Expanded(
               flex: 2,
               child: Padding(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(16),
                 child: SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -178,9 +180,12 @@ class _ArtPostCardState extends State<ArtPostCard>
                                     children: [
                                       Text(
                                         widget.post.userName,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.w600,
+                                        style: GoogleFonts.spaceGrotesk(
+                                          fontWeight: FontWeight.w700,
                                           fontSize: 14,
+                                          color: Colors.white.withValues(
+                                            alpha: 0.92,
+                                          ),
                                         ),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
@@ -210,11 +215,11 @@ class _ArtPostCardState extends State<ArtPostCard>
                                               8,
                                             ),
                                           ),
-                                          child: const Text(
+                                          child: Text(
                                             'Artist',
-                                            style: TextStyle(
+                                            style: GoogleFonts.spaceGrotesk(
                                               fontSize: 10,
-                                              fontWeight: FontWeight.w500,
+                                              fontWeight: FontWeight.w600,
                                               color:
                                                   ArtbeatColors.primaryPurple,
                                             ),
@@ -224,8 +229,9 @@ class _ArtPostCardState extends State<ArtPostCard>
                                   ),
                                   Text(
                                     _formatTimeAgo(widget.post.createdAt),
-                                    style: const TextStyle(
+                                    style: GoogleFonts.spaceGrotesk(
                                       fontSize: 12,
+                                      fontWeight: FontWeight.w400,
                                       color: ArtbeatColors.textSecondary,
                                     ),
                                   ),
@@ -236,16 +242,20 @@ class _ArtPostCardState extends State<ArtPostCard>
                         ),
 
                       // Post content
-                      if (widget.post.content.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8),
-                          child: Text(
-                            widget.post.content,
-                            style: const TextStyle(fontSize: 14, height: 1.4),
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Text(
+                          widget.post.content,
+                          style: GoogleFonts.spaceGrotesk(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                            height: 1.4,
+                            color: Colors.white.withValues(alpha: 0.9),
                           ),
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
                         ),
+                      ),
 
                       // Tags
                       if (widget.post.tags.isNotEmpty)
@@ -270,8 +280,9 @@ class _ArtPostCardState extends State<ArtPostCard>
                                 ),
                                 child: Text(
                                   '#$tag',
-                                  style: const TextStyle(
+                                  style: GoogleFonts.spaceGrotesk(
                                     fontSize: 12,
+                                    fontWeight: FontWeight.w500,
                                     color: ArtbeatColors.textSecondary,
                                   ),
                                 ),
@@ -325,14 +336,14 @@ class _ArtPostCardState extends State<ArtPostCard>
                                       builder: (context, child) {
                                         return Text(
                                           '$_likesCount',
-                                          style: TextStyle(
+                                          style: GoogleFonts.spaceGrotesk(
                                             fontSize: 10,
                                             color:
                                                 _colorAnimation.value ??
                                                 ArtbeatColors.textSecondary,
                                             fontWeight: _isLiked
                                                 ? FontWeight.w600
-                                                : FontWeight.normal,
+                                                : FontWeight.w400,
                                           ),
                                           overflow: TextOverflow.ellipsis,
                                         );
@@ -366,8 +377,9 @@ class _ArtPostCardState extends State<ArtPostCard>
                                   Flexible(
                                     child: Text(
                                       '${widget.post.commentsCount}',
-                                      style: const TextStyle(
+                                      style: GoogleFonts.spaceGrotesk(
                                         fontSize: 10,
+                                        fontWeight: FontWeight.w400,
                                         color: ArtbeatColors.textSecondary,
                                       ),
                                       overflow: TextOverflow.ellipsis,
@@ -394,9 +406,9 @@ class _ArtPostCardState extends State<ArtPostCard>
                                   if (mounted) {
                                     // ignore: use_build_context_synchronously
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
+                                      SnackBar(
                                         content: Text(
-                                          'Post shared successfully!',
+                                          tr('art_gallery_post_shared_success'),
                                         ),
                                         backgroundColor: Colors.green,
                                         behavior: SnackBarBehavior.floating,
@@ -408,7 +420,12 @@ class _ArtPostCardState extends State<ArtPostCard>
                                     // ignore: use_build_context_synchronously
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        content: Text('Failed to share: $e'),
+                                        content: Text(
+                                          tr(
+                                            'art_gallery_share_failed',
+                                            args: [e.toString()],
+                                          ),
+                                        ),
                                         backgroundColor: Colors.red,
                                         behavior: SnackBarBehavior.floating,
                                       ),
@@ -446,13 +463,22 @@ class _ArtPostCardState extends State<ArtPostCard>
     final difference = now.difference(dateTime);
 
     if (difference.inDays > 0) {
-      return '${difference.inDays}d ago';
+      return tr(
+        'art_gallery_time_days_ago',
+        args: [difference.inDays.toString()],
+      );
     } else if (difference.inHours > 0) {
-      return '${difference.inHours}h ago';
+      return tr(
+        'art_gallery_time_hours_ago',
+        args: [difference.inHours.toString()],
+      );
     } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}m ago';
+      return tr(
+        'art_gallery_time_minutes_ago',
+        args: [difference.inMinutes.toString()],
+      );
     } else {
-      return 'Just now';
+      return tr('art_gallery_time_just_now');
     }
   }
 }
@@ -548,32 +574,20 @@ class _ArtistCardState extends State<ArtistCard> {
       print('   Avatar URL: ${widget.artist.avatarUrl}');
     }
 
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    return GlassCard(
+      borderRadius: 24,
       child: InkWell(
         onTap: widget.onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
+        borderRadius: BorderRadius.circular(24),
+        child: SizedBox(
           height: 200,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                ArtbeatColors.primaryPurple.withValues(alpha: 0.1),
-                ArtbeatColors.primaryGreen.withValues(alpha: 0.1),
-              ],
-            ),
-          ),
           child: Stack(
             children: [
               // Background image if available
               if (widget.artist.portfolioImages.isNotEmpty)
                 Positioned.fill(
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(24),
                     child: SecureNetworkImage(
                       imageUrl: widget.artist.portfolioImages.first,
                       fit: BoxFit.cover,
@@ -628,7 +642,7 @@ class _ArtistCardState extends State<ArtistCard> {
               Positioned.fill(
                 child: Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(24),
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
@@ -746,9 +760,9 @@ class _ArtistCardState extends State<ArtistCard> {
                         // Name
                         Text(
                           widget.artist.displayName,
-                          style: const TextStyle(
+                          style: GoogleFonts.spaceGrotesk(
                             fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w900,
                             color: Colors.white,
                           ),
                           maxLines: 1,
@@ -761,8 +775,9 @@ class _ArtistCardState extends State<ArtistCard> {
                         if (widget.artist.bio.isNotEmpty)
                           Text(
                             widget.artist.bio,
-                            style: TextStyle(
+                            style: GoogleFonts.spaceGrotesk(
                               fontSize: 14,
+                              fontWeight: FontWeight.w400,
                               color: Colors.white.withValues(alpha: 0.9),
                             ),
                             maxLines: 2,
@@ -790,10 +805,10 @@ class _ArtistCardState extends State<ArtistCard> {
                                 ),
                                 child: Text(
                                   specialty,
-                                  style: const TextStyle(
+                                  style: GoogleFonts.spaceGrotesk(
                                     fontSize: 12,
+                                    fontWeight: FontWeight.w600,
                                     color: Colors.white,
-                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
                               );
@@ -812,9 +827,13 @@ class _ArtistCardState extends State<ArtistCard> {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              '$_followersCount followers',
-                              style: TextStyle(
+                              tr(
+                                'art_gallery_followers_count',
+                                args: [_followersCount.toString()],
+                              ),
+                              style: GoogleFonts.spaceGrotesk(
                                 fontSize: 12,
+                                fontWeight: FontWeight.w400,
                                 color: Colors.white.withValues(alpha: 0.8),
                               ),
                             ),

@@ -445,7 +445,8 @@ class ArtCommunityService extends ChangeNotifier {
   }
 
   /// Update an existing post
-  Future<bool> updatePost(String postId, {
+  Future<bool> updatePost(
+    String postId, {
     String? content,
     List<String>? imageUrls,
     List<String>? videoUrls,

@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:artbeat_core/artbeat_core.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'glass_card.dart';
+import 'hud_button.dart';
+import 'glass_input_decoration.dart';
 
 /// Dialog for reporting posts with predefined reasons
 class ReportDialog extends StatefulWidget {
@@ -26,36 +30,48 @@ class _ReportDialogState extends State<ReportDialog> {
     {
       'value': 'spam',
       'label': 'Spam or misleading',
+      'label_key': 'report_reason_spam_label',
       'description':
           'Unsolicited commercial content, scams, or intentionally deceptive material',
+      'description_key': 'report_reason_spam_description',
     },
     {
       'value': 'harassment',
       'label': 'Harassment or bullying',
+      'label_key': 'report_reason_harassment_label',
       'description':
           'Threatening, abusive, or harassing behavior towards others',
+      'description_key': 'report_reason_harassment_description',
     },
     {
       'value': 'inappropriate',
       'label': 'Inappropriate content',
+      'label_key': 'report_reason_inappropriate_label',
       'description':
           'Nudity, sexual content, violence, or other inappropriate material',
+      'description_key': 'report_reason_inappropriate_description',
     },
     {
       'value': 'hate_speech',
       'label': 'Hate speech',
+      'label_key': 'report_reason_hate_speech_label',
       'description':
           'Content that promotes discrimination or violence against groups',
+      'description_key': 'report_reason_hate_speech_description',
     },
     {
       'value': 'copyright',
       'label': 'Copyright violation',
+      'label_key': 'report_reason_copyright_label',
       'description': 'Content that infringes on intellectual property rights',
+      'description_key': 'report_reason_copyright_description',
     },
     {
       'value': 'other',
       'label': 'Other',
+      'label_key': 'report_reason_other_label',
       'description': 'Something else not covered by the options above',
+      'description_key': 'report_reason_other_description',
     },
   ];
 
@@ -68,10 +84,10 @@ class _ReportDialogState extends State<ReportDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: ArtbeatColors.backgroundDark,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Container(
-        constraints: const BoxConstraints(maxWidth: 500),
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      child: GlassCard(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -83,18 +99,22 @@ class _ReportDialogState extends State<ReportDialog> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.orange.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF7C4DFF), Color(0xFF22D3EE)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                  child: const Icon(Icons.flag, color: Colors.orange, size: 24),
+                  child: const Icon(Icons.flag, color: Colors.white, size: 24),
                 ),
-                const SizedBox(width: 12),
-                const Expanded(
+                const SizedBox(width: 16),
+                Expanded(
                   child: Text(
-                    'Report Post',
-                    style: TextStyle(
+                    'report_dialog_title'.tr(),
+                    style: GoogleFonts.spaceGrotesk(
                       fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w900,
                       color: Colors.white,
                     ),
                   ),
@@ -102,54 +122,60 @@ class _ReportDialogState extends State<ReportDialog> {
                 IconButton(
                   onPressed: () => Navigator.of(context).pop(),
                   icon: const Icon(Icons.close, color: Colors.white70),
+                  padding: const EdgeInsets.all(8),
+                  constraints: const BoxConstraints(
+                    minWidth: 44,
+                    minHeight: 44,
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 16),
 
             // Post preview
-            Container(
+            GlassCard(
               padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-              ),
+              borderRadius: 16,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Post content:',
-                    style: TextStyle(
+                  Text(
+                    'report_dialog_post_content_label'.tr(),
+                    style: GoogleFonts.spaceGrotesk(
                       fontSize: 12,
-                      color: Colors.white70,
-                      fontWeight: FontWeight.w500,
+                      color: Colors.white.withValues(alpha: 179),
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.3,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 8),
                   Text(
                     widget.postContent.isNotEmpty
                         ? widget.postContent.length > 100
                               ? '${widget.postContent.substring(0, 100)}...'
                               : widget.postContent
-                        : 'No text content',
-                    style: const TextStyle(fontSize: 14, color: Colors.white),
+                        : 'report_dialog_no_text_content'.tr(),
+                    style: GoogleFonts.spaceGrotesk(
+                      fontSize: 14,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
 
             // Report reasons
-            const Text(
-              'Why are you reporting this post?',
-              style: TextStyle(
+            Text(
+              'report_dialog_reason_question'.tr(),
+              style: GoogleFonts.spaceGrotesk(
                 fontSize: 16,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w700,
                 color: Colors.white,
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
 
             Flexible(
               child: ListView.builder(
@@ -159,35 +185,31 @@ class _ReportDialogState extends State<ReportDialog> {
                   final reason = _reportReasons[index];
                   final isSelected = _selectedReason == reason['value'];
 
-                  return Container(
+                  return GlassCard(
                     margin: const EdgeInsets.only(bottom: 8),
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? ArtbeatColors.primaryPurple.withValues(alpha: 0.1)
-                          : Colors.white.withValues(alpha: 0.05),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: isSelected
-                            ? ArtbeatColors.primaryPurple
-                            : Colors.white.withValues(alpha: 0.1),
-                        width: isSelected ? 2 : 1,
-                      ),
-                    ),
+                    padding: const EdgeInsets.all(16),
+                    borderRadius: 16,
+                    glassOpacity: isSelected ? 0.12 : 0.08,
+                    borderOpacity: isSelected ? 0.2 : 0.12,
+                    showAccentGlow: isSelected,
+                    accentColor: const Color(0xFF22D3EE),
                     child: RadioListTile<String>(
                       title: Text(
-                        reason['label']!,
-                        style: TextStyle(
+                        reason['label_key']!.tr(),
+                        style: GoogleFonts.spaceGrotesk(
                           color: Colors.white,
                           fontWeight: isSelected
-                              ? FontWeight.w600
-                              : FontWeight.normal,
+                              ? FontWeight.w700
+                              : FontWeight.w600,
+                          fontSize: 14,
                         ),
                       ),
                       subtitle: Text(
-                        reason['description']!,
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.7),
+                        reason['description_key']!.tr(),
+                        style: GoogleFonts.spaceGrotesk(
+                          color: Colors.white.withValues(alpha: 179),
                           fontSize: 12,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                       value: reason['value']!,
@@ -199,11 +221,8 @@ class _ReportDialogState extends State<ReportDialog> {
                           _selectedReason = value;
                         });
                       },
-                      activeColor: ArtbeatColors.primaryPurple,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
+                      activeColor: const Color(0xFF22D3EE),
+                      contentPadding: EdgeInsets.zero,
                     ),
                   );
                 },
@@ -212,12 +231,12 @@ class _ReportDialogState extends State<ReportDialog> {
 
             // Additional details
             if (_selectedReason != null) ...[
-              const SizedBox(height: 16),
-              const Text(
-                'Additional details (optional)',
-                style: TextStyle(
+              const SizedBox(height: 24),
+              Text(
+                'report_dialog_additional_details_label'.tr(),
+                style: GoogleFonts.spaceGrotesk(
                   fontSize: 14,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
                   color: Colors.white,
                 ),
               ),
@@ -225,24 +244,18 @@ class _ReportDialogState extends State<ReportDialog> {
               TextField(
                 controller: _detailsController,
                 maxLines: 3,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  hintText: 'Provide more context about this report...',
-                  hintStyle: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.5),
-                  ),
-                  filled: true,
-                  fillColor: Colors.white.withValues(alpha: 0.1),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide.none,
-                  ),
-                  contentPadding: const EdgeInsets.all(12),
+                style: GoogleFonts.spaceGrotesk(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+                decoration: GlassInputDecoration(
+                  hintText: 'report_dialog_details_hint'.tr(),
                 ),
               ),
             ],
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 32),
 
             // Action buttons
             Row(
@@ -250,33 +263,28 @@ class _ReportDialogState extends State<ReportDialog> {
               children: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    minimumSize: const Size(0, 44),
+                  ),
                   child: Text(
-                    'Cancel',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.7),
-                      fontSize: 16,
+                    'cancel'.tr(),
+                    style: GoogleFonts.spaceGrotesk(
+                      color: Colors.white.withValues(alpha: 179),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
-                ElevatedButton(
+                const SizedBox(width: 16),
+                HudButton.primary(
                   onPressed: _selectedReason != null ? _submitReport : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: ArtbeatColors.primaryPurple,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 12,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    disabledBackgroundColor: Colors.grey.withValues(alpha: 0.3),
-                  ),
-                  child: const Text(
-                    'Submit Report',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                  ),
+                  text: 'report_dialog_submit_button'.tr(),
+                  width: 140,
+                  height: 44,
                 ),
               ],
             ),

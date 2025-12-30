@@ -1,24 +1,31 @@
-import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:artbeat_core/artbeat_core.dart' as core;
-import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+
+import 'package:easy_localization/easy_localization.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:artbeat_core/artbeat_core.dart' as core;
+
 import '../../models/direct_commission_model.dart';
 import '../../services/direct_commission_service.dart';
+import '../../widgets/glass_card.dart';
+import '../../widgets/gradient_cta_button.dart';
+import '../../widgets/hud_button.dart';
+import '../../widgets/hud_top_bar.dart';
+import '../../widgets/world_background.dart';
 
-/// Mode for the wizard: firstTime setup or editing existing settings
 enum SetupMode { firstTime, editing }
 
-/// Enhanced wizard for artists to set up commissions with portfolio & advanced pricing
 class CommissionSetupWizardScreen extends StatefulWidget {
-  final SetupMode mode;
-  final ArtistCommissionSettings? initialSettings;
-
   const CommissionSetupWizardScreen({
     super.key,
     this.mode = SetupMode.firstTime,
     this.initialSettings,
   });
+
+  final SetupMode mode;
+  final ArtistCommissionSettings? initialSettings;
 
   @override
   State<CommissionSetupWizardScreen> createState() =>
@@ -27,6 +34,86 @@ class CommissionSetupWizardScreen extends StatefulWidget {
 
 class _CommissionSetupWizardScreenState
     extends State<CommissionSetupWizardScreen> {
+  static const int _totalSteps = 6;
+  static const List<String> _stepLabelKeys = [
+    'commission_setup_step_intro',
+    'commission_setup_step_types',
+    'commission_setup_step_pricing',
+    'commission_setup_step_portfolio',
+    'commission_setup_step_advanced',
+    'commission_setup_step_review',
+  ];
+  static const List<String> _stepSubtitleKeys = [
+    'commission_setup_step_intro_subtitle',
+    'commission_setup_step_types_subtitle',
+    'commission_setup_step_pricing_subtitle',
+    'commission_setup_step_portfolio_subtitle',
+    'commission_setup_step_advanced_subtitle',
+    'commission_setup_step_review_subtitle',
+  ];
+  static const List<_BenefitItem> _benefitItems = [
+    _BenefitItem(
+      icon: Icons.palette,
+      titleKey: 'commission_setup_intro_checklist_types_title',
+      subtitleKey: 'commission_setup_intro_checklist_types_desc',
+    ),
+    _BenefitItem(
+      icon: Icons.attach_money,
+      titleKey: 'commission_setup_intro_checklist_pricing_title',
+      subtitleKey: 'commission_setup_intro_checklist_pricing_desc',
+    ),
+    _BenefitItem(
+      icon: Icons.schedule,
+      titleKey: 'commission_setup_intro_checklist_turnaround_title',
+      subtitleKey: 'commission_setup_intro_checklist_turnaround_desc',
+    ),
+    _BenefitItem(
+      icon: Icons.photo_library,
+      titleKey: 'commission_setup_intro_checklist_portfolio_title',
+      subtitleKey: 'commission_setup_intro_checklist_portfolio_desc',
+    ),
+  ];
+  static const Map<CommissionType, IconData> _typeIcons = {
+    CommissionType.digital: Icons.tablet_mac,
+    CommissionType.physical: Icons.brush,
+    CommissionType.portrait: Icons.face_retouching_natural,
+    CommissionType.commercial: Icons.business_center,
+  };
+  static const Map<CommissionType, String> _typeLabelKeys = {
+    CommissionType.digital: 'commission_settings_type_digital',
+    CommissionType.physical: 'commission_settings_type_physical',
+    CommissionType.portrait: 'commission_settings_type_portrait',
+    CommissionType.commercial: 'commission_settings_type_commercial',
+  };
+  static const Map<CommissionType, String> _typeDescriptionKeys = {
+    CommissionType.digital: 'commission_settings_type_digital_desc',
+    CommissionType.physical: 'commission_settings_type_physical_desc',
+    CommissionType.portrait: 'commission_settings_type_portrait_desc',
+    CommissionType.commercial: 'commission_settings_type_commercial_desc',
+  };
+  static const List<_SizeOption> _sizeOptions = [
+    _SizeOption(
+      storageKey: 'Small (up to 8x10")',
+      labelKey: 'commission_settings_size_small',
+    ),
+    _SizeOption(
+      storageKey: 'Medium (11x14" to 16x20")',
+      labelKey: 'commission_settings_size_medium',
+    ),
+    _SizeOption(
+      storageKey: 'Large (18x24" to 24x36")',
+      labelKey: 'commission_settings_size_large',
+    ),
+    _SizeOption(
+      storageKey: 'Extra Large (30x40"+)',
+      labelKey: 'commission_settings_size_extra_large',
+    ),
+    _SizeOption(
+      storageKey: 'Custom Size',
+      labelKey: 'commission_settings_size_custom',
+    ),
+  ];
+
   final DirectCommissionService _commissionService = DirectCommissionService();
   final core.EnhancedStorageService _storageService =
       core.EnhancedStorageService();
@@ -48,20 +135,17 @@ class _CommissionSetupWizardScreenState
   bool _isLoading = false;
   bool _isUploadingImage = false;
 
-  // Size labels
-  final List<String> _commonSizes = [
-    'Small (up to 8x10")',
-    'Medium (11x14" to 16x20")',
-    'Large (18x24" to 24x36")',
-    'Extra Large (30x40"+)',
-    'Custom Size',
-  ];
-
   @override
   void initState() {
     super.initState();
     _initializePricingMaps();
     _loadInitialSettings();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   void _initializePricingMaps() {
@@ -72,11 +156,8 @@ class _CommissionSetupWizardScreenState
       CommissionType.commercial: 100.0,
     };
     _sizePricing = {
-      'Small (up to 8x10")': 0.0,
-      'Medium (11x14" to 16x20")': 25.0,
-      'Large (18x24" to 24x36")': 75.0,
-      'Extra Large (30x40"+)': 150.0,
-      'Custom Size': 0.0,
+      for (final option in _sizeOptions)
+        option.storageKey: _defaultSizeModifier(option.storageKey),
     };
   }
 
@@ -89,20 +170,27 @@ class _CommissionSetupWizardScreenState
       _turnaroundDays = settings.averageTurnaroundDays;
       _description = settings.terms;
       _portfolioImages = List.from(settings.portfolioImages);
-      // Merge with defaults to ensure all keys exist
       _typePricing.addAll(Map.from(settings.typePricing));
       _sizePricing.addAll(Map.from(settings.sizePricing));
       _maxActiveCommissions = settings.maxActiveCommissions;
       _depositPercentage = settings.depositPercentage;
     } else {
       _selectedTypes = [CommissionType.digital];
+      _description = 'commission_settings_default_terms'.tr();
     }
   }
 
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
+  double _defaultSizeModifier(String key) {
+    switch (key) {
+      case 'Medium (11x14" to 16x20")':
+        return 25.0;
+      case 'Large (18x24" to 24x36")':
+        return 75.0;
+      case 'Extra Large (30x40"+)':
+        return 150.0;
+      default:
+        return 0.0;
+    }
   }
 
   Future<void> _saveSettings() async {
@@ -110,9 +198,11 @@ class _CommissionSetupWizardScreenState
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('User not authenticated')));
+        _showSnackBar(
+          'commission_setup_error_not_authenticated'.tr(),
+          backgroundColor: _WizardPalette.accentPink,
+        );
+        setState(() => _isLoading = false);
         return;
       }
 
@@ -131,61 +221,68 @@ class _CommissionSetupWizardScreenState
         lastUpdated: DateTime.now(),
       );
 
-      // Use the unified method
       await _commissionService.updateArtistCommissionSettings(settings);
 
+      if (!mounted) return;
+      _showSnackBar(
+        'commission_setup_toast_saved'.tr(),
+        backgroundColor: _WizardPalette.accentGreen,
+      );
+      await Future.delayed(const Duration(milliseconds: 900));
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('✅ Commission settings saved successfully!'),
-            backgroundColor: Colors.green.shade700,
-            duration: const Duration(seconds: 2),
-          ),
-        );
-        Future.delayed(const Duration(seconds: 1), () {
-          if (mounted) {
-            Navigator.pop(context, true);
-          }
-        });
+        Navigator.pop(context, true);
       }
     } catch (e) {
-      setState(() => _isLoading = false);
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error saving settings: $e')));
+        _showSnackBar(
+          'commission_setup_toast_error'.tr(namedArgs: {'error': '$e'}),
+          backgroundColor: _WizardPalette.accentPink,
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
       }
     }
   }
 
   Future<void> _addPortfolioImage() async {
     try {
-      // Show image source selection dialog
-      final ImageSource? source = await showDialog<ImageSource>(
+      final source = await showDialog<ImageSource>(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Select Image Source'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: const Text('Gallery'),
-                onTap: () => Navigator.pop(context, ImageSource.gallery),
-              ),
-              ListTile(
-                leading: const Icon(Icons.camera_alt),
-                title: const Text('Camera'),
-                onTap: () => Navigator.pop(context, ImageSource.camera),
-              ),
-            ],
+        builder: (context) => Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 32),
+          child: GlassCard(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'commission_setup_image_source_title'.tr(),
+                  style: _sectionTitleStyle,
+                ),
+                const SizedBox(height: 16),
+                HudButton.primary(
+                  onPressed: () => Navigator.pop(context, ImageSource.gallery),
+                  text: 'commission_setup_image_source_gallery'.tr(),
+                  icon: Icons.photo_library,
+                ),
+                const SizedBox(height: 12),
+                HudButton.secondary(
+                  onPressed: () => Navigator.pop(context, ImageSource.camera),
+                  text: 'commission_setup_image_source_camera'.tr(),
+                  icon: Icons.camera_alt,
+                ),
+              ],
+            ),
           ),
         ),
       );
 
       if (source == null) return;
 
-      // Pick image
       final XFile? pickedFile = await _imagePicker.pickImage(
         source: source,
         maxWidth: 1920,
@@ -195,43 +292,34 @@ class _CommissionSetupWizardScreenState
 
       if (pickedFile == null) return;
 
-      // Show loading indicator
       setState(() => _isUploadingImage = true);
 
-      // Upload image to Firebase Storage
-      final imageFile = File(pickedFile.path);
       final uploadResult = await _storageService.uploadImageWithOptimization(
-        imageFile: imageFile,
+        imageFile: File(pickedFile.path),
         category: 'commission_portfolio',
         generateThumbnail: true,
       );
 
-      // Add image URL to portfolio
       if (uploadResult['imageUrl'] != null) {
         setState(() {
           _portfolioImages.add(uploadResult['imageUrl']!);
           _isUploadingImage = false;
         });
-
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('✅ Portfolio image uploaded successfully!'),
-              backgroundColor: Colors.green,
-              duration: Duration(seconds: 2),
-            ),
+          _showSnackBar(
+            'commission_setup_image_success'.tr(),
+            backgroundColor: _WizardPalette.accentGreen,
           );
         }
+      } else {
+        setState(() => _isUploadingImage = false);
       }
     } catch (e) {
       setState(() => _isUploadingImage = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('❌ Error uploading image: $e'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
+        _showSnackBar(
+          'commission_setup_image_error'.tr(namedArgs: {'error': '$e'}),
+          backgroundColor: _WizardPalette.accentPink,
         );
       }
     }
@@ -249,131 +337,231 @@ class _CommissionSetupWizardScreenState
       canPop: _currentStep == 0,
       onPopInvokedWithResult: (didPop, result) {
         if (!didPop && _currentStep > 0) {
-          setState(() => _currentStep--);
-          _pageController.previousPage(
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-          );
+          _handleBack();
         }
       },
-      child: Scaffold(
-        appBar: core.EnhancedUniversalHeader(
-          title: 'Set Up Commissions (Step ${_currentStep + 1}/6)',
-          showLogo: false,
-          showBackButton: true,
+      child: WorldBackground(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: HudTopBar(
+            title: widget.mode == SetupMode.firstTime
+                ? 'commission_setup_title'.tr()
+                : 'commission_setup_edit_title'.tr(),
+            glassBackground: true,
+          ),
+          body: SafeArea(
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : Column(
+                    children: [
+                      _buildProgressHeader(),
+                      const SizedBox(height: 12),
+                      Expanded(
+                        child: PageView(
+                          controller: _pageController,
+                          physics: const NeverScrollableScrollPhysics(),
+                          children: [
+                            _buildStep1Welcome(),
+                            _buildStep2Types(),
+                            _buildStep3Pricing(),
+                            _buildStep4Portfolio(),
+                            _buildStep5AdvancedPricing(),
+                            _buildStep6Review(),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      _buildNavigationBar(),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
+          ),
         ),
-        body: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : PageView(
-                controller: _pageController,
-                physics: const NeverScrollableScrollPhysics(),
-                children: [
-                  _buildStep1Welcome(),
-                  _buildStep2Types(),
-                  _buildStep3Pricing(),
-                  _buildStep4Portfolio(),
-                  _buildStep5AdvancedPricing(),
-                  _buildStep6Review(),
-                ],
+      ),
+    );
+  }
+
+  Widget _buildProgressHeader() {
+    final stepLabel = _stepLabelKeys[_currentStep].tr();
+    final stepSubtitle = _stepSubtitleKeys[_currentStep].tr();
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      child: GlassCard(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'commission_setup_progress_label'.tr(
+                namedArgs: {
+                  'current': '${_currentStep + 1}',
+                  'total': '$_totalSteps',
+                },
               ),
+              style: _bodyStyle(opacity: 0.8, fontSize: 12),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: List.generate(
+                _totalSteps,
+                (index) => Expanded(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    margin: EdgeInsets.symmetric(horizontal: index == 0 ? 0 : 4),
+                    height: 4,
+                    decoration: BoxDecoration(
+                      gradient: index <= _currentStep
+                          ? _WizardPalette.primaryGradient
+                          : null,
+                      color: index <= _currentStep
+                          ? null
+                          : Colors.white.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(stepLabel, style: _sectionTitleStyle),
+            const SizedBox(height: 4),
+            Text(stepSubtitle, style: _bodyStyle(opacity: 0.7)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavigationBar() {
+    final isLastStep = _currentStep == _totalSteps - 1;
+    final primaryText = isLastStep
+        ? 'commission_setup_action_save'.tr()
+        : 'commission_setup_action_next'.tr();
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: [
+          Expanded(
+            child: HudButton.secondary(
+              onPressed: _currentStep == 0 ? null : _handleBack,
+              text: 'commission_setup_action_back'.tr(),
+              icon: Icons.arrow_back,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: GradientCTAButton(
+              onPressed: _canProceed ? _handleNext : null,
+              text: primaryText,
+              icon: isLastStep ? Icons.check : Icons.arrow_forward,
+              isLoading: isLastStep && _isLoading,
+            ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildStep1Welcome() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Column(
-                    children: [
-                      Icon(
-                        Icons.art_track,
-                        size: 64,
-                        color: Colors.blue.shade700,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Start Accepting Commissions',
-                        style: Theme.of(context).textTheme.headlineSmall,
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Let your followers hire you for custom artwork. This quick setup will get you started.',
-                        style: Theme.of(context).textTheme.bodyLarge,
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 32),
-                Text(
-                  'What you\'ll set up:',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 12),
-                _buildBenefitItem(
-                  '✓',
-                  'Commission Types',
-                  'Digital, Physical, Portraits, or Commercial',
-                ),
-                _buildBenefitItem(
-                  '✓',
-                  'Base Pricing',
-                  'Starting price for your work',
-                ),
-                _buildBenefitItem(
-                  '✓',
-                  'Turnaround Time',
-                  'How long projects typically take',
-                ),
-                _buildBenefitItem(
-                  '✓',
-                  'Description',
-                  'Tell clients about your process',
-                ),
-              ],
-            ),
+    return _buildStepWrapper(
+      [
+        GlassCard(
+          padding: const EdgeInsets.all(20),
+          showAccentGlow: true,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildBadge('commission_setup_intro_badge'.tr()),
+              const SizedBox(height: 16),
+              Text('commission_setup_intro_title'.tr(), style: _heroTitleStyle),
+              const SizedBox(height: 8),
+              Text(
+                'commission_setup_intro_subtitle'.tr(),
+                style: _bodyStyle(opacity: 0.75),
+              ),
+            ],
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.all(24),
+        GlassCard(
+          padding: const EdgeInsets.all(20),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: _benefitItems
+                .map(
+                  (benefit) => Padding(
+                    padding: EdgeInsets.only(
+                      bottom: benefit == _benefitItems.last ? 0 : 16,
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(18),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.12),
+                            ),
+                          ),
+                          child: Icon(benefit.icon, color: Colors.white),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                benefit.titleKey.tr(),
+                                style: _sectionTitleStyle,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                benefit.subtitleKey.tr(),
+                                style: _bodyStyle(opacity: 0.72),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+                .toList(),
+          ),
+        ),
+        GlassCard(
+          padding: const EdgeInsets.all(20),
+          child: Row(
             children: [
-              SwitchListTile(
-                title: const Text('Accept Commissions'),
-                subtitle: const Text('Clients will be able to request work'),
-                value: _acceptingCommissions,
-                onChanged: (value) {
-                  setState(() => _acceptingCommissions = value);
-                },
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() => _currentStep = 1);
-                  _pageController.nextPage(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'commission_setup_accept_label'.tr(),
+                      style: _sectionTitleStyle,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'commission_setup_accept_subtitle'.tr(),
+                      style: _bodyStyle(opacity: 0.7, fontSize: 12),
+                    ),
+                  ],
                 ),
-                child: const Text('Next'),
+              ),
+              Switch.adaptive(
+                value: _acceptingCommissions,
+                onChanged: (value) =>
+                    setState(() => _acceptingCommissions = value),
+                activeColor: Colors.white,
+                trackColor: WidgetStateProperty.resolveWith(
+                  (states) => states.contains(WidgetState.selected)
+                      ? _WizardPalette.accentTeal.withValues(alpha: 0.6)
+                      : Colors.white.withValues(alpha: 0.2),
+                ),
               ),
             ],
           ),
@@ -383,77 +571,33 @@ class _CommissionSetupWizardScreenState
   }
 
   Widget _buildStep2Types() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'What types of commissions do you want to accept?',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 24),
-                ...CommissionType.values.map((type) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: CheckboxListTile(
-                      value: _selectedTypes.contains(type),
-                      onChanged: (selected) {
-                        setState(() {
-                          if (selected == true) {
-                            _selectedTypes.add(type);
-                          } else {
-                            _selectedTypes.remove(type);
-                          }
-                        });
-                      },
-                      title: Text(type.displayName),
-                      tileColor: Colors.grey.shade50,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  );
-                }),
-              ],
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(24),
-          child: Row(
+    return _buildStepWrapper(
+      [
+        GlassCard(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () {
-                    setState(() => _currentStep = 0);
-                    _pageController.previousPage(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                    );
-                  },
-                  child: const Text('Back'),
+              _buildSectionHeader(
+                'commission_setup_types_title'.tr(),
+                'commission_setup_types_subtitle'.tr(),
+              ),
+              const SizedBox(height: 16),
+              ...CommissionType.values.map(
+                (type) => Padding(
+                  padding: EdgeInsets.only(
+                    bottom: type == CommissionType.values.last ? 0 : 16,
+                  ),
+                  child: _buildTypeOption(type),
                 ),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: _selectedTypes.isNotEmpty
-                      ? () {
-                          setState(() => _currentStep = 2);
-                          _pageController.nextPage(
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeInOut,
-                          );
-                        }
-                      : null,
-                  child: const Text('Next'),
+              if (_selectedTypes.isEmpty) ...[
+                const SizedBox(height: 16),
+                Text(
+                  'commission_setup_types_hint'.tr(),
+                  style: _bodyStyle(opacity: 0.65, fontSize: 12),
                 ),
-              ),
+              ],
             ],
           ),
         ),
@@ -462,99 +606,56 @@ class _CommissionSetupWizardScreenState
   }
 
   Widget _buildStep3Pricing() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Set your pricing',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 32),
-                Text(
-                  'Base Price',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '\$${_basePrice.toStringAsFixed(2)}',
-                  style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                    color: Colors.green.shade700,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Slider(
-                  value: _basePrice,
-                  onChanged: (value) {
-                    setState(() => _basePrice = value);
-                  },
-                  min: 25,
-                  max: 1000,
-                  divisions: 39,
-                  label: '\$${_basePrice.toStringAsFixed(0)}',
-                ),
-                const SizedBox(height: 32),
-                Text(
-                  'Turnaround Time',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '$_turnaroundDays days',
-                  style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                    color: Colors.blue.shade700,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Slider(
-                  value: _turnaroundDays.toDouble(),
-                  onChanged: (value) {
-                    setState(() => _turnaroundDays = value.toInt());
-                  },
-                  min: 1,
-                  max: 90,
-                  divisions: 89,
-                  label: '$_turnaroundDays days',
-                ),
-              ],
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(24),
-          child: Row(
+    return _buildStepWrapper(
+      [
+        GlassCard(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () {
-                    setState(() => _currentStep = 1);
-                    _pageController.previousPage(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                    );
-                  },
-                  child: const Text('Back'),
-                ),
+              _buildSectionHeader(
+                'commission_setup_pricing_title'.tr(),
+                'commission_setup_pricing_subtitle'.tr(),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () {
-                    setState(() => _currentStep = 3);
-                    _pageController.nextPage(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                    );
-                  },
-                  child: const Text('Next'),
-                ),
+              const SizedBox(height: 16),
+              _buildStatRow(
+                'commission_settings_base_price_label'.tr(),
+                _formatCurrency(_basePrice),
+                icon: Icons.attach_money,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'commission_setup_pricing_base_helper'.tr(),
+                style: _bodyStyle(opacity: 0.65, fontSize: 12),
+              ),
+              _buildSlider(
+                value: _basePrice,
+                min: 25,
+                max: 1000,
+                divisions: 39,
+                label: _formatCurrency(_basePrice),
+                onChanged: (value) => setState(() => _basePrice = value),
+              ),
+              const SizedBox(height: 24),
+              _buildStatRow(
+                'commission_setup_pricing_turnaround_label'.tr(),
+                '${_turnaroundDays} ${'commission_setup_label_days'.tr()}',
+                icon: Icons.schedule,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'commission_setup_pricing_turnaround_helper'.tr(),
+                style: _bodyStyle(opacity: 0.65, fontSize: 12),
+              ),
+              _buildSlider(
+                value: _turnaroundDays.toDouble(),
+                min: 1,
+                max: 90,
+                divisions: 89,
+                label:
+                    '${_turnaroundDays} ${'commission_setup_label_days'.tr()}',
+                onChanged: (value) =>
+                    setState(() => _turnaroundDays = value.toInt()),
               ),
             ],
           ),
@@ -564,161 +665,73 @@ class _CommissionSetupWizardScreenState
   }
 
   Widget _buildStep4Portfolio() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Build Your Portfolio',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Showcase your best work to attract clients (optional but recommended)',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.copyWith(color: Colors.grey.shade700),
-                ),
-                const SizedBox(height: 24),
-                // Portfolio images grid
-                if (_portfolioImages.isEmpty)
-                  Container(
-                    width: double.infinity,
-                    height: 200,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
-                      border: Border.all(color: Colors.grey.shade300),
-                      borderRadius: BorderRadius.circular(8),
+    return _buildStepWrapper(
+      [
+        GlassCard(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildSectionHeader(
+                'commission_setup_portfolio_title'.tr(),
+                'commission_setup_portfolio_subtitle'.tr(),
+              ),
+              const SizedBox(height: 16),
+              if (_portfolioImages.isEmpty)
+                Container(
+                  width: double.infinity,
+                  height: 200,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.04),
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.12),
                     ),
+                  ),
+                  child: Center(
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
                           Icons.photo_library,
-                          size: 48,
-                          color: Colors.grey.shade400,
+                          color: Colors.white.withValues(alpha: 0.5),
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'No portfolio images added',
-                          style: TextStyle(color: Colors.grey.shade600),
+                          'commission_setup_portfolio_empty_title'.tr(),
+                          style: _sectionTitleStyle,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'commission_setup_portfolio_empty_subtitle'.tr(),
+                          textAlign: TextAlign.center,
+                          style: _bodyStyle(opacity: 0.7, fontSize: 12),
                         ),
                       ],
                     ),
-                  )
-                else
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
-                          crossAxisSpacing: 8,
-                          mainAxisSpacing: 8,
-                        ),
-                    itemCount: _portfolioImages.length,
-                    itemBuilder: (context, index) {
-                      return Stack(
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              image:
-                                  core.ImageUrlValidator.isValidImageUrl(
-                                    _portfolioImages[index],
-                                  )
-                                  ? DecorationImage(
-                                      image:
-                                          core.ImageUrlValidator.safeNetworkImage(
-                                            _portfolioImages[index],
-                                          )!,
-                                      fit: BoxFit.cover,
-                                    )
-                                  : null,
-                            ),
-                          ),
-                          Positioned(
-                            top: 4,
-                            right: 4,
-                            child: GestureDetector(
-                              onTap: () => _removePortfolioImage(index),
-                              child: Container(
-                                padding: const EdgeInsets.all(4),
-                                decoration: const BoxDecoration(
-                                  color: Colors.red,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.close,
-                                  color: Colors.white,
-                                  size: 16,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
                   ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: _isUploadingImage ? null : _addPortfolioImage,
-                    icon: _isUploadingImage
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.add_photo_alternate),
-                    label: Text(
-                      _isUploadingImage
-                          ? 'Uploading...'
-                          : 'Add Portfolio Image',
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
+                )
+              else
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  padding: EdgeInsets.zero,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
                   ),
+                  itemCount: _portfolioImages.length,
+                  itemBuilder: (context, index) => _buildPortfolioTile(index),
                 ),
-              ],
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(24),
-          child: Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () {
-                    setState(() => _currentStep = 2);
-                    _pageController.previousPage(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                    );
-                  },
-                  child: const Text('Back'),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () {
-                    setState(() => _currentStep = 4);
-                    _pageController.nextPage(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                    );
-                  },
-                  child: const Text('Next'),
-                ),
+              const SizedBox(height: 16),
+              HudButton.secondary(
+                onPressed: _isUploadingImage ? null : _addPortfolioImage,
+                text: _isUploadingImage
+                    ? 'commission_setup_portfolio_uploading'.tr()
+                    : 'commission_setup_portfolio_add_button'.tr(),
+                icon: Icons.add_photo_alternate,
+                isLoading: _isUploadingImage,
               ),
             ],
           ),
@@ -728,224 +741,105 @@ class _CommissionSetupWizardScreenState
   }
 
   Widget _buildStep5AdvancedPricing() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Advanced Pricing',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Set modifiers for different commission types and sizes',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.copyWith(color: Colors.grey.shade700),
-                ),
-                const SizedBox(height: 24),
-                // Type-specific pricing
-                Text(
-                  'Commission Type Modifiers',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                ..._selectedTypes.map((type) {
-                  final modifier = _typePricing[type] ?? 0.0;
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              type.displayName,
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                            Text(
-                              '+\$${modifier.toStringAsFixed(2)}',
-                              style: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(
-                                    color: Colors.green.shade700,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                            ),
-                          ],
-                        ),
-                        Slider(
-                          value: modifier,
-                          onChanged: (value) {
-                            setState(() {
-                              _typePricing[type] = value;
-                            });
-                          },
-                          min: 0,
-                          max: 500,
-                          divisions: 50,
-                          label: '\$${modifier.toStringAsFixed(0)}',
-                        ),
-                      ],
-                    ),
-                  );
-                }),
-                const SizedBox(height: 24),
-                // Size pricing
-                Text(
-                  'Size Modifiers',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                ..._commonSizes.map((size) {
-                  final modifier = _sizePricing[size] ?? 0.0;
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              size,
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                            Text(
-                              '+\$${modifier.toStringAsFixed(2)}',
-                              style: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(
-                                    color: Colors.green.shade700,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                            ),
-                          ],
-                        ),
-                        Slider(
-                          value: modifier,
-                          onChanged: (value) {
-                            setState(() {
-                              _sizePricing[size] = value;
-                            });
-                          },
-                          min: 0,
-                          max: 500,
-                          divisions: 50,
-                          label: '\$${modifier.toStringAsFixed(0)}',
-                        ),
-                      ],
-                    ),
-                  );
-                }),
-                const SizedBox(height: 24),
-                // Max active commissions
-                Text(
-                  'Max Active Commissions',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      '$_maxActiveCommissions commissions',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    Text(
-                      'max',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                  ],
-                ),
-                Slider(
-                  value: _maxActiveCommissions.toDouble(),
-                  onChanged: (value) {
-                    setState(() => _maxActiveCommissions = value.toInt());
-                  },
-                  min: 1,
-                  max: 20,
-                  divisions: 19,
-                  label: '$_maxActiveCommissions',
-                ),
-                const SizedBox(height: 24),
-                // Deposit percentage
-                Text(
-                  'Deposit Required',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      '${_depositPercentage.toStringAsFixed(0)}%',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    Text(
-                      'of total price',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                  ],
-                ),
-                Slider(
-                  value: _depositPercentage,
-                  onChanged: (value) {
-                    setState(() => _depositPercentage = value);
-                  },
-                  min: 25,
-                  max: 100,
-                  divisions: 15,
-                  label: '${_depositPercentage.toStringAsFixed(0)}%',
-                ),
-              ],
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(24),
-          child: Row(
+    return _buildStepWrapper(
+      [
+        GlassCard(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () {
-                    setState(() => _currentStep = 3);
-                    _pageController.previousPage(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                    );
-                  },
-                  child: const Text('Back'),
+              _buildSectionHeader(
+                'commission_setup_advanced_title'.tr(),
+                'commission_setup_advanced_subtitle'.tr(),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'commission_setup_advanced_types_label'.tr(),
+                style: _sectionTitleStyle,
+              ),
+              const SizedBox(height: 12),
+              ..._selectedTypes.map(
+                (type) => Padding(
+                  padding: EdgeInsets.only(
+                    bottom: type == _selectedTypes.last ? 0 : 16,
+                  ),
+                  child: _buildModifierSlider(
+                    label: _typeLabelKeys[type]!.tr(),
+                    value: _typePricing[type] ?? 0,
+                    onChanged: (value) => setState(() {
+                      _typePricing[type] = value;
+                    }),
+                  ),
                 ),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () {
-                    setState(() => _currentStep = 5);
-                    _pageController.nextPage(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                    );
-                  },
-                  child: const Text('Next'),
+              if (_selectedTypes.isEmpty)
+                Text(
+                  'commission_setup_types_hint'.tr(),
+                  style: _bodyStyle(opacity: 0.65, fontSize: 12),
                 ),
+              if (_selectedTypes.isNotEmpty) const SizedBox(height: 24),
+              Text(
+                'commission_setup_advanced_sizes_label'.tr(),
+                style: _sectionTitleStyle,
+              ),
+              const SizedBox(height: 12),
+              ..._sizeOptions.map(
+                (option) => Padding(
+                  padding: EdgeInsets.only(
+                    bottom: option == _sizeOptions.last ? 0 : 16,
+                  ),
+                  child: _buildModifierSlider(
+                    label: option.labelKey.tr(),
+                    value: _sizePricing[option.storageKey] ?? 0,
+                    onChanged: (value) => setState(() {
+                      _sizePricing[option.storageKey] = value;
+                    }),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        GlassCard(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'commission_setup_advanced_max_label'.tr(),
+                style: _sectionTitleStyle,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'commission_setup_advanced_max_helper'.tr(),
+                style: _bodyStyle(opacity: 0.65, fontSize: 12),
+              ),
+              _buildSlider(
+                value: _maxActiveCommissions.toDouble(),
+                min: 1,
+                max: 20,
+                divisions: 19,
+                label: '$_maxActiveCommissions',
+                onChanged: (value) =>
+                    setState(() => _maxActiveCommissions = value.toInt()),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'commission_setup_advanced_deposit_label'.tr(),
+                style: _sectionTitleStyle,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'commission_setup_advanced_deposit_helper'.tr(),
+                style: _bodyStyle(opacity: 0.65, fontSize: 12),
+              ),
+              _buildSlider(
+                value: _depositPercentage,
+                min: 25,
+                max: 100,
+                divisions: 15,
+                label: '${_depositPercentage.toStringAsFixed(0)}%',
+                onChanged: (value) => setState(() => _depositPercentage = value),
               ),
             ],
           ),
@@ -955,139 +849,89 @@ class _CommissionSetupWizardScreenState
   }
 
   Widget _buildStep6Review() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Review Your Settings',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 24),
-                _buildReviewCard(
-                  'Accepting Commissions',
-                  _acceptingCommissions ? '✅ Yes' : '⏸ No',
-                  Colors.blue,
-                ),
-                _buildReviewCard(
-                  'Commission Types',
-                  _selectedTypes.map((t) => t.displayName).join(', '),
-                  Colors.purple,
-                ),
-                _buildReviewCard(
-                  'Base Price',
-                  '\$${_basePrice.toStringAsFixed(2)}',
-                  Colors.green,
-                ),
-                _buildReviewCard(
-                  'Turnaround Time',
-                  '$_turnaroundDays days',
-                  Colors.orange,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Portfolio',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                _buildReviewCard(
-                  'Portfolio Images',
-                  '${_portfolioImages.length} image${_portfolioImages.length != 1 ? 's' : ''}',
-                  Colors.indigo,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Pricing Details',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                _buildReviewCard(
-                  'Max Active Commissions',
-                  '$_maxActiveCommissions',
-                  Colors.teal,
-                ),
-                _buildReviewCard(
-                  'Deposit Required',
-                  '${_depositPercentage.toStringAsFixed(0)}%',
-                  Colors.pink,
-                ),
-                const SizedBox(height: 32),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.green.shade50,
-                    border: Border.all(color: Colors.green.shade200),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.check_circle,
-                        color: Colors.green.shade700,
-                        size: 24,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'You\'re all set! 🎉',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.green.shade900,
-                              ),
-                            ),
-                            Text(
-                              'Clients can now request commissions from you',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.green.shade700,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+    final acceptingValue = _acceptingCommissions
+        ? 'commission_setup_review_accepting_on'.tr()
+        : 'commission_setup_review_accepting_off'.tr();
+    final typeSummary = _selectedTypes.isEmpty
+        ? 'commission_setup_types_hint'.tr()
+        : _selectedTypes.map((type) => _typeLabelKeys[type]!.tr()).join(', ');
+    final portfolioCount = 'commission_setup_review_portfolio_count'.plural(
+      _portfolioImages.length,
+      namedArgs: {'count': _portfolioImages.length.toString()},
+    );
+
+    return _buildStepWrapper(
+      [
+        GlassCard(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildSectionHeader(
+                'commission_setup_review_title'.tr(),
+                'commission_setup_review_subtitle'.tr(),
+              ),
+              const SizedBox(height: 16),
+              _buildReviewRow(
+                'commission_setup_review_accepting_label'.tr(),
+                acceptingValue,
+              ),
+              _buildReviewRow(
+                'commission_setup_review_types_label'.tr(),
+                typeSummary,
+              ),
+              _buildReviewRow(
+                'commission_setup_review_base_label'.tr(),
+                _formatCurrency(_basePrice),
+              ),
+              _buildReviewRow(
+                'commission_setup_review_turnaround_label'.tr(),
+                '${_turnaroundDays} ${'commission_setup_label_days'.tr()}',
+              ),
+              _buildReviewRow(
+                'commission_setup_review_portfolio_label'.tr(),
+                portfolioCount,
+              ),
+              _buildReviewRow(
+                'commission_setup_review_pricing_label'.tr(),
+                '$_maxActiveCommissions',
+              ),
+              _buildReviewRow(
+                'commission_setup_review_deposit_label'.tr(),
+                '${_depositPercentage.toStringAsFixed(0)}%',
+              ),
+            ],
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.all(24),
+        GlassCard(
+          padding: const EdgeInsets.all(20),
+          showAccentGlow: true,
           child: Row(
             children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () {
-                    setState(() => _currentStep = 4);
-                    _pageController.previousPage(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                    );
-                  },
-                  child: const Text('Back'),
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  gradient: _WizardPalette.primaryGradient,
+                  borderRadius: BorderRadius.circular(20),
                 ),
+                child: const Icon(Icons.rocket_launch, color: Colors.white),
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: _saveSettings,
-                  icon: const Icon(Icons.check),
-                  label: const Text('Save & Finish'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    backgroundColor: Colors.green,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'commission_setup_review_ready_title'.tr(),
+                      style: _heroTitleStyle,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'commission_setup_review_ready_subtitle'.tr(),
+                      style: _bodyStyle(opacity: 0.8),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -1097,55 +941,109 @@ class _CommissionSetupWizardScreenState
     );
   }
 
-  Widget _buildBenefitItem(String emoji, String title, String subtitle) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildStepWrapper(List<Widget> children) {
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
+      child: Column(
         children: [
-          Text(emoji, style: const TextStyle(fontSize: 24)),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  subtitle,
-                  style: TextStyle(color: Colors.grey[600], fontSize: 12),
-                ),
-              ],
-            ),
-          ),
+          for (int i = 0; i < children.length; i++) ...[
+            children[i],
+            if (i != children.length - 1) const SizedBox(height: 16),
+          ],
         ],
       ),
     );
   }
 
-  Widget _buildReviewCard(String label, String value, Color color) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Container(
-        padding: const EdgeInsets.all(16),
+  Widget _buildSectionHeader(String title, String subtitle) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: _sectionTitleStyle),
+        const SizedBox(height: 4),
+        Text(subtitle, style: _bodyStyle(opacity: 0.7)),
+      ],
+    );
+  }
+
+  Widget _buildTypeOption(CommissionType type) {
+    final isSelected = _selectedTypes.contains(type);
+    final icon = _typeIcons[type] ?? Icons.palette;
+
+    return GestureDetector(
+      onTap: () => setState(() {
+        if (isSelected) {
+          _selectedTypes.remove(type);
+        } else {
+          _selectedTypes.add(type);
+        }
+      }),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: color.withAlpha(25),
-          border: Border.all(color: color.withAlpha(100)),
-          borderRadius: BorderRadius.circular(8),
+          gradient: isSelected ? _WizardPalette.primaryGradient : null,
+          color: isSelected ? null : Colors.white.withValues(alpha: 0.04),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: isSelected
+                ? Colors.transparent
+                : Colors.white.withValues(alpha: 0.18),
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: _WizardPalette.accentPurple.withValues(alpha: 0.3),
+                    blurRadius: 24,
+                    offset: const Offset(0, 12),
+                  ),
+                ]
+              : null,
         ),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: isSelected ? 0.18 : 0.08),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
+              ),
+              child: Icon(icon, color: Colors.white),
+            ),
+            const SizedBox(width: 16),
             Expanded(
-              child: Text(
-                value,
-                textAlign: TextAlign.end,
-                overflow: TextOverflow.ellipsis,
-                maxLines: 2,
-                style: TextStyle(fontWeight: FontWeight.bold, color: color),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _typeLabelKeys[type]!.tr(),
+                    style: GoogleFonts.spaceGrotesk(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    _typeDescriptionKeys[type]!.tr(),
+                    style: _bodyStyle(opacity: 0.75, fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: isSelected ? 0.3 : 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                isSelected ? Icons.check : Icons.add,
+                color: Colors.white,
               ),
             ),
           ],
@@ -1153,4 +1051,306 @@ class _CommissionSetupWizardScreenState
       ),
     );
   }
+
+  Widget _buildStatRow(String label, String value, {IconData? icon}) {
+    return Row(
+      children: [
+        if (icon != null) ...[
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(icon, color: Colors.white),
+          ),
+          const SizedBox(width: 12),
+        ],
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label, style: _bodyStyle(opacity: 0.7, fontSize: 12)),
+              const SizedBox(height: 4),
+              Text(
+                value,
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSlider({
+    required double value,
+    required double min,
+    required double max,
+    required int divisions,
+    required String label,
+    required ValueChanged<double> onChanged,
+  }) {
+    return SliderTheme(
+      data: SliderTheme.of(context).copyWith(
+        activeTrackColor: _WizardPalette.accentTeal,
+        inactiveTrackColor: Colors.white.withValues(alpha: 0.1),
+        thumbColor: Colors.white,
+        overlayColor: _WizardPalette.accentTeal.withValues(alpha: 0.2),
+        valueIndicatorColor: _WizardPalette.accentPurple,
+      ),
+      child: Slider(
+        value: value,
+        min: min,
+        max: max,
+        divisions: divisions,
+        label: label,
+        onChanged: onChanged,
+      ),
+    );
+  }
+
+  Widget _buildModifierSlider({
+    required String label,
+    required double value,
+    required ValueChanged<double> onChanged,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                label,
+                style: _bodyStyle(opacity: 0.9, fontSize: 14),
+              ),
+            ),
+            Text(
+              '+${_formatCurrency(value)}',
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: _WizardPalette.accentGreen,
+              ),
+            ),
+          ],
+        ),
+        _buildSlider(
+          value: value,
+          min: 0,
+          max: 500,
+          divisions: 50,
+          label: _formatCurrency(value),
+          onChanged: onChanged,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPortfolioTile(int index) {
+    final imageUrl = _portfolioImages[index];
+    final imageProvider = core.ImageUrlValidator.isValidImageUrl(imageUrl)
+        ? core.ImageUrlValidator.safeNetworkImage(imageUrl)
+        : null;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(24),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          if (imageProvider != null)
+            DecoratedBox(
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: imageProvider,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            )
+          else
+            Container(color: Colors.white.withValues(alpha: 0.05)),
+          Positioned(
+            top: 8,
+            right: 8,
+            child: GestureDetector(
+              onTap: () => _removePortfolioImage(index),
+              child: Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.45),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: const Icon(Icons.close, size: 18, color: Colors.white),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReviewRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 2,
+            child: Text(
+              label,
+              style: _bodyStyle(opacity: 0.7, fontSize: 12),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            flex: 3,
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: _bodyStyle(opacity: 0.95, fontSize: 14),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _handleBack() {
+    if (_currentStep == 0) return;
+    _goToStep(_currentStep - 1);
+  }
+
+  void _handleNext() {
+    if (_currentStep >= _totalSteps - 1) {
+      _saveSettings();
+      return;
+    }
+    _goToStep(_currentStep + 1);
+  }
+
+  void _goToStep(int step) {
+    setState(() => _currentStep = step);
+    _pageController.animateToPage(
+      step,
+      duration: const Duration(milliseconds: 320),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  bool get _canProceed {
+    if (_currentStep == 1) {
+      return _selectedTypes.isNotEmpty;
+    }
+    return true;
+  }
+
+  void _showSnackBar(String message, {Color backgroundColor = Colors.black}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: GoogleFonts.spaceGrotesk(
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: backgroundColor.withValues(alpha: 0.9),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  String _formatCurrency(double value) {
+    final formatted =
+        value % 1 == 0 ? value.toStringAsFixed(0) : value.toStringAsFixed(2);
+    return '\$$formatted';
+  }
+
+  Widget _buildBadge(String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+      ),
+      child: Text(
+        label,
+        style: GoogleFonts.spaceGrotesk(
+          fontSize: 12,
+          fontWeight: FontWeight.w800,
+          color: Colors.white,
+          letterSpacing: 0.6,
+        ),
+      ),
+    );
+  }
+
+  TextStyle get _heroTitleStyle => GoogleFonts.spaceGrotesk(
+        fontSize: 18,
+        fontWeight: FontWeight.w900,
+        color: _WizardPalette.textPrimary,
+      );
+
+  TextStyle get _sectionTitleStyle => GoogleFonts.spaceGrotesk(
+        fontSize: 15,
+        fontWeight: FontWeight.w800,
+        color: _WizardPalette.textPrimary,
+      );
+
+  TextStyle _bodyStyle({double opacity = 0.8, double fontSize = 13}) {
+    return GoogleFonts.spaceGrotesk(
+      fontSize: fontSize,
+      fontWeight: FontWeight.w600,
+      color: Colors.white.withValues(alpha: opacity),
+      height: 1.4,
+    );
+  }
+}
+
+class _WizardPalette {
+  static const Color textPrimary = Color(0xF2FFFFFF);
+  static const Color accentTeal = Color(0xFF22D3EE);
+  static const Color accentPurple = Color(0xFF7C4DFF);
+  static const Color accentGreen = Color(0xFF34D399);
+  static const Color accentPink = Color(0xFFFF3D8D);
+  static const LinearGradient primaryGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [accentPurple, accentTeal, accentGreen],
+  );
+}
+
+class _BenefitItem {
+  const _BenefitItem({
+    required this.icon,
+    required this.titleKey,
+    required this.subtitleKey,
+  });
+
+  final IconData icon;
+  final String titleKey;
+  final String subtitleKey;
+}
+
+class _SizeOption {
+  const _SizeOption({
+    required this.storageKey,
+    required this.labelKey,
+  });
+
+  final String storageKey;
+  final String labelKey;
 }

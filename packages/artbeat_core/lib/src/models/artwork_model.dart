@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'artwork_content_type.dart';
 
+enum ArtBattleStatus { eligible, active, cooling_down, opted_out }
+
 class ArtworkModel {
   final String id;
   final String title;
@@ -22,6 +24,13 @@ class ArtworkModel {
   final int? releasedChapters;
   final Map<String, dynamic>? readingMetadata;
   final Map<String, dynamic>? serializationConfig;
+  final bool artBattleEnabled;
+  final ArtBattleStatus artBattleStatus;
+  final int artBattleScore;
+  final int artBattleAppearances;
+  final int artBattleWins;
+  final DateTime? artBattleLastShownAt;
+  final DateTime? artBattleLastWinAt;
 
   ArtworkModel({
     required this.id,
@@ -44,6 +53,13 @@ class ArtworkModel {
     this.releasedChapters,
     this.readingMetadata,
     this.serializationConfig,
+    this.artBattleEnabled = false,
+    this.artBattleStatus = ArtBattleStatus.eligible,
+    this.artBattleScore = 0,
+    this.artBattleAppearances = 0,
+    this.artBattleWins = 0,
+    this.artBattleLastShownAt,
+    this.artBattleLastWinAt,
   });
 
   factory ArtworkModel.fromFirestore(DocumentSnapshot doc) {
@@ -71,6 +87,17 @@ class ArtworkModel {
       releasedChapters: data['releasedChapters'] as int?,
       readingMetadata: data['readingMetadata'] as Map<String, dynamic>?,
       serializationConfig: data['serializationConfig'] as Map<String, dynamic>?,
+      artBattleEnabled: data['artBattleEnabled'] as bool? ?? false,
+      artBattleStatus: ArtBattleStatus.values.firstWhere(
+        (e) => e.name == (data['artBattleStatus'] as String? ?? 'eligible'),
+        orElse: () => ArtBattleStatus.eligible,
+      ),
+      artBattleScore: data['artBattleScore'] as int? ?? 0,
+      artBattleAppearances: data['artBattleAppearances'] as int? ?? 0,
+      artBattleWins: data['artBattleWins'] as int? ?? 0,
+      artBattleLastShownAt: (data['artBattleLastShownAt'] as Timestamp?)
+          ?.toDate(),
+      artBattleLastWinAt: (data['artBattleLastWinAt'] as Timestamp?)?.toDate(),
     );
   }
 
@@ -96,6 +123,15 @@ class ArtworkModel {
       if (readingMetadata != null) 'readingMetadata': readingMetadata,
       if (serializationConfig != null)
         'serializationConfig': serializationConfig,
+      'artBattleEnabled': artBattleEnabled,
+      'artBattleStatus': artBattleStatus.name,
+      'artBattleScore': artBattleScore,
+      'artBattleAppearances': artBattleAppearances,
+      'artBattleWins': artBattleWins,
+      if (artBattleLastShownAt != null)
+        'artBattleLastShownAt': Timestamp.fromDate(artBattleLastShownAt!),
+      if (artBattleLastWinAt != null)
+        'artBattleLastWinAt': Timestamp.fromDate(artBattleLastWinAt!),
     };
   }
 

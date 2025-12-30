@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:artbeat_events/artbeat_events.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../models/models.dart';
 import '../widgets/language_selector.dart';
 
@@ -19,7 +21,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return _buildSettingsBody(context);
+    return WorldBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          title: Text('settings_title'.tr()),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ),
+        body: _buildSettingsBody(context),
+      ),
+    );
   }
 
   Widget _buildSettingsBody(BuildContext context) {
@@ -28,10 +44,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        // User profile summary
-        _buildProfileSummary(context),
-        const SizedBox(height: 24),
-
         // Language selector
         const LanguageSelector(),
         const SizedBox(height: 24),
@@ -52,46 +64,46 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _buildProfileSummary(BuildContext context) {
     final user = _auth.currentUser;
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 30,
-              backgroundImage:
-                  ImageUrlValidator.safeNetworkImage(user?.photoURL) ??
-                  const AssetImage('assets/default_profile.png')
-                      as ImageProvider,
-              child: !ImageUrlValidator.isValidImageUrl(user?.photoURL)
-                  ? const Icon(Icons.person, size: 30)
-                  : null,
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'settings_your_account'.tr(),
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Colors.black87,
-                      fontWeight: FontWeight.w600,
-                    ),
+    return GlassCard(
+      onTap: () => _navigateToProfile(context),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 30,
+            backgroundImage:
+                ImageUrlValidator.safeNetworkImage(user?.photoURL) ??
+                const AssetImage('assets/default_profile.png') as ImageProvider,
+            child: !ImageUrlValidator.isValidImageUrl(user?.photoURL)
+                ? const Icon(Icons.person, size: 30, color: Colors.white70)
+                : null,
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'settings_your_account'.tr(),
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'settings_manage_profile'.tr(),
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodySmall?.copyWith(color: Colors.black54),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'settings_manage_profile'.tr(),
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white70,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            const Icon(Icons.arrow_forward_ios, size: 16),
-          ],
-        ),
+          ),
+          const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.white70),
+        ],
       ),
     );
   }
@@ -102,23 +114,43 @@ class _SettingsScreenState extends State<SettingsScreen> {
   ) {
     if (!category.isEnabled) return const SizedBox.shrink();
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        leading: _getIconForCategory(category.iconData),
-        title: Text(
-          category.title.tr(),
-          style: const TextStyle(
-            color: Colors.black87,
-            fontWeight: FontWeight.w500,
+    return GlassCard(
+      margin: const EdgeInsets.only(bottom: 16),
+      onTap: () => _navigateToCategory(context, category),
+      child: Row(
+        children: [
+          Icon(
+            _getIconForCategory(category.iconData),
+            color: Colors.white70,
+            size: 24,
           ),
-        ),
-        subtitle: Text(
-          category.description.tr(),
-          style: const TextStyle(color: Colors.black54),
-        ),
-        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-        onTap: () => _navigateToCategory(context, category),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  category.title.tr(),
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  category.description.tr(),
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white70,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.white70),
+        ],
       ),
     );
   }
@@ -129,53 +161,69 @@ class _SettingsScreenState extends State<SettingsScreen> {
       children: [
         Text(
           'settings_quick_actions'.tr(),
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            color: Colors.black87,
-            fontWeight: FontWeight.w600,
+          style: GoogleFonts.spaceGrotesk(
+            fontSize: 18,
+            fontWeight: FontWeight.w900,
+            color: Colors.white,
           ),
         ),
-        const SizedBox(height: 12),
-        Card(
+        const SizedBox(height: 16),
+        GlassCard(
           child: Column(
             children: [
               ListTile(
-                leading: const Icon(Icons.logout, color: Colors.red),
+                leading: const Icon(Icons.logout, color: Color(0xFFFF3D8D)),
                 title: Text(
                   'settings_sign_out'.tr(),
-                  style: const TextStyle(color: Colors.red),
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
                 ),
                 onTap: () => _showLogoutDialog(context),
+                minVerticalPadding: 12,
               ),
-              const Divider(height: 1),
+              Container(
+                height: 1,
+                color: Colors.white12,
+                margin: const EdgeInsets.symmetric(horizontal: 16),
+              ),
               ListTile(
                 leading: const Icon(Icons.delete_forever, color: Colors.red),
                 title: Text(
                   'settings_delete_account'.tr(),
-                  style: const TextStyle(color: Colors.red),
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
                 ),
                 onTap: () => _showDeleteAccountDialog(context),
+                minVerticalPadding: 12,
               ),
             ],
           ),
         ),
+        const SizedBox(height: 24),
       ],
     );
   }
 
-  Icon _getIconForCategory(String iconName) {
+  IconData _getIconForCategory(String iconName) {
     switch (iconName) {
       case 'account_circle':
-        return const Icon(Icons.account_circle);
+        return Icons.account_circle;
       case 'privacy_tip':
-        return const Icon(Icons.privacy_tip);
+        return Icons.privacy_tip;
       case 'notifications':
-        return const Icon(Icons.notifications);
+        return Icons.notifications;
       case 'security':
-        return const Icon(Icons.security);
+        return Icons.security;
       case 'block':
-        return const Icon(Icons.block);
+        return Icons.block;
       default:
-        return const Icon(Icons.settings);
+        return Icons.settings;
     }
   }
 
@@ -186,23 +234,49 @@ class _SettingsScreenState extends State<SettingsScreen> {
     Navigator.pushNamed(context, category.route);
   }
 
+  void _navigateToProfile(BuildContext context) {
+    Navigator.pushNamed(context, '/profile');
+  }
+
   void _showLogoutDialog(BuildContext context) {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('settings_sign_out'.tr()),
-        content: Text('settings_confirm_signout'.tr()),
+        backgroundColor: Colors.black.withValues(alpha: 0.8),
+        title: Text(
+          'settings_sign_out'.tr(),
+          style: GoogleFonts.spaceGrotesk(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        content: Text(
+          'settings_confirm_signout'.tr(),
+          style: GoogleFonts.spaceGrotesk(color: Colors.white70, fontSize: 14),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text('common_cancel'.tr()),
+            child: Text(
+              'common_cancel'.tr(),
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white70,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
           TextButton(
             onPressed: () async {
               Navigator.of(context).pop();
               await _signOut();
             },
-            child: Text('settings_sign_out'.tr()),
+            child: Text(
+              'settings_sign_out'.tr(),
+              style: GoogleFonts.spaceGrotesk(
+                color: const Color(0xFFFF3D8D),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
         ],
       ),
@@ -213,12 +287,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('settings_delete_account'.tr()),
-        content: Text('settings_confirm_delete'.tr()),
+        backgroundColor: Colors.black.withValues(alpha: 0.8),
+        title: Text(
+          'settings_delete_account'.tr(),
+          style: GoogleFonts.spaceGrotesk(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        content: Text(
+          'settings_confirm_delete'.tr(),
+          style: GoogleFonts.spaceGrotesk(color: Colors.white70, fontSize: 14),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text('common_cancel'.tr()),
+            child: Text(
+              'common_cancel'.tr(),
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white70,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
           TextButton(
             onPressed: _isDeleting
@@ -232,9 +322,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ? const SizedBox(
                     width: 16,
                     height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
+                    ),
                   )
-                : Text('common_delete'.tr()),
+                : Text(
+                    'common_delete'.tr(),
+                    style: GoogleFonts.spaceGrotesk(
+                      color: Colors.red,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
           ),
         ],
       ),
@@ -308,12 +407,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('settings_reauth_required'.tr()),
-        content: Text('settings_reauth_message'.tr()),
+        backgroundColor: Colors.black.withValues(alpha: 0.8),
+        title: Text(
+          'settings_reauth_required'.tr(),
+          style: GoogleFonts.spaceGrotesk(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        content: Text(
+          'settings_reauth_message'.tr(),
+          style: GoogleFonts.spaceGrotesk(color: Colors.white70, fontSize: 14),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text('common_ok'.tr()),
+            child: Text(
+              'common_ok'.tr(),
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white70,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
         ],
       ),

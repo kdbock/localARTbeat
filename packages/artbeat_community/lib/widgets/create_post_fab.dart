@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:artbeat_core/artbeat_core.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../models/group_models.dart';
 import '../screens/feed/create_group_post_screen.dart';
+import 'glass_card.dart';
 
 /// Floating Action Button for creating posts in different groups
 class CreatePostFAB extends StatelessWidget {
@@ -14,10 +16,10 @@ class CreatePostFAB extends StatelessWidget {
   Widget build(BuildContext context) {
     return FloatingActionButton.extended(
       onPressed: () => _showCreatePostOptions(context),
-      backgroundColor: _getGroupColor(),
+      backgroundColor: const Color(0xFF22D3EE),
       foregroundColor: Colors.white,
       icon: Icon(_getGroupIcon()),
-      label: Text(_getCreateLabel()),
+      label: Text(_getCreateLabel().tr()),
     );
   }
 
@@ -30,11 +32,8 @@ class CreatePostFAB extends StatelessWidget {
         initialChildSize: 0.6,
         maxChildSize: 0.8,
         minChildSize: 0.3,
-        builder: (context, scrollController) => Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          ),
+        builder: (context, scrollController) => GlassCard(
+          padding: EdgeInsets.zero,
           child: Column(
             children: [
               // Handle bar
@@ -43,7 +42,7 @@ class CreatePostFAB extends StatelessWidget {
                 height: 4,
                 margin: const EdgeInsets.only(top: 12),
                 decoration: BoxDecoration(
-                  color: Colors.grey[300],
+                  color: const Color(0xFF70FFFFFF),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -56,12 +55,12 @@ class CreatePostFAB extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: _getGroupColor().withValues(alpha: 0.1),
+                        color: const Color(0xFF22D3EE).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Icon(
                         _getGroupIcon(),
-                        color: _getGroupColor(),
+                        color: const Color(0xFF22D3EE),
                         size: 24,
                       ),
                     ),
@@ -71,18 +70,19 @@ class CreatePostFAB extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Create ${groupType.title} Post',
-                            style: const TextStyle(
+                            'create_group_post'.tr(args: [groupType.title]),
+                            style: GoogleFonts.spaceGrotesk(
                               fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: ArtbeatColors.textPrimary,
+                              fontWeight: FontWeight.w900,
+                              color: const Color(0xFF92FFFFFF),
                             ),
                           ),
                           Text(
-                            _getCreateDescription(),
-                            style: const TextStyle(
+                            _getCreateDescription().tr(),
+                            style: GoogleFonts.spaceGrotesk(
                               fontSize: 14,
-                              color: ArtbeatColors.textSecondary,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF70FFFFFF),
                             ),
                           ),
                         ],
@@ -114,25 +114,25 @@ class CreatePostFAB extends StatelessWidget {
           _buildCreateOption(
             context: context,
             icon: Icons.photo_camera,
-            title: 'Share Artwork',
-            subtitle: 'Post photos of your latest creation',
-            color: ArtbeatColors.primaryPurple,
+            title: 'share_artwork'.tr(),
+            subtitle: 'post_photos_latest_creation'.tr(),
+            color: const Color(0xFF22D3EE),
             postType: 'artwork',
           ),
           _buildCreateOption(
             context: context,
             icon: Icons.video_camera_back,
-            title: 'Process Video',
-            subtitle: 'Share your creative process',
-            color: ArtbeatColors.primaryGreen,
+            title: 'process_video'.tr(),
+            subtitle: 'share_creative_process'.tr(),
+            color: const Color(0xFF34D399),
             postType: 'process',
           ),
           _buildCreateOption(
             context: context,
             icon: Icons.text_fields,
-            title: 'Artist Update',
-            subtitle: 'Share thoughts or updates',
-            color: ArtbeatColors.secondaryTeal,
+            title: 'artist_update'.tr(),
+            subtitle: 'share_thoughts_updates'.tr(),
+            color: const Color(0xFF22D3EE),
             postType: 'update',
           ),
         ];
@@ -142,25 +142,25 @@ class CreatePostFAB extends StatelessWidget {
           _buildCreateOption(
             context: context,
             icon: Icons.event_seat,
-            title: 'Hosting Event',
-            subtitle: 'Share an event you\'re organizing',
-            color: ArtbeatColors.primaryGreen,
+            title: 'hosting_event'.tr(),
+            subtitle: 'share_event_organizing'.tr(),
+            color: const Color(0xFF34D399),
             postType: 'hosting',
           ),
           _buildCreateOption(
             context: context,
             icon: Icons.event_available,
-            title: 'Attending Event',
-            subtitle: 'Share an event you\'re attending',
-            color: ArtbeatColors.secondaryTeal,
+            title: 'attending_event'.tr(),
+            subtitle: 'share_event_attending'.tr(),
+            color: const Color(0xFF22D3EE),
             postType: 'attending',
           ),
           _buildCreateOption(
             context: context,
             icon: Icons.photo_camera,
-            title: 'Event Photos',
-            subtitle: 'Share photos from an event',
-            color: ArtbeatColors.accentYellow,
+            title: 'event_photos'.tr(),
+            subtitle: 'share_photos_from_event'.tr(),
+            color: const Color(0xFFFFC857),
             postType: 'photos',
           ),
         ];
@@ -170,17 +170,17 @@ class CreatePostFAB extends StatelessWidget {
           _buildCreateOption(
             context: context,
             icon: Icons.add_a_photo,
-            title: 'Share Art Walk',
-            subtitle: 'Post up to 5 photos from your route',
-            color: ArtbeatColors.secondaryTeal,
+            title: 'share_art_walk'.tr(),
+            subtitle: 'post_up_to_5_photos'.tr(),
+            color: const Color(0xFF22D3EE),
             postType: 'artwalk',
           ),
           _buildCreateOption(
             context: context,
             icon: Icons.map,
-            title: 'Create Route',
-            subtitle: 'Design a new art walking route',
-            color: ArtbeatColors.primaryPurple,
+            title: 'create_route'.tr(),
+            subtitle: 'design_new_art_route'.tr(),
+            color: const Color(0xFF7C4DFF),
             postType: 'route',
           ),
         ];
@@ -190,17 +190,17 @@ class CreatePostFAB extends StatelessWidget {
           _buildCreateOption(
             context: context,
             icon: Icons.work_outline,
-            title: 'Post Project',
-            subtitle: 'Looking for an artist for your project',
-            color: ArtbeatColors.accentYellow,
+            title: 'post_project'.tr(),
+            subtitle: 'looking_for_artist'.tr(),
+            color: const Color(0xFFFFC857),
             postType: 'project',
           ),
           _buildCreateOption(
             context: context,
             icon: Icons.person_add,
-            title: 'Offer Services',
-            subtitle: 'Share your availability and skills',
-            color: ArtbeatColors.primaryGreen,
+            title: 'offer_services'.tr(),
+            subtitle: 'share_availability_skills'.tr(),
+            color: const Color(0xFF34D399),
             postType: 'services',
           ),
         ];
@@ -240,19 +240,19 @@ class CreatePostFAB extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.08),
+              color: Colors.white.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: color.withValues(alpha: 0.2)),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
             ),
             child: Row(
               children: [
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.1),
+                    color: const Color(0xFF22D3EE).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(icon, color: color, size: 20),
+                  child: Icon(icon, color: const Color(0xFF22D3EE), size: 20),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -261,42 +261,34 @@ class CreatePostFAB extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: const TextStyle(
+                        style: GoogleFonts.spaceGrotesk(
                           fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: ArtbeatColors.textPrimary,
+                          fontWeight: FontWeight.w900,
+                          color: const Color(0xFF92FFFFFF),
                         ),
                       ),
                       Text(
                         subtitle,
-                        style: const TextStyle(
+                        style: GoogleFonts.spaceGrotesk(
                           fontSize: 14,
-                          color: ArtbeatColors.textSecondary,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF70FFFFFF),
                         ),
                       ),
                     ],
                   ),
                 ),
-                Icon(Icons.arrow_forward_ios, size: 16, color: color),
+                const Icon(
+                  Icons.arrow_forward_ios,
+                  size: 16,
+                  color: Color(0xFF22D3EE),
+                ),
               ],
             ),
           ),
         ),
       ),
     );
-  }
-
-  Color _getGroupColor() {
-    switch (groupType) {
-      case GroupType.artist:
-        return ArtbeatColors.primaryPurple;
-      case GroupType.event:
-        return ArtbeatColors.primaryGreen;
-      case GroupType.artWalk:
-        return ArtbeatColors.secondaryTeal;
-      case GroupType.artistWanted:
-        return ArtbeatColors.accentYellow;
-    }
   }
 
   IconData _getGroupIcon() {
@@ -315,26 +307,26 @@ class CreatePostFAB extends StatelessWidget {
   String _getCreateLabel() {
     switch (groupType) {
       case GroupType.artist:
-        return 'Share Art';
+        return 'share_art';
       case GroupType.event:
-        return 'Add Event';
+        return 'add_event';
       case GroupType.artWalk:
-        return 'Share Walk';
+        return 'share_walk';
       case GroupType.artistWanted:
-        return 'Post Job';
+        return 'post_job';
     }
   }
 
   String _getCreateDescription() {
     switch (groupType) {
       case GroupType.artist:
-        return 'Share your artwork with the community';
+        return 'share_artwork_community';
       case GroupType.event:
-        return 'Share art events and exhibitions';
+        return 'share_art_events';
       case GroupType.artWalk:
-        return 'Share your art discovery adventures';
+        return 'share_art_discovery';
       case GroupType.artistWanted:
-        return 'Find artists or offer your services';
+        return 'find_artists_services';
     }
   }
 }

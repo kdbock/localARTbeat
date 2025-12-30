@@ -134,8 +134,8 @@ class CommunityModuleHome extends StatelessWidget {
             _buildSectionCard(context, [
               _buildNavButton(
                 context,
-                'Unified Community Hub',
-                const UnifiedCommunityHub(),
+                'Art Community Hub',
+                const ArtCommunityHub(),
                 Icons.view_stream,
               ),
               _buildNavButton(

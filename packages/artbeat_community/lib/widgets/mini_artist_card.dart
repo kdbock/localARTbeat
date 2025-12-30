@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../models/art_models.dart';
-import 'package:artbeat_core/artbeat_core.dart';
+import 'glass_card.dart';
+import 'gradient_badge.dart';
 
 /// Compact mini artist card for 2-column grid layout
 class MiniArtistCard extends StatefulWidget {
@@ -79,32 +82,20 @@ class _MiniArtistCardState extends State<MiniArtistCard> {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        onTap: widget.onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          height: 140, // More compact height for mini card
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                ArtbeatColors.primaryPurple.withValues(alpha: 0.1),
-                ArtbeatColors.primaryGreen.withValues(alpha: 0.1),
-              ],
-            ),
-          ),
+    return GestureDetector(
+      onTap: widget.onTap,
+      child: GlassCard(
+        borderRadius: 24,
+        padding: EdgeInsets.zero,
+        child: SizedBox(
+          height: 140,
           child: Stack(
             children: [
               // Background image if available
               if (widget.artist.portfolioImages.isNotEmpty)
                 Positioned.fill(
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(24),
                     child: Image.network(
                       widget.artist.portfolioImages.first,
                       fit: BoxFit.cover,
@@ -114,10 +105,8 @@ class _MiniArtistCardState extends State<MiniArtistCard> {
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                             colors: [
-                              ArtbeatColors.primaryPurple.withValues(
-                                alpha: 0.2,
-                              ),
-                              ArtbeatColors.primaryGreen.withValues(alpha: 0.2),
+                              const Color(0xFF7C4DFF).withAlpha(51),
+                              const Color(0xFF34D399).withAlpha(51),
                             ],
                           ),
                         ),
@@ -130,7 +119,7 @@ class _MiniArtistCardState extends State<MiniArtistCard> {
               Positioned.fill(
                 child: Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(24),
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
@@ -168,8 +157,9 @@ class _MiniArtistCardState extends State<MiniArtistCard> {
                                     errorBuilder:
                                         (context, error, stackTrace) =>
                                             Container(
-                                              color: ArtbeatColors.primaryPurple
-                                                  .withValues(alpha: 0.3),
+                                              color: const Color(
+                                                0xFF7C4DFF,
+                                              ).withAlpha(77),
                                               child: const Icon(
                                                 Icons.person,
                                                 color: Colors.white,
@@ -178,8 +168,9 @@ class _MiniArtistCardState extends State<MiniArtistCard> {
                                             ),
                                   )
                                 : Container(
-                                    color: ArtbeatColors.primaryPurple
-                                        .withValues(alpha: 0.3),
+                                    color: const Color(
+                                      0xFF7C4DFF,
+                                    ).withAlpha(77),
                                     child: const Icon(
                                       Icons.person,
                                       color: Colors.white,
@@ -196,9 +187,7 @@ class _MiniArtistCardState extends State<MiniArtistCard> {
                             height: 28,
                             decoration: BoxDecoration(
                               color: _isFollowing
-                                  ? ArtbeatColors.primaryGreen.withValues(
-                                      alpha: 0.3,
-                                    )
+                                  ? const Color(0xFF34D399).withAlpha(77)
                                   : Colors.white.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(14),
                             ),
@@ -227,8 +216,14 @@ class _MiniArtistCardState extends State<MiniArtistCard> {
                                       size: 14,
                                     ),
                               tooltip: _isFollowing
-                                  ? 'Unfollow ${widget.artist.displayName}'
-                                  : 'Follow ${widget.artist.displayName}',
+                                  ? 'unfollow'.tr().replaceAll(
+                                      '{user}',
+                                      widget.artist.displayName,
+                                    )
+                                  : 'follow'.tr().replaceAll(
+                                      '{user}',
+                                      widget.artist.displayName,
+                                    ),
                             ),
                           ),
                       ],
@@ -243,9 +238,9 @@ class _MiniArtistCardState extends State<MiniArtistCard> {
                         // Name
                         Text(
                           widget.artist.displayName,
-                          style: const TextStyle(
+                          style: GoogleFonts.spaceGrotesk(
                             fontSize: 14,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w700,
                             color: Colors.white,
                           ),
                           maxLines: 1,
@@ -258,8 +253,9 @@ class _MiniArtistCardState extends State<MiniArtistCard> {
                         if (widget.artist.bio.isNotEmpty)
                           Text(
                             widget.artist.bio,
-                            style: TextStyle(
+                            style: GoogleFonts.spaceGrotesk(
                               fontSize: 11,
+                              fontWeight: FontWeight.w500,
                               color: Colors.white.withValues(alpha: 0.8),
                             ),
                             maxLines: 1,
@@ -279,17 +275,22 @@ class _MiniArtistCardState extends State<MiniArtistCard> {
                             const SizedBox(width: 2),
                             Text(
                               '$_followersCount',
-                              style: TextStyle(
+                              style: GoogleFonts.spaceGrotesk(
                                 fontSize: 10,
+                                fontWeight: FontWeight.w500,
                                 color: Colors.white.withValues(alpha: 0.7),
                               ),
                             ),
                             if (widget.artist.isVerified) ...[
                               const SizedBox(width: 4),
-                              const Icon(
-                                Icons.verified,
-                                size: 12,
-                                color: ArtbeatColors.primaryGreen,
+                              const GradientBadge(
+                                text: 'VERIFIED',
+                                fontSize: 8,
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                  vertical: 2,
+                                ),
+                                borderRadius: 8,
                               ),
                             ],
                           ],

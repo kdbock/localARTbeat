@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'glass_card.dart';
+import 'hud_button.dart';
 
 class GiftCardWidget extends StatelessWidget {
   final GiftModel gift;
@@ -9,29 +13,32 @@ class GiftCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    return GlassCard(
       child: Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               gift.giftType,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              style: GoogleFonts.spaceGrotesk(
+                fontWeight: FontWeight.w900,
+                fontSize: 18,
+                color: const Color(0xFF92FFFFFF),
+              ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Amount: \$${gift.amount.toStringAsFixed(2)}',
-              style: const TextStyle(color: Colors.grey, fontSize: 16),
-            ),
-            const SizedBox(height: 12),
-            if (onSendGift != null)
-              ElevatedButton(
-                onPressed: onSendGift,
-                child: const Text('Send Gift'),
+              'amount'.tr(args: [gift.amount.toStringAsFixed(2)]),
+              style: GoogleFonts.spaceGrotesk(
+                color: const Color(0xFF70FFFFFF),
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
               ),
+            ),
+            const SizedBox(height: 16),
+            if (onSendGift != null)
+              HudButton(onPressed: onSendGift, text: 'send_gift'.tr()),
           ],
         ),
       ),

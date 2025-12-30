@@ -554,7 +554,11 @@ class _CreatePostScreenState extends State<CreatePostScreen>
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(widget.postToEdit != null ? 'Post updated successfully!' : 'Post created successfully!'),
+            content: Text(
+              widget.postToEdit != null
+                  ? 'Post updated successfully!'
+                  : 'Post created successfully!',
+            ),
             backgroundColor: Colors.green,
           ),
         );
@@ -608,7 +612,9 @@ class _CreatePostScreenState extends State<CreatePostScreen>
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
         title: Text(
-          widget.postToEdit != null ? 'Edit Post' : 'screen_title_create_post'.tr(),
+          widget.postToEdit != null
+              ? 'Edit Post'
+              : 'screen_title_create_post'.tr(),
           style: const TextStyle(fontWeight: FontWeight.w600),
         ),
         backgroundColor: ArtbeatColors.primaryPurple,

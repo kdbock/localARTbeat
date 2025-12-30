@@ -82,10 +82,19 @@ class ContentModel {
       type: 'artwork',
       authorId: data['artistId'] as String? ?? '',
       authorName: data['artistName'] as String? ?? 'Unknown Artist',
-      status: data['status'] as String? ?? 'pending',
+      status: () {
+        final status = data['status'] as String?;
+        if (status != null && status != 'active') return status;
+        final moderationStatus = data['moderationStatus'] as String?;
+        if (moderationStatus == 'approved') return 'approved';
+        if (moderationStatus == 'pending') return 'pending';
+        if (moderationStatus == 'rejected') return 'rejected';
+        if (moderationStatus == 'flagged') return 'flagged';
+        return 'approved'; // default to approved for artworks
+      }(),
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate(),
-      isFlagged: data['isFlagged'] as bool? ?? false,
+      isFlagged: data['flagged'] as bool? ?? false,
       isPublic: data['isPublic'] as bool? ?? true,
       tags: List<String>.from(data['tags'] as List? ?? []),
       metadata: {
@@ -159,7 +168,16 @@ class ContentModel {
       type: 'event',
       authorId: data['organizerId'] as String? ?? '',
       authorName: data['organizerName'] as String? ?? 'Unknown Organizer',
-      status: data['status'] as String? ?? 'pending',
+      status: () {
+        final status = data['status'] as String?;
+        if (status != null && status != 'active') return status;
+        final moderationStatus = data['moderationStatus'] as String?;
+        if (moderationStatus == 'approved') return 'approved';
+        if (moderationStatus == 'pending') return 'pending';
+        if (moderationStatus == 'rejected') return 'rejected';
+        if (moderationStatus == 'flagged') return 'flagged';
+        return 'pending'; // default to pending for events
+      }(),
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate(),
       isFlagged: data['isFlagged'] as bool? ?? false,
@@ -171,6 +189,49 @@ class ContentModel {
         'location': data['location'] as String? ?? '',
         'ticketPrice': data['ticketPrice'] as double? ?? 0.0,
         'maxAttendees': data['maxAttendees'] as int? ?? 0,
+      },
+      imageUrl: data['imageUrl'] as String?,
+      thumbnailUrl: data['thumbnailUrl'] as String?,
+      viewCount: data['viewCount'] as int? ?? 0,
+      likeCount: data['likeCount'] as int? ?? 0,
+      reportCount: data['reportCount'] as int? ?? 0,
+    );
+  }
+
+  factory ContentModel.fromCapture(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+
+    return ContentModel(
+      id: doc.id,
+      title: data['title'] as String? ?? 'Untitled Capture',
+      description: data['description'] as String? ?? '',
+      type: 'capture',
+      authorId: data['userId'] as String? ?? '',
+      authorName: data['userName'] as String? ?? 'Unknown User',
+      status: () {
+        final status = data['status'] as String?;
+        if (status == 'approved') return 'active';
+        if (status == 'pending') return 'pending';
+        if (status == 'rejected') return 'rejected';
+        final moderationStatus = data['moderationStatus'] as String?;
+        if (moderationStatus == 'approved') return 'approved';
+        if (moderationStatus == 'pending') return 'pending';
+        if (moderationStatus == 'rejected') return 'rejected';
+        if (moderationStatus == 'flagged') return 'flagged';
+        return 'active'; // default to active for legacy captures
+      }(),
+      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      updatedAt: (data['updatedAt'] as Timestamp?)?.toDate(),
+      isFlagged: data['isFlagged'] as bool? ?? false,
+      isPublic: data['isPublic'] as bool? ?? false,
+      tags: List<String>.from(data['tags'] as List? ?? []),
+      metadata: {
+        'artType': data['artType'] as String?,
+        'artMedium': data['artMedium'] as String?,
+        'locationName': data['locationName'] as String?,
+        'artistId': data['artistId'] as String?,
+        'artistName': data['artistName'] as String?,
+        'textAnnotations': data['textAnnotations'] as List<dynamic>?,
       },
       imageUrl: data['imageUrl'] as String?,
       thumbnailUrl: data['thumbnailUrl'] as String?,
@@ -255,6 +316,8 @@ class ContentModel {
         return 'Post';
       case 'event':
         return 'Event';
+      case 'capture':
+        return 'Capture';
       case 'ad':
         return 'Advertisement';
       case 'commission':
@@ -299,6 +362,26 @@ class ContentModel {
     return 'low';
   }
 
+  /// Get AdminContentType from type string
+  AdminContentType get contentType {
+    switch (type) {
+      case 'artwork':
+        return AdminContentType.artwork;
+      case 'post':
+        return AdminContentType.post;
+      case 'event':
+        return AdminContentType.event;
+      case 'capture':
+        return AdminContentType.capture;
+      case 'ad':
+        return AdminContentType.ad;
+      case 'commission':
+        return AdminContentType.commission;
+      default:
+        return AdminContentType.all;
+    }
+  }
+
   /// Get engagement score
   double get engagementScore {
     if (viewCount == 0) return 0.0;
@@ -326,6 +409,7 @@ enum AdminContentType {
   artwork,
   post,
   event,
+  capture,
   ad,
   commission;
 
@@ -339,6 +423,8 @@ enum AdminContentType {
         return 'Posts';
       case AdminContentType.event:
         return 'Events';
+      case AdminContentType.capture:
+        return 'Captures';
       case AdminContentType.ad:
         return 'Advertisements';
       case AdminContentType.commission:
@@ -356,6 +442,8 @@ enum AdminContentType {
         return 'post';
       case AdminContentType.event:
         return 'event';
+      case AdminContentType.capture:
+        return 'capture';
       case AdminContentType.ad:
         return 'ad';
       case AdminContentType.commission:

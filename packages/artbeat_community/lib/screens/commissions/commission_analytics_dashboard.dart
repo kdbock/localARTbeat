@@ -1,15 +1,21 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart' as intl;
+import 'package:artbeat_core/artbeat_core.dart' as core hide NumberFormat;
+
 import '../../models/commission_analytics_model.dart'
     show ArtistCommissionAnalytics;
 import '../../services/commission_analytics_service.dart';
-import 'package:artbeat_core/artbeat_core.dart' hide NumberFormat;
+import '../../widgets/glass_card.dart';
+import '../../widgets/hud_button.dart';
+import '../../widgets/hud_top_bar.dart';
+import '../../widgets/world_background.dart';
 
 class CommissionAnalyticsDashboard extends StatefulWidget {
   final String artistId;
 
-  const CommissionAnalyticsDashboard({Key? key, required this.artistId})
-    : super(key: key);
+  const CommissionAnalyticsDashboard({super.key, required this.artistId});
 
   @override
   State<CommissionAnalyticsDashboard> createState() =>
@@ -18,266 +24,100 @@ class CommissionAnalyticsDashboard extends StatefulWidget {
 
 class _CommissionAnalyticsDashboardState
     extends State<CommissionAnalyticsDashboard> {
-  late CommissionAnalyticsService _analyticsService;
+  final CommissionAnalyticsService _analyticsService =
+      CommissionAnalyticsService();
+
   ArtistCommissionAnalytics? _analytics;
   bool _isLoading = true;
+
+  final intl.NumberFormat _currencyFormatter = intl.NumberFormat.currency(
+    symbol: '\$',
+  );
 
   @override
   void initState() {
     super.initState();
-    _analyticsService = CommissionAnalyticsService();
     _loadAnalytics();
   }
 
   Future<void> _loadAnalytics() async {
+    setState(() => _isLoading = true);
     try {
       final analytics = await _analyticsService.getArtistAnalytics(
         widget.artistId,
       );
+      if (!mounted) return;
       setState(() {
         _analytics = analytics;
         _isLoading = false;
       });
     } catch (e) {
-      AppLogger.error('Failed to load analytics: $e');
+      core.AppLogger.error('Failed to load analytics: $e');
+      if (!mounted) return;
       setState(() => _isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
-
-    if (_analytics == null) {
-      return Scaffold(
-        appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(kToolbarHeight + 48 + 4),
-          child: Container(
-            decoration: const BoxDecoration(
-              gradient: ArtbeatColors.primaryGradient,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black26,
-                  blurRadius: 8,
-                  offset: Offset(0, 4),
-                ),
-              ],
-            ),
-            child: AppBar(title: const Text('Commission Analytics')),
-          ),
+    return WorldBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: HudTopBar(
+          title: 'commission_analytics_title'.tr(),
+          glassBackground: true,
         ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('No analytics data available yet'),
-              const SizedBox(height: 16),
-              ElevatedButton.icon(
-                onPressed: _loadAnalytics,
-                icon: const Icon(Icons.refresh),
-                label: const Text('Refresh'),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    final formatter = intl.NumberFormat.currency(
-      symbol: '\$',
-      decimalDigits: 2,
-    );
-
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(kToolbarHeight + 48 + 4),
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: ArtbeatColors.primaryGradient,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black26,
-                blurRadius: 8,
-                offset: Offset(0, 4),
-              ),
-            ],
-          ),
-          child: AppBar(
-            title: const Text('Commission Analytics'),
-            elevation: 0,
-          ),
+        body: SafeArea(
+          child: _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _analytics == null
+              ? _buildEmptyState()
+              : _buildAnalyticsContent(),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
+      child: GlassCard(
+        padding: const EdgeInsets.all(24),
+        showAccentGlow: true,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Summary Cards
-            GridView.count(
-              crossAxisCount: 2,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              childAspectRatio: 1.2,
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              children: [
-                _buildStatCard(
-                  title: 'Total Commissions',
-                  value: '${_analytics!.totalCommissions}',
-                  icon: Icons.work,
-                  color: Colors.blue,
-                ),
-                _buildStatCard(
-                  title: 'Completed',
-                  value: '${_analytics!.completedCommissions}',
-                  icon: Icons.check_circle,
-                  color: Colors.green,
-                ),
-                _buildStatCard(
-                  title: 'Active',
-                  value: '${_analytics!.activeCommissions}',
-                  icon: Icons.hourglass_top,
-                  color: Colors.orange,
-                ),
-                _buildStatCard(
-                  title: 'Total Earnings',
-                  value: formatter.format(_analytics!.totalEarnings),
-                  icon: Icons.attach_money,
-                  color: Colors.deepPurple,
-                ),
-              ],
+            const Icon(
+              Icons.analytics_outlined,
+              color: _AnalyticsPalette.accentTeal,
+              size: 48,
             ),
-            const SizedBox(height: 24),
-
-            // Key Metrics
-            _buildSection(
-              title: 'Key Metrics',
-              children: [
-                _buildMetricRow(
-                  label: 'Average Rating',
-                  value: '${_analytics!.averageRating.toStringAsFixed(1)} ⭐',
-                ),
-                _buildMetricRow(
-                  label: 'Completion Rate',
-                  value:
-                      '${(_analytics!.completionRate * 100).toStringAsFixed(1)}%',
-                ),
-                _buildMetricRow(
-                  label: 'Acceptance Rate',
-                  value:
-                      '${(_analytics!.acceptanceRate * 100).toStringAsFixed(1)}%',
-                ),
-                _buildMetricRow(
-                  label: 'Avg Turnaround',
-                  value:
-                      '${_analytics!.averageTurnaroundDays.toStringAsFixed(1)} days',
-                ),
-                _buildMetricRow(
-                  label: 'Repeat Clients',
-                  value: '${_analytics!.returningClients}',
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-
-            // Commission Types
-            if (_analytics!.commissionsByType.isNotEmpty)
-              _buildSection(
-                title: 'Commissions by Type',
-                children: [
-                  ..._analytics!.commissionsByType.entries.map((e) {
-                    final earnings = _analytics!.earningsByType[e.key] ?? 0.0;
-                    return Column(
-                      children: [
-                        _buildMetricRow(
-                          label: e.key.toUpperCase(),
-                          value: '${e.value} (${formatter.format(earnings)})',
-                        ),
-                        const Divider(height: 16),
-                      ],
-                    );
-                  }).toList(),
-                ],
+            const SizedBox(height: 16),
+            Text(
+              'commission_analytics_empty_title'.tr(),
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: _AnalyticsPalette.textPrimary,
               ),
-            const SizedBox(height: 24),
-
-            // Financial Summary
-            _buildSection(
-              title: 'Financial Summary',
-              children: [
-                _buildMetricRow(
-                  label: 'Average Commission Value',
-                  value: formatter.format(_analytics!.averageCommissionValue),
-                ),
-                _buildMetricRow(
-                  label: 'Estimated Earnings',
-                  value: formatter.format(_analytics!.estimatedEarnings),
-                ),
-                _buildMetricRow(
-                  label: 'Total Refunded',
-                  value: formatter.format(_analytics!.totalRefunded),
-                ),
-              ],
+              textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 24),
-
-            // Client Metrics
-            _buildSection(
-              title: 'Client Metrics',
-              children: [
-                _buildMetricRow(
-                  label: 'Unique Clients',
-                  value: '${_analytics!.uniqueClients}',
-                ),
-                _buildMetricRow(
-                  label: 'Returning Clients',
-                  value: '${_analytics!.returningClients}',
-                ),
-                if (_analytics!.returningClients > 0)
-                  _buildMetricRow(
-                    label: 'Repeat Client Rate',
-                    value:
-                        '${((_analytics!.returningClients / _analytics!.uniqueClients) * 100).toStringAsFixed(1)}%',
-                  ),
-              ],
-            ),
-            const SizedBox(height: 24),
-
-            // Quality Metrics
-            _buildSection(
-              title: 'Quality Metrics',
-              children: [
-                _buildMetricRow(
-                  label: 'On-Time Deliveries',
-                  value: '${_analytics!.onTimeDeliveryCount}',
-                ),
-                _buildMetricRow(
-                  label: 'Late Deliveries',
-                  value: '${_analytics!.lateDeliveryCount}',
-                ),
-                _buildMetricRow(
-                  label: 'Ratings Received',
-                  value: '${_analytics!.ratingsCount}',
-                ),
-                _buildMetricRow(
-                  label: 'Disputes',
-                  value: '${_analytics!.disputesCount}',
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-
-            // Refresh Button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: _loadAnalytics,
-                icon: const Icon(Icons.refresh),
-                label: const Text('Refresh Analytics'),
+            const SizedBox(height: 8),
+            Text(
+              'commission_analytics_empty_subtitle'.tr(),
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: _AnalyticsPalette.textSecondary,
               ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            HudButton.secondary(
+              onPressed: _loadAnalytics,
+              text: 'commission_analytics_empty_refresh'.tr(),
+              icon: Icons.refresh,
             ),
           ],
         ),
@@ -285,81 +125,427 @@ class _CommissionAnalyticsDashboardState
     );
   }
 
-  Widget _buildStatCard({
-    required String title,
-    required String value,
-    required IconData icon,
-    required Color color,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: color, size: 28),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: color,
+  Widget _buildAnalyticsContent() {
+    final analytics = _analytics!;
+
+    return ListView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
+      children: [
+        _buildHeroCard(analytics.totalCommissions),
+        const SizedBox(height: 16),
+        _buildStatGrid(analytics),
+        const SizedBox(height: 16),
+        _buildSectionCard(
+          title: 'commission_analytics_section_key_metrics_title'.tr(),
+          subtitle: 'commission_analytics_section_key_metrics_subtitle'.tr(),
+          children: [
+            _AnalyticsMetricRow(
+              label: 'commission_analytics_metric_avg_rating'.tr(),
+              value: '${analytics.averageRating.toStringAsFixed(1)} ⭐',
             ),
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
+            _AnalyticsMetricRow(
+              label: 'commission_analytics_metric_completion_rate'.tr(),
+              value: '${(analytics.completionRate * 100).toStringAsFixed(1)}%',
+            ),
+            _AnalyticsMetricRow(
+              label: 'commission_analytics_metric_acceptance_rate'.tr(),
+              value: '${(analytics.acceptanceRate * 100).toStringAsFixed(1)}%',
+            ),
+            _AnalyticsMetricRow(
+              label: 'commission_analytics_metric_turnaround'.tr(),
+              value:
+                  '${analytics.averageTurnaroundDays.toStringAsFixed(1)} ${'commission_analytics_metric_days'.tr()}',
+            ),
+            _AnalyticsMetricRow(
+              label: 'commission_analytics_metric_repeat_clients'.tr(),
+              value: '${analytics.returningClients}',
+            ),
+          ],
+        ),
+        if (analytics.commissionsByType.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          _buildSectionCard(
+            title: 'commission_analytics_section_types_title'.tr(),
+            subtitle: 'commission_analytics_section_types_subtitle'.tr(),
+            children: analytics.commissionsByType.entries.map((entry) {
+              final earnings = analytics.earningsByType[entry.key] ?? 0.0;
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        entry.key,
+                        style: GoogleFonts.spaceGrotesk(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: _AnalyticsPalette.textPrimary,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      'commission_analytics_type_value'.tr(
+                        namedArgs: {
+                          'count': '${entry.value}',
+                          'earnings': _currencyFormatter.format(earnings),
+                        },
+                      ),
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: _AnalyticsPalette.accentTeal,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
           ),
-          const SizedBox(height: 4),
-          Text(
-            title,
-            style: Theme.of(context).textTheme.bodySmall,
-            textAlign: TextAlign.center,
-            maxLines: 2,
+        ],
+        const SizedBox(height: 16),
+        _buildSectionCard(
+          title: 'commission_analytics_section_financial_title'.tr(),
+          subtitle: 'commission_analytics_section_financial_subtitle'.tr(),
+          children: [
+            _AnalyticsMetricRow(
+              label: 'commission_analytics_metric_avg_value'.tr(),
+              value: _currencyFormatter.format(
+                analytics.averageCommissionValue,
+              ),
+            ),
+            _AnalyticsMetricRow(
+              label: 'commission_analytics_metric_estimated_earnings'.tr(),
+              value: _currencyFormatter.format(analytics.estimatedEarnings),
+            ),
+            _AnalyticsMetricRow(
+              label: 'commission_analytics_metric_total_refunded'.tr(),
+              value: _currencyFormatter.format(analytics.totalRefunded),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        _buildSectionCard(
+          title: 'commission_analytics_section_clients_title'.tr(),
+          subtitle: 'commission_analytics_section_clients_subtitle'.tr(),
+          children: [
+            _AnalyticsMetricRow(
+              label: 'commission_analytics_metric_unique_clients'.tr(),
+              value: '${analytics.uniqueClients}',
+            ),
+            _AnalyticsMetricRow(
+              label: 'commission_analytics_metric_returning_clients'.tr(),
+              value: '${analytics.returningClients}',
+            ),
+            if (analytics.returningClients > 0 && analytics.uniqueClients > 0)
+              _AnalyticsMetricRow(
+                label: 'commission_analytics_metric_repeat_rate'.tr(),
+                value:
+                    '${((analytics.returningClients / analytics.uniqueClients) * 100).toStringAsFixed(1)}%',
+              ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        _buildSectionCard(
+          title: 'commission_analytics_section_quality_title'.tr(),
+          subtitle: 'commission_analytics_section_quality_subtitle'.tr(),
+          children: [
+            _AnalyticsMetricRow(
+              label: 'commission_analytics_metric_on_time'.tr(),
+              value: '${analytics.onTimeDeliveryCount}',
+            ),
+            _AnalyticsMetricRow(
+              label: 'commission_analytics_metric_late'.tr(),
+              value: '${analytics.lateDeliveryCount}',
+            ),
+            _AnalyticsMetricRow(
+              label: 'commission_analytics_metric_ratings'.tr(),
+              value: '${analytics.ratingsCount}',
+            ),
+            _AnalyticsMetricRow(
+              label: 'commission_analytics_metric_disputes'.tr(),
+              value: '${analytics.disputesCount}',
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        HudButton.primary(
+          onPressed: _loadAnalytics,
+          text: 'commission_analytics_refresh'.tr(),
+          icon: Icons.refresh,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHeroCard(int totalCommissions) {
+    return GlassCard(
+      padding: const EdgeInsets.all(20),
+      showAccentGlow: true,
+      child: Row(
+        children: [
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              gradient: _AnalyticsPalette.primaryGradient,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: _AnalyticsPalette.accentPurple.withValues(alpha: 0.25),
+                  blurRadius: 32,
+                  offset: const Offset(0, 16),
+                ),
+              ],
+            ),
+            child: const Icon(Icons.auto_graph, color: Colors.white, size: 30),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'commission_analytics_hero_title'.tr(
+                    namedArgs: {'count': '$totalCommissions'},
+                  ),
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                    color: _AnalyticsPalette.textPrimary,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'commission_analytics_hero_subtitle'.tr(),
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: _AnalyticsPalette.textSecondary,
+                    height: 1.3,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildSection({
+  Widget _buildStatGrid(ArtistCommissionAnalytics analytics) {
+    final stats = [
+      _AnalyticsStatConfig(
+        title: 'commission_analytics_stat_total'.tr(),
+        value: '${analytics.totalCommissions}',
+        icon: Icons.workspaces_outlined,
+        gradient: _AnalyticsPalette.primaryGradient,
+      ),
+      _AnalyticsStatConfig(
+        title: 'commission_analytics_stat_completed'.tr(),
+        value: '${analytics.completedCommissions}',
+        icon: Icons.verified_outlined,
+        gradient: _AnalyticsPalette.successGradient,
+      ),
+      _AnalyticsStatConfig(
+        title: 'commission_analytics_stat_active'.tr(),
+        value: '${analytics.activeCommissions}',
+        icon: Icons.timelapse,
+        gradient: _AnalyticsPalette.warningGradient,
+      ),
+      _AnalyticsStatConfig(
+        title: 'commission_analytics_stat_total_earnings'.tr(),
+        value: _currencyFormatter.format(analytics.totalEarnings),
+        icon: Icons.attach_money,
+        gradient: _AnalyticsPalette.accentGradient,
+      ),
+    ];
+
+    return Wrap(
+      alignment: WrapAlignment.spaceBetween,
+      spacing: 12,
+      runSpacing: 12,
+      children: stats
+          .map(
+            (stat) => _AnalyticsStatCard(
+              title: stat.title,
+              value: stat.value,
+              icon: stat.icon,
+              gradient: stat.gradient,
+            ),
+          )
+          .toList(),
+    );
+  }
+
+  Widget _buildSectionCard({
     required String title,
+    required String subtitle,
     required List<Widget> children,
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!),
-      ),
-      padding: const EdgeInsets.all(16),
+    return GlassCard(
+      padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              color: _AnalyticsPalette.textPrimary,
+            ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 6),
+          Text(
+            subtitle,
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: _AnalyticsPalette.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 16),
           ...children,
         ],
       ),
     );
   }
+}
 
-  Widget _buildMetricRow({required String label, required String value}) {
+class _AnalyticsPalette {
+  static const Color textPrimary = Color(0xF2FFFFFF);
+  static const Color textSecondary = Color(0xB3FFFFFF);
+  static const Color accentTeal = Color(0xFF22D3EE);
+  static const Color accentPurple = Color(0xFF7C4DFF);
+
+  static const Gradient primaryGradient = LinearGradient(
+    colors: [accentPurple, accentTeal, Color(0xFF34D399)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const Gradient accentGradient = LinearGradient(
+    colors: [Color(0xFFFF3D8D), accentPurple],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const Gradient successGradient = LinearGradient(
+    colors: [Color(0xFF34D399), Color(0xFF22D3EE)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const Gradient warningGradient = LinearGradient(
+    colors: [Color(0xFFFFC857), Color(0xFFFF3D8D)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+}
+
+class _AnalyticsStatConfig {
+  const _AnalyticsStatConfig({
+    required this.title,
+    required this.value,
+    required this.icon,
+    required this.gradient,
+  });
+
+  final String title;
+  final String value;
+  final IconData icon;
+  final Gradient gradient;
+}
+
+class _AnalyticsStatCard extends StatelessWidget {
+  const _AnalyticsStatCard({
+    required this.title,
+    required this.value,
+    required this.icon,
+    required this.gradient,
+  });
+
+  final String title;
+  final String value;
+  final IconData icon;
+  final Gradient gradient;
+
+  @override
+  Widget build(BuildContext context) {
+    final availableWidth = MediaQuery.of(context).size.width;
+    return SizedBox(
+      width: (availableWidth - 52) / 2,
+      child: GlassCard(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                gradient: gradient,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(icon, color: Colors.white),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              value,
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: _AnalyticsPalette.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              title,
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: _AnalyticsPalette.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AnalyticsMetricRow extends StatelessWidget {
+  const _AnalyticsMetricRow({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
+          Expanded(
+            child: Text(
+              label,
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: _AnalyticsPalette.textSecondary,
+              ),
+            ),
+          ),
+          Text(
+            value,
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              color: _AnalyticsPalette.textPrimary,
+            ),
+          ),
         ],
       ),
     );

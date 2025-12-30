@@ -1,11 +1,14 @@
-import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart' as intl;
 import 'package:artbeat_core/artbeat_core.dart' as core;
 import '../../models/direct_commission_model.dart';
 import '../../services/direct_commission_service.dart';
-import '../../theme/community_colors.dart';
-import 'commission_detail_screen.dart';
+import '../../widgets/widgets.dart';
 import 'artist_selection_screen.dart';
+import 'commission_detail_screen.dart';
 
 class DirectCommissionsScreen extends StatefulWidget {
   const DirectCommissionsScreen({super.key});
@@ -18,8 +21,13 @@ class DirectCommissionsScreen extends StatefulWidget {
 class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
     with SingleTickerProviderStateMixin {
   final DirectCommissionService _commissionService = DirectCommissionService();
-  final _scaffoldKey = GlobalKey<ScaffoldState>();
   late final TabController _tabController;
+  final intl.NumberFormat _currencyFormatter = intl.NumberFormat.currency(
+    symbol: '\$',
+  );
+  final intl.NumberFormat _compactCurrencyFormatter =
+      intl.NumberFormat.compactSimpleCurrency(name: 'USD');
+  final intl.DateFormat _dateFormat = intl.DateFormat('MMM d, yyyy');
 
   List<DirectCommissionModel> _allCommissions = [];
   bool _isLoading = true;
@@ -47,7 +55,7 @@ class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
         setState(() => _isLoading = false);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Please sign in to view commissions')),
+            SnackBar(content: Text('direct_commissions_sign_in_required'.tr())),
           );
         }
         return;
@@ -66,7 +74,11 @@ class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
       setState(() => _isLoading = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading commissions: $e')),
+          SnackBar(
+            content: Text(
+              'direct_commissions_error_loading'.tr(namedArgs: {'error': '$e'}),
+            ),
+          ),
         );
       }
     }
@@ -78,197 +90,8 @@ class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
     return _allCommissions.where((c) => statuses.contains(c.status)).toList();
   }
 
-  bool _isUserArtist(DirectCommissionModel commission) {
-    return commission.artistId == _currentUserId;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(kToolbarHeight + 48 + 4),
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: core.ArtbeatColors.primaryGradient,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black26,
-                blurRadius: 8,
-                offset: Offset(0, 4),
-              ),
-            ],
-          ),
-          child: AppBar(
-            title: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(
-                    Icons.handshake,
-                    color: Colors.white,
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                const Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'Direct Commissions',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                          color: Colors.white,
-                        ),
-                      ),
-                      Text(
-                        'Manage active commissions',
-                        style: TextStyle(fontSize: 11, color: Colors.white70),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            backgroundColor: Colors.transparent,
-            foregroundColor: Colors.white,
-            elevation: 0,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-          ),
-        ),
-      ),
-      backgroundColor: CommunityColors.background,
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showArtistSelection(),
-        backgroundColor: CommunityColors.primary,
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.add),
-        label: const Text('New Commission'),
-      ),
-      body: Column(
-        children: [
-          // Summary Cards
-          if (!_isLoading) _buildSummaryCards(),
-
-          // Tabs for filtering commissions
-          TabBar(
-            controller: _tabController,
-            isScrollable: true,
-            tabs: [
-              Tab(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.pending_actions, size: 16),
-                    const SizedBox(width: 4),
-                    Text(
-                      'Active (${_getCommissionsByStatus([CommissionStatus.pending, CommissionStatus.quoted, CommissionStatus.accepted, CommissionStatus.inProgress]).length})',
-                    ),
-                  ],
-                ),
-              ),
-              Tab(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.schedule, size: 16),
-                    const SizedBox(width: 4),
-                    Text(
-                      'Pending (${_getCommissionsByStatus([CommissionStatus.pending, CommissionStatus.quoted]).length})',
-                    ),
-                  ],
-                ),
-              ),
-              Tab(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.check_circle, size: 16),
-                    const SizedBox(width: 4),
-                    Text(
-                      'Completed (${_getCommissionsByStatus([CommissionStatus.completed, CommissionStatus.delivered]).length})',
-                    ),
-                  ],
-                ),
-              ),
-              Tab(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.list, size: 16),
-                    const SizedBox(width: 4),
-                    Text('All (${_allCommissions.length})'),
-                  ],
-                ),
-              ),
-            ],
-          ),
-
-          // Commission list
-          Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : TabBarView(
-                    controller: _tabController,
-                    children: [
-                      // Active commissions
-                      _buildCommissionList(
-                        _getCommissionsByStatus([
-                          CommissionStatus.pending,
-                          CommissionStatus.quoted,
-                          CommissionStatus.accepted,
-                          CommissionStatus.inProgress,
-                        ]),
-                      ),
-                      // Pending commissions
-                      _buildCommissionList(
-                        _getCommissionsByStatus([
-                          CommissionStatus.pending,
-                          CommissionStatus.quoted,
-                        ]),
-                      ),
-                      // Completed commissions
-                      _buildCommissionList(
-                        _getCommissionsByStatus([
-                          CommissionStatus.completed,
-                          CommissionStatus.delivered,
-                        ]),
-                      ),
-                      // All commissions
-                      _buildCommissionList(_allCommissions),
-                    ],
-                  ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSummaryCards() {
-    final activeCount = _getCommissionsByStatus([
-      CommissionStatus.pending,
-      CommissionStatus.quoted,
-      CommissionStatus.accepted,
-      CommissionStatus.inProgress,
-    ]).length;
-
-    final completedCount = _getCommissionsByStatus([
-      CommissionStatus.completed,
-      CommissionStatus.delivered,
-    ]).length;
-
-    final totalEarnings = _allCommissions
+  double _calculateTotalEarnings() {
+    return _allCommissions
         .where(
           (c) =>
               c.artistId == _currentUserId &&
@@ -278,35 +101,151 @@ class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
               ].contains(c.status),
         )
         .fold(0.0, (sum, c) => sum + c.totalPrice);
+  }
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: Row(
+  bool _isUserArtist(DirectCommissionModel commission) {
+    return commission.artistId == _currentUserId;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final activeCommissions = _getCommissionsByStatus([
+      CommissionStatus.pending,
+      CommissionStatus.quoted,
+      CommissionStatus.accepted,
+      CommissionStatus.inProgress,
+    ]);
+    final pendingCommissions = _getCommissionsByStatus([
+      CommissionStatus.pending,
+      CommissionStatus.quoted,
+    ]);
+    final completedCommissions = _getCommissionsByStatus([
+      CommissionStatus.completed,
+      CommissionStatus.delivered,
+    ]);
+    final totalEarnings = _calculateTotalEarnings();
+    final totalCount = _allCommissions.length;
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      appBar: HudTopBar(
+        title: 'direct_commissions_title'.tr(),
+        glassBackground: true,
+        actions: [
+          IconButton(
+            tooltip: 'direct_commissions_refresh'.tr(),
+            icon: const Icon(Icons.refresh, color: Colors.white),
+            onPressed: _isLoading ? null : _loadCommissions,
+          ),
+        ],
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: Padding(
+        padding: EdgeInsets.fromLTRB(
+          24,
+          0,
+          24,
+          bottomPadding == 0 ? 24 : bottomPadding,
+        ),
+        child: GradientCTAButton(
+          text: 'direct_commissions_new_cta'.tr(),
+          icon: Icons.add,
+          onPressed: _isLoading ? null : _showArtistSelection,
+          isLoading: _isLoading,
+        ),
+      ),
+      body: WorldBackground(
+        child: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                child: Column(
+                  children: [
+                    _buildHeroCard(totalCount),
+                    const SizedBox(height: 16),
+                    _buildSummaryRow(
+                      active: activeCommissions.length,
+                      completed: completedCommissions.length,
+                      earnings: totalEarnings,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildTabSwitcher(
+                      active: activeCommissions.length,
+                      pending: pendingCommissions.length,
+                      completed: completedCommissions.length,
+                      total: totalCount,
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: GlassCard(
+                    padding: EdgeInsets.zero,
+                    child: _isLoading
+                        ? const Center(
+                            child: CircularProgressIndicator(
+                              color: Color(0xFF7C4DFF),
+                            ),
+                          )
+                        : TabBarView(
+                            controller: _tabController,
+                            children: [
+                              _buildCommissionList(activeCommissions),
+                              _buildCommissionList(pendingCommissions),
+                              _buildCommissionList(completedCommissions),
+                              _buildCommissionList(_allCommissions),
+                            ],
+                          ),
+                  ),
+                ),
+              ),
+              SizedBox(height: bottomPadding == 0 ? 96 : bottomPadding + 72),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeroCard(int totalCount) {
+    return GlassCard(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      showAccentGlow: true,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: _buildSummaryCard(
-              'Active',
-              activeCount.toString(),
-              Icons.pending_actions,
-              Colors.orange,
+          Text(
+            'direct_commissions_hero_title'.tr(),
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 22,
+              fontWeight: FontWeight.w900,
+              color: Colors.white,
             ),
           ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: _buildSummaryCard(
-              'Completed',
-              completedCount.toString(),
-              Icons.check_circle,
-              Colors.green,
+          const SizedBox(height: 8),
+          Text(
+            'direct_commissions_subtitle'.tr(),
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Colors.white.withValues(alpha: 0.75),
             ),
           ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: _buildSummaryCard(
-              'Earnings',
-              '\$${totalEarnings.toStringAsFixed(0)}',
-              Icons.attach_money,
-              Colors.blue,
+          const SizedBox(height: 16),
+          Text(
+            'direct_commissions_hero_total'.tr(
+              namedArgs: {'count': '$totalCount'},
+            ),
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: Colors.white.withValues(alpha: 0.7),
+              letterSpacing: 0.3,
             ),
           ),
         ],
@@ -314,27 +253,162 @@ class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
     );
   }
 
-  Widget _buildSummaryCard(
-    String title,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          children: [
-            Icon(icon, color: color, size: 24),
-            const SizedBox(height: 4),
-            Text(
-              value,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
+  Widget _buildSummaryRow({
+    required int active,
+    required int completed,
+    required double earnings,
+  }) {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildSummaryMetric(
+            icon: Icons.timeline,
+            value: '$active',
+            label: 'direct_commissions_summary_active'.tr(),
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: _buildSummaryMetric(
+            icon: Icons.verified,
+            value: '$completed',
+            label: 'direct_commissions_summary_completed'.tr(),
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: _buildSummaryMetric(
+            icon: Icons.attach_money,
+            value: _compactCurrencyFormatter.format(earnings),
+            label: 'direct_commissions_summary_earnings'.tr(),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSummaryMetric({
+    required IconData icon,
+    required String value,
+    required String label,
+  }) {
+    return GlassCard(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+      child: Row(
+        children: [
+          Container(
+            height: 44,
+            width: 44,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(22),
             ),
-            Text(title, style: Theme.of(context).textTheme.bodySmall),
+            child: Icon(icon, color: Colors.white),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  value,
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  label,
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white.withValues(alpha: 0.7),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTabSwitcher({
+    required int active,
+    required int pending,
+    required int completed,
+    required int total,
+  }) {
+    return GlassCard(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      child: TabBar(
+        controller: _tabController,
+        isScrollable: true,
+        labelColor: Colors.white,
+        unselectedLabelColor: Colors.white.withValues(alpha: 0.6),
+        labelStyle: GoogleFonts.spaceGrotesk(
+          fontSize: 13,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 0.3,
+        ),
+        unselectedLabelStyle: GoogleFonts.spaceGrotesk(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+        ),
+        indicator: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF7C4DFF), Color(0xFF22D3EE), Color(0xFF34D399)],
+          ),
+        ),
+        indicatorPadding: const EdgeInsets.symmetric(
+          vertical: 8,
+          horizontal: 4,
+        ),
+        tabs: [
+          _buildTabChip(
+            icon: Icons.pending_actions,
+            label: 'direct_commissions_tab_active'.tr(
+              namedArgs: {'count': '$active'},
+            ),
+          ),
+          _buildTabChip(
+            icon: Icons.schedule,
+            label: 'direct_commissions_tab_pending'.tr(
+              namedArgs: {'count': '$pending'},
+            ),
+          ),
+          _buildTabChip(
+            icon: Icons.check_circle,
+            label: 'direct_commissions_tab_completed'.tr(
+              namedArgs: {'count': '$completed'},
+            ),
+          ),
+          _buildTabChip(
+            icon: Icons.list,
+            label: 'direct_commissions_tab_all'.tr(
+              namedArgs: {'count': '$total'},
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Tab _buildTabChip({required IconData icon, required String label}) {
+    return Tab(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 18, color: Colors.white),
+            const SizedBox(width: 8),
+            Text(label),
           ],
         ),
       ),
@@ -342,35 +416,53 @@ class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
   }
 
   Widget _buildCommissionList(List<DirectCommissionModel> commissions) {
+    final bottomInset = MediaQuery.of(context).padding.bottom + 160;
+
     if (commissions.isEmpty) {
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.art_track, size: 64, color: Colors.grey.shade400),
-            const SizedBox(height: 16),
-            Text(
-              'No commissions found',
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(color: Colors.grey.shade600),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Start by requesting a commission from an artist',
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: Colors.grey.shade500),
-            ),
-          ],
+        child: GlassCard(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.auto_awesome,
+                size: 48,
+                color: Colors.white.withValues(alpha: 0.85),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'direct_commissions_empty_title'.tr(),
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'direct_commissions_empty_body'.tr(),
+                textAlign: TextAlign.center,
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white.withValues(alpha: 0.72),
+                ),
+              ),
+            ],
+          ),
         ),
       );
     }
 
     return RefreshIndicator(
+      color: const Color(0xFF7C4DFF),
       onRefresh: _loadCommissions,
       child: ListView.builder(
-        padding: const EdgeInsets.all(16),
+        physics: const AlwaysScrollableScrollPhysics(
+          parent: BouncingScrollPhysics(),
+        ),
+        padding: EdgeInsets.fromLTRB(8, 8, 8, bottomInset),
         itemCount: commissions.length,
         itemBuilder: (context, index) {
           final commission = commissions[index];
@@ -383,146 +475,196 @@ class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
   Widget _buildCommissionCard(DirectCommissionModel commission) {
     final isArtist = _isUserArtist(commission);
     final statusColor = _getStatusColor(commission.status);
+    final budgetValue = commission.totalPrice > 0
+        ? _currencyFormatter.format(commission.totalPrice)
+        : null;
+    final deadlineValue = commission.deadline != null
+        ? _dateFormat.format(commission.deadline!)
+        : null;
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: InkWell(
-        onTap: () => _openCommissionDetail(commission),
-        borderRadius: BorderRadius.circular(8),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          commission.title,
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          isArtist
-                              ? 'Client: ${commission.clientName}'
-                              : 'Artist: ${commission.artistName}',
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(color: Colors.grey.shade600),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: statusColor.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: statusColor.withValues(alpha: 0.3),
+    return GlassCard(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: EdgeInsets.zero,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(24),
+          onTap: () => _openCommissionDetail(commission),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            commission.title,
+                            style: GoogleFonts.spaceGrotesk(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            isArtist
+                                ? 'direct_commissions_client_label'.tr(
+                                    namedArgs: {'name': commission.clientName},
+                                  )
+                                : 'direct_commissions_artist_label'.tr(
+                                    namedArgs: {'name': commission.artistName},
+                                  ),
+                            style: GoogleFonts.spaceGrotesk(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white.withValues(alpha: 0.72),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    child: Text(
-                      commission.status.displayName,
-                      style: TextStyle(
-                        color: statusColor,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: statusColor.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(
+                          color: statusColor.withValues(alpha: 0.32),
+                        ),
+                      ),
+                      child: Text(
+                        _localizedStatus(commission.status),
+                        style: GoogleFonts.spaceGrotesk(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                          color: statusColor,
+                          letterSpacing: 0.4,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-
-              // Commission Details
-              Row(
-                children: [
-                  Icon(
-                    _getTypeIcon(commission.type),
-                    size: 16,
-                    color: Colors.grey.shade600,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    commission.type.displayName,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                  const SizedBox(width: 16),
-                  Icon(
-                    Icons.calendar_today,
-                    size: 16,
-                    color: Colors.grey.shade600,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    _formatDate(commission.requestedAt),
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-
-              // Price and Progress
-              Row(
-                children: [
-                  if (commission.totalPrice > 0) ...[
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Icon(
+                      _getTypeIcon(commission.type),
+                      size: 18,
+                      color: Colors.white.withValues(alpha: 0.75),
+                    ),
+                    const SizedBox(width: 8),
                     Text(
-                      '\$${commission.totalPrice.toStringAsFixed(2)}',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green.shade700,
+                      _localizedType(commission.type),
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white.withValues(alpha: 0.75),
                       ),
                     ),
                     const SizedBox(width: 16),
-                  ],
-                  if (commission.deadline != null) ...[
                     Icon(
-                      Icons.schedule,
-                      size: 16,
-                      color: _isDeadlineClose(commission.deadline!)
-                          ? Colors.red.shade600
-                          : Colors.grey.shade600,
+                      Icons.calendar_today,
+                      size: 18,
+                      color: Colors.white.withValues(alpha: 0.75),
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: 8),
                     Text(
-                      'Due: ${_formatDate(commission.deadline!)}',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: _isDeadlineClose(commission.deadline!)
-                            ? Colors.red.shade600
-                            : Colors.grey.shade600,
+                      'direct_commissions_requested_on'.tr(
+                        namedArgs: {
+                          'date': _formatDate(commission.requestedAt),
+                        },
+                      ),
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white.withValues(alpha: 0.75),
                       ),
                     ),
                   ],
+                ),
+                if (budgetValue != null || deadlineValue != null) ...[
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      if (budgetValue != null)
+                        _buildMetricChip(
+                          label: 'direct_commissions_price_label'.tr(),
+                          value: budgetValue,
+                          valueColor: const Color(0xFF34D399),
+                        ),
+                      if (budgetValue != null && deadlineValue != null)
+                        const SizedBox(width: 24),
+                      if (deadlineValue != null)
+                        _buildMetricChip(
+                          label: 'direct_commissions_deadline_label'.tr(),
+                          value: deadlineValue,
+                          valueColor: _isDeadlineClose(commission.deadline!)
+                              ? const Color(0xFFFF3D8D)
+                              : Colors.white,
+                        ),
+                    ],
+                  ),
                 ],
-              ),
-
-              // Progress Bar for Active Commissions
-              if ([
-                CommissionStatus.accepted,
-                CommissionStatus.inProgress,
-              ].contains(commission.status)) ...[
-                const SizedBox(height: 12),
-                _buildProgressBar(commission),
+                if (_shouldShowProgressBar(commission)) ...[
+                  const SizedBox(height: 16),
+                  _buildProgressBar(commission),
+                ],
+                if (_shouldShowActionButtons(commission)) ...[
+                  const SizedBox(height: 16),
+                  _buildActionButtons(commission),
+                ],
               ],
-
-              // Action Buttons
-              if (_shouldShowActionButtons(commission)) ...[
-                const SizedBox(height: 12),
-                _buildActionButtons(commission),
-              ],
-            ],
+            ),
           ),
         ),
       ),
     );
+  }
+
+  Widget _buildMetricChip({
+    required String label,
+    required String value,
+    Color? valueColor,
+  }) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: Colors.white.withValues(alpha: 0.7),
+              letterSpacing: 0.4,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+              color: valueColor ?? Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  bool _shouldShowProgressBar(DirectCommissionModel commission) {
+    return [
+      CommissionStatus.accepted,
+      CommissionStatus.inProgress,
+    ].contains(commission.status);
   }
 
   Widget _buildProgressBar(DirectCommissionModel commission) {
@@ -537,6 +679,7 @@ class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
     final progress = totalMilestones > 0
         ? completedMilestones / totalMilestones
         : 0.0;
+    final safeProgress = progress.isNaN ? 0.0 : progress.clamp(0.0, 1.0);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -544,19 +687,49 @@ class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Progress', style: Theme.of(context).textTheme.bodySmall),
             Text(
-              '$completedMilestones/$totalMilestones milestones',
-              style: Theme.of(context).textTheme.bodySmall,
+              'direct_commissions_progress_label'.tr(),
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: Colors.white.withValues(alpha: 0.72),
+              ),
+            ),
+            Text(
+              'direct_commissions_progress_count'.tr(
+                namedArgs: {
+                  'current': '$completedMilestones',
+                  'total': '$totalMilestones',
+                },
+              ),
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: Colors.white.withValues(alpha: 0.72),
+              ),
             ),
           ],
         ),
-        const SizedBox(height: 4),
-        LinearProgressIndicator(
-          value: progress,
-          backgroundColor: Colors.grey.shade300,
-          valueColor: const AlwaysStoppedAnimation<Color>(
-            CommunityColors.primary,
+        const SizedBox(height: 8),
+        Container(
+          height: 8,
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: FractionallySizedBox(
+            alignment: Alignment.centerLeft,
+            widthFactor: safeProgress,
+            child: Container(
+              decoration: const BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(8)),
+                gradient: LinearGradient(
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  colors: [Color(0xFF7C4DFF), Color(0xFF22D3EE)],
+                ),
+              ),
+            ),
           ),
         ),
       ],
@@ -565,43 +738,60 @@ class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
 
   Widget _buildActionButtons(DirectCommissionModel commission) {
     final isArtist = _isUserArtist(commission);
+    final buttonWidgets = <Widget>[];
 
-    return Row(
-      children: [
-        if (commission.status == CommissionStatus.pending && isArtist)
-          Expanded(
-            child: OutlinedButton.icon(
-              onPressed: () => _provideQuote(commission),
-              icon: const Icon(Icons.request_quote, size: 16),
-              label: const Text('Provide Quote'),
-            ),
+    if (commission.status == CommissionStatus.pending && isArtist) {
+      buttonWidgets.add(
+        Expanded(
+          child: HudButton.secondary(
+            onPressed: () => _provideQuote(commission),
+            text: 'direct_commissions_action_provide_quote'.tr(),
+            icon: Icons.request_quote,
+            height: 48,
           ),
-        if (commission.status == CommissionStatus.quoted && !isArtist)
-          Expanded(
-            child: ElevatedButton.icon(
-              onPressed: () => _acceptCommission(commission),
-              icon: const Icon(Icons.check, size: 16),
-              label: const Text('Accept Quote'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                foregroundColor: Colors.white,
-              ),
-            ),
+        ),
+      );
+    }
+
+    if (commission.status == CommissionStatus.quoted && !isArtist) {
+      buttonWidgets.add(
+        Expanded(
+          child: HudButton.primary(
+            onPressed: () => _acceptCommission(commission),
+            text: 'direct_commissions_action_accept_quote'.tr(),
+            icon: Icons.check,
+            height: 48,
           ),
-        if (commission.status == CommissionStatus.inProgress && isArtist)
-          Expanded(
-            child: ElevatedButton.icon(
-              onPressed: () => _markCompleted(commission),
-              icon: const Icon(Icons.done, size: 16),
-              label: const Text('Mark Complete'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: CommunityColors.primary,
-                foregroundColor: Colors.white,
-              ),
-            ),
+        ),
+      );
+    }
+
+    if (commission.status == CommissionStatus.inProgress && isArtist) {
+      buttonWidgets.add(
+        Expanded(
+          child: HudButton.primary(
+            onPressed: () => _markCompleted(commission),
+            text: 'direct_commissions_action_mark_complete'.tr(),
+            icon: Icons.done,
+            height: 48,
           ),
-      ],
-    );
+        ),
+      );
+    }
+
+    if (buttonWidgets.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final children = <Widget>[];
+    for (var i = 0; i < buttonWidgets.length; i++) {
+      children.add(buttonWidgets[i]);
+      if (i < buttonWidgets.length - 1) {
+        children.add(const SizedBox(width: 16));
+      }
+    }
+
+    return Row(children: children);
   }
 
   bool _shouldShowActionButtons(DirectCommissionModel commission) {
@@ -611,26 +801,62 @@ class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
         (commission.status == CommissionStatus.inProgress && isArtist);
   }
 
+  String _localizedStatus(CommissionStatus status) {
+    switch (status) {
+      case CommissionStatus.pending:
+        return 'commission_status_pending'.tr();
+      case CommissionStatus.quoted:
+        return 'commission_status_quoted'.tr();
+      case CommissionStatus.accepted:
+        return 'commission_status_accepted'.tr();
+      case CommissionStatus.inProgress:
+        return 'commission_status_in_progress'.tr();
+      case CommissionStatus.revision:
+        return 'commission_status_revision'.tr();
+      case CommissionStatus.completed:
+        return 'commission_status_completed'.tr();
+      case CommissionStatus.delivered:
+        return 'commission_status_delivered'.tr();
+      case CommissionStatus.cancelled:
+        return 'commission_status_cancelled'.tr();
+      case CommissionStatus.disputed:
+        return 'commission_status_disputed'.tr();
+    }
+  }
+
+  String _localizedType(CommissionType type) {
+    switch (type) {
+      case CommissionType.digital:
+        return 'commission_type_digital'.tr();
+      case CommissionType.physical:
+        return 'commission_type_physical'.tr();
+      case CommissionType.portrait:
+        return 'commission_type_portrait'.tr();
+      case CommissionType.commercial:
+        return 'commission_type_commercial'.tr();
+    }
+  }
+
   Color _getStatusColor(CommissionStatus status) {
     switch (status) {
       case CommissionStatus.pending:
-        return Colors.orange;
+        return const Color(0xFFFFC857);
       case CommissionStatus.quoted:
-        return Colors.blue;
+        return const Color(0xFF7C4DFF);
       case CommissionStatus.accepted:
-        return Colors.green;
+        return const Color(0xFF34D399);
       case CommissionStatus.inProgress:
-        return Colors.purple;
+        return const Color(0xFF22D3EE);
       case CommissionStatus.revision:
-        return Colors.amber;
+        return const Color(0xFFFF3D8D);
       case CommissionStatus.completed:
-        return Colors.green;
+        return const Color(0xFF34D399);
       case CommissionStatus.delivered:
-        return Colors.teal;
+        return const Color(0xFF22D3EE);
       case CommissionStatus.cancelled:
-        return Colors.red;
+        return const Color(0xFFFF3D8D);
       case CommissionStatus.disputed:
-        return Colors.red.shade800;
+        return const Color(0xFFFB7185);
     }
   }
 
@@ -652,14 +878,16 @@ class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
     final difference = now.difference(date);
 
     if (difference.inDays == 0) {
-      return 'Today';
+      return 'direct_commissions_date_today'.tr();
     } else if (difference.inDays == 1) {
-      return 'Yesterday';
+      return 'direct_commissions_date_yesterday'.tr();
     } else if (difference.inDays < 7) {
-      return '${difference.inDays} days ago';
-    } else {
-      return '${date.day}/${date.month}/${date.year}';
+      return 'direct_commissions_date_days_ago'.tr(
+        namedArgs: {'count': '${difference.inDays}'},
+      );
     }
+
+    return _dateFormat.format(date);
   }
 
   bool _isDeadlineClose(DateTime deadline) {
@@ -698,10 +926,10 @@ class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
       await _loadCommissions();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Quote provided successfully!'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 3),
+          SnackBar(
+            content: Text('direct_commissions_quote_success'.tr()),
+            backgroundColor: const Color(0xFF34D399),
+            duration: const Duration(seconds: 3),
           ),
         );
       }
@@ -714,16 +942,20 @@ class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
       await _loadCommissions();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Commission accepted! Proceed to payment.'),
-            backgroundColor: Colors.green,
+          SnackBar(
+            content: Text('direct_commissions_accept_success'.tr()),
+            backgroundColor: const Color(0xFF34D399),
           ),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error accepting commission: $e')),
+          SnackBar(
+            content: Text(
+              'direct_commissions_accept_error'.tr(namedArgs: {'error': '$e'}),
+            ),
+          ),
         );
       }
     }
@@ -735,16 +967,22 @@ class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
       await _loadCommissions();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Commission marked as completed!'),
-            backgroundColor: Colors.green,
+          SnackBar(
+            content: Text('direct_commissions_complete_success'.tr()),
+            backgroundColor: const Color(0xFF34D399),
           ),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error completing commission: $e')),
+          SnackBar(
+            content: Text(
+              'direct_commissions_complete_error'.tr(
+                namedArgs: {'error': '$e'},
+              ),
+            ),
+          ),
         );
       }
     }
@@ -758,131 +996,191 @@ class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
 
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Request Commission from ${selectedArtist.displayName}'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: titleController,
-                decoration: const InputDecoration(
-                  labelText: 'Commission Title',
-                  hintText: 'e.g., Portrait of my dog',
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(16),
+        child: GlassPanel(
+          padding: const EdgeInsets.all(24),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'direct_commissions_request_title'.tr(
+                    namedArgs: {'name': selectedArtist.displayName},
+                  ),
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Description',
-                  hintText: 'Describe what you want...',
+                const SizedBox(height: 16),
+                TextField(
+                  controller: titleController,
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                  decoration: GlassInputDecoration(
+                    labelText: 'direct_commissions_request_field_title_label'
+                        .tr(),
+                    hintText: 'direct_commissions_request_field_title_hint'
+                        .tr(),
+                  ),
                 ),
-                maxLines: 3,
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: budgetController,
-                decoration: const InputDecoration(
-                  labelText: 'Budget (USD)',
-                  hintText: 'e.g., 150',
+                const SizedBox(height: 16),
+                TextField(
+                  controller: descriptionController,
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                  decoration: GlassInputDecoration(
+                    labelText:
+                        'direct_commissions_request_field_description_label'
+                            .tr(),
+                    hintText:
+                        'direct_commissions_request_field_description_hint'
+                            .tr(),
+                  ),
+                  maxLines: 3,
                 ),
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: deadlineController,
-                decoration: const InputDecoration(
-                  labelText: 'Deadline',
-                  hintText: 'e.g., 2 weeks',
+                const SizedBox(height: 16),
+                TextField(
+                  controller: budgetController,
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                  decoration: GlassInputDecoration(
+                    labelText: 'direct_commissions_request_field_budget_label'
+                        .tr(),
+                    hintText: 'direct_commissions_request_field_budget_hint'
+                        .tr(),
+                  ),
+                  keyboardType: TextInputType.number,
                 ),
-              ),
-            ],
+                const SizedBox(height: 16),
+                TextField(
+                  controller: deadlineController,
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                  decoration: GlassInputDecoration(
+                    labelText: 'direct_commissions_request_field_deadline_label'
+                        .tr(),
+                    hintText: 'direct_commissions_request_field_deadline_hint'
+                        .tr(),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    HudButton.secondary(
+                      onPressed: () => Navigator.of(context).pop(),
+                      text: 'common_cancel'.tr(),
+                      height: 48,
+                    ),
+                    const SizedBox(width: 16),
+                    HudButton.primary(
+                      onPressed: () async {
+                        if (titleController.text.isEmpty ||
+                            descriptionController.text.isEmpty ||
+                            budgetController.text.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'direct_commissions_request_missing_fields'
+                                    .tr(),
+                              ),
+                              backgroundColor: const Color(0xFFFF3D8D),
+                            ),
+                          );
+                          return;
+                        }
+
+                        try {
+                          final budget =
+                              double.tryParse(budgetController.text) ?? 0.0;
+                          final deadline = _parseDeadline(
+                            deadlineController.text,
+                          );
+
+                          await _commissionService.createCommissionRequest(
+                            artistId: selectedArtist.id,
+                            artistName: selectedArtist.displayName,
+                            type: CommissionType.digital,
+                            title: titleController.text,
+                            description: descriptionController.text,
+                            specs: CommissionSpecs(
+                              size: 'Custom',
+                              medium: 'Digital',
+                              style: 'Custom',
+                              colorScheme: 'Full Color',
+                              revisions: 2,
+                              commercialUse: false,
+                              deliveryFormat: 'Digital File',
+                              customRequirements: {
+                                'budget': budget,
+                                'notes': descriptionController.text,
+                              },
+                            ),
+                            deadline: deadline,
+                            metadata: {
+                              'requestedVia': 'direct_request',
+                              'budget': budget,
+                            },
+                          );
+
+                          if (mounted) {
+                            Navigator.of(context).pop();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'direct_commissions_request_success'.tr(
+                                    namedArgs: {
+                                      'name': selectedArtist.displayName,
+                                    },
+                                  ),
+                                ),
+                                backgroundColor: const Color(0xFF34D399),
+                              ),
+                            );
+                            await _loadCommissions();
+                          }
+                        } catch (e) {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'direct_commissions_request_error'.tr(
+                                    namedArgs: {'error': '$e'},
+                                  ),
+                                ),
+                                backgroundColor: const Color(0xFFFF3D8D),
+                              ),
+                            );
+                          }
+                        }
+                      },
+                      text: 'direct_commissions_request_submit'.tr(),
+                      icon: Icons.send,
+                      height: 48,
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              if (titleController.text.isEmpty ||
-                  descriptionController.text.isEmpty ||
-                  budgetController.text.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Please fill in all required fields'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-                return;
-              }
-
-              try {
-                // Parse budget
-                final budget = double.tryParse(budgetController.text) ?? 0.0;
-
-                // Parse deadline
-                final deadline = _parseDeadline(deadlineController.text);
-
-                // Create commission request in Firestore
-                await _commissionService.createCommissionRequest(
-                  artistId: selectedArtist.id,
-                  artistName: selectedArtist.displayName,
-                  type: CommissionType
-                      .digital, // Default to digital, can be enhanced later
-                  title: titleController.text,
-                  description: descriptionController.text,
-                  specs: CommissionSpecs(
-                    size:
-                        'Custom', // Default values, can be enhanced with more fields
-                    medium: 'Digital',
-                    style: 'Custom',
-                    colorScheme: 'Full Color',
-                    revisions: 2,
-                    commercialUse: false,
-                    deliveryFormat: 'Digital File',
-                    customRequirements: {
-                      'budget': budget,
-                      'notes': descriptionController.text,
-                    },
-                  ),
-                  deadline: deadline,
-                  metadata: {
-                    'requestedVia': 'direct_request',
-                    'budget': budget,
-                  },
-                );
-
-                // ignore: use_build_context_synchronously
-                Navigator.of(context).pop();
-                if (mounted) {
-                  // ignore: use_build_context_synchronously
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Commission request sent to ${selectedArtist.displayName}!',
-                      ),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
-                  // Refresh the commissions list
-                  await _loadCommissions();
-                }
-              } catch (e) {
-                // ignore: use_build_context_synchronously
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Error creating commission request: $e'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
-            },
-            child: const Text('Send Request'),
-          ),
-        ],
       ),
     );
   }
@@ -960,6 +1258,11 @@ class _QuoteProvisionDialogState extends State<_QuoteProvisionDialog> {
   final _depositPercentageController = TextEditingController(text: '50');
   final _quoteMessageController = TextEditingController();
 
+  final intl.NumberFormat _currencyFormatter = intl.NumberFormat.currency(
+    symbol: '\$',
+  );
+  final intl.DateFormat _dateFormat = intl.DateFormat('MMM d, yyyy');
+
   // Milestones
   final List<_MilestoneData> _milestones = [];
 
@@ -1025,9 +1328,9 @@ class _QuoteProvisionDialogState extends State<_QuoteProvisionDialog> {
 
     if (_estimatedCompletion == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select an estimated completion date'),
-          backgroundColor: Colors.red,
+        SnackBar(
+          content: Text('direct_commissions_quote_missing_date'.tr()),
+          backgroundColor: const Color(0xFFFF3D8D),
         ),
       );
       return;
@@ -1035,21 +1338,24 @@ class _QuoteProvisionDialogState extends State<_QuoteProvisionDialog> {
 
     if (_milestones.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please add at least one milestone'),
-          backgroundColor: Colors.red,
+        SnackBar(
+          content: Text('direct_commissions_quote_missing_milestone'.tr()),
+          backgroundColor: const Color(0xFFFF3D8D),
         ),
       );
       return;
     }
 
-    // Validate all milestones
     for (int i = 0; i < _milestones.length; i++) {
       if (!_milestones[i].validate()) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Please complete milestone ${i + 1}'),
-            backgroundColor: Colors.red,
+            content: Text(
+              'direct_commissions_quote_missing_milestone_fields'.tr(
+                namedArgs: {'index': '${i + 1}'},
+              ),
+            ),
+            backgroundColor: const Color(0xFFFF3D8D),
           ),
         );
         return;
@@ -1094,8 +1400,10 @@ class _QuoteProvisionDialogState extends State<_QuoteProvisionDialog> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error providing quote: $e'),
-            backgroundColor: Colors.red,
+            content: Text(
+              'direct_commissions_quote_error'.tr(namedArgs: {'error': '$e'}),
+            ),
+            backgroundColor: const Color(0xFFFF3D8D),
           ),
         );
       }
@@ -1117,300 +1425,348 @@ class _QuoteProvisionDialogState extends State<_QuoteProvisionDialog> {
         : 0.0;
 
     return Dialog(
-      child: Container(
-        constraints: const BoxConstraints(maxWidth: 600, maxHeight: 700),
-        child: Column(
-          children: [
-            // Header
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: const BoxDecoration(
-                color: CommunityColors.primary,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(4),
-                  topRight: Radius.circular(4),
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.all(16),
+      child: GlassPanel(
+        padding: EdgeInsets.zero,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 720, maxHeight: 760),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 20,
+                ),
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF7C4DFF), Color(0xFF22D3EE)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(28),
+                    topRight: Radius.circular(28),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.request_quote, color: Colors.white),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'direct_commissions_quote_title'.tr(),
+                            style: GoogleFonts.spaceGrotesk(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'direct_commissions_quote_for_client'.tr(
+                              namedArgs: {'name': widget.commission.clientName},
+                            ),
+                            style: GoogleFonts.spaceGrotesk(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white.withValues(alpha: 0.8),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close, color: Colors.white),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
                 ),
               ),
-              child: Row(
-                children: [
-                  const Icon(Icons.request_quote, color: Colors.white),
-                  const SizedBox(width: 12),
-                  Expanded(
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(24),
+                  child: Form(
+                    key: _formKey,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Provide Quote',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          'For: ${widget.commission.clientName}',
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                ],
-              ),
-            ),
-
-            // Form content
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Commission details
-                      Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
+                        GlassCard(
+                          padding: const EdgeInsets.all(16),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 widget.commission.title,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
+                                style: GoogleFonts.spaceGrotesk(
                                   fontSize: 16,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.white,
                                 ),
                               ),
                               const SizedBox(height: 8),
                               Text(
                                 widget.commission.description,
-                                style: const TextStyle(fontSize: 14),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Pricing section
-                      const Text(
-                        'Pricing',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextFormField(
-                              controller: _totalPriceController,
-                              decoration: const InputDecoration(
-                                labelText: 'Total Price',
-                                prefixText: '\$',
-                                border: OutlineInputBorder(),
-                              ),
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                    decimal: true,
-                                  ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Required';
-                                }
-                                if (double.tryParse(value) == null) {
-                                  return 'Invalid number';
-                                }
-                                if (double.parse(value) <= 0) {
-                                  return 'Must be > 0';
-                                }
-                                return null;
-                              },
-                              onChanged: (_) => setState(() {}),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: TextFormField(
-                              controller: _depositPercentageController,
-                              decoration: const InputDecoration(
-                                labelText: 'Deposit %',
-                                suffixText: '%',
-                                border: OutlineInputBorder(),
-                              ),
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                    decimal: true,
-                                  ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Required';
-                                }
-                                final num = double.tryParse(value);
-                                if (num == null) {
-                                  return 'Invalid';
-                                }
-                                if (num < 0 || num > 100) {
-                                  return '0-100';
-                                }
-                                return null;
-                              },
-                              onChanged: (_) => setState(() {}),
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (depositAmount > 0) ...[
-                        const SizedBox(height: 8),
-                        Text(
-                          'Deposit: \$${depositAmount.toStringAsFixed(2)}',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey,
-                          ),
-                        ),
-                      ],
-                      const SizedBox(height: 16),
-
-                      // Estimated completion
-                      const Text(
-                        'Estimated Completion',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      InkWell(
-                        onTap: _selectEstimatedCompletion,
-                        child: Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.calendar_today, size: 20),
-                              const SizedBox(width: 12),
-                              Text(
-                                _estimatedCompletion != null
-                                    ? '${_estimatedCompletion!.month}/${_estimatedCompletion!.day}/${_estimatedCompletion!.year}'
-                                    : 'Select date',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: _estimatedCompletion != null
-                                      ? Colors.black
-                                      : Colors.grey,
+                                style: GoogleFonts.spaceGrotesk(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white.withValues(alpha: 0.8),
                                 ),
                               ),
                             ],
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Milestones section
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'Milestones',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
+                        const SizedBox(height: 24),
+                        Text(
+                          'direct_commissions_quote_section_pricing'.tr(),
+                          style: GoogleFonts.spaceGrotesk(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                controller: _totalPriceController,
+                                style: GoogleFonts.spaceGrotesk(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                                decoration: GlassInputDecoration(
+                                  labelText:
+                                      'direct_commissions_quote_total_label'
+                                          .tr(),
+                                  prefix: Text(
+                                    '\$ ',
+                                    style: GoogleFonts.spaceGrotesk(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(
+                                      decimal: true,
+                                    ),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'direct_commissions_form_error_required'
+                                        .tr();
+                                  }
+                                  if (double.tryParse(value) == null) {
+                                    return 'direct_commissions_form_error_number'
+                                        .tr();
+                                  }
+                                  if (double.parse(value) <= 0) {
+                                    return 'direct_commissions_form_error_positive'
+                                        .tr();
+                                  }
+                                  return null;
+                                },
+                                onChanged: (_) => setState(() {}),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: TextFormField(
+                                controller: _depositPercentageController,
+                                style: GoogleFonts.spaceGrotesk(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                                decoration: GlassInputDecoration(
+                                  labelText:
+                                      'direct_commissions_quote_deposit_label'
+                                          .tr(),
+                                  suffixText: '%',
+                                ),
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(
+                                      decimal: true,
+                                    ),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'direct_commissions_form_error_required'
+                                        .tr();
+                                  }
+                                  final num = double.tryParse(value);
+                                  if (num == null) {
+                                    return 'direct_commissions_form_error_number'
+                                        .tr();
+                                  }
+                                  if (num < 0 || num > 100) {
+                                    return 'direct_commissions_form_error_range'
+                                        .tr();
+                                  }
+                                  return null;
+                                },
+                                onChanged: (_) => setState(() {}),
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (depositAmount > 0) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            'direct_commissions_quote_deposit_value'.tr(
+                              namedArgs: {
+                                'amount': _currencyFormatter.format(
+                                  depositAmount,
+                                ),
+                              },
+                            ),
+                            style: GoogleFonts.spaceGrotesk(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white.withValues(alpha: 0.75),
                             ),
                           ),
-                          TextButton.icon(
-                            onPressed: _addMilestone,
-                            icon: const Icon(Icons.add),
-                            label: const Text('Add Milestone'),
-                          ),
                         ],
-                      ),
-                      const SizedBox(height: 8),
-                      ...List.generate(_milestones.length, (index) {
-                        return _MilestoneCard(
-                          milestone: _milestones[index],
-                          index: index,
-                          onRemove: _milestones.length > 1
-                              ? () => _removeMilestone(index)
-                              : null,
-                        );
-                      }),
-                      const SizedBox(height: 16),
-
-                      // Quote message (optional)
-                      const Text(
-                        'Message to Client (Optional)',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                        const SizedBox(height: 24),
+                        Text(
+                          'direct_commissions_quote_estimated_label'.tr(),
+                          style: GoogleFonts.spaceGrotesk(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      TextFormField(
-                        controller: _quoteMessageController,
-                        decoration: const InputDecoration(
-                          hintText: 'Add any additional details or notes...',
-                          border: OutlineInputBorder(),
+                        const SizedBox(height: 16),
+                        GestureDetector(
+                          onTap: _selectEstimatedCompletion,
+                          child: GlassCard(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 16,
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.calendar_today,
+                                  size: 20,
+                                  color: Colors.white.withValues(alpha: 0.85),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Text(
+                                    _estimatedCompletion != null
+                                        ? _dateFormat.format(
+                                            _estimatedCompletion!,
+                                          )
+                                        : 'direct_commissions_quote_estimated_placeholder'
+                                              .tr(),
+                                    style: GoogleFonts.spaceGrotesk(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                                const Icon(
+                                  Icons.chevron_right,
+                                  color: Colors.white,
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                        maxLines: 3,
-                      ),
-                    ],
+                        const SizedBox(height: 24),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'direct_commissions_quote_milestones_label'.tr(),
+                              style: GoogleFonts.spaceGrotesk(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                              ),
+                            ),
+                            HudButton.secondary(
+                              onPressed: _addMilestone,
+                              text: 'direct_commissions_quote_add_milestone'
+                                  .tr(),
+                              icon: Icons.add,
+                              height: 44,
+                              width: 200,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        ...List.generate(_milestones.length, (index) {
+                          return _MilestoneCard(
+                            milestone: _milestones[index],
+                            index: index,
+                            onRemove: _milestones.length > 1
+                                ? () => _removeMilestone(index)
+                                : null,
+                          );
+                        }),
+                        const SizedBox(height: 24),
+                        Text(
+                          'direct_commissions_quote_message_label'.tr(),
+                          style: GoogleFonts.spaceGrotesk(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _quoteMessageController,
+                          style: GoogleFonts.spaceGrotesk(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                          decoration: GlassInputDecoration(
+                            hintText: 'direct_commissions_quote_message_hint'
+                                .tr(),
+                          ),
+                          maxLines: 3,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-
-            // Footer with actions
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                border: Border(top: BorderSide(color: Colors.grey[300]!)),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: _isSubmitting
-                        ? null
-                        : () => Navigator.of(context).pop(),
-                    child: const Text('Cancel'),
-                  ),
-                  const SizedBox(width: 12),
-                  ElevatedButton(
-                    onPressed: _isSubmitting ? null : _submitQuote,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: CommunityColors.primary,
-                      foregroundColor: Colors.white,
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: HudButton.secondary(
+                        onPressed: _isSubmitting
+                            ? null
+                            : () => Navigator.of(context).pop(),
+                        text: 'common_cancel'.tr(),
+                        height: 52,
+                      ),
                     ),
-                    child: _isSubmitting
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.white,
-                              ),
-                            ),
-                          )
-                        : const Text('Submit Quote'),
-                  ),
-                ],
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: HudButton.primary(
+                        onPressed: _isSubmitting ? null : _submitQuote,
+                        text: 'direct_commissions_quote_submit'.tr(),
+                        icon: Icons.send,
+                        height: 52,
+                        isLoading: _isSubmitting,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -1456,6 +1812,8 @@ class _MilestoneCard extends StatefulWidget {
 }
 
 class _MilestoneCardState extends State<_MilestoneCard> {
+  final intl.DateFormat _milestoneDateFormat = intl.DateFormat('MMM d, yyyy');
+
   Future<void> _selectDueDate() async {
     final now = DateTime.now();
     final picked = await showDatePicker(
@@ -1474,114 +1832,139 @@ class _MilestoneCardState extends State<_MilestoneCard> {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Text(
-                  'Milestone ${widget.index + 1}',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
+    return GlassCard(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                'direct_commissions_milestone_label'.tr(
+                  namedArgs: {'index': '${widget.index + 1}'},
+                ),
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                ),
+              ),
+              const Spacer(),
+              if (widget.onRemove != null)
+                IconButton(
+                  icon: const Icon(
+                    Icons.delete,
+                    size: 20,
+                    color: Color(0xFFFF3D8D),
+                  ),
+                  onPressed: widget.onRemove,
+                ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: widget.milestone.titleController,
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+            decoration: GlassInputDecoration(
+              labelText: 'direct_commissions_milestone_title_label'.tr(),
+              isDense: true,
+            ),
+            validator: (value) => value?.isEmpty ?? true
+                ? 'direct_commissions_form_error_required'.tr()
+                : null,
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: widget.milestone.descriptionController,
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+            decoration: GlassInputDecoration(
+              labelText: 'direct_commissions_milestone_description_label'.tr(),
+              isDense: true,
+            ),
+            maxLines: 2,
+            validator: (value) => value?.isEmpty ?? true
+                ? 'direct_commissions_form_error_required'.tr()
+                : null,
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: widget.milestone.amountController,
+                  style: GoogleFonts.spaceGrotesk(
                     fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
                   ),
+                  decoration: GlassInputDecoration(
+                    labelText: 'direct_commissions_milestone_amount_label'.tr(),
+                    prefixText: '\$ ',
+                    isDense: true,
+                  ),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'direct_commissions_form_error_required'.tr();
+                    }
+                    if (double.tryParse(value) == null) {
+                      return 'direct_commissions_form_error_number'.tr();
+                    }
+                    return null;
+                  },
                 ),
-                const Spacer(),
-                if (widget.onRemove != null)
-                  IconButton(
-                    icon: const Icon(Icons.delete, size: 20),
-                    onPressed: widget.onRemove,
-                    color: Colors.red,
-                  ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            TextFormField(
-              controller: widget.milestone.titleController,
-              decoration: const InputDecoration(
-                labelText: 'Title',
-                border: OutlineInputBorder(),
-                isDense: true,
               ),
-              validator: (value) => value?.isEmpty ?? true ? 'Required' : null,
-            ),
-            const SizedBox(height: 8),
-            TextFormField(
-              controller: widget.milestone.descriptionController,
-              decoration: const InputDecoration(
-                labelText: 'Description',
-                border: OutlineInputBorder(),
-                isDense: true,
-              ),
-              maxLines: 2,
-              validator: (value) => value?.isEmpty ?? true ? 'Required' : null,
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: widget.milestone.amountController,
-                    decoration: const InputDecoration(
-                      labelText: 'Amount',
-                      prefixText: '\$',
-                      border: OutlineInputBorder(),
-                      isDense: true,
+              const SizedBox(width: 16),
+              Expanded(
+                child: GestureDetector(
+                  onTap: _selectDueDate,
+                  child: GlassCard(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 16,
                     ),
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Required';
-                      }
-                      if (double.tryParse(value) == null) {
-                        return 'Invalid';
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: InkWell(
-                    onTap: _selectDueDate,
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.calendar_today, size: 16),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              widget.milestone.dueDate != null
-                                  ? '${widget.milestone.dueDate!.month}/${widget.milestone.dueDate!.day}/${widget.milestone.dueDate!.year}'
-                                  : 'Due date',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: widget.milestone.dueDate != null
-                                    ? Colors.black
-                                    : Colors.grey,
-                              ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.calendar_today,
+                          size: 18,
+                          color: Colors.white.withValues(alpha: 0.85),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            widget.milestone.dueDate != null
+                                ? _milestoneDateFormat.format(
+                                    widget.milestone.dueDate!,
+                                  )
+                                : 'direct_commissions_milestone_due_placeholder'
+                                      .tr(),
+                            style: GoogleFonts.spaceGrotesk(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-              ],
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

@@ -1,4 +1,5 @@
 const { onRequest } = require("firebase-functions/v2/https");
+const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { setGlobalOptions } = require("firebase-functions/v2");
 const admin = require("firebase-admin");
 const { defineSecret } = require("firebase-functions/params");
@@ -1869,3 +1870,451 @@ function getAppleErrorMessage(statusCode) {
 
   return errorMessages[statusCode] || `Unknown error code: ${statusCode}`;
 }
+
+/**
+ * Place a bid on an auction artwork
+ */
+exports.placeBid = onRequest((request, response) => {
+  cors(request, response, async () => {
+    try {
+      // Only allow POST requests
+      if (request.method !== "POST") {
+        return response.status(405).send({ error: "Method not allowed" });
+      }
+
+      // Verify authentication
+      if (!request.auth) {
+        return response.status(401).send({ error: "Authentication required" });
+      }
+
+      const { artworkId, amount } = request.body;
+      const userId = request.auth.uid;
+
+      if (!artworkId || !amount) {
+        return response.status(400).send({ error: "Missing required fields" });
+      }
+
+      const bidAmount = parseFloat(amount);
+      if (isNaN(bidAmount) || bidAmount <= 0) {
+        return response.status(400).send({ error: "Invalid bid amount" });
+      }
+
+      // Get artwork data
+      const artworkRef = admin
+        .firestore()
+        .collection("artworks")
+        .doc(artworkId);
+      const artworkDoc = await artworkRef.get();
+
+      if (!artworkDoc.exists) {
+        return response.status(404).send({ error: "Artwork not found" });
+      }
+
+      const artwork = artworkDoc.data();
+
+      // Validate auction is active
+      if (!artwork.auctionEnabled || artwork.auctionStatus !== "open") {
+        return response.status(400).send({ error: "Auction is not active" });
+      }
+
+      // Check if auction has ended
+      if (artwork.auctionEnd && artwork.auctionEnd.toDate() < new Date()) {
+        return response.status(400).send({ error: "Auction has ended" });
+      }
+
+      // Check if user is the artist
+      if (artwork.userId === userId) {
+        return response
+          .status(400)
+          .send({ error: "Cannot bid on own artwork" });
+      }
+
+      // Get current highest bid
+      const currentHighestBid =
+        artwork.currentHighestBid || artwork.startingPrice || 0;
+
+      // Validate bid amount
+      if (bidAmount <= currentHighestBid) {
+        return response.status(400).send({
+          error: `Bid must be higher than current highest bid of \$${currentHighestBid}`,
+        });
+      }
+
+      // Create bid document
+      const bidRef = artworkRef.collection("bids").doc();
+      const bidData = {
+        userId: userId,
+        amount: bidAmount,
+        timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      };
+
+      // Update artwork with new highest bid
+      const artworkUpdate = {
+        currentHighestBid: bidAmount,
+        currentHighestBidder: userId,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      };
+
+      // Use transaction to ensure atomicity
+      await admin.firestore().runTransaction(async (transaction) => {
+        // Check current state again (optimistic locking)
+        const currentArtwork = await transaction.get(artworkRef);
+        if (!currentArtwork.exists) {
+          throw new Error("Artwork no longer exists");
+        }
+
+        const currentData = currentArtwork.data();
+        const currentHighest =
+          currentData.currentHighestBid || currentData.startingPrice || 0;
+
+        if (bidAmount <= currentHighest) {
+          throw new Error(`Bid must be higher than \$${currentHighest}`);
+        }
+
+        // Add the bid
+        transaction.set(bidRef, bidData);
+
+        // Update artwork
+        transaction.update(artworkRef, artworkUpdate);
+      });
+
+      console.log(
+        `✅ Bid placed: User ${userId} bid \$${bidAmount} on artwork ${artworkId}`
+      );
+
+      response.status(200).send({
+        success: true,
+        bidId: bidRef.id,
+        amount: bidAmount,
+        timestamp: new Date(),
+      });
+    } catch (error) {
+      console.error("❌ Error placing bid:", error);
+      response.status(500).send({
+        error: error.message || "Failed to place bid",
+      });
+    }
+  });
+});
+
+/**
+ * Close auctions that have ended
+ * Runs every minute to check for ended auctions
+ */
+exports.closeAuction = onSchedule("every 1 minutes", async (event) => {
+  try {
+    console.log("🔨 Checking for auctions to close...");
+
+    const now = new Date();
+
+    // Query artworks with active auctions that have ended
+    const endedAuctionsQuery = admin
+      .firestore()
+      .collection("artworks")
+      .where("auctionEnabled", "==", true)
+      .where("auctionStatus", "==", "open")
+      .where("auctionEnd", "<=", now);
+
+    const endedAuctionsSnapshot = await endedAuctionsQuery.get();
+
+    if (endedAuctionsSnapshot.empty) {
+      console.log("✅ No auctions to close");
+      return;
+    }
+
+    console.log(
+      `📊 Found ${endedAuctionsSnapshot.docs.length} auctions to close`
+    );
+
+    const batch = admin.firestore().batch();
+
+    for (const artworkDoc of endedAuctionsSnapshot.docs) {
+      const artworkId = artworkDoc.id;
+      const artwork = artworkDoc.data();
+
+      console.log(`🔒 Closing auction for artwork: ${artworkId}`);
+
+      const currentHighestBid = artwork.currentHighestBid || 0;
+      const reservePrice = artwork.reservePrice || 0;
+      const startingPrice = artwork.startingPrice || 0;
+
+      let winner = null;
+      let finalPrice = 0;
+      let status = "no_sale";
+
+      if (currentHighestBid >= reservePrice && currentHighestBid > 0) {
+        winner = artwork.currentHighestBidder;
+        finalPrice = currentHighestBid;
+        status = "sold";
+      } else if (reservePrice > 0 && currentHighestBid < reservePrice) {
+        // Reserve not met
+        status = "reserve_not_met";
+      }
+
+      // Create auction result document
+      const resultRef = admin
+        .firestore()
+        .collection("artworks")
+        .doc(artworkId)
+        .collection("auction_results")
+        .doc();
+
+      const resultData = {
+        artworkId: artworkId,
+        artistId: artwork.userId,
+        winnerId: winner,
+        finalPrice: finalPrice,
+        reservePrice: reservePrice,
+        startingPrice: startingPrice,
+        status: status,
+        closedAt: admin.firestore.FieldValue.serverTimestamp(),
+        auctionEnd: artwork.auctionEnd,
+      };
+
+      batch.set(resultRef, resultData);
+
+      // Update artwork status
+      const artworkUpdate = {
+        auctionStatus: "closed",
+        winnerId: winner,
+        finalPrice: finalPrice,
+        closedAt: admin.firestore.FieldValue.serverTimestamp(),
+      };
+
+      batch.update(artworkDoc.ref, artworkUpdate);
+
+      // Create notifications
+      if (winner) {
+        // Notify winner
+        const winnerNotificationRef = admin
+          .firestore()
+          .collection("notifications")
+          .doc();
+        batch.set(winnerNotificationRef, {
+          userId: winner,
+          type: "auction_won",
+          title: "You won an auction!",
+          message: `Congratulations! You won the auction for "${artwork.title}" by ${artwork.artistName}.`,
+          artworkId: artworkId,
+          read: false,
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+      }
+
+      // Notify artist
+      const artistNotificationRef = admin
+        .firestore()
+        .collection("notifications")
+        .doc();
+      const artistMessage = winner
+        ? `Your artwork "${artwork.title}" was sold for \$${finalPrice}!`
+        : `The auction for "${artwork.title}" ended without meeting the reserve price.`;
+      batch.set(artistNotificationRef, {
+        userId: artwork.userId,
+        type: winner ? "auction_sold" : "auction_ended",
+        title: winner ? "Artwork sold!" : "Auction ended",
+        message: artistMessage,
+        artworkId: artworkId,
+        read: false,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+    }
+
+    await batch.commit();
+
+    console.log(
+      `✅ Successfully closed ${endedAuctionsSnapshot.docs.length} auctions`
+    );
+  } catch (error) {
+    console.error("❌ Error closing auctions:", error);
+  }
+});
+
+/**
+ * Submit Art Battle Vote
+ */
+exports.submitArtBattleVote = onRequest((request, response) => {
+  cors(request, response, async () => {
+    try {
+      // Only allow POST requests
+      if (request.method !== "POST") {
+        return response.status(405).json({ error: "Method not allowed" });
+      }
+
+      // Validate authentication
+      const authHeader = request.headers.authorization;
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return response.status(401).json({ error: "Unauthorized" });
+      }
+
+      const idToken = authHeader.split("Bearer ")[1];
+      let decodedToken;
+      try {
+        decodedToken = await admin.auth().verifyIdToken(idToken);
+      } catch (error) {
+        return response.status(401).json({ error: "Invalid token" });
+      }
+
+      const userId = decodedToken.uid;
+      const { battleId, artworkIdChosen } = request.body;
+
+      if (!battleId || !artworkIdChosen) {
+        return response.status(400).json({ error: "Missing required fields" });
+      }
+
+      // Get the battle
+      const battleDoc = await admin
+        .firestore()
+        .collection("art_battles")
+        .doc(battleId)
+        .get();
+      if (!battleDoc.exists) {
+        return response.status(404).json({ error: "Battle not found" });
+      }
+
+      const battle = battleDoc.data();
+      if (battle.winnerArtworkId) {
+        return response.status(400).json({ error: "Battle already completed" });
+      }
+
+      // Validate chosen artwork is in the battle
+      if (
+        artworkIdChosen !== battle.artworkAId &&
+        artworkIdChosen !== battle.artworkBId
+      ) {
+        return response.status(400).json({ error: "Invalid artwork choice" });
+      }
+
+      // Enhanced rate limiting and anti-abuse
+      const now = Date.now();
+      const tenSecondsAgo = now - 10000;
+      const oneHourAgo = now - 3600000;
+
+      // Check for rapid voting (last 10 seconds)
+      const recentVotesQuery = await admin
+        .firestore()
+        .collection("art_battle_votes")
+        .where("userId", "==", userId)
+        .where(
+          "timestamp",
+          ">",
+          admin.firestore.Timestamp.fromMillis(tenSecondsAgo)
+        )
+        .limit(1)
+        .get();
+
+      if (!recentVotesQuery.empty) {
+        return response
+          .status(429)
+          .json({ error: "Please wait before voting again" });
+      }
+
+      // Check for excessive voting (more than 50 votes in last hour)
+      const hourlyVotesQuery = await admin
+        .firestore()
+        .collection("art_battle_votes")
+        .where("userId", "==", userId)
+        .where(
+          "timestamp",
+          ">",
+          admin.firestore.Timestamp.fromMillis(oneHourAgo)
+        )
+        .get();
+
+      if (hourlyVotesQuery.docs.length >= 50) {
+        return response
+          .status(429)
+          .json({ error: "Voting limit reached for today" });
+      }
+
+      // Check for repetitive voting patterns (same artwork multiple times)
+      const recentArtworkVotes = await admin
+        .firestore()
+        .collection("art_battle_votes")
+        .where("userId", "==", userId)
+        .where("artworkIdChosen", "==", artworkIdChosen)
+        .where(
+          "timestamp",
+          ">",
+          admin.firestore.Timestamp.fromMillis(oneHourAgo)
+        )
+        .get();
+
+      // Reduce vote weight if user has voted for same artwork multiple times recently
+      let voteWeight = 1;
+      if (recentArtworkVotes.docs.length > 5) {
+        voteWeight = 0.5; // Reduce influence of repetitive voting
+      } else if (recentArtworkVotes.docs.length > 10) {
+        voteWeight = 0.2; // Further reduce for excessive repetition
+      }
+
+      // Update battle with winner
+      await admin.firestore().collection("art_battles").doc(battleId).update({
+        winnerArtworkId: artworkIdChosen,
+      });
+
+      // Update winner artwork
+      const winnerDoc = await admin
+        .firestore()
+        .collection("artworks")
+        .doc(artworkIdChosen)
+        .get();
+      if (winnerDoc.exists) {
+        const winnerData = winnerDoc.data();
+        const currentScore = winnerData.artBattleScore || 0;
+        const currentWins = winnerData.artBattleWins || 0;
+        const currentAppearances = winnerData.artBattleAppearances || 0;
+
+        await admin
+          .firestore()
+          .collection("artworks")
+          .doc(artworkIdChosen)
+          .update({
+            artBattleScore: currentScore + voteWeight,
+            artBattleWins: currentWins + 1,
+            artBattleAppearances: currentAppearances + 1,
+            artBattleLastWinAt: admin.firestore.FieldValue.serverTimestamp(),
+            artBattleLastShownAt: admin.firestore.FieldValue.serverTimestamp(),
+          });
+      }
+
+      // Update loser artwork
+      const loserId =
+        battle.artworkAId === artworkIdChosen
+          ? battle.artworkBId
+          : battle.artworkAId;
+      const loserDoc = await admin
+        .firestore()
+        .collection("artworks")
+        .doc(loserId)
+        .get();
+      if (loserDoc.exists) {
+        const loserData = loserDoc.data();
+        const currentAppearances = loserData.artBattleAppearances || 0;
+
+        await admin
+          .firestore()
+          .collection("artworks")
+          .doc(loserId)
+          .update({
+            artBattleAppearances: currentAppearances + 1,
+            artBattleLastShownAt: admin.firestore.FieldValue.serverTimestamp(),
+          });
+      }
+
+      // Record the vote
+      await admin.firestore().collection("art_battle_votes").add({
+        battleId,
+        artworkIdChosen,
+        userId,
+        timestamp: admin.firestore.FieldValue.serverTimestamp(),
+        voteWeight,
+      });
+
+      response.json({ success: true });
+    } catch (error) {
+      console.error("Error submitting art battle vote:", error);
+      response.status(500).json({ error: "Internal server error" });
+    }
+  });
+});

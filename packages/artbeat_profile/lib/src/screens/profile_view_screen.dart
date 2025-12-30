@@ -6,7 +6,6 @@ import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_capture/artbeat_capture.dart' as capture;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_profile/src/widgets/design_system.dart';
-import 'package:artbeat_profile/src/widgets/hud_top_bar.dart';
 import 'package:artbeat_profile/src/widgets/glass_card.dart';
 import 'package:artbeat_profile/src/widgets/recent_badges_carousel.dart';
 import 'package:artbeat_profile/src/widgets/dynamic_achievements_tab.dart';
@@ -325,12 +324,12 @@ class _ProfileViewScreenState extends State<ProfileViewScreen>
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return MainLayout(
+      return const MainLayout(
         currentIndex: -1,
         child: WorldBackground(
           child: Scaffold(
             backgroundColor: Colors.transparent,
-            body: const Center(
+            body: Center(
               child: CircularProgressIndicator(
                 strokeWidth: 3,
                 valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF22D3EE)),

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../models/post_model.dart';
 import '../services/community_service.dart';
-import '../theme/community_colors.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:artbeat_community/widgets/glass_card.dart';
+import 'package:artbeat_community/widgets/hud_button.dart';
 
 /// Horizontal scrolling slider displaying art awaiting critique
 class ArtCritiqueSlider extends StatefulWidget {
@@ -68,47 +71,17 @@ class _ArtCritiqueSliderState extends State<ArtCritiqueSlider> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Art to Critique',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: ArtbeatColors.primary,
+                'art_critique_slider_title'.tr(),
+                style: GoogleFonts.spaceGrotesk(
+                  fontWeight: FontWeight.w900,
+                  fontSize: 18,
+                  color: Colors.white.withValues(alpha: 0.92),
                 ),
               ),
-              if (widget.onViewAllPressed != null)
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: CommunityColors.communityGradient,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.2),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: ElevatedButton(
-                    onPressed: widget.onViewAllPressed,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      shadowColor: Colors.transparent,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
-                    child: const Text(
-                      'View All',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
+              HudButton(
+                text: 'view_all'.tr(),
+                onPressed: widget.onViewAllPressed,
+              ),
             ],
           ),
         ),
@@ -134,13 +107,11 @@ class _ArtCritiqueSliderState extends State<ArtCritiqueSlider> {
       itemBuilder: (context, index) {
         return Container(
           width: 160,
-          margin: const EdgeInsets.only(right: 12.0),
-          child: Card(
-            elevation: 2,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Column(
+          height: 200,
+          margin: const EdgeInsets.only(right: 16),
+          child: const GlassCard(
+            padding: EdgeInsets.zero,
+            child: Column(
               children: [
                 Expanded(child: Center(child: CircularProgressIndicator())),
                 Padding(
@@ -160,16 +131,28 @@ class _ArtCritiqueSliderState extends State<ArtCritiqueSlider> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.palette_outlined, size: 48, color: Colors.grey.shade400),
+          Icon(
+            Icons.palette_outlined,
+            size: 48,
+            color: Colors.white.withValues(alpha: 0.45),
+          ),
           const SizedBox(height: 8),
           Text(
-            'No art awaiting critique',
-            style: TextStyle(color: Colors.grey.shade600, fontSize: 16),
+            'art_critique_empty_title'.tr(),
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white.withValues(alpha: 0.7),
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+            ),
           ),
           const SizedBox(height: 4),
           Text(
-            'Check back later for new submissions',
-            style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+            'art_critique_empty_subtitle'.tr(),
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white.withValues(alpha: 0.45),
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ],
       ),
@@ -191,13 +174,13 @@ class _ArtCritiqueSliderState extends State<ArtCritiqueSlider> {
   Widget _buildArtCard(PostModel post) {
     return Container(
       width: 160,
-      margin: const EdgeInsets.only(right: 12.0),
-      child: Card(
-        elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      height: 200,
+      margin: const EdgeInsets.only(right: 16),
+      child: GlassCard(
+        padding: EdgeInsets.zero,
         child: InkWell(
           onTap: () => widget.onPostSelected?.call(post),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -205,7 +188,7 @@ class _ArtCritiqueSliderState extends State<ArtCritiqueSlider> {
               Expanded(
                 child: ClipRRect(
                   borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(12),
+                    top: Radius.circular(24),
                   ),
                   child: post.imageUrls.isNotEmpty
                       ? ImageManagementService().getOptimizedImage(
@@ -234,30 +217,32 @@ class _ArtCritiqueSliderState extends State<ArtCritiqueSlider> {
 
               // Content section
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       post.content.isNotEmpty
                           ? post.content
-                          : 'Untitled artwork',
-                      style: const TextStyle(
+                          : 'untitled_artwork'.tr(),
+                      style: GoogleFonts.spaceGrotesk(
                         fontSize: 12,
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white.withValues(alpha: 0.92),
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
                           '@${post.authorUsername}',
-                          style: TextStyle(
+                          style: GoogleFonts.spaceGrotesk(
                             fontSize: 10,
-                            color: Colors.grey.shade600,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white.withValues(alpha: 0.7),
                           ),
                         ),
                         Row(
@@ -265,14 +250,15 @@ class _ArtCritiqueSliderState extends State<ArtCritiqueSlider> {
                             Icon(
                               Icons.comment_outlined,
                               size: 12,
-                              color: Colors.grey.shade600,
+                              color: Colors.white.withValues(alpha: 0.45),
                             ),
-                            const SizedBox(width: 2),
+                            const SizedBox(width: 4),
                             Text(
                               '${post.commentCount}',
-                              style: TextStyle(
+                              style: GoogleFonts.spaceGrotesk(
                                 fontSize: 10,
-                                color: Colors.grey.shade600,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white.withValues(alpha: 0.45),
                               ),
                             ),
                           ],

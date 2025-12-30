@@ -1,5 +1,8 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'artist_profile_edit_screen.dart';
@@ -79,11 +82,13 @@ class _Modern2025OnboardingScreenState extends State<Modern2025OnboardingScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: ArtbeatColors.backgroundDark,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black87),
+          icon: Icon(Icons.arrow_back_ios,
+              color: Colors.white.withValues(alpha: 0.92)),
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
@@ -91,8 +96,8 @@ class _Modern2025OnboardingScreenState extends State<Modern2025OnboardingScreen>
             onPressed: () => Navigator.of(context).pop(),
             child: Text(
               tr('art_walk_skip'),
-              style: TextStyle(
-                color: Colors.grey.shade600,
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white.withValues(alpha: 0.7),
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
               ),
@@ -130,22 +135,36 @@ class _Modern2025OnboardingScreenState extends State<Modern2025OnboardingScreen>
   Widget _buildModernProgressBar() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        children: [
-          for (int i = 0; i < 4; i++)
-            Expanded(
-              child: Container(
-                height: 6,
-                margin: const EdgeInsets.symmetric(horizontal: 2),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(3),
-                  color: i <= _currentPage
-                      ? Theme.of(context).primaryColor
-                      : Colors.grey.shade300,
-                ),
-              ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(18),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.06),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
             ),
-        ],
+            child: Row(
+              children: [
+                for (int i = 0; i < 4; i++)
+                  Expanded(
+                    child: Container(
+                      height: 6,
+                      margin: const EdgeInsets.symmetric(horizontal: 2),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(3),
+                        color: i <= _currentPage
+                            ? const Color(0xFF22D3EE) // teal accent
+                            : Colors.white.withValues(alpha: 0.15),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -175,21 +194,18 @@ class _Modern2025OnboardingScreenState extends State<Modern2025OnboardingScreen>
                           height: 200,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(40),
-                            gradient: LinearGradient(
+                            gradient: const LinearGradient(
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                               colors: [
-                                Theme.of(context).primaryColor,
-                                Theme.of(context)
-                                    .primaryColor
-                                    .withValues(alpha: 0.7),
-                                Colors.purple.shade400,
+                                Color(0xFF7C4DFF), // purple
+                                Color(0xFF22D3EE), // teal
+                                Color(0xFF34D399), // green
                               ],
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: Theme.of(context)
-                                    .primaryColor
+                                color: const Color(0xFF7C4DFF)
                                     .withValues(alpha: 0.3),
                                 blurRadius: 30,
                                 offset: const Offset(0, 15),
@@ -211,11 +227,12 @@ class _Modern2025OnboardingScreenState extends State<Modern2025OnboardingScreen>
                   Text(
                     tr('art_walk_welcome_to_nartbeat'),
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
+                    style: GoogleFonts.spaceGrotesk(
                       fontSize: 36,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w900,
                       height: 1.2,
                       letterSpacing: -0.5,
+                      color: Colors.white.withValues(alpha: 0.92),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -223,30 +240,37 @@ class _Modern2025OnboardingScreenState extends State<Modern2025OnboardingScreen>
                   Text(
                     tr('art_walk_the_modern_platform_where_artists_thrive__npersonalized_for_your_creative_journey'),
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: GoogleFonts.spaceGrotesk(
                       fontSize: 18,
-                      color: Colors.grey.shade600,
+                      color: Colors.white.withValues(alpha: 0.7),
                       height: 1.5,
-                      fontWeight: FontWeight.w400,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                   const SizedBox(height: 40),
 
-                  // Modern stats preview
-                  Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade50,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.grey.shade200),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _buildStatItem('50K+', 'Artists'),
-                        _buildStatItem('2M+', 'Artworks'),
-                        _buildStatItem('5M+', 'Sales'),
-                      ],
+                  // Modern stats preview in glass
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(24),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+                      child: Container(
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.06),
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.10)),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            _buildStatItem('50K+', 'Artists'),
+                            _buildStatItem('2M+', 'Artworks'),
+                            _buildStatItem('5M+', 'Sales'),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -263,17 +287,18 @@ class _Modern2025OnboardingScreenState extends State<Modern2025OnboardingScreen>
       children: [
         Text(
           number,
-          style: TextStyle(
+          style: GoogleFonts.spaceGrotesk(
             fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).primaryColor,
+            fontWeight: FontWeight.w900,
+            color: const Color(0xFFFFC857), // yellow accent
           ),
         ),
         Text(
           label,
-          style: TextStyle(
+          style: GoogleFonts.spaceGrotesk(
             fontSize: 14,
-            color: Colors.grey.shade600,
+            color: Colors.white.withValues(alpha: 0.7),
+            fontWeight: FontWeight.w600,
           ),
         ),
       ],
@@ -295,17 +320,20 @@ class _Modern2025OnboardingScreenState extends State<Modern2025OnboardingScreen>
                 children: [
                   Text(
                     tr('art_walk_what__s_your_artistic_focus'),
-                    style: const TextStyle(
+                    style: GoogleFonts.spaceGrotesk(
                       fontSize: 28,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white.withValues(alpha: 0.92),
+                      letterSpacing: -0.3,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     tr('art_walk_select_all_that_apply_to_personalize_your_experience'),
-                    style: TextStyle(
+                    style: GoogleFonts.spaceGrotesk(
                       fontSize: 16,
-                      color: Colors.grey.shade600,
+                      color: Colors.white.withValues(alpha: 0.7),
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                   const SizedBox(height: 32),
@@ -338,31 +366,38 @@ class _Modern2025OnboardingScreenState extends State<Modern2025OnboardingScreen>
                                 }
                               });
                             },
-                            borderRadius: BorderRadius.circular(16),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: isSelected
-                                      ? Theme.of(context).primaryColor
-                                      : Colors.grey.shade300,
-                                  width: isSelected ? 2 : 1,
-                                ),
-                                color: isSelected
-                                    ? Theme.of(context)
-                                        .primaryColor
-                                        .withValues(alpha: 0.1)
-                                    : Colors.white,
-                              ),
-                              child: Center(
-                                child: Text(
-                                  interest,
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
+                            borderRadius: BorderRadius.circular(24),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(24),
+                              child: BackdropFilter(
+                                filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(24),
+                                    border: Border.all(
+                                      color: isSelected
+                                          ? const Color(0xFF22D3EE) // teal
+                                          : Colors.white
+                                              .withValues(alpha: 0.15),
+                                      width: isSelected ? 2 : 1,
+                                    ),
                                     color: isSelected
-                                        ? Theme.of(context).primaryColor
-                                        : Colors.grey.shade700,
+                                        ? const Color(0xFF22D3EE)
+                                            .withValues(alpha: 0.1)
+                                        : Colors.white.withValues(alpha: 0.04),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      interest,
+                                      style: GoogleFonts.spaceGrotesk(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w700,
+                                        color: isSelected
+                                            ? const Color(0xFF22D3EE)
+                                            : Colors.white
+                                                .withValues(alpha: 0.8),
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -396,17 +431,20 @@ class _Modern2025OnboardingScreenState extends State<Modern2025OnboardingScreen>
                 children: [
                   Text(
                     tr('art_walk_what_describes_you_best'),
-                    style: const TextStyle(
+                    style: GoogleFonts.spaceGrotesk(
                       fontSize: 28,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white.withValues(alpha: 0.92),
+                      letterSpacing: -0.3,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     tr('art_walk_this_helps_us_recommend_the_right_plan_for_you'),
-                    style: TextStyle(
+                    style: GoogleFonts.spaceGrotesk(
                       fontSize: 16,
-                      color: Colors.grey.shade600,
+                      color: Colors.white.withValues(alpha: 0.7),
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                   const SizedBox(height: 32),
@@ -414,76 +452,84 @@ class _Modern2025OnboardingScreenState extends State<Modern2025OnboardingScreen>
                     final isSelected = _experienceLevel == entry.key;
 
                     return Container(
-                      margin: const EdgeInsets.only(bottom: 16),
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: () {
-                            setState(() {
-                              _experienceLevel = entry.key;
-                            });
-                          },
-                          borderRadius: BorderRadius.circular(16),
-                          child: Container(
-                            padding: const EdgeInsets.all(20),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: isSelected
-                                    ? Theme.of(context).primaryColor
-                                    : Colors.grey.shade300,
-                                width: isSelected ? 2 : 1,
+                        margin: const EdgeInsets.only(bottom: 16),
+                        child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () {
+                                setState(() {
+                                  _experienceLevel = entry.key;
+                                });
+                              },
+                              borderRadius: BorderRadius.circular(24),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(24),
+                                child: BackdropFilter(
+                                  filter:
+                                      ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(20),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(24),
+                                      border: Border.all(
+                                        color: isSelected
+                                            ? const Color(0xFF34D399) // green
+                                            : Colors.white
+                                                .withValues(alpha: 0.15),
+                                        width: isSelected ? 2 : 1,
+                                      ),
+                                      color: isSelected
+                                          ? const Color(0xFF34D399)
+                                              .withValues(alpha: 0.1)
+                                          : Colors.white
+                                              .withValues(alpha: 0.04),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          width: 24,
+                                          height: 24,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                              color: isSelected
+                                                  ? const Color(0xFF34D399)
+                                                  : Colors.white
+                                                      .withValues(alpha: 0.4),
+                                              width: 2,
+                                            ),
+                                            color: isSelected
+                                                ? const Color(0xFF34D399)
+                                                : Colors.transparent,
+                                          ),
+                                          child: isSelected
+                                              ? const Icon(
+                                                  Icons.check,
+                                                  size: 16,
+                                                  color: Colors.white,
+                                                )
+                                              : null,
+                                        ),
+                                        const SizedBox(width: 16),
+                                        Expanded(
+                                          child: Text(
+                                            entry.value,
+                                            style: GoogleFonts.spaceGrotesk(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w700,
+                                              color: isSelected
+                                                  ? const Color(0xFF34D399)
+                                                  : Colors.white
+                                                      .withValues(alpha: 0.8),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
                               ),
-                              color: isSelected
-                                  ? Theme.of(context)
-                                      .primaryColor
-                                      .withValues(alpha: 0.1)
-                                  : Colors.white,
-                            ),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 24,
-                                  height: 24,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: isSelected
-                                          ? Theme.of(context).primaryColor
-                                          : Colors.grey.shade400,
-                                      width: 2,
-                                    ),
-                                    color: isSelected
-                                        ? Theme.of(context).primaryColor
-                                        : Colors.transparent,
-                                  ),
-                                  child: isSelected
-                                      ? const Icon(
-                                          Icons.check,
-                                          size: 16,
-                                          color: Colors.white,
-                                        )
-                                      : null,
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: Text(
-                                    entry.value,
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                      color: isSelected
-                                          ? Theme.of(context).primaryColor
-                                          : Colors.grey.shade700,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
+                            )));
                   }).toList(),
                 ],
               ),
@@ -514,17 +560,20 @@ class _Modern2025OnboardingScreenState extends State<Modern2025OnboardingScreen>
                 children: [
                   Text(
                     tr('art_walk_perfect_plan_for_you'),
-                    style: const TextStyle(
+                    style: GoogleFonts.spaceGrotesk(
                       fontSize: 28,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white.withValues(alpha: 0.92),
+                      letterSpacing: -0.3,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Based on your interests: ${_selectedInterests.take(2).join(", ")}',
-                    style: TextStyle(
+                    style: GoogleFonts.spaceGrotesk(
                       fontSize: 16,
-                      color: Colors.grey.shade600,
+                      color: Colors.white.withValues(alpha: 0.7),
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                   const SizedBox(height: 32),
@@ -953,62 +1002,84 @@ class _Modern2025OnboardingScreenState extends State<Modern2025OnboardingScreen>
   Widget _buildModernNavigation() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, -5),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          if (_currentPage > 0) ...[
-            Expanded(
-              child: OutlinedButton(
-                onPressed: () => _pageController.previousPage(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                ),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.06),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
+            ),
+            child: Row(
+              children: [
+                if (_currentPage > 0) ...[
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => _pageController.previousPage(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        side: BorderSide(
+                            color: Colors.white.withValues(alpha: 0.3)),
+                        foregroundColor: Colors.white.withValues(alpha: 0.8),
+                      ),
+                      child: Text(
+                        tr('artist_artist_journey_text_back'),
+                        style: GoogleFonts.spaceGrotesk(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                ],
+                Expanded(
+                  flex: _currentPage == 0 ? 1 : 2,
+                  child: ElevatedButton(
+                    onPressed:
+                        _isProcessingPlan ? null : _getNextButtonAction(),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          const Color(0xFF7C4DFF), // purple gradient start
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      elevation: 0,
+                      shadowColor:
+                          const Color(0xFF7C4DFF).withValues(alpha: 0.3),
+                    ),
+                    child: _isProcessingPlan && _currentPage == 3
+                        ? const SizedBox(
+                            height: 18,
+                            width: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          )
+                        : Text(
+                            _getNextButtonText(),
+                            style: GoogleFonts.spaceGrotesk(
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
                   ),
                 ),
-                child: Text(tr('artist_artist_journey_text_back')),
-              ),
-            ),
-            const SizedBox(width: 12),
-          ],
-          Expanded(
-            flex: _currentPage == 0 ? 1 : 2,
-            child: ElevatedButton(
-              onPressed: _isProcessingPlan ? null : _getNextButtonAction(),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).primaryColor,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 0,
-              ),
-              child: _isProcessingPlan && _currentPage == 3
-                  ? const SizedBox(
-                      height: 18,
-                      width: 18,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
-                    )
-                  : Text(_getNextButtonText()),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

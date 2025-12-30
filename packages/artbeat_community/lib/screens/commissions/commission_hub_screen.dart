@@ -1,21 +1,24 @@
-import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:artbeat_core/artbeat_core.dart' as core;
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart' as intl;
+
 import 'package:artbeat_artist/artbeat_artist.dart';
+
 import '../../models/direct_commission_model.dart';
 import '../../services/direct_commission_service.dart';
-import '../../theme/community_colors.dart';
-import 'direct_commissions_screen.dart';
+import '../../widgets/widgets.dart';
 import 'artist_commission_settings_screen.dart';
-import 'commission_setup_wizard_screen.dart';
-import 'commission_detail_screen.dart';
-import 'commission_rating_screen.dart';
-import 'commission_progress_tracker.dart';
-import 'commission_dispute_screen.dart';
-import 'commission_templates_browser.dart';
-import 'commission_gallery_screen.dart';
 import 'commission_analytics_dashboard.dart';
+import 'commission_detail_screen.dart';
+import 'commission_dispute_screen.dart';
+import 'commission_gallery_screen.dart';
+import 'commission_progress_tracker.dart';
+import 'commission_rating_screen.dart';
+import 'commission_setup_wizard_screen.dart';
+import 'commission_templates_browser.dart';
+import 'direct_commissions_screen.dart';
 
 class CommissionHubScreen extends StatefulWidget {
   const CommissionHubScreen({super.key});
@@ -26,6 +29,12 @@ class CommissionHubScreen extends StatefulWidget {
 
 class _CommissionHubScreenState extends State<CommissionHubScreen> {
   final DirectCommissionService _commissionService = DirectCommissionService();
+
+  final intl.DateFormat _dateFormat = intl.DateFormat('MMM d, yyyy');
+  final intl.NumberFormat _compactCurrencyFormatter =
+      intl.NumberFormat.compactCurrency(symbol: '\$');
+  final intl.NumberFormat _currencyFormatter =
+      intl.NumberFormat.currency(symbol: '\$');
 
   bool _isLoading = true;
   bool _isArtist = false;
@@ -45,29 +54,30 @@ class _CommissionHubScreenState extends State<CommissionHubScreen> {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
-        setState(() => _isLoading = false);
+        if (!mounted) return;
+        setState(() {
+          _isArtist = false;
+          _artistSettings = null;
+          _recentCommissions = [];
+          _stats = {};
+          _isLoading = false;
+        });
         return;
       }
 
-      // Check if user is an artist by trying to load settings
+      ArtistCommissionSettings? artistSettings;
+      var isArtist = false;
       try {
-        final settings = await _commissionService.getArtistSettings(user.uid);
-        setState(() {
-          _isArtist = settings != null;
-          _artistSettings = settings;
-        });
-      } catch (e) {
-        // User is not an artist or hasn't set up commission settings
-        setState(() => _isArtist = false);
+        artistSettings = await _commissionService.getArtistSettings(user.uid);
+        isArtist = artistSettings != null;
+      } catch (_) {
+        isArtist = false;
+        artistSettings = null;
       }
 
-      // Load recent commissions
-      final commissions = await _commissionService.getCommissionsByUser(
-        user.uid,
-      );
+      final commissions = await _commissionService.getCommissionsByUser(user.uid);
       final recentCommissions = commissions.take(5).toList();
 
-      // Calculate stats
       final activeCount = commissions
           .where(
             (c) => [
@@ -92,14 +102,15 @@ class _CommissionHubScreenState extends State<CommissionHubScreen> {
           .where(
             (c) =>
                 c.artistId == user.uid &&
-                [
-                  CommissionStatus.completed,
-                  CommissionStatus.delivered,
-                ].contains(c.status),
+                [CommissionStatus.completed, CommissionStatus.delivered]
+                    .contains(c.status),
           )
-          .fold(0.0, (sum, c) => sum + c.totalPrice);
+          .fold<double>(0, (sum, c) => sum + c.totalPrice);
 
+      if (!mounted) return;
       setState(() {
+        _isArtist = isArtist;
+        _artistSettings = artistSettings;
         _recentCommissions = recentCommissions;
         _stats = {
           'active': activeCount,
@@ -110,828 +121,841 @@ class _CommissionHubScreenState extends State<CommissionHubScreen> {
         _isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() => _isLoading = false);
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error loading data: $e')));
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'commission_hub_load_error_with_reason'.tr(
+              namedArgs: {'error': e.toString()},
+            ),
+          ),
+        ),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(kToolbarHeight + 48 + 4),
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: core.ArtbeatColors.primaryGradient,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black26,
-                blurRadius: 8,
-                offset: Offset(0, 4),
-              ),
-            ],
-          ),
-          child: AppBar(
-            title: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(Icons.work, color: Colors.white, size: 24),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'screen_title_commissions'.tr(),
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const Text(
-                        'Manage your commission requests',
-                        style: TextStyle(fontSize: 11, color: Colors.white70),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            backgroundColor: Colors.transparent,
-            foregroundColor: Colors.white,
-            elevation: 0,
-            automaticallyImplyLeading: false,
-          ),
-        ),
-      ),
-      backgroundColor: CommunityColors.background,
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              onRefresh: _loadData,
-              child: ListView(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  // Welcome Card
-                  _buildWelcomeCard(),
-                  const SizedBox(height: 16),
-
-                  // Stats Cards
-                  _buildStatsCards(),
-                  const SizedBox(height: 16),
-
-                  // Quick Actions
-                  _buildQuickActions(),
-                  const SizedBox(height: 16),
-
-                  // Artist Settings (if artist)
-                  if (_isArtist) ...[
-                    _buildArtistSection(),
-                    const SizedBox(height: 16),
-                  ],
-
-                  // Recent Commissions
-                  _buildRecentCommissions(),
-                  const SizedBox(height: 16),
-
-                  // Getting Started (if no commissions)
-                  if (_stats['total'] == 0) _buildGettingStarted(),
-                ],
-              ),
-            ),
-    );
-  }
-
-  Widget _buildWelcomeCard() {
-    return Card(
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          gradient: LinearGradient(
-            colors: [
-              CommunityColors.primary.withValues(alpha: 0.1),
-              CommunityColors.secondary.withValues(alpha: 0.1),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(
-                  Icons.palette,
-                  size: 32,
-                  color: CommunityColors.primary,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _isArtist
-                            ? 'Manage your commission requests and settings'
-                            : 'Request custom artwork from talented artists',
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: core.ArtbeatColors.textPrimary,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            if (!_isArtist) ...[
-              const SizedBox(height: 16),
-              OutlinedButton.icon(
-                onPressed: _setupArtistProfile,
-                icon: const Icon(Icons.brush),
-                label: const Text('Become an Artist'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: core.ArtbeatColors.primaryPurple,
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatsCards() {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildStatCard(
-            'Active',
-            _stats['active']?.toString() ?? '0',
-            Icons.pending_actions,
-            core.ArtbeatColors.warning,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _buildStatCard(
-            'Completed',
-            _stats['completed']?.toString() ?? '0',
-            Icons.check_circle,
-            core.ArtbeatColors.primaryGreen,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _buildStatCard(
-            'Total',
-            _stats['total']?.toString() ?? '0',
-            Icons.art_track,
-            core.ArtbeatColors.info,
-          ),
-        ),
-        if (_isArtist) ...[
-          const SizedBox(width: 8),
-          Expanded(
-            child: _buildStatCard(
-              'Earnings',
-              '\$${_stats['earnings']?.toString() ?? '0'}',
-              Icons.attach_money,
-              core.ArtbeatColors.primaryPurple,
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-
-  Widget _buildStatCard(
-    String title,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [color.withValues(alpha: 0.1), color.withValues(alpha: 0.05)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withValues(alpha: 0.2), width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+      backgroundColor: Colors.transparent,
+      appBar: HudTopBar(
+        title: 'commission_hub_app_bar'.tr(),
+        glassBackground: true,
+        leading: const SizedBox.shrink(),
+        actions: [
+          IconButton(
+            tooltip: 'commission_hub_refresh_tooltip'.tr(),
+            icon: const Icon(Icons.refresh, color: Colors.white),
+            onPressed: _isLoading ? null : _loadData,
           ),
         ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(icon, color: color, size: 24),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              value,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: CommunityColors.textPrimary,
-              ),
-            ),
-            Text(
-              title,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: CommunityColors.textSecondary,
-              ),
-            ),
-          ],
+      body: WorldBackground(
+        child: SafeArea(
+          bottom: false,
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: _isLoading
+                ? const Center(
+                    child: CircularProgressIndicator(
+                      color: Color(0xFF7C4DFF),
+                    ),
+                  )
+                : RefreshIndicator(
+                    color: const Color(0xFF7C4DFF),
+                    onRefresh: _loadData,
+                    child: ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: EdgeInsets.fromLTRB(16, 16, 16, bottomPadding + 32),
+                      children: [
+                        _buildHeroCard(),
+                        const SizedBox(height: 16),
+                        _buildStatsSection(),
+                        const SizedBox(height: 16),
+                        _buildQuickActionsSection(),
+                        if (_isArtist) ...[
+                          const SizedBox(height: 16),
+                          _buildArtistSection(),
+                        ],
+                        const SizedBox(height: 16),
+                        _buildRecentCommissionsSection(),
+                        if ((_stats['total'] ?? 0) == 0) ...[
+                          const SizedBox(height: 16),
+                          _buildGettingStartedCard(),
+                        ],
+                      ],
+                    ),
+                  ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildQuickActions() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Quick Actions',
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+  Widget _buildHeroCard() {
+    final badge = _isArtist
+        ? 'commission_hub_hero_badge_artist'.tr()
+        : 'commission_hub_hero_badge_patron'.tr();
+    final subtitle = _isArtist
+        ? 'commission_hub_hero_artist_subtitle'.tr()
+        : 'commission_hub_hero_patron_subtitle'.tr();
+
+    return GlassCard(
+      padding: const EdgeInsets.all(24),
+      showAccentGlow: true,
+      accentColor: _isArtist
+          ? _CommissionPalette.tealAccent
+          : _CommissionPalette.purpleAccent,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
             ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildActionButton(
-                    'View All Commissions',
-                    Icons.list,
-                    () => Navigator.push(
-                      context,
-                      MaterialPageRoute<DirectCommissionsScreen>(
-                        builder: (context) => const DirectCommissionsScreen(),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildActionButton(
-                    'Browse Artists',
-                    Icons.search,
-                    _browseArtists,
-                  ),
-                ),
-              ],
-            ),
-            if (_isArtist) ...[
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildActionButton(
-                      'Commission Settings',
-                      Icons.settings,
-                      () => Navigator.push(
-                        context,
-                        MaterialPageRoute<ArtistCommissionSettingsScreen>(
-                          builder: (context) =>
-                              const ArtistCommissionSettingsScreen(),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildActionButton(
-                      'Analytics',
-                      Icons.analytics,
-                      _viewAnalytics,
-                    ),
-                  ),
-                ],
+            child: Text(
+              badge,
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.6,
+                color: _CommissionPalette.textSecondary,
               ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildActionButton(
-                      'Templates',
-                      Icons.auto_awesome,
-                      _viewTemplates,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildActionButton(
-                      'Gallery',
-                      Icons.image_search,
-                      _viewGallery,
-                    ),
-                  ),
-                ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'commission_hub_hero_title'.tr(),
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 22,
+              fontWeight: FontWeight.w900,
+              color: _CommissionPalette.textPrimary,
+              letterSpacing: 0.8,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            subtitle,
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: _CommissionPalette.textSecondary,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: GradientCTAButton(
+                  text: (_isArtist
+                          ? 'commission_hub_hero_cta_artist_primary'
+                          : 'commission_hub_hero_cta_patron_primary')
+                      .tr(),
+                  icon: _isArtist ? Icons.view_timeline : Icons.explore,
+                  onPressed: _isArtist ? _openCommissions : _browseArtists,
+                ),
               ),
             ],
-          ],
-        ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: HudButton.secondary(
+                  onPressed: _isArtist
+                      ? () => _openSetupWizard(SetupMode.editing)
+                      : _setupArtistProfile,
+                  text: (_isArtist
+                          ? 'commission_hub_hero_cta_artist_secondary'
+                          : 'commission_hub_hero_cta_patron_secondary')
+                      .tr(),
+                  icon: _isArtist ? Icons.auto_fix_high : Icons.brush,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildActionButton(
-    String label,
-    IconData icon,
-    VoidCallback onPressed,
-  ) {
-    return OutlinedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, size: 18),
-      label: Text(label, style: const TextStyle(fontSize: 12)),
-      style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+  Widget _buildStatsSection() {
+    final stats = <_StatEntry>[
+      _StatEntry(
+        label: 'commission_hub_stats_active'.tr(),
+        value: (_stats['active'] ?? 0).toString(),
+        icon: Icons.pending_actions,
+        color: _CommissionPalette.yellowAccent,
+      ),
+      _StatEntry(
+        label: 'commission_hub_stats_completed'.tr(),
+        value: (_stats['completed'] ?? 0).toString(),
+        icon: Icons.check_circle,
+        color: _CommissionPalette.greenAccent,
+      ),
+      _StatEntry(
+        label: 'commission_hub_stats_total'.tr(),
+        value: (_stats['total'] ?? 0).toString(),
+        icon: Icons.layers,
+        color: _CommissionPalette.purpleAccent,
+      ),
+    ];
+
+    if (_isArtist) {
+      stats.add(
+        _StatEntry(
+          label: 'commission_hub_stats_earnings'.tr(),
+          value: _compactCurrencyFormatter.format(_stats['earnings'] ?? 0),
+          icon: Icons.attach_money,
+          color: _CommissionPalette.tealAccent,
+        ),
+      );
+    }
+
+    return GlassCard(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'commission_hub_stats_title'.tr(),
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              color: _CommissionPalette.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 16),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final twoColumnWidth = (constraints.maxWidth - 12) / 2;
+              final singleColumn = constraints.maxWidth < 360;
+
+              return Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: stats.map((entry) {
+                  final width = singleColumn ? constraints.maxWidth : twoColumnWidth;
+                  return SizedBox(
+                    width: width,
+                    child: _StatTile(entry: entry),
+                  );
+                }).toList(),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickActionsSection() {
+    final actions = <_QuickActionData>[
+      _QuickActionData(
+        label: 'commission_hub_actions_view_all'.tr(),
+        icon: Icons.list_alt,
+        onTap: _openCommissions,
+      ),
+      _QuickActionData(
+        label: 'commission_hub_actions_browse_artists'.tr(),
+        icon: Icons.biotech,
+        onTap: _browseArtists,
+      ),
+    ];
+
+    if (_isArtist) {
+      actions.addAll([
+        _QuickActionData(
+          label: 'commission_hub_actions_settings'.tr(),
+          icon: Icons.settings,
+          onTap: _openArtistSettings,
+        ),
+        _QuickActionData(
+          label: 'commission_hub_actions_analytics'.tr(),
+          icon: Icons.analytics,
+          onTap: _viewAnalytics,
+        ),
+        _QuickActionData(
+          label: 'commission_hub_actions_templates'.tr(),
+          icon: Icons.auto_awesome,
+          onTap: _viewTemplates,
+        ),
+        _QuickActionData(
+          label: 'commission_hub_actions_gallery'.tr(),
+          icon: Icons.image,
+          onTap: _viewGallery,
+        ),
+      ]);
+    }
+
+    return GlassCard(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'commission_hub_actions_title'.tr(),
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              color: _CommissionPalette.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 16),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final twoColumnWidth = (constraints.maxWidth - 12) / 2;
+              final singleColumn = constraints.maxWidth < 420;
+
+              return Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: actions.map((action) {
+                  final width = singleColumn ? constraints.maxWidth : twoColumnWidth;
+                  return _QuickActionButton(
+                    width: width,
+                    label: action.label,
+                    icon: action.icon,
+                    onTap: action.onTap,
+                  );
+                }).toList(),
+              );
+            },
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildArtistSection() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+    final accepting = _artistSettings?.acceptingCommissions ?? false;
+    final basePrice = _artistSettings?.basePrice ?? 0;
+    final availableTypes = _artistSettings?.availableTypes
+            .map((type) => type.displayName)
+            .join(', ') ??
+        '';
+
+    return GlassCard(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'commission_hub_artist_section_title'.tr(),
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              color: _CommissionPalette.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'commission_hub_artist_section_subtitle'.tr(),
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: _CommissionPalette.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+            ),
+            child: Row(
               children: [
-                const Icon(
-                  Icons.brush,
-                  color: core.ArtbeatColors.primaryPurple,
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: (accepting
+                            ? _CommissionPalette.greenAccent
+                            : _CommissionPalette.yellowAccent)
+                        .withValues(alpha: 0.18),
+                  ),
+                  child: Icon(
+                    accepting ? Icons.check_circle : Icons.pause_circle,
+                    color: accepting
+                        ? _CommissionPalette.greenAccent
+                        : _CommissionPalette.yellowAccent,
+                  ),
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  'Artist Dashboard',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        accepting
+                            ? 'commission_hub_artist_status_accepting'.tr()
+                            : 'commission_hub_artist_status_paused'.tr(),
+                        style: GoogleFonts.spaceGrotesk(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: _CommissionPalette.textPrimary,
+                        ),
+                      ),
+                      if (_artistSettings != null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          'commission_hub_artist_base_price'.tr(
+                            namedArgs: {
+                              'price': _currencyFormatter.format(basePrice),
+                            },
+                          ),
+                          style: GoogleFonts.spaceGrotesk(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: _CommissionPalette.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
               ],
             ),
+          ),
+          const SizedBox(height: 16),
+          if (_artistSettings != null) ...[
+            Text(
+              'commission_hub_artist_types'.tr(
+                namedArgs: {'types': availableTypes},
+              ),
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: _CommissionPalette.textSecondary,
+              ),
+            ),
             const SizedBox(height: 16),
-            if (_artistSettings != null) ...[
-              Row(
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: [
+                HudButton.secondary(
+                  onPressed: () => _openSetupWizard(SetupMode.editing),
+                  text: 'commission_hub_artist_cta_edit_wizard'.tr(),
+                  icon: Icons.auto_fix_high,
+                  width: 200,
+                ),
+                HudButton.secondary(
+                  onPressed: _openArtistSettings,
+                  text: 'commission_hub_artist_cta_open_settings'.tr(),
+                  icon: Icons.settings,
+                  width: 200,
+                ),
+              ],
+            ),
+          ] else ...[
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.04),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
-                    _artistSettings!.acceptingCommissions
-                        ? Icons.check_circle
-                        : Icons.pause_circle,
-                    color: _artistSettings!.acceptingCommissions
-                        ? core.ArtbeatColors.primaryGreen
-                        : core.ArtbeatColors.warning,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
                   Text(
-                    _artistSettings!.acceptingCommissions
-                        ? 'Currently accepting commissions'
-                        : 'Not accepting commissions',
-                    style: TextStyle(
-                      color: _artistSettings!.acceptingCommissions
-                          ? core.ArtbeatColors.primaryGreen
-                          : core.ArtbeatColors.warning,
-                      fontWeight: FontWeight.w500,
+                    'commission_hub_artist_no_settings_title'.tr(),
+                    style: GoogleFonts.spaceGrotesk(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: _CommissionPalette.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'commission_hub_artist_no_settings_body'.tr(),
+                    style: GoogleFonts.spaceGrotesk(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: _CommissionPalette.textSecondary,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
-              Text(
-                'Base Price: \$${_artistSettings!.basePrice.toStringAsFixed(2)}',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              Text(
-                'Available Types: ${_artistSettings!.availableTypes.map((t) => t.displayName).join(', ')}',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute<void>(
-                          builder: (context) => CommissionSetupWizardScreen(
-                            mode: SetupMode.editing,
-                            initialSettings: _artistSettings,
-                          ),
-                        ),
-                      ).then((_) => _loadData()),
-                      icon: const Icon(Icons.edit),
-                      label: const Text('Edit (Wizard)'),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute<void>(
-                          builder: (context) =>
-                              const ArtistCommissionSettingsScreen(),
-                        ),
-                      ).then((_) => _loadData()),
-                      icon: const Icon(Icons.settings),
-                      label: const Text('Advanced'),
-                    ),
-                  ),
-                ],
-              ),
-            ] else ...[
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: core.ArtbeatColors.warning.withAlpha(25),
-                  border: Border.all(
-                    color: core.ArtbeatColors.warning.withAlpha(100),
-                  ),
-                  borderRadius: BorderRadius.circular(8),
+            ),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: [
+                GradientCTAButton(
+                  text: 'commission_hub_artist_cta_quick_setup'.tr(),
+                  icon: Icons.auto_awesome,
+                  onPressed: () => _openSetupWizard(SetupMode.firstTime),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Row(
-                      children: [
-                        Icon(
-                          Icons.info_outline,
-                          size: 20,
-                          color: core.ArtbeatColors.warning,
-                        ),
-                        SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Complete your commission setup',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: core.ArtbeatColors.warning,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Take our quick guided setup to start accepting commissions',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: core.ArtbeatColors.warning,
-                      ),
-                    ),
-                  ],
+                HudButton.secondary(
+                  onPressed: _openArtistSettings,
+                  text: 'commission_hub_artist_cta_detailed_settings'.tr(),
+                  icon: Icons.settings,
                 ),
-              ),
-              const SizedBox(height: 12),
-              ElevatedButton.icon(
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute<void>(
-                    builder: (context) => const CommissionSetupWizardScreen(
-                      mode: SetupMode.firstTime,
-                    ),
-                  ),
-                ).then((_) => _loadData()),
-                icon: const Icon(Icons.auto_awesome),
-                label: const Text('Quick Setup Wizard'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: core.ArtbeatColors.primaryPurple,
-                  foregroundColor: Colors.white,
-                ),
-              ),
-              const SizedBox(height: 8),
-              OutlinedButton.icon(
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute<void>(
-                    builder: (context) =>
-                        const ArtistCommissionSettingsScreen(),
-                  ),
-                ).then((_) => _loadData()),
-                icon: const Icon(Icons.settings),
-                label: const Text('Detailed Settings'),
-              ),
-            ],
+              ],
+            ),
           ],
-        ),
+        ],
       ),
     );
   }
 
-  Widget _buildRecentCommissions() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Text(
-                  'Recent Commissions',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+  Widget _buildRecentCommissionsSection() {
+    return GlassCard(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                'commission_hub_recent_title'.tr(),
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  color: _CommissionPalette.textPrimary,
+                ),
+              ),
+              const Spacer(),
+              if (_recentCommissions.isNotEmpty)
+                TextButton(
+                  onPressed: _openCommissions,
+                  child: Text(
+                    'commission_hub_recent_cta_view_all'.tr(),
+                    style: GoogleFonts.spaceGrotesk(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: _CommissionPalette.tealAccent,
+                    ),
                   ),
                 ),
-                const Spacer(),
-                if (_recentCommissions.isNotEmpty)
-                  TextButton(
-                    onPressed: () => Navigator.push(
-                      context,
-                      MaterialPageRoute<DirectCommissionsScreen>(
-                        builder: (context) => const DirectCommissionsScreen(),
-                      ),
-                    ),
-                    child: const Text('View All'),
-                  ),
-              ],
+            ],
+          ),
+          const SizedBox(height: 16),
+          if (_recentCommissions.isEmpty)
+            _buildEmptyState()
+          else
+            Column(
+              children: _recentCommissions
+                  .map((commission) => _buildCommissionTile(commission))
+                  .toList(),
             ),
-            const SizedBox(height: 16),
-            if (_recentCommissions.isEmpty)
-              const Center(
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.art_track,
-                      size: 48,
-                      color: core.ArtbeatColors.textSecondary,
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      'No commissions yet',
-                      style: TextStyle(color: core.ArtbeatColors.textSecondary),
-                    ),
-                  ],
-                ),
-              )
-            else
-              ...(_recentCommissions.map(
-                (commission) => _buildCommissionTile(commission),
-              )),
-          ],
-        ),
+        ],
       ),
     );
   }
 
   Widget _buildCommissionTile(DirectCommissionModel commission) {
     final statusColor = _getStatusColor(commission.status);
-    final isArtist =
+    final statusLabel = _getStatusLabel(commission.status);
+    final isArtistView =
         commission.artistId == FirebaseAuth.instance.currentUser?.uid;
-    final currentUser = FirebaseAuth.instance.currentUser;
 
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ListTile(
-              leading: CircleAvatar(
-                backgroundColor: statusColor.withValues(alpha: 0.1),
-                child: Icon(
-                  _getStatusIcon(commission.status),
-                  color: statusColor,
-                  size: 20,
-                ),
-              ),
-              title: Text(
-                commission.title,
-                style: const TextStyle(fontWeight: FontWeight.w500),
-              ),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    isArtist
-                        ? 'Client: ${commission.clientName}'
-                        : 'Artist: ${commission.artistName}',
-                  ),
-                  Text(
-                    commission.status.displayName,
-                    style: TextStyle(color: statusColor, fontSize: 12),
-                  ),
-                ],
-              ),
-              trailing: commission.totalPrice > 0
-                  ? Text(
-                      '\$${commission.totalPrice.toStringAsFixed(2)}',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: core.ArtbeatColors.primaryGreen,
-                      ),
-                    )
-                  : null,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute<void>(
-                    builder: (context) =>
-                        CommissionDetailScreen(commission: commission),
-                  ),
-                );
-              },
-            ),
-            // Action buttons
-            Wrap(
-              spacing: 8,
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.04),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(28),
+          onTap: () => _openCommissionDetail(commission),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // View Progress button
-                if ([
-                  CommissionStatus.accepted,
-                  CommissionStatus.inProgress,
-                  CommissionStatus.revision,
-                ].contains(commission.status))
-                  SizedBox(
-                    height: 32,
-                    child: OutlinedButton.icon(
-                      onPressed: () => _viewProgress(commission),
-                      icon: const Icon(Icons.trending_up, size: 16),
-                      label: const Text('Progress'),
+                Row(
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: statusColor.withValues(alpha: 0.12),
+                      ),
+                      child: Icon(
+                        _getStatusIcon(commission.status),
+                        color: statusColor,
+                      ),
                     ),
-                  ),
-                // Rate Commission button (after completed)
-                if ([
-                      CommissionStatus.completed,
-                      CommissionStatus.delivered,
-                    ].contains(commission.status) &&
-                    currentUser != null)
-                  SizedBox(
-                    height: 32,
-                    child: OutlinedButton.icon(
-                      onPressed: () => _rateCommission(commission),
-                      icon: const Icon(Icons.star_outline, size: 16),
-                      label: const Text('Rate'),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            commission.title,
+                            style: GoogleFonts.spaceGrotesk(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w800,
+                              color: _CommissionPalette.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            isArtistView
+                                ? 'commission_hub_recent_meta_client'
+                                    .tr(namedArgs: {'name': commission.clientName})
+                                : 'commission_hub_recent_meta_artist'
+                                    .tr(namedArgs: {'name': commission.artistName}),
+                            style: GoogleFonts.spaceGrotesk(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: _CommissionPalette.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                // Report Issue button
-                if ([
-                      CommissionStatus.inProgress,
-                      CommissionStatus.revision,
-                    ].contains(commission.status) &&
-                    currentUser != null)
-                  SizedBox(
-                    height: 32,
-                    child: OutlinedButton.icon(
-                      onPressed: () => _reportDispute(commission),
-                      icon: const Icon(Icons.flag_outlined, size: 16),
-                      label: const Text('Report'),
+                    if (commission.totalPrice > 0)
+                      Text(
+                        _currencyFormatter.format(commission.totalPrice),
+                        style: GoogleFonts.spaceGrotesk(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          color: _CommissionPalette.greenAccent,
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Container(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: statusColor.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Text(
+                        statusLabel,
+                        style: GoogleFonts.spaceGrotesk(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: statusColor,
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 12),
+                    Text(
+                      'commission_hub_recent_meta_requested'.tr(
+                        namedArgs: {
+                          'date': _dateFormat.format(commission.requestedAt),
+                        },
+                      ),
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: _CommissionPalette.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                _buildCommissionActions(commission),
               ],
             ),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildGettingStarted() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            const Icon(
-              Icons.lightbulb_outline,
-              size: 64,
-              color: core.ArtbeatColors.primaryPurple,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Getting Started with Commissions',
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              _isArtist
-                  ? 'Set up your commission settings to start receiving requests from clients.'
-                  : 'Browse artists and request custom artwork tailored to your needs.',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: core.ArtbeatColors.textSecondary,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: _isArtist
-                  ? () => Navigator.push(
-                      context,
-                      MaterialPageRoute<ArtistCommissionSettingsScreen>(
-                        builder: (context) =>
-                            const ArtistCommissionSettingsScreen(),
-                      ),
-                    )
-                  : _browseArtists,
-              icon: Icon(_isArtist ? Icons.settings : Icons.search),
-              label: Text(
-                _isArtist ? 'Setup Commission Settings' : 'Browse Artists',
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: core.ArtbeatColors.primaryPurple,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 12,
-                ),
-              ),
-            ),
-          ],
+  Widget _buildCommissionActions(DirectCommissionModel commission) {
+    final actions = <Widget>[];
+
+    if ([
+      CommissionStatus.accepted,
+      CommissionStatus.inProgress,
+      CommissionStatus.revision,
+    ].contains(commission.status)) {
+      actions.add(
+        HudButton.secondary(
+          onPressed: () => _viewProgress(commission),
+          text: 'commission_hub_commission_actions_progress'.tr(),
+          icon: Icons.timeline,
+          width: 180,
         ),
+      );
+    }
+
+    if ([
+          CommissionStatus.completed,
+          CommissionStatus.delivered,
+        ].contains(commission.status) &&
+        FirebaseAuth.instance.currentUser != null) {
+      actions.add(
+        HudButton.secondary(
+          onPressed: () => _rateCommission(commission),
+          text: 'commission_hub_commission_actions_rate'.tr(),
+          icon: Icons.star_rate,
+          width: 180,
+        ),
+      );
+    }
+
+    if ([
+          CommissionStatus.inProgress,
+          CommissionStatus.revision,
+        ].contains(commission.status) &&
+        FirebaseAuth.instance.currentUser != null) {
+      actions.add(
+        HudButton.secondary(
+          onPressed: () => _reportDispute(commission),
+          text: 'commission_hub_commission_actions_report'.tr(),
+          icon: Icons.flag,
+          width: 180,
+        ),
+      );
+    }
+
+    if (actions.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Wrap(
+      spacing: 12,
+      runSpacing: 12,
+      children: actions,
+    );
+  }
+
+  Widget _buildGettingStartedCard() {
+    final description = _isArtist
+        ? 'commission_hub_getting_started_artist'.tr()
+        : 'commission_hub_getting_started_patron'.tr();
+    final ctaLabel = _isArtist
+        ? 'commission_hub_getting_started_cta_artist'.tr()
+        : 'commission_hub_getting_started_cta_patron'.tr();
+    final ctaAction = _isArtist ? _openArtistSettings : _browseArtists;
+    final ctaIcon = _isArtist ? Icons.settings : Icons.search;
+
+    return GlassCard(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        children: [
+          const Icon(Icons.auto_awesome, size: 48, color: _CommissionPalette.purpleAccent),
+          const SizedBox(height: 16),
+          Text(
+            'commission_hub_getting_started_title'.tr(),
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              color: _CommissionPalette.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            description,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: _CommissionPalette.textSecondary,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 16),
+          GradientCTAButton(
+            text: ctaLabel,
+            icon: ctaIcon,
+            onPressed: ctaAction,
+          ),
+        ],
       ),
     );
   }
 
-  Color _getStatusColor(CommissionStatus status) {
-    switch (status) {
-      case CommissionStatus.pending:
-        return core.ArtbeatColors.warning;
-      case CommissionStatus.quoted:
-        return core.ArtbeatColors.info;
-      case CommissionStatus.accepted:
-        return core.ArtbeatColors.primaryGreen;
-      case CommissionStatus.inProgress:
-        return core.ArtbeatColors.primaryPurple;
-      case CommissionStatus.revision:
-        return core.ArtbeatColors.warning;
-      case CommissionStatus.completed:
-        return core.ArtbeatColors.primaryGreen;
-      case CommissionStatus.delivered:
-        return core.ArtbeatColors.primaryGreen;
-      case CommissionStatus.cancelled:
-        return core.ArtbeatColors.error;
-      case CommissionStatus.disputed:
-        return core.ArtbeatColors.error;
-    }
+  Widget _buildEmptyState() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.03),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+      ),
+      child: Column(
+        children: [
+          const Icon(Icons.auto_fix_off, size: 40, color: _CommissionPalette.textTertiary),
+          const SizedBox(height: 12),
+          Text(
+            'commission_hub_recent_empty_title'.tr(),
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: _CommissionPalette.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'commission_hub_recent_empty_subtitle'.tr(),
+            textAlign: TextAlign.center,
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: _CommissionPalette.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
-  IconData _getStatusIcon(CommissionStatus status) {
-    switch (status) {
-      case CommissionStatus.pending:
-        return Icons.schedule;
-      case CommissionStatus.quoted:
-        return Icons.request_quote;
-      case CommissionStatus.accepted:
-        return Icons.handshake;
-      case CommissionStatus.inProgress:
-        return Icons.brush;
-      case CommissionStatus.revision:
-        return Icons.edit;
-      case CommissionStatus.completed:
-        return Icons.check_circle;
-      case CommissionStatus.delivered:
-        return Icons.local_shipping;
-      case CommissionStatus.cancelled:
-        return Icons.cancel;
-      case CommissionStatus.disputed:
-        return Icons.warning;
-    }
+  void _openCommissions() {
+    Navigator.push(
+      context,
+      MaterialPageRoute<DirectCommissionsScreen>(
+        builder: (context) => const DirectCommissionsScreen(),
+      ),
+    );
   }
 
   void _setupArtistProfile() {
-    Navigator.push(
+    _openSetupWizard(SetupMode.firstTime);
+  }
+
+  Future<void> _openSetupWizard(SetupMode mode) async {
+    await Navigator.push(
       context,
-      MaterialPageRoute<ArtistCommissionSettingsScreen>(
+      MaterialPageRoute<void>(
+        builder: (context) => CommissionSetupWizardScreen(
+          mode: mode,
+          initialSettings: mode == SetupMode.editing ? _artistSettings : null,
+        ),
+      ),
+    );
+    if (mounted) {
+      await _loadData();
+    }
+  }
+
+  Future<void> _openArtistSettings() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute<void>(
         builder: (context) => const ArtistCommissionSettingsScreen(),
       ),
-    ).then((_) => _loadData());
+    );
+    if (mounted) {
+      await _loadData();
+    }
   }
 
   void _browseArtists() {
@@ -970,6 +994,15 @@ class _CommissionHubScreenState extends State<CommissionHubScreen> {
       context,
       MaterialPageRoute<void>(
         builder: (context) => CommissionGalleryScreen(artistId: user.uid),
+      ),
+    );
+  }
+
+  void _openCommissionDetail(DirectCommissionModel commission) {
+    Navigator.push(
+      context,
+      MaterialPageRoute<void>(
+        builder: (context) => CommissionDetailScreen(commission: commission),
       ),
     );
   }
@@ -1014,4 +1047,230 @@ class _CommissionHubScreenState extends State<CommissionHubScreen> {
       ),
     );
   }
+
+  String _getStatusLabel(CommissionStatus status) {
+    switch (status) {
+      case CommissionStatus.pending:
+        return 'commission_hub_status_pending'.tr();
+      case CommissionStatus.quoted:
+        return 'commission_hub_status_quoted'.tr();
+      case CommissionStatus.accepted:
+        return 'commission_hub_status_accepted'.tr();
+      case CommissionStatus.inProgress:
+        return 'commission_hub_status_in_progress'.tr();
+      case CommissionStatus.revision:
+        return 'commission_hub_status_revision'.tr();
+      case CommissionStatus.completed:
+        return 'commission_hub_status_completed'.tr();
+      case CommissionStatus.delivered:
+        return 'commission_hub_status_delivered'.tr();
+      case CommissionStatus.cancelled:
+        return 'commission_hub_status_cancelled'.tr();
+      case CommissionStatus.disputed:
+        return 'commission_hub_status_disputed'.tr();
+    }
+  }
+
+  Color _getStatusColor(CommissionStatus status) {
+    switch (status) {
+      case CommissionStatus.pending:
+        return _CommissionPalette.yellowAccent;
+      case CommissionStatus.quoted:
+        return _CommissionPalette.tealAccent;
+      case CommissionStatus.accepted:
+        return _CommissionPalette.greenAccent;
+      case CommissionStatus.inProgress:
+        return _CommissionPalette.purpleAccent;
+      case CommissionStatus.revision:
+        return _CommissionPalette.yellowAccent;
+      case CommissionStatus.completed:
+        return _CommissionPalette.greenAccent;
+      case CommissionStatus.delivered:
+        return _CommissionPalette.greenAccent;
+      case CommissionStatus.cancelled:
+        return _CommissionPalette.pinkAccent;
+      case CommissionStatus.disputed:
+        return _CommissionPalette.pinkAccent;
+    }
+  }
+
+  IconData _getStatusIcon(CommissionStatus status) {
+    switch (status) {
+      case CommissionStatus.pending:
+        return Icons.schedule;
+      case CommissionStatus.quoted:
+        return Icons.request_quote;
+      case CommissionStatus.accepted:
+        return Icons.handshake;
+      case CommissionStatus.inProgress:
+        return Icons.brush;
+      case CommissionStatus.revision:
+        return Icons.edit;
+      case CommissionStatus.completed:
+        return Icons.check_circle;
+      case CommissionStatus.delivered:
+        return Icons.local_shipping;
+      case CommissionStatus.cancelled:
+        return Icons.cancel;
+      case CommissionStatus.disputed:
+        return Icons.warning;
+    }
+  }
+}
+
+class _StatEntry {
+  const _StatEntry({
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.color,
+  });
+
+  final String label;
+  final String value;
+  final IconData icon;
+  final Color color;
+}
+
+class _StatTile extends StatelessWidget {
+  const _StatTile({required this.entry});
+
+  final _StatEntry entry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        color: Colors.white.withValues(alpha: 0.04),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: entry.color.withValues(alpha: 0.18),
+            ),
+            child: Icon(entry.icon, color: entry.color),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            entry.value,
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 20,
+              fontWeight: FontWeight.w900,
+              color: _CommissionPalette.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            entry.label,
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: _CommissionPalette.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QuickActionData {
+  const _QuickActionData({
+    required this.label,
+    required this.icon,
+    required this.onTap,
+  });
+
+  final String label;
+  final IconData icon;
+  final VoidCallback onTap;
+}
+
+class _QuickActionButton extends StatelessWidget {
+  const _QuickActionButton({
+    required this.width,
+    required this.label,
+    required this.icon,
+    required this.onTap,
+  });
+
+  final double width;
+  final String label;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: width,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(24),
+          child: Container(
+            height: 72,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              color: Colors.white.withValues(alpha: 0.04),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Color(0xFF7C4DFF),
+                        Color(0xFF22D3EE),
+                        Color(0xFF34D399),
+                      ],
+                    ),
+                  ),
+                  child: Icon(icon, color: Colors.white, size: 18),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: GoogleFonts.spaceGrotesk(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: _CommissionPalette.textPrimary,
+                    ),
+                  ),
+                ),
+                const Icon(Icons.arrow_forward, color: Colors.white54, size: 18),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CommissionPalette {
+  static const Color textPrimary = Color(0xF2FFFFFF);
+  static const Color textSecondary = Color(0xCCFFFFFF);
+  static const Color textTertiary = Color(0x80FFFFFF);
+  static const Color purpleAccent = Color(0xFF7C4DFF);
+  static const Color tealAccent = Color(0xFF22D3EE);
+  static const Color greenAccent = Color(0xFF34D399);
+  static const Color pinkAccent = Color(0xFFFF3D8D);
+  static const Color yellowAccent = Color(0xFFFFC857);
 }

@@ -86,11 +86,15 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
       // Get artwork count and other analytics
       final artworkCount = await _getArtworkCount(userId);
       final profileViews = await _getProfileViews(userId);
+      final artBattleStats = await _getArtBattleStats(userId);
 
       return {
         'artworkCount': artworkCount,
         'profileViews': profileViews,
         'totalSales': _earnings?.totalEarnings ?? 0.0,
+        'artBattleVotes': artBattleStats['totalVotes'] ?? 0,
+        'artBattleAppearances': artBattleStats['totalAppearances'] ?? 0,
+        'artBattleWins': artBattleStats['totalWins'] ?? 0,
       };
     } catch (e) {
       return {};
@@ -118,6 +122,38 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
       return snapshot.docs.length;
     } catch (e) {
       return 0;
+    }
+  }
+
+  Future<Map<String, int>> _getArtBattleStats(String userId) async {
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('artworks')
+          .where('artistId', isEqualTo: userId)
+          .get();
+
+      int totalVotes = 0;
+      int totalAppearances = 0;
+      int totalWins = 0;
+
+      for (final doc in snapshot.docs) {
+        final data = doc.data();
+        totalVotes += (data['artBattleScore'] as int?) ?? 0;
+        totalAppearances += (data['artBattleAppearances'] as int?) ?? 0;
+        totalWins += (data['artBattleWins'] as int?) ?? 0;
+      }
+
+      return {
+        'totalVotes': totalVotes,
+        'totalAppearances': totalAppearances,
+        'totalWins': totalWins,
+      };
+    } catch (e) {
+      return {
+        'totalVotes': 0,
+        'totalAppearances': 0,
+        'totalWins': 0,
+      };
     }
   }
 
@@ -550,6 +586,24 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
                         '\$${_earnings?.pendingBalance.toStringAsFixed(2) ?? '0.00'}',
                         Icons.pending,
                         Colors.red,
+                      ),
+                      _buildStatCard(
+                        'Art Battle Votes',
+                        _analytics['artBattleVotes']?.toString() ?? '0',
+                        Icons.thumb_up,
+                        Colors.pink,
+                      ),
+                      _buildStatCard(
+                        'Battle Appearances',
+                        _analytics['artBattleAppearances']?.toString() ?? '0',
+                        Icons.visibility,
+                        Colors.cyan,
+                      ),
+                      _buildStatCard(
+                        'Battle Wins',
+                        _analytics['artBattleWins']?.toString() ?? '0',
+                        Icons.emoji_events,
+                        Colors.amber,
                       ),
                     ],
                   ),

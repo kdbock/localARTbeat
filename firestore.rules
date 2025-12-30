@@ -264,6 +264,24 @@ service cloud.firestore {
         resource.data.artistId == request.auth.uid ||
         isAdmin(request.auth.uid)
       );
+
+      // Auction bids subcollection
+      match /bids/{bidId} {
+        allow read: if isAuthenticated();
+        allow list: if isAuthenticated();
+        allow create: if false; // Only Cloud Functions can create bids
+        allow update: if false;
+        allow delete: if false;
+      }
+
+      // Auction results subcollection
+      match /auction_results/{resultId} {
+        allow read: if isAuthenticated();
+        allow list: if isAuthenticated();
+        allow create: if false; // Only Cloud Functions can create results
+        allow update: if false;
+        allow delete: if false;
+      }
     }
 
     // Earnings Transactions - detailed transaction records for artists

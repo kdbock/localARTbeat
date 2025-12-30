@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:artbeat_core/artbeat_core.dart';
 import '../models/direct_commission_model.dart';
 
 /// Commission filter options
@@ -91,11 +94,11 @@ class _CommissionFilterDialogState extends State<CommissionFilterDialog> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'Filter Commissions',
-                        style: TextStyle(
+                      Text(
+                        'commission_filter_dialog_title'.tr(),
+                        style: GoogleFonts.spaceGrotesk(
                           fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                       GestureDetector(
@@ -115,9 +118,12 @@ class _CommissionFilterDialogState extends State<CommissionFilterDialog> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Commission Types',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  Text(
+                    'commission_filter_dialog_types_title'.tr(),
+                    style: GoogleFonts.spaceGrotesk(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   Wrap(
@@ -155,19 +161,21 @@ class _CommissionFilterDialogState extends State<CommissionFilterDialog> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'Max Price',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
+                      Text(
+                        'commission_filter_dialog_max_price_title'.tr(),
+                        style: GoogleFonts.spaceGrotesk(
+                          fontWeight: FontWeight.w700,
                           fontSize: 16,
                         ),
                       ),
                       Text(
-                        '\$${_maxPrice.toStringAsFixed(0)}',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
+                        'commission_filter_dialog_price_value'.tr(
+                          args: [_maxPrice.toStringAsFixed(0)],
+                        ),
+                        style: GoogleFonts.spaceGrotesk(
+                          fontWeight: FontWeight.w700,
                           fontSize: 16,
-                          color: Colors.green,
+                          color: ArtbeatColors.success,
                         ),
                       ),
                     ],
@@ -198,19 +206,21 @@ class _CommissionFilterDialogState extends State<CommissionFilterDialog> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'Max Turnaround',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
+                      Text(
+                        'commission_filter_dialog_max_turnaround_title'.tr(),
+                        style: GoogleFonts.spaceGrotesk(
+                          fontWeight: FontWeight.w700,
                           fontSize: 16,
                         ),
                       ),
                       Text(
-                        '$_maxTurnaround days',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
+                        'commission_filter_dialog_turnaround_value'.tr(
+                          args: [_maxTurnaround.toString()],
+                        ),
+                        style: GoogleFonts.spaceGrotesk(
+                          fontWeight: FontWeight.w700,
                           fontSize: 16,
-                          color: Colors.blue,
+                          color: ArtbeatColors.primary,
                         ),
                       ),
                     ],
@@ -240,14 +250,14 @@ class _CommissionFilterDialogState extends State<CommissionFilterDialog> {
                   Expanded(
                     child: OutlinedButton(
                       onPressed: _resetFilters,
-                      child: const Text('Reset'),
+                      child: Text('commission_filter_dialog_reset'.tr()),
                     ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: ElevatedButton(
                       onPressed: _applyFilters,
-                      child: const Text('Apply Filters'),
+                      child: Text('commission_filter_dialog_apply'.tr()),
                     ),
                   ),
                 ],

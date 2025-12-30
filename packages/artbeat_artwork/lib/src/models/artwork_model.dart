@@ -56,6 +56,52 @@ enum ArtworkModerationStatus {
   }
 }
 
+/// Status for Art Battle participation
+enum ArtBattleStatus {
+  eligible,
+  active,
+  coolingDown,
+  optedOut,
+  removed,
+  frozen;
+
+  String get value {
+    switch (this) {
+      case ArtBattleStatus.eligible:
+        return 'eligible';
+      case ArtBattleStatus.active:
+        return 'active';
+      case ArtBattleStatus.coolingDown:
+        return 'cooling_down';
+      case ArtBattleStatus.optedOut:
+        return 'opted_out';
+      case ArtBattleStatus.removed:
+        return 'removed';
+      case ArtBattleStatus.frozen:
+        return 'frozen';
+    }
+  }
+
+  static ArtBattleStatus fromString(String status) {
+    switch (status) {
+      case 'eligible':
+        return ArtBattleStatus.eligible;
+      case 'active':
+        return ArtBattleStatus.active;
+      case 'cooling_down':
+        return ArtBattleStatus.coolingDown;
+      case 'opted_out':
+        return ArtBattleStatus.optedOut;
+      case 'removed':
+        return ArtBattleStatus.removed;
+      case 'frozen':
+        return ArtBattleStatus.frozen;
+      default:
+        return ArtBattleStatus.eligible;
+    }
+  }
+}
+
 /// Model representing an artwork item in the ARTbeat platform
 class ArtworkModel {
   /// Unique identifier for the artwork
@@ -175,6 +221,48 @@ class ArtworkModel {
   /// Serialization configuration
   final Map<String, dynamic>? serializationConfig;
 
+  /// Whether this artwork is in auction
+  final bool auctionEnabled;
+
+  /// End date/time of the auction
+  final DateTime? auctionEnd;
+
+  /// Starting price for the auction
+  final double? startingPrice;
+
+  /// Reserve price for the auction (hidden from bidders)
+  final double? reservePrice;
+
+  /// Current status of the auction
+  final String? auctionStatus;
+
+  /// Current highest bid amount
+  final double? currentHighestBid;
+
+  /// User ID of the current highest bidder
+  final String? currentHighestBidder;
+
+  /// Whether this artwork is enabled for Art Battles
+  final bool artBattleEnabled;
+
+  /// Current status in Art Battle system
+  final ArtBattleStatus artBattleStatus;
+
+  /// Score in Art Battle system (wins - losses)
+  final int artBattleScore;
+
+  /// Number of appearances in Art Battles
+  final int artBattleAppearances;
+
+  /// Number of wins in Art Battles
+  final int artBattleWins;
+
+  /// Last time this artwork was shown in a battle
+  final DateTime? artBattleLastShownAt;
+
+  /// Last time this artwork won a battle
+  final DateTime? artBattleLastWinAt;
+
   ArtworkModel({
     required this.id,
     required this.userId,
@@ -215,6 +303,20 @@ class ArtworkModel {
     this.releasedChapters,
     this.readingMetadata,
     this.serializationConfig,
+    this.auctionEnabled = false,
+    this.auctionEnd,
+    this.startingPrice,
+    this.reservePrice,
+    this.auctionStatus,
+    this.currentHighestBid,
+    this.currentHighestBidder,
+    this.artBattleEnabled = false,
+    this.artBattleStatus = ArtBattleStatus.eligible,
+    this.artBattleScore = 0,
+    this.artBattleAppearances = 0,
+    this.artBattleWins = 0,
+    this.artBattleLastShownAt,
+    this.artBattleLastWinAt,
   })  :
         // Create defensive copies of all lists to prevent external modification
         additionalImageUrls = List.unmodifiable(additionalImageUrls),
@@ -287,6 +389,29 @@ class ArtworkModel {
       releasedChapters: data['releasedChapters'] as int?,
       readingMetadata: data['readingMetadata'] as Map<String, dynamic>?,
       serializationConfig: data['serializationConfig'] as Map<String, dynamic>?,
+      auctionEnabled: data['auctionEnabled'] as bool? ?? false,
+      auctionEnd: (data['auctionEnd'] as Timestamp?)?.toDate(),
+      startingPrice: data['startingPrice'] != null
+          ? (data['startingPrice'] as num).toDouble()
+          : null,
+      reservePrice: data['reservePrice'] != null
+          ? (data['reservePrice'] as num).toDouble()
+          : null,
+      auctionStatus: data['auctionStatus'] as String?,
+      currentHighestBid: data['currentHighestBid'] != null
+          ? (data['currentHighestBid'] as num).toDouble()
+          : null,
+      currentHighestBidder: data['currentHighestBidder'] as String?,
+      artBattleEnabled: data['artBattleEnabled'] as bool? ?? false,
+      artBattleStatus: ArtBattleStatus.fromString(
+        data['artBattleStatus'] as String? ?? 'eligible',
+      ),
+      artBattleScore: data['artBattleScore'] as int? ?? 0,
+      artBattleAppearances: data['artBattleAppearances'] as int? ?? 0,
+      artBattleWins: data['artBattleWins'] as int? ?? 0,
+      artBattleLastShownAt:
+          (data['artBattleLastShownAt'] as Timestamp?)?.toDate(),
+      artBattleLastWinAt: (data['artBattleLastWinAt'] as Timestamp?)?.toDate(),
     );
   }
 
@@ -332,6 +457,23 @@ class ArtworkModel {
       if (readingMetadata != null) 'readingMetadata': readingMetadata,
       if (serializationConfig != null)
         'serializationConfig': serializationConfig,
+      'auctionEnabled': auctionEnabled,
+      if (auctionEnd != null) 'auctionEnd': Timestamp.fromDate(auctionEnd!),
+      if (startingPrice != null) 'startingPrice': startingPrice,
+      if (reservePrice != null) 'reservePrice': reservePrice,
+      if (auctionStatus != null) 'auctionStatus': auctionStatus,
+      if (currentHighestBid != null) 'currentHighestBid': currentHighestBid,
+      if (currentHighestBidder != null)
+        'currentHighestBidder': currentHighestBidder,
+      'artBattleEnabled': artBattleEnabled,
+      'artBattleStatus': artBattleStatus.value,
+      'artBattleScore': artBattleScore,
+      'artBattleAppearances': artBattleAppearances,
+      'artBattleWins': artBattleWins,
+      if (artBattleLastShownAt != null)
+        'artBattleLastShownAt': Timestamp.fromDate(artBattleLastShownAt!),
+      if (artBattleLastWinAt != null)
+        'artBattleLastWinAt': Timestamp.fromDate(artBattleLastWinAt!),
     };
   }
 
@@ -376,6 +518,13 @@ class ArtworkModel {
     int? releasedChapters,
     Map<String, dynamic>? readingMetadata,
     Map<String, dynamic>? serializationConfig,
+    bool? auctionEnabled,
+    DateTime? auctionEnd,
+    double? startingPrice,
+    double? reservePrice,
+    String? auctionStatus,
+    double? currentHighestBid,
+    String? currentHighestBidder,
   }) {
     return ArtworkModel(
       id: id ?? this.id,
@@ -417,6 +566,13 @@ class ArtworkModel {
       releasedChapters: releasedChapters ?? this.releasedChapters,
       readingMetadata: readingMetadata ?? this.readingMetadata,
       serializationConfig: serializationConfig ?? this.serializationConfig,
+      auctionEnabled: auctionEnabled ?? this.auctionEnabled,
+      auctionEnd: auctionEnd ?? this.auctionEnd,
+      startingPrice: startingPrice ?? this.startingPrice,
+      reservePrice: reservePrice ?? this.reservePrice,
+      auctionStatus: auctionStatus ?? this.auctionStatus,
+      currentHighestBid: currentHighestBid ?? this.currentHighestBid,
+      currentHighestBidder: currentHighestBidder ?? this.currentHighestBidder,
     );
   }
 

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_core/artbeat_core.dart';
@@ -6,7 +8,8 @@ import '../models/post_model.dart';
 import '../models/group_models.dart';
 import '../models/comment_model.dart';
 import '../widgets/group_post_card.dart';
-import '../theme/community_colors.dart';
+import 'glass_card.dart';
+import 'glass_input_decoration.dart';
 
 class PostDetailModal extends StatefulWidget {
   final BaseGroupPost post;
@@ -405,63 +408,190 @@ class _PostDetailModalState extends State<PostDetailModal> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.9,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Handle bar
-          Container(
-            margin: const EdgeInsets.symmetric(vertical: 12),
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: Colors.grey[300],
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-
-          // Header with gradient
-          Container(
-            decoration: const BoxDecoration(
-              gradient: CommunityColors.communityGradient,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              child: Row(
-                children: [
-                  const Text(
-                    'Post Details',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+    final List<Widget> commentsWidgets = _showComments ? [
+      const Divider(),
+      Flexible(
+        child: _isLoadingComments
+            ? const Center(child: CircularProgressIndicator())
+            : _comments.isEmpty
+            ? Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Text(
+                    'post_detail_modal_no_comments'.tr(),
+                    style: GoogleFonts.spaceGrotesk(
+                      color: Colors.white.withValues(alpha: 0.7),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
-                  const Spacer(),
-                  // Search icon
-                  IconButton(
-                    onPressed: () => _navigateToSearch(context),
-                    icon: const Icon(Icons.search, color: Colors.white),
+                ),
+              )
+            : ListView.builder(
+                controller: _scrollController,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                itemCount: _comments.length,
+                shrinkWrap: true,
+                itemBuilder: (context, index) {
+                  final comment = _comments[index];
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    child: _buildCommentItem(comment),
+                  );
+                },
+              ),
+      ),
+
+      // Comment input - moved outside the Flexible widget
+      const Divider(),
+      Container(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (_replyingToCommentId != null) ...[
+              GlassCard(
+                padding: const EdgeInsets.all(12),
+                borderRadius: 16,
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.reply,
+                      color: Color(0xFF22D3EE),
+                      size: 16,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'post_detail_modal_replying_to'.tr().replaceAll('{user}', _replyingToUserName ?? ''),
+                      style: GoogleFonts.spaceGrotesk(
+                        color: const Color(0xFF22D3EE),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const Spacer(),
+                    GestureDetector(
+                      onTap: _clearReply,
+                      child: const Icon(
+                        Icons.close,
+                        color: Color(0xFF22D3EE),
+                        size: 16,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _commentController,
+                    decoration: GlassInputDecoration(
+                      hintText: 'post_detail_modal_add_comment_hint'.tr(),
+                    ),
+                    maxLines: null,
+                    textInputAction: TextInputAction.send,
+                    onSubmitted: (_) => _addComment(),
+                    style: GoogleFonts.spaceGrotesk(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
+                ),
+                const SizedBox(width: 12),
+                IconButton(
+                  onPressed: _isSendingComment ? null : _addComment,
+                  icon: _isSendingComment
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF22D3EE)),
+                          ),
+                        )
+                      : const Icon(Icons.send, color: Color(0xFF22D3EE)),
+                  padding: const EdgeInsets.all(8),
+                  constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ] : [Container()];
+
+    return GlassCard(
+      margin: EdgeInsets.zero,
+      borderRadius: 24,
+      child: SizedBox(
+        height: MediaQuery.of(context).size.height * 0.9,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Handle bar
+            Container(
+              margin: const EdgeInsets.symmetric(vertical: 12),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+
+            // Header with gradient
+            Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFF7C4DFF), Color(0xFF22D3EE), Color(0xFF34D399)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                child: Row(
+                  children: [
+                    Text(
+                      'post_detail_modal_title'.tr(),
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const Spacer(),
+                    // Search icon
+                    IconButton(
+                      onPressed: () => _navigateToSearch(context),
+                      icon: const Icon(Icons.search, color: Colors.white),
+                      padding: const EdgeInsets.all(8),
+                      constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+                    ),
                   // Messaging icon
                   IconButton(
                     onPressed: () => _navigateToMessaging(context),
                     icon: const Icon(Icons.message, color: Colors.white),
+                    padding: const EdgeInsets.all(8),
+                    constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
                   ),
                   // Developer icon
                   IconButton(
                     onPressed: () => _openDeveloperTools(context),
                     icon: const Icon(Icons.developer_mode, color: Colors.white),
+                    padding: const EdgeInsets.all(8),
+                    constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
                   ),
                   // Close icon
                   IconButton(
                     onPressed: () => Navigator.pop(context),
                     icon: const Icon(Icons.close, color: Colors.white),
+                    padding: const EdgeInsets.all(8),
+                    constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
                   ),
                 ],
               ),
@@ -500,137 +630,23 @@ class _PostDetailModalState extends State<PostDetailModal> {
                 ),
 
                 // Comments section
-                if (_showComments) ...[
-                  const Divider(),
-                  Flexible(
-                    child: _isLoadingComments
-                        ? const Center(child: CircularProgressIndicator())
-                        : _comments.isEmpty
-                        ? const Center(
-                            child: Padding(
-                              padding: EdgeInsets.all(20),
-                              child: Text(
-                                'No comments yet. Be the first to comment!',
-                                style: TextStyle(color: Colors.grey),
-                              ),
-                            ),
-                          )
-                        : ListView.builder(
-                            controller: _scrollController,
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            itemCount: _comments.length,
-                            shrinkWrap: true,
-                            itemBuilder: (context, index) {
-                              final comment = _comments[index];
-                              return Container(
-                                margin: const EdgeInsets.only(bottom: 16),
-                                child: _buildCommentItem(comment),
-                              );
-                            },
-                          ),
-                  ),
-
-                  // Comment input - moved outside the Flexible widget
-                  const Divider(),
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (_replyingToCommentId != null) ...[
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.blue[50],
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.reply,
-                                  color: Colors.blue[700],
-                                  size: 16,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'Replying to $_replyingToUserName',
-                                  style: TextStyle(
-                                    color: Colors.blue[700],
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                const Spacer(),
-                                GestureDetector(
-                                  onTap: _clearReply,
-                                  child: Icon(
-                                    Icons.close,
-                                    color: Colors.blue[700],
-                                    size: 16,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                        ],
-                        Row(
-                          children: [
-                            Expanded(
-                              child: TextField(
-                                controller: _commentController,
-                                decoration: const InputDecoration(
-                                  hintText: 'Add a comment...',
-                                  border: OutlineInputBorder(),
-                                  contentPadding: EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 12,
-                                  ),
-                                ),
-                                maxLines: null,
-                                textInputAction: TextInputAction.send,
-                                onSubmitted: (_) => _addComment(),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            IconButton(
-                              onPressed: _isSendingComment ? null : _addComment,
-                              icon: _isSendingComment
-                                  ? const SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                  : const Icon(Icons.send),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ] else
-                  // When comments are not shown, fill remaining space with empty container
-                  Container(),
+                ...commentsWidgets,
               ],
             ),
           ),
         ],
       ),
-    );
+    ));
   }
 
   Widget _buildCommentItem(CommentModel comment) {
     final isReply = comment.parentCommentId.isNotEmpty;
 
-    return Container(
-      margin: EdgeInsets.only(left: isReply ? 32 : 0),
+    return GlassCard(
+      margin: EdgeInsets.only(left: isReply ? 32 : 0, bottom: 8),
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: isReply ? Colors.grey[50] : Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey[200]!),
-      ),
+      borderRadius: 16,
+      glassOpacity: isReply ? 0.06 : 0.08,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -643,7 +659,7 @@ class _PostDetailModalState extends State<PostDetailModal> {
                   comment.userAvatarUrl,
                 ),
                 child: !ImageUrlValidator.isValidImageUrl(comment.userAvatarUrl)
-                    ? const Icon(Icons.person, size: 16)
+                    ? const Icon(Icons.person, size: 16, color: Colors.white)
                     : null,
               ),
               const SizedBox(width: 8),
@@ -653,14 +669,19 @@ class _PostDetailModalState extends State<PostDetailModal> {
                   children: [
                     Text(
                       comment.userName,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
+                      style: GoogleFonts.spaceGrotesk(
+                        fontWeight: FontWeight.w700,
                         fontSize: 12,
+                        color: Colors.white,
                       ),
                     ),
                     Text(
                       _formatTimeAgo(comment.createdAt.toDate()),
-                      style: TextStyle(color: Colors.grey[600], fontSize: 10),
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.white.withValues(alpha: 0.6),
+                        fontSize: 10,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ],
                 ),
@@ -675,28 +696,43 @@ class _PostDetailModalState extends State<PostDetailModal> {
                     }
                   },
                   itemBuilder: (context) => [
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'reply',
                       child: Row(
                         children: [
-                          Icon(Icons.reply, size: 16),
-                          SizedBox(width: 8),
-                          Text('Reply'),
+                          const Icon(Icons.reply, size: 16, color: Color(0xFF22D3EE)),
+                          const SizedBox(width: 8),
+                          Text(
+                            'post_detail_modal_reply'.tr(),
+                            style: GoogleFonts.spaceGrotesk(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
                         ],
                       ),
                     ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'report',
                       child: Row(
                         children: [
-                          Icon(Icons.flag, size: 16, color: Colors.red),
-                          SizedBox(width: 8),
-                          Text('Report', style: TextStyle(color: Colors.red)),
+                          const Icon(Icons.flag, size: 16, color: Color(0xFFFF3D8D)),
+                          const SizedBox(width: 8),
+                          Text(
+                            'post_detail_modal_report'.tr(),
+                            style: GoogleFonts.spaceGrotesk(
+                              color: const Color(0xFFFF3D8D),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
                         ],
                       ),
                     ),
                   ],
-                  child: const Icon(Icons.more_vert, size: 16),
+                  icon: const Icon(Icons.more_vert, size: 16, color: Colors.white70),
+                  color: Colors.black.withValues(alpha: 0.8),
                 ),
             ],
           ),
@@ -704,7 +740,14 @@ class _PostDetailModalState extends State<PostDetailModal> {
           const SizedBox(height: 8),
 
           // Comment content
-          Text(comment.content),
+          Text(
+            comment.content,
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
 
           const SizedBox(height: 8),
 
@@ -720,31 +763,21 @@ class _PostDetailModalState extends State<PostDetailModal> {
                     Icon(
                       Icons.favorite_border,
                       size: 16,
-                      color: Colors.grey[600],
+                      color: Colors.white.withValues(alpha: 0.6),
                     ),
                     const SizedBox(width: 4),
                     Text(
                       '0', // Since CommentModel doesn't have likes field
-                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.white.withValues(alpha: 0.6),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: 16),
-              if (!isReply)
-                GestureDetector(
-                  onTap: () => _replyToComment(comment),
-                  child: Text(
-                    'Reply',
-                    style: TextStyle(
-                      color: Colors.blue[700],
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-            ],
-          ),
+        ]),
         ],
       ),
     );

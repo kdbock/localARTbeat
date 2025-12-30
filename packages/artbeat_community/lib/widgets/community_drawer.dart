@@ -3,8 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import '../screens/unified_community_hub.dart';
+import '../screens/art_community_hub.dart';
 import '../screens/feed/enhanced_community_feed_screen.dart';
 import '../screens/feed/trending_content_screen.dart';
 import '../screens/portfolios/portfolios_screen.dart';
@@ -15,7 +16,6 @@ import '../screens/gifts/gifts_screen.dart';
 import '../src/screens/community_artists_screen.dart';
 import '../screens/settings/quiet_mode_screen.dart';
 import '../screens/moderation/moderation_queue_screen.dart';
-import '../../theme/community_colors.dart';
 
 /// Community navigation drawer with user profile and navigation options
 class CommunityDrawer extends StatefulWidget {
@@ -71,8 +71,8 @@ class _CommunityDrawerState extends State<CommunityDrawer> {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                CommunityColors.primary,
-                CommunityColors.secondary,
+                ArtbeatColors.primary,
+                ArtbeatColors.primaryPurple,
                 Colors.white,
               ],
               stops: [0.0, 0.3, 0.3],
@@ -95,7 +95,7 @@ class _CommunityDrawerState extends State<CommunityDrawer> {
                         title: 'community_drawer_community_hub'.tr(),
                         onTap: () => _navigateToScreen(
                           context,
-                          const UnifiedCommunityHub(),
+                          const ArtCommunityHub(),
                         ),
                       ),
                       _buildDrawerItem(
@@ -178,8 +178,8 @@ class _CommunityDrawerState extends State<CommunityDrawer> {
                 color: Colors.white,
                 child: Text(
                   'community_drawer_version'.tr(),
-                  style: const TextStyle(
-                    color: CommunityColors.textSecondary,
+                  style: GoogleFonts.spaceGrotesk(
+                    color: ArtbeatColors.textSecondary,
                     fontSize: 12,
                   ),
                   textAlign: TextAlign.center,
@@ -204,7 +204,7 @@ class _CommunityDrawerState extends State<CommunityDrawer> {
             child: _isLoading
                 ? const CircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation<Color>(
-                      CommunityColors.primary,
+                      ArtbeatColors.primary,
                     ),
                   )
                 : _currentUser?.profileImageUrl != null
@@ -219,14 +219,14 @@ class _CommunityDrawerState extends State<CommunityDrawer> {
                       errorWidget: (context, url, error) => const Icon(
                         Icons.person,
                         size: 40,
-                        color: CommunityColors.primary,
+                        color: ArtbeatColors.primary,
                       ),
                     ),
                   )
                 : const Icon(
                     Icons.person,
                     size: 40,
-                    color: CommunityColors.primary,
+                    color: ArtbeatColors.primary,
                   ),
           ),
 
@@ -238,10 +238,10 @@ class _CommunityDrawerState extends State<CommunityDrawer> {
                 ? 'community_drawer_loading'.tr()
                 : _currentUser?.fullName ??
                       'community_drawer_community_member'.tr(),
-            style: const TextStyle(
+            style: GoogleFonts.spaceGrotesk(
               color: Colors.white,
               fontSize: 18,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w700,
             ),
             textAlign: TextAlign.center,
           ),
@@ -251,7 +251,10 @@ class _CommunityDrawerState extends State<CommunityDrawer> {
           // User role/status
           Text(
             _isLoading ? '' : _getUserRoleText(),
-            style: const TextStyle(color: Colors.white70, fontSize: 14),
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white70,
+              fontSize: 14,
+            ),
             textAlign: TextAlign.center,
           ),
         ],
@@ -285,11 +288,11 @@ class _CommunityDrawerState extends State<CommunityDrawer> {
     required VoidCallback onTap,
   }) {
     return ListTile(
-      leading: Icon(icon, color: CommunityColors.primary),
+      leading: Icon(icon, color: ArtbeatColors.primary),
       title: Text(
         title,
-        style: const TextStyle(
-          color: CommunityColors.textPrimary,
+        style: GoogleFonts.spaceGrotesk(
+          color: ArtbeatColors.textPrimary,
           fontSize: 16,
         ),
       ),
