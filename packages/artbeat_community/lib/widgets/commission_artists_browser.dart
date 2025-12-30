@@ -1,6 +1,13 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:artbeat_artist/artbeat_artist.dart' as artist;
+import 'package:artbeat_core/artbeat_core.dart';
 import '../models/direct_commission_model.dart';
 import '../services/direct_commission_service.dart';
+import 'glass_card.dart';
 
 /// Widget to browse artists accepting commissions
 class CommissionArtistsBrowser extends StatefulWidget {
@@ -15,6 +22,9 @@ class CommissionArtistsBrowser extends StatefulWidget {
 
 class _CommissionArtistsBrowserState extends State<CommissionArtistsBrowser> {
   final DirectCommissionService _commissionService = DirectCommissionService();
+  final artist.ArtistProfileService _artistProfileService =
+      artist.ArtistProfileService();
+  final Map<String, String> _artistNames = {};
 
   bool _isLoading = false;
   List<ArtistCommissionSettings> _artists = [];
@@ -33,9 +43,11 @@ class _CommissionArtistsBrowserState extends State<CommissionArtistsBrowser> {
       final artists = await _commissionService.getAvailableArtists(
         type: _selectedType,
       );
+      final names = await _fetchArtistNames(artists);
       if (mounted) {
         setState(() {
           _artists = artists;
+          _artistNames.addAll(names);
           _isLoading = false;
         });
       }
@@ -52,6 +64,63 @@ class _CommissionArtistsBrowserState extends State<CommissionArtistsBrowser> {
   void _handleTypeFilter(CommissionType? type) {
     setState(() => _selectedType = type);
     _loadCommissionArtists();
+  }
+
+  Future<Map<String, String>> _fetchArtistNames(
+    List<ArtistCommissionSettings> artists,
+  ) async {
+    final ids = artists
+        .map((artist) => artist.artistId)
+        .where((id) => id.isNotEmpty && !_artistNames.containsKey(id))
+        .toSet();
+    if (ids.isEmpty) {
+      return {};
+    }
+
+    final results = await Future.wait(
+      ids.map((id) async {
+        try {
+          final profile = await _artistProfileService.getArtistProfileByUserId(id);
+          if (profile != null) {
+            return MapEntry(id, profile.displayName);
+          }
+        } catch (_) {}
+        return MapEntry(id, _buildFallbackName(id));
+      }),
+    );
+
+    return Map.fromEntries(results);
+  }
+
+  String _resolveArtistName(ArtistCommissionSettings artist) {
+    return _artistNames[artist.artistId] ?? _buildFallbackName(artist.artistId);
+  }
+
+  String _buildFallbackName(String artistId) {
+    final shortId = _shortenArtistId(artistId);
+    if (shortId.isEmpty) {
+      return 'Artist';
+    }
+    return 'Artist $shortId';
+  }
+
+  String _shortenArtistId(String artistId) {
+    if (artistId.isEmpty) {
+      return '';
+    }
+    final length = math.min(artistId.length, 8);
+    return artistId.substring(0, length);
+  }
+
+  void _handleCommissionRequest(ArtistCommissionSettings artist) {
+    final artistName = _resolveArtistName(artist);
+    Navigator.of(context).pushNamed(
+      AppRoutes.commissionRequest,
+      arguments: {
+        'artistId': artist.artistId,
+        'artistName': artistName,
+      },
+    );
   }
 
   @override
@@ -84,18 +153,21 @@ class _CommissionArtistsBrowserState extends State<CommissionArtistsBrowser> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Commission Artists',
-                          style: TextStyle(
+                        Text(
+                          'commission_artists_browser_title'.tr(),
+                          style: GoogleFonts.spaceGrotesk(
                             fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                         Text(
-                          'Browse ${_artists.length} artists accepting commissions',
-                          style: TextStyle(
+                          'commission_artists_browser_subtitle'.tr(
+                            args: [_artists.length.toString()],
+                          ),
+                          style: GoogleFonts.spaceGrotesk(
                             fontSize: 12,
-                            color: Colors.grey[600],
+                            fontWeight: FontWeight.w400,
+                            color: ArtbeatColors.textSecondary,
                           ),
                         ),
                       ],
@@ -110,7 +182,7 @@ class _CommissionArtistsBrowserState extends State<CommissionArtistsBrowser> {
                 child: Row(
                   children: [
                     _buildFilterChip(
-                      label: 'All Types',
+                      label: 'commission_artists_browser_all_types'.tr(),
                       selected: _selectedType == null,
                       onSelected: () => _handleTypeFilter(null),
                     ),
@@ -142,17 +214,20 @@ class _CommissionArtistsBrowserState extends State<CommissionArtistsBrowser> {
                   Icon(Icons.search_off, size: 48, color: Colors.grey[400]),
                   const SizedBox(height: 16),
                   Text(
-                    'No artists found',
-                    style: TextStyle(
-                      color: Colors.grey[600],
+                    'commission_artists_browser_no_artists_title'.tr(),
+                    style: GoogleFonts.spaceGrotesk(
+                      color: ArtbeatColors.textSecondary,
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Check back soon for more commission artists',
-                    style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                    'commission_artists_browser_no_artists_subtitle'.tr(),
+                    style: GoogleFonts.spaceGrotesk(
+                      color: ArtbeatColors.textSecondary,
+                      fontSize: 12,
+                    ),
                   ),
                 ],
               ),
@@ -199,84 +274,104 @@ class _CommissionArtistsBrowserState extends State<CommissionArtistsBrowser> {
   }
 
   Widget _buildArtistCard(ArtistCommissionSettings artist) {
-    return Container(
-      width: 180,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: Colors.grey[200]!),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Artist avatar placeholder
-          Container(
-            height: 120,
-            decoration: BoxDecoration(
-              color: Colors.blue.shade50,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(12),
-                topRight: Radius.circular(12),
-              ),
-            ),
-            child: Center(
-              child: Icon(Icons.palette, size: 48, color: Colors.blue.shade300),
-            ),
-          ),
-          // Artist info
-          Padding(
-            padding: const EdgeInsets.all(12),
+    final artistName = _resolveArtistName(artist);
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(24),
+        onTap: () => _handleCommissionRequest(artist),
+        child: GlassCard(
+          borderRadius: 24,
+          child: SizedBox(
+            width: 180,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Artist ID: ${artist.artistId.substring(0, 8)}...',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  maxLines: 1,
-                ),
-                const SizedBox(height: 4),
-                if (artist.basePrice > 0)
-                  Text(
-                    'From \$${artist.basePrice.toStringAsFixed(2)}',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.green.shade700,
+                Container(
+                  height: 120,
+                  decoration: BoxDecoration(
+                    color: ArtbeatColors.primary.withValues(alpha: 0.1),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(24),
+                      topRight: Radius.circular(24),
                     ),
                   ),
-                const SizedBox(height: 8),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      // TODO: Navigate to artist profile or commission request
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Commission request feature coming soon',
+                  child: const Center(
+                    child: Icon(
+                      Icons.palette,
+                      size: 48,
+                      color: ArtbeatColors.primary,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          artistName,
+                          style: GoogleFonts.spaceGrotesk(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'commission_artists_browser_artist_id'.tr(
+                            args: [_shortenArtistId(artist.artistId)],
+                          ),
+                          style: GoogleFonts.spaceGrotesk(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: ArtbeatColors.textSecondary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        if (artist.basePrice > 0) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            'commission_artists_browser_price_from'.tr(
+                              args: [artist.basePrice.toStringAsFixed(2)],
+                            ),
+                            style: GoogleFonts.spaceGrotesk(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: ArtbeatColors.success,
+                            ),
+                          ),
+                        ],
+                        const Spacer(),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () => _handleCommissionRequest(artist),
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              backgroundColor: ArtbeatColors.primary,
+                              foregroundColor: Colors.white,
+                            ),
+                            child: Text(
+                              'commission_artists_browser_request'.tr(),
+                              style: GoogleFonts.spaceGrotesk(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
                           ),
                         ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      backgroundColor: Colors.blue,
-                      foregroundColor: Colors.white,
-                    ),
-                    child: const Text(
-                      'Request',
-                      style: TextStyle(fontSize: 12),
+                      ],
                     ),
                   ),
                 ),
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

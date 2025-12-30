@@ -15,6 +15,7 @@ import '../services/admin_service.dart';
 import '../services/content_review_service.dart';
 import '../services/unified_admin_service.dart';
 import '../services/financial_service.dart';
+import '../services/admin_artwork_management_service.dart';
 import '../widgets/admin_drawer.dart';
 import '../widgets/admin_search_modal.dart';
 import '../screens/admin_user_detail_screen.dart';
@@ -51,6 +52,8 @@ class _ModernUnifiedAdminDashboardState
   final ContentReviewService _contentService = ContentReviewService();
   final UnifiedAdminService _unifiedAdminService = UnifiedAdminService();
   final FinancialService _financialService = FinancialService();
+  final AdminArtworkManagementService _artworkService =
+      AdminArtworkManagementService();
 
   // Data
   AnalyticsModel? _analytics;
@@ -60,6 +63,7 @@ class _ModernUnifiedAdminDashboardState
   List<ContentModel> _allContent = [];
   List<TransactionModel> _recentTransactions = [];
   Map<String, double> _revenueBreakdown = {};
+  int _artBattleEligibleCount = 0;
 
   // State
   bool _isLoading = true;
@@ -72,6 +76,7 @@ class _ModernUnifiedAdminDashboardState
 
   // Content filter state
   String _selectedContentFilter = 'All';
+  AdminContentType _selectedContentType = AdminContentType.all;
 
   @override
   void initState() {
@@ -159,9 +164,18 @@ class _ModernUnifiedAdminDashboardState
   Future<void> _loadContentData() async {
     final pendingReviews = await _contentService.getPendingReviews();
     final allContent = await _unifiedAdminService.getAllContent();
+
+    // Get art battle eligible count
+    final artBattleEligibleSnapshot = await FirebaseFirestore.instance
+        .collection('artwork')
+        .where('artBattleEnabled', isEqualTo: true)
+        .where('artBattleStatus', isEqualTo: 'eligible')
+        .get();
+
     setState(() {
       _pendingReviews = pendingReviews;
       _allContent = allContent;
+      _artBattleEligibleCount = artBattleEligibleSnapshot.docs.length;
     });
   }
 
@@ -1578,6 +1592,12 @@ class _ModernUnifiedAdminDashboardState
                             Icons.flag_rounded,
                             const Color(0xFFFF5722),
                           ),
+                          _buildContentStatCard(
+                            'Art Battle Eligible',
+                            _artBattleEligibleCount.toString(),
+                            Icons.sports_kabaddi_rounded,
+                            const Color(0xFF9C27B0),
+                          ),
                         ],
                       );
                     },
@@ -1651,6 +1671,28 @@ class _ModernUnifiedAdminDashboardState
                             _allContent
                                 .where((c) => c.status == 'flagged')
                                 .length),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        _buildContentTypeFilterChip(AdminContentType.all),
+                        const SizedBox(width: 8),
+                        _buildContentTypeFilterChip(AdminContentType.artwork),
+                        const SizedBox(width: 8),
+                        _buildContentTypeFilterChip(AdminContentType.post),
+                        const SizedBox(width: 8),
+                        _buildContentTypeFilterChip(AdminContentType.event),
+                        const SizedBox(width: 8),
+                        _buildContentTypeFilterChip(AdminContentType.capture),
+                        const SizedBox(width: 8),
+                        _buildContentTypeFilterChip(AdminContentType.ad),
+                        const SizedBox(width: 8),
+                        _buildContentTypeFilterChip(
+                            AdminContentType.commission),
                       ],
                     ),
                   ),
@@ -1808,31 +1850,73 @@ class _ModernUnifiedAdminDashboardState
     );
   }
 
+  Widget _buildContentTypeFilterChip(AdminContentType contentType) {
+    final isSelected = _selectedContentType == contentType;
+    final count = contentType == AdminContentType.all
+        ? _allContent.length
+        : _allContent.where((c) => c.contentType == contentType).length;
+
+    return GestureDetector(
+      onTap: () => setState(() => _selectedContentType = contentType),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? Colors.blue.withValues(alpha: 0.3)
+              : Colors.white.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected
+                ? Colors.blue.withValues(alpha: 0.6)
+                : Colors.white.withValues(alpha: 0.2),
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Text(
+          '${contentType.displayName} ($count)',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 12,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+          ),
+        ),
+      ),
+    );
+  }
+
   List<ContentModel> _getFilteredContent() {
     final query = _contentSearchController.text.toLowerCase();
 
-    // First filter by status
-    List<ContentModel> filteredByStatus = _allContent;
+    // First filter by content type
+    List<ContentModel> filteredByType = _allContent;
+    if (_selectedContentType != AdminContentType.all) {
+      filteredByType = _allContent
+          .where((c) => c.contentType == _selectedContentType)
+          .toList();
+    }
+
+    // Then filter by status
+    List<ContentModel> filteredByStatus = filteredByType;
     if (_selectedContentFilter != 'All') {
       switch (_selectedContentFilter) {
         case 'Pending':
           final pendingContentIds =
               _pendingReviews.map((r) => r.contentId).toSet();
-          filteredByStatus = _allContent
+          filteredByStatus = filteredByType
               .where((c) => pendingContentIds.contains(c.id))
               .toList();
           break;
         case 'Approved':
           filteredByStatus =
-              _allContent.where((c) => c.status == 'approved').toList();
+              filteredByType.where((c) => c.status == 'approved').toList();
           break;
         case 'Rejected':
           filteredByStatus =
-              _allContent.where((c) => c.status == 'rejected').toList();
+              filteredByType.where((c) => c.status == 'rejected').toList();
           break;
         case 'Reported':
           filteredByStatus =
-              _allContent.where((c) => c.status == 'flagged').toList();
+              filteredByType.where((c) => c.status == 'flagged').toList();
           break;
       }
     }
@@ -2058,6 +2142,20 @@ class _ModernUnifiedAdminDashboardState
                 child:
                     Text('Edit Content', style: TextStyle(color: Colors.white)),
               ),
+              if (content.type == 'artwork') ...[
+                const PopupMenuDivider(),
+                const PopupMenuItem(
+                  value: 'enroll_art_battle',
+                  child: Text('Enroll in Art Battles',
+                      style: TextStyle(color: Colors.white)),
+                ),
+                const PopupMenuItem(
+                  value: 'remove_art_battle',
+                  child: Text('Remove from Art Battles',
+                      style: TextStyle(color: Colors.white)),
+                ),
+              ],
+              const PopupMenuDivider(),
               const PopupMenuItem(
                 value: 'delete',
                 child: Text('Delete Content',
@@ -2212,6 +2310,12 @@ class _ModernUnifiedAdminDashboardState
         break;
       case 'edit':
         _showEditContentDialog(content);
+        break;
+      case 'enroll_art_battle':
+        _enrollArtworkInArtBattles(content);
+        break;
+      case 'remove_art_battle':
+        _removeArtworkFromArtBattles(content);
         break;
       case 'delete':
         _showDeleteConfirmation(content);
@@ -2825,15 +2929,16 @@ class _ModernUnifiedAdminDashboardState
                           const BorderSide(color: Colors.white, width: 2),
                     ),
                   ),
-                  items: ['active', 'pending', 'rejected', 'archived']
-                      .map((status) => DropdownMenuItem(
-                            value: status,
-                            child: Text(
-                              status.toUpperCase(),
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                          ))
-                      .toList(),
+                  items:
+                      ['approved', 'pending', 'rejected', 'flagged', 'archived']
+                          .map((status) => DropdownMenuItem(
+                                value: status,
+                                child: Text(
+                                  status.toUpperCase(),
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                              ))
+                          .toList(),
                   onChanged: (value) {
                     if (value != null) {
                       setState(() {
@@ -2876,6 +2981,54 @@ class _ModernUnifiedAdminDashboardState
         ),
       ),
     );
+  }
+
+  Future<void> _enrollArtworkInArtBattles(ContentModel content) async {
+    try {
+      await _artworkService.enrollArtworkInArtBattles(content.id);
+      await _loadContentData(); // Refresh data
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Artwork enrolled in Art Battles'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to enroll artwork: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _removeArtworkFromArtBattles(ContentModel content) async {
+    try {
+      await _artworkService.removeArtworkFromArtBattles(content.id);
+      await _loadContentData(); // Refresh data
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Artwork removed from Art Battles'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to remove artwork: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   void _showDeleteConfirmation(ContentModel content) {
@@ -2989,15 +3142,23 @@ class _ModernUnifiedAdminDashboardState
     try {
       // Update in Firestore based on content type
       final collection = _getCollectionForContentType(content.type);
+      final updateData = {
+        'title': newTitle,
+        'description': newDescription,
+        'updatedAt': FieldValue.serverTimestamp(),
+      };
+
+      // For artworks, update moderationStatus; for others, update status
+      if (content.type == 'artwork') {
+        updateData['moderationStatus'] = newStatus;
+      } else {
+        updateData['status'] = newStatus;
+      }
+
       await FirebaseFirestore.instance
           .collection(collection)
           .doc(content.id)
-          .update({
-        'title': newTitle,
-        'description': newDescription,
-        'status': newStatus,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
+          .update(updateData);
 
       // Update local data
       final index = _allContent.indexWhere((c) => c.id == content.id);
@@ -3106,7 +3267,7 @@ class _ModernUnifiedAdminDashboardState
   String _getCollectionForContentType(String type) {
     switch (type.toLowerCase()) {
       case 'artwork':
-        return 'artworks';
+        return 'artwork';
       case 'post':
         return 'posts';
       case 'event':

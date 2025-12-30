@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:google_fonts/google_fonts.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_art_walk/artbeat_art_walk.dart' as art_walk;
+import 'package:artbeat_community/widgets/glass_card.dart';
 
 /// Activity card that matches the style of EnhancedPostCard
 class ActivityCard extends StatelessWidget {
@@ -30,17 +33,17 @@ class ActivityCard extends StatelessWidget {
   String _getActivityTitle(art_walk.SocialActivityType type) {
     switch (type) {
       case art_walk.SocialActivityType.discovery:
-        return 'Art Discovery';
+        return 'activity_discovery_title'.tr();
       case art_walk.SocialActivityType.capture:
-        return 'Art Capture';
+        return 'activity_capture_title'.tr();
       case art_walk.SocialActivityType.walkCompleted:
-        return 'Walk Completed!';
+        return 'activity_walk_completed_title'.tr();
       case art_walk.SocialActivityType.achievement:
-        return 'Achievement Unlocked';
+        return 'activity_achievement_title'.tr();
       case art_walk.SocialActivityType.friendJoined:
-        return 'New Friend';
+        return 'activity_friend_joined_title'.tr();
       case art_walk.SocialActivityType.milestone:
-        return 'Milestone Reached';
+        return 'activity_milestone_title'.tr();
     }
   }
 
@@ -65,26 +68,13 @@ class ActivityCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final activityColor = _getActivityColor(activity.type);
 
-    return Container(
+    return GlassCard(
       margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-        border: Border.all(
-          color: activityColor.withValues(alpha: 0.2),
-          width: 1,
-        ),
-      ),
+      padding: EdgeInsets.zero,
+      borderRadius: 24,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -106,20 +96,8 @@ class ActivityCard extends StatelessWidget {
   }
 
   Widget _buildHeader(Color activityColor) {
-    return Container(
+    return Padding(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            activityColor.withValues(alpha: 0.1),
-            activityColor.withValues(alpha: 0.05),
-          ],
-        ),
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(16),
-          topRight: Radius.circular(16),
-        ),
-      ),
       child: Row(
         children: [
           // Activity icon
@@ -137,8 +115,7 @@ class ActivityCard extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 12),
-
+          const SizedBox(width: 16), // multiple of 8
           // Activity title and user
           Expanded(
             child: Column(
@@ -146,17 +123,18 @@ class ActivityCard extends StatelessWidget {
               children: [
                 Text(
                   _getActivityTitle(activity.type),
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
+                  style: GoogleFonts.spaceGrotesk(
+                    fontWeight: FontWeight.w800,
                     fontSize: 14,
                     color: activityColor,
                   ),
                 ),
                 Text(
                   activity.userName,
-                  style: const TextStyle(
+                  style: GoogleFonts.spaceGrotesk(
                     fontSize: 12,
-                    color: ArtbeatColors.textSecondary,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white.withValues(alpha: 0.7), // secondary
                   ),
                 ),
               ],
@@ -168,14 +146,14 @@ class ActivityCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
               color: activityColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(16),
             ),
             child: Text(
               activity.type.name.toUpperCase(),
-              style: TextStyle(
+              style: GoogleFonts.spaceGrotesk(
                 color: activityColor,
                 fontSize: 10,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),
@@ -186,13 +164,17 @@ class ActivityCard extends StatelessWidget {
 
   Widget _buildContent() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 8,
+      ), // adjust to multiple of 8
       child: Text(
         activity.message,
-        style: const TextStyle(
+        style: GoogleFonts.spaceGrotesk(
           fontSize: 14,
+          fontWeight: FontWeight.w600,
           height: 1.4,
-          color: ArtbeatColors.textPrimary,
+          color: Colors.white.withValues(alpha: 0.92), // primary text
         ),
       ),
     );
@@ -206,14 +188,15 @@ class ActivityCard extends StatelessWidget {
           Icon(
             Icons.location_on,
             size: 14,
-            color: ArtbeatColors.textSecondary.withValues(alpha: 0.6),
+            color: Colors.white.withValues(alpha: 0.45), // tertiary
           ),
-          const SizedBox(width: 4),
+          const SizedBox(width: 8),
           Text(
-            'Nearby',
-            style: TextStyle(
+            'activity_nearby'.tr(),
+            style: GoogleFonts.spaceGrotesk(
               fontSize: 12,
-              color: ArtbeatColors.textSecondary.withValues(alpha: 0.6),
+              fontWeight: FontWeight.w600,
+              color: Colors.white.withValues(alpha: 0.45),
             ),
           ),
         ],
@@ -226,9 +209,10 @@ class ActivityCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
       child: Text(
         timeago.format(activity.timestamp),
-        style: TextStyle(
+        style: GoogleFonts.spaceGrotesk(
           fontSize: 12,
-          color: ArtbeatColors.textSecondary.withValues(alpha: 0.6),
+          fontWeight: FontWeight.w600,
+          color: Colors.white.withValues(alpha: 0.45),
         ),
       ),
     );

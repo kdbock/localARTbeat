@@ -97,7 +97,7 @@ class ConsolidatedAdminService {
   Future<Map<String, dynamic>> _getContentStats() async {
     try {
       final results = await Future.wait([
-        _firestore.collection('artworks').get(),
+        _firestore.collection('artwork').get(),
         _firestore.collection('posts').get(),
         _firestore.collection('events').get(),
         _firestore

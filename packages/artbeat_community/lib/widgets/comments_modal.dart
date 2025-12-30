@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../models/post_model.dart';
 import '../models/art_models.dart';
 import '../services/art_community_service.dart';
@@ -181,10 +183,14 @@ class _CommentsModalState extends State<CommentsModal> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'Comments (${_comments.length})',
-                    style: const TextStyle(
+                    tr(
+                      'comments_modal_title',
+                      args: [_comments.length.toString()],
+                    ),
+                    style: GoogleFonts.spaceGrotesk(
                       fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w900,
+                      color: ArtbeatColors.textPrimary,
                     ),
                   ),
                   const Spacer(),
@@ -201,24 +207,32 @@ class _CommentsModalState extends State<CommentsModal> {
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : _comments.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.chat_bubble_outline,
                             size: 64,
                             color: Colors.grey,
                           ),
-                          SizedBox(height: 16),
+                          const SizedBox(height: 16),
                           Text(
-                            'No comments yet',
-                            style: TextStyle(fontSize: 16, color: Colors.grey),
+                            tr('comments_modal_no_comments_title'),
+                            style: GoogleFonts.spaceGrotesk(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                              color: ArtbeatColors.textSecondary,
+                            ),
                           ),
-                          SizedBox(height: 8),
+                          const SizedBox(height: 8),
                           Text(
-                            'Be the first to share your thoughts!',
-                            style: TextStyle(fontSize: 14, color: Colors.grey),
+                            tr('comments_modal_no_comments_subtitle'),
+                            style: GoogleFonts.spaceGrotesk(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: ArtbeatColors.textSecondary,
+                            ),
                           ),
                         ],
                       ),
@@ -282,7 +296,7 @@ class _CommentsModalState extends State<CommentsModal> {
                           controller: _commentController,
                           focusNode: _textFieldFocus,
                           decoration: InputDecoration(
-                            hintText: 'Add a comment...',
+                            hintText: tr('comments_modal_add_comment_hint'),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(24),
                               borderSide: BorderSide(color: Colors.grey[300]!),
@@ -383,23 +397,35 @@ class _CommentsModalState extends State<CommentsModal> {
                     Text(
                       comment.userName.isNotEmpty
                           ? comment.userName
-                          : 'Anonymous',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
+                          : tr('comments_modal_anonymous'),
+                      style: GoogleFonts.spaceGrotesk(
+                        fontWeight: FontWeight.w700,
                         fontSize: 14,
+                        color: ArtbeatColors.textPrimary,
                       ),
                     ),
                     const SizedBox(width: 8),
                     Text(
                       timeago.format(comment.createdAt),
-                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                      style: GoogleFonts.spaceGrotesk(
+                        color: ArtbeatColors.textSecondary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                      ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 4),
 
                 // Comment text
-                Text(comment.content, style: const TextStyle(fontSize: 14)),
+                Text(
+                  comment.content,
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    color: ArtbeatColors.textPrimary,
+                  ),
+                ),
               ],
             ),
           ),

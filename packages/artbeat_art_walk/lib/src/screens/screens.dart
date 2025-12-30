@@ -17,3 +17,4 @@ export 'enhanced_my_art_walks_screen.dart';
 export 'instant_discovery_radar_screen.dart';
 export 'quest_history_screen.dart';
 export 'weekly_goals_screen.dart';
+export 'instant_discovery_screen.dart';

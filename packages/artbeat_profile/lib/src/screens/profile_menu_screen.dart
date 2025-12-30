@@ -7,7 +7,6 @@ import '../widgets/world_background.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/section_header.dart';
 import '../widgets/user_avatar_badge.dart';
-import 'user_profile_screen.dart';
 
 class ProfileMenuScreen extends StatefulWidget {
   const ProfileMenuScreen({super.key});

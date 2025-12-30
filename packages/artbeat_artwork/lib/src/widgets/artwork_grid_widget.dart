@@ -10,6 +10,7 @@ class ArtworkGridWidget extends StatelessWidget {
   final void Function(ArtworkModel)? onArtworkTap;
   final void Function(ArtworkModel)? onArtworkEdit;
   final void Function(ArtworkModel)? onArtworkDelete;
+  final void Function(ArtworkModel)? onArtworkAuctionManage;
   final Future<void> Function()? onRefresh;
   final bool showManagementActions;
   final int crossAxisCount;
@@ -22,6 +23,7 @@ class ArtworkGridWidget extends StatelessWidget {
     this.onArtworkTap,
     this.onArtworkEdit,
     this.onArtworkDelete,
+    this.onArtworkAuctionManage,
     this.onRefresh,
     this.showManagementActions = false,
     this.crossAxisCount = 2,
@@ -127,6 +129,16 @@ class ArtworkGridWidget extends StatelessWidget {
                           const Icon(Icons.edit, size: 18),
                           const SizedBox(width: 8),
                           Text('art_walk_edit'.tr()),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 'auction',
+                      child: Row(
+                        children: [
+                          const Icon(Icons.gavel, size: 18),
+                          const SizedBox(width: 8),
+                          Text('auction.manage_auction'.tr()),
                         ],
                       ),
                     ),
@@ -243,6 +255,11 @@ class ArtworkGridWidget extends StatelessWidget {
       case 'edit':
         if (onArtworkEdit != null) {
           onArtworkEdit!(artwork);
+        }
+        break;
+      case 'auction':
+        if (onArtworkAuctionManage != null) {
+          onArtworkAuctionManage!(artwork);
         }
         break;
       case 'delete':

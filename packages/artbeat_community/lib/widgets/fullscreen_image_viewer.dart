@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Fullscreen image viewer with swipe support for multiple images
 class FullscreenImageViewer extends StatefulWidget {
@@ -82,21 +84,22 @@ class _FullscreenImageViewerState extends State<FullscreenImageViewer> {
                       );
                     },
                     errorBuilder: (context, error, stackTrace) {
-                      return const Center(
+                      return Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.broken_image_outlined,
                               color: Colors.white,
                               size: 64,
                             ),
-                            SizedBox(height: 16),
+                            const SizedBox(height: 16),
                             Text(
-                              'Failed to load image',
-                              style: TextStyle(
+                              'failed_to_load_image'.tr(),
+                              style: GoogleFonts.spaceGrotesk(
                                 color: Colors.white,
                                 fontSize: 16,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ],
@@ -141,7 +144,11 @@ class _FullscreenImageViewerState extends State<FullscreenImageViewer> {
                 ),
                 child: Text(
                   '${_currentIndex + 1} / ${widget.imageUrls.length}',
-                  style: const TextStyle(color: Colors.white, fontSize: 14),
+                  style: GoogleFonts.spaceGrotesk(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ),

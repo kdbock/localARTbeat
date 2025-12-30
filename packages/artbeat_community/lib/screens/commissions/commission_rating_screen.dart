@@ -1,13 +1,19 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+
 import '../../models/direct_commission_model.dart';
 import '../../services/commission_rating_service.dart';
-import 'package:artbeat_core/artbeat_core.dart';
+import '../../widgets/gradient_cta_button.dart';
+import '../../widgets/glass_card.dart';
+import '../../widgets/glass_input_decoration.dart';
+import '../../widgets/hud_top_bar.dart';
+import '../../widgets/world_background.dart';
 
 class CommissionRatingScreen extends StatefulWidget {
-  final DirectCommissionModel commission;
+  const CommissionRatingScreen({super.key, required this.commission});
 
-  const CommissionRatingScreen({Key? key, required this.commission})
-    : super(key: key);
+  final DirectCommissionModel commission;
 
   @override
   State<CommissionRatingScreen> createState() => _CommissionRatingScreenState();
@@ -20,7 +26,7 @@ class _CommissionRatingScreenState extends State<CommissionRatingScreen> {
   double _communicationRating = 5;
   double _timelinessRating = 5;
   bool _wouldRecommend = true;
-  final Set<String> _selectedTags = {};
+  final Set<String> _selectedTags = <String>{};
   bool _isLoading = false;
 
   static const List<String> _availableTags = [
@@ -33,6 +39,27 @@ class _CommissionRatingScreenState extends State<CommissionRatingScreen> {
     'easy-to-work-with',
     'worth-the-price',
   ];
+
+  static const Map<String, String> _tagLabelKeys = {
+    'excellent-quality': 'commission_rating_tag_excellent_quality',
+    'great-communication': 'commission_rating_tag_great_communication',
+    'fast-delivery': 'commission_rating_tag_fast_delivery',
+    'professional': 'commission_rating_tag_professional',
+    'responsive': 'commission_rating_tag_responsive',
+    'attention-to-detail': 'commission_rating_tag_attention_to_detail',
+    'easy-to-work-with': 'commission_rating_tag_easy_to_work_with',
+    'worth-the-price': 'commission_rating_tag_worth_the_price',
+  };
+
+  static const LinearGradient _primaryGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      Color(0xFF7C4DFF),
+      Color(0xFF22D3EE),
+      Color(0xFF34D399),
+    ],
+  );
 
   @override
   void initState() {
@@ -47,10 +74,10 @@ class _CommissionRatingScreenState extends State<CommissionRatingScreen> {
   }
 
   Future<void> _submitRating() async {
-    if (_commentController.text.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Please write a comment')));
+    if (_commentController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('commission_rating_error_comment_required'.tr())),
+      );
       return;
     }
 
@@ -66,21 +93,27 @@ class _CommissionRatingScreenState extends State<CommissionRatingScreen> {
         qualityRating: _qualityRating,
         communicationRating: _communicationRating,
         timelinessRating: _timelinessRating,
-        comment: _commentController.text,
+        comment: _commentController.text.trim(),
         wouldRecommend: _wouldRecommend,
         tags: _selectedTags.toList(),
         isArtistRating: false,
       );
 
       if (!mounted) return;
+      FocusScope.of(context).unfocus();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Rating submitted successfully!')),
+        SnackBar(content: Text('commission_rating_submit_success'.tr())),
       );
       Navigator.pop(context, true);
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'commission_rating_submit_error'.tr(namedArgs: {'error': '$e'}),
+          ),
+        ),
+      );
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -88,268 +121,496 @@ class _CommissionRatingScreenState extends State<CommissionRatingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(kToolbarHeight + 48 + 4),
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: ArtbeatColors.primaryGradient,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black26,
-                blurRadius: 8,
-                offset: Offset(0, 4),
-              ),
-            ],
-          ),
-          child: AppBar(title: const Text('Rate Commission'), elevation: 0),
+    return WorldBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: HudTopBar(
+          title: 'commission_rating_title'.tr(),
+          glassBackground: true,
         ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Artist info
-            Row(
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 40),
+            child: Column(
               children: [
-                CircleAvatar(
-                  radius: 32,
-                  backgroundColor: Colors.grey[300],
-                  child: const Icon(Icons.person),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.commission.artistName,
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        widget.commission.title,
-                        style: Theme.of(context).textTheme.bodySmall,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
+                _buildArtistSummary(),
+                const SizedBox(height: 24),
+                _buildRatingCard(),
+                const SizedBox(height: 24),
+                _buildFeedbackCard(),
+                const SizedBox(height: 24),
+                _buildCommentCard(),
               ],
             ),
-            const SizedBox(height: 24),
-
-            // Overall Rating
-            _buildRatingSection(
-              title: 'Overall Rating',
-              currentRating: _overallRating,
-              onChanged: (value) => setState(() => _overallRating = value),
-            ),
-            const SizedBox(height: 24),
-
-            // Detailed Ratings
-            Text(
-              'Detailed Ratings',
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-
-            _buildDetailedRating(
-              label: 'Quality of Work',
-              value: _qualityRating,
-              onChanged: (v) => setState(() => _qualityRating = v),
-            ),
-            const SizedBox(height: 12),
-
-            _buildDetailedRating(
-              label: 'Communication',
-              value: _communicationRating,
-              onChanged: (v) => setState(() => _communicationRating = v),
-            ),
-            const SizedBox(height: 12),
-
-            _buildDetailedRating(
-              label: 'Timeliness',
-              value: _timelinessRating,
-              onChanged: (v) => setState(() => _timelinessRating = v),
-            ),
-            const SizedBox(height: 24),
-
-            // Would Recommend
-            CheckboxListTile(
-              value: _wouldRecommend,
-              onChanged: (value) =>
-                  setState(() => _wouldRecommend = value ?? false),
-              title: const Text('I would recommend this artist to others'),
-              contentPadding: EdgeInsets.zero,
-            ),
-            const SizedBox(height: 24),
-
-            // Tags
-            Text(
-              'What stood out? (Select all that apply)',
-              style: Theme.of(
-                context,
-              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: _availableTags.map((tag) {
-                final isSelected = _selectedTags.contains(tag);
-                return FilterChip(
-                  label: Text(tag.replaceAll('-', ' ')),
-                  selected: isSelected,
-                  onSelected: (selected) {
-                    setState(() {
-                      if (selected) {
-                        _selectedTags.add(tag);
-                      } else {
-                        _selectedTags.remove(tag);
-                      }
-                    });
-                  },
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 24),
-
-            // Comment
-            Text(
-              'Tell us more',
-              style: Theme.of(
-                context,
-              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _commentController,
-              maxLines: 5,
-              decoration: InputDecoration(
-                hintText: 'Share your experience working with this artist...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                filled: true,
-                fillColor: Colors.grey[100],
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Submit Button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _isLoading ? null : _submitRating,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                child: _isLoading
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Text('Submit Rating'),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildRatingSection({
-    required String title,
-    required double currentRating,
+  Widget _buildArtistSummary() {
+    return GlassCard(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeading(
+            title: 'commission_rating_artist_title'.tr(),
+            subtitle: 'commission_rating_artist_subtitle'.tr(),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  gradient: _primaryGradient,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.35),
+                      blurRadius: 32,
+                      offset: const Offset(0, 16),
+                    ),
+                  ],
+                ),
+                child: const Icon(Icons.person, color: Colors.white, size: 32),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.commission.artistName,
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      widget.commission.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white.withValues(alpha: 0.78),
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRatingCard() {
+    return GlassCard(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeading(
+            title: 'commission_rating_overall_title'.tr(),
+            subtitle: 'commission_rating_overall_subtitle'.tr(),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Container(
+                width: 96,
+                height: 96,
+                decoration: BoxDecoration(
+                  gradient: _primaryGradient,
+                  borderRadius: BorderRadius.circular(32),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.35),
+                      blurRadius: 32,
+                      offset: const Offset(0, 16),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      _overallRating.toStringAsFixed(1),
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'commission_rating_overall_max'.tr(),
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white.withValues(alpha: 0.8),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 24),
+              Expanded(
+                child: Column(
+                  children: [
+                    SliderTheme(
+                      data: _sliderTheme(context),
+                      child: Slider(
+                        value: _overallRating,
+                        min: 1,
+                        max: 5,
+                        divisions: 8,
+                        label: _overallRating.toStringAsFixed(1),
+                        onChanged: (value) =>
+                            setState(() => _overallRating = value),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: List.generate(
+                        5,
+                        (index) => _buildStarButton(
+                          value: index + 1.0,
+                          currentRating: _overallRating,
+                          onChanged: (value) =>
+                              setState(() => _overallRating = value),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          _buildDetailedRating(
+            labelKey: 'commission_rating_quality_label',
+            value: _qualityRating,
+            onChanged: (value) => setState(() => _qualityRating = value),
+          ),
+          const SizedBox(height: 16),
+          _buildDetailedRating(
+            labelKey: 'commission_rating_communication_label',
+            value: _communicationRating,
+            onChanged: (value) => setState(() => _communicationRating = value),
+          ),
+          const SizedBox(height: 16),
+          _buildDetailedRating(
+            labelKey: 'commission_rating_timeliness_label',
+            value: _timelinessRating,
+            onChanged: (value) => setState(() => _timelinessRating = value),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFeedbackCard() {
+    return GlassCard(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeading(
+            title: 'commission_rating_feedback_title'.tr(),
+            subtitle: 'commission_rating_feedback_subtitle'.tr(),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Text(
+                  'commission_rating_recommend_label'.tr(),
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+              Switch(
+                value: _wouldRecommend,
+                onChanged: (value) => setState(() => _wouldRecommend = value),
+                thumbColor: WidgetStateProperty.resolveWith(
+                  (states) => states.contains(WidgetState.selected)
+                      ? Colors.white
+                      : Colors.white.withValues(alpha: 0.7),
+                ),
+                trackColor: WidgetStateProperty.resolveWith(
+                  (states) => states.contains(WidgetState.selected)
+                      ? const Color(0xFF22D3EE)
+                      : Colors.white.withValues(alpha: 0.2),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'commission_rating_tags_title'.tr(),
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'commission_rating_tags_subtitle'.tr(),
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: Colors.white.withValues(alpha: 0.75),
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 24),
+          Wrap(
+            spacing: 16,
+            runSpacing: 16,
+            children: _availableTags.map(_buildTagPill).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCommentCard() {
+    return GlassCard(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeading(
+            title: 'commission_rating_comment_title'.tr(),
+            subtitle: 'commission_rating_comment_subtitle'.tr(),
+          ),
+          const SizedBox(height: 24),
+          TextField(
+            controller: _commentController,
+            maxLines: 6,
+            minLines: 5,
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+              height: 1.5,
+            ),
+            cursorColor: const Color(0xFF22D3EE),
+            decoration: GlassInputDecoration(
+              hintText: 'commission_rating_comment_hint'.tr(),
+            ),
+          ),
+          const SizedBox(height: 24),
+          GradientCTAButton(
+            text: 'commission_rating_submit_button'.tr(),
+            onPressed: _isLoading ? null : _submitRating,
+            isLoading: _isLoading,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionHeading({required String title, String? subtitle}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: GoogleFonts.spaceGrotesk(
+            fontSize: 16,
+            fontWeight: FontWeight.w900,
+            color: Colors.white,
+            letterSpacing: 0.4,
+          ),
+        ),
+        if (subtitle != null) ...[
+          const SizedBox(height: 8),
+          Text(
+            subtitle,
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: Colors.white.withValues(alpha: 0.78),
+              height: 1.4,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildDetailedRating({
+    required String labelKey,
+    required double value,
     required ValueChanged<double> onChanged,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          title,
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          labelKey.tr(),
+          style: GoogleFonts.spaceGrotesk(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         Row(
           children: [
-            Text(
-              currentRating.toStringAsFixed(1),
-              style: Theme.of(
-                context,
-              ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(width: 8),
             Expanded(
-              child: Slider(
-                value: currentRating,
-                min: 1,
-                max: 5,
-                divisions: 4,
-                label: currentRating.toStringAsFixed(1),
-                onChanged: onChanged,
+              child: SliderTheme(
+                data: _sliderTheme(context),
+                child: Slider(
+                  value: value,
+                  min: 1,
+                  max: 5,
+                  divisions: 8,
+                  label: value.toStringAsFixed(1),
+                  onChanged: onChanged,
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Container(
+              width: 56,
+              height: 48,
+              decoration: BoxDecoration(
+                gradient: _primaryGradient,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Center(
+                child: Text(
+                  value.toStringAsFixed(1),
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                  ),
+                ),
               ),
             ),
           ],
-        ),
-        Padding(
-          padding: const EdgeInsets.only(top: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: List.generate(5, (index) {
-              final value = index + 1.0;
-              return GestureDetector(
-                onTap: () => onChanged(value),
-                child: Icon(
-                  Icons.star,
-                  color: currentRating >= value
-                      ? Colors.amber
-                      : Colors.grey[300],
-                  size: 32,
-                ),
-              );
-            }),
-          ),
         ),
       ],
     );
   }
 
-  Widget _buildDetailedRating({
-    required String label,
+  Widget _buildStarButton({
     required double value,
+    required double currentRating,
     required ValueChanged<double> onChanged,
   }) {
-    return Row(
-      children: [
-        Expanded(flex: 2, child: Text(label)),
-        Expanded(
-          flex: 3,
-          child: Slider(
-            value: value,
-            min: 1,
-            max: 5,
-            divisions: 4,
-            onChanged: onChanged,
+    final isActive = currentRating >= value;
+    return SizedBox(
+      width: 48,
+      height: 48,
+      child: IconButton(
+        onPressed: () => onChanged(value),
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+        icon: Icon(
+          isActive ? Icons.star_rounded : Icons.star_border_rounded,
+          color: isActive
+              ? const Color(0xFFFFC857)
+              : Colors.white.withValues(alpha: 0.3),
+          size: 28,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTagPill(String tag) {
+    final isSelected = _selectedTags.contains(tag);
+    final labelKey = _tagLabelKeys[tag];
+    final label = labelKey != null ? labelKey.tr() : tag;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          setState(() {
+            if (isSelected) {
+              _selectedTags.remove(tag);
+            } else {
+              _selectedTags.add(tag);
+            }
+          });
+        },
+        borderRadius: BorderRadius.circular(24),
+        child: Container(
+          height: 48,
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          decoration: BoxDecoration(
+            gradient: isSelected ? _primaryGradient : null,
+            color:
+                isSelected ? null : Colors.white.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: isSelected
+                  ? Colors.transparent
+                  : Colors.white.withValues(alpha: 0.18),
+            ),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.35),
+                      blurRadius: 24,
+                      offset: const Offset(0, 12),
+                    ),
+                  ]
+                : null,
+          ),
+          child: Center(
+            child: Text(
+              label,
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+                letterSpacing: 0.2,
+              ),
+              textAlign: TextAlign.center,
+            ),
           ),
         ),
-        SizedBox(
-          width: 40,
-          child: Text(
-            value.toStringAsFixed(1),
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-        ),
-      ],
+      ),
+    );
+  }
+
+  SliderThemeData _sliderTheme(BuildContext context) {
+    final base = SliderTheme.of(context);
+    return base.copyWith(
+      trackHeight: 6,
+      activeTrackColor: const Color(0xFF22D3EE),
+      inactiveTrackColor: Colors.white.withValues(alpha: 0.18),
+      thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 12),
+      overlayShape: const RoundSliderOverlayShape(overlayRadius: 20),
+      thumbColor: Colors.white,
+      overlayColor: const Color(0xFF22D3EE).withValues(alpha: 0.25),
+      valueIndicatorColor: const Color(0xFF22D3EE),
+      valueIndicatorTextStyle: GoogleFonts.spaceGrotesk(
+        fontSize: 12,
+        fontWeight: FontWeight.w700,
+        color: Colors.white,
+      ),
     );
   }
 }

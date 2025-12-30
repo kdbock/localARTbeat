@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:artbeat_core/artbeat_core.dart' show ArtistProfileModel;
+import 'package:google_fonts/google_fonts.dart';
+import 'package:artbeat_core/artbeat_core.dart'
+    show ArtistProfileModel, ArtbeatColors;
+import 'package:artbeat_community/widgets/glass_card.dart';
 import '../models/artwork_model.dart';
 import 'avatar_widget.dart';
 
@@ -20,24 +23,62 @@ class CanvasFeed extends StatelessWidget {
       itemCount: artworks.length,
       itemBuilder: (context, index) {
         final artwork = artworks[index];
-        return Card(
+        return GlassCard(
           margin: const EdgeInsets.all(8.0),
-          child: ListTile(
-            leading: AvatarWidget(
-              avatarUrl: artwork.artist?.profileImageUrl ?? '',
-              onTap: () {
-                if (artwork.artist != null) {
-                  onArtistTap(artwork.artist!);
-                }
-              },
-            ),
-            title: Text(artwork.title),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          borderRadius: 24,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
               children: [
-                Text('Medium: ${artwork.medium}'),
-                Text('Location: ${artwork.location}'),
-                Text('Posted: ${artwork.createdAt}'),
+                AvatarWidget(
+                  avatarUrl: artwork.artist?.profileImageUrl ?? '',
+                  onTap: () {
+                    if (artwork.artist != null) {
+                      onArtistTap(artwork.artist!);
+                    }
+                  },
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        artwork.title,
+                        style: GoogleFonts.spaceGrotesk(
+                          fontWeight: FontWeight.w900,
+                          fontSize: 16,
+                          color: ArtbeatColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Medium: ${artwork.medium}',
+                        style: GoogleFonts.spaceGrotesk(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                          color: ArtbeatColors.textSecondary,
+                        ),
+                      ),
+                      Text(
+                        'Location: ${artwork.location}',
+                        style: GoogleFonts.spaceGrotesk(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                          color: ArtbeatColors.textSecondary,
+                        ),
+                      ),
+                      Text(
+                        'Posted: ${artwork.createdAt}',
+                        style: GoogleFonts.spaceGrotesk(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                          color: ArtbeatColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),

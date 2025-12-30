@@ -283,4 +283,69 @@ class AdminArtworkManagementService {
       return [];
     }
   }
+
+  /// Remove artwork from Art Battles by disabling it
+  Future<void> removeArtworkFromArtBattles(String artworkId) async {
+    try {
+      await _firestore.collection('artwork').doc(artworkId).update({
+        'artBattleEnabled': false,
+        'artBattleStatus': 'removed',
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      throw Exception('Error removing artwork from battles: $e');
+    }
+  }
+
+  /// Enroll artwork in Art Battles by enabling it
+  Future<void> enrollArtworkInArtBattles(String artworkId) async {
+    try {
+      await _firestore.collection('artwork').doc(artworkId).update({
+        'artBattleEnabled': true,
+        'artBattleStatus': 'eligible',
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      throw Exception('Error enrolling artwork in battles: $e');
+    }
+  }
+
+  /// Adjust the Art Battle score for an artwork
+  Future<void> adjustArtBattleScore(String artworkId, int newScore) async {
+    try {
+      await _firestore.collection('artwork').doc(artworkId).update({
+        'artBattleScore': newScore,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      throw Exception('Error adjusting Art Battle score: $e');
+    }
+  }
+
+  /// Freeze Art Battles for an artwork (set status to frozen)
+  Future<void> freezeArtBattles(String artworkId) async {
+    try {
+      await _firestore.collection('artwork').doc(artworkId).update({
+        'artBattleStatus': 'frozen',
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      throw Exception('Error freezing Art Battles: $e');
+    }
+  }
+
+  /// Reset Art Battle stats for an artwork
+  Future<void> resetArtBattleStats(String artworkId) async {
+    try {
+      await _firestore.collection('artwork').doc(artworkId).update({
+        'artBattleScore': 0,
+        'artBattleAppearances': 0,
+        'artBattleWins': 0,
+        'artBattleLastVotedAt': null,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      throw Exception('Error resetting Art Battle stats: $e');
+    }
+  }
 }

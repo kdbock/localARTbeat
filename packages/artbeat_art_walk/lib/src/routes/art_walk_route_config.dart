@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:artbeat_art_walk/src/constants/routes.dart';
 import 'package:artbeat_art_walk/src/screens/screens.dart';
 import 'package:artbeat_art_walk/src/models/models.dart';
+import 'package:geolocator/geolocator.dart';
 
 /// Art walk module route configuration
 class ArtWalkRouteConfig {
@@ -11,6 +12,7 @@ class ArtWalkRouteConfig {
     ArtWalkRoutes.dashboard: (_) => const DiscoverDashboardScreen(),
     ArtWalkRoutes.questHistory: (_) => const QuestHistoryScreen(),
     ArtWalkRoutes.weeklyGoals: (_) => const WeeklyGoalsScreen(),
+    ArtWalkRoutes.instantDiscovery: (_) => const InstantDiscoveryRadarScreen(),
   };
 
   static Route<dynamic>? generateRoute(RouteSettings settings) {
@@ -79,14 +81,22 @@ class ArtWalkRouteConfig {
           );
         }
         return MaterialPageRoute(
-          builder: (_) => ArtWalkCelebrationScreen(
-            celebrationData: celebrationData,
-          ),
+          builder: (_) =>
+              ArtWalkCelebrationScreen(celebrationData: celebrationData),
         );
 
       // Note: ArtWalkRoutes.enhancedExperience is deprecated and now points to
       // the same path as ArtWalkRoutes.experience, so no separate case needed
 
+      case ArtWalkRoutes.instantDiscovery:
+        final args = settings.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(
+          builder: (_) => InstantDiscoveryRadarScreen(
+            userPosition: args?['userPosition'] as Position?,
+            initialNearbyArt: (args?['initialNearbyArt'] as List?)
+                ?.cast<PublicArtModel>(),
+          ),
+        );
       default:
         return null;
     }

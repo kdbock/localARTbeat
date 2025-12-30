@@ -257,7 +257,9 @@ class _UserActionMenuState extends State<UserActionMenu> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Delete Post'),
-        content: const Text('Are you sure you want to delete this post? This action cannot be undone.'),
+        content: const Text(
+          'Are you sure you want to delete this post? This action cannot be undone.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
@@ -311,18 +313,18 @@ class _UserActionMenuState extends State<UserActionMenu> {
 
         if (isOwner && isPost) {
           items.addAll([
-            PopupMenuItem<String>(
+            const PopupMenuItem<String>(
               value: 'edit',
               child: ListTile(
-                leading: const Icon(Icons.edit),
-                title: const Text('Edit post'),
+                leading: Icon(Icons.edit),
+                title: Text('Edit post'),
               ),
             ),
-            PopupMenuItem<String>(
+            const PopupMenuItem<String>(
               value: 'delete',
               child: ListTile(
-                leading: const Icon(Icons.delete, color: Colors.red),
-                title: const Text('Delete post'),
+                leading: Icon(Icons.delete, color: Colors.red),
+                title: Text('Delete post'),
               ),
             ),
           ]);

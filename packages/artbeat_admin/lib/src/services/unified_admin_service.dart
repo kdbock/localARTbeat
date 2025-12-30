@@ -24,7 +24,7 @@ class UnifiedAdminService {
           contentType == AdminContentType.all ||
           contentType == AdminContentType.artwork) {
         final artworksQuery = _firestore
-            .collection('artworks')
+            .collection('artwork')
             .orderBy('createdAt', descending: true);
 
         final artworksSnapshot = await (limit != null
@@ -85,6 +85,28 @@ class UnifiedAdminService {
         }
       }
 
+      // Get captures
+      if (contentType == null ||
+          contentType == AdminContentType.all ||
+          contentType == AdminContentType.capture) {
+        final capturesQuery = _firestore
+            .collection('captures')
+            .orderBy('createdAt', descending: true);
+
+        final capturesSnapshot = await (limit != null
+            ? capturesQuery.limit(limit).get()
+            : capturesQuery.get());
+
+        for (final doc in capturesSnapshot.docs) {
+          final content = ContentModel.fromCapture(doc);
+          if (status == null ||
+              status == AdminContentStatus.all ||
+              content.status == status.value) {
+            allContent.add(content);
+          }
+        }
+      }
+
       // Sort by creation date (most recent first)
       allContent.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
@@ -108,18 +130,26 @@ class UnifiedAdminService {
       }
 
       // Try to find and update the content in different collections
-      final collections = ['artworks', 'posts', 'events', 'captures'];
+      final collections = ['artwork', 'posts', 'events', 'captures'];
 
       for (final collection in collections) {
         final doc =
             await _firestore.collection(collection).doc(contentId).get();
         if (doc.exists) {
-          await doc.reference.update({
-            'status': 'approved',
+          final updateData = {
             'moderatedBy': user.uid,
             'moderatedAt': FieldValue.serverTimestamp(),
             'isFlagged': false,
-          });
+          };
+
+          // For artworks, update moderationStatus; for others, update status
+          if (collection == 'artwork') {
+            updateData['moderationStatus'] = 'approved';
+          } else {
+            updateData['status'] = 'approved';
+          }
+
+          await doc.reference.update(updateData);
 
           // Log the moderation action
           await _logModerationAction(
@@ -148,20 +178,28 @@ class UnifiedAdminService {
       }
 
       // Try to find and update the content in different collections
-      final collections = ['artworks', 'posts', 'events', 'captures'];
+      final collections = ['artwork', 'posts', 'events', 'captures'];
 
       for (final collection in collections) {
         final doc =
             await _firestore.collection(collection).doc(contentId).get();
         if (doc.exists) {
-          await doc.reference.update({
-            'status': 'rejected',
+          final updateData = {
             'moderatedBy': user.uid,
             'moderatedAt': FieldValue.serverTimestamp(),
             'rejectionReason':
                 reason ?? 'Content does not meet community guidelines',
             'isFlagged': false,
-          });
+          };
+
+          // For artworks, update moderationStatus; for others, update status
+          if (collection == 'artwork') {
+            updateData['moderationStatus'] = 'rejected';
+          } else {
+            updateData['status'] = 'rejected';
+          }
+
+          await doc.reference.update(updateData);
 
           // Log the moderation action
           await _logModerationAction(
@@ -222,11 +260,12 @@ class UnifiedAdminService {
   Future<Map<String, dynamic>> getContentStatistics() async {
     try {
       final results = await Future.wait([
-        _firestore.collection('artworks').get(),
+        _firestore.collection('artwork').get(),
         _firestore.collection('posts').get(),
         _firestore.collection('events').get(),
+        _firestore.collection('captures').get(),
         _firestore
-            .collection('artworks')
+            .collection('artwork')
             .where('status', isEqualTo: 'pending')
             .get(),
         _firestore
@@ -238,7 +277,11 @@ class UnifiedAdminService {
             .where('status', isEqualTo: 'pending')
             .get(),
         _firestore
-            .collection('artworks')
+            .collection('captures')
+            .where('status', isEqualTo: 'pending')
+            .get(),
+        _firestore
+            .collection('artwork')
             .where('isFlagged', isEqualTo: true)
             .get(),
         _firestore
@@ -247,6 +290,10 @@ class UnifiedAdminService {
             .get(),
         _firestore
             .collection('events')
+            .where('isFlagged', isEqualTo: true)
+            .get(),
+        _firestore
+            .collection('captures')
             .where('isFlagged', isEqualTo: true)
             .get(),
       ]);
@@ -254,20 +301,26 @@ class UnifiedAdminService {
       final totalArtworks = results[0].docs.length;
       final totalPosts = results[1].docs.length;
       final totalEvents = results[2].docs.length;
-      final pendingArtworks = results[3].docs.length;
-      final pendingPosts = results[4].docs.length;
-      final pendingEvents = results[5].docs.length;
-      final flaggedArtworks = results[6].docs.length;
-      final flaggedPosts = results[7].docs.length;
-      final flaggedEvents = results[8].docs.length;
+      final totalCaptures = results[3].docs.length;
+      final pendingArtworks = results[4].docs.length;
+      final pendingPosts = results[5].docs.length;
+      final pendingEvents = results[6].docs.length;
+      final pendingCaptures = results[7].docs.length;
+      final flaggedArtworks = results[8].docs.length;
+      final flaggedPosts = results[9].docs.length;
+      final flaggedEvents = results[10].docs.length;
+      final flaggedCaptures = results[11].docs.length;
 
       return {
-        'total': totalArtworks + totalPosts + totalEvents,
+        'total': totalArtworks + totalPosts + totalEvents + totalCaptures,
         'artworks': totalArtworks,
         'posts': totalPosts,
         'events': totalEvents,
-        'pending': pendingArtworks + pendingPosts + pendingEvents,
-        'flagged': flaggedArtworks + flaggedPosts + flaggedEvents,
+        'captures': totalCaptures,
+        'pending':
+            pendingArtworks + pendingPosts + pendingEvents + pendingCaptures,
+        'flagged':
+            flaggedArtworks + flaggedPosts + flaggedEvents + flaggedCaptures,
         'breakdown': {
           'artworks': {
             'total': totalArtworks,
@@ -283,6 +336,11 @@ class UnifiedAdminService {
             'total': totalEvents,
             'pending': pendingEvents,
             'flagged': flaggedEvents,
+          },
+          'captures': {
+            'total': totalCaptures,
+            'pending': pendingCaptures,
+            'flagged': flaggedCaptures,
           },
         },
       };

@@ -25,6 +25,7 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
   final artist.SubscriptionService _subscriptionService =
       artist.SubscriptionService();
   final artist.AnalyticsService _analyticsService = artist.AnalyticsService();
+  final AuctionService _auctionService = AuctionService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   bool _isLoading = true;
@@ -33,6 +34,10 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
   String? _fallbackArtistName;
   String? _fallbackArtistImageUrl;
   bool _isOwner = false;
+
+  // Auction state
+  double? _currentHighestBid;
+  List<AuctionBidModel> _bidHistory = [];
 
   @override
   void initState() {
@@ -118,6 +123,15 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
         return;
       }
 
+      // Load auction data if this is an auction
+      double? currentHighestBid;
+      List<AuctionBidModel> bidHistory = [];
+      if (artwork.auctionEnabled) {
+        currentHighestBid =
+            await _auctionService.getCurrentHighestBid(widget.artworkId);
+        bidHistory = await _auctionService.getBidHistory(widget.artworkId);
+      }
+
       if (mounted) {
         setState(() {
           _artwork = artwork;
@@ -125,6 +139,8 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
           _fallbackArtistName = fallbackArtistName;
           _fallbackArtistImageUrl = fallbackArtistImageUrl;
           _isOwner = isOwner;
+          _currentHighestBid = currentHighestBid;
+          _bidHistory = bidHistory;
           _isLoading = false;
         });
       }
@@ -590,7 +606,10 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
                             ],
                           ),
                         ),
-                        if (artwork.isForSale)
+                        // Show auction info or regular price
+                        if (artwork.auctionEnabled)
+                          _buildAuctionPriceDisplay(artwork)
+                        else if (artwork.isForSale)
                           Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 16, vertical: 8),
@@ -785,7 +804,9 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
 
                     // Action buttons
                     const SizedBox(height: 32),
-                    if (artwork.isForSale)
+                    if (artwork.auctionEnabled)
+                      _buildAuctionActionButtons(artwork)
+                    else if (artwork.isForSale)
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton.icon(
@@ -811,6 +832,311 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildAuctionActionButtons(ArtworkModel artwork) {
+    final theme = Theme.of(context);
+    final currentUser = _auth.currentUser;
+    final isAuctionActive = artwork.auctionStatus == 'open' &&
+        artwork.auctionEnd != null &&
+        artwork.auctionEnd!.isAfter(DateTime.now());
+    final isWinning =
+        currentUser != null && artwork.currentHighestBidder == currentUser.uid;
+    final canBid = currentUser != null &&
+        currentUser.uid != artwork.userId &&
+        isAuctionActive;
+
+    return Column(
+      children: [
+        // Place Bid button
+        if (canBid)
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: _showPlaceBidModal,
+              icon: const Icon(Icons.gavel),
+              label: Text('auction.place_bid'.tr()),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                backgroundColor: theme.colorScheme.primary,
+                foregroundColor: theme.colorScheme.onPrimary,
+              ),
+            ),
+          ),
+
+        // Status messages
+        if (!canBid) ...[
+          if (currentUser == null)
+            _buildStatusMessage('auction.login_to_bid'.tr(), Colors.orange)
+          else if (currentUser.uid == artwork.userId)
+            _buildStatusMessage('auction.cannot_bid_own'.tr(), Colors.grey)
+          else if (!isAuctionActive)
+            _buildStatusMessage('auction.auction_ended'.tr(), Colors.red)
+        ] else if (isWinning)
+          _buildStatusMessage('auction.you_are_winning'.tr(), Colors.green),
+
+        const SizedBox(height: 16),
+
+        // My Bids button
+        if (currentUser != null)
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<dynamic>(
+                    builder: (context) => const MyBidsScreen(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.history),
+              label: Text('auction.my_bids'.tr()),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+              ),
+            ),
+          ),
+
+        // Bid history
+        if (_bidHistory.isNotEmpty) ...[
+          const SizedBox(height: 24),
+          _buildBidHistory(),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildStatusMessage(String message, Color color) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Text(
+        message,
+        style: TextStyle(
+          color: color,
+          fontWeight: FontWeight.w600,
+        ),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
+  Widget _buildBidHistory() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'auction.bid_history'.tr(),
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+        const SizedBox(height: 12),
+        ..._bidHistory.take(5).map((bid) => Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              margin: const EdgeInsets.only(bottom: 8),
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    '\$${bid.amount.toStringAsFixed(2)}',
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  Text(
+                    _formatBidTime(bid.timestamp),
+                    style: TextStyle(
+                      color: Theme.of(context)
+                          .textTheme
+                          .bodyMedium
+                          ?.color
+                          ?.withValues(alpha: 0.6),
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            )),
+      ],
+    );
+  }
+
+  String _formatBidTime(DateTime timestamp) {
+    final now = DateTime.now();
+    final difference = now.difference(timestamp);
+
+    if (difference.inDays > 0) {
+      return '${difference.inDays}d ago';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours}h ago';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes}m ago';
+    } else {
+      return 'Just now';
+    }
+  }
+
+  void _showPlaceBidModal() {
+    if (_artwork == null) return;
+
+    final currentBid = _currentHighestBid ?? _artwork!.startingPrice ?? 0.0;
+    final minimumBid =
+        _auctionService.getMinimumNextBid(currentBid, _artwork!.startingPrice);
+
+    showModalBottomSheet<dynamic>(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => PlaceBidModal(
+        artworkId: _artwork!.id,
+        artwork: _artwork!,
+        currentHighestBid: _currentHighestBid,
+        minimumBid: minimumBid,
+      ),
+    ).then((success) {
+      if (success == true) {
+        // Refresh auction data
+        _loadArtworkData();
+      }
+    });
+  }
+
+  Widget _buildAuctionPriceDisplay(ArtworkModel artwork) {
+    final theme = Theme.of(context);
+    final currentBid = _currentHighestBid ?? artwork.startingPrice ?? 0.0;
+    final isAuctionActive = artwork.auctionStatus == 'open' &&
+        artwork.auctionEnd != null &&
+        artwork.auctionEnd!.isAfter(DateTime.now());
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primary.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.3),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Auction badge
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: isAuctionActive ? Colors.green : Colors.orange,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              isAuctionActive ? 'auction.live'.tr() : 'auction.ended'.tr(),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          // Current bid
+          Text(
+            'auction.current_bid'.tr(),
+            style: TextStyle(
+              fontSize: 14,
+              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+            ),
+          ),
+          Text(
+            '\$${currentBid.toStringAsFixed(2)}',
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.green,
+            ),
+          ),
+
+          // Countdown timer
+          if (isAuctionActive && artwork.auctionEnd != null) ...[
+            const SizedBox(height: 8),
+            _buildCountdownTimer(artwork.auctionEnd!),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCountdownTimer(DateTime endTime) {
+    return StreamBuilder(
+      stream: Stream<int>.periodic(const Duration(seconds: 1)),
+      builder: (context, snapshot) {
+        final now = DateTime.now();
+        final difference = endTime.difference(now);
+
+        if (difference.isNegative) {
+          return Text(
+            'auction.ended'.tr(),
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.red,
+            ),
+          );
+        }
+
+        final days = difference.inDays;
+        final hours = difference.inHours % 24;
+        final minutes = difference.inMinutes % 60;
+        final seconds = difference.inSeconds % 60;
+
+        String timeString;
+        if (days > 0) {
+          timeString = '${days}d ${hours}h ${minutes}m';
+        } else if (hours > 0) {
+          timeString = '${hours}h ${minutes}m ${seconds}s';
+        } else {
+          timeString = '${minutes}m ${seconds}s';
+        }
+
+        return Row(
+          children: [
+            Icon(
+              Icons.timer,
+              size: 16,
+              color: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.color
+                  ?.withValues(alpha: 0.7),
+            ),
+            const SizedBox(width: 4),
+            Text(
+              timeString,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.color
+                    ?.withValues(alpha: 0.7),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 

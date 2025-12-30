@@ -723,6 +723,66 @@ class _AdminArtworkManagementScreenState
                 ),
               ],
             ),
+            const SizedBox(height: 16),
+            const Text(
+              'Art Battle Controls',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.remove_circle),
+                    label: const Text('Remove from Battles'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.purple,
+                    ),
+                    onPressed: () => _removeFromArtBattles(artwork),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.edit),
+                    label: const Text('Adjust Score'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.teal,
+                    ),
+                    onPressed: () => _showAdjustScoreDialog(artwork),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.pause),
+                    label: const Text('Freeze Battles'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueGrey,
+                    ),
+                    onPressed: () => _freezeArtBattles(artwork),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Reset Stats'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.indigo,
+                    ),
+                    onPressed: () => _resetArtBattleStats(artwork),
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -827,6 +887,115 @@ class _AdminArtworkManagementScreenState
         return Colors.blue;
       case artwork_pkg.ArtworkModerationStatus.underReview:
         return Colors.amber;
+    }
+  }
+
+  Future<void> _removeFromArtBattles(artwork_pkg.ArtworkModel artwork) async {
+    try {
+      await _service.removeArtworkFromArtBattles(artwork.id);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Artwork removed from Art Battles')),
+        );
+        await _loadArtworkDetails(artwork);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error removing from battles: $e')),
+        );
+      }
+    }
+  }
+
+  void _showAdjustScoreDialog(artwork_pkg.ArtworkModel artwork) {
+    final scoreController = TextEditingController(
+      text: artwork.artBattleScore.toString(),
+    );
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Adjust Art Battle Score'),
+        content: TextField(
+          controller: scoreController,
+          decoration: const InputDecoration(
+            hintText: 'New score',
+            labelText: 'Score',
+          ),
+          keyboardType: TextInputType.number,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final newScore = int.tryParse(scoreController.text);
+              if (newScore != null) {
+                await _adjustArtBattleScore(artwork, newScore);
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('Update'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _adjustArtBattleScore(
+      artwork_pkg.ArtworkModel artwork, int newScore) async {
+    try {
+      await _service.adjustArtBattleScore(artwork.id, newScore);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Art Battle score updated')),
+        );
+        await _loadArtworkDetails(artwork);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error updating score: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _freezeArtBattles(artwork_pkg.ArtworkModel artwork) async {
+    try {
+      await _service.freezeArtBattles(artwork.id);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Art Battles frozen for this artwork')),
+        );
+        await _loadArtworkDetails(artwork);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error freezing battles: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _resetArtBattleStats(artwork_pkg.ArtworkModel artwork) async {
+    try {
+      await _service.resetArtBattleStats(artwork.id);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Art Battle stats reset')),
+        );
+        await _loadArtworkDetails(artwork);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error resetting stats: $e')),
+        );
+      }
     }
   }
 }

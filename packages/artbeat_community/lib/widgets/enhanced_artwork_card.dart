@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'glass_card.dart';
 
 /// Enhanced artwork card with the new social engagement system
 class EnhancedArtworkCard extends StatelessWidget {
@@ -18,66 +21,66 @@ class EnhancedArtworkCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.symmetric(
+    return Padding(
+      padding: EdgeInsets.symmetric(
         horizontal: isCompact ? 8 : 16,
         vertical: isCompact ? 4 : 8,
       ),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: InkWell(
+      child: GestureDetector(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Artist Header
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    radius: isCompact ? 16 : 20,
-                    backgroundColor: ArtbeatColors.primaryPurple.withValues(
-                      alpha: 0.1,
+        child: GlassCard(
+          padding: EdgeInsets.zero,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Artist Header
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: isCompact ? 16 : 20,
+                      backgroundColor: const Color(0xFF7C4DFF).withValues(
+                        alpha: 0.1,
+                      ),
+                      child: Icon(
+                        Icons.person,
+                        color: const Color(0xFF7C4DFF),
+                        size: isCompact ? 16 : 20,
+                      ),
                     ),
-                    child: Icon(
-                      Icons.person,
-                      color: ArtbeatColors.primaryPurple,
-                      size: isCompact ? 16 : 20,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          artwork.artistName,
-                          style: TextStyle(
-                            fontSize: isCompact ? 14 : 16,
-                            fontWeight: FontWeight.w600,
-                            color: ArtbeatColors.textPrimary,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            artwork.artistName,
+                            style: GoogleFonts.spaceGrotesk(
+                              fontSize: isCompact ? 14 : 16,
+                              fontWeight: FontWeight.w900,
+                              color: const Color(0xFF92FFFFFF),
+                            ),
                           ),
-                        ),
-                        Text(
-                          _formatTimeAgo(artwork.createdAt),
-                          style: TextStyle(
-                            fontSize: isCompact ? 11 : 12,
-                            color: ArtbeatColors.textSecondary,
+                          Text(
+                            _formatTimeAgo(artwork.createdAt),
+                            style: GoogleFonts.spaceGrotesk(
+                              fontSize: isCompact ? 11 : 12,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF45FFFFFF),
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.more_vert),
-                    color: ArtbeatColors.textSecondary,
-                    onPressed: () => _showArtworkOptions(context),
-                  ),
-                ],
+                    IconButton(
+                      icon: const Icon(Icons.more_vert),
+                      color: const Color(0xFF70FFFFFF),
+                      onPressed: () => _showArtworkOptions(context),
+                    ),
+                  ],
+                ),
               ),
-            ),
 
             // Artwork Image
             SizedBox(
@@ -120,19 +123,20 @@ class EnhancedArtworkCard extends StatelessWidget {
                   // Title and Description
                   Text(
                     artwork.title,
-                    style: TextStyle(
+                    style: GoogleFonts.spaceGrotesk(
                       fontSize: isCompact ? 16 : 18,
-                      fontWeight: FontWeight.bold,
-                      color: ArtbeatColors.textPrimary,
+                      fontWeight: FontWeight.w900,
+                      color: const Color(0xFF92FFFFFF),
                     ),
                   ),
                   if (artwork.description.isNotEmpty) ...[
                     const SizedBox(height: 8),
                     Text(
                       artwork.description,
-                      style: TextStyle(
+                      style: GoogleFonts.spaceGrotesk(
                         fontSize: isCompact ? 13 : 14,
-                        color: ArtbeatColors.textSecondary,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF70FFFFFF),
                         height: 1.4,
                       ),
                       maxLines: isCompact ? 2 : 3,
@@ -153,22 +157,22 @@ class EnhancedArtworkCard extends StatelessWidget {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: ArtbeatColors.primaryPurple.withValues(
+                            color: const Color(0xFF7C4DFF).withValues(
                               alpha: 0.1,
                             ),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: ArtbeatColors.primaryPurple.withValues(
+                              color: const Color(0xFF7C4DFF).withValues(
                                 alpha: 0.3,
                               ),
                             ),
                           ),
                           child: Text(
                             tag,
-                            style: const TextStyle(
+                            style: GoogleFonts.spaceGrotesk(
                               fontSize: 11,
-                              fontWeight: FontWeight.w500,
-                              color: ArtbeatColors.primaryPurple,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF7C4DFF),
                             ),
                           ),
                         );
@@ -185,10 +189,10 @@ class EnhancedArtworkCard extends StatelessWidget {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: ArtbeatColors.accentGold.withValues(alpha: 0.1),
+                        color: const Color(0xFFFFC857).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: ArtbeatColors.accentGold.withValues(
+                          color: const Color(0xFFFFC857).withValues(
                             alpha: 0.3,
                           ),
                         ),
@@ -199,22 +203,23 @@ class EnhancedArtworkCard extends StatelessWidget {
                           const Icon(
                             Icons.attach_money,
                             size: 16,
-                            color: ArtbeatColors.accentGold,
+                            color: Color(0xFFFFC857),
                           ),
                           Text(
                             '\$${artwork.price.toStringAsFixed(0)}',
-                            style: const TextStyle(
+                            style: GoogleFonts.spaceGrotesk(
                               fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: ArtbeatColors.accentGold,
+                              fontWeight: FontWeight.w800,
+                              color: const Color(0xFFFFC857),
                             ),
                           ),
                           const SizedBox(width: 4),
-                          const Text(
-                            'For Sale',
-                            style: TextStyle(
+                          Text(
+                            'for_sale'.tr(),
+                            style: GoogleFonts.spaceGrotesk(
                               fontSize: 12,
-                              color: ArtbeatColors.accentGold,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFFFFC857),
                             ),
                           ),
                         ],
@@ -246,7 +251,7 @@ class EnhancedArtworkCard extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ));
   }
 
   String _formatTimeAgo(DateTime dateTime) {
@@ -270,58 +275,61 @@ class EnhancedArtworkCard extends StatelessWidget {
     showModalBottomSheet<void>(
       context: context,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Handle bar
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
+      builder: (context) => GlassCard(
+        padding: EdgeInsets.zero,
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Handle bar
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF70FFFFFF),
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-            // Options
-            _buildOption(
-              icon: Icons.share,
-              title: 'Share Artwork',
-              onTap: () {
-                Navigator.pop(context);
-                // Handle share
-              },
-            ),
-            _buildOption(
-              icon: Icons.bookmark_border,
-              title: 'Save to Collection',
-              onTap: () {
-                Navigator.pop(context);
-                // Handle save
-              },
-            ),
-            _buildOption(
-              icon: Icons.report_outlined,
-              title: 'Report',
-              onTap: () {
-                Navigator.pop(context);
-                // Handle report
-              },
-            ),
-            _buildOption(
-              icon: Icons.block,
-              title: 'Hide from Feed',
-              onTap: () {
-                Navigator.pop(context);
-                // Handle hide
-              },
-            ),
-          ],
+              // Options
+              _buildOption(
+                icon: Icons.share,
+                title: 'share_artwork'.tr(),
+                onTap: () {
+                  Navigator.pop(context);
+                  // Handle share
+                },
+              ),
+              _buildOption(
+                icon: Icons.bookmark_border,
+                title: 'save_to_collection'.tr(),
+                onTap: () {
+                  Navigator.pop(context);
+                  // Handle save
+                },
+              ),
+              _buildOption(
+                icon: Icons.report_outlined,
+                title: 'report'.tr(),
+                onTap: () {
+                  Navigator.pop(context);
+                  // Handle report
+                },
+              ),
+              _buildOption(
+                icon: Icons.block,
+                title: 'hide_from_feed'.tr(),
+                onTap: () {
+                  Navigator.pop(context);
+                  // Handle hide
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -333,10 +341,14 @@ class EnhancedArtworkCard extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     return ListTile(
-      leading: Icon(icon, color: ArtbeatColors.textSecondary),
+      leading: Icon(icon, color: const Color(0xFF70FFFFFF)),
       title: Text(
         title,
-        style: const TextStyle(fontSize: 16, color: ArtbeatColors.textPrimary),
+        style: GoogleFonts.spaceGrotesk(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          color: const Color(0xFF92FFFFFF),
+        ),
       ),
       onTap: onTap,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),

@@ -832,6 +832,14 @@
       ]
     },
     {
+      "collectionGroup": "artwork",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "artBattleEnabled", "order": "ASCENDING" },
+        { "fieldPath": "artBattleStatus", "order": "ASCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "subscriptions",
       "queryScope": "COLLECTION",
       "fields": [
@@ -1262,6 +1270,15 @@
       "fields": [
         { "fieldPath": "status", "order": "ASCENDING" },
         { "fieldPath": "timestamp", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "artwork",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "artBattleEnabled", "order": "ASCENDING" },
+        { "fieldPath": "artBattleStatus", "order": "ASCENDING" },
+        { "fieldPath": "artBattleScore", "order": "DESCENDING" }
       ]
     }
   ],

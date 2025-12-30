@@ -1,5 +1,7 @@
 import 'package:artbeat_core/artbeat_core.dart' hide ArtworkModel, UserModel;
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:artbeat_community/widgets/glass_card.dart';
 import '../models/artwork_model.dart';
 import '../models/user_model.dart';
 
@@ -17,9 +19,8 @@ class ArtworkCardWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     // Check if the avatar URL is valid for NetworkImage
 
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    return GlassCard(
+      borderRadius: 24,
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Column(
@@ -51,14 +52,19 @@ class ArtworkCardWidget extends StatelessWidget {
                   children: [
                     Text(
                       artist.username,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
+                      style: GoogleFonts.spaceGrotesk(
+                        fontWeight: FontWeight.w900,
                         fontSize: 16,
+                        color: ArtbeatColors.textPrimary,
                       ),
                     ),
                     Text(
                       artwork.location,
-                      style: const TextStyle(color: Colors.grey, fontSize: 14),
+                      style: GoogleFonts.spaceGrotesk(
+                        color: ArtbeatColors.textSecondary,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                      ),
                     ),
                   ],
                 ),
@@ -67,12 +73,20 @@ class ArtworkCardWidget extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               artwork.title,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              style: GoogleFonts.spaceGrotesk(
+                fontWeight: FontWeight.w900,
+                fontSize: 18,
+                color: ArtbeatColors.textPrimary,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               artwork.medium,
-              style: const TextStyle(color: Colors.grey, fontSize: 14),
+              style: GoogleFonts.spaceGrotesk(
+                color: ArtbeatColors.textSecondary,
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
+              ),
             ),
           ],
         ),

@@ -16,6 +16,8 @@ dependencies:
     path: ../artbeat_core
   artbeat_artist:
     path: ../artbeat_artist
+  artbeat_events:
+    path: ../artbeat_events
 
   # Firebase dependencies - match main project versions
   firebase_core: ^4.0.0

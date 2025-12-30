@@ -157,7 +157,7 @@ class _EnhancedBottomNavState extends State<EnhancedBottomNav>
     final activeColor = widget.activeColor ?? const Color(0xFF22D3EE); // neon
     // ignore: deprecated_member_use
     final inactiveColor =
-        widget.inactiveColor ?? Colors.white.withOpacity(0.55);
+        widget.inactiveColor ?? Colors.white.withValues(alpha: 0.55);
 
     return AnimatedBuilder(
       animation: _hudController,
@@ -181,20 +181,20 @@ class _EnhancedBottomNavState extends State<EnhancedBottomNav>
                         color:
                             (widget.backgroundColor ?? const Color(0xFF0A0B14))
                             // ignore: deprecated_member_use
-                            .withOpacity(0.62),
+                            .withValues(alpha: 0.62),
                         borderRadius: BorderRadius.circular(24),
                         border: Border.all(
                           // ignore: deprecated_member_use
-                          color: Colors.white.withOpacity(0.10),
+                          color: Colors.white.withValues(alpha: 0.10),
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.35),
+                            color: Colors.black.withValues(alpha: 0.35),
                             blurRadius: 26,
                             offset: const Offset(0, 14),
                           ),
                           BoxShadow(
-                            color: activeColor.withOpacity(0.10),
+                            color: activeColor.withValues(alpha: 0.10),
                             blurRadius: 28,
                             spreadRadius: 1,
                           ),
@@ -216,8 +216,8 @@ class _EnhancedBottomNavState extends State<EnhancedBottomNav>
                                   gradient: LinearGradient(
                                     colors: [
                                       Colors.transparent,
-                                      Colors.white.withOpacity(0.10),
-                                      activeColor.withOpacity(0.08),
+                                      Colors.white.withValues(alpha: 0.10),
+                                      activeColor.withValues(alpha: 0.08),
                                       Colors.transparent,
                                     ],
                                     stops: const [0.0, 0.45, 0.58, 1.0],
@@ -326,18 +326,18 @@ class _EnhancedBottomNavState extends State<EnhancedBottomNav>
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         color: isActive
-                            ? activeColor.withOpacity(0.10)
-                            : Colors.white.withOpacity(0.04),
+                            ? activeColor.withValues(alpha: 0.10)
+                            : Colors.white.withValues(alpha: 0.04),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
                           color: isActive
-                              ? activeColor.withOpacity(0.22)
-                              : Colors.white.withOpacity(0.10),
+                              ? activeColor.withValues(alpha: 0.22)
+                              : Colors.white.withValues(alpha: 0.10),
                         ),
                         boxShadow: [
                           if (isActive)
                             BoxShadow(
-                              color: activeColor.withOpacity(0.16),
+                              color: activeColor.withValues(alpha: 0.16),
                               blurRadius: 18,
                               spreadRadius: 1,
                             ),
@@ -440,11 +440,11 @@ class _EnhancedBottomNavState extends State<EnhancedBottomNav>
                                 borderRadius: BorderRadius.circular(18),
                                 gradient: LinearGradient(
                                   colors: [
-                                    ArtbeatColors.primaryPurple.withOpacity(
+                                    ArtbeatColors.primaryPurple.withValues(alpha: 
                                       0.95,
                                     ),
-                                    activeColor.withOpacity(0.85),
-                                    ArtbeatColors.primaryGreen.withOpacity(
+                                    activeColor.withValues(alpha: 0.85),
+                                    ArtbeatColors.primaryGreen.withValues(alpha: 
                                       0.70,
                                     ),
                                   ],
@@ -453,7 +453,7 @@ class _EnhancedBottomNavState extends State<EnhancedBottomNav>
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: activeColor.withOpacity(
+                                    color: activeColor.withValues(alpha: 
                                       0.22 + 0.10 * anim,
                                     ),
                                     blurRadius: 18 + 10 * anim,
@@ -462,7 +462,7 @@ class _EnhancedBottomNavState extends State<EnhancedBottomNav>
                                   ),
                                 ],
                                 border: Border.all(
-                                  color: Colors.white.withOpacity(0.14),
+                                  color: Colors.white.withValues(alpha: 0.14),
                                 ),
                               ),
                               child: Stack(
@@ -484,7 +484,7 @@ class _EnhancedBottomNavState extends State<EnhancedBottomNav>
                                                 gradient: LinearGradient(
                                                   colors: [
                                                     Colors.transparent,
-                                                    Colors.white.withOpacity(
+                                                    Colors.white.withValues(alpha: 
                                                       0.24,
                                                     ),
                                                     Colors.transparent,
@@ -525,8 +525,8 @@ class _EnhancedBottomNavState extends State<EnhancedBottomNav>
                         fontWeight: FontWeight.w900,
                         letterSpacing: 1.0,
                         color: isActive
-                            ? Colors.white.withOpacity(0.92)
-                            : inactiveColor.withOpacity(0.90),
+                            ? Colors.white.withValues(alpha: 0.92)
+                            : inactiveColor.withValues(alpha: 0.90),
                       ),
                     ),
                   ],
@@ -567,10 +567,10 @@ class _Badge extends StatelessWidget {
       decoration: BoxDecoration(
         color: ArtbeatColors.error,
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: Colors.white.withOpacity(0.12)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
         boxShadow: [
           BoxShadow(
-            color: ArtbeatColors.error.withOpacity(0.28),
+            color: ArtbeatColors.error.withValues(alpha: 0.28),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -611,7 +611,7 @@ class _ReticleRingPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.6
       ..strokeCap = StrokeCap.round
-      ..color = color.withOpacity(0.10 + 0.16 * progress);
+      ..color = color.withValues(alpha: 0.10 + 0.16 * progress);
 
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: r),
@@ -624,7 +624,7 @@ class _ReticleRingPainter extends CustomPainter {
     // ticks
     final tick = Paint()
       ..strokeWidth = 1.0
-      ..color = Colors.white.withOpacity(0.06 + 0.08 * progress);
+      ..color = Colors.white.withValues(alpha: 0.06 + 0.08 * progress);
 
     for (int i = 0; i < 8; i++) {
       final a = (i / 8.0) * 2 * math.pi;
@@ -673,10 +673,10 @@ class _CaptureRingPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..shader = SweepGradient(
         colors: [
-          neon.withOpacity(0.00),
-          neon.withOpacity(0.28),
-          cyan.withOpacity(0.24),
-          neon.withOpacity(0.00),
+          neon.withValues(alpha: 0.00),
+          neon.withValues(alpha: 0.28),
+          cyan.withValues(alpha: 0.24),
+          neon.withValues(alpha: 0.00),
         ],
         stops: const [0.12, 0.40, 0.62, 0.92],
         transform: GradientRotation(angle),
@@ -694,7 +694,7 @@ class _CaptureRingPainter extends CustomPainter {
     final glow = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 6
-      ..color = cyan.withOpacity(0.06)
+      ..color = cyan.withValues(alpha: 0.06)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
 
     canvas.drawCircle(center, r, glow);

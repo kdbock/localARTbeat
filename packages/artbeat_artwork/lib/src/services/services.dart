@@ -1,5 +1,5 @@
 // artbeat_artwork services export file
-// Generated on Sun Jun  1 13:03:48 EDT 2025
+// Generated on Sun  1 13:03:48 EDT 2025
 
 export 'artwork_service.dart';
 export 'artwork_cleanup_service.dart';
@@ -16,3 +16,4 @@ export 'enhanced_moderation_service.dart';
 export 'chapter_service.dart';
 export 'schedule_service.dart';
 export 'reading_analytics_service.dart';
+export 'auction_service.dart';

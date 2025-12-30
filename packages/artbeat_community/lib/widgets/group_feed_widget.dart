@@ -3,10 +3,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../models/group_models.dart';
 import '../models/post_model.dart';
 import '../screens/feed/comments_screen.dart';
 import 'group_post_card.dart';
+import 'glass_card.dart';
+import 'hud_button.dart';
 
 /// Widget that displays the feed for a specific group type
 class GroupFeedWidget extends StatefulWidget {
@@ -157,9 +161,11 @@ class _GroupFeedWidgetState extends State<GroupFeedWidget>
     } catch (e) {
       AppLogger.error('Error loading more ${widget.groupType.value} posts: $e');
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error loading more posts: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('error_loading_more_posts'.tr(args: [e.toString()])),
+          ),
+        );
       }
     } finally {
       if (mounted) {
@@ -190,9 +196,9 @@ class _GroupFeedWidgetState extends State<GroupFeedWidget>
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please sign in to appreciate posts')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('sign_in_to_appreciate'.tr())));
       }
       return;
     }
@@ -233,21 +239,23 @@ class _GroupFeedWidgetState extends State<GroupFeedWidget>
         if (mounted) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(const SnackBar(content: Text('❤️ Appreciated!')));
+          ).showSnackBar(SnackBar(content: Text('appreciated'.tr())));
         }
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('You already appreciated this post')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('already_appreciated'.tr())));
         }
       }
     } catch (e) {
       AppLogger.error('Error appreciating post: $e');
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error appreciating post: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('error_appreciating_post'.tr(args: [e.toString()])),
+          ),
+        );
       }
     }
   }
@@ -275,7 +283,7 @@ class _GroupFeedWidgetState extends State<GroupFeedWidget>
         if (mounted) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(const SnackBar(content: Text('Post not found')));
+          ).showSnackBar(SnackBar(content: Text('post_not_found'.tr())));
         }
         return;
       }
@@ -286,14 +294,16 @@ class _GroupFeedWidgetState extends State<GroupFeedWidget>
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('Post featured!')));
+        ).showSnackBar(SnackBar(content: Text('post_featured'.tr())));
       }
     } catch (e) {
       AppLogger.error('Error featuring post: $e');
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Failed to feature post: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('failed_to_feature_post'.tr(args: [e.toString()])),
+          ),
+        );
       }
     }
   }
@@ -321,9 +331,9 @@ class _GroupFeedWidgetState extends State<GroupFeedWidget>
       await _updateShareCount(post.id);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Failed to share: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('failed_to_share'.tr(args: [e.toString()]))),
+        );
       }
     }
   }
@@ -348,72 +358,94 @@ class _GroupFeedWidgetState extends State<GroupFeedWidget>
   }
 
   Widget _buildLoadingState() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(
-              ArtbeatColors.primaryPurple,
-            ),
+    return Center(
+      child: GlassCard(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  Color(0xFF22D3EE), // teal
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'loading_posts'.tr(),
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 16,
+                  color: const Color(0xFF70FFFFFF),
+                ),
+              ),
+            ],
           ),
-          SizedBox(height: 16),
-          Text(
-            'Loading posts...',
-            style: TextStyle(fontSize: 16, color: ArtbeatColors.textSecondary),
-          ),
-        ],
+        ),
       ),
     );
   }
 
   Widget _buildErrorState() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.error_outline,
-            size: 64,
-            color: ArtbeatColors.textSecondary,
+      child: GlassCard(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.error_outline,
+                size: 64,
+                color: Color(0xFF70FFFFFF),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                _errorMessage ?? 'something_went_wrong'.tr(),
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 16,
+                  color: const Color(0xFF70FFFFFF),
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              HudButton(onPressed: _loadPosts, text: 'try_again'.tr()),
+            ],
           ),
-          const SizedBox(height: 16),
-          Text(
-            _errorMessage ?? 'Something went wrong',
-            style: const TextStyle(
-              fontSize: 16,
-              color: ArtbeatColors.textSecondary,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(onPressed: _loadPosts, child: const Text('Try Again')),
-        ],
+        ),
       ),
     );
   }
 
   Widget _buildEmptyState() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(_getGroupIcon(), size: 64, color: ArtbeatColors.textSecondary),
-          const SizedBox(height: 16),
-          Text(
-            'No posts yet in ${widget.groupType.title}',
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: ArtbeatColors.textPrimary,
-            ),
+      child: GlassCard(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(_getGroupIcon(), size: 64, color: const Color(0xFF70FFFFFF)),
+              const SizedBox(height: 16),
+              Text(
+                'no_posts_yet_in_group'.tr(args: [widget.groupType.title]),
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
+                  color: const Color(0xFF92FFFFFF),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'be_the_first_to_share'.tr(),
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF45FFFFFF),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
-          const Text(
-            'Be the first to share something!',
-            style: TextStyle(fontSize: 14, color: ArtbeatColors.textSecondary),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -458,7 +490,9 @@ class _GroupFeedWidgetState extends State<GroupFeedWidget>
             return const Center(
               child: Padding(
                 padding: EdgeInsets.all(16),
-                child: CircularProgressIndicator(),
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF22D3EE)),
+                ),
               ),
             );
           }

@@ -62,6 +62,11 @@ class AppRouter {
           child: const core.AnimatedDashboardScreen(),
         );
 
+      case core.AppRoutes.artBattle:
+        return RouteUtils.createMainLayoutRoute(
+          child: const community.ArtBattleScreen(),
+        );
+
       case '/old-dashboard':
         return RouteUtils.createMainNavRoute(
           currentIndex: 0,
