@@ -37,7 +37,7 @@ class _AuctionManagementModalState extends State<AuctionManagementModal> {
 
   void _loadCurrentAuctionSettings() {
     setState(() {
-      _auctionEnabled = widget.artwork.auctionEnabled ?? false;
+      _auctionEnabled = widget.artwork.auctionEnabled;
       _startingPrice = widget.artwork.startingPrice;
       _reservePrice = widget.artwork.reservePrice;
       _auctionEnd = widget.artwork.auctionEnd;
@@ -153,7 +153,8 @@ class _AuctionManagementModalState extends State<AuctionManagementModal> {
                             ),
                             IconButton(
                               onPressed: () => Navigator.of(context).pop(),
-                              icon: const Icon(Icons.close, color: Colors.white),
+                              icon:
+                                  const Icon(Icons.close, color: Colors.white),
                             ),
                           ],
                         ),
@@ -179,7 +180,8 @@ class _AuctionManagementModalState extends State<AuctionManagementModal> {
                                 children: [
                                   Text(
                                     widget.artwork.title,
-                                    style: theme.textTheme.titleMedium?.copyWith(
+                                    style:
+                                        theme.textTheme.titleMedium?.copyWith(
                                       fontFamily: 'SpaceGrotesk',
                                       fontWeight: FontWeight.w700,
                                       color: Colors.white,
@@ -190,7 +192,8 @@ class _AuctionManagementModalState extends State<AuctionManagementModal> {
                                   Text(
                                     widget.artwork.artistName,
                                     style: theme.textTheme.bodyMedium?.copyWith(
-                                      color: Colors.white.withValues(alpha: 0.7),
+                                      color:
+                                          Colors.white.withValues(alpha: 0.7),
                                     ),
                                   ),
                                 ],
@@ -230,7 +233,8 @@ class _AuctionManagementModalState extends State<AuctionManagementModal> {
 
                           // Starting price
                           TextFormField(
-                            initialValue: _startingPrice?.toStringAsFixed(2) ?? '',
+                            initialValue:
+                                _startingPrice?.toStringAsFixed(2) ?? '',
                             keyboardType: const TextInputType.numberWithOptions(
                               decimal: true,
                             ),
@@ -238,7 +242,8 @@ class _AuctionManagementModalState extends State<AuctionManagementModal> {
                               labelText: 'auction.starting_price'.tr(),
                               prefixText: '\$',
                               border: const OutlineInputBorder(
-                                borderRadius: BorderRadius.all(Radius.circular(12)),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(12)),
                               ),
                               filled: true,
                               fillColor: Colors.white.withValues(alpha: 0.1),
@@ -264,7 +269,8 @@ class _AuctionManagementModalState extends State<AuctionManagementModal> {
 
                           // Reserve price
                           TextFormField(
-                            initialValue: _reservePrice?.toStringAsFixed(2) ?? '',
+                            initialValue:
+                                _reservePrice?.toStringAsFixed(2) ?? '',
                             keyboardType: const TextInputType.numberWithOptions(
                               decimal: true,
                             ),
@@ -272,7 +278,8 @@ class _AuctionManagementModalState extends State<AuctionManagementModal> {
                               labelText: 'auction.reserve_price'.tr(),
                               prefixText: '\$',
                               border: const OutlineInputBorder(
-                                borderRadius: BorderRadius.all(Radius.circular(12)),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(12)),
                               ),
                               filled: true,
                               fillColor: Colors.white.withValues(alpha: 0.1),
@@ -309,7 +316,8 @@ class _AuctionManagementModalState extends State<AuctionManagementModal> {
                                 ),
                                 filled: true,
                                 fillColor: Colors.white.withValues(alpha: 0.1),
-                                labelStyle: const TextStyle(color: Colors.white),
+                                labelStyle:
+                                    const TextStyle(color: Colors.white),
                                 suffixIcon: const Icon(
                                   Icons.calendar_today,
                                   color: Colors.white,
@@ -396,8 +404,8 @@ class _AuctionManagementModalState extends State<AuctionManagementModal> {
                                         color: Colors.white)
                                     : Text(
                                         'auction.save_settings'.tr(),
-                                        style:
-                                            theme.textTheme.titleMedium?.copyWith(
+                                        style: theme.textTheme.titleMedium
+                                            ?.copyWith(
                                           fontFamily: 'SpaceGrotesk',
                                           fontWeight: FontWeight.w700,
                                           color: Colors.white,

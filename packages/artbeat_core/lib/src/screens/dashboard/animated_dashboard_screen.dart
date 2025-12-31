@@ -329,12 +329,13 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                           child: _BottomChips(
                             onArtist: () => Navigator.pushNamed(
                               context,
-
                               '/2025_modern_onboarding',
                             ),
 
-                            onBusiness: () =>
-                                Navigator.pushNamed(context, '/iap/ads'),
+                            onBusiness: () => Navigator.pushNamed(
+                              context,
+                              '/local-business',
+                            ),
                           ),
                         ),
 
@@ -794,8 +795,7 @@ class _QuestButtonState extends State<_QuestButton> {
                 ),
               ],
             ),
-          ),
-        );
+          ));
       },
     );
   }

@@ -67,15 +67,19 @@ class _ArtBattleScreenState extends State<ArtBattleScreen> {
       } else {
         setState(() => _isLoading = false);
         // Show no matches available
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No battles available right now')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('No battles available right now')),
+          );
+        }
       }
     } catch (e) {
       setState(() => _isLoading = false);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error loading battle: $e')));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error loading battle: $e')));
+      }
     }
   }
 
@@ -108,7 +112,7 @@ class _ArtBattleScreenState extends State<ArtBattleScreen> {
       }
     } catch (e) {
       // Silently fail pre-fetching
-      print('Error pre-fetching next match: $e');
+      debugPrint('Error pre-fetching next match: $e');
     }
   }
 
@@ -124,19 +128,25 @@ class _ArtBattleScreenState extends State<ArtBattleScreen> {
 
       // Show winner briefly
       final winner = chosenArtworkId == _artworkA?.id ? _artworkA : _artworkB;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('You chose: ${winner?.artistName ?? 'Unknown'}'),
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('You chose: ${winner?.artistName ?? 'Unknown'}'),
+          ),
+        );
+      }
 
       // Load next match
       await Future.delayed(const Duration(seconds: 2));
-      _loadNextMatch();
+      if (mounted) {
+        _loadNextMatch();
+      }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error submitting vote: $e')));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error submitting vote: $e')));
+      }
     }
   }
 

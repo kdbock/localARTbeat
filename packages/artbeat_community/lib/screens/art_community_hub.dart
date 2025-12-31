@@ -1325,7 +1325,7 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
                 communityService: _communityService,
                 searchQuery: _searchQuery,
               ),
-              ArtBattleTab(),
+              const ArtBattleTab(),
               ArtistsGalleryTab(
                 communityService: _communityService,
                 searchQuery: _searchQuery,
@@ -2981,13 +2981,13 @@ class _ArtBattleTabState extends State<ArtBattleTab> {
                         size: 40,
                       ),
                       const SizedBox(width: 12),
-                      Expanded(
+                      const Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               'Art Battle',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: _LAB.textPrimary,
                                 fontWeight: FontWeight.w900,
                                 fontSize: 18,
@@ -2995,7 +2995,7 @@ class _ArtBattleTabState extends State<ArtBattleTab> {
                             ),
                             Text(
                               'Vote on head-to-head artwork battles',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: _LAB.textSecondary,
                                 fontWeight: FontWeight.w700,
                               ),
@@ -3020,14 +3020,14 @@ class _ArtBattleTabState extends State<ArtBattleTab> {
           ),
         ),
         // Add current battles list here
-        SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+        const SliverPadding(
+          padding: EdgeInsets.symmetric(horizontal: 16),
           sliver: SliverToBoxAdapter(
             child: _Glass(
               radius: 18,
               blur: 14,
-              padding: const EdgeInsets.all(16),
-              child: const Center(
+              padding: EdgeInsets.all(16),
+              child: Center(
                 child: Text(
                   'Current battles will be displayed here',
                   style: TextStyle(color: _LAB.textSecondary),

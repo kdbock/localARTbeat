@@ -148,6 +148,13 @@ packages:
       relative: true
     source: path
     version: "0.0.2"
+  artbeat_sponsorships:
+    dependency: "direct main"
+    description:
+      path: "packages/artbeat_sponsorships"
+      relative: true
+    source: path
+    version: "0.1.0"
   async:
     dependency: transitive
     description:

@@ -24,15 +24,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return WorldBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          title: Text('settings_title'.tr()),
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ),
         body: _buildSettingsBody(context),
       ),
     );

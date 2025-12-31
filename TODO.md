@@ -1,0 +1,3 @@
+- [ ] Add mounted check in \_loadNextMatch catch block before ScaffoldMessenger
+- [ ] Replace print with debugPrint in \_preFetchNextMatch
+- [ ] Remove <void> type parameter from Future.delayed in \_submitVote
