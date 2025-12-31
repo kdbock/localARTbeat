@@ -95,7 +95,7 @@ class _SponsorshipDashboardScreenState
             padding: const EdgeInsets.all(16),
             child: GradientCtaButton(
               label: 'Create Sponsorship',
-              onPressed: _goToCreate,
+              onPressed: _goToCreate, onTap: () {  },
             ),
           ),
         ],

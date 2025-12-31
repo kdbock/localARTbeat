@@ -5,11 +5,11 @@ class SponsorshipPricing {
   static double priceFor(SponsorshipTier tier) {
     switch (tier) {
       case SponsorshipTier.title:
-        return 10000;
+        return 25000;
       case SponsorshipTier.event:
-        return 750;
+        return 1000;
       case SponsorshipTier.artWalk:
-        return 250;
+        return 500;
       case SponsorshipTier.capture:
         return 250;
       case SponsorshipTier.discover:

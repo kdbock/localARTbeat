@@ -4,7 +4,7 @@ class GradientBadge extends StatelessWidget {
   const GradientBadge({
     super.key,
     required this.child,
-    this.size = 40,
+    this.size = 40, required String label, required IconData icon,
   });
 
   final Widget child;

@@ -7,9 +7,24 @@ import '../../widgets/sponsorship_form_section.dart';
 import '../../widgets/sponsorship_price_summary.dart';
 import '../../widgets/sponsorship_section.dart';
 import '../../widgets/world_background.dart';
+import 'sponsorship_review_screen.dart';
 
-class CaptureSponsorshipScreen extends StatelessWidget {
+class CaptureSponsorshipScreen extends StatefulWidget {
   const CaptureSponsorshipScreen({super.key});
+
+  @override
+  State<CaptureSponsorshipScreen> createState() =>
+      _CaptureSponsorshipScreenState();
+}
+
+class _CaptureSponsorshipScreenState extends State<CaptureSponsorshipScreen> {
+  final TextEditingController radiusController = TextEditingController();
+
+  @override
+  void dispose() {
+    radiusController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) => WorldBackground(
@@ -22,14 +37,14 @@ class CaptureSponsorshipScreen extends StatelessWidget {
         Expanded(
           child: ListView(
             padding: const EdgeInsets.only(bottom: 120),
-            children: const [
-              SponsorshipSection(
+            children: [
+              const SponsorshipSection(
                 title: 'What You Get',
                 child: Text(
                   'Your business will appear when users capture nearby art.',
                 ),
               ),
-              SponsorshipSection(
+              const SponsorshipSection(
                 title: 'Pricing',
                 child: SponsorshipPriceSummary(
                   price: r'$250',
@@ -40,7 +55,10 @@ class CaptureSponsorshipScreen extends StatelessWidget {
                 title: 'Target Area',
                 child: SponsorshipFormSection(
                   label: 'Radius (miles)',
-                  child: GlassInputField(label: 'e.g. 3'),
+                  child: GlassInputField(
+                    controller: radiusController,
+                    label: 'e.g. 3',
+                  ),
                 ),
               ),
             ],
@@ -51,8 +69,27 @@ class CaptureSponsorshipScreen extends StatelessWidget {
           child: GradientCtaButton(
             label: 'Continue',
             onPressed: () {
-              Navigator.pushNamed(context, '/sponsorship-review');
+              if (radiusController.text.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Please enter a radius to continue'),
+                  ),
+                );
+                return;
+              }
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SponsorshipReviewScreen(
+                    type: 'capture',
+                    duration: '30 days',
+                    price: r'$250',
+                    notes: 'Radius: ${radiusController.text} miles',
+                  ),
+                ),
+              );
             },
+            onTap: () {},
           ),
         ),
       ],

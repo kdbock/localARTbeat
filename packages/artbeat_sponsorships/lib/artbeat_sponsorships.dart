@@ -13,7 +13,19 @@ export 'src/screens/sponsorships/capture_sponsorship_screen.dart';
 export 'src/screens/sponsorships/discover_sponsorship_screen.dart';
 export 'src/screens/sponsorships/sponsorship_review_screen.dart';
 export 'src/screens/sponsorships/sponsorship_detail_screen.dart';
+export 'src/widgets/sponsorship_sku_header.dart';
+
 
 // (Optional future exports)
 // export 'src/services/sponsor_service.dart';
 // export 'src/models/sponsorship.dart';
+// Widgets – Sponsorship UI primitives
+export 'src/widgets/sponsorship_card.dart';
+export 'src/widgets/sponsorship_section.dart';
+export 'src/widgets/sponsorship_price_summary.dart';
+export 'src/widgets/sponsorship_review_row.dart';
+export 'src/widgets/sponsorship_status_chip.dart';
+export 'src/widgets/sponsorship_tier_badge.dart';
+export 'src/widgets/sponsorship_cta_tile.dart';
+export 'src/widgets/sponsorship_empty_state.dart';
+export 'src/widgets/sponsor_banner.dart';
