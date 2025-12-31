@@ -20,6 +20,7 @@ class SponsorshipPriceSummary extends StatelessWidget {
               price,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.w900,
+                    color: Colors.white,
                   ),
             ),
             const SizedBox(height: 6),

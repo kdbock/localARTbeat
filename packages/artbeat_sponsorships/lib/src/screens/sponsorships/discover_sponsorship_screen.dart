@@ -7,9 +7,24 @@ import '../../widgets/sponsorship_form_section.dart';
 import '../../widgets/sponsorship_price_summary.dart';
 import '../../widgets/sponsorship_section.dart';
 import '../../widgets/world_background.dart';
+import 'sponsorship_review_screen.dart';
 
-class DiscoverSponsorshipScreen extends StatelessWidget {
+class DiscoverSponsorshipScreen extends StatefulWidget {
   const DiscoverSponsorshipScreen({super.key});
+
+  @override
+  State<DiscoverSponsorshipScreen> createState() =>
+      _DiscoverSponsorshipScreenState();
+}
+
+class _DiscoverSponsorshipScreenState extends State<DiscoverSponsorshipScreen> {
+  final TextEditingController radiusController = TextEditingController();
+
+  @override
+  void dispose() {
+    radiusController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) => WorldBackground(
@@ -22,15 +37,15 @@ class DiscoverSponsorshipScreen extends StatelessWidget {
         Expanded(
           child: ListView(
             padding: const EdgeInsets.only(bottom: 120),
-            children: const [
-              SponsorshipSection(
+            children: [
+              const SponsorshipSection(
                 title: 'What You Get',
                 child: Text(
                   'Your business appears on the discovery radar when users '
                   'are actively searching for nearby art.',
                 ),
               ),
-              SponsorshipSection(
+              const SponsorshipSection(
                 title: 'Pricing',
                 child: SponsorshipPriceSummary(
                   price: r'$250',
@@ -41,7 +56,10 @@ class DiscoverSponsorshipScreen extends StatelessWidget {
                 title: 'Target Area',
                 child: SponsorshipFormSection(
                   label: 'Radius (miles)',
-                  child: GlassInputField(label: 'e.g. 5'),
+                  child: GlassInputField(
+                    controller: radiusController,
+                    label: 'e.g. 5',
+                  ),
                 ),
               ),
             ],
@@ -52,8 +70,27 @@ class DiscoverSponsorshipScreen extends StatelessWidget {
           child: GradientCtaButton(
             label: 'Continue',
             onPressed: () {
-              Navigator.pushNamed(context, '/sponsorship-review');
+              if (radiusController.text.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Please enter a radius to continue'),
+                  ),
+                );
+                return;
+              }
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SponsorshipReviewScreen(
+                    type: 'discover',
+                    duration: '30 days',
+                    price: r'$250',
+                    notes: 'Radius: ${radiusController.text} miles',
+                  ),
+                ),
+              );
             },
+            onTap: () {},
           ),
         ),
       ],

@@ -5,7 +5,7 @@ class GradientCtaButton extends StatelessWidget {
     super.key,
     required this.label,
     required this.onPressed,
-    this.icon,
+    this.icon, required Null Function() onTap,
   });
 
   final String label;
