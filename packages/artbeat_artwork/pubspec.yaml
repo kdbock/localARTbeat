@@ -54,6 +54,8 @@ dependencies:
 
   artbeat_profile:
     path: ../artbeat_profile
+  artbeat_events:
+    path: ../artbeat_events
 flutter:
   uses-material-design: true
 

@@ -13,6 +13,7 @@ import 'package:artbeat_events/artbeat_events.dart' as events;
 import 'package:artbeat_messaging/artbeat_messaging.dart' as messaging;
 import 'package:artbeat_profile/artbeat_profile.dart' as profile;
 import 'package:artbeat_settings/artbeat_settings.dart' as settings_pkg;
+import 'package:artbeat_sponsorships/artbeat_sponsorships.dart' as sponsorships;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -48,6 +49,30 @@ class AppRouter {
 
     // Core routes
     switch (routeName) {
+            case '/title-sponsorship':
+              return RouteUtils.createMainLayoutRoute(
+                child: const sponsorships.TitleSponsorshipScreen(),
+              );
+            case '/art-walk-sponsorship':
+              return RouteUtils.createMainLayoutRoute(
+                child: const sponsorships.ArtWalkSponsorshipScreen(),
+              );
+            case '/event-sponsorship':
+              return RouteUtils.createMainLayoutRoute(
+                child: const sponsorships.EventSponsorshipScreen(),
+              );
+            case '/capture-sponsorship':
+              return RouteUtils.createMainLayoutRoute(
+                child: const sponsorships.CaptureSponsorshipScreen(),
+              );
+            case '/discover-sponsorship':
+              return RouteUtils.createMainLayoutRoute(
+                child: const sponsorships.DiscoverSponsorshipScreen(),
+              );
+      case '/sponsorship-dashboard':
+        return RouteUtils.createMainLayoutRoute(
+          child: const sponsorships.CreateSponsorshipScreen(),
+        );
       case '/store':
         return RouteUtils.createMainLayoutRoute(
           appBar: RouteUtils.createAppBar('Artbeat Store'),
@@ -170,6 +195,11 @@ class AppRouter {
       case core.AppRoutes.inAppPurchaseDemo:
         return RouteUtils.createMainNavRoute(
           child: const InAppPurchaseDemoScreen(),
+        );
+
+      case '/local-business':
+        return RouteUtils.createMainLayoutRoute(
+          child: const sponsorships.LocalBusinessScreen(),
         );
     }
 

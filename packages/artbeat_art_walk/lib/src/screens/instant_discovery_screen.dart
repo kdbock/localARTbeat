@@ -14,7 +14,7 @@ class InstantDiscoveryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Instant Discovery Radar')),
-      body: Center(child: Text('Radar screen goes here')),
+      body: const Center(child: Text('Radar screen goes here')),
     );
   }
 }

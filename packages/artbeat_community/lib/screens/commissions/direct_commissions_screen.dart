@@ -1348,16 +1348,18 @@ class _QuoteProvisionDialogState extends State<_QuoteProvisionDialog> {
 
     for (int i = 0; i < _milestones.length; i++) {
       if (!_milestones[i].validate()) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'direct_commissions_quote_missing_milestone_fields'.tr(
-                namedArgs: {'index': '${i + 1}'},
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'direct_commissions_quote_missing_milestone_fields'.tr(
+                  namedArgs: {'index': '${i + 1}'},
+                ),
               ),
+              backgroundColor: const Color(0xFFFF3D8D),
             ),
-            backgroundColor: const Color(0xFFFF3D8D),
-          ),
-        );
+          );
+        }
         return;
       }
     }

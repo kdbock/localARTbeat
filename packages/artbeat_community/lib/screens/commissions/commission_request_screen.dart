@@ -1,7 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 
 import '../../models/direct_commission_model.dart';
 import '../../services/direct_commission_service.dart';
@@ -22,7 +21,8 @@ class CommissionRequestScreen extends StatefulWidget {
   });
 
   @override
-  State<CommissionRequestScreen> createState() => _CommissionRequestScreenState();
+  State<CommissionRequestScreen> createState() =>
+      _CommissionRequestScreenState();
 }
 
 class _CommissionRequestScreenState extends State<CommissionRequestScreen> {
@@ -236,7 +236,8 @@ class _CommissionRequestScreenState extends State<CommissionRequestScreen> {
     Navigator.push(
       context,
       MaterialPageRoute<void>(
-        builder: (context) => CommissionGalleryScreen(artistId: widget.artistId),
+        builder: (context) =>
+            CommissionGalleryScreen(artistId: widget.artistId),
       ),
     );
   }
@@ -321,7 +322,9 @@ class _CommissionRequestScreenState extends State<CommissionRequestScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'commission_request_from_artist'.tr(namedArgs: {'artist': widget.artistName}),
+            'commission_request_from_artist'.tr(
+              namedArgs: {'artist': widget.artistName},
+            ),
             style: GoogleFonts.spaceGrotesk(
               fontSize: 18,
               fontWeight: FontWeight.w900,
@@ -335,7 +338,7 @@ class _CommissionRequestScreenState extends State<CommissionRequestScreen> {
             style: GoogleFonts.spaceGrotesk(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: Colors.white.withOpacity(0.78),
+              color: Colors.white.withValues(alpha: 0.78),
               height: 1.4,
             ),
           ),
@@ -402,7 +405,7 @@ class _CommissionRequestScreenState extends State<CommissionRequestScreen> {
                     fontWeight: FontWeight.w600,
                     color: isAvailable
                         ? Colors.white
-                        : Colors.white.withOpacity(0.4),
+                        : Colors.white.withValues(alpha: 0.4),
                   ),
                 ),
               );
@@ -490,24 +493,39 @@ class _CommissionRequestScreenState extends State<CommissionRequestScreen> {
           const SizedBox(height: 16),
           Row(
             children: [
-              Expanded(child: _buildTextField(_sizeController,
+              Expanded(
+                child: _buildTextField(
+                  _sizeController,
                   label: 'commission_request_field_size_label'.tr(),
                   hint: 'commission_request_field_size_hint'.tr(),
-                  validatorMessage: 'commission_request_field_size_validation'.tr())),
+                  validatorMessage: 'commission_request_field_size_validation'
+                      .tr(),
+                ),
+              ),
               const SizedBox(width: 16),
-              Expanded(child: _buildTextField(_mediumController,
+              Expanded(
+                child: _buildTextField(
+                  _mediumController,
                   label: 'commission_request_field_medium_label'.tr(),
                   hint: 'commission_request_field_medium_hint'.tr(),
-                  validatorMessage: 'commission_request_field_medium_validation'.tr())),
+                  validatorMessage: 'commission_request_field_medium_validation'
+                      .tr(),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 16),
           Row(
             children: [
-              Expanded(child: _buildTextField(_styleController,
+              Expanded(
+                child: _buildTextField(
+                  _styleController,
                   label: 'commission_request_field_style_label'.tr(),
                   hint: 'commission_request_field_style_hint'.tr(),
-                  validatorMessage: 'commission_request_field_style_validation'.tr())),
+                  validatorMessage: 'commission_request_field_style_validation'
+                      .tr(),
+                ),
+              ),
               const SizedBox(width: 16),
               Expanded(
                 child: DropdownButtonFormField<String>(
@@ -590,8 +608,9 @@ class _CommissionRequestScreenState extends State<CommissionRequestScreen> {
           _sectionTitle('commission_request_section_options'),
           const SizedBox(height: 16),
           Text(
-            'commission_request_revisions_label'
-                .tr(namedArgs: {'count': '$_revisions'}),
+            'commission_request_revisions_label'.tr(
+              namedArgs: {'count': '$_revisions'},
+            ),
             style: GoogleFonts.spaceGrotesk(
               fontSize: 14,
               fontWeight: FontWeight.w800,
@@ -602,7 +621,7 @@ class _CommissionRequestScreenState extends State<CommissionRequestScreen> {
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
               activeTrackColor: const Color(0xFF22D3EE),
-              inactiveTrackColor: Colors.white.withOpacity(0.2),
+              inactiveTrackColor: Colors.white.withValues(alpha: 0.2),
               thumbColor: const Color(0xFF7C4DFF),
             ),
             child: Slider(
@@ -622,16 +641,16 @@ class _CommissionRequestScreenState extends State<CommissionRequestScreen> {
             style: GoogleFonts.spaceGrotesk(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withValues(alpha: 0.7),
             ),
           ),
           const SizedBox(height: 16),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.04),
+              color: Colors.white.withValues(alpha: 0.04),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.white.withOpacity(0.12)),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
             ),
             child: Row(
               children: [
@@ -653,7 +672,7 @@ class _CommissionRequestScreenState extends State<CommissionRequestScreen> {
                         style: GoogleFonts.spaceGrotesk(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white.withOpacity(0.7),
+                          color: Colors.white.withValues(alpha: 0.7),
                         ),
                       ),
                     ],
@@ -663,8 +682,10 @@ class _CommissionRequestScreenState extends State<CommissionRequestScreen> {
                   value: _commercialUse,
                   onChanged: (value) => setState(() => _commercialUse = value),
                   activeThumbColor: const Color(0xFF22D3EE),
-                  activeTrackColor: const Color(0xFF22D3EE).withOpacity(0.3),
-                  inactiveTrackColor: Colors.white.withOpacity(0.2),
+                  activeTrackColor: const Color(
+                    0xFF22D3EE,
+                  ).withValues(alpha: 0.3),
+                  inactiveTrackColor: Colors.white.withValues(alpha: 0.2),
                 ),
               ],
             ),
@@ -688,13 +709,17 @@ class _CommissionRequestScreenState extends State<CommissionRequestScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.04),
+                color: Colors.white.withValues(alpha: 0.04),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.white.withOpacity(0.12)),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.calendar_today, color: Colors.white, size: 18),
+                  const Icon(
+                    Icons.calendar_today,
+                    color: Colors.white,
+                    size: 18,
+                  ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
@@ -720,7 +745,7 @@ class _CommissionRequestScreenState extends State<CommissionRequestScreen> {
                           style: GoogleFonts.spaceGrotesk(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: Colors.white.withOpacity(0.7),
+                            color: Colors.white.withValues(alpha: 0.7),
                           ),
                         ),
                       ],
@@ -787,7 +812,7 @@ class _CommissionRequestScreenState extends State<CommissionRequestScreen> {
             style: GoogleFonts.spaceGrotesk(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withValues(alpha: 0.7),
             ),
           ),
         ],
@@ -832,10 +857,7 @@ class _CommissionRequestScreenState extends State<CommissionRequestScreen> {
         color: Colors.white,
       ),
       cursorColor: const Color(0xFF22D3EE),
-      decoration: GlassInputDecoration(
-        labelText: label,
-        hintText: hint,
-      ),
+      decoration: GlassInputDecoration(labelText: label, hintText: hint),
       validator: (value) {
         if (value == null || value.isEmpty) {
           return validatorMessage;
