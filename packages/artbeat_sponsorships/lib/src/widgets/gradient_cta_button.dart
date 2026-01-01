@@ -15,8 +15,14 @@ class GradientCtaButton extends StatelessWidget {
   final IconData? icon;
 
   @override
-  Widget build(BuildContext context) => GestureDetector(
-      onTap: onTap ?? onPressed,
+  Widget build(BuildContext context) {
+    void handleTap() {
+      onTap?.call();
+      onPressed();
+    }
+
+    return GestureDetector(
+      onTap: handleTap,
       child: Container(
         height: 52,
         decoration: BoxDecoration(
@@ -49,4 +55,5 @@ class GradientCtaButton extends StatelessWidget {
         ),
       ),
     );
+  }
 }
