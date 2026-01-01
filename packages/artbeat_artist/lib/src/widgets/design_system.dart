@@ -235,6 +235,7 @@ class HudTopBar extends StatelessWidget {
   final VoidCallback? onSearch;
   final VoidCallback? onProfile;
   final bool showLogo;
+  final IconData? menuIcon;
 
   const HudTopBar({
     super.key,
@@ -244,6 +245,7 @@ class HudTopBar extends StatelessWidget {
     this.onSearch,
     this.onProfile,
     this.showLogo = false,
+    this.menuIcon,
   });
 
   @override
@@ -259,7 +261,8 @@ class HudTopBar extends StatelessWidget {
               if (onMenu != null)
                 IconButton(
                   onPressed: onMenu,
-                  icon: const Icon(Icons.menu_rounded, color: Colors.white),
+                  icon:
+                      Icon(menuIcon ?? Icons.menu_rounded, color: Colors.white),
                 ),
               const SizedBox(width: 6),
               Expanded(

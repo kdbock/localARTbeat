@@ -7,16 +7,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart' as intl;
 
-import 'package:artbeat_core/artbeat_core.dart';
+import 'package:artbeat_core/artbeat_core.dart' hide GradientCTAButton;
+import 'package:artbeat_core/shared_widgets.dart' hide GradientCTAButton;
+import '../widgets/widgets.dart';
 
 import '../models/artbeat_event.dart';
 import 'events_list_screen.dart';
 
 // Shared widgets (local to events package)
-import '../widgets/world_background.dart';
-import '../widgets/hud_top_bar.dart';
-import '../widgets/glass_card.dart';
-import '../widgets/gradient_cta_button.dart';
 import '../widgets/glass_bottom_sheet.dart';
 
 /// User-focused events dashboard showcasing upcoming events
@@ -132,7 +130,7 @@ class _UserEventsDashboardScreenState
           child: SafeArea(
             child: Column(
               children: [
-                HudTopBar(
+                EventsHudTopBar(
                   title: 'user_events_discover_title'.tr(),
                   showBack: true,
                   onBack: Navigator.of(context).pop,

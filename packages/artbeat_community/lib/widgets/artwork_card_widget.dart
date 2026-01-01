@@ -1,7 +1,6 @@
 import 'package:artbeat_core/artbeat_core.dart' hide ArtworkModel, UserModel;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:artbeat_community/widgets/glass_card.dart';
 import '../models/artwork_model.dart';
 import '../models/user_model.dart';
 
@@ -20,7 +19,7 @@ class ArtworkCardWidget extends StatelessWidget {
     // Check if the avatar URL is valid for NetworkImage
 
     return GlassCard(
-      borderRadius: 24,
+      radius: 24,
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Column(

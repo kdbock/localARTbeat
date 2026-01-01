@@ -6,11 +6,19 @@ class GlassCard extends StatelessWidget {
   final EdgeInsetsGeometry padding;
   final EdgeInsetsGeometry? margin;
   final double radius;
+  final double? borderRadius;
   final double blur;
+  final Color? fillColor;
   final Color? glassColor;
   final Color? borderColor;
+  final BoxShadow? shadow;
   final List<BoxShadow>? shadows;
   final VoidCallback? onTap;
+  final double? glassOpacity;
+  final double? borderOpacity;
+  final bool showAccentGlow;
+  final Color? accentColor;
+  final Color? glassBackground;
 
   const GlassCard({
     super.key,
@@ -18,37 +26,60 @@ class GlassCard extends StatelessWidget {
     this.padding = const EdgeInsets.all(16),
     this.margin,
     this.radius = 24,
+    this.borderRadius,
     this.blur = 16,
+    this.fillColor,
     this.glassColor,
     this.borderColor,
+    this.shadow,
     this.shadows,
     this.onTap,
+    this.glassOpacity,
+    this.borderOpacity,
+    this.showAccentGlow = false,
+    this.accentColor,
+    this.glassBackground,
   });
 
   @override
   Widget build(BuildContext context) {
-    final borderRadius = BorderRadius.circular(radius);
+    final effectiveRadius = borderRadius ?? radius;
+    final borderRadiusGeometry = BorderRadius.circular(effectiveRadius);
+    final effectiveGlassColor = glassBackground ??
+        fillColor ??
+        glassColor ??
+        Colors.white.withValues(alpha: glassOpacity ?? 0.06);
+    final effectiveBorderColor = borderColor ??
+        Colors.white.withValues(alpha: borderOpacity ?? 0.12);
+    final shadowList =
+        shadows ?? (shadow != null ? <BoxShadow>[shadow!] : null);
 
     Widget content = ClipRRect(
-      borderRadius: borderRadius,
+      borderRadius: borderRadiusGeometry,
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
         child: Container(
           padding: padding,
           decoration: BoxDecoration(
-            color: glassColor ?? Colors.white.withValues(alpha: 0.06),
-            borderRadius: borderRadius,
+            color: effectiveGlassColor,
+            borderRadius: borderRadiusGeometry,
             border: Border.all(
-              color: borderColor ?? Colors.white.withValues(alpha: 0.12),
+              color: effectiveBorderColor,
             ),
-            boxShadow:
-                shadows ??
+            boxShadow: shadowList ??
                 [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.35),
                     blurRadius: 26,
                     offset: const Offset(0, 16),
                   ),
+                  if (showAccentGlow)
+                    BoxShadow(
+                      color: (accentColor ?? const Color(0xFF00FD8A))
+                          .withValues(alpha: 0.25),
+                      blurRadius: 32,
+                      spreadRadius: 2,
+                    ),
                 ],
           ),
           child: child,
@@ -60,7 +91,7 @@ class GlassCard extends StatelessWidget {
       content = Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: borderRadius,
+          borderRadius: borderRadiusGeometry,
           onTap: onTap,
           child: content,
         ),

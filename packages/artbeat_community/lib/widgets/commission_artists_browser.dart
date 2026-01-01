@@ -5,9 +5,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_artist/artbeat_artist.dart' as artist;
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:artbeat_core/shared_widgets.dart';
+
 import '../models/direct_commission_model.dart';
 import '../services/direct_commission_service.dart';
-import 'glass_card.dart';
 
 /// Widget to browse artists accepting commissions
 class CommissionArtistsBrowser extends StatefulWidget {

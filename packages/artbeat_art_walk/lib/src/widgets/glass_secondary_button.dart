@@ -49,12 +49,14 @@ class GlassSecondaryButton extends StatelessWidget {
                 Icon(icon, color: Colors.white, size: 18),
                 const SizedBox(width: 8),
               ],
-              Text(
-                label,
-                style: GoogleFonts.spaceGrotesk(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
+              Expanded(
+                child: Text(
+                  label,
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF1A1A1A),
+                  ),
                 ),
               ),
             ],

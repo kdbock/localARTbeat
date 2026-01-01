@@ -31,13 +31,13 @@ class _WorldBackgroundState extends State<WorldBackground>
     _blobAnimation2 = Tween<double>(begin: 0, end: 2 * 3.14159).animate(
       CurvedAnimation(
         parent: _blobController,
-        curve: const Interval(0.2, 1.0, curve: Curves.easeInOut),
+        curve: const Interval(0.2, 1, curve: Curves.easeInOut),
       ),
     );
     _blobAnimation3 = Tween<double>(begin: 0, end: 2 * 3.14159).animate(
       CurvedAnimation(
         parent: _blobController,
-        curve: const Interval(0.4, 1.0, curve: Curves.easeInOut),
+        curve: const Interval(0.4, 1, curve: Curves.easeInOut),
       ),
     );
   }

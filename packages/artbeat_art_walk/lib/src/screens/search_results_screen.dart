@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:provider/provider.dart';
-import 'package:artbeat_core/artbeat_core.dart';
+import 'package:artbeat_core/artbeat_core.dart'
+    hide GlassCard, WorldBackground, HudTopBar, GradientCTAButton;
 import 'package:artbeat_art_walk/src/models/models.dart';
 import 'package:artbeat_art_walk/src/services/art_walk_service.dart';
 import 'package:artbeat_art_walk/src/widgets/widgets.dart';
 import 'package:artbeat_art_walk/src/widgets/text_styles.dart';
-import 'package:artbeat_capture/src/widgets/glass_input_decoration.dart';
 
 class SearchResultsScreen extends StatefulWidget {
   final String? initialQuery;
@@ -108,11 +108,11 @@ class _SearchResultsScreenState extends State<SearchResultsScreen>
                   TextField(
                     controller: _searchController,
                     style: AppTextStyles.body,
-                    decoration: glassInputDecoration(
-                      labelText: _currentTabIndex == 0
+                    decoration: GlassInputDecoration.search(
+                      hintText: _currentTabIndex == 0
                           ? 'art_walk_search_hint_walks'.tr()
                           : 'art_walk_search_hint_public_art'.tr(),
-                      prefixIcon: Icons.search,
+                      prefixIcon: const Icon(Icons.search, color: Colors.white70),
                     ),
                     onSubmitted: (q) {
                       _updateCriteria(q);
@@ -135,14 +135,17 @@ class _SearchResultsScreenState extends State<SearchResultsScreen>
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: GlassCard(
-              child: TabBar(
-                controller: _tabController,
-                indicatorColor: Theme.of(context).colorScheme.secondary,
-                labelColor: Theme.of(context).colorScheme.onSurface,
-                tabs: [
-                  Tab(text: 'art_walk_search_tab_walks'.tr()),
-                  Tab(text: 'art_walk_search_tab_public_art'.tr()),
-                ],
+              child: Material(
+                color: Colors.transparent,
+                child: TabBar(
+                  controller: _tabController,
+                  indicatorColor: Theme.of(context).colorScheme.secondary,
+                  labelColor: Theme.of(context).colorScheme.onSurface,
+                  tabs: [
+                    Tab(text: 'art_walk_search_tab_walks'.tr()),
+                    Tab(text: 'art_walk_search_tab_public_art'.tr()),
+                  ],
+                ),
               ),
             ),
           ),

@@ -36,6 +36,9 @@ class HudButton extends StatelessWidget {
   final bool isPrimary;
   final IconData? icon;
   final double? width;
+  final double? height;
+  final bool isLoading;
+  final bool isDestructive;
 
   const HudButton({
     super.key,
@@ -44,19 +47,90 @@ class HudButton extends StatelessWidget {
     this.isPrimary = true,
     this.icon,
     this.width,
+    this.height,
+    this.isLoading = false,
+    this.isDestructive = false,
   });
+
+  const HudButton.primary({
+    Key? key,
+    required String text,
+    VoidCallback? onPressed,
+    IconData? icon,
+    double? width,
+    double? height,
+    bool isLoading = false,
+    bool isDestructive = false,
+  }) : this(
+          key: key,
+          text: text,
+          onPressed: onPressed,
+          icon: icon,
+          width: width,
+          height: height,
+          isPrimary: true,
+          isLoading: isLoading,
+          isDestructive: isDestructive,
+        );
+
+  const HudButton.secondary({
+    Key? key,
+    required String text,
+    VoidCallback? onPressed,
+    IconData? icon,
+    double? width,
+    double? height,
+    bool isLoading = false,
+    bool isDestructive = false,
+  }) : this(
+          key: key,
+          text: text,
+          onPressed: onPressed,
+          icon: icon,
+          width: width,
+          height: height,
+          isPrimary: false,
+          isLoading: isLoading,
+          isDestructive: isDestructive,
+        );
+
+  const HudButton.destructive({
+    Key? key,
+    required String text,
+    VoidCallback? onPressed,
+    IconData? icon,
+    double? width,
+    double? height,
+    bool isLoading = false,
+  }) : this(
+          key: key,
+          text: text,
+          onPressed: onPressed,
+          icon: icon,
+          width: width,
+          height: height,
+          isPrimary: true,
+          isLoading: isLoading,
+          isDestructive: true,
+        );
 
   @override
   Widget build(BuildContext context) {
+    final effectiveHeight = height ?? 48.0;
     return SizedBox(
       width: width,
+      height: effectiveHeight,
       child: ElevatedButton(
-        onPressed: onPressed,
+        onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: isPrimary
-              ? const Color(0xFF00fd8a)
-              : Colors.white.withValues(alpha: 0.1),
-          foregroundColor: isPrimary ? Colors.black : Colors.white,
+          backgroundColor: isDestructive
+              ? const Color(0xFFFF3D8D)
+              : isPrimary
+                  ? const Color(0xFF00fd8a)
+                  : Colors.white.withValues(alpha: 0.1),
+          foregroundColor: isPrimary && !isDestructive
+              ? Colors.black
+              : Colors.white,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -66,6 +140,17 @@ class HudButton extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (isLoading) ...[
+              const SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              ),
+              const SizedBox(width: 8),
+            ],
             if (icon != null) ...[
               Icon(icon, size: 18),
               const SizedBox(width: 8),

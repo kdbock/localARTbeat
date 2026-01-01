@@ -6,7 +6,6 @@ import 'package:intl/intl.dart' as intl;
 import 'package:artbeat_core/artbeat_core.dart';
 
 import '../models/artbeat_event.dart';
-import '../widgets/glass_card.dart';
 
 class EventCard extends StatelessWidget {
   final ArtbeatEvent event;

@@ -59,18 +59,23 @@ class GradientCTAButton extends StatelessWidget {
             alignment: Alignment.center,
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             child: Row(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 if (icon != null) ...[
                   Icon(icon, size: 18, color: Colors.white),
                   const SizedBox(width: 8),
                 ],
-                Text(
-                  text,
-                  style: GoogleFonts.spaceGrotesk(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
+                Flexible(
+                  child: Text(
+                    text,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.spaceGrotesk(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
                 ),
               ],

@@ -8,7 +8,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_art_walk/src/services/social_service.dart';
-import 'package:artbeat_art_walk/src/widgets/glass_card.dart';
 import 'package:artbeat_art_walk/src/widgets/typography.dart';
 
 class SocialActivityFeed extends StatefulWidget {

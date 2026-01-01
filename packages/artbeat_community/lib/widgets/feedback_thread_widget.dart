@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:artbeat_core/shared_widgets.dart';
+
 import 'avatar_widget.dart';
 import '../models/comment_model.dart';
-import 'glass_card.dart';
-import 'hud_button.dart';
 
 class FeedbackThreadWidget extends StatelessWidget {
   final List<CommentModel> comments;

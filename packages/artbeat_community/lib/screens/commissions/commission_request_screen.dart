@@ -260,10 +260,7 @@ class _CommissionRequestScreenState extends State<CommissionRequestScreen> {
       appBar: HudTopBar(
         title: 'commission_request_app_bar'.tr(),
         glassBackground: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
+        onBackPressed: () => Navigator.of(context).pop(),
         actions: [
           IconButton(
             tooltip: 'commission_request_action_templates'.tr(),

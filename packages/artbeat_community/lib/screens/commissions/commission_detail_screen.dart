@@ -8,15 +8,11 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart' as intl;
 import 'package:path_provider/path_provider.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
+import 'package:artbeat_core/shared_widgets.dart';
 
 import '../../models/direct_commission_model.dart';
 import '../../services/direct_commission_service.dart';
 import '../../services/stripe_service.dart';
-import '../../widgets/glass_card.dart';
-import '../../widgets/glass_input_decoration.dart';
-import '../../widgets/hud_button.dart';
-import '../../widgets/hud_top_bar.dart';
-import '../../widgets/world_background.dart';
 
 class CommissionDetailScreen extends StatefulWidget {
   const CommissionDetailScreen({super.key, required this.commission});

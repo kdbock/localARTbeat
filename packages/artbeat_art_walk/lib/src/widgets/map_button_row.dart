@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:artbeat_art_walk/src/widgets/glass_card.dart';
+import 'package:artbeat_core/shared_widgets.dart';
 
 class MapButtonRow extends StatelessWidget {
   final VoidCallback onZoomIn;

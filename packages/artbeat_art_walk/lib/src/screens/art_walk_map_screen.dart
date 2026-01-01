@@ -751,7 +751,8 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
                           color: ArtWalkDesignSystem.hudInactiveColor,
                         ),
                         onPressed: () =>
-                            Navigator.pushNamed(context, '/profile'),
+                            Navigator.of(context, rootNavigator: true)
+                                .pushNamed(AppRoutes.profileMenu),
                       ),
                     ],
                   ),
@@ -976,11 +977,19 @@ class CaptureDetailBottomSheet extends StatelessWidget {
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(24),
               ),
-              child: OptimizedImage(
-                imageUrl: capture.imageUrl,
-                width: double.infinity,
-                height: 200,
-                fit: BoxFit.cover,
+              child: Container(
+                color: Colors.black,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 280,
+                  child: OptimizedImage(
+                    imageUrl: capture.imageUrl,
+                    width: double.infinity,
+                    height: 280,
+                    fit: BoxFit.contain,
+                  ),
+                ),
               ),
             ),
 
@@ -1052,27 +1061,55 @@ class CaptureDetailBottomSheet extends StatelessWidget {
                   ),
                 ],
                 const SizedBox(height: 24),
-                // Close button centered since we removed the redundant "View Details" button
-                // The bottom sheet already shows all capture details
-                Center(
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 48,
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: ArtWalkDesignSystem.hudActiveColor,
-                        foregroundColor: ArtWalkDesignSystem.hudInactiveColor,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
-                        ),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      final navigator = Navigator.of(context);
+                      navigator.pop();
+                      Future.microtask(
+                        () => navigator.pushNamed('/art-walk/create'),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          ArtWalkDesignSystem.hudActiveColor.withValues(
+                        alpha: 0.15,
                       ),
-                      child: Text(
-                        'art_walk_art_walk_map_text_close'.tr(),
-                        style: GoogleFonts.spaceGrotesk(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
+                      foregroundColor: ArtWalkDesignSystem.hudActiveColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                    ),
+                    icon: const Icon(Icons.add_location_alt),
+                    label: Text(
+                      'art_walk_art_walk_map_text_create_art_walk'.tr(),
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: ArtWalkDesignSystem.hudActiveColor,
+                      foregroundColor: ArtWalkDesignSystem.hudInactiveColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                    ),
+                    child: Text(
+                      'art_walk_art_walk_map_text_close'.tr(),
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),

@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../widgets/hud_top_bar.dart';
-import '../widgets/settings_section_card.dart';
-import '../widgets/glass_text_field.dart';
-import '../widgets/hud_button.dart';
+import '../widgets/widgets.dart';
 
 class SocialLinksScreen extends StatefulWidget {
   const SocialLinksScreen({super.key});

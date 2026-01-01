@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'glass_card.dart';
-import 'hud_button.dart';
+import 'package:artbeat_core/shared_widgets.dart';
 
 class GiftCardWidget extends StatelessWidget {
   final GiftModel gift;

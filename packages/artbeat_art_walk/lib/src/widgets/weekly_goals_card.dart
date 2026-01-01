@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_art_walk/src/models/weekly_goal_model.dart';
-import 'package:artbeat_art_walk/src/widgets/glass_card.dart';
-import 'package:artbeat_art_walk/src/widgets/gradient_cta_button.dart';
+import 'package:artbeat_core/shared_widgets.dart';
 
 class WeeklyGoalsCard extends StatefulWidget {
   final List<WeeklyGoalModel> goals;

@@ -42,6 +42,37 @@ class EventModel {
   /// Create an EventModel from a Firestore document
   factory EventModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>? ?? {};
+
+    String? _firstNonEmpty(List<String?> values) {
+      for (final value in values) {
+        final trimmed = value?.trim();
+        if (trimmed != null && trimmed.isNotEmpty) {
+          return trimmed;
+        }
+      }
+      return null;
+    }
+
+    final galleryImages = (data['imageUrls'] as List?)
+            ?.whereType<String>()
+            .map((url) => url.trim())
+            .where((url) => url.isNotEmpty)
+            .toList() ??
+        [];
+
+    final resolvedImageUrl = _firstNonEmpty([
+      data['imageUrl'] as String?,
+      data['eventBannerUrl'] as String?,
+      data['eventCoverUrl'] as String?,
+      galleryImages.isNotEmpty ? galleryImages.first : null,
+    ]);
+
+    final resolvedArtistImageUrl = _firstNonEmpty([
+      data['artistProfileImageUrl'] as String?,
+      data['artistHeadshotUrl'] as String?,
+      data['artistAvatarUrl'] as String?,
+    ]);
+
     return EventModel(
       id: doc.id,
       title: data['title'] as String? ?? '',
@@ -52,11 +83,8 @@ class EventModel {
           DateTime.now(),
       endDate: (data['endDate'] as Timestamp?)?.toDate(),
       location: data['location'] as String? ?? '',
-      imageUrl:
-          data['imageUrl'] as String? ?? data['eventBannerUrl'] as String?,
-      artistProfileImageUrl:
-          data['artistProfileImageUrl'] as String? ??
-          data['artistHeadshotUrl'] as String?,
+      imageUrl: resolvedImageUrl,
+      artistProfileImageUrl: resolvedArtistImageUrl,
       artistId: data['artistId'] as String? ?? '',
       isPublic: data['isPublic'] as bool? ?? true,
       attendeeIds: List<String>.from(data['attendeeIds'] as List? ?? []),
@@ -69,7 +97,7 @@ class EventModel {
 
   /// Convert model to a Firestore document
   Map<String, dynamic> toFirestore() {
-    return {
+    final map = {
       'title': title,
       'description': description,
       'startDate': Timestamp.fromDate(startDate),
@@ -85,6 +113,9 @@ class EventModel {
       'contactEmail': contactEmail,
       'price': price,
     };
+    // Remove null values to prevent iOS crash in cloud_firestore plugin
+    map.removeWhere((key, value) => value == null);
+    return map;
   }
 
   /// Create a copy of this EventModel with given fields replaced

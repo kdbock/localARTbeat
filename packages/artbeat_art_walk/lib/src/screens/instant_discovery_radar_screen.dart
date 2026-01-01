@@ -4,8 +4,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:artbeat_art_walk/src/models/public_art_model.dart';
 import 'package:artbeat_art_walk/src/widgets/instant_discovery_radar.dart';
 import 'package:artbeat_art_walk/src/widgets/discovery_capture_modal.dart';
-import 'package:artbeat_art_walk/src/widgets/world_background.dart';
-import 'package:artbeat_art_walk/src/widgets/hud_top_bar.dart';
+import 'package:artbeat_art_walk/src/widgets/text_styles.dart';
 
 /// Refactored full-screen Instant Discovery Radar with design guide
 class InstantDiscoveryRadarScreen extends StatefulWidget {
@@ -116,21 +115,11 @@ class _InstantDiscoveryRadarScreenState
 
     return WorldBackground(
       child: SafeArea(
-        child: Stack(
-          children: [
-            InstantDiscoveryRadar(
-              userPosition: _userPosition!,
-              nearbyArt: _nearbyArt,
-              radiusMeters: 500,
-              onArtTap: _handleArtTap,
-            ),
-            const Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: HudTopBar(title: 'art_walk_instant_discovery_radar_title'),
-            ),
-          ],
+        child: InstantDiscoveryRadar(
+          userPosition: _userPosition!,
+          nearbyArt: _nearbyArt,
+          radiusMeters: 500,
+          onArtTap: _handleArtTap,
         ),
       ),
     );

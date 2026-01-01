@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:artbeat_core/artbeat_core.dart';
 import '../models/artbeat_event.dart';
 import '../services/event_service.dart';
 import 'event_card.dart';
 import '../screens/event_details_screen.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../widgets/glass_card.dart';
 
 /// Widget that displays upcoming events in the community feed
 class CommunityFeedEventsWidget extends StatefulWidget {

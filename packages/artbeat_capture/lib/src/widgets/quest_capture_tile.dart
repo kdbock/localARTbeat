@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_core/artbeat_core.dart'; // for CaptureModel
-import 'glass_card.dart';
 
 class QuestCaptureTile extends StatelessWidget {
   final CaptureModel capture;

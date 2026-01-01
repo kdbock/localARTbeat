@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import 'package:artbeat_art_walk/src/models/challenge_model.dart';
-import 'package:artbeat_art_walk/src/widgets/glass_card.dart';
 import 'package:artbeat_art_walk/src/widgets/typography.dart';
+import 'package:artbeat_core/shared_widgets.dart';
 
 class DailyQuestCard extends StatefulWidget {
   final ChallengeModel? challenge;

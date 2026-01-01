@@ -1,11 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-
-import '../widgets/hud_top_bar.dart';
-import '../widgets/settings_section_card.dart';
-import '../widgets/glass_text_field.dart';
-import '../widgets/hud_button.dart';
+import '../widgets/widgets.dart';
 
 class ProfileSettingsScreen extends StatefulWidget {
   const ProfileSettingsScreen({super.key});

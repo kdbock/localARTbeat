@@ -552,68 +552,121 @@ class ArtbeatDrawerItems {
 
   static List<ArtbeatDrawerItem> get settingsItems => [settings, help, signOut];
 
+  static List<ArtbeatDrawerItem> _filterItemsForRole(
+    List<ArtbeatDrawerItem> items,
+    String? userRole,
+  ) {
+    return items.where((item) {
+      final requiredRoles = item.requiredRoles;
+      if (requiredRoles == null || requiredRoles.isEmpty) {
+        return true;
+      }
+      if (userRole == null) return false;
+      return requiredRoles.contains(userRole);
+    }).toList();
+  }
+
   // Helper method to get sections for a specific user role
   static List<DrawerSection> getSectionsForRole(String? userRole) {
     final List<DrawerSection> sections = [];
 
     // 1. Core Navigation (Always Visible)
-    sections.add(
-      DrawerSection(title: 'drawer_section_navigation', items: coreItems),
-    );
+    final navigationItems = _filterItemsForRole(coreItems, userRole);
+    if (navigationItems.isNotEmpty) {
+      sections.add(
+        DrawerSection(
+          title: 'drawer_section_navigation',
+          items: navigationItems,
+        ),
+      );
+    }
 
     // 2. Creation Tools (for artists, galleries, admins)
     final hasCreationRole =
         userRole == 'artist' || userRole == 'gallery' || userRole == 'admin';
     if (hasCreationRole) {
-      sections.add(
-        DrawerSection(title: 'drawer_section_create', items: creationItems),
-      );
+      final creationTools = _filterItemsForRole(creationItems, userRole);
+      if (creationTools.isNotEmpty) {
+        sections.add(
+          DrawerSection(
+            title: 'drawer_section_create',
+            items: creationTools,
+          ),
+        );
+      }
     }
 
     // 3. Messaging (always available for authenticated users)
-    sections.add(const DrawerSection(items: [messaging]));
+    final messagingItems = _filterItemsForRole(const [messaging], userRole);
+    if (messagingItems.isNotEmpty) {
+      sections.add(DrawerSection(items: messagingItems));
+    }
 
     // 4. Role-Specific Management Tools
     switch (userRole) {
       case 'artist':
-        sections.add(
-          DrawerSection(title: 'drawer_section_artist', items: artistItems),
-        );
+        final artistTools = _filterItemsForRole(artistItems, userRole);
+        if (artistTools.isNotEmpty) {
+          sections.add(
+            DrawerSection(
+              title: 'drawer_section_artist',
+              items: artistTools,
+            ),
+          );
+        }
         break;
       case 'gallery':
-        sections.add(
-          DrawerSection(title: 'drawer_section_gallery', items: galleryItems),
-        );
+        final galleryTools = _filterItemsForRole(galleryItems, userRole);
+        if (galleryTools.isNotEmpty) {
+          sections.add(
+            DrawerSection(
+              title: 'drawer_section_gallery',
+              items: galleryTools,
+            ),
+          );
+        }
         break;
       case 'admin':
-        sections.add(
-          DrawerSection(title: 'drawer_section_admin', items: adminItems),
-        );
+        final adminTools = _filterItemsForRole(adminItems, userRole);
+        if (adminTools.isNotEmpty) {
+          sections.add(
+            DrawerSection(title: 'drawer_section_admin', items: adminTools),
+          );
+        }
         // Removed paymentMethods from admin drawer - admins should use AdminPaymentScreen
         break;
       case 'moderator':
-        sections.add(
-          DrawerSection(
-            title: 'drawer_section_moderation',
-            items: moderatorItems,
-          ),
-        );
+        final moderatorTools = _filterItemsForRole(moderatorItems, userRole);
+        if (moderatorTools.isNotEmpty) {
+          sections.add(
+            DrawerSection(
+              title: 'drawer_section_moderation',
+              items: moderatorTools,
+            ),
+          );
+        }
         break;
     }
 
     // 6. Personal & Social Features
-    sections.add(
-      DrawerSection(title: 'drawer_section_personal', items: personalItems),
-    );
+    final personal = _filterItemsForRole(personalItems, userRole);
+    if (personal.isNotEmpty) {
+      sections.add(
+        DrawerSection(title: 'drawer_section_personal', items: personal),
+      );
+    }
 
     // 7. Settings & Support
-    sections.add(
-      DrawerSection(
-        title: 'drawer_settings',
-        items: settingsItems,
-        showDivider: true,
-      ),
-    );
+    final settingsAndSupport = _filterItemsForRole(settingsItems, userRole);
+    if (settingsAndSupport.isNotEmpty) {
+      sections.add(
+        DrawerSection(
+          title: 'drawer_settings',
+          items: settingsAndSupport,
+          showDivider: true,
+        ),
+      );
+    }
 
     return sections;
   }

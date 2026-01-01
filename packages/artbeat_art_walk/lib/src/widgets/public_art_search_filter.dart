@@ -1,11 +1,9 @@
 import 'package:artbeat_art_walk/src/models/search_criteria_model.dart';
-import 'package:artbeat_art_walk/src/widgets/glass_card.dart';
 import 'package:artbeat_art_walk/src/widgets/glass_secondary_button.dart';
-import 'package:artbeat_art_walk/src/widgets/gradient_cta_button.dart';
 import 'package:artbeat_art_walk/src/widgets/typography.dart';
-import 'package:artbeat_art_walk/src/widgets/world_background.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:artbeat_core/shared_widgets.dart';
 
 class PublicArtSearchFilter extends StatefulWidget {
   final PublicArtSearchCriteria initialCriteria;

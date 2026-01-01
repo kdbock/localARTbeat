@@ -17,6 +17,7 @@ export 'src/screens/my_captures_pending_screen.dart';
 export 'src/screens/my_captures_approved_screen.dart';
 export 'src/screens/capture_screen.dart';
 export 'src/screens/capture_view_screen.dart';
+export 'src/screens/capture_review_screen.dart';
 export 'src/services/capture_service.dart';
 export 'src/services/storage_service.dart';
 export 'src/services/camera_service.dart';

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_artwork/artbeat_artwork.dart';
-import 'package:artbeat_events/artbeat_events.dart'; // For GlassCard
+import 'package:artbeat_core/shared_widgets.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
 
 /// Screen shown when user wins an auction

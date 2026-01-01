@@ -1,13 +1,12 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:provider/provider.dart';
-import 'package:artbeat_core/artbeat_core.dart';
+import 'package:artbeat_core/artbeat_core.dart'
+    hide GlassCard, WorldBackground, HudTopBar, GradientCTAButton;
 import 'package:artbeat_art_walk/src/models/challenge_model.dart';
 import 'package:artbeat_art_walk/src/services/challenge_service.dart';
 import 'package:artbeat_art_walk/src/widgets/daily_quest_card.dart';
-import 'package:artbeat_art_walk/src/widgets/world_background.dart';
-import 'package:artbeat_art_walk/src/widgets/glass_card.dart';
-import 'package:artbeat_art_walk/src/widgets/hud_top_bar.dart';
 import 'package:artbeat_art_walk/src/widgets/text_styles.dart';
 
 class QuestHistoryScreen extends StatefulWidget {
@@ -68,21 +67,24 @@ class _QuestHistoryScreenState extends State<QuestHistoryScreen>
             onBack: () => Navigator.of(context).pop(),
           ),
 
-          TabBar(
-            controller: _tabController,
-            indicatorColor: ArtbeatColors.primaryPurple,
-            labelColor: ArtbeatColors.primaryPurple,
-            unselectedLabelColor: const Color.fromARGB(
-              115,
-              255,
-              255,
-              255,
-            ), // ~45% alpha
-            tabs: [
-              Tab(text: 'art_walk_quest_tab_current'.tr()),
-              Tab(text: 'art_walk_quest_tab_stats'.tr()),
-              Tab(text: 'art_walk_quest_tab_all'.tr()),
-            ],
+          Material(
+            color: Colors.transparent,
+            child: TabBar(
+              controller: _tabController,
+              indicatorColor: ArtbeatColors.primaryPurple,
+              labelColor: Colors.white,
+              unselectedLabelColor: const Color.fromARGB(
+                115,
+                255,
+                255,
+                255,
+              ), // ~45% alpha
+              tabs: [
+                Tab(text: 'art_walk_quest_tab_current'.tr()),
+                Tab(text: 'art_walk_quest_tab_stats'.tr()),
+                Tab(text: 'art_walk_quest_tab_all'.tr()),
+              ],
+            ),
           ),
           Expanded(
             child: _isLoading
@@ -130,7 +132,7 @@ class _QuestHistoryScreenState extends State<QuestHistoryScreen>
           const SizedBox(height: 24),
           Text(
             'art_walk_quest_your_progress'.tr(),
-            style: AppTextStyles.sectionTitle,
+            style: AppTextStyles.sectionTitle.copyWith(color: Colors.white),
           ),
           const SizedBox(height: 16),
           Row(
@@ -139,7 +141,7 @@ class _QuestHistoryScreenState extends State<QuestHistoryScreen>
                 'day_streak_label',
                 Icons.local_fire_department,
                 (_stats['currentStreak'] as int? ?? 0),
-                ArtbeatColors.accentOrange,
+                ArtbeatColors.secondaryTeal,
               ),
               const SizedBox(width: 8),
               _buildStatTile(
@@ -207,26 +209,46 @@ class _QuestHistoryScreenState extends State<QuestHistoryScreen>
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          GlassCard(
-            padding: const EdgeInsets.all(24),
-            fillColor: const Color.fromARGB(216, 124, 77, 255), // 85% alpha
-            child: Column(
-              children: [
-                Text(
-                  'quest_master_level_label'.tr(),
-                  style: AppTextStyles.cardCaptionWhite,
+          ClipRRect(
+            borderRadius: BorderRadius.circular(24),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 18.0, sigmaY: 18.0),
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      ArtbeatColors.primaryPurple.withValues(alpha: 0.85),
+                      ArtbeatColors.secondaryTeal.withValues(alpha: 0.85),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(
+                    color: const Color(0xFFFFFFFF).withValues(alpha: 0.12),
+                    width: 1.0,
+                  ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  _getQuestMasterLevel(completedChallenges),
-                  style: AppTextStyles.cardTitleWhite,
+                child: Column(
+                  children: [
+                    Text(
+                      'quest_master_level_label'.tr(),
+                      style: AppTextStyles.cardCaptionWhite,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      _getQuestMasterLevel(completedChallenges),
+                      style: AppTextStyles.cardTitleWhite,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _getQuestMasterTitle(completedChallenges),
+                      style: AppTextStyles.cardSubtitleWhite,
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  _getQuestMasterTitle(completedChallenges),
-                  style: AppTextStyles.cardSubtitleWhite,
-                ),
-              ],
+              ),
             ),
           ),
           const SizedBox(height: 24),
@@ -264,7 +286,7 @@ class _QuestHistoryScreenState extends State<QuestHistoryScreen>
         fillColor: const Color.fromARGB(18, 255, 255, 255),
         child: Row(
           children: [
-            Icon(icon, color: ArtbeatColors.primaryPurple, size: 24),
+            Icon(icon, color: Colors.white, size: 24),
             const SizedBox(width: 16),
             Expanded(child: Text(label, style: AppTextStyles.body)),
             Text(value, style: AppTextStyles.bodyBold),
@@ -288,11 +310,7 @@ class _QuestHistoryScreenState extends State<QuestHistoryScreen>
             fillColor: const Color.fromARGB(18, 255, 255, 255),
             child: Row(
               children: [
-                const Icon(
-                  Icons.flag,
-                  color: ArtbeatColors.primaryPurple,
-                  size: 28,
-                ),
+                const Icon(Icons.flag, color: Colors.white, size: 28),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
@@ -324,7 +342,10 @@ class _QuestHistoryScreenState extends State<QuestHistoryScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('quest_tips_title'.tr(), style: AppTextStyles.sectionTitle),
+        Text(
+          'quest_tips_title'.tr(),
+          style: AppTextStyles.sectionTitle.copyWith(color: Colors.white),
+        ),
         const SizedBox(height: 12),
         ...tips.map(
           (key) => Padding(

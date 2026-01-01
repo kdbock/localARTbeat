@@ -5,7 +5,8 @@ import 'package:artbeat_artwork/artbeat_artwork.dart';
 import 'package:artbeat_artist/artbeat_artist.dart' as artist;
 import 'package:artbeat_core/artbeat_core.dart' hide ArtworkModel;
 import 'package:share_plus/share_plus.dart';
-import 'package:artbeat_art_walk/artbeat_art_walk.dart';
+import 'package:artbeat_art_walk/artbeat_art_walk.dart' hide WorldBackground;
+import 'package:google_fonts/google_fonts.dart';
 
 /// Screen for viewing artwork details
 class ArtworkDetailScreen extends StatefulWidget {
@@ -474,14 +475,10 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return MainLayout(
-        currentIndex: -1, // No navigation highlight for detail screens
-        child: Scaffold(
-          appBar: EnhancedUniversalHeader(
-            title: 'artwork_detail_title'.tr(),
-            showLogo: false,
-          ),
-          body: const Center(child: CircularProgressIndicator()),
+      return WorldBackground(
+        child: const Scaffold(
+          backgroundColor: Colors.transparent,
+          body: Center(child: CircularProgressIndicator()),
         ),
       );
     }
@@ -489,60 +486,43 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
     final artwork = _artwork!;
     final artistProfile = _artist;
 
-    return MainLayout(
-      currentIndex: -1, // No navigation highlight for detail screens
+    return WorldBackground(
       child: Scaffold(
-        appBar: AppBar(
-          title: Text('artwork_detail_title'.tr()),
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => Navigator.pop(context),
-          ),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.share),
-              onPressed: _shareArtwork,
-            ),
-            if (_isOwner) ...[
-              PopupMenuButton<String>(
-                onSelected: (value) {
-                  if (value == 'edit') {
-                    _editArtwork();
-                  } else if (value == 'delete') {
-                    _showDeleteConfirmation();
-                  }
-                },
-                itemBuilder: (context) => [
-                  PopupMenuItem(
-                    value: 'edit',
-                    child: Row(
-                      children: [
-                        const Icon(Icons.edit, size: 18),
-                        const SizedBox(width: 8),
-                        Text('common_edit'.tr()),
-                      ],
-                    ),
-                  ),
-                  PopupMenuItem(
-                    value: 'delete',
-                    child: Row(
-                      children: [
-                        const Icon(Icons.delete, size: 18, color: Colors.red),
-                        const SizedBox(width: 8),
-                        Text('common_delete'.tr(),
-                            style: const TextStyle(color: Colors.red)),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ],
-        ),
+        backgroundColor: Colors.transparent,
         body: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Top App Bar
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 10, 14, 0),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back, color: Colors.white),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                      Expanded(
+                        child: Text(
+                          'artwork_detail_title'.tr(),
+                          style: GoogleFonts.spaceGrotesk(
+                            color: Colors.white.withValues(alpha: 0.95),
+                            fontSize: 18,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1.2,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.share, color: Colors.white),
+                        onPressed: _shareArtwork,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               // Full-size artwork image
               Container(
                 width: double.infinity,

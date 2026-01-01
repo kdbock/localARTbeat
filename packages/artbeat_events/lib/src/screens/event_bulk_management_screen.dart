@@ -1,16 +1,16 @@
 // FULL FILE — paste over existing
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart' as intl;
+import 'package:artbeat_core/artbeat_core.dart' hide GradientCTAButton;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:artbeat_core/shared_widgets.dart' hide GradientCTAButton;
+import '../widgets/widgets.dart';
 
 import '../models/artbeat_event.dart';
 import '../services/event_bulk_management_service.dart';
 
-import '../widgets/world_background.dart';
-import '../widgets/glass_card.dart';
-import '../widgets/hud_top_bar.dart';
-import '../widgets/gradient_cta_button.dart';
 
 class EventBulkManagementScreen extends StatefulWidget {
   const EventBulkManagementScreen({super.key});
@@ -74,7 +74,7 @@ class _EventBulkManagementScreenState extends State<EventBulkManagementScreen> {
       child: SafeArea(
         child: Column(
           children: [
-            HudTopBar(
+            EventsHudTopBar(
               title: 'event_bulk_title'.tr(),
               onBack: () => Navigator.pop(context),
             ),
@@ -135,7 +135,7 @@ class _EventBulkManagementScreenState extends State<EventBulkManagementScreen> {
                     icon: const Icon(Icons.date_range, color: Colors.white70),
                     label: Text(
                       _startDate != null
-                          ? DateFormat('MMM dd, yyyy').format(_startDate!)
+                          ? intl.DateFormat('MMM dd, yyyy').format(_startDate!)
                           : 'event_bulk_start_date'.tr(),
                       style: GoogleFonts.spaceGrotesk(color: Colors.white70),
                     ),
@@ -148,7 +148,7 @@ class _EventBulkManagementScreenState extends State<EventBulkManagementScreen> {
                     icon: const Icon(Icons.date_range, color: Colors.white70),
                     label: Text(
                       _endDate != null
-                          ? DateFormat('MMM dd, yyyy').format(_endDate!)
+                          ? intl.DateFormat('MMM dd, yyyy').format(_endDate!)
                           : 'event_bulk_end_date'.tr(),
                       style: GoogleFonts.spaceGrotesk(color: Colors.white70),
                     ),

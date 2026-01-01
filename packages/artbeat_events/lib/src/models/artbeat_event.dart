@@ -216,7 +216,7 @@ class ArtbeatEvent {
 
   /// Convert ArtbeatEvent to a Map for Firestore
   Map<String, dynamic> toFirestore() {
-    return {
+    final map = {
       'title': title,
       'description': description,
       'artistId': artistId,
@@ -250,6 +250,9 @@ class ArtbeatEvent {
       'shareCount': shareCount,
       'saveCount': saveCount,
     };
+    // Remove null values to prevent iOS crash in cloud_firestore plugin
+    map.removeWhere((key, value) => value == null);
+    return map;
   }
 
   /// Create a copy of this ArtbeatEvent with the given fields replaced

@@ -108,7 +108,7 @@ class CommentModel {
   }
 
   Map<String, dynamic> toFirestore() {
-    return {
+    final map = {
       'postId': postId,
       'userId': userId,
       'content': content,
@@ -122,5 +122,8 @@ class CommentModel {
       'flaggedAt': flaggedAt != null ? Timestamp.fromDate(flaggedAt!) : null,
       'moderationNotes': moderationNotes,
     };
+    // Remove null values to prevent iOS crash in cloud_firestore plugin
+    map.removeWhere((key, value) => value == null);
+    return map;
   }
 }

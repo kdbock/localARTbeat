@@ -6,7 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 /// - Transparent background over world/glass layouts
 /// - Optional back button, menu, search, profile, notifications, dev icon
 /// - Uses Space Grotesk + consistent icon spacing
-class HudTopBar extends StatelessWidget implements PreferredSizeWidget {
+class EventsHudTopBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final bool showBack;
   final bool showMenu;
@@ -21,7 +21,7 @@ class HudTopBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onProfile;
   final VoidCallback? onDeveloper;
 
-  const HudTopBar({
+  const EventsHudTopBar({
     super.key,
     required this.title,
     this.showBack = false,

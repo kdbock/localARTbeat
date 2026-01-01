@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-
 import '../widgets/hud_top_bar.dart';
+
 import '../widgets/settings_category_header.dart';
 import '../widgets/settings_list_item.dart';
 import '../widgets/settings_section_card.dart';

@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart' as intl;
 
-import 'package:artbeat_artist/artbeat_artist.dart';
+import 'package:artbeat_artist/artbeat_artist.dart'
+    hide HudTopBar, WorldBackground, GlassCard, HudButton, GradientBadge;
 
 import '../../models/direct_commission_model.dart';
 import '../../services/direct_commission_service.dart';
@@ -144,7 +145,6 @@ class _CommissionHubScreenState extends State<CommissionHubScreen> {
       appBar: HudTopBar(
         title: 'commission_hub_app_bar'.tr(),
         glassBackground: true,
-        leading: const SizedBox.shrink(),
         actions: [
           IconButton(
             tooltip: 'commission_hub_refresh_tooltip'.tr(),

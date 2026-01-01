@@ -1,6 +1,6 @@
 import 'package:artbeat_artist/artbeat_artist.dart' as artist;
-import 'package:artbeat_community/artbeat_community.dart';
-import 'package:artbeat_core/artbeat_core.dart';
+import 'package:artbeat_community/artbeat_community.dart' as community;
+import 'package:artbeat_core/artbeat_core.dart' as core;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -19,7 +19,7 @@ class ArtistFeedContainerWithParams extends StatefulWidget {
 
 class _ArtistFeedContainerWithParamsState
     extends State<ArtistFeedContainerWithParams> {
-  ArtistProfileModel? _artistProfile;
+  core.ArtistProfileModel? _artistProfile;
   bool _isLoading = true;
   String? _errorMessage;
   final artist.SubscriptionService _subscriptionService =
@@ -65,7 +65,7 @@ class _ArtistFeedContainerWithParamsState
       }
 
       setState(() {
-        _artistProfile = profile as ArtistProfileModel?;
+        _artistProfile = profile as core.ArtistProfileModel?;
         _isLoading = false;
       });
     } on Exception catch (error) {
@@ -131,6 +131,6 @@ class _ArtistFeedContainerWithParamsState
     }
 
     // Show the artist community feed with the loaded profile
-    return ArtistCommunityFeedScreen(artist: _artistProfile!);
+    return community.ArtistCommunityFeedScreen(artist: _artistProfile!);
   }
 }

@@ -669,71 +669,53 @@ class _ArtWalkListScreenState extends State<ArtWalkListScreen> {
     );
   }
 
-  void _showSearchDialog() {
+  Future<void> _showSearchDialog() async {
     final TextEditingController searchController = TextEditingController(
       text: _searchQuery,
     );
 
-    showDialog<void>(
+    final result = await showDialog<String?>(
       context: context,
       builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: Text('art_walk_art_walk_list_hint_search_art_walks'.tr()),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    controller: searchController,
-                    decoration: const InputDecoration(
-                      hintText: 'Search by title, description, tags...',
-                      prefixIcon: Icon(Icons.search),
-                    ),
-                    onChanged: (value) {
-                      setState(
-                        () {},
-                      ); // Trigger rebuild for real-time filtering preview
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Search in: Title, Description, Tags, Difficulty, Location',
-                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                  ),
-                ],
+        return AlertDialog(
+          title: Text('art_walk_art_walk_list_hint_search_art_walks'.tr()),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: searchController,
+                decoration: const InputDecoration(
+                  hintText: 'Search by title, description, tags...',
+                  prefixIcon: Icon(Icons.search),
+                ),
               ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      _searchQuery = '';
-                      _applyFilters();
-                    });
-                    searchController.dispose();
-                    Navigator.of(context).pop();
-                  },
-                  child: Text('admin_admin_settings_text_clear'.tr()),
-                ),
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      _searchQuery = searchController.text;
-                      _applyFilters();
-                    });
-                    searchController.dispose();
-                    Navigator.of(context).pop();
-                  },
-                  child: Text('art_walk_art_walk_list_hint_search'.tr()),
-                ),
-              ],
-            );
-          },
+              const SizedBox(height: 16),
+              Text(
+                'Search in: Title, Description, Tags, Difficulty, Location',
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(''),
+              child: Text('admin_admin_settings_text_clear'.tr()),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(searchController.text),
+              child: Text('art_walk_art_walk_list_hint_search'.tr()),
+            ),
+          ],
         );
       },
-    ).then((_) {
-      searchController.dispose();
-    });
+    );
+
+    searchController.dispose();
+
+    if (!mounted || result == null) return;
+
+    setState(() => _searchQuery = result);
+    _applyFilters();
   }
 
   @override
@@ -747,6 +729,8 @@ class _ArtWalkListScreenState extends State<ArtWalkListScreen> {
         title: 'art_walk_art_walk_list_text_art_walks'.tr(),
         showBackButton: true,
         scaffoldKey: _scaffoldKey,
+        showSearch: false,
+        showChat: false,
         actions: [
           IconButton(
             icon: const Icon(Icons.search, color: Colors.white),

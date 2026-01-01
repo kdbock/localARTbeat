@@ -1,8 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:artbeat_core/shared_widgets.dart';
 
 import '../theme/art_walk_design_system.dart';
-import 'world_background.dart';
 
 class ArtWalkWorldScaffold extends StatelessWidget {
   final String title;

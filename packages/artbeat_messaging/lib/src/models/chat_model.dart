@@ -104,7 +104,7 @@ class ChatModel {
   }
 
   Map<String, dynamic> toFirestore() {
-    return {
+    final map = {
       'participantIds': participantIds,
       'lastMessage': lastMessage?.toMap(),
       'createdAt': Timestamp.fromDate(createdAt),
@@ -116,5 +116,8 @@ class ChatModel {
       'creatorId': creatorId,
       'participants': participants,
     };
+    // Remove null values to prevent iOS crash in cloud_firestore plugin
+    map.removeWhere((key, value) => value == null);
+    return map;
   }
 }

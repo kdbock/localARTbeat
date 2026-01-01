@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
+import 'package:artbeat_core/shared_widgets.dart'
+    show GlassCard, WorldBackground;
 import 'package:artbeat_profile/widgets/widgets.dart';
 
 class FavoritesScreen extends StatefulWidget {

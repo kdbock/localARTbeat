@@ -53,23 +53,29 @@ class _ArtistSocialStatsWidgetState extends State<ArtistSocialStatsWidget> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _buildStatCard(
-                icon: Icons.people,
-                label: 'Followers',
-                value: '$totalFollowers',
-                color: Colors.blue,
+              Flexible(
+                child: _buildStatCard(
+                  icon: Icons.people,
+                  label: 'Followers',
+                  value: '$totalFollowers',
+                  color: Colors.blue,
+                ),
               ),
-              _buildStatCard(
-                icon: Icons.favorite,
-                label: 'Total Engagement',
-                value: '$totalEngagement',
-                color: Colors.red,
+              Flexible(
+                child: _buildStatCard(
+                  icon: Icons.favorite,
+                  label: 'Total Engagement',
+                  value: '$totalEngagement',
+                  color: Colors.red,
+                ),
               ),
-              _buildStatCard(
-                icon: Icons.trending_up,
-                label: 'Avg Engagement',
-                value: '$avgEngagement',
-                color: Colors.green,
+              Flexible(
+                child: _buildStatCard(
+                  icon: Icons.trending_up,
+                  label: 'Avg Engagement',
+                  value: '$avgEngagement',
+                  color: Colors.green,
+                ),
               ),
             ],
           ),
@@ -85,7 +91,7 @@ class _ArtistSocialStatsWidgetState extends State<ArtistSocialStatsWidget> {
     required Color color,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),

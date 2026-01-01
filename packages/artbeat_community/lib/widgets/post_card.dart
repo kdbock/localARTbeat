@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:artbeat_core/shared_widgets.dart';
+
 import '../models/post_model.dart';
 import '../models/comment_model.dart';
-import 'glass_card.dart';
-import 'hud_button.dart';
 
 /// Post card widget using the universal engagement system
 /// This replaces the old post card with Appreciate/Connect/Discuss/Amplify actions

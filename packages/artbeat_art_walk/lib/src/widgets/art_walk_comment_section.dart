@@ -1,8 +1,6 @@
 import 'package:artbeat_art_walk/src/models/comment_model.dart';
 import 'package:artbeat_art_walk/src/services/art_walk_service.dart';
 import 'package:artbeat_art_walk/src/widgets/comment_tile.dart';
-import 'package:artbeat_art_walk/src/widgets/glass_card.dart';
-import 'package:artbeat_art_walk/src/widgets/gradient_cta_button.dart';
 import 'package:artbeat_art_walk/src/widgets/typography.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -10,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:artbeat_core/shared_widgets.dart';
 
 class ArtWalkCommentSection extends StatefulWidget {
   final String artWalkId;

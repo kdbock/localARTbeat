@@ -3,14 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:artbeat_core/shared_widgets.dart';
 
 import '../models/artbeat_event.dart';
 import '../models/ticket_type.dart';
 import '../services/event_service.dart';
 import '../services/event_notification_service.dart';
 
-import '../widgets/glass_card.dart';
-import '../widgets/gradient_cta_button.dart';
 
 class TicketPurchaseSheet extends StatefulWidget {
   final ArtbeatEvent event;

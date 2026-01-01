@@ -328,26 +328,45 @@ class InstantDiscoveryService {
       _discoveredArtIds = null;
       _discoveredArtCacheTime = null;
 
-      // Award XP
-      await _awardDiscoveryXP(userId);
-
-      // Update challenge progress
-      await _challengeService.recordArtDiscovery();
-
-      // Track time-based discovery (early bird or night owl)
-      await _challengeService.recordTimeBasedDiscovery();
-
-      // Track art style discovery if available
-      if (art.artType != null && art.artType!.isNotEmpty) {
-        await _challengeService.recordStyleDiscovery(art.artType!);
+      // Award XP (non-blocking)
+      try {
+        await _awardDiscoveryXP(userId);
+      } catch (e) {
+        AppLogger.error('Error awarding discovery XP: $e');
       }
 
-      // Track neighborhood discovery if address is available
+      // Update challenge progress (non-blocking)
+      try {
+        await _challengeService.recordArtDiscovery();
+      } catch (e) {
+        AppLogger.error('Error recording art discovery challenge: $e');
+      }
+
+      // Track time-based discovery (non-blocking)
+      try {
+        await _challengeService.recordTimeBasedDiscovery();
+      } catch (e) {
+        AppLogger.error('Error recording time-based discovery: $e');
+      }
+
+      // Track art style discovery if available (non-blocking)
+      if (art.artType != null && art.artType!.isNotEmpty) {
+        try {
+          await _challengeService.recordStyleDiscovery(art.artType!);
+        } catch (e) {
+          AppLogger.error('Error recording style discovery: $e');
+        }
+      }
+
+      // Track neighborhood discovery if address is available (non-blocking)
       if (art.address != null && art.address!.isNotEmpty) {
-        // Extract neighborhood from address (simple approach - use first part)
-        final neighborhood = _extractNeighborhood(art.address!);
-        if (neighborhood.isNotEmpty) {
-          await _challengeService.recordNeighborhoodDiscovery(neighborhood);
+        try {
+          final neighborhood = _extractNeighborhood(art.address!);
+          if (neighborhood.isNotEmpty) {
+            await _challengeService.recordNeighborhoodDiscovery(neighborhood);
+          }
+        } catch (e) {
+          AppLogger.error('Error recording neighborhood discovery: $e');
         }
       }
 
@@ -432,8 +451,8 @@ class InstantDiscoveryService {
       final Map<String, bool> discoveryDates = {};
       for (var doc in snapshot.docs) {
         final discoveredAtTimestamp = doc.data()['discoveredAt'] as Timestamp?;
-        final discoveredAt =
-            (discoveredAtTimestamp ?? Timestamp.now()).toDate();
+        final discoveredAt = (discoveredAtTimestamp ?? Timestamp.now())
+            .toDate();
         final dateKey =
             '${discoveredAt.year}-${discoveredAt.month.toString().padLeft(2, '0')}-${discoveredAt.day.toString().padLeft(2, '0')}';
         discoveryDates[dateKey] = true;

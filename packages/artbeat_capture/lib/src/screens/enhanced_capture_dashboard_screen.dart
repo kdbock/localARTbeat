@@ -226,7 +226,7 @@ class _EnhancedCaptureDashboardScreenState
   }
 
   void _showProfileMenu(BuildContext context) {
-    Navigator.pushNamed(context, AppRoutes.profile);
+    Navigator.pushNamed(context, AppRoutes.profileMenu);
   }
 
   void _showSearchModal(BuildContext context) {
@@ -454,6 +454,14 @@ class _EnhancedCaptureDashboardScreenState
                               subtitle: 'capture_dashboard_subtitle'.tr(),
                               onMenu: () => Scaffold.of(context).openDrawer(),
                               onSearch: () => _showSearchModal(context),
+                              onChat: () => Navigator.pushNamed(
+                                context,
+                                AppRoutes.messaging,
+                              ),
+                              onNotifications: () => Navigator.pushNamed(
+                                context,
+                                AppRoutes.notifications,
+                              ),
                               onProfile: () => _showProfileMenu(context),
                             ),
                           ),
@@ -596,10 +604,17 @@ class _EnhancedCaptureDashboardScreenState
                             ),
                           ),
                         // Keep your existing artist CTA
-                        const SliverToBoxAdapter(
+                        SliverToBoxAdapter(
                           child: Padding(
-                            padding: EdgeInsets.fromLTRB(8, 18, 8, 0),
-                            child: CompactArtistCTAWidget(),
+                            padding: const EdgeInsets.fromLTRB(8, 18, 8, 0),
+                            child: Builder(
+                              builder: (context) => CompactArtistCTAWidget(
+                                onTap: () => Navigator.pushNamed(
+                                  context,
+                                  '/2025_modern_onboarding',
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                         const SliverToBoxAdapter(child: SizedBox(height: 110)),
@@ -688,6 +703,8 @@ class _TopHudBar extends StatelessWidget {
   final String subtitle;
   final VoidCallback onMenu;
   final VoidCallback onSearch;
+  final VoidCallback onChat;
+  final VoidCallback onNotifications;
   final VoidCallback onProfile;
 
   const _TopHudBar({
@@ -695,6 +712,8 @@ class _TopHudBar extends StatelessWidget {
     required this.subtitle,
     required this.onMenu,
     required this.onSearch,
+    required this.onChat,
+    required this.onNotifications,
     required this.onProfile,
   });
 
@@ -738,6 +757,17 @@ class _TopHudBar extends StatelessWidget {
           IconButton(
             onPressed: onSearch,
             icon: const Icon(Icons.search_rounded, color: Colors.white),
+          ),
+          IconButton(
+            onPressed: onChat,
+            icon: const Icon(
+              Icons.chat_bubble_outline_rounded,
+              color: Colors.white,
+            ),
+          ),
+          IconButton(
+            onPressed: onNotifications,
+            icon: const Icon(Icons.notifications_outlined, color: Colors.white),
           ),
           IconButton(
             onPressed: onProfile,
@@ -879,6 +909,23 @@ class _QuestCaptureTile extends StatelessWidget {
                   ),
                 ),
                 Positioned(
+                  top: 8,
+                  right: 8,
+                  child: IconButton(
+                    onPressed: () => Navigator.pushNamed(
+                      context,
+                      AppRoutes.captureReview,
+                      arguments: {'captureId': capture.id},
+                    ),
+                    icon: Icon(
+                      Icons.rate_review_rounded,
+                      color: Colors.white.withValues(alpha: 0.8),
+                      size: 20,
+                    ),
+                    tooltip: 'Review capture',
+                  ),
+                ),
+                Positioned(
                   left: 10,
                   right: 10,
                   bottom: 10,
@@ -979,6 +1026,23 @@ class _QuestCommunityCard extends StatelessWidget {
                           Color.fromRGBO(0, 0, 0, 0.80),
                         ],
                       ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: IconButton(
+                      onPressed: () => Navigator.pushNamed(
+                        context,
+                        AppRoutes.captureReview,
+                        arguments: {'captureId': capture.id},
+                      ),
+                      icon: Icon(
+                        Icons.rate_review_rounded,
+                        color: Colors.white.withValues(alpha: 0.8),
+                        size: 18,
+                      ),
+                      tooltip: 'Review capture',
                     ),
                   ),
                   Positioned(
@@ -1086,118 +1150,143 @@ class _CaptureMissionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final progress = mission.progress;
+    final isDailyDrop = mission.title.contains('daily_drop'); // rough check
+    final hasCaptures = mission.current > 0;
 
     return SizedBox(
       width: 230,
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(22),
-        child: InkWell(
-          onTap: mission.onTap,
-          borderRadius: BorderRadius.circular(22),
-          child: _Glass(
-            radius: 22,
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+      child: Stack(
+        children: [
+          Material(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(22),
+            child: InkWell(
+              onTap: mission.onTap,
+              borderRadius: BorderRadius.circular(22),
+              child: _Glass(
+                radius: 22,
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: 42,
-                      height: 42,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        color: mission.accent.withValues(alpha: 0.20),
-                        border: Border.all(
-                          color: mission.accent.withValues(alpha: 0.4),
+                    Row(
+                      children: [
+                        Container(
+                          width: 42,
+                          height: 42,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            color: mission.accent.withValues(alpha: 0.20),
+                            border: Border.all(
+                              color: mission.accent.withValues(alpha: 0.4),
+                            ),
+                          ),
+                          child: Icon(
+                            mission.icon,
+                            color: Colors.white,
+                            size: 20,
+                          ),
                         ),
-                      ),
-                      child: Icon(mission.icon, color: Colors.white, size: 20),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            mission.title,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.spaceGrotesk(
-                              color: Colors.white.withValues(alpha: 0.95),
-                              fontSize: 14,
-                              fontWeight: FontWeight.w900,
-                            ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                mission.title,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.spaceGrotesk(
+                                  color: Colors.white.withValues(alpha: 0.95),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                              Text(
+                                '+${mission.xpReward} XP',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.spaceGrotesk(
+                                  color: mission.accent,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ],
                           ),
-                          Text(
-                            '+${mission.xpReward} XP',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.spaceGrotesk(
-                              color: mission.accent,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      mission.description,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.white.withValues(alpha: 0.72),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        height: 1.2,
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  mission.description,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.spaceGrotesk(
-                    color: Colors.white.withValues(alpha: 0.72),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    height: 1.2,
-                  ),
-                ),
-                const Spacer(),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(999),
-                        child: Container(
-                          height: 8,
-                          color: Colors.white.withValues(alpha: 0.08),
-                          child: FractionallySizedBox(
-                            alignment: Alignment.centerLeft,
-                            widthFactor: progress,
+                    const Spacer(),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(999),
                             child: Container(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    mission.accent,
-                                    mission.accent.withValues(alpha: 0.5),
-                                  ],
+                              height: 8,
+                              color: Colors.white.withValues(alpha: 0.08),
+                              child: FractionallySizedBox(
+                                alignment: Alignment.centerLeft,
+                                widthFactor: progress,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        mission.accent,
+                                        mission.accent.withValues(alpha: 0.5),
+                                      ],
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Text(
-                      '${mission.current}/${mission.target}',
-                      style: GoogleFonts.spaceGrotesk(
-                        color: Colors.white.withValues(alpha: 0.82),
-                        fontSize: 12,
-                        fontWeight: FontWeight.w800,
-                      ),
+                        const SizedBox(width: 10),
+                        Text(
+                          '${mission.current}/${mission.target}',
+                          style: GoogleFonts.spaceGrotesk(
+                            color: Colors.white.withValues(alpha: 0.82),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
           ),
-        ),
+          if (isDailyDrop && hasCaptures)
+            Positioned(
+              top: 8,
+              right: 8,
+              child: IconButton(
+                onPressed: () =>
+                    Navigator.pushNamed(context, AppRoutes.captureMyCaptures),
+                icon: Icon(
+                  Icons.visibility_outlined,
+                  color: Colors.white.withValues(alpha: 0.8),
+                  size: 20,
+                ),
+                tooltip: 'Review captures',
+              ),
+            ),
+        ],
       ),
     );
   }

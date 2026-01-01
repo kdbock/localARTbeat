@@ -1,11 +1,4 @@
 class TourEvent {
-  final String name;
-  final String venue;
-  final String startDate;
-  final String startTime;
-  final String endTime;
-  final String excerpt;
-  final String imageUrl;
 
   const TourEvent({
     required this.name,
@@ -16,6 +9,13 @@ class TourEvent {
     required this.excerpt,
     required this.imageUrl,
   });
+  final String name;
+  final String venue;
+  final String startDate;
+  final String startTime;
+  final String endTime;
+  final String excerpt;
+  final String imageUrl;
 
   String get displayName => '$name - $venue ($startDate)';
 }

@@ -3,3 +3,7 @@ export 'artbeat_typography.dart';
 export 'artbeat_components.dart';
 export 'artbeat_theme.dart';
 export 'theme_provider.dart';
+export 'design_system.dart';
+export 'world_background.dart';
+export 'glass_card.dart';
+export 'hud_top_bar.dart';

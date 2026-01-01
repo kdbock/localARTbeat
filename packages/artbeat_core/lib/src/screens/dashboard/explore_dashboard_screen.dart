@@ -11,6 +11,7 @@ import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_art_walk/artbeat_art_walk.dart';
 
 import '../../widgets/dashboard/dashboard_browse_section.dart';
+import '../../widgets/dashboard/dashboard_section_button.dart';
 
 /// Local ARTbeat - Explore Dashboard (Feed + Tabs)
 /// - Same modern visual language as the AnimatedDashboardScreen
@@ -1061,8 +1062,10 @@ class _ArtistSpotlightHero extends StatelessWidget {
                         const SizedBox(height: 16),
                         if (event != null) _HeroEventPill(event: event!),
                         const SizedBox(height: 16),
-                        ElevatedButton.icon(
-                          onPressed: artist != null
+                        DashboardSectionButton(
+                          label: 'View Artist',
+                          icon: Icons.visibility,
+                          onTap: artist != null
                               ? () => Navigator.pushNamed(
                                   context,
                                   '/artist/public-profile',
@@ -1072,19 +1075,6 @@ class _ArtistSpotlightHero extends StatelessWidget {
                                   context,
                                   '/artist/browse',
                                 ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: Colors.black,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 24,
-                              vertical: 14,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                          ),
-                          icon: const Icon(Icons.visibility),
-                          label: const Text('View Artist'),
                         ),
                       ],
                     ),
@@ -1117,7 +1107,7 @@ class _TagChip extends StatelessWidget {
         style: const TextStyle(
           color: Colors.white,
           fontWeight: FontWeight.w700,
-          fontSize: 12,
+          fontSize: 10,
         ),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
@@ -1219,16 +1209,11 @@ class _SectionHeader extends StatelessWidget {
             ],
           ),
         ),
-        if (actionLabel != null)
-          TextButton(
-            onPressed: onActionTap,
-            child: Text(
-              actionLabel!,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
+        if (actionLabel != null && onActionTap != null)
+          DashboardSectionButton(
+            label: actionLabel!,
+            icon: Icons.arrow_forward,
+            onTap: onActionTap!,
           ),
       ],
     );
@@ -1561,7 +1546,7 @@ class _ArtistEventsShowcase extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           SizedBox(
-            height: 190,
+            height: 260,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               physics: const BouncingScrollPhysics(),
@@ -1586,100 +1571,210 @@ class _ArtistEventCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final dateLabel = intl.DateFormat('EEE, MMM d').format(event.startDate);
     final timeLabel = intl.DateFormat('h:mm a').format(event.startDate);
+    final coverImage =
+        (event.imageUrl ?? event.artistProfileImageUrl ?? '').trim();
+    final priceLabel = event.price != null && event.price! > 0
+        ? '\$${event.price!.toStringAsFixed(0)}'
+        : 'Free RSVP';
+    final attendeesLabel = event.attendeesCount > 0
+        ? '${event.attendeesCount} attending'
+        : 'Be the first to RSVP';
 
     return SizedBox(
-      width: 220,
+      width: 250,
+      height: 260,
       child: Material(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(24),
         child: InkWell(
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(24),
           onTap: () => Navigator.pushNamed(
             context,
             '/events/detail',
             arguments: {'eventId': event.id},
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(6),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _TagChip(label: dateLabel),
-                const SizedBox(height: 10),
-                Text(
-                  event.title.isNotEmpty ? event.title : 'Untitled Event',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: ArtbeatColors.textPrimary,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              ClipRRect(
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(24),
                 ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.schedule,
-                      size: 14,
-                      color: ArtbeatColors.textSecondary,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      timeLabel,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: ArtbeatColors.textSecondary,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-                if (event.location.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.place,
-                          size: 14,
-                          color: ArtbeatColors.textSecondary,
-                        ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            event.location,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: ArtbeatColors.textSecondary,
+                child: SizedBox(
+                  height: 120,
+                  child: coverImage.isNotEmpty
+                      ? Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            SecureNetworkImage(
+                              imageUrl: coverImage,
+                              fit: BoxFit.cover,
+                              enableThumbnailFallback: true,
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                            Positioned(
+                              top: 12,
+                              left: 12,
+                              child: _TagChip(label: dateLabel),
+                            ),
+                            Positioned(
+                              bottom: 12,
+                              right: 12,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withValues(alpha: 0.65),
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Text(
+                                  priceLabel,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        )
+                      : Container(
+                          color: Colors.grey[200],
+                          child: const Icon(
+                            Icons.image_outlined,
+                            color: Colors.grey,
+                            size: 40,
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                const Spacer(),
-                OutlinedButton(
-                  onPressed: () => Navigator.pushNamed(
-                    context,
-                    '/events/detail',
-                    arguments: {'eventId': event.id},
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: ArtbeatColors.primaryPurple,
-                    side: const BorderSide(color: ArtbeatColors.primaryPurple),
-                    minimumSize: const Size.fromHeight(38),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text('View Event'),
                 ),
-              ],
-            ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: SingleChildScrollView(
+                          physics: const BouncingScrollPhysics(),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                event.title.isNotEmpty
+                                    ? event.title
+                                    : 'Untitled Event',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                  color: ArtbeatColors.textPrimary,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                event.description.isNotEmpty
+                                    ? event.description
+                                    : 'Join this community moment.',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: ArtbeatColors.textSecondary,
+                                  height: 1.25,
+                                ),
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Icons.schedule,
+                                    size: 16,
+                                    color: ArtbeatColors.textSecondary,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Expanded(
+                                    child: Text(
+                                      timeLabel,
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: ArtbeatColors.textSecondary,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              if (event.location.isNotEmpty) ...[
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.place_outlined,
+                                      size: 16,
+                                      color: ArtbeatColors.textSecondary,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Expanded(
+                                      child: Text(
+                                        event.location,
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: ArtbeatColors.textSecondary,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Icons.people_alt_outlined,
+                                    size: 16,
+                                    color: ArtbeatColors.textSecondary,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Expanded(
+                                    child: Text(
+                                      attendeesLabel,
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: ArtbeatColors.textSecondary,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      DashboardSectionButton(
+                        label: 'View Details',
+                        icon: Icons.event_available,
+                        fullWidth: true,
+                        onTap: () => Navigator.pushNamed(
+                          context,
+                          '/events/detail',
+                          arguments: {'eventId': event.id},
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),

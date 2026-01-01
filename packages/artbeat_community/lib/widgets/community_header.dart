@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:artbeat_core/artbeat_core.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'hud_top_bar.dart';
 
 class CommunityHeader extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -30,12 +30,8 @@ class CommunityHeader extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return HudTopBar(
       title: title,
-      leading: showBackButton
-          ? IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: onBackPressed ?? () => Navigator.pop(context),
-            )
-          : null,
+      showBackButton: showBackButton,
+      onBackPressed: onBackPressed ?? () => Navigator.pop(context),
       actions: [
         if (showSearchIcon)
           IconButton(

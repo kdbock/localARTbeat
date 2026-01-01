@@ -6,8 +6,6 @@ import 'package:intl/intl.dart' as intl;
 
 import 'package:artbeat_art_walk/src/models/art_walk_model.dart';
 
-import 'glass_card.dart';
-
 class ArtWalkCard extends StatelessWidget {
   final ArtWalkModel artWalk;
   final VoidCallback? onTap;

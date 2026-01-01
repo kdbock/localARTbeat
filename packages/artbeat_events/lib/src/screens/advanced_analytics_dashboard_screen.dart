@@ -3,12 +3,10 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:artbeat_core/artbeat_core.dart';
+import 'package:artbeat_core/artbeat_core.dart' hide GradientCTAButton;
+import 'package:artbeat_core/shared_widgets.dart' hide GradientCTAButton;
+import '../widgets/widgets.dart';
 
-import '../widgets/world_background.dart';
-import '../widgets/hud_top_bar.dart';
-import '../widgets/glass_card.dart';
-import '../widgets/gradient_cta_button.dart';
 
 import '../services/event_analytics_service_phase3.dart';
 
@@ -162,7 +160,7 @@ class _AdvancedAnalyticsDashboardScreenState
       child: SafeArea(
         child: Column(
           children: [
-            HudTopBar(
+            EventsHudTopBar(
               title: widget.artistId == null
                   ? 'event_analytics_platform'.tr()
                   : 'event_analytics_my'.tr(),

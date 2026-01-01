@@ -4,13 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:artbeat_core/artbeat_core.dart';
+import 'package:artbeat_core/artbeat_core.dart'
+    hide GlassCard, WorldBackground, HudTopBar, GradientCTAButton;
 import 'package:artbeat_art_walk/src/models/weekly_goal_model.dart';
 import 'package:artbeat_art_walk/src/services/weekly_goals_service.dart';
-import '../widgets/world_background.dart';
-import '../widgets/glass_card.dart';
-import '../widgets/hud_top_bar.dart';
-import '../widgets/gradient_cta_button.dart';
+import 'package:artbeat_art_walk/src/widgets/text_styles.dart';
 
 class WeeklyGoalsScreen extends StatefulWidget {
   const WeeklyGoalsScreen({super.key});
@@ -63,27 +61,33 @@ class _WeeklyGoalsScreenState extends State<WeeklyGoalsScreen>
       child: SafeArea(
         child: Column(
           children: [
-            HudTopBar(title: 'weekly_goals.title'.tr()),
-            TabBar(
-              controller: _tabController,
-              tabs: [
-                Tab(text: 'weekly_goals.current_tab'.tr()),
-                Tab(text: 'weekly_goals.stats_tab'.tr()),
-              ],
-              labelStyle: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
-              labelColor: Colors.white,
-              unselectedLabelColor: Colors.white70,
-              indicatorColor: Colors.tealAccent,
+            HudTopBar(
+              title: 'weekly_goals.title'.tr(),
+              showBack: true,
+              onBack: () => Navigator.of(context).pop(),
+            ),
+            Material(
+              color: Colors.transparent,
+              child: TabBar(
+                controller: _tabController,
+                tabs: [
+                  Tab(text: 'weekly_goals.current_tab'.tr()),
+                  Tab(text: 'weekly_goals.stats_tab'.tr()),
+                ],
+                labelStyle: GoogleFonts.spaceGrotesk(
+                  fontWeight: FontWeight.w700,
+                ),
+                labelColor: Colors.white,
+                unselectedLabelColor: Colors.white70,
+                indicatorColor: Colors.tealAccent,
+              ),
             ),
             Expanded(
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : TabBarView(
                       controller: _tabController,
-                      children: [
-                        _buildCurrentWeekTab(),
-                        _buildStatisticsTab(),
-                      ],
+                      children: [_buildCurrentWeekTab(), _buildStatisticsTab()],
                     ),
             ),
           ],
@@ -160,7 +164,7 @@ class _WeeklyGoalsScreenState extends State<WeeklyGoalsScreen>
                   GradientCTAButton(
                     label: 'weekly_goals.progress'.tr(),
                     onPressed: () {},
-                  )
+                  ),
                 ],
               ),
             ),
@@ -209,12 +213,12 @@ class _WeeklyGoalsScreenState extends State<WeeklyGoalsScreen>
                         color: Colors.white,
                       ),
                     ),
-                  )
+                  ),
                 ],
-              )
+              ),
             ],
           ),
-        )
+        ),
       ],
     );
   }

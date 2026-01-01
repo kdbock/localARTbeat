@@ -47,14 +47,14 @@ class DashboardBrowseSection extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: ArtbeatColors.textPrimary,
+                          color: Colors.white,
                         ),
                       ),
                       Text(
                         'dashboard_browse_subtitle'.tr(),
                         style: const TextStyle(
                           fontSize: 14,
-                          color: ArtbeatColors.textSecondary,
+                          color: Colors.white70,
                         ),
                       ),
                     ],

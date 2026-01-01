@@ -342,6 +342,8 @@ class EngagementStats {
       messageCount +
       commissionCount;
 
+  get captureCount => null;
+
   /// Get count for specific engagement type
   int getCount(EngagementType type) {
     switch (type) {

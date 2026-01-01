@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:artbeat_core/shared_widgets.dart';
+
 import '../models/group_models.dart';
 import '../screens/feed/create_group_post_screen.dart';
-import 'glass_card.dart';
 
 /// Floating Action Button for creating posts in different groups
 class CreatePostFAB extends StatelessWidget {

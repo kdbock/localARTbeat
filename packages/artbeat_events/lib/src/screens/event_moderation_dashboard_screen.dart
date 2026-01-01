@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart' as intl;
+import 'package:artbeat_core/artbeat_core.dart' hide GradientCTAButton;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:artbeat_core/shared_widgets.dart' hide GradientCTAButton;
+import '../widgets/widgets.dart';
 
 import '../models/artbeat_event.dart';
 import '../services/event_moderation_service.dart';
 
-import '../widgets/world_background.dart';
-import '../widgets/glass_card.dart';
-import '../widgets/hud_top_bar.dart';
-import '../widgets/gradient_cta_button.dart';
 // ignore: implementation_imports
-import 'package:artbeat_core/src/theme/artbeat_colors.dart';
 
 class EventModerationDashboardScreen extends StatefulWidget {
   const EventModerationDashboardScreen({super.key});
@@ -81,7 +80,7 @@ class _EventModerationDashboardScreenState
       child: SafeArea(
         child: Column(
           children: [
-            HudTopBar(
+            EventsHudTopBar(
               title: 'event_mod_title'.tr(),
               onBack: () => Navigator.pop(context),
             ),
@@ -514,7 +513,7 @@ class _EventModerationDashboardScreenState
   String _formatTimestamp(dynamic t) {
     try {
       final date = t is DateTime ? t : (t as Timestamp).toDate();
-      return DateFormat('MMM dd, yyyy HH:mm').format(date);
+      return intl.DateFormat('MMM dd, yyyy HH:mm').format(date);
       // ignore: avoid_catches_without_on_clauses
     } catch (_) {
       return 'Unknown';

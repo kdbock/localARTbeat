@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 
+import 'dashboard_section_button.dart';
+
 class DashboardEventsSection extends StatelessWidget {
   final DashboardViewModel viewModel;
 
@@ -52,72 +54,32 @@ class DashboardEventsSection extends StatelessWidget {
           child: const Icon(Icons.event, color: Colors.white, size: 20),
         ),
         const SizedBox(width: 12),
-        const Expanded(
+        Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'dashboard_events_title',
-                style: TextStyle(
+                'dashboard_events_title'.tr(),
+                style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: ArtbeatColors.textPrimary,
+                  color: Colors.white,
                 ),
               ),
               Text(
-                'dashboard_events_subtitle',
-                style: TextStyle(
+                'dashboard_events_subtitle'.tr(),
+                style: const TextStyle(
                   fontSize: 14,
-                  color: ArtbeatColors.textSecondary,
+                  color: Colors.white70,
                 ),
               ),
             ],
           ),
         ),
-        Container(
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-              colors: [ArtbeatColors.primaryPurple, ArtbeatColors.primaryGreen],
-            ),
-            borderRadius: BorderRadius.circular(25),
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.black26,
-                blurRadius: 8,
-                offset: Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () => Navigator.pushNamed(context, '/events'),
-              borderRadius: BorderRadius.circular(25),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 10,
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.explore, color: Colors.white, size: 18),
-                    SizedBox(width: 8),
-                    Text(
-                      'View All',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
+        DashboardSectionButton(
+          label: 'View All',
+          icon: Icons.explore,
+          onTap: () => Navigator.pushNamed(context, '/events'),
         ),
       ],
     );
@@ -278,55 +240,33 @@ class DashboardEventsSection extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Event image (if available and valid)
-                  if (_isValidImageUrl(event.imageUrl))
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: FadeInImage(
+                  // Event image (if available)
+                  FadeInImage(
+                    height: 80,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    placeholder: const AssetImage('assets/default_profile.png'),
+                    image:
+                        ImageUrlValidator.safeNetworkImage(event.imageUrl) ??
+                        const AssetImage('assets/default_profile.png')
+                            as ImageProvider,
+                    imageErrorBuilder: (context, error, stackTrace) {
+                      AppLogger.error('Error loading event image: $error');
+                      return Container(
                         height: 80,
                         width: double.infinity,
-                        fit: BoxFit.cover,
-                        placeholder: const AssetImage(
-                          'assets/default_profile.png',
+                        decoration: BoxDecoration(
+                          color: ArtbeatColors.backgroundSecondary,
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                        image:
-                            ImageUrlValidator.safeNetworkImage(
-                              event.imageUrl,
-                            ) ??
-                            const AssetImage('assets/default_profile.png')
-                                as ImageProvider,
-                        imageErrorBuilder: (context, error, stackTrace) {
-                          AppLogger.error('Error loading event image: $error');
-                          return Container(
-                            height: 80,
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: ArtbeatColors.backgroundSecondary,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Icon(
-                              Icons.event,
-                              color: ArtbeatColors.textSecondary,
-                              size: 32,
-                            ),
-                          );
-                        },
-                      ),
-                    )
-                  else
-                    Container(
-                      height: 80,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: ArtbeatColors.backgroundSecondary,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(
-                        Icons.event,
-                        color: ArtbeatColors.textSecondary,
-                        size: 32,
-                      ),
-                    ),
+                        child: const Icon(
+                          Icons.event,
+                          color: ArtbeatColors.textSecondary,
+                          size: 32,
+                        ),
+                      );
+                    },
+                  ),
 
                   const SizedBox(height: 6),
 

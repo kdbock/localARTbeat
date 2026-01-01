@@ -1,6 +1,5 @@
 // current_step_overlay.dart
 import 'package:flutter/material.dart';
-import 'package:artbeat_art_walk/src/widgets/glass_card.dart';
 import 'package:artbeat_art_walk/src/widgets/text_styles.dart';
 
 class CurrentStepOverlay extends StatelessWidget {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'glass_input_decoration.dart';
+import 'package:artbeat_core/shared_widgets.dart';
 
 class GlassTextField extends StatelessWidget {
   final String label;
@@ -29,7 +29,11 @@ class GlassTextField extends StatelessWidget {
         fontWeight: FontWeight.w600,
         fontSize: 14,
       ),
-      decoration: glassInputDecoration(labelText: label, prefixIcon: icon),
+      decoration: GlassInputDecoration(
+        labelText: label,
+        prefixIcon:
+            icon != null ? Icon(icon, color: Colors.white70, size: 18) : null,
+      ),
     );
   }
 }

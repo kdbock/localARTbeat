@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_community/widgets/glass_card.dart';
+import 'package:artbeat_core/shared_widgets.dart';
 
 class ApplauseButton extends StatelessWidget {
   final String postId;
