@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:artbeat_profile/src/widgets/glass_card.dart';
+import 'package:artbeat_core/artbeat_core.dart';
 
 class FavoriteTile extends StatelessWidget {
   final dynamic id;

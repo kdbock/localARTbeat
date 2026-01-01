@@ -2,15 +2,11 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart' as intl;
-import 'package:artbeat_core/artbeat_core.dart';
+import '../../widgets/widgets.dart';
+import 'package:artbeat_core/artbeat_core.dart' show AppLogger;
 
 import '../../models/direct_commission_model.dart';
 import '../../services/direct_commission_service.dart';
-import '../../widgets/glass_card.dart';
-import '../../widgets/gradient_badge.dart';
-import '../../widgets/hud_button.dart';
-import '../../widgets/hud_top_bar.dart';
-import '../../widgets/world_background.dart';
 import 'commission_detail_screen.dart';
 
 class _GalleryPalette {

@@ -58,7 +58,7 @@ class _LocalBusinessScreenState extends State<LocalBusinessScreen>
                 children: [
                   _StampFadeIn(
                     intro: _intro,
-                    delay: 0.0,
+                    delay: 0,
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                       child: _HeroCard(
@@ -274,8 +274,7 @@ class _HeroCard extends StatelessWidget {
   final VoidCallback onSecondary;
 
   @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
+  Widget build(BuildContext context) => AnimatedBuilder(
       animation: loop,
       builder: (context, child) {
         final sweep = loop.value % 1.0;
@@ -439,7 +438,6 @@ class _HeroCard extends StatelessWidget {
         );
       },
     );
-  }
 }
 
 class _PerkChip extends StatelessWidget {
@@ -549,8 +547,8 @@ class _AnimatedWorldBackground extends StatelessWidget {
 }
 
 class _SponsorshipWorldPainter extends CustomPainter {
-  final double t;
   _SponsorshipWorldPainter({required this.t});
+  final double t;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -564,7 +562,7 @@ class _SponsorshipWorldPainter extends CustomPainter {
     canvas.drawRect(Offset.zero & size, base);
 
     // Ambient paint blobs
-    _blob(canvas, size, const Color(0xFFFF3D8D), 0.18, 0.18, 0.34, phase: 0.0);
+    _blob(canvas, size, const Color(0xFFFF3D8D), 0.18, 0.18, 0.34, phase: 0);
     _blob(canvas, size, const Color(0xFF7C4DFF), 0.80, 0.20, 0.28, phase: 0.2);
     _blob(canvas, size, const Color(0xFFFFC857), 0.74, 0.78, 0.38, phase: 0.45);
     _blob(canvas, size, const Color(0xFF34D399), 0.16, 0.78, 0.34, phase: 0.62);
@@ -587,7 +585,7 @@ class _SponsorshipWorldPainter extends CustomPainter {
 
     final paint = Paint()
       ..shader = RadialGradient(
-        colors: [color.withValues(alpha: 0.26), color.withValues(alpha: 0.0)],
+        colors: [color.withValues(alpha: 0.26), color.withValues(alpha: 0)],
       ).createShader(Rect.fromCircle(center: center, radius: radius))
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 70);
 
@@ -611,8 +609,7 @@ class _AnimatedSignalCard extends StatelessWidget {
   final int index;
 
   @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
+  Widget build(BuildContext context) => AnimatedBuilder(
       animation: loop,
       builder: (context, child) {
         final phase = index * 0.15;
@@ -704,7 +701,6 @@ class _AnimatedSignalCard extends StatelessWidget {
         );
       },
     );
-  }
 }
 
 class _AnimatedSponsorshipOptionCard extends StatelessWidget {
@@ -719,8 +715,7 @@ class _AnimatedSponsorshipOptionCard extends StatelessWidget {
   final int index;
 
   @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
+  Widget build(BuildContext context) => AnimatedBuilder(
       animation: loop,
       builder: (context, child) {
         final phase = index * 0.12;
@@ -851,7 +846,6 @@ class _AnimatedSponsorshipOptionCard extends StatelessWidget {
         );
       },
     );
-  }
 }
 
 class _QuickSignal {

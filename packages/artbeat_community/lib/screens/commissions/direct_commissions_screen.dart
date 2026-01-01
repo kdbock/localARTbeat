@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart' as intl;
-import 'package:artbeat_core/artbeat_core.dart' as core;
+import 'package:artbeat_core/artbeat_core.dart';
 import '../../models/direct_commission_model.dart';
 import '../../services/direct_commission_service.dart';
 import '../../widgets/widgets.dart';
@@ -906,7 +906,7 @@ class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
   }
 
   void _showArtistSelection() async {
-    final selectedArtist = await Navigator.push<core.ArtistProfileModel>(
+    final selectedArtist = await Navigator.push<ArtistProfileModel>(
       context,
       MaterialPageRoute(builder: (context) => const ArtistSelectionScreen()),
     );
@@ -988,7 +988,7 @@ class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
     }
   }
 
-  void _showCommissionRequestDialog(core.ArtistProfileModel selectedArtist) {
+  void _showCommissionRequestDialog(ArtistProfileModel selectedArtist) {
     final titleController = TextEditingController();
     final descriptionController = TextEditingController();
     final budgetController = TextEditingController();

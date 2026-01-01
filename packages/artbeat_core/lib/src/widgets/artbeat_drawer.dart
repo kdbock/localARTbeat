@@ -23,7 +23,6 @@ const Set<String> mainRoutes = {
   '/dashboard',
   '/browse',
   '/community/feed',
-  '/events/discover',
   '/artist/dashboard',
   '/gallery/artists-management',
   '/admin/dashboard',

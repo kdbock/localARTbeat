@@ -3,8 +3,6 @@ import 'package:artbeat_auth/artbeat_auth.dart'; // Assuming for logout/auth sta
 import 'package:provider/provider.dart';
 import 'package:artbeat_capture/src/screens/terms_and_conditions_screen.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import '../widgets/world_background.dart';
-import '../widgets/glass_card.dart';
 import '../widgets/section_header.dart';
 import '../widgets/user_avatar_badge.dart';
 

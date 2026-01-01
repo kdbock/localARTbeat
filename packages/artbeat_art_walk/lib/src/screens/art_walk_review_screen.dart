@@ -6,13 +6,13 @@ import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:artbeat_core/artbeat_core.dart';
+import 'package:artbeat_core/artbeat_core.dart'
+    hide GlassCard, WorldBackground, HudTopBar, GradientCTAButton;
 import 'package:artbeat_art_walk/src/models/models.dart';
 import 'package:artbeat_art_walk/src/constants/routes.dart';
 import 'package:artbeat_art_walk/src/theme/art_walk_design_system.dart';
 import 'package:artbeat_art_walk/src/services/art_walk_service.dart';
-import 'package:artbeat_art_walk/src/widgets/world_background.dart';
-import 'package:artbeat_art_walk/src/widgets/glass_card.dart';
+import 'package:artbeat_art_walk/src/widgets/widgets.dart';
 
 /// Review screen shown after creating an art walk, allows selfie upload before starting
 class ArtWalkReviewScreen extends StatefulWidget {

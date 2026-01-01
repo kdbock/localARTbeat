@@ -5,12 +5,12 @@ import 'package:artbeat_core/artbeat_core.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:artbeat_core/shared_widgets.dart';
+
 import '../models/group_models.dart';
 import '../models/post_model.dart';
 import '../screens/feed/comments_screen.dart';
 import 'group_post_card.dart';
-import 'glass_card.dart';
-import 'hud_button.dart';
 
 /// Widget that displays the feed for a specific group type
 class GroupFeedWidget extends StatefulWidget {

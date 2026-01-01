@@ -3,7 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:artbeat_community/widgets/glass_card.dart';
+import 'package:artbeat_core/shared_widgets.dart';
+
 // Using ArtistProfileModel from artbeat_core to avoid conflicts
 import '../screens/feed/artist_community_feed_screen.dart';
 

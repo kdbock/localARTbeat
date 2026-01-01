@@ -8,7 +8,5 @@ export 'ticket_purchase_sheet.dart';
 export 'ticket_type_builder.dart';
 
 // Design system widgets
-export 'world_background.dart';
-export 'hud_top_bar.dart';
-export 'glass_card.dart';
+export 'hud_top_bar.dart' show EventsHudTopBar;
 export 'gradient_cta_button.dart';

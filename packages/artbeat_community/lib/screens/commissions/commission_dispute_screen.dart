@@ -2,14 +2,10 @@ import 'package:artbeat_core/artbeat_core.dart' as core;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:artbeat_core/shared_widgets.dart';
 
 import '../../models/commission_dispute_model.dart';
 import '../../services/commission_dispute_service.dart';
-import '../../widgets/glass_card.dart';
-import '../../widgets/glass_input_decoration.dart';
-import '../../widgets/hud_button.dart';
-import '../../widgets/hud_top_bar.dart';
-import '../../widgets/world_background.dart';
 
 class CommissionDisputeScreen extends StatefulWidget {
   const CommissionDisputeScreen({

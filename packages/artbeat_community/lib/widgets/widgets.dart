@@ -1,17 +1,8 @@
 // Widgets barrel file for artbeat_community
 
-// Central Theme Widgets (Local ARTbeat Design System)
-export 'world_background.dart';
-export 'glass_card.dart';
-export 'gradient_badge.dart';
-export 'gradient_cta_button.dart';
-export 'hud_top_bar.dart';
-export 'hud_button.dart';
-export 'glass_input_decoration.dart';
-export 'drawer_section.dart';
-export 'drawer_item_pill.dart';
-
 // Existing Widgets
+export 'package:artbeat_core/shared_widgets.dart'
+    show GlassCard, HudTopBar, WorldBackground, GradientCTAButton, GlassInputDecoration, GlassTextField, HudButton;
 export 'activity_card.dart';
 export 'applause_button.dart';
 export 'art_critique_slider.dart';
@@ -28,6 +19,8 @@ export 'community_drawer.dart';
 export 'community_header.dart';
 export 'create_post_fab.dart';
 export 'critique_card.dart';
+export 'glass_panel.dart';
+export 'gradient_badge.dart';
 export 'enhanced_artwork_card.dart';
 export 'enhanced_post_card.dart';
 export 'feedback_thread_widget.dart';

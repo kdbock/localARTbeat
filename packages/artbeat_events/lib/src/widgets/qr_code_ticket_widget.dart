@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' as intl;
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:artbeat_core/artbeat_core.dart'
-    show EnhancedUniversalHeader, MainLayout;
+import 'package:artbeat_core/artbeat_core.dart';
 import '../models/ticket_purchase.dart';
 import '../models/artbeat_event.dart';
 import '../utils/event_utils.dart';
-import '../widgets/glass_card.dart';
 
 class QRCodeTicketWidget extends StatelessWidget {
   final TicketPurchase ticket;
@@ -223,7 +221,7 @@ class QRCodeTicketWidget extends StatelessWidget {
         children: [
           _footerRow(
             'Purchase Date',
-            DateFormat('MMM d, y').format(ticket.purchaseDate),
+            intl.DateFormat('MMM d, y').format(ticket.purchaseDate),
           ),
           const SizedBox(height: 12),
           _footerRow(

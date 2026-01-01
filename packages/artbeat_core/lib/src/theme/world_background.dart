@@ -4,8 +4,14 @@ import 'package:flutter/material.dart';
 class WorldBackground extends StatefulWidget {
   final Widget child;
   final bool animated;
+  final bool withBlobs;
 
-  const WorldBackground({super.key, required this.child, this.animated = true});
+  const WorldBackground({
+    super.key,
+    required this.child,
+    this.animated = true,
+    this.withBlobs = true,
+  });
 
   @override
   State<WorldBackground> createState() => _WorldBackgroundState();
@@ -46,7 +52,7 @@ class _WorldBackgroundState extends State<WorldBackground>
             ),
           ),
         ),
-        if (widget.animated)
+        if (widget.animated && widget.withBlobs)
           AnimatedBuilder(
             animation: _animationController,
             builder: (context, child) {

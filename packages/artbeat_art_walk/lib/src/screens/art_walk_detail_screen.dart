@@ -7,7 +7,8 @@ import 'package:share_plus/share_plus.dart' as share_plus;
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 import 'package:artbeat_art_walk/artbeat_art_walk.dart';
-import 'package:artbeat_core/artbeat_core.dart';
+import 'package:artbeat_core/artbeat_core.dart'
+    hide GlassCard, WorldBackground, HudTopBar, GradientCTAButton;
 import 'package:logger/logger.dart';
 import 'dart:math';
 
@@ -590,8 +591,8 @@ class _ArtWalkDetailScreenState extends State<ArtWalkDetailScreen> {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      Colors.black.withValues(alpha: 0.1),
-                      Colors.black.withValues(alpha: 0.8),
+                      Colors.black.withOpacity(0.1),
+                      Colors.black.withOpacity(0.8),
                     ],
                   ),
                 ),
@@ -618,7 +619,7 @@ class _ArtWalkDetailScreenState extends State<ArtWalkDetailScreen> {
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                     style: AppTypography.body(
-                      Colors.white.withValues(alpha: 0.85),
+                      Colors.white.withOpacity(0.85),
                     ),
                   ),
                 ],

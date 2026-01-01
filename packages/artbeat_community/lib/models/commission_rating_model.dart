@@ -79,7 +79,7 @@ class CommissionRating {
   }
 
   Map<String, dynamic> toFirestore() {
-    return {
+    final map = {
       'commissionId': commissionId,
       'ratedById': ratedById,
       'ratedByName': ratedByName,
@@ -99,6 +99,9 @@ class CommissionRating {
       'isPublic': isPublic,
       'metadata': metadata,
     };
+    // Remove null values to prevent iOS crash in cloud_firestore plugin
+    map.removeWhere((key, value) => value == null);
+    return map;
   }
 
   CommissionRating copyWith({

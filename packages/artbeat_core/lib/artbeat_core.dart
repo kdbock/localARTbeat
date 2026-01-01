@@ -14,6 +14,19 @@ export 'src/theme/artbeat_colors.dart' show ArtbeatColors;
 export 'src/theme/artbeat_components.dart' show ArtbeatComponents;
 export 'src/theme/artbeat_theme.dart' show ArtbeatTheme;
 export 'src/theme/artbeat_typography.dart' show ArtbeatTypography;
+export 'src/theme/design_system.dart'
+    show
+        GradientBadge,
+        HudButton,
+        PulsingButton,
+        GradientCircularProgress,
+        ToggleTile;
+export 'src/theme/world_background.dart' show WorldBackground;
+export 'src/theme/glass_card.dart' show GlassCard;
+export 'src/theme/hud_top_bar.dart' show HudTopBar;
+export 'src/theme/glass_input_decoration.dart'
+    show GlassInputDecoration, GlassTextField;
+export 'shared_widgets.dart';
 
 // Export Models
 // Note: AchievementModel is now provided by artbeat_art_walk package
@@ -139,6 +152,7 @@ export 'src/widgets/login_prompt_dialog.dart';
 
 export 'src/widgets/artbeat_drawer.dart';
 export 'src/widgets/artbeat_drawer_items.dart';
+export 'src/widgets/gradient_cta_button.dart' show GradientCTAButton;
 export 'src/widgets/art_capture_warning_dialog.dart';
 export 'src/widgets/loading_screen.dart';
 

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:artbeat_core/artbeat_core.dart';
 import 'package:flutter/services.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:artbeat_core/shared_widgets.dart';
 
 import '../models/ticket_type.dart';
-import '../widgets/glass_card.dart';
-import '../widgets/glass_input_decoration.dart';
-import '../widgets/gradient_cta_button.dart';
 import '../widgets/glass_chip.dart';
+import '../widgets/glass_input_decoration.dart';
 
 class TicketTypeBuilder extends StatefulWidget {
   final TicketType ticketType;

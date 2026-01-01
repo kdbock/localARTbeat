@@ -6,13 +6,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'package:artbeat_capture/src/widgets/hud_top_bar.dart';
-import 'package:artbeat_capture/src/widgets/glass_card.dart';
-import 'package:artbeat_capture/src/widgets/glass_text_field.dart';
-import 'package:artbeat_capture/src/widgets/hud_button.dart';
-import 'package:artbeat_capture/src/services/capture_service.dart';
-import 'package:artbeat_capture/src/services/storage_service.dart';
-import 'package:artbeat_core/artbeat_core.dart';
+import 'package:artbeat_capture/artbeat_capture.dart' as capture_widgets;
+import 'package:artbeat_capture/artbeat_capture.dart';
+import 'package:artbeat_core/artbeat_core.dart' show AppLogger, CaptureStatus;
 
 class CaptureUploadScreen extends StatefulWidget {
   final File? initialImage;
@@ -183,7 +179,7 @@ class _CaptureUploadScreenState extends State<CaptureUploadScreen> {
                     child: Center(
                       child: ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: 520),
-                        child: GlassCard(
+                        child: capture_widgets.GlassCard(
                           radius: 26,
                           padding: const EdgeInsets.all(18),
                           child: Column(
@@ -322,7 +318,7 @@ class _CaptureUploadScreenState extends State<CaptureUploadScreen> {
 
                               const SizedBox(height: 22),
 
-                              HudButton(
+                              capture_widgets.HudButton(
                                 label: _isSubmitting
                                     ? 'capture_upload_submitting'.tr()
                                     : 'capture_upload_submit'.tr(),

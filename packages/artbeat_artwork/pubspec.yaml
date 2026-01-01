@@ -49,6 +49,9 @@ dependencies:
   # Localization
   easy_localization: ^3.0.7
 
+  # Typography
+  google_fonts: ^6.1.0
+
   # Rich text editing
   flutter_markdown_plus: ^1.0.5
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-
 import '../../utils/tour_events.dart';
+import '../../widgets/glass_card.dart';
 import '../../widgets/glass_input_field.dart';
 import '../../widgets/gradient_cta_button.dart';
 import '../../widgets/hud_top_bar.dart';
@@ -47,8 +47,8 @@ class _EventSponsorshipScreenState extends State<EventSponsorshipScreen>
     );
 
     _fadeAnimation ??= Tween<double>(
-      begin: 0.0,
-      end: 1.0,
+      begin: 0,
+      end: 1,
     ).animate(CurvedAnimation(parent: _fadeController!, curve: Curves.easeOut));
 
     _slideAnimation ??= Tween<Offset>(

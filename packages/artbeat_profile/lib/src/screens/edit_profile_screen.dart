@@ -6,8 +6,6 @@ import 'package:easy_localization/easy_localization.dart';
 import '../widgets/avatar_picker.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/custom_multiline_text_field.dart';
-import '../widgets/world_background.dart';
-import '../widgets/glass_card.dart';
 
 class EditProfileScreen extends StatefulWidget {
   final String userId;

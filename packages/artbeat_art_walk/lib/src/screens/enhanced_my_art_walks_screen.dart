@@ -3,9 +3,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:artbeat_art_walk/src/widgets/world_background.dart';
-import 'package:artbeat_art_walk/src/widgets/glass_card.dart';
-import 'package:artbeat_art_walk/src/widgets/gradient_cta_button.dart';
 import 'package:artbeat_art_walk/src/widgets/text_styles.dart';
 
 class EnhancedMyArtWalksScreen extends StatelessWidget {

@@ -55,3 +55,6 @@ export 'src/services/subscription_plan_validator.dart';
 // Deprecated Services (for migration)
 export 'src/services/artist_service.dart';
 export 'src/services/artwork_service.dart';
+
+// Widgets
+export 'src/widgets/widgets.dart';

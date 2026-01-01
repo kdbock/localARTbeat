@@ -185,6 +185,18 @@ service cloud.firestore {
           request.auth.uid == userId
         );
       }
+
+      // User's discoveries subcollection
+      match /discoveries/{discoveryId} {
+        allow read, list: if isAuthenticated() && (
+          isAdmin(request.auth.uid) || 
+          request.auth.uid == userId
+        );
+        allow write: if isAuthenticated() && (
+          isAdmin(request.auth.uid) || 
+          request.auth.uid == userId
+        );
+      }
     }
 
     // Artists collection rules

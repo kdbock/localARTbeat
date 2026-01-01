@@ -735,7 +735,7 @@ PART 8 — PRICING & DURATION RULES
 Hardcode pricing (NOT IAP):
 
 Tier	Price	Duration
-Title	$10,000	12 months
+Title	$25,000	12 months
 Event	$750	Event dates
 Art Walk	$250	30 days
 Capture	$250	30 days

@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-import '../widgets/hud_top_bar.dart';
 import '../widgets/settings_category_header.dart';
 import '../widgets/settings_section_card.dart';
 import '../widgets/settings_list_item.dart';
+import '../widgets/hud_top_bar.dart';
 
 class LegalSettingsScreen extends StatelessWidget {
   const LegalSettingsScreen({super.key});

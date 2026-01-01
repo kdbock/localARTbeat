@@ -29,9 +29,6 @@ import '../widgets/mini_artist_card.dart';
 import '../widgets/comments_modal.dart';
 import '../widgets/commission_artists_browser.dart';
 import '../widgets/fullscreen_image_viewer.dart';
-import '../widgets/world_background.dart';
-import '../widgets/glass_card.dart';
-import '../widgets/hud_button.dart';
 import '../widgets/drawer_section.dart' as lab_drawer;
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -43,6 +40,8 @@ import 'feed/create_post_screen.dart';
 import 'package:artbeat_artist/src/services/community_service.dart'
     as artist_community;
 import 'package:artbeat_art_walk/artbeat_art_walk.dart' as art_walk;
+import 'package:artbeat_core/shared_widgets.dart';
+
 import 'feed/trending_content_screen.dart';
 import 'feed/group_feed_screen.dart';
 import 'feed/social_engagement_demo_screen.dart';
@@ -128,7 +127,7 @@ class _Glass extends StatelessWidget {
       child: GlassCard(
         padding: padding ?? const EdgeInsets.all(16),
         borderRadius: radius,
-        blurSigma: blur,
+        blur: blur,
         glassOpacity: fillAlpha,
         borderOpacity: borderAlpha,
         child: child,

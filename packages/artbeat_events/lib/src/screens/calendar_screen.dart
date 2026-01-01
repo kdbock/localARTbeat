@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart' as intl;
+import 'package:artbeat_core/artbeat_core.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:artbeat_core/shared_widgets.dart';
+import '../widgets/widgets.dart';
 
 import '../models/artbeat_event.dart';
 import '../services/event_service.dart';
 
-import '../widgets/world_background.dart';
-import '../widgets/glass_card.dart';
-import '../widgets/hud_top_bar.dart';
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
@@ -69,7 +70,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       child: SafeArea(
         child: Column(
           children: [
-            HudTopBar(title: 'event_calendar_title'.tr(), showBack: true),
+            EventsHudTopBar(title: 'event_calendar_title'.tr(), showBack: true),
             Expanded(
               child: _loading
                   ? const Center(child: CircularProgressIndicator())
@@ -132,7 +133,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   // ---------------- Month navigation ----------------
 
   Widget _buildMonthHeader() {
-    final monthLabel = DateFormat('MMMM yyyy').format(_focusedMonth);
+    final monthLabel = intl.DateFormat('MMMM yyyy').format(_focusedMonth);
 
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -300,7 +301,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ),
           ),
           subtitle: Text(
-            '${DateFormat('h:mm a').format(event.dateTime)}  •  ${event.location}',
+            '${intl.DateFormat('h:mm a').format(event.dateTime)}  •  ${event.location}',
             style: GoogleFonts.spaceGrotesk(
               color: Colors.white70,
               fontSize: 12,

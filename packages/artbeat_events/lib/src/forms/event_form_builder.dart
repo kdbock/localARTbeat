@@ -2,19 +2,20 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart' as intl;
 import 'package:image_picker/image_picker.dart';
-import 'package:artbeat_core/artbeat_core.dart' as core;
+import 'package:artbeat_core/artbeat_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:artbeat_core/shared_widgets.dart';
+
 import '../models/artbeat_event.dart';
 import '../models/ticket_type.dart';
 import '../models/refund_policy.dart';
 import '../widgets/ticket_type_builder.dart';
-import '../widgets/gradient_cta_button.dart';
-import '../widgets/glass_card.dart';
 
 /// Form builder for creating and editing ARTbeat events
 /// Includes all required fields from the specification
@@ -527,7 +528,7 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
                   Expanded(
                     child: Text(
                       _selectedDateTime != null
-                          ? DateFormat(
+                          ? intl.DateFormat(
                               'EEEE, MMMM d, y \'at\' h:mm a',
                             ).format(_selectedDateTime!)
                           : 'Select date and time *',
@@ -1512,7 +1513,7 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
 
     // Upload images to Firebase Storage and get URLs
     // Get current user ID from UserService
-    final userId = core.UserService().currentUserId;
+    final userId = UserService().currentUserId;
     if (userId == null) {
       ScaffoldMessenger.of(
         context,

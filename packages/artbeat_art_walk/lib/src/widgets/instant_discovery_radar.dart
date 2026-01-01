@@ -75,7 +75,6 @@ class _InstantDiscoveryRadarState extends State<InstantDiscoveryRadar>
   // Discovery statistics
   int _todayDiscoveries = 0;
   int _streakCount = 0;
-  String _currentWeather = 'Clear';
 
   // Particles for background animation
   final List<RadarParticle> _particles = [];
@@ -143,7 +142,6 @@ class _InstantDiscoveryRadarState extends State<InstantDiscoveryRadar>
     setState(() {
       _todayDiscoveries = 3;
       _streakCount = 7;
-      _currentWeather = 'Sunny';
       _checkAchievements();
     });
   }
@@ -188,29 +186,24 @@ class _InstantDiscoveryRadarState extends State<InstantDiscoveryRadar>
         children: [
           // Header
           _buildHeader(),
-          // Radar with overlays
+          // Radar
           Expanded(
-            child: Stack(
-              children: [
-                // Main radar
-                Center(
-                  child: AspectRatio(
-                    aspectRatio: 1,
-                    child: Padding(
-                      padding: const EdgeInsets.all(24.0),
-                      child: _buildRadar(),
-                    ),
-                  ),
+            child: Center(
+              child: AspectRatio(
+                aspectRatio: 1,
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: _buildRadar(),
                 ),
-                // Mini map overlay
-                _buildMiniMapOverlay(),
-                // Discovery stats overlay
-                _buildStatsOverlay(),
-                // Weather info overlay
-                _buildWeatherOverlay(),
-                // Achievement notifications
-                _buildAchievementOverlay(),
-              ],
+              ),
+            ),
+          ),
+          // Overlays moved below
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [_buildStatsWidget(), _buildMiniMapWidget()],
             ),
           ),
           // Art list
@@ -223,16 +216,7 @@ class _InstantDiscoveryRadarState extends State<InstantDiscoveryRadar>
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: ArtWalkDesignSystem.cardBackground,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+      decoration: ArtWalkDesignSystem.glassDecoration(borderRadius: 0),
       child: SafeArea(
         bottom: false,
         child: Column(
@@ -354,180 +338,102 @@ class _InstantDiscoveryRadarState extends State<InstantDiscoveryRadar>
   }
 
   // Overlay widgets
-  Widget _buildMiniMapOverlay() {
-    return Positioned(
-      top: 16,
-      right: 16,
-      child: Container(
-        width: 80,
-        height: 80,
-        decoration: ArtWalkDesignSystem.glassDecoration(borderRadius: 12),
-        child: Stack(
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                gradient: const LinearGradient(
-                  colors: [
-                    ArtWalkDesignSystem.primaryTeal,
-                    ArtWalkDesignSystem.accentOrange,
-                  ],
-                ),
-              ),
-            ),
-            const Center(child: Icon(Icons.map, color: Colors.white, size: 24)),
-            Positioned(
-              bottom: 4,
-              right: 4,
-              child: Container(
-                width: 8,
-                height: 8,
-                decoration: const BoxDecoration(
-                  color: ArtWalkDesignSystem.accentOrange,
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatsOverlay() {
-    return Positioned(
-      top: 16,
-      left: 16,
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: ArtWalkDesignSystem.glassDecoration(borderRadius: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  Icons.star,
-                  color: ArtWalkDesignSystem.accentOrange,
-                  size: 16,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  'Today: $_todayDiscoveries',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
-                    color: ArtWalkDesignSystem.textPrimary,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  Icons.local_fire_department,
-                  color: ArtWalkDesignSystem.accentOrange,
-                  size: 16,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  'Streak: $_streakCount',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
-                    color: ArtWalkDesignSystem.textPrimary,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(
-              '${widget.nearbyArt.length} nearby',
-              style: const TextStyle(
-                fontSize: 10,
-                color: ArtWalkDesignSystem.textSecondary,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildWeatherOverlay() {
-    return Positioned(
-      bottom: 16,
-      right: 16,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: ArtWalkDesignSystem.glassDecoration(borderRadius: 20),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.wb_sunny,
-              color: ArtWalkDesignSystem.accentOrange,
-              size: 16,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              _currentWeather,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: ArtWalkDesignSystem.textPrimary,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAchievementOverlay() {
-    if (_recentAchievements.isEmpty) return const SizedBox.shrink();
-
-    return Positioned(
-      bottom: 60,
-      left: 16,
-      right: 16,
-      child: AnimatedBuilder(
-        animation: _pulseController,
-        builder: (context, child) {
-          return Transform.scale(
-            scale: 1.0 + (_pulseController.value * 0.05),
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: ArtWalkDesignSystem.glassDecoration(
-                borderRadius: 16,
-                alpha: 0.9,
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.emoji_events,
-                    color: ArtWalkDesignSystem.accentOrange,
-                    size: 24,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      _recentAchievements.last,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: ArtWalkDesignSystem.textPrimary,
-                      ),
-                    ),
-                  ),
+  Widget _buildMiniMapWidget() {
+    return Container(
+      width: 80,
+      height: 80,
+      decoration: ArtWalkDesignSystem.glassDecoration(borderRadius: 12),
+      child: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  ArtWalkDesignSystem.primaryTeal,
+                  ArtWalkDesignSystem.accentOrange,
                 ],
               ),
             ),
-          );
-        },
+            child: const Center(
+              child: Icon(Icons.map, color: Colors.white, size: 24),
+            ),
+          ),
+          Positioned(
+            bottom: 4,
+            right: 4,
+            child: Container(
+              width: 8,
+              height: 8,
+              decoration: const BoxDecoration(
+                color: ArtWalkDesignSystem.accentOrange,
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatsWidget() {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: ArtWalkDesignSystem.glassDecoration(borderRadius: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.star,
+                color: ArtWalkDesignSystem.accentOrange,
+                size: 16,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                'Today: $_todayDiscoveries',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                  color: ArtWalkDesignSystem.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.local_fire_department,
+                color: ArtWalkDesignSystem.accentOrange,
+                size: 16,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                'Streak: $_streakCount',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                  color: ArtWalkDesignSystem.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '${widget.nearbyArt.length} nearby',
+            style: const TextStyle(
+              fontSize: 10,
+              color: ArtWalkDesignSystem.textSecondary,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -928,20 +834,20 @@ class _InstantDiscoveryRadarState extends State<InstantDiscoveryRadar>
             const Icon(
               Icons.search_off,
               size: 48,
-              color: ArtWalkDesignSystem.textSecondary,
+              color: ArtWalkDesignSystem.textSecondaryDark,
             ),
             const SizedBox(height: 16),
             Text(
               'No art nearby',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: ArtWalkDesignSystem.textSecondary,
+                color: ArtWalkDesignSystem.textSecondaryDark,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               'Try moving to a different location',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: ArtWalkDesignSystem.textSecondary,
+                color: ArtWalkDesignSystem.textSecondaryDark,
               ),
             ),
           ],
@@ -951,16 +857,7 @@ class _InstantDiscoveryRadarState extends State<InstantDiscoveryRadar>
 
     return Container(
       constraints: const BoxConstraints(maxHeight: 200),
-      decoration: BoxDecoration(
-        color: ArtWalkDesignSystem.cardBackground,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 8,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
+      decoration: ArtWalkDesignSystem.glassDecoration(borderRadius: 0),
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: widget.nearbyArt.length,
@@ -995,7 +892,7 @@ class _InstantDiscoveryRadarState extends State<InstantDiscoveryRadar>
               height: 50,
               decoration: BoxDecoration(
                 color: isVeryClose
-                    ? const Color(0xFFFFD700)
+                    ? ArtWalkDesignSystem.accentOrange
                     : (isClose
                           ? ArtWalkDesignSystem.accentOrange
                           : ArtWalkDesignSystem.primaryTeal),
@@ -1003,11 +900,9 @@ class _InstantDiscoveryRadarState extends State<InstantDiscoveryRadar>
                 boxShadow: isClose
                     ? [
                         BoxShadow(
-                          color:
-                              (isVeryClose
-                                      ? const Color(0xFFFFD700)
-                                      : ArtWalkDesignSystem.accentOrange)
-                                  .withValues(alpha: 0.4),
+                          color: ArtWalkDesignSystem.accentOrange.withValues(
+                            alpha: 0.4,
+                          ),
                           blurRadius: 8,
                           spreadRadius: 2,
                         ),
@@ -1045,7 +940,10 @@ class _InstantDiscoveryRadarState extends State<InstantDiscoveryRadar>
             Expanded(
               child: Text(
                 art.title,
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: ArtWalkDesignSystem.textPrimaryDark,
+                ),
               ),
             ),
             if (art.description.toLowerCase().contains('rare'))
@@ -1059,7 +957,7 @@ class _InstantDiscoveryRadarState extends State<InstantDiscoveryRadar>
               Text(
                 'by ${art.artistName}',
                 style: const TextStyle(
-                  color: ArtWalkDesignSystem.textSecondary,
+                  color: ArtWalkDesignSystem.textSecondaryDark,
                   fontSize: 12,
                 ),
               ),

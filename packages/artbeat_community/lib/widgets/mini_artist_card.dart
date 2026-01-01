@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
+
 import '../models/art_models.dart';
-import 'glass_card.dart';
-import 'gradient_badge.dart';
+import 'widgets.dart';
 
 /// Compact mini artist card for 2-column grid layout
 class MiniArtistCard extends StatefulWidget {

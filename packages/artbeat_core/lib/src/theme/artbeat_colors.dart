@@ -69,4 +69,10 @@ class ArtbeatColors {
     end: Alignment.bottomRight,
     colors: [primaryPurple, primaryGreen],
   );
+
+  static const LinearGradient ctaGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFF7C4DFF), Color(0xFF22D3EE), Color(0xFF34D399)],
+  );
 }

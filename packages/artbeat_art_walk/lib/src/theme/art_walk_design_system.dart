@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:artbeat_core/artbeat_core.dart';
+import 'package:artbeat_core/artbeat_core.dart' show ArtbeatColors;
+import '../widgets/text_styles.dart';
 
 import '../widgets/art_walk_header.dart';
-import '../widgets/glass_card.dart';
-import '../widgets/gradient_cta_button.dart';
-import '../widgets/world_background.dart';
 import '../widgets/typography.dart';
 
 /// Local ARTbeat aligned design system for the Art Walk module
@@ -15,8 +13,10 @@ class ArtWalkDesignSystem {
   static const Color primaryTealLight = Color(0xFF34D399);
   static const Color primaryTealDark = Color(0xFF0D9BCF);
 
-  static const Color accentOrange = Color(0xFFFFC857);
-  static const Color accentOrangeLight = Color(0xFFFFE3A3);
+  static const Color accentOrange = Color(
+    0xFFFF3D8D,
+  ); // Changed from yellow to pink
+  static const Color accentOrangeLight = Color(0xFFFF7A9A);
 
   static const Color backgroundGradientStart = Color(0xFF07060F);
   static const Color backgroundGradientMid = Color(0xFF0A1330);
@@ -26,6 +26,10 @@ class ArtWalkDesignSystem {
   static const Color textPrimary = Color(0xFFEFEFFC);
   static const Color textSecondary = Color(0xFFB5B4D1);
   static const Color textLight = Colors.white;
+
+  // Dark text for glass surfaces
+  static const Color textPrimaryDark = Color(0xFF1A1A1A);
+  static const Color textSecondaryDark = Color(0xFF666666);
 
   static const Color glassBackground = Colors.white;
   static const Color glassBorder = Colors.white;
@@ -432,10 +436,22 @@ class ArtWalkDesignSystem {
     List<Widget>? actions,
     GlobalKey<ScaffoldState>? scaffoldKey,
     bool useHudStyle = true,
+    bool showSearch = true,
+    bool showChat = true,
+    bool showDeveloper = false,
+    VoidCallback? onSearchPressed,
+    VoidCallback? onChatPressed,
+    VoidCallback? onDeveloperPressed,
   }) {
     return ArtWalkHeader(
       title: title,
       showBackButton: showBackButton,
+      showSearch: showSearch,
+      showChat: showChat,
+      showDeveloper: showDeveloper,
+      onSearchPressed: onSearchPressed,
+      onChatPressed: onChatPressed,
+      onDeveloperPressed: onDeveloperPressed,
       actions: actions,
       onBackPressed: () {
         final context = scaffoldKey?.currentContext;

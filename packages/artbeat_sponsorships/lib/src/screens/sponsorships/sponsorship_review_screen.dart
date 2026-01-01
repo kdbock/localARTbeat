@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-
 import '../../utils/tour_events.dart';
+import '../../widgets/glass_card.dart';
 import '../../widgets/gradient_cta_button.dart';
 import '../../widgets/hud_top_bar.dart';
 import '../../widgets/sponsorship_review_row.dart';
@@ -159,7 +159,7 @@ class _SponsorshipReviewScreenState extends State<SponsorshipReviewScreen> {
                         ],
                       ),
                     ),
-                    SponsorshipSection(
+                    const SponsorshipSection(
                       title: 'Thank You',
                       child: Text(
                         'Thank you for investing in the future of Local ARTbeat. Your support keeps the app independent and helps small towns circulate joy again.',

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'glass_card.dart';
-import 'hud_button.dart';
-import 'glass_input_decoration.dart';
+import 'package:artbeat_core/shared_widgets.dart';
 
 /// Dialog for reporting posts with predefined reasons
 class ReportDialog extends StatefulWidget {

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:artbeat_art_walk/src/widgets/world_background.dart';
-import 'package:artbeat_art_walk/src/widgets/glass_card.dart';
+import 'package:artbeat_core/shared_widgets.dart';
 
 class ExperienceMap extends StatelessWidget {
   final Widget map;

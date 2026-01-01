@@ -3,6 +3,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
+import 'dashboard_section_button.dart';
+
 class DashboardArtistsSection extends StatefulWidget {
   final DashboardViewModel viewModel;
 
@@ -71,63 +73,23 @@ class _DashboardArtistsSectionState extends State<DashboardArtistsSection> {
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: ArtbeatColors.textPrimary,
+                  color: Colors.white,
                 ),
               ),
               Text(
                 'dashboard_artists_subtitle'.tr(),
                 style: const TextStyle(
                   fontSize: 14,
-                  color: ArtbeatColors.textSecondary,
+                  color: Colors.white70,
                 ),
               ),
             ],
           ),
         ),
-        Container(
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-              colors: [ArtbeatColors.primaryPurple, ArtbeatColors.primaryGreen],
-            ),
-            borderRadius: BorderRadius.circular(25),
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.black26,
-                blurRadius: 8,
-                offset: Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () => Navigator.pushNamed(context, '/artist/browse'),
-              borderRadius: BorderRadius.circular(25),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 10,
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.explore, color: Colors.white, size: 18),
-                    SizedBox(width: 8),
-                    Text(
-                      'View All',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
+        DashboardSectionButton(
+          label: 'View All',
+          icon: Icons.explore,
+          onTap: () => Navigator.pushNamed(context, '/artist/browse'),
         ),
       ],
     );

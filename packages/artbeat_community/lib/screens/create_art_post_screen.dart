@@ -6,14 +6,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:artbeat_core/shared_widgets.dart';
 
 import '../services/art_community_service.dart';
 import '../services/firebase_storage_service.dart';
-import '../widgets/glass_card.dart';
-import '../widgets/glass_input_decoration.dart';
-import '../widgets/hud_button.dart';
-import '../widgets/hud_top_bar.dart';
-import '../widgets/world_background.dart';
 
 class _CreatePostPalette {
   static const Color textPrimary = Color(0xF2FFFFFF);

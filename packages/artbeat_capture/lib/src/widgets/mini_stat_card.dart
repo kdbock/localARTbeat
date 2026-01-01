@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:artbeat_core/shared_widgets.dart';
 
-import 'glass_card.dart';
 
 class MiniStatCard extends StatelessWidget {
   final String label;

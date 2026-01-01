@@ -49,26 +49,26 @@ class AppRouter {
 
     // Core routes
     switch (routeName) {
-            case '/title-sponsorship':
-              return RouteUtils.createMainLayoutRoute(
-                child: const sponsorships.TitleSponsorshipScreen(),
-              );
-            case '/art-walk-sponsorship':
-              return RouteUtils.createMainLayoutRoute(
-                child: const sponsorships.ArtWalkSponsorshipScreen(),
-              );
-            case '/event-sponsorship':
-              return RouteUtils.createMainLayoutRoute(
-                child: const sponsorships.EventSponsorshipScreen(),
-              );
-            case '/capture-sponsorship':
-              return RouteUtils.createMainLayoutRoute(
-                child: const sponsorships.CaptureSponsorshipScreen(),
-              );
-            case '/discover-sponsorship':
-              return RouteUtils.createMainLayoutRoute(
-                child: const sponsorships.DiscoverSponsorshipScreen(),
-              );
+      case '/title-sponsorship':
+        return RouteUtils.createMainLayoutRoute(
+          child: const sponsorships.TitleSponsorshipScreen(),
+        );
+      case '/art-walk-sponsorship':
+        return RouteUtils.createMainLayoutRoute(
+          child: const sponsorships.ArtWalkSponsorshipScreen(),
+        );
+      case '/event-sponsorship':
+        return RouteUtils.createMainLayoutRoute(
+          child: const sponsorships.EventSponsorshipScreen(),
+        );
+      case '/capture-sponsorship':
+        return RouteUtils.createMainLayoutRoute(
+          child: const sponsorships.CaptureSponsorshipScreen(),
+        );
+      case '/discover-sponsorship':
+        return RouteUtils.createMainLayoutRoute(
+          child: const sponsorships.DiscoverSponsorshipScreen(),
+        );
       case '/sponsorship-dashboard':
         return RouteUtils.createMainLayoutRoute(
           child: const sponsorships.CreateSponsorshipScreen(),
@@ -274,7 +274,8 @@ class AppRouter {
     // Art Walk routes (including admin moderation)
     if (routeName.startsWith('/art-walk') ||
         routeName.startsWith('/enhanced') ||
-        routeName.startsWith('/artwalk')) {
+        routeName.startsWith('/artwalk') ||
+        routeName.startsWith('/instant')) {
       return _handleArtWalkRoutes(settings);
     }
 
@@ -926,14 +927,12 @@ class AppRouter {
         );
 
       case '/quest-history':
-        return RouteUtils.createMainLayoutRoute(
-          currentIndex: 1,
+        return RouteUtils.createSimpleRoute(
           child: const art_walk.QuestHistoryScreen(),
         );
 
       case '/weekly-goals':
-        return RouteUtils.createMainLayoutRoute(
-          currentIndex: 1,
+        return RouteUtils.createSimpleRoute(
           child: const art_walk.WeeklyGoalsScreen(),
         );
 
@@ -1407,8 +1406,10 @@ class AppRouter {
             }
             return core.MainLayout(
               currentIndex: -1,
-              appBar: RouteUtils.createAppBar('Following'),
-              child: profile.FollowingListScreen(userId: currentUser.uid),
+              child: profile.FollowedArtistsScreen(
+                userId: currentUser.uid,
+                embedInMainLayout: false,
+              ),
             );
           },
           unauthenticatedBuilder: () => const core.MainLayout(
@@ -1804,6 +1805,15 @@ class AppRouter {
           'Capture settings not yet implemented',
         );
 
+      case core.AppRoutes.captureReview:
+        final captureId = RouteUtils.getArgument<String>(settings, 'captureId');
+        if (captureId == null || captureId.isEmpty) {
+          return RouteUtils.createErrorRoute('Capture ID is required');
+        }
+        return RouteUtils.createMainLayoutRoute(
+          child: capture.CaptureReviewScreen(captureId: captureId),
+        );
+
       default:
         return RouteUtils.createNotFoundRoute('Capture feature');
     }
@@ -1893,13 +1903,6 @@ class AppRouter {
           child: const NotificationsScreen(useScaffold: false),
           drawer: const events.EventsDrawer(),
           currentIndex: 4,
-          appBarBuilder: (context) => AppBar(
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            title: const Text('Notifications'),
-          ),
         );
 
       case core.AppRoutes.search:
@@ -2554,7 +2557,17 @@ class _LocationCapturesView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: Text(locationName), elevation: 0),
+    appBar: AppBar(
+      title: Text(locationName),
+      elevation: 0,
+      backgroundColor: Colors.white,
+      iconTheme: const IconThemeData(color: Colors.black),
+      titleTextStyle: const TextStyle(
+        color: Colors.black,
+        fontSize: 20,
+        fontWeight: FontWeight.w600,
+      ),
+    ),
     body: captures.isEmpty
         ? const Center(
             child: Column(

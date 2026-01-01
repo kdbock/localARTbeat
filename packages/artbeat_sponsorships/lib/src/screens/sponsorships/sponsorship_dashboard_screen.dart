@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-
 import '../../models/sponsorship.dart';
 import '../../services/sponsorship_repository.dart';
-import '../../widgets/gradient_cta_button.dart';
-import '../../widgets/hud_top_bar.dart';
 import '../../widgets/sponsorship_card.dart';
 import '../../widgets/sponsorship_empty_state.dart';
 import '../../widgets/sponsorship_section.dart';
+import '../../widgets/hud_top_bar.dart';
+import '../../widgets/gradient_cta_button.dart';
 import '../../widgets/world_background.dart';
+import '../../widgets/glass_card.dart';
 
 class SponsorshipDashboardScreen extends StatefulWidget {
   const SponsorshipDashboardScreen({

@@ -11,9 +11,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_art_walk/src/models/public_art_model.dart';
 import 'package:artbeat_art_walk/src/services/instant_discovery_service.dart';
 import 'package:artbeat_art_walk/src/services/social_service.dart';
-import 'package:artbeat_art_walk/src/widgets/glass_card.dart';
-import 'package:artbeat_art_walk/src/widgets/gradient_cta_button.dart';
 import 'package:artbeat_art_walk/src/widgets/typography.dart';
+import 'package:artbeat_core/shared_widgets.dart';
 
 class DiscoveryCaptureModal extends StatefulWidget {
   final PublicArtModel art;
@@ -37,6 +36,8 @@ class _DiscoveryCaptureModalState extends State<DiscoveryCaptureModal> {
   late ConfettiController _confettiController;
   bool _isCapturing = false;
   bool _captured = false;
+  String? _feedbackMessage;
+  Color? _feedbackColor;
 
   @override
   void initState() {
@@ -67,30 +68,13 @@ class _DiscoveryCaptureModalState extends State<DiscoveryCaptureModal> {
         setState(() {
           _captured = true;
           _isCapturing = false;
+          _feedbackMessage = 'discovery_success_message'.tr(
+            namedArgs: {'title': widget.art.title},
+          );
+          _feedbackColor = const Color(0xFF22D3EE);
         });
 
         _confettiController.play();
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.celebration, color: Colors.white),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'discovery_success_message'.tr(
-                      namedArgs: {'title': widget.art.title},
-                    ),
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ],
-            ),
-            backgroundColor: const Color(0xFF22D3EE),
-            duration: const Duration(seconds: 3),
-          ),
-        );
 
         final user = FirebaseAuth.instance.currentUser;
         if (user != null) {
@@ -114,22 +98,20 @@ class _DiscoveryCaptureModalState extends State<DiscoveryCaptureModal> {
           );
         }
 
-        await Future<void>.delayed(const Duration(seconds: 2));
+        await Future<void>.delayed(const Duration(seconds: 3));
         if (mounted) Navigator.pop(context, true);
       } else {
         throw Exception('Failed to save discovery');
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _isCapturing = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'discovery_error_message'.tr(namedArgs: {'error': e.toString()}),
-            ),
-            backgroundColor: Colors.red,
-          ),
-        );
+        setState(() {
+          _isCapturing = false;
+          _feedbackMessage = 'discovery_error_message'.tr(
+            namedArgs: {'error': e.toString()},
+          );
+          _feedbackColor = Colors.red;
+        });
       }
     }
   }
@@ -183,11 +165,24 @@ class _DiscoveryCaptureModalState extends State<DiscoveryCaptureModal> {
                   isClose ? Colors.amber : Colors.teal,
                 ),
               ),
+              if (_feedbackMessage != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    _feedbackMessage!,
+                    style: AppTypography.body(_feedbackColor!),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
               const SizedBox(height: 24),
               if (!_captured)
                 GradientCTAButton(
-                  label: isClose ? 'capture_discovery'.tr() : 'get_closer'.tr(),
-                  icon: Icons.camera_alt,
+                  label: _isCapturing
+                      ? 'capturing'.tr()
+                      : (isClose
+                            ? 'capture_discovery'.tr()
+                            : 'get_closer'.tr()),
+                  icon: _isCapturing ? null : Icons.camera_alt,
                   onPressed: isClose && !_isCapturing
                       ? () {
                           _captureDiscovery();

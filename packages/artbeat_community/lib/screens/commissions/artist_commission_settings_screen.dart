@@ -6,14 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
+import 'package:artbeat_core/shared_widgets.dart';
 
 import '../../models/direct_commission_model.dart';
 import '../../services/direct_commission_service.dart';
-import '../../widgets/glass_card.dart';
-import '../../widgets/glass_input_decoration.dart';
-import '../../widgets/hud_button.dart';
-import '../../widgets/hud_top_bar.dart';
-import '../../widgets/world_background.dart';
 
 class _CommissionPalette {
   static const Color textPrimary = Color(0xF2FFFFFF);

@@ -10,7 +10,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:artbeat_core/artbeat_core.dart';
+import 'package:artbeat_core/artbeat_core.dart'
+    hide GlassCard, WorldBackground, HudTopBar, GradientCTAButton;
 import 'package:artbeat_capture/artbeat_capture.dart';
 import 'package:artbeat_art_walk/artbeat_art_walk.dart' as walk;
 import 'package:artbeat_art_walk/src/theme/art_walk_design_system.dart';
@@ -19,7 +20,6 @@ import 'package:artbeat_art_walk/src/models/public_art_model.dart';
 import 'package:artbeat_art_walk/src/services/art_walk_service.dart';
 import 'package:artbeat_art_walk/src/utils/route_optimization_utils.dart';
 import 'package:artbeat_settings/artbeat_settings.dart';
-import 'package:artbeat_profile/artbeat_profile.dart' as profile;
 import 'package:artbeat_events/artbeat_events.dart' as events;
 import 'package:flutter/foundation.dart';
 
@@ -678,7 +678,7 @@ class _EnhancedArtWalkCreateScreenState
           Navigator.of(context).pop();
         }
       },
-      child: profile.WorldBackground(
+      child: walk.WorldBackground(
         child: Scaffold(
           backgroundColor: Colors.transparent,
           appBar: AppBar(
@@ -753,7 +753,7 @@ class _EnhancedArtWalkCreateScreenState
   }
 
   Widget _buildPersistentSelectedBar() {
-    return profile.GlassCard(
+    return walk.GlassCard(
       margin: EdgeInsets.zero,
       radius: 16,
       child: Padding(
@@ -871,7 +871,7 @@ class _EnhancedArtWalkCreateScreenState
   }
 
   Widget _buildTitleField() {
-    return profile.GlassCard(
+    return walk.GlassCard(
       child: TextFormField(
         controller: _titleController,
         decoration: InputDecoration(

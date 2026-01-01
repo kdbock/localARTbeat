@@ -64,7 +64,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const profile_widgets.WorldBackground(
+      return const WorldBackground(
         child: SafeArea(child: Center(child: CircularProgressIndicator())),
       );
     }
@@ -73,7 +73,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
     final achievements = _achievements;
 
     if (user == null) {
-      return const profile_widgets.WorldBackground(
+      return const WorldBackground(
         child: SafeArea(
           child: Column(
             children: [
@@ -92,7 +92,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
       );
     }
 
-    return profile_widgets.WorldBackground(
+    return WorldBackground(
       child: SafeArea(
         child: Column(
           children: [
@@ -139,7 +139,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
         : ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              profile_widgets.GlassCard(
+              GlassCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

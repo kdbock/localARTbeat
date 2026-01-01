@@ -135,7 +135,7 @@ class TicketPurchase {
 
   /// Convert TicketPurchase to Map for Firestore
   Map<String, dynamic> toFirestore() {
-    return {
+    final map = {
       'eventId': eventId,
       'ticketTypeId': ticketTypeId,
       'userId': userId,
@@ -152,6 +152,9 @@ class TicketPurchase {
       'refundDate': refundDate != null ? Timestamp.fromDate(refundDate!) : null,
       'metadata': metadata,
     };
+    // Remove null values to prevent iOS crash in cloud_firestore plugin
+    map.removeWhere((key, value) => value == null);
+    return map;
   }
 
   /// Create a copy of this TicketPurchase with the given fields replaced

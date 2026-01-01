@@ -1,4 +1,3 @@
-import 'package:artbeat_art_walk/src/widgets/glass_card.dart';
 import 'package:artbeat_art_walk/src/widgets/typography.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:easy_localization/easy_localization.dart';

@@ -115,6 +115,7 @@ class AppRoutes {
   static const String captureCreate = '/capture/create';
   static const String capturePublic = '/capture/public';
   static const String captureTerms = '/capture/terms';
+  static const String captureReview = '/capture/review';
 
   // Art Walk routes
   static const String artWalkMap = '/art-walk/map';

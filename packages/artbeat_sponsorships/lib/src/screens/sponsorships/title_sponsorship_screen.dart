@@ -1,14 +1,13 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-
 import '../../widgets/glass_card.dart';
-import '../../widgets/gradient_badge.dart';
 import '../../widgets/gradient_cta_button.dart';
 import '../../widgets/hud_top_bar.dart';
 import '../../widgets/sponsorship_price_summary.dart';
 import '../../widgets/sponsorship_section.dart';
 import '../../widgets/world_background.dart';
+import '../../widgets/gradient_badge.dart';
 import 'sponsorship_review_screen.dart';
 
 class TitleSponsorshipScreen extends StatefulWidget {
@@ -152,13 +151,13 @@ class _HeroCard extends StatelessWidget {
               children: [
                 GradientBadge(
                   size: 48,
+                  label: 'title',
+                  icon: Icons.auto_awesome,
                   child: Icon(
                     Icons.auto_awesome,
                     color: Colors.white,
                     size: 22,
                   ),
-                  label: 'title',
-                  icon: Icons.auto_awesome,
                 ),
                 SizedBox(width: 12),
                 Column(

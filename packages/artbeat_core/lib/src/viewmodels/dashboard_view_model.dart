@@ -288,20 +288,27 @@ class DashboardViewModel extends ChangeNotifier {
       final events = await _eventService.getUpcomingPublicEvents();
       _events = events
           .map(
-            (e) => EventModel(
-              id: e.id,
-              title: e.title,
-              description: e.description,
-              startDate: e.dateTime,
-              location: e.location,
-              artistId: e.artistId,
-              isPublic: e.isPublic,
-              attendeeIds: e.attendeeIds,
-              createdAt: e.createdAt,
-              updatedAt: e.updatedAt,
-              imageUrl: e.imageUrls.isNotEmpty ? e.imageUrls.first : null,
-              price: 0.0, // Default price
-            ),
+            (e) {
+              final coverImage = _selectBestEventImage(e);
+              final artistImage = _normalizeImageUrl(e.artistHeadshotUrl);
+
+              return EventModel(
+                id: e.id,
+                title: e.title,
+                description: e.description,
+                startDate: e.dateTime,
+                location: e.location,
+                artistId: e.artistId,
+                isPublic: e.isPublic,
+                attendeeIds: e.attendeeIds,
+                createdAt: e.createdAt,
+                updatedAt: e.updatedAt,
+                imageUrl: coverImage,
+                artistProfileImageUrl:
+                    artistImage.isNotEmpty ? artistImage : null,
+                price: 0.0,
+              );
+            },
           )
           .toList();
       _eventsError = null;
@@ -660,6 +667,47 @@ class DashboardViewModel extends ChangeNotifier {
   }
 
   // Intentionally removed duplicate methods that were declared again below
+
+  String _normalizeImageUrl(String? url) {
+    final trimmed = url?.trim() ?? '';
+    if (trimmed.isEmpty) {
+      return '';
+    }
+    if (trimmed.startsWith('gs://')) {
+      final withoutScheme = trimmed.substring(5);
+      final slashIndex = withoutScheme.indexOf('/');
+      if (slashIndex == -1) {
+        return '';
+      }
+      final bucket = withoutScheme.substring(0, slashIndex);
+      final objectPath = withoutScheme.substring(slashIndex + 1);
+      final encodedPath = Uri.encodeComponent(objectPath);
+      return 'https://firebasestorage.googleapis.com/v0/b/$bucket/o/$encodedPath?alt=media';
+    }
+    return trimmed;
+  }
+
+  bool _isValidNetworkUrl(String url) {
+    final normalized = url.trim();
+    return normalized.startsWith('http://') ||
+        normalized.startsWith('https://') ||
+        normalized.contains('firebasestorage');
+  }
+
+  String? _selectBestEventImage(eventLib.ArtbeatEvent event) {
+    final candidates = <String>[
+      _normalizeImageUrl(event.eventBannerUrl),
+      ...event.imageUrls.map(_normalizeImageUrl),
+      _normalizeImageUrl(event.artistHeadshotUrl),
+    ];
+
+    for (final candidate in candidates) {
+      if (candidate.isNotEmpty && _isValidNetworkUrl(candidate)) {
+        return candidate;
+      }
+    }
+    return null;
+  }
 
   Future<void> _loadUserProgress() async {
     try {

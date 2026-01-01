@@ -3,17 +3,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:artbeat_core/shared_widgets.dart';
 
 import '../models/post_model.dart';
 import '../services/art_community_service.dart';
 import '../widgets/comments_modal.dart';
 import '../widgets/enhanced_post_card.dart';
 import '../widgets/fullscreen_image_viewer.dart';
-import '../widgets/glass_card.dart';
-import '../widgets/hud_button.dart';
-import '../widgets/hud_top_bar.dart';
 import '../widgets/post_detail_modal.dart';
-import '../widgets/world_background.dart';
 
 class _Palette {
   static const Color textPrimary = Color(0xF2FFFFFF);

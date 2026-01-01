@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:artbeat_core/artbeat_core.dart' hide SubscriptionService;
+import 'package:artbeat_core/artbeat_core.dart'
+    hide
+        SubscriptionService,
+        GlassCard,
+        WorldBackground,
+        HudTopBar,
+        HudButton,
+        GradientBadge;
 import 'package:artbeat_artwork/artbeat_artwork.dart' as artwork;
 import 'package:artbeat_community/artbeat_community.dart'
     show DirectCommissionService, ArtistCommissionSettings;
@@ -214,6 +221,7 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
             child: HudTopBar(
               title: 'artist_artist_public_profile_text_artist_profile'.tr(),
               onMenu: () => Navigator.pop(context),
+              menuIcon: Icons.arrow_back,
             ),
           ),
 

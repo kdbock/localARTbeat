@@ -1,12 +1,10 @@
-import 'package:artbeat_art_walk/src/widgets/glass_card.dart';
-import 'package:artbeat_art_walk/src/widgets/gradient_cta_button.dart';
 import 'package:artbeat_art_walk/src/widgets/typography.dart';
-import 'package:artbeat_art_walk/src/widgets/world_background.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:artbeat_core/shared_widgets.dart';
 
 class LocalArtWalkPreviewWidget extends StatefulWidget {
   final String zipCode;

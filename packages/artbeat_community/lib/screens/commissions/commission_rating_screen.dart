@@ -1,14 +1,10 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:artbeat_core/shared_widgets.dart';
 
 import '../../models/direct_commission_model.dart';
 import '../../services/commission_rating_service.dart';
-import '../../widgets/gradient_cta_button.dart';
-import '../../widgets/glass_card.dart';
-import '../../widgets/glass_input_decoration.dart';
-import '../../widgets/hud_top_bar.dart';
-import '../../widgets/world_background.dart';
 
 class CommissionRatingScreen extends StatefulWidget {
   const CommissionRatingScreen({super.key, required this.commission});

@@ -42,12 +42,7 @@ export 'src/widgets/ticket_type_builder.dart';
 export 'src/widgets/events_drawer.dart';
 export 'src/widgets/events_header.dart';
 export 'src/widgets/social_feed_widget.dart';
-
-// Design system widgets
-export 'src/widgets/world_background.dart';
-export 'src/widgets/hud_top_bar.dart';
-export 'src/widgets/glass_card.dart';
-export 'src/widgets/gradient_cta_button.dart';
+export 'src/widgets/widgets.dart';
 
 // Forms - Form builders and validation
 export 'src/forms/event_form_builder.dart';
