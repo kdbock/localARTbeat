@@ -7,7 +7,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_core/shared_widgets.dart';
 
 import '../models/art_models.dart';
 import '../services/art_community_service.dart';

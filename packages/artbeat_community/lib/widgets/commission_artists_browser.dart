@@ -5,7 +5,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_artist/artbeat_artist.dart' as artist;
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_core/shared_widgets.dart';
 
 import '../models/direct_commission_model.dart';
 import '../services/direct_commission_service.dart';
@@ -81,7 +80,9 @@ class _CommissionArtistsBrowserState extends State<CommissionArtistsBrowser> {
     final results = await Future.wait(
       ids.map((id) async {
         try {
-          final profile = await _artistProfileService.getArtistProfileByUserId(id);
+          final profile = await _artistProfileService.getArtistProfileByUserId(
+            id,
+          );
           if (profile != null) {
             return MapEntry(id, profile.displayName);
           }
@@ -117,10 +118,7 @@ class _CommissionArtistsBrowserState extends State<CommissionArtistsBrowser> {
     final artistName = _resolveArtistName(artist);
     Navigator.of(context).pushNamed(
       AppRoutes.commissionRequest,
-      arguments: {
-        'artistId': artist.artistId,
-        'artistName': artistName,
-      },
+      arguments: {'artistId': artist.artistId, 'artistName': artistName},
     );
   }
 
@@ -285,6 +283,7 @@ class _CommissionArtistsBrowserState extends State<CommissionArtistsBrowser> {
           borderRadius: 24,
           child: SizedBox(
             width: 180,
+            height: 260,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

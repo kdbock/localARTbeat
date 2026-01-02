@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../../utils/tour_events.dart';
-import '../../widgets/glass_card.dart';
 import '../../widgets/gradient_cta_button.dart';
 import '../../widgets/hud_top_bar.dart';
 import '../../widgets/sponsorship_review_row.dart';
@@ -204,13 +203,15 @@ class _SponsorshipReviewScreenState extends State<SponsorshipReviewScreen> {
                   await FirebaseFirestore.instance
                       .collection('sponsorships')
                       .add(data);
+                  if (!mounted || !context.mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Sponsorship submitted for approval!'),
                     ),
                   );
                   Navigator.pop(context);
-                } catch (e) {
+                } on FirebaseException catch (e) {
+                  if (!mounted || !context.mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Failed to submit: $e')),
                   );

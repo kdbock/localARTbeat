@@ -4,7 +4,6 @@ import 'package:artbeat_core/artbeat_core.dart' hide GradientCTAButton;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:artbeat_core/shared_widgets.dart' hide GradientCTAButton;
 import '../widgets/widgets.dart';
 
 import '../models/artbeat_event.dart';

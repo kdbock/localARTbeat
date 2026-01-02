@@ -27,12 +27,16 @@ import '../widgets/enhanced_post_card.dart';
 import '../widgets/activity_card.dart';
 import '../widgets/mini_artist_card.dart';
 import '../widgets/comments_modal.dart';
+import '../widgets/community_hud_drawer.dart';
 import '../widgets/commission_artists_browser.dart';
 import '../widgets/fullscreen_image_viewer.dart';
-import '../widgets/drawer_section.dart' as lab_drawer;
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:artbeat_artwork/artbeat_artwork.dart';
+import 'package:artbeat_artist/artbeat_artist.dart'
+    show Modern2025OnboardingScreen;
 import 'package:google_fonts/google_fonts.dart';
 
+import 'art_battle_screen.dart';
 import 'artist_onboarding_screen.dart';
 import 'artist_feed_screen.dart';
 import 'feed/comments_screen.dart';
@@ -40,13 +44,10 @@ import 'feed/create_post_screen.dart';
 import 'package:artbeat_artist/src/services/community_service.dart'
     as artist_community;
 import 'package:artbeat_art_walk/artbeat_art_walk.dart' as art_walk;
-import 'package:artbeat_core/shared_widgets.dart';
 
 import 'feed/trending_content_screen.dart';
 import 'feed/group_feed_screen.dart';
-import 'feed/social_engagement_demo_screen.dart';
 import 'posts/user_posts_screen.dart';
-import 'settings/quiet_mode_screen.dart';
 import '../models/direct_commission_model.dart';
 import '../services/direct_commission_service.dart';
 
@@ -79,32 +80,18 @@ class _LAB {
 /// ------------------------------------------------------------
 /// Background + Glass primitives
 /// ------------------------------------------------------------
-class _WorldBackground extends StatelessWidget {
-  const _WorldBackground({required this.child});
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return WorldBackground(child: child);
-  }
-}
-
 class _Glass extends StatelessWidget {
   const _Glass({
     required this.child,
     this.padding,
     this.radius = 24,
     this.blur = 18,
-    this.fillAlpha = 0.08,
-    this.borderAlpha = 0.14,
   });
 
   final Widget child;
   final EdgeInsets? padding;
   final double radius;
   final double blur;
-  final double fillAlpha;
-  final double borderAlpha;
 
   @override
   Widget build(BuildContext context) {
@@ -128,8 +115,8 @@ class _Glass extends StatelessWidget {
         padding: padding ?? const EdgeInsets.all(16),
         borderRadius: radius,
         blur: blur,
-        glassOpacity: fillAlpha,
-        borderOpacity: borderAlpha,
+        glassOpacity: 0.08,
+        borderOpacity: 0.14,
         child: child,
       ),
     );
@@ -162,93 +149,6 @@ class _GradientIconChip extends StatelessWidget {
         ],
       ),
       child: Icon(icon, color: Colors.white, size: size * 0.55),
-    );
-  }
-}
-
-class _PillTile extends StatelessWidget {
-  const _PillTile({
-    required this.icon,
-    required this.title,
-    this.subtitle,
-    this.onTap,
-    this.selected = false,
-    this.accent = _LAB.teal,
-  });
-
-  final IconData icon;
-  final String title;
-  final String? subtitle;
-  final VoidCallback? onTap;
-  final bool selected;
-  final Color accent;
-
-  @override
-  Widget build(BuildContext context) {
-    final fill = selected ? 0.14 : 0.08;
-    final border = selected ? 0.22 : 0.14;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(18),
-        onTap: onTap,
-        child: _Glass(
-          radius: 18,
-          blur: 14,
-          fillAlpha: fill,
-          borderAlpha: border,
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          child: Row(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: accent.withValues(alpha: selected ? 0.22 : 0.14),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: accent.withValues(alpha: selected ? 0.35 : 0.22),
-                  ),
-                ),
-                child: Icon(icon, color: accent, size: 18),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: _LAB.textPrimary,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 14,
-                      ),
-                    ),
-                    if (subtitle != null) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        subtitle!,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: _LAB.textSecondary,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              const Icon(Icons.chevron_right, color: _LAB.textTertiary),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }
@@ -818,345 +718,42 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
     Future.delayed(const Duration(milliseconds: 220), action);
   }
 
-  Widget _buildDrawer() {
-    final footerTitle = 'community_hub_drawer_footer_title'.tr();
-    final footerVersion = 'community_hub_drawer_version'.tr(args: ['v2.0.5']);
-
-    return Drawer(
-      backgroundColor: _LAB.world0,
-      child: SafeArea(
-        child: _WorldBackground(
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
-                child: _Glass(
-                  radius: 26,
-                  blur: 18,
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      const _GradientIconChip(icon: Icons.people, size: 44),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'community_hub_drawer_brand_title'.tr(),
-                              style: const TextStyle(
-                                color: _LAB.textPrimary,
-                                fontWeight: FontWeight.w900,
-                                fontSize: 18,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              'community_hub_drawer_brand_tagline'.tr(),
-                              style: const TextStyle(
-                                color: _LAB.textSecondary,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.only(bottom: 18),
-                  children: [
-                    lab_drawer.DrawerSection(
-                      title: 'community_hub_drawer_section_main_feeds'.tr(),
-                    ),
-                    _PillTile(
-                      icon: Icons.feed,
-                      title: 'community_hub_drawer_item_feed_title'.tr(),
-                      subtitle: 'community_hub_drawer_item_feed_subtitle'.tr(),
-                      selected: _tabController.index == 0,
-                      accent: _LAB.teal,
-                      onTap: () =>
-                          _closeDrawerAnd(() => _tabController.animateTo(0)),
-                    ),
-                    _PillTile(
-                      icon: Icons.trending_up,
-                      title: 'community_hub_drawer_item_trending_title'.tr(),
-                      subtitle: 'community_hub_drawer_item_trending_subtitle'
-                          .tr(),
-                      accent: _LAB.yellow,
-                      onTap: () => _navigateToScreen('TrendingContentScreen'),
-                    ),
-                    lab_drawer.DrawerSection(
-                      title: 'community_hub_drawer_section_create'.tr(),
-                    ),
-                    _PillTile(
-                      icon: Icons.add_circle,
-                      title: 'community_hub_drawer_item_create_post_title'.tr(),
-                      subtitle: 'community_hub_drawer_item_create_post_subtitle'
-                          .tr(),
-                      accent: _LAB.pink,
-                      onTap: () => _navigateToScreen('CreatePostScreen'),
-                    ),
-                    _PillTile(
-                      icon: Icons.group_add,
-                      title: 'community_hub_drawer_item_create_group_title'
-                          .tr(),
-                      subtitle:
-                          'community_hub_drawer_item_create_group_subtitle'
-                              .tr(),
-                      accent: _LAB.purple,
-                      onTap: () => _closeDrawerAnd(_showGroupPostDialog),
-                    ),
-                    lab_drawer.DrawerSection(
-                      title: 'community_hub_drawer_section_artists'.tr(),
-                    ),
-                    _PillTile(
-                      icon: Icons.palette,
-                      title: 'community_hub_drawer_item_artists_gallery_title'
-                          .tr(),
-                      subtitle:
-                          'community_hub_drawer_item_artists_gallery_subtitle'
-                              .tr(),
-                      selected: _tabController.index == 1,
-                      accent: _LAB.purple,
-                      onTap: () =>
-                          _closeDrawerAnd(() => _tabController.animateTo(1)),
-                    ),
-                    _PillTile(
-                      icon: Icons.person_add,
-                      title: 'community_hub_drawer_item_artist_onboarding_title'
-                          .tr(),
-                      subtitle:
-                          'community_hub_drawer_item_artist_onboarding_subtitle'
-                              .tr(),
-                      accent: _LAB.teal,
-                      onTap: () => _navigateToScreen('ArtistOnboardingScreen'),
-                    ),
-                    lab_drawer.DrawerSection(
-                      title: 'community_hub_drawer_section_discover'.tr(),
-                    ),
-                    _PillTile(
-                      icon: Icons.topic,
-                      title: 'community_hub_drawer_item_topics_title'.tr(),
-                      subtitle: 'community_hub_drawer_item_topics_subtitle'
-                          .tr(),
-                      selected: _tabController.index == 2,
-                      accent: _LAB.green,
-                      onTap: () =>
-                          _closeDrawerAnd(() => _tabController.animateTo(2)),
-                    ),
-                    lab_drawer.DrawerSection(
-                      title: 'community_hub_drawer_section_my_content'.tr(),
-                    ),
-                    _PillTile(
-                      icon: Icons.person,
-                      title: 'community_hub_drawer_item_my_posts_title'.tr(),
-                      subtitle: 'community_hub_drawer_item_my_posts_subtitle'
-                          .tr(),
-                      accent: _LAB.teal,
-                      onTap: () => _navigateToScreen('UserPostsScreen'),
-                    ),
-                    lab_drawer.DrawerSection(
-                      title: 'community_hub_drawer_section_tools'.tr(),
-                    ),
-                    _PillTile(
-                      icon: Icons.settings,
-                      title: 'community_hub_drawer_item_quiet_mode_title'.tr(),
-                      subtitle: 'community_hub_drawer_item_quiet_mode_subtitle'
-                          .tr(),
-                      accent: _LAB.yellow,
-                      onTap: () => _navigateToScreen('QuietModeScreen'),
-                    ),
-                    _PillTile(
-                      icon: Icons.analytics,
-                      title: 'community_hub_drawer_item_social_title'.tr(),
-                      subtitle: 'community_hub_drawer_item_social_subtitle'
-                          .tr(),
-                      accent: _LAB.pink,
-                      onTap: () =>
-                          _navigateToScreen('SocialEngagementDemoScreen'),
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                child: _Glass(
-                  radius: 18,
-                  blur: 14,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 12,
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.info_outline,
-                        color: _LAB.textTertiary,
-                        size: 18,
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          footerTitle,
-                          style: const TextStyle(
-                            color: _LAB.textSecondary,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
-                      Flexible(
-                        child: Text(
-                          footerVersion,
-                          textAlign: TextAlign.right,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: _LAB.textTertiary,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 11,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _navigateToScreen(String screenClassName) {
+  void _handleHudNavigation(CommunityHudDestination destination) {
     final navigator = Navigator.of(context);
-    final messenger = ScaffoldMessenger.of(context);
-    navigator.pop();
 
-    Widget? screen;
-    switch (screenClassName) {
-      case 'TrendingContentScreen':
+    late final Widget screen;
+    switch (destination) {
+      case CommunityHudDestination.trending:
         screen = const TrendingContentScreen();
         break;
-      case 'UserPostsScreen':
-        screen = const UserPostsScreen();
+      case CommunityHudDestination.artBattle:
+        screen = const ArtBattleScreen();
         break;
-      case 'QuietModeScreen':
-        screen = const QuietModeScreen();
-        break;
-      case 'SocialEngagementDemoScreen':
-        screen = const SocialEngagementDemoScreen();
-        break;
-      case 'ArtistOnboardingScreen':
-        screen = const ArtistOnboardingScreen();
-        break;
-      case 'CreatePostScreen':
+      case CommunityHudDestination.createPost:
         screen = const CreatePostScreen();
         break;
-      default:
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(
-              'community_hub_navigation_unavailable'.tr(
-                args: [screenClassName],
-              ),
-            ),
-            duration: const Duration(seconds: 2),
-          ),
-        );
-        return;
+      case CommunityHudDestination.artworkBrowse:
+        screen = const ArtworkBrowseScreen();
+        break;
+      case CommunityHudDestination.artistOnboarding:
+        screen = const Modern2025OnboardingScreen();
+        break;
+      case CommunityHudDestination.leaderboard:
+        screen = const LeaderboardScreen();
+        break;
+      case CommunityHudDestination.userPosts:
+        screen = const UserPostsScreen();
+        break;
     }
 
-    Future.delayed(const Duration(milliseconds: 220), () {
-      navigator.push<Widget>(
-        MaterialPageRoute<Widget>(builder: (context) => screen!),
-      );
-    });
-  }
-
-  void _showGroupPostDialog() {
-    showDialog<void>(
-      context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.7),
-      builder: (context) => Dialog(
-        backgroundColor: Colors.transparent,
-        child: _Glass(
-          radius: 26,
-          blur: 18,
-          padding: const EdgeInsets.all(18),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                children: [
-                  const _GradientIconChip(icon: Icons.group_add, size: 42),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'community_hub_group_post_title'.tr(),
-                      style: const TextStyle(
-                        color: _LAB.textPrimary,
-                        fontWeight: FontWeight.w900,
-                        fontSize: 18,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close, color: _LAB.textSecondary),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Text(
-                'community_hub_group_post_prompt'.tr(),
-                style: const TextStyle(
-                  color: _LAB.textSecondary,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 14),
-              Row(
-                children: [
-                  Expanded(
-                    child: HudButton.secondary(
-                      onPressed: () => Navigator.pop(context),
-                      text: 'common_cancel'.tr(),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: HudButton.primary(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        Navigator.push<void>(
-                          context,
-                          MaterialPageRoute<void>(
-                            builder: (context) => const CreatePostScreen(),
-                          ),
-                        );
-                      },
-                      text: 'community_hub_group_post_cta'.tr(),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
+    navigator.push<Widget>(
+      MaterialPageRoute<Widget>(builder: (context) => screen),
     );
   }
 
   PreferredSizeWidget _buildHudAppBar() {
     return PreferredSize(
-      preferredSize: const Size.fromHeight(110),
+      preferredSize: const Size.fromHeight(120),
       child: SafeArea(
         bottom: false,
         child: Padding(
@@ -1220,7 +817,7 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
 
                 // Tabs strip
                 SizedBox(
-                  height: 48,
+                  height: 56,
                   child: _Glass(
                     radius: 18,
                     blur: 14,
@@ -1315,8 +912,13 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
       child: Scaffold(
         backgroundColor: _LAB.world0,
         appBar: _buildHudAppBar(),
-        drawer: _buildDrawer(),
-        body: _WorldBackground(
+        drawer: CommunityHudDrawer(
+          selectedTabIndex: _tabController.index,
+          onTabSelected: (index) => _tabController.animateTo(index),
+          onNavigate: _handleHudNavigation,
+          closeDrawerAnd: _closeDrawerAnd,
+        ),
+        body: HudWorldBackground(
           child: TabBarView(
             controller: _tabController,
             children: [

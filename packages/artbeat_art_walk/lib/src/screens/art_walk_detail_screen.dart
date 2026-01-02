@@ -591,8 +591,8 @@ class _ArtWalkDetailScreenState extends State<ArtWalkDetailScreen> {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      Colors.black.withOpacity(0.1),
-                      Colors.black.withOpacity(0.8),
+                      Colors.black.withValues(alpha: 0.1),
+                      Colors.black.withValues(alpha: 0.8),
                     ],
                   ),
                 ),
@@ -619,7 +619,7 @@ class _ArtWalkDetailScreenState extends State<ArtWalkDetailScreen> {
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                     style: AppTypography.body(
-                      Colors.white.withOpacity(0.85),
+                      Colors.white.withValues(alpha: 0.85),
                     ),
                   ),
                 ],

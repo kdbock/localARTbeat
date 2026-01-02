@@ -408,6 +408,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
     LeaderboardCategory category, {
     bool isCurrentUser = false,
   }) {
+    // Some entries have an empty profile image URL which breaks CachedNetworkImageProvider.
+    final profileImageUrl =
+        _profileImageUrlOrNull(entry.profileImageUrl);
     final gradient = isCurrentUser
         ? const [Color(0xFF22D3EE), Color(0xFF34D399)]
         : _rankGradient(entry.rank);
@@ -463,11 +466,11 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                 const SizedBox(height: 10),
                 CircleAvatar(
                   radius: 22,
-                  backgroundImage: entry.profileImageUrl != null
-                      ? CachedNetworkImageProvider(entry.profileImageUrl!)
+                  backgroundImage: profileImageUrl != null
+                      ? CachedNetworkImageProvider(profileImageUrl)
                       : null,
                   backgroundColor: Colors.white.withValues(alpha: 0.1),
-                  child: entry.profileImageUrl == null
+                  child: profileImageUrl == null
                       ? const Icon(Icons.person, color: Colors.white)
                       : null,
                 ),
@@ -695,6 +698,12 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
       case LeaderboardCategory.highestRatedArtWalk:
         return 'stars';
     }
+  }
+
+  String? _profileImageUrlOrNull(String? url) {
+    if (url == null) return null;
+    final trimmed = url.trim();
+    return trimmed.isEmpty ? null : trimmed;
   }
 
   String _formatNumber(int number) {

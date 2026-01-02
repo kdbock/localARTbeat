@@ -4046,8 +4046,6 @@
   "community_hub_drawer_section_create": "Criar",
   "community_hub_drawer_item_create_post_title": "Criar publicação",
   "community_hub_drawer_item_create_post_subtitle": "Compartilhe sua arte",
-  "community_hub_drawer_item_create_group_title": "Criar grupo",
-  "community_hub_drawer_item_create_group_subtitle": "Forme uma comunidade",
   "community_hub_drawer_section_artists": "Artistas",
   "community_hub_drawer_item_artists_gallery_title": "Galeria de artistas",
   "community_hub_drawer_item_artists_gallery_subtitle": "Explorar obras",
@@ -4922,6 +4920,7 @@
   "community_commission_gallery_untitled": "Comissão sem título",
 
   "community_hub_tab_art_battle": "Art Battle",
+  "community_hub_tab_commissions": "Comissões",
   "create_post": "Criar publicação",
   "critique": "Crítica",
   "delete": "Excluir",

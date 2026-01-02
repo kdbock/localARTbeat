@@ -4,7 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_core/shared_widgets.dart';
 
 import '../models/post_model.dart';
 import '../models/group_models.dart';

@@ -224,7 +224,7 @@ class _CommissionSetupWizardScreenState
         'commission_setup_toast_saved'.tr(),
         backgroundColor: _WizardPalette.accentGreen,
       );
-      await Future.delayed(const Duration(milliseconds: 900));
+      await Future<void>.delayed(const Duration(milliseconds: 900));
       if (mounted) {
         Navigator.pop(context, true);
       }
@@ -260,13 +260,13 @@ class _CommissionSetupWizardScreenState
                   style: _sectionTitleStyle,
                 ),
                 const SizedBox(height: 16),
-                HudButton.primary(
+                HudButton(isPrimary: true,
                   onPressed: () => Navigator.pop(context, ImageSource.gallery),
                   text: 'commission_setup_image_source_gallery'.tr(),
                   icon: Icons.photo_library,
                 ),
                 const SizedBox(height: 12),
-                HudButton.secondary(
+                HudButton(isPrimary: false,
                   onPressed: () => Navigator.pop(context, ImageSource.camera),
                   text: 'commission_setup_image_source_camera'.tr(),
                   icon: Icons.camera_alt,
@@ -440,7 +440,7 @@ class _CommissionSetupWizardScreenState
       child: Row(
         children: [
           Expanded(
-            child: HudButton.secondary(
+            child: HudButton(isPrimary: false,
               onPressed: _currentStep == 0 ? null : _handleBack,
               text: 'commission_setup_action_back'.tr(),
               icon: Icons.arrow_back,
@@ -552,7 +552,7 @@ class _CommissionSetupWizardScreenState
                 value: _acceptingCommissions,
                 onChanged: (value) =>
                     setState(() => _acceptingCommissions = value),
-                activeColor: Colors.white,
+                thumbColor: WidgetStateProperty.all(Colors.white),
                 trackColor: WidgetStateProperty.resolveWith(
                   (states) => states.contains(WidgetState.selected)
                       ? _WizardPalette.accentTeal.withValues(alpha: 0.6)

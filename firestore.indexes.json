@@ -423,6 +423,15 @@
       ]
     },
     {
+      "collectionGroup": "artworks",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "artBattleEnabled", "order": "ASCENDING" },
+        { "fieldPath": "artBattleStatus", "order": "ASCENDING" },
+        { "fieldPath": "artBattleScore", "order": "DESCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "comments",
       "queryScope": "COLLECTION",
       "fields": [
@@ -445,6 +454,15 @@
       "fields": [
         { "fieldPath": "isPublic", "order": "ASCENDING" },
         { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "posts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "isPublic", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" },
+        { "fieldPath": "applauseCount", "order": "DESCENDING" }
       ]
     },
     {

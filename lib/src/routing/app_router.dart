@@ -927,7 +927,8 @@ class AppRouter {
         );
 
       case '/quest-history':
-        return RouteUtils.createSimpleRoute(
+        return RouteUtils.createMainLayoutRoute(
+          currentIndex: 1,
           child: const art_walk.QuestHistoryScreen(),
         );
 

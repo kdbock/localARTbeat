@@ -743,7 +743,7 @@ class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
     if (commission.status == CommissionStatus.pending && isArtist) {
       buttonWidgets.add(
         Expanded(
-          child: HudButton.secondary(
+          child: HudButton(isPrimary: false,
             onPressed: () => _provideQuote(commission),
             text: 'direct_commissions_action_provide_quote'.tr(),
             icon: Icons.request_quote,
@@ -756,7 +756,7 @@ class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
     if (commission.status == CommissionStatus.quoted && !isArtist) {
       buttonWidgets.add(
         Expanded(
-          child: HudButton.primary(
+          child: HudButton(isPrimary: true,
             onPressed: () => _acceptCommission(commission),
             text: 'direct_commissions_action_accept_quote'.tr(),
             icon: Icons.check,
@@ -769,7 +769,7 @@ class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
     if (commission.status == CommissionStatus.inProgress && isArtist) {
       buttonWidgets.add(
         Expanded(
-          child: HudButton.primary(
+          child: HudButton(isPrimary: true,
             onPressed: () => _markCompleted(commission),
             text: 'direct_commissions_action_mark_complete'.tr(),
             icon: Icons.done,
@@ -1084,13 +1084,13 @@ class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    HudButton.secondary(
+                    HudButton(isPrimary: false,
                       onPressed: () => Navigator.of(context).pop(),
                       text: 'common_cancel'.tr(),
                       height: 48,
                     ),
                     const SizedBox(width: 16),
-                    HudButton.primary(
+                    HudButton(isPrimary: true,
                       onPressed: () async {
                         if (titleController.text.isEmpty ||
                             descriptionController.text.isEmpty ||
@@ -1140,35 +1140,34 @@ class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
                             },
                           );
 
-                          if (mounted) {
-                            Navigator.of(context).pop();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  'direct_commissions_request_success'.tr(
-                                    namedArgs: {
-                                      'name': selectedArtist.displayName,
-                                    },
-                                  ),
+                          if (!mounted || !context.mounted) return;
+
+                          Navigator.of(context).pop();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'direct_commissions_request_success'.tr(
+                                  namedArgs: {
+                                    'name': selectedArtist.displayName,
+                                  },
                                 ),
-                                backgroundColor: const Color(0xFF34D399),
                               ),
-                            );
-                            await _loadCommissions();
-                          }
+                              backgroundColor: const Color(0xFF34D399),
+                            ),
+                          );
+                          await _loadCommissions();
                         } catch (e) {
-                          if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  'direct_commissions_request_error'.tr(
-                                    namedArgs: {'error': '$e'},
-                                  ),
+                          if (!mounted || !context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'direct_commissions_request_error'.tr(
+                                  namedArgs: {'error': '$e'},
                                 ),
-                                backgroundColor: const Color(0xFFFF3D8D),
                               ),
-                            );
-                          }
+                              backgroundColor: const Color(0xFFFF3D8D),
+                            ),
+                          );
                         }
                       },
                       text: 'direct_commissions_request_submit'.tr(),
@@ -1693,7 +1692,7 @@ class _QuoteProvisionDialogState extends State<_QuoteProvisionDialog> {
                                 color: Colors.white,
                               ),
                             ),
-                            HudButton.secondary(
+                            HudButton(isPrimary: false,
                               onPressed: _addMilestone,
                               text: 'direct_commissions_quote_add_milestone'
                                   .tr(),
@@ -1746,7 +1745,7 @@ class _QuoteProvisionDialogState extends State<_QuoteProvisionDialog> {
                 child: Row(
                   children: [
                     Expanded(
-                      child: HudButton.secondary(
+                      child: HudButton(isPrimary: false,
                         onPressed: _isSubmitting
                             ? null
                             : () => Navigator.of(context).pop(),
@@ -1756,7 +1755,7 @@ class _QuoteProvisionDialogState extends State<_QuoteProvisionDialog> {
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: HudButton.primary(
+                      child: HudButton(isPrimary: true,
                         onPressed: _isSubmitting ? null : _submitQuote,
                         text: 'direct_commissions_quote_submit'.tr(),
                         icon: Icons.send,

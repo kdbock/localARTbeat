@@ -164,6 +164,9 @@ class _ArtWalkDrawerState extends State<ArtWalkDrawer> {
   bool _shouldPush(String route) {
     return route.startsWith('/art-walk/') ||
         route == '/capture/public' ||
+        route == '/instant-discovery' ||
+        route == '/achievements' ||
+        route == '/leaderboard' ||
         route == '/quest-history' ||
         route == '/weekly-goals' ||
         route == '/profile';
@@ -612,8 +615,20 @@ const _drawerSections = <_DrawerSectionConfig>[
       _DrawerNavItem(
         titleKey: 'art_walk_drawer_achievements',
         icon: Icons.emoji_events_rounded,
-        route: '/art-walk/achievements',
+        route: '/achievements',
         accent: Color(0xFFFFC857),
+      ),
+      _DrawerNavItem(
+        titleKey: 'art_walk_drawer_quest_history',
+        icon: Icons.history_rounded,
+        route: '/quest-history',
+        accent: Color(0xFF22D3EE),
+      ),
+      _DrawerNavItem(
+        titleKey: 'leaderboard_title',
+        icon: Icons.leaderboard_rounded,
+        route: '/leaderboard',
+        accent: Color(0xFF7C4DFF),
       ),
     ],
   ),

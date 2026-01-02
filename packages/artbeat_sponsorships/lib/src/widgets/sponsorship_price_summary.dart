@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:artbeat_core/shared_widgets.dart';
+import 'package:flutter/material.dart';
 
 class SponsorshipPriceSummary extends StatelessWidget {
   const SponsorshipPriceSummary({

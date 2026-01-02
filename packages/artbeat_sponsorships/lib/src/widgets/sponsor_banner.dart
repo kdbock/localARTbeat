@@ -76,7 +76,7 @@ class _SponsorBannerState extends State<SponsorBanner> {
         _sponsor = sponsor;
         _isLoading = false;
       });
-    } catch (_) {
+    } on Exception catch (_) {
       // Fail silently — sponsorships must never break UI
       if (!mounted || token != _requestToken) return;
 
@@ -178,7 +178,7 @@ class _LabeledBanner extends StatelessWidget {
             BoxShadow(
               blurRadius: 6,
               offset: const Offset(0, 3),
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withValues(alpha: 0.08),
             ),
           ],
         ),

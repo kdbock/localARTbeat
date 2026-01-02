@@ -934,6 +934,7 @@ class _AdminArtworkManagementScreenState
               final newScore = int.tryParse(scoreController.text);
               if (newScore != null) {
                 await _adjustArtBattleScore(artwork, newScore);
+                if (!context.mounted) return;
                 Navigator.pop(context);
               }
             },

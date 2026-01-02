@@ -27,7 +27,9 @@
 	<key>AppGroup</key>
 	<string>group.H49R32NPY6.com.wordnerd.artbeat</string>
 	<key>FirebaseAppDelegateProxyEnabled</key>
-	<true/>
+	<false/>
+	<key>FirebaseAutomaticScreenReportingEnabled</key>
+	<false/>
 	<key>NSCameraUsageDescription</key>
 	<string>ARTbeat needs access to your camera to capture photos of public art and share them with the community.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

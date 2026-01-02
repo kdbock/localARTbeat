@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:artbeat_core/shared_widgets.dart';
 
 /// Enhanced artwork card with the new social engagement system
 class EnhancedArtworkCard extends StatelessWidget {

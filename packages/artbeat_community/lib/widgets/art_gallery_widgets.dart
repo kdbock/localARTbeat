@@ -6,7 +6,6 @@ import 'package:easy_localization/easy_localization.dart';
 import '../models/art_models.dart';
 import '../services/art_community_service.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_core/shared_widgets.dart';
 
 /// Gallery-style post card focused on beautiful image display
 class ArtPostCard extends StatefulWidget {

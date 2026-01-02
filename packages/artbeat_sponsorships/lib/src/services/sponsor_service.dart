@@ -120,9 +120,7 @@ class SponsorService {
   bool _isWithinRadius(
     LatLng userLocation,
     double radiusMiles,
-  ) {
-    // TODO: Replace with proper Haversine calculation if required.
-    // For now, radius logic is expected to be validated server-side or via GeoFire.
-    return true;
-  }
+  ) =>
+      // TODO(artbeat): Replace with proper Haversine calculation if required; radius logic validated server-side.
+      true;
 }

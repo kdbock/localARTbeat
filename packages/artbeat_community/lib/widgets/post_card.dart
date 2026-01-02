@@ -155,7 +155,8 @@ class PostCard extends StatelessWidget {
       children: [
         // Comment button
         Expanded(
-          child: HudButton.secondary(
+          child: HudButton(
+            isPrimary: false,
             onPressed: () => onComment(post.id),
             text: '${post.engagementStats.commentCount}',
             icon: Icons.comment_outlined,
@@ -164,7 +165,8 @@ class PostCard extends StatelessWidget {
         const SizedBox(width: 8),
         // Gift button
         Expanded(
-          child: HudButton.primary(
+          child: HudButton(
+            isPrimary: true,
             onPressed: () => onGift?.call(post),
             text: 'gift'.tr(),
             icon: Icons.card_giftcard,

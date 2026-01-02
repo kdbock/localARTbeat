@@ -34,7 +34,6 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
   ArtistProfileModel? _artist;
   String? _fallbackArtistName;
   String? _fallbackArtistImageUrl;
-  bool _isOwner = false;
 
   // Auction state
   double? _currentHighestBid;
@@ -95,12 +94,6 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
         }
       }
 
-      // Check if user is the owner of this artwork
-
-      // Check if current user is the owner of this artwork
-      final currentUser = _auth.currentUser;
-      final isOwner = currentUser != null && currentUser.uid == artwork.userId;
-
       // Increment view count
       await _artworkService.incrementViewCount(widget.artworkId);
 
@@ -139,7 +132,6 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
           _artist = artistProfile;
           _fallbackArtistName = fallbackArtistName;
           _fallbackArtistImageUrl = fallbackArtistImageUrl;
-          _isOwner = isOwner;
           _currentHighestBid = currentHighestBid;
           _bidHistory = bidHistory;
           _isLoading = false;
@@ -371,112 +363,11 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
     }
   }
 
-  void _editArtwork() {
-    if (_artwork == null) return;
-
-    Navigator.pushNamed(
-      context,
-      '/artwork/edit',
-      arguments: {
-        'artworkId': _artwork!.id,
-        'artwork': _artwork,
-      },
-    ).then((_) {
-      // Refresh artwork data when returning from edit
-      _loadArtworkData();
-    });
-  }
-
-  Future<void> _showDeleteConfirmation() async {
-    if (_artwork == null) return;
-
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('artwork_delete_title'.tr()),
-        content: Text(
-          'artwork_delete_confirm'.tr(namedArgs: {'title': _artwork!.title}),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text('common_cancel'.tr()),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.red,
-            ),
-            child: Text('common_delete'.tr()),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed == true) {
-      await _deleteArtwork();
-    }
-  }
-
-  Future<void> _deleteArtwork() async {
-    if (_artwork == null) return;
-
-    try {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
-              const SizedBox(width: 16),
-              Text('artwork_deleting'.tr()),
-            ],
-          ),
-          duration: const Duration(seconds: 30),
-        ),
-      );
-
-      await _artworkService.deleteArtwork(_artwork!.id);
-
-      if (mounted) {
-        // Hide loading snackbar
-        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('artwork_deleted_success'
-                .tr(namedArgs: {'title': _artwork!.title})),
-            backgroundColor: ArtbeatColors.primaryGreen,
-          ),
-        );
-
-        // Navigate back to the previous screen
-        Navigator.of(context).pop();
-      }
-    } catch (e) {
-      if (mounted) {
-        // Hide loading snackbar
-        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-                'artwork_delete_failed'.tr(namedArgs: {'error': e.toString()})),
-            backgroundColor: ArtbeatColors.error,
-          ),
-        );
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return WorldBackground(
-        child: const Scaffold(
+      return const WorldBackground(
+        child: Scaffold(
           backgroundColor: Colors.transparent,
           body: Center(child: CircularProgressIndicator()),
         ),
