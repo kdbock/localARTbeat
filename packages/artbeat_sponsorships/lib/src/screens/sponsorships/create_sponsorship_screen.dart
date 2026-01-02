@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../widgets/glass_card.dart';
-import '../../widgets/gradient_cta_button.dart';
 import '../../widgets/hud_top_bar.dart';
 import '../../widgets/sponsorship_cta_tile.dart';
 import '../../widgets/sponsorship_section.dart';

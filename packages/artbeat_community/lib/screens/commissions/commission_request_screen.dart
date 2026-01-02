@@ -346,7 +346,7 @@ class _CommissionRequestScreenState extends State<CommissionRequestScreen> {
             children: [
               SizedBox(
                 width: 200,
-                child: HudButton.primary(
+                child: HudButton(isPrimary: true,
                   onPressed: _openTemplates,
                   text: 'commission_request_action_templates'.tr(),
                   icon: Icons.auto_awesome,
@@ -355,7 +355,7 @@ class _CommissionRequestScreenState extends State<CommissionRequestScreen> {
               ),
               SizedBox(
                 width: 200,
-                child: HudButton.secondary(
+                child: HudButton(isPrimary: false,
                   onPressed: _openGallery,
                   text: 'commission_request_action_gallery'.tr(),
                   icon: Icons.image_search,
@@ -821,7 +821,7 @@ class _CommissionRequestScreenState extends State<CommissionRequestScreen> {
     return Row(
       children: [
         Expanded(
-          child: HudButton.secondary(
+          child: HudButton(isPrimary: false,
             onPressed: _isLoading ? null : _calculatePrice,
             text: 'commission_request_action_calculate'.tr(),
             icon: Icons.toll,

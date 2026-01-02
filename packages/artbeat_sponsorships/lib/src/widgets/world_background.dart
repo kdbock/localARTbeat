@@ -75,7 +75,7 @@ class _WorldBackgroundState extends State<WorldBackground>
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      const Color(0xFF22D3EE).withOpacity(0.1),
+                      const Color(0xFF22D3EE).withValues(alpha: 0.1),
                       Colors.transparent,
                     ],
                   ),
@@ -92,7 +92,7 @@ class _WorldBackgroundState extends State<WorldBackground>
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      const Color(0xFF7C4DFF).withOpacity(0.08),
+                      const Color(0xFF7C4DFF).withValues(alpha: 0.08),
                       Colors.transparent,
                     ],
                   ),
@@ -109,7 +109,7 @@ class _WorldBackgroundState extends State<WorldBackground>
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      const Color(0xFFFF3D8D).withOpacity(0.06),
+                      const Color(0xFFFF3D8D).withValues(alpha: 0.06),
                       Colors.transparent,
                     ],
                   ),

@@ -4,7 +4,6 @@ import 'package:easy_localization/easy_localization.dart';
 import '../models/post_model.dart';
 import '../services/community_service.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_core/shared_widgets.dart';
 
 /// Horizontal scrolling slider displaying art awaiting critique
 class ArtCritiqueSlider extends StatefulWidget {

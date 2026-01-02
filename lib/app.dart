@@ -13,7 +13,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'src/routing/app_router.dart';
-import 'src/services/firebase_initializer.dart';
 import 'src/widgets/error_boundary.dart';
 
 /// Global navigator key for navigation from services
@@ -23,7 +22,6 @@ class MyApp extends StatelessWidget {
   MyApp({super.key}) {
     _setupGlobalErrorHandling();
   }
-  final _firebaseInitializer = FirebaseInitializer();
   final _appRouter = AppRouter();
 
   void _setupGlobalErrorHandling() {
@@ -58,7 +56,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => FutureBuilder(
-    future: _firebaseInitializer.ensureInitialized(),
     builder: (context, snapshot) {
       if (snapshot.hasError) {
         return MaterialApp(
@@ -263,6 +260,6 @@ class MyApp extends StatelessWidget {
           ),
         ),
       );
-    },
+    }, future: null,
   );
 }

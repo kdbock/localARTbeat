@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:flutter/foundation.dart';
+import 'package:cloud_functions/cloud_functions.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../models/art_battle_match.dart';
 
 class ArtBattleService {
@@ -21,23 +23,43 @@ class ArtBattleService {
     String? medium,
     int limit = 100,
   }) async {
-    Query query = _firestore
+    // Prefer statuses that are actively eligible, but fall back to any enabled artwork
+    const preferredStatuses = ['eligible', 'active', 'cooling_down'];
+
+    Query baseQuery = _firestore
         .collection('artwork')
-        .where('artBattleEnabled', isEqualTo: true)
-        .where('artBattleStatus', isEqualTo: ArtBattleStatus.eligible.name)
-        .orderBy('artBattleScore', descending: true)
-        .limit(limit);
+        .where('artBattleEnabled', isEqualTo: true);
 
     if (region != null) {
-      query = query.where('region', isEqualTo: region);
+      baseQuery = baseQuery.where('region', isEqualTo: region);
     }
 
     if (medium != null) {
-      query = query.where('medium', isEqualTo: medium);
+      baseQuery = baseQuery.where('medium', isEqualTo: medium);
     }
 
-    final snapshot = await query.get();
-    return snapshot.docs.map((doc) => ArtworkModel.fromFirestore(doc)).toList();
+    // First attempt: only pull clearly eligible statuses
+    try {
+      final snapshot = await baseQuery
+          .where('artBattleStatus', whereIn: preferredStatuses)
+          .orderBy('artBattleScore', descending: true)
+          .limit(limit * 2)
+          .get();
+
+      final preferred = snapshot.docs
+          .map((doc) => ArtworkModel.fromFirestore(doc))
+          .toList();
+      if (preferred.length >= 2) return preferred;
+    } catch (_) {
+      // If the filtered query fails (e.g., missing index), fall through to the broader pull.
+    }
+
+    // Fallback: any enabled artwork that isn't explicitly opted out
+    final fallbackSnapshot = await baseQuery.limit(limit * 2).get();
+    return fallbackSnapshot.docs
+        .map((doc) => ArtworkModel.fromFirestore(doc))
+        .where((artwork) => artwork.artBattleStatus != ArtBattleStatus.opted_out)
+        .toList();
   }
 
   // Generate a battle matchup
@@ -55,10 +77,25 @@ class ArtBattleService {
       return null; // Not enough artworks
     }
 
-    // Simple matchmaking: pick two random artworks
+    // Simple matchmaking with guardrails: pick two random artworks from different artists
     artworks.shuffle();
-    final artworkA = artworks[0];
-    final artworkB = artworks[1];
+    ArtworkModel? artworkA;
+    ArtworkModel? artworkB;
+
+    for (int i = 0; i < artworks.length; i++) {
+      for (int j = i + 1; j < artworks.length; j++) {
+        if (artworks[i].artistId != artworks[j].artistId) {
+          artworkA = artworks[i];
+          artworkB = artworks[j];
+          break;
+        }
+      }
+      if (artworkA != null && artworkB != null) break;
+    }
+
+    if (artworkA == null || artworkB == null) {
+      return null; // Not enough variety to form a match
+    }
 
     // Check if this should be a sponsored battle (every 5th battle)
     final isSponsored = await _shouldInjectSponsor();
@@ -118,16 +155,30 @@ class ArtBattleService {
     required String chosenArtworkId,
     required String userId,
   }) async {
-    // Call Cloud Function
-    final functions = FirebaseFunctions.instance;
-    final callable = functions.httpsCallable('submitArtBattleVote');
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      throw Exception('Sign in to vote in Art Battles.');
+    }
+
+    final callable =
+        FirebaseFunctions.instance.httpsCallable('submitArtBattleVote');
 
     try {
-      await callable.call<Map<String, dynamic>>({
+      debugPrint(
+        '[ArtBattle] submitVote callable match=$matchId artwork=$chosenArtworkId user=$userId',
+      );
+
+      await callable.call({
         'battleId': matchId,
         'artworkIdChosen': chosenArtworkId,
       });
+    } on FirebaseFunctionsException catch (e) {
+      debugPrint(
+        '[ArtBattle] submitVote callable failed code=${e.code} message=${e.message}',
+      );
+      throw Exception(e.message ?? 'Failed to submit vote (${e.code})');
     } catch (e) {
+      debugPrint('[ArtBattle] submitVote callable exception error=$e');
       throw Exception('Failed to submit vote: $e');
     }
   }

@@ -432,31 +432,4 @@ class DashboardEventsSection extends StatelessWidget {
     }
   }
 
-  bool _isValidImageUrl(String? url) {
-    if (url == null || url.isEmpty) return false;
-
-    // Check if it's a valid HTTP/HTTPS URL
-    final uri = Uri.tryParse(url);
-    if (uri == null) return false;
-
-    // Must have http or https scheme
-    if (!uri.hasScheme || (uri.scheme != 'http' && uri.scheme != 'https')) {
-      return false;
-    }
-
-    // Must have a host
-    if (!uri.hasAuthority || uri.host.isEmpty) {
-      return false;
-    }
-
-    // Avoid localhost and placeholder URLs
-    if (uri.host == 'localhost' ||
-        uri.host == '127.0.0.1' ||
-        uri.host.contains('placeholder') ||
-        url.contains('placeholder_url_')) {
-      return false;
-    }
-
-    return true;
-  }
 }

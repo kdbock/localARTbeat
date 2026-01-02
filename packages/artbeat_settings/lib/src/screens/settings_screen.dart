@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:artbeat_events/artbeat_events.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/models.dart';
 import '../widgets/language_selector.dart';
@@ -49,53 +48,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         // Quick actions
         _buildQuickActions(context),
       ],
-    );
-  }
-
-  Widget _buildProfileSummary(BuildContext context) {
-    final user = _auth.currentUser;
-
-    return GlassCard(
-      onTap: () => _navigateToProfile(context),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 30,
-            backgroundImage:
-                ImageUrlValidator.safeNetworkImage(user?.photoURL) ??
-                const AssetImage('assets/default_profile.png') as ImageProvider,
-            child: !ImageUrlValidator.isValidImageUrl(user?.photoURL)
-                ? const Icon(Icons.person, size: 30, color: Colors.white70)
-                : null,
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'settings_your_account'.tr(),
-                  style: GoogleFonts.spaceGrotesk(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'settings_manage_profile'.tr(),
-                  style: GoogleFonts.spaceGrotesk(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white70,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.white70),
-        ],
-      ),
     );
   }
 
@@ -223,10 +175,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     SettingsCategoryModel category,
   ) {
     Navigator.pushNamed(context, category.route);
-  }
-
-  void _navigateToProfile(BuildContext context) {
-    Navigator.pushNamed(context, '/profile');
   }
 
   void _showLogoutDialog(BuildContext context) {

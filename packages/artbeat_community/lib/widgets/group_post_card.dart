@@ -118,7 +118,8 @@ class GroupPostCard extends StatelessWidget {
       children: [
         // Appreciate button
         Expanded(
-          child: HudButton.secondary(
+          child: HudButton(
+            isPrimary: false,
             onPressed: onAppreciate,
             text: '${post.applauseCount}',
             icon: Icons.favorite_border,
@@ -127,7 +128,8 @@ class GroupPostCard extends StatelessWidget {
         const SizedBox(width: 8),
         // Comment button
         Expanded(
-          child: HudButton.secondary(
+          child: HudButton(
+            isPrimary: false,
             onPressed: onComment,
             text: '${post.commentCount}',
             icon: Icons.comment_outlined,
@@ -136,7 +138,8 @@ class GroupPostCard extends StatelessWidget {
         const SizedBox(width: 8),
         // Share button
         Expanded(
-          child: HudButton.secondary(
+          child: HudButton(
+            isPrimary: false,
             onPressed: onShare,
             text: '${post.shareCount}',
             icon: Icons.share_outlined,
@@ -145,7 +148,8 @@ class GroupPostCard extends StatelessWidget {
         const SizedBox(width: 8),
         // Gift button
         Expanded(
-          child: HudButton.primary(
+          child: HudButton(
+            isPrimary: true,
             onPressed: onGift,
             text: 'gift'.tr(),
             icon: Icons.card_giftcard,

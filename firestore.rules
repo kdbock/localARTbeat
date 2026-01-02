@@ -592,6 +592,13 @@ service cloud.firestore {
       }
     }
 
+    // Art Battle match records
+    match /art_battles/{battleId} {
+      allow read, list: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update, delete: if false; // Mutations handled by privileged backend (Cloud Functions)
+    }
+
     // Subscriptions
     match /subscriptions/{subscriptionId} {
       allow read: if isAuthenticated() && (

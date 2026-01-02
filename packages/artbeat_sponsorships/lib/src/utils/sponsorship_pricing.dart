@@ -38,7 +38,10 @@ class SponsorshipPricing {
     switch (tier) {
       case SponsorshipTier.event:
         return false;
-      default:
+      case SponsorshipTier.title:
+      case SponsorshipTier.artWalk:
+      case SponsorshipTier.capture:
+      case SponsorshipTier.discover:
         return true;
     }
   }

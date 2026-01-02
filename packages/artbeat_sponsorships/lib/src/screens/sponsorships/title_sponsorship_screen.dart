@@ -1,13 +1,14 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+
 import '../../widgets/glass_card.dart';
+import '../../widgets/gradient_badge.dart';
 import '../../widgets/gradient_cta_button.dart';
 import '../../widgets/hud_top_bar.dart';
 import '../../widgets/sponsorship_price_summary.dart';
 import '../../widgets/sponsorship_section.dart';
 import '../../widgets/world_background.dart';
-import '../../widgets/gradient_badge.dart';
 import 'sponsorship_review_screen.dart';
 
 class TitleSponsorshipScreen extends StatefulWidget {
@@ -868,7 +869,10 @@ class _HeroMetricData {
     this.display,
     this.suffix = '',
     required this.detail,
-  }) : assert((value != null) ^ (display != null));
+  }) : assert(
+          (value != null) ^ (display != null),
+          'Provide either a numeric value or a display string',
+        );
 
   final String label;
   final double? value;
@@ -890,7 +894,8 @@ const List<_HeroMetricData> _heroMetrics = [
   ),
   _HeroMetricData(
     label: 'Term',
-    display: '12 months',
+    value: 12,
+    suffix: ' mos',
     detail: 'exclusive presenting rights',
   ),
 ];

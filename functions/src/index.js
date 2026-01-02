@@ -1,4 +1,4 @@
-const { onRequest } = require("firebase-functions/v2/https");
+const { onRequest, onCall } = require("firebase-functions/v2/https");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { setGlobalOptions } = require("firebase-functions/v2");
 const admin = require("firebase-admin");
@@ -2130,191 +2130,181 @@ exports.closeAuction = onSchedule("every 1 minutes", async (event) => {
   }
 });
 
-/**
- * Submit Art Battle Vote
- */
-exports.submitArtBattleVote = onRequest((request, response) => {
-  cors(request, response, async () => {
-    try {
-      // Only allow POST requests
-      if (request.method !== "POST") {
-        return response.status(405).json({ error: "Method not allowed" });
-      }
+exports.submitArtBattleVote = onCall(async (request) => {
+  try {
+    const { data, auth } = request;
 
-      // Validate authentication
-      const authHeader = request.headers.authorization;
-      if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        return response.status(401).json({ error: "Unauthorized" });
-      }
+    if (!auth) {
+      throw new HttpsError(
+        "unauthenticated",
+        "User must be authenticated"
+      );
+    }
 
-      const idToken = authHeader.split("Bearer ")[1];
-      let decodedToken;
-      try {
-        decodedToken = await admin.auth().verifyIdToken(idToken);
-      } catch (error) {
-        return response.status(401).json({ error: "Invalid token" });
-      }
+    const userId = auth.uid;
+    const { battleId, artworkIdChosen } = data;
 
-      const userId = decodedToken.uid;
-      const { battleId, artworkIdChosen } = request.body;
+    if (!battleId || !artworkIdChosen) {
+      throw new HttpsError(
+        "invalid-argument",
+        "Missing required fields"
+      );
+    }
 
-      if (!battleId || !artworkIdChosen) {
-        return response.status(400).json({ error: "Missing required fields" });
-      }
+    // Get the battle
+    const battleDoc = await admin
+      .firestore()
+      .collection("art_battles")
+      .doc(battleId)
+      .get();
+    if (!battleDoc.exists) {
+      throw new HttpsError("not-found", "Battle not found");
+    }
 
-      // Get the battle
-      const battleDoc = await admin
-        .firestore()
-        .collection("art_battles")
-        .doc(battleId)
-        .get();
-      if (!battleDoc.exists) {
-        return response.status(404).json({ error: "Battle not found" });
-      }
+    const battle = battleDoc.data();
+    if (battle.winnerArtworkId) {
+      throw new HttpsError("failed-precondition", "Battle already completed");
+    }
 
-      const battle = battleDoc.data();
-      if (battle.winnerArtworkId) {
-        return response.status(400).json({ error: "Battle already completed" });
-      }
+    // Validate chosen artwork is in the battle
+    if (
+      artworkIdChosen !== battle.artworkAId &&
+      artworkIdChosen !== battle.artworkBId
+    ) {
+      throw new HttpsError("invalid-argument", "Invalid artwork choice");
+    }
 
-      // Validate chosen artwork is in the battle
-      if (
-        artworkIdChosen !== battle.artworkAId &&
-        artworkIdChosen !== battle.artworkBId
-      ) {
-        return response.status(400).json({ error: "Invalid artwork choice" });
-      }
+    // Enhanced rate limiting and anti-abuse
+    const now = Date.now();
+    const tenSecondsAgo = now - 10000;
+    const oneHourAgo = now - 3600000;
 
-      // Enhanced rate limiting and anti-abuse
-      const now = Date.now();
-      const tenSecondsAgo = now - 10000;
-      const oneHourAgo = now - 3600000;
+    // Check for rapid voting (last 10 seconds)
+    const recentVotesQuery = await admin
+      .firestore()
+      .collection("art_battle_votes")
+      .where("userId", "==", userId)
+      .where(
+        "timestamp",
+        ">",
+        admin.firestore.Timestamp.fromMillis(tenSecondsAgo)
+      )
+      .limit(1)
+      .get();
 
-      // Check for rapid voting (last 10 seconds)
-      const recentVotesQuery = await admin
-        .firestore()
-        .collection("art_battle_votes")
-        .where("userId", "==", userId)
-        .where(
-          "timestamp",
-          ">",
-          admin.firestore.Timestamp.fromMillis(tenSecondsAgo)
-        )
-        .limit(1)
-        .get();
+    if (!recentVotesQuery.empty) {
+      throw new HttpsError(
+        "resource-exhausted",
+        "Please wait before voting again"
+      );
+    }
 
-      if (!recentVotesQuery.empty) {
-        return response
-          .status(429)
-          .json({ error: "Please wait before voting again" });
-      }
+    // Check for excessive voting (more than 50 votes in last hour)
+    const hourlyVotesQuery = await admin
+      .firestore()
+      .collection("art_battle_votes")
+      .where("userId", "==", userId)
+      .where(
+        "timestamp",
+        ">",
+        admin.firestore.Timestamp.fromMillis(oneHourAgo)
+      )
+      .get();
 
-      // Check for excessive voting (more than 50 votes in last hour)
-      const hourlyVotesQuery = await admin
-        .firestore()
-        .collection("art_battle_votes")
-        .where("userId", "==", userId)
-        .where(
-          "timestamp",
-          ">",
-          admin.firestore.Timestamp.fromMillis(oneHourAgo)
-        )
-        .get();
+    if (hourlyVotesQuery.docs.length >= 50) {
+      throw new HttpsError(
+        "resource-exhausted",
+        "Voting limit reached for today"
+      );
+    }
 
-      if (hourlyVotesQuery.docs.length >= 50) {
-        return response
-          .status(429)
-          .json({ error: "Voting limit reached for today" });
-      }
+    // Check for repetitive voting patterns (same artwork multiple times)
+    const recentArtworkVotes = await admin
+      .firestore()
+      .collection("art_battle_votes")
+      .where("userId", "==", userId)
+      .where("artworkIdChosen", "==", artworkIdChosen)
+      .where(
+        "timestamp",
+        ">",
+        admin.firestore.Timestamp.fromMillis(oneHourAgo)
+      )
+      .get();
 
-      // Check for repetitive voting patterns (same artwork multiple times)
-      const recentArtworkVotes = await admin
-        .firestore()
-        .collection("art_battle_votes")
-        .where("userId", "==", userId)
-        .where("artworkIdChosen", "==", artworkIdChosen)
-        .where(
-          "timestamp",
-          ">",
-          admin.firestore.Timestamp.fromMillis(oneHourAgo)
-        )
-        .get();
+    // Reduce vote weight if user has voted for same artwork multiple times recently
+    let voteWeight = 1;
+    if (recentArtworkVotes.docs.length > 10) {
+      voteWeight = 0.2; // Further reduce for excessive repetition
+    } else if (recentArtworkVotes.docs.length > 5) {
+      voteWeight = 0.5; // Reduce influence of repetitive voting
+    }
 
-      // Reduce vote weight if user has voted for same artwork multiple times recently
-      let voteWeight = 1;
-      if (recentArtworkVotes.docs.length > 5) {
-        voteWeight = 0.5; // Reduce influence of repetitive voting
-      } else if (recentArtworkVotes.docs.length > 10) {
-        voteWeight = 0.2; // Further reduce for excessive repetition
-      }
+    // Update battle with winner
+    await admin.firestore().collection("art_battles").doc(battleId).update({
+      winnerArtworkId: artworkIdChosen,
+    });
 
-      // Update battle with winner
-      await admin.firestore().collection("art_battles").doc(battleId).update({
-        winnerArtworkId: artworkIdChosen,
-      });
+    // Update winner artwork
+    const winnerDoc = await admin
+      .firestore()
+      .collection("artworks")
+      .doc(artworkIdChosen)
+      .get();
+    if (winnerDoc.exists) {
+      const winnerData = winnerDoc.data();
+      const currentScore = winnerData.artBattleScore || 0;
+      const currentWins = winnerData.artBattleWins || 0;
+      const currentAppearances = winnerData.artBattleAppearances || 0;
 
-      // Update winner artwork
-      const winnerDoc = await admin
+      await admin
         .firestore()
         .collection("artworks")
         .doc(artworkIdChosen)
-        .get();
-      if (winnerDoc.exists) {
-        const winnerData = winnerDoc.data();
-        const currentScore = winnerData.artBattleScore || 0;
-        const currentWins = winnerData.artBattleWins || 0;
-        const currentAppearances = winnerData.artBattleAppearances || 0;
+        .update({
+          artBattleScore: currentScore + voteWeight,
+          artBattleWins: currentWins + 1,
+          artBattleAppearances: currentAppearances + 1,
+          artBattleLastWinAt: admin.firestore.FieldValue.serverTimestamp(),
+          artBattleLastShownAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+    }
 
-        await admin
-          .firestore()
-          .collection("artworks")
-          .doc(artworkIdChosen)
-          .update({
-            artBattleScore: currentScore + voteWeight,
-            artBattleWins: currentWins + 1,
-            artBattleAppearances: currentAppearances + 1,
-            artBattleLastWinAt: admin.firestore.FieldValue.serverTimestamp(),
-            artBattleLastShownAt: admin.firestore.FieldValue.serverTimestamp(),
-          });
-      }
+    // Update loser artwork
+    const loserId =
+      battle.artworkAId === artworkIdChosen
+        ? battle.artworkBId
+        : battle.artworkAId;
+    const loserDoc = await admin
+      .firestore()
+      .collection("artworks")
+      .doc(loserId)
+      .get();
+    if (loserDoc.exists) {
+      const loserData = loserDoc.data();
+      const currentAppearances = loserData.artBattleAppearances || 0;
 
-      // Update loser artwork
-      const loserId =
-        battle.artworkAId === artworkIdChosen
-          ? battle.artworkBId
-          : battle.artworkAId;
-      const loserDoc = await admin
+      await admin
         .firestore()
         .collection("artworks")
         .doc(loserId)
-        .get();
-      if (loserDoc.exists) {
-        const loserData = loserDoc.data();
-        const currentAppearances = loserData.artBattleAppearances || 0;
-
-        await admin
-          .firestore()
-          .collection("artworks")
-          .doc(loserId)
-          .update({
-            artBattleAppearances: currentAppearances + 1,
-            artBattleLastShownAt: admin.firestore.FieldValue.serverTimestamp(),
-          });
-      }
-
-      // Record the vote
-      await admin.firestore().collection("art_battle_votes").add({
-        battleId,
-        artworkIdChosen,
-        userId,
-        timestamp: admin.firestore.FieldValue.serverTimestamp(),
-        voteWeight,
-      });
-
-      response.json({ success: true });
-    } catch (error) {
-      console.error("Error submitting art battle vote:", error);
-      response.status(500).json({ error: "Internal server error" });
+        .update({
+          artBattleAppearances: currentAppearances + 1,
+          artBattleLastShownAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
     }
-  });
+
+    // Record the vote
+    await admin.firestore().collection("art_battle_votes").add({
+      battleId,
+      artworkIdChosen,
+      userId,
+      timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      voteWeight,
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error submitting art battle vote:", error);
+    throw new HttpsError("internal", "Internal server error");
+  }
 });

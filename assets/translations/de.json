@@ -3890,8 +3890,6 @@
   "community_hub_drawer_section_create": "Erstellen",
   "community_hub_drawer_item_create_post_title": "Beitrag erstellen",
   "community_hub_drawer_item_create_post_subtitle": "Teile deine Kunst",
-  "community_hub_drawer_item_create_group_title": "Gruppe erstellen",
-  "community_hub_drawer_item_create_group_subtitle": "Erstelle eine Community",
   "community_hub_drawer_section_artists": "Künstler",
   "community_hub_drawer_item_artists_gallery_title": "Künstlergalerie",
   "community_hub_drawer_item_artists_gallery_subtitle": "Kunstwerke entdecken",
@@ -4879,6 +4877,7 @@
     "community_commission_gallery_untitled": "Unbetitelter Auftrag",
 
     "community_hub_tab_art_battle": "Art Battle",
+    "community_hub_tab_commissions": "Aufträge",
     "continue": "Weiter",
     "core_analytics_last24h": "Letzte 24 Stunden",
     "core_analytics_last30d": "Letzte 30 Tage",

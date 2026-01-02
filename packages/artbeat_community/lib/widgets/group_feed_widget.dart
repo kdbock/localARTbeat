@@ -5,7 +5,6 @@ import 'package:artbeat_core/artbeat_core.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:artbeat_core/shared_widgets.dart';
 
 import '../models/group_models.dart';
 import '../models/post_model.dart';
@@ -408,7 +407,7 @@ class _GroupFeedWidgetState extends State<GroupFeedWidget>
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
-              HudButton(onPressed: _loadPosts, text: 'try_again'.tr()),
+              HudButton(isPrimary: true, onPressed: _loadPosts, text: 'try_again'.tr()),
             ],
           ),
         ),

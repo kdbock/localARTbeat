@@ -4,6 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:artbeat_artist/artbeat_artist.dart' as artist;
+import 'package:artbeat_artwork/artbeat_artwork.dart' as artwork;
 import 'package:artbeat_core/artbeat_core.dart';
 import '../screens/art_community_hub.dart';
 import '../screens/feed/enhanced_community_feed_screen.dart';
@@ -12,6 +14,7 @@ import '../screens/portfolios/portfolios_screen.dart';
 import '../screens/studios/studios_screen.dart';
 import '../screens/commissions/commission_hub_screen.dart';
 import '../screens/gifts/gifts_screen.dart';
+import '../screens/art_battle_screen.dart';
 
 import '../src/screens/community_artists_screen.dart';
 import '../screens/settings/quiet_mode_screen.dart';
@@ -63,6 +66,91 @@ class _CommunityDrawerState extends State<CommunityDrawer> {
 
   @override
   Widget build(BuildContext context) {
+    final mainFeedEntries = <_DrawerEntry>[
+      _DrawerEntry(
+        icon: Icons.home,
+        titleBuilder: (_) => 'community_drawer_community_hub'.tr(),
+        screenBuilder: () => const ArtCommunityHub(),
+      ),
+      _DrawerEntry(
+        icon: Icons.feed,
+        titleBuilder: (_) => 'community_drawer_art_feed'.tr(),
+        screenBuilder: () => const EnhancedCommunityFeedScreen(),
+      ),
+      _DrawerEntry(
+        icon: Icons.trending_up,
+        titleBuilder: (_) => 'community_drawer_trending'.tr(),
+        screenBuilder: () => const TrendingContentScreen(),
+      ),
+      _DrawerEntry(
+        icon: Icons.local_fire_department,
+        titleBuilder: (_) => 'Art Battle',
+        screenBuilder: () => const ArtBattleScreen(),
+      ),
+      _DrawerEntry(
+        icon: Icons.museum,
+        titleBuilder: (_) => 'Art Gallery',
+        screenBuilder: () => const artwork.ArtworkBrowseScreen(),
+      ),
+    ];
+
+    final artistEntries = <_DrawerEntry>[
+      _DrawerEntry(
+        icon: Icons.palette,
+        titleBuilder: (_) => 'community_drawer_artist_portfolios'.tr(),
+        screenBuilder: () => const PortfoliosScreen(),
+      ),
+      _DrawerEntry(
+        icon: Icons.brush,
+        titleBuilder: (_) => 'Become an Artist',
+        screenBuilder: () => const artist.Modern2025OnboardingScreen(),
+      ),
+    ];
+
+    final studioEntries = <_DrawerEntry>[
+      _DrawerEntry(
+        icon: Icons.business,
+        titleBuilder: (_) => 'community_drawer_studios'.tr(),
+        screenBuilder: () => const StudiosScreen(),
+      ),
+      _DrawerEntry(
+        icon: Icons.handshake,
+        titleBuilder: (_) => 'community_drawer_commissions'.tr(),
+        screenBuilder: () => const CommissionHubScreen(),
+      ),
+      _DrawerEntry(
+        icon: Icons.card_giftcard,
+        titleBuilder: (_) => 'community_drawer_gifts'.tr(),
+        screenBuilder: () => const ViewReceivedGiftsScreen(),
+      ),
+    ];
+
+    final discoverEntries = <_DrawerEntry>[
+      _DrawerEntry(
+        icon: Icons.search,
+        titleBuilder: (_) => 'community_drawer_search_community'.tr(),
+        screenBuilder: () => const CommunityArtistsScreen(),
+      ),
+      _DrawerEntry(
+        icon: Icons.leaderboard,
+        titleBuilder: (_) => 'leaderboard_title'.tr(),
+        screenBuilder: () => const LeaderboardScreen(),
+      ),
+    ];
+
+    final settingsEntries = <_DrawerEntry>[
+      _DrawerEntry(
+        icon: Icons.settings,
+        titleBuilder: (_) => 'community_drawer_community_settings'.tr(),
+        screenBuilder: () => const QuietModeScreen(),
+      ),
+      _DrawerEntry(
+        icon: Icons.admin_panel_settings,
+        titleBuilder: (_) => 'community_drawer_moderation'.tr(),
+        screenBuilder: () => const ModerationQueueScreen(),
+      ),
+    ];
+
     return Drawer(
       child: SafeArea(
         child: Container(
@@ -90,82 +178,31 @@ class _CommunityDrawerState extends State<CommunityDrawer> {
                   child: ListView(
                     padding: EdgeInsets.zero,
                     children: [
-                      _buildDrawerItem(
-                        icon: Icons.home,
-                        title: 'community_drawer_community_hub'.tr(),
-                        onTap: () => _navigateToScreen(
-                          context,
-                          const ArtCommunityHub(),
-                        ),
+                      ..._buildNavigationSection(
+                        'Main Feeds',
+                        mainFeedEntries,
+                        context,
                       ),
-                      _buildDrawerItem(
-                        icon: Icons.feed,
-                        title: 'community_drawer_art_feed'.tr(),
-                        onTap: () => _navigateToScreen(
-                          context,
-                          const EnhancedCommunityFeedScreen(),
-                        ),
+                      ..._buildNavigationSection(
+                        'Artists',
+                        artistEntries,
+                        context,
                       ),
-                      _buildDrawerItem(
-                        icon: Icons.trending_up,
-                        title: 'community_drawer_trending'.tr(),
-                        onTap: () => _navigateToScreen(
-                          context,
-                          const TrendingContentScreen(),
-                        ),
-                      ),
-                      _buildDrawerItem(
-                        icon: Icons.palette,
-                        title: 'community_drawer_artist_portfolios'.tr(),
-                        onTap: () => _navigateToScreen(
-                          context,
-                          const PortfoliosScreen(),
-                        ),
-                      ),
-                      _buildDrawerItem(
-                        icon: Icons.business,
-                        title: 'community_drawer_studios'.tr(),
-                        onTap: () =>
-                            _navigateToScreen(context, const StudiosScreen()),
-                      ),
-                      _buildDrawerItem(
-                        icon: Icons.handshake,
-                        title: 'community_drawer_commissions'.tr(),
-                        onTap: () => _navigateToScreen(
-                          context,
-                          const CommissionHubScreen(),
-                        ),
-                      ),
-                      _buildDrawerItem(
-                        icon: Icons.card_giftcard,
-                        title: 'community_drawer_gifts'.tr(),
-                        onTap: () => _navigateToScreen(
-                          context,
-                          const ViewReceivedGiftsScreen(),
-                        ),
+                      ..._buildNavigationSection(
+                        'Studios & Work',
+                        studioEntries,
+                        context,
                       ),
                       const Divider(),
-                      _buildDrawerItem(
-                        icon: Icons.search,
-                        title: 'community_drawer_search_community'.tr(),
-                        onTap: () => _navigateToScreen(
-                          context,
-                          const CommunityArtistsScreen(),
-                        ),
+                      ..._buildNavigationSection(
+                        'Discover',
+                        discoverEntries,
+                        context,
                       ),
-                      _buildDrawerItem(
-                        icon: Icons.settings,
-                        title: 'community_drawer_community_settings'.tr(),
-                        onTap: () =>
-                            _navigateToScreen(context, const QuietModeScreen()),
-                      ),
-                      _buildDrawerItem(
-                        icon: Icons.admin_panel_settings,
-                        title: 'community_drawer_moderation'.tr(),
-                        onTap: () => _navigateToScreen(
-                          context,
-                          const ModerationQueueScreen(),
-                        ),
+                      ..._buildNavigationSection(
+                        'Settings',
+                        settingsEntries,
+                        context,
                       ),
                     ],
                   ),
@@ -302,6 +339,39 @@ class _CommunityDrawerState extends State<CommunityDrawer> {
     );
   }
 
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+      child: Text(
+        title.toUpperCase(),
+        style: GoogleFonts.spaceGrotesk(
+          color: ArtbeatColors.textSecondary,
+          fontSize: 12,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 0.6,
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _buildNavigationSection(
+    String title,
+    List<_DrawerEntry> entries,
+    BuildContext context,
+  ) {
+    final children = <Widget>[_buildSectionHeader(title)];
+    children.addAll(
+      entries.map(
+        (entry) => _buildDrawerItem(
+          icon: entry.icon,
+          title: entry.titleBuilder(context),
+          onTap: () => _navigateToScreen(context, entry.screenBuilder()),
+        ),
+      ),
+    );
+    return children;
+  }
+
   void _navigateToScreen(BuildContext context, Widget screen) {
     Navigator.pop(context); // Close drawer
     Navigator.push<Widget>(
@@ -309,4 +379,16 @@ class _CommunityDrawerState extends State<CommunityDrawer> {
       MaterialPageRoute<Widget>(builder: (context) => screen),
     );
   }
+}
+
+class _DrawerEntry {
+  final IconData icon;
+  final String Function(BuildContext) titleBuilder;
+  final Widget Function() screenBuilder;
+
+  const _DrawerEntry({
+    required this.icon,
+    required this.titleBuilder,
+    required this.screenBuilder,
+  });
 }

@@ -95,11 +95,15 @@ class _AuctionManagementModalState extends State<AuctionManagementModal> {
       lastDate: now.add(const Duration(days: 30)), // Max 30 days
     );
 
+    if (!mounted) return;
+
     if (pickedDate != null) {
       final pickedTime = await showTimePicker(
         context: context,
         initialTime: TimeOfDay.fromDateTime(_auctionEnd ?? now),
       );
+
+      if (!mounted) return;
 
       if (pickedTime != null) {
         setState(() {

@@ -11,18 +11,15 @@ import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
 import 'routing/app_router.dart';
-import 'services/firebase_initializer.dart';
 import 'widgets/error_boundary.dart';
 
 class MyApp extends StatelessWidget {
   MyApp({super.key});
   final navigatorKey = GlobalKey<NavigatorState>();
-  final _firebaseInitializer = FirebaseInitializer();
   final _appRouter = AppRouter();
 
   @override
   Widget build(BuildContext context) => FutureBuilder(
-    future: _firebaseInitializer.ensureInitialized(),
     builder: (context, snapshot) {
       if (snapshot.hasError) {
         return _buildErrorApp(snapshot.error.toString());
@@ -33,7 +30,7 @@ class MyApp extends StatelessWidget {
       }
 
       return _buildMainApp();
-    },
+    }, future: null,
   );
 
   /// Builds the error state app

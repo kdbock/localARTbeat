@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+
 import '../../widgets/glass_input_field.dart';
-import '../../widgets/glass_card.dart';
 import '../../widgets/gradient_cta_button.dart';
 import '../../widgets/hud_top_bar.dart';
 import '../../widgets/sponsorship_form_section.dart';
@@ -79,7 +79,7 @@ class _CaptureSponsorshipScreenState extends State<CaptureSponsorshipScreen> {
               }
               Navigator.push(
                 context,
-                MaterialPageRoute(
+                MaterialPageRoute<void>(
                   builder: (context) => SponsorshipReviewScreen(
                     type: 'capture',
                     duration: '30 days',

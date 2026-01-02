@@ -6,6 +6,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:artbeat_art_walk/artbeat_art_walk.dart' show ArtWalkRoutes;
 
 /// Capture specific drawer with focused navigation for capture features
 /// Updated to match the new "Quest / Glass / Neon" theme.
@@ -109,13 +110,6 @@ class _CaptureDrawerState extends State<CaptureDrawer>
                         AppRoutes.capturePending,
                         const Color(0xFFFFC857), // yellow
                       ),
-                      _buildDrawerItem(
-                        context,
-                        'capture_drawer_approved_captures'.tr(),
-                        Icons.verified_rounded,
-                        AppRoutes.captureApproved,
-                        const Color(0xFF22D3EE),
-                      ),
 
                       const SizedBox(height: 10),
                       const _QuestDivider(),
@@ -133,7 +127,7 @@ class _CaptureDrawerState extends State<CaptureDrawer>
                         context,
                         'capture_drawer_nearby_art'.tr(),
                         Icons.my_location_rounded,
-                        AppRoutes.captureNearby,
+                        ArtWalkRoutes.instantDiscovery,
                         const Color(0xFF22D3EE),
                       ),
                       _buildDrawerItem(
@@ -142,6 +136,13 @@ class _CaptureDrawerState extends State<CaptureDrawer>
                         Icons.trending_up_rounded,
                         AppRoutes.capturePopular,
                         const Color(0xFFFF3D8D), // pink
+                      ),
+                      _buildDrawerItem(
+                        context,
+                        'leaderboard_title'.tr(),
+                        Icons.emoji_events_rounded,
+                        AppRoutes.leaderboard,
+                        const Color(0xFFFFC857),
                       ),
 
                       const SizedBox(height: 10),
