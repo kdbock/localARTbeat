@@ -21,57 +21,50 @@ design_guide.md /Users/kristybock/artbeat/.zencoder/workflows/design_guide.md
 
 Add new widgets if needed from design_guide.md
 
-Packages:
-Community screens and widgets
+Package: artbeat_artist
 
-## Artwork Screens
-screens
-- [ ] advanced_artwork_search_screen.dart
-- [ ]  artist_artwork_management_screen.dart
-- [ ]  artwork_analytics_dashboard.dart
-- [ ] artwork_browse_screen.dart
-- [ ] artwork_detail_screen.dart
-- [ ]  artwork_discovery_screen.dart
-- [ ] artwork_edit_screen.dart
-- [ ] artwork_featured_screen.dart
-- [ ] artwork_moderation_screen.dart
-- [ ] artwork_purchase_screen.dart
-- [ ] artwork_recent_screen.dart
-- [ ] artwork_trending_screen.dart
-- [ ] artwork_upload_screen.dart
-- [ ] auction_management_modal.dart
-- [ ] auction_win_screen.dart
-- [ ] audio_content_detail_screen.dart
-- [ ] audio_content_upload_screen.dart
-- [ ] curated_gallery_screen.dart
-- [ ] enhanced_artwork_upload_screen.dart
-- [ ] my_bids_screen.dart
-- [ ] place_bid_modal.dart
-- [ ] portfolio_management_screen.dart
-- [ ] screens.dart
-- [ ] upload_choice_screen.dart
-- [ ] video_content_upload_screen.dart
-- [ ] written_content_detail_screen.dart
-- [ ] written_content_discovery_screen.dart
-- [ ] written_content_upload_screen.dart
+├── screens
+│   │   │   ├── analytics_dashboard_screen.dart
+│   │   │   ├── artist_approved_ads_screen.dart
+│   │   │   ├── artist_browse_screen.dart
+│   │   │   ├── artist_dashboard_screen.dart
+│   │   │   ├── artist_journey_screen.dart
+│   │   │   ├── artist_list_screen.dart
+│   │   │   ├── artist_onboarding_screen.dart
+│   │   │   ├── artist_profile_edit_screen.dart
+│   │   │   ├── artist_public_profile_screen.dart
+│   │   │   ├── earnings
+│   │   │   │   ├── artist_earnings_dashboard.dart
+│   │   │   │   ├── artwork_sales_dashboard.dart
+│   │   │   │   ├── payout_accounts_screen.dart
+│   │   │   │   └── payout_request_screen.dart
+│   │   │   ├── event_creation_screen.dart
+│   │   │   ├── events_screen.dart
+│   │   │   ├── featured_artist_screen.dart
+│   │   │   ├── gallery_analytics_dashboard_screen.dart
+│   │   │   ├── gallery_artists_management_screen.dart
+│   │   │   ├── modern_2025_onboarding_screen.dart
+│   │   │   ├── my_artwork_screen.dart
+│   │   │   ├── payment_methods_screen.dart
+│   │   │   ├── payment_screen.dart
+│   │   │   ├── refund_request_screen.dart
+│   │   │   ├── screens.dart
+│   │   │   ├── subscription_analytics_screen.dart
+│   │   │   └── verified_artist_screen.dart
 
-widgets
-- [ ] artwork_discovery_widget.dart
-- [ ] artwork_grid_widget.dart
-- [ ] artwork_header.dart
-- [ ] artwork_moderation_status_chip.dart
-- [ ] artwork_social_widget.dart
-- [ ] local_artwork_row_widget.dart
-- [ ] widgets.dart
-### Main Screens
-
-
-### Studios
-
-- [x] studios/studio_chat_screen.dart (StudioChatScreen - used in studio_discovery_screen.dart and studios_screen.dart)
-- [ ] studios/studios_screen.dart (StudiosScreen - used in main router)
-
-
+│   │   └── widgets
+│   │       ├── artist_header.dart
+│   │       ├── artist_social_stats_widget.dart
+│   │       ├── artist_subscription_cta_widget.dart
+│   │       ├── commission_badge_widget.dart
+│   │       ├── design_system.dart
+│   │       ├── local_artists_row_widget.dart
+│   │       ├── local_galleries_widget.dart
+│   │       ├── top_followers_widget.dart
+│   │       ├── upcoming_events_row_widget.dart
+│   │       └── widgets.dart
+│   └── theme
+│       └── artist_theme.dart
 
 Local ARTbeat UI Design Guide (v1) 0) Brand + vibe
 

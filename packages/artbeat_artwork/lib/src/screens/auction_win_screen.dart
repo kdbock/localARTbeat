@@ -3,7 +3,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_artwork/artbeat_artwork.dart';
 import 'package:artbeat_core/shared_widgets.dart';
-import 'package:artbeat_core/artbeat_core.dart' as core;
+import 'package:artbeat_core/artbeat_core.dart' as core
+    show StripePaymentService;
 
 /// Screen shown when user wins an auction
 class AuctionWinScreen extends StatefulWidget {

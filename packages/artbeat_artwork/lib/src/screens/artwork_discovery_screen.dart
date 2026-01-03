@@ -1,7 +1,15 @@
-import 'package:artbeat_core/artbeat_core.dart' hide ArtworkModel;
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:artbeat_core/artbeat_core.dart'
+    show
+        GlassCard,
+        GradientCTAButton,
+        HudTopBar,
+        MainLayout,
+        SecureNetworkImage,
+        WorldBackground;
 import '../models/artwork_model.dart';
 import '../services/artwork_discovery_service.dart';
 
@@ -74,76 +82,168 @@ class _ArtworkDiscoveryScreenState extends State<ArtworkDiscoveryScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('artwork_discovery_title'.tr()),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: [
-            Tab(
-                text: 'artwork_personalized_tab'.tr(),
-                icon: const Icon(Icons.person)),
-            Tab(
-                text: 'artwork_trending_tab'.tr(),
-                icon: const Icon(Icons.trending_up)),
-            Tab(
-                text: 'artwork_similar_tab'.tr(),
-                icon: const Icon(Icons.shuffle)),
-          ],
-        ),
+    return MainLayout(
+      currentIndex: 0,
+      appBar: HudTopBar(
+        title: 'artwork_discovery_title'.tr(),
+        showBackButton: true,
+        onBackPressed: () => Navigator.of(context).maybePop(),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadDiscoveryContent,
+            icon: const Icon(Icons.refresh, color: Colors.white),
             tooltip: 'artwork_discover_loading'.tr(),
+            onPressed: _loadDiscoveryContent,
           ),
         ],
       ),
-      body: _isLoading
-          ? Center(
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                  const CircularProgressIndicator(),
-                  const SizedBox(height: 16),
-                  Text('artwork_discover_loading'.tr())
-                ]))
-          : _error != null
-              ? _buildErrorView()
-              : TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _buildPersonalizedTab(),
-                    _buildTrendingTab(),
-                    _buildSimilarTab(),
-                  ],
+      child: WorldBackground(
+        child: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                child: GlassCard(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  radius: 24,
+                  child: TabBar(
+                    controller: _tabController,
+                    indicator: BoxDecoration(
+                      borderRadius: BorderRadius.circular(18),
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Color(0xFF7C4DFF),
+                          Color(0xFF22D3EE),
+                        ],
+                      ),
+                    ),
+                    labelStyle: GoogleFonts.spaceGrotesk(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 13,
+                    ),
+                    unselectedLabelStyle: GoogleFonts.spaceGrotesk(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                    labelColor: Colors.white,
+                    unselectedLabelColor: Colors.white70,
+                    tabs: [
+                      Tab(text: 'artwork_personalized_tab'.tr()),
+                      Tab(text: 'artwork_trending_tab'.tr()),
+                      Tab(text: 'artwork_similar_tab'.tr()),
+                    ],
+                  ),
                 ),
+              ),
+              const SizedBox(height: 12),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: _isLoading
+                      ? _buildLoadingView()
+                      : _error != null
+                          ? _buildErrorView()
+                          : TabBarView(
+                              controller: _tabController,
+                              children: [
+                                _buildPersonalizedTab(),
+                                _buildTrendingTab(),
+                                _buildSimilarTab(),
+                              ],
+                            ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingView() {
+    return Center(
+      child: GlassCard(
+        padding: const EdgeInsets.all(20),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(
+              height: 24,
+              width: 24,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.5,
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF22D3EE)),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'artwork_discover_loading'.tr(),
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
   Widget _buildErrorView() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error_outline, size: 64, color: Colors.red),
-          const SizedBox(height: 16),
-          Text(
-            'artwork_discover_error'.tr(),
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            _error ?? 'common_error'.tr(),
-            style: Theme.of(context).textTheme.bodyMedium,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: _loadDiscoveryContent,
-            child: Text('common_retry'.tr()),
-          ),
-        ],
+      child: GlassCard(
+        padding: const EdgeInsets.all(20),
+        radius: 26,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  height: 36,
+                  width: 36,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withValues(alpha: 0.08),
+                  ),
+                  child: const Icon(Icons.error_outline,
+                      color: Color(0xFFFF3D8D)),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'artwork_discover_error'.tr(),
+                    style: GoogleFonts.spaceGrotesk(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              _error ?? 'common_error'.tr(),
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white.withValues(alpha: 0.78),
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 16),
+            GradientCTAButton(
+              height: 46,
+              text: 'common_retry'.tr(),
+              icon: Icons.refresh,
+              onPressed: _loadDiscoveryContent,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -157,86 +257,151 @@ class _ArtworkDiscoveryScreenState extends State<ArtworkDiscoveryScreen>
 
     if (_personalizedArtworks.isEmpty) {
       return _buildEmptyState(
-        'No personalized recommendations yet',
-        'Like some artworks to get better recommendations!',
+        title: 'artwork_discovery_empty_personalized_title'.tr(),
+        message: 'artwork_discovery_empty_personalized_body'.tr(),
       );
     }
 
-    return _buildArtworkGrid(_personalizedArtworks, 'Personalized for You');
+    return _buildArtworkGrid(
+      _personalizedArtworks,
+      'artwork_discovery_section_personalized'.tr(),
+    );
   }
 
   Widget _buildTrendingTab() {
     if (_trendingArtworks.isEmpty) {
       return _buildEmptyState(
-        'No trending artworks',
-        'Check back later for trending content!',
+        title: 'artwork_discovery_empty_trending_title'.tr(),
+        message: 'artwork_discovery_empty_trending_body'.tr(),
       );
     }
 
-    return _buildArtworkGrid(_trendingArtworks, 'Trending Now');
+    return _buildArtworkGrid(
+      _trendingArtworks,
+      'artwork_discovery_section_trending'.tr(),
+    );
   }
 
   Widget _buildSimilarTab() {
     if (_similarArtworks.isEmpty) {
       return _buildEmptyState(
-        'No similar artworks found',
-        'Explore more artworks to see similar recommendations!',
+        title: 'artwork_discovery_empty_similar_title'.tr(),
+        message: 'artwork_discovery_empty_similar_body'.tr(),
       );
     }
 
-    return _buildArtworkGrid(_similarArtworks, 'You Might Like');
+    return _buildArtworkGrid(
+      _similarArtworks,
+      'artwork_discovery_section_similar'.tr(),
+    );
   }
 
   Widget _buildSignInPrompt() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.login, size: 64, color: Colors.grey),
-          const SizedBox(height: 16),
-          Text(
-            'Sign in to get personalized recommendations',
-            style: Theme.of(context).textTheme.headlineSmall,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Your likes and preferences help us find the perfect artworks for you',
-            style: Theme.of(context).textTheme.bodyMedium,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () {
-              // Navigate to sign in screen
-              Navigator.of(context).pushNamed('/auth/login');
-            },
-            child: Text('art_walk_sign_in'.tr()),
-          ),
-        ],
+      child: GlassCard(
+        radius: 26,
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              height: 52,
+              width: 52,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  colors: [Color(0xFF7C4DFF), Color(0xFF22D3EE)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+              child: const Icon(Icons.login, color: Colors.white, size: 26),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'artwork_discovery_sign_in_title'.tr(),
+              textAlign: TextAlign.center,
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'artwork_discovery_sign_in_body'.tr(),
+              textAlign: TextAlign.center,
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white.withValues(alpha: 0.72),
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 14),
+            GradientCTAButton(
+              height: 48,
+              text: 'art_walk_sign_in'.tr(),
+              icon: Icons.arrow_forward_rounded,
+              onPressed: () => Navigator.of(context).pushNamed('/auth/login'),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildEmptyState(String title, String message) {
+  Widget _buildEmptyState({
+    required String title,
+    required String message,
+  }) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.palette_outlined, size: 64, color: Colors.grey),
-          const SizedBox(height: 16),
-          Text(
-            title,
-            style: Theme.of(context).textTheme.headlineSmall,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            message,
-            style: Theme.of(context).textTheme.bodyMedium,
-            textAlign: TextAlign.center,
-          ),
-        ],
+      child: GlassCard(
+        padding: const EdgeInsets.all(20),
+        radius: 24,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  height: 40,
+                  width: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.08),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.explore_outlined,
+                    color: Colors.white70,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: GoogleFonts.spaceGrotesk(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(
+              message,
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white.withValues(alpha: 0.72),
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                height: 1.4,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -246,21 +411,24 @@ class _ArtworkDiscoveryScreenState extends State<ArtworkDiscoveryScreen>
       slivers: [
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(8, 8, 8, 12),
             child: Text(
               title,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white.withValues(alpha: 0.95),
+                fontSize: 18,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.4,
+              ),
             ),
           ),
         ),
         SliverGrid(
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
-            childAspectRatio: 0.75,
-            crossAxisSpacing: 8,
-            mainAxisSpacing: 8,
+            childAspectRatio: 0.78,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
           ),
           delegate: SliverChildBuilderDelegate(
             (context, index) {
@@ -275,159 +443,119 @@ class _ArtworkDiscoveryScreenState extends State<ArtworkDiscoveryScreen>
   }
 
   Widget _buildArtworkCard(ArtworkModel artwork) {
-    return GestureDetector(
+    return GlassCard(
+      padding: EdgeInsets.zero,
+      radius: 22,
       onTap: () {
-        // Navigate to artwork detail screen
         Navigator.pushNamed(
           context,
           '/artwork/detail',
           arguments: {'artworkId': artwork.id},
         );
       },
-      child: Card(
-        elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Artwork image
-            Expanded(
-              flex: 3,
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius:
-                      const BorderRadius.vertical(top: Radius.circular(12)),
-                  image: ImageUrlValidator.isValidImageUrl(artwork.imageUrl)
-                      ? DecorationImage(
-                          image: ImageUrlValidator.safeNetworkImage(
-                              artwork.imageUrl)!,
-                          fit: BoxFit.cover,
-                        )
-                      : null,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ClipRRect(
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(22),
+            ),
+            child: AspectRatio(
+              aspectRatio: 4 / 3,
+              child: SecureNetworkImage(
+                imageUrl: artwork.imageUrl,
+                fit: BoxFit.cover,
+                enableThumbnailFallback: true,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  artwork.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.spaceGrotesk(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
-                child: Stack(
+                const SizedBox(height: 6),
+                if (artwork.medium.isNotEmpty)
+                  _InfoRow(
+                    icon: Icons.palette_outlined,
+                    label: artwork.medium,
+                  ),
+                const SizedBox(height: 8),
+                Row(
                   children: [
-                    // Tap hint overlay
-                    Positioned.fill(
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: () {
-                            Navigator.pushNamed(
-                              context,
-                              '/artwork/detail',
-                              arguments: {'artworkId': artwork.id},
-                            );
-                          },
-                          child: Center(
-                            child: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Colors.black.withValues(alpha: 0.5),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Icon(
-                                Icons.touch_app,
-                                color: Colors.white,
-                                size: 24,
-                              ),
-                            ),
-                          ),
-                        ),
+                    if (artwork.isForSale && artwork.price != null)
+                      _InfoRow(
+                        icon: Icons.sell_outlined,
+                        label: '\$${artwork.price!.toStringAsFixed(0)}',
+                        color: const Color(0xFF34D399),
                       ),
+                    if (artwork.isForSale && artwork.price != null)
+                      const SizedBox(width: 10),
+                    _InfoRow(
+                      icon: Icons.visibility,
+                      label: '${artwork.viewCount}',
+                      color: Colors.white.withValues(alpha: 0.75),
+                    ),
+                    const SizedBox(width: 10),
+                    _InfoRow(
+                      icon: Icons.comment_outlined,
+                      label: '${artwork.commentCount}',
+                      color: Colors.white.withValues(alpha: 0.75),
                     ),
                   ],
                 ),
-              ),
+              ],
             ),
-
-            // Artwork details
-            Expanded(
-              flex: 2,
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Title
-                    Text(
-                      artwork.title,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-
-                    const SizedBox(height: 2),
-
-                    // Medium
-                    Text(
-                      artwork.medium,
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 10,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-
-                    // Price if for sale
-                    if (artwork.isForSale && artwork.price != null) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        '\$${artwork.price!.toStringAsFixed(0)}',
-                        style: const TextStyle(
-                          color: Colors.green,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 11,
-                        ),
-                      ),
-                    ],
-
-                    // Comment count for engagement
-                    const SizedBox(height: 2),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.comment,
-                          size: 12,
-                          color: Colors.grey[600],
-                        ),
-                        const SizedBox(width: 2),
-                        Text(
-                          '${artwork.commentCount}',
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 10,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Icon(
-                          Icons.visibility,
-                          size: 12,
-                          color: Colors.grey[600],
-                        ),
-                        const SizedBox(width: 2),
-                        Text(
-                          '${artwork.viewCount}',
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 10,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
+    );
+  }
+}
+
+class _InfoRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color? color;
+
+  const _InfoRow({
+    required this.icon,
+    required this.label,
+    this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          icon,
+          size: 14,
+          color: color ?? Colors.white70,
+        ),
+        const SizedBox(width: 4),
+        Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: GoogleFonts.spaceGrotesk(
+            color: (color ?? Colors.white).withValues(alpha: 0.85),
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
     );
   }
 }

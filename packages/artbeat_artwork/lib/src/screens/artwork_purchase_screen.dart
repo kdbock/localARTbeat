@@ -1,8 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_core/artbeat_core.dart'
-    show MainLayout, AppLogger, StripePaymentService;
+    show
+        AppLogger,
+        GlassCard,
+        GlassInputDecoration,
+        GradientCTAButton,
+        HudTopBar,
+        MainLayout,
+        SecureNetworkImage,
+        StripePaymentService,
+        WorldBackground;
 import '../models/artwork_model.dart';
 import '../services/artwork_service.dart';
 
@@ -151,20 +161,26 @@ class _ArtworkPurchaseScreenState extends State<ArtworkPurchaseScreen> {
   Widget build(BuildContext context) {
     return MainLayout(
       currentIndex: 0,
-      appBar: AppBar(
-        title: Text('artwork_purchase_title'.tr()),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+      appBar: HudTopBar(
+        title: 'artwork_purchase_title'.tr(),
+        showBackButton: true,
+        onBackPressed: () => Navigator.pop(context),
+      ),
+      child: WorldBackground(
+        child: SafeArea(
+          child: _buildContent(),
         ),
       ),
-      child: _buildContent(),
     );
   }
 
   Widget _buildContent() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF22D3EE)),
+        ),
+      );
     }
 
     if (_error != null) {
@@ -172,13 +188,32 @@ class _ArtworkPurchaseScreenState extends State<ArtworkPurchaseScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 48, color: Colors.red),
-            const SizedBox(height: 16),
-            Text('error_generic'.tr()),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('common_back'.tr()),
+            GlassCard(
+              radius: 24,
+              padding: const EdgeInsets.all(18),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.error_outline,
+                      size: 48, color: Color(0xFFFF3D8D)),
+                  const SizedBox(height: 12),
+                  Text(
+                    'error_generic'.tr(),
+                    style: GoogleFonts.spaceGrotesk(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  GradientCTAButton(
+                    height: 44,
+                    text: 'common_back'.tr(),
+                    icon: Icons.arrow_back,
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -190,44 +225,70 @@ class _ArtworkPurchaseScreenState extends State<ArtworkPurchaseScreen> {
     }
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Artwork preview
-          Card(
-            child: Column(
+          GlassCard(
+            radius: 26,
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Image.network(
-                  _artwork!.imageUrl,
-                  height: 200,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    height: 200,
-                    color: Colors.grey[300],
-                    child: const Icon(Icons.image_not_supported),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(14),
+                  child: SizedBox(
+                    height: 90,
+                    width: 90,
+                    child: SecureNetworkImage(
+                      imageUrl: _artwork!.imageUrl,
+                      fit: BoxFit.cover,
+                      enableThumbnailFallback: true,
+                    ),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(16),
+                const SizedBox(width: 12),
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         _artwork!.title,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                        style: GoogleFonts.spaceGrotesk(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 6),
                       Text(
-                        'by ${_artwork!.artistName}',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey[600],
+                        'artwork_purchase_by'.tr(
+                          namedArgs: {'artist': _artwork!.artistName},
                         ),
+                        style: GoogleFonts.spaceGrotesk(
+                          color: Colors.white.withValues(alpha: 0.72),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      _buildPriceRow(
+                        label: 'artwork_price_label'.tr(),
+                        value:
+                            '\$${_artwork!.price?.toStringAsFixed(2) ?? '0.00'}',
+                      ),
+                      const SizedBox(height: 6),
+                      _buildPriceRow(
+                        label: 'artwork_purchase_platform_fee'.tr(),
+                        value:
+                            '\$${((_artwork!.price ?? 0) * 0.15).toStringAsFixed(2)}',
+                      ),
+                      const SizedBox(height: 8),
+                      _buildPriceRow(
+                        label: 'artwork_purchase_total'.tr(),
+                        value:
+                            '\$${((_artwork!.price ?? 0) * 1.15).toStringAsFixed(2)}',
+                        emphasize: true,
                       ),
                     ],
                   ),
@@ -235,138 +296,130 @@ class _ArtworkPurchaseScreenState extends State<ArtworkPurchaseScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 32),
-
-          // Order summary
-          Text(
-            'artwork_purchase_order_summary'.tr(),
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
           const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('${'artwork_price_label'.tr()}:'),
-              Text(
-                '\$${_artwork!.price?.toStringAsFixed(2) ?? '0.00'}',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('${'artwork_purchase_platform_fee'.tr()}:'),
-              Text(
-                '\$${((_artwork!.price ?? 0) * 0.15).toStringAsFixed(2)}',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-          const Divider(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '${'artwork_purchase_total'.tr()}:',
-                style:
-                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-              Text(
-                '\$${((_artwork!.price ?? 0) * 1.15).toStringAsFixed(2)}',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 32),
-
-          // Payment form
-          Text(
-            'artwork_purchase_payment_info'.tr(),
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Form(
-            key: _formKey,
+          GlassCard(
+            radius: 26,
+            padding: const EdgeInsets.all(16),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                TextFormField(
-                  decoration: InputDecoration(
-                    labelText: 'artwork_purchase_cardholder_name'.tr(),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    prefixIcon: const Icon(Icons.person),
+                Text(
+                  'artwork_purchase_payment_info'.tr(),
+                  style: GoogleFonts.spaceGrotesk(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900,
                   ),
-                  validator: (value) => value?.isEmpty ?? true
-                      ? 'error_name_required'.tr()
-                      : null,
-                  onChanged: (value) => _cardholderName = value,
+                ),
+                const SizedBox(height: 12),
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        decoration: GlassInputDecoration.glass(
+                          labelText: 'artwork_purchase_cardholder_name'.tr(),
+                          prefixIcon:
+                              const Icon(Icons.person, color: Colors.white70),
+                        ),
+                        style: GoogleFonts.spaceGrotesk(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                        ),
+                        validator: (value) => value?.isEmpty ?? true
+                            ? 'error_name_required'.tr()
+                            : null,
+                        onChanged: (value) => _cardholderName = value,
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        decoration: GlassInputDecoration.glass(
+                          labelText: 'artwork_purchase_card_number'.tr(),
+                          prefixIcon: const Icon(Icons.credit_card,
+                              color: Colors.white70),
+                          hintText: 'artwork_purchase_card_hint'.tr(),
+                        ),
+                        style: GoogleFonts.spaceGrotesk(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                        ),
+                        keyboardType: TextInputType.number,
+                        maxLength: 19,
+                        validator: (value) => value?.isEmpty ?? true
+                            ? 'error_card_number_required'.tr()
+                            : null,
+                        onChanged: (value) => _cardNumber = value,
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              decoration: GlassInputDecoration.glass(
+                                labelText: 'artwork_purchase_expiry'.tr(),
+                                hintText: 'artwork_purchase_expiry_hint'.tr(),
+                              ),
+                              style: GoogleFonts.spaceGrotesk(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                              ),
+                              keyboardType: TextInputType.number,
+                              maxLength: 5,
+                              validator: (value) => value?.isEmpty ?? true
+                                  ? 'error_expiry_required'.tr()
+                                  : null,
+                              onChanged: (value) => _expiryDate = value,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: TextFormField(
+                              decoration: GlassInputDecoration.glass(
+                                labelText: 'artwork_purchase_cvv'.tr(),
+                                hintText: 'artwork_purchase_cvv_hint'.tr(),
+                              ),
+                              style: GoogleFonts.spaceGrotesk(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                              ),
+                              keyboardType: TextInputType.number,
+                              maxLength: 4,
+                              obscureText: true,
+                              validator: (value) => value?.isEmpty ?? true
+                                  ? 'error_cvv_required'.tr()
+                                  : null,
+                              onChanged: (value) => _cvv = value,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 16),
-                TextFormField(
-                  decoration: InputDecoration(
-                    labelText: 'artwork_purchase_card_number'.tr(),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    prefixIcon: const Icon(Icons.credit_card),
-                    hintText: 'artwork_purchase_card_hint'.tr(),
-                  ),
-                  keyboardType: TextInputType.number,
-                  maxLength: 19,
-                  validator: (value) => value?.isEmpty ?? true
-                      ? 'error_card_number_required'.tr()
-                      : null,
-                  onChanged: (value) => _cardNumber = value,
+                GradientCTAButton(
+                  height: 52,
+                  width: double.infinity,
+                  text: _isProcessing
+                      ? 'artwork_purchase_processing'.tr()
+                      : 'artwork_purchase_complete'.tr(),
+                  icon: Icons.shopping_cart,
+                  isLoading: _isProcessing,
+                  onPressed: _isProcessing ? null : _processPurchase,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 Row(
                   children: [
+                    const Icon(Icons.lock_outline, color: Colors.white70),
+                    const SizedBox(width: 8),
                     Expanded(
-                      child: TextFormField(
-                        decoration: InputDecoration(
-                          labelText: 'artwork_purchase_expiry'.tr(),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          hintText: 'artwork_purchase_expiry_hint'.tr(),
+                      child: Text(
+                        'artwork_purchase_secure_notice'.tr(),
+                        style: GoogleFonts.spaceGrotesk(
+                          color: Colors.white.withValues(alpha: 0.76),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
                         ),
-                        keyboardType: TextInputType.number,
-                        maxLength: 5,
-                        validator: (value) => value?.isEmpty ?? true
-                            ? 'error_expiry_required'.tr()
-                            : null,
-                        onChanged: (value) => _expiryDate = value,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: TextFormField(
-                        decoration: InputDecoration(
-                          labelText: 'artwork_purchase_cvv'.tr(),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          hintText: 'artwork_purchase_cvv_hint'.tr(),
-                        ),
-                        keyboardType: TextInputType.number,
-                        maxLength: 4,
-                        obscureText: true,
-                        validator: (value) => value?.isEmpty ?? true
-                            ? 'error_cvv_required'.tr()
-                            : null,
-                        onChanged: (value) => _cvv = value,
                       ),
                     ),
                   ],
@@ -374,58 +427,33 @@ class _ArtworkPurchaseScreenState extends State<ArtworkPurchaseScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 32),
-
-          // Purchase button
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: _isProcessing ? null : _processPurchase,
-              icon: _isProcessing
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                      ),
-                    )
-                  : const Icon(Icons.shopping_cart),
-              label: Text(
-                _isProcessing
-                    ? 'artwork_purchase_processing'.tr()
-                    : 'artwork_purchase_complete'.tr(),
-              ),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // Security notice
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.blue[50],
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.blue[200]!),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.lock, color: Colors.blue[700]),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'artwork_purchase_secure_notice'.tr(),
-                    style: TextStyle(color: Colors.blue[700]),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 32),
         ],
       ),
+    );
+  }
+
+  Widget _buildPriceRow(
+      {required String label, required String value, bool emphasize = false}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.spaceGrotesk(
+            color: Colors.white.withValues(alpha: 0.78),
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        Text(
+          value,
+          style: GoogleFonts.spaceGrotesk(
+            color: Colors.white,
+            fontSize: emphasize ? 15 : 13,
+            fontWeight: emphasize ? FontWeight.w900 : FontWeight.w800,
+          ),
+        ),
+      ],
     );
   }
 }
