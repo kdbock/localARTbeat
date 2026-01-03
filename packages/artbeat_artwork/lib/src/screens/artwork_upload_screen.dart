@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -10,12 +11,16 @@ import 'package:artbeat_artist/artbeat_artist.dart' show SubscriptionService;
 import 'package:artbeat_core/artbeat_core.dart'
     show
         SubscriptionTier,
-        ArtbeatColors,
-        EnhancedUniversalHeader,
         EnhancedStorageService,
         MainLayout,
         AppLogger,
-        ImageUrlValidator;
+        ImageUrlValidator,
+        GlassCard,
+        GlassInputDecoration,
+        GradientCTAButton,
+        HudTopBar,
+        SecureNetworkImage,
+        WorldBackground;
 
 /// Screen for uploading and editing artwork
 class ArtworkUploadScreen extends StatefulWidget {
@@ -411,359 +416,495 @@ class _ArtworkUploadScreenState extends State<ArtworkUploadScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const MainLayout(
-        currentIndex: -1,
-        child: Scaffold(
-          appBar: EnhancedUniversalHeader(
-            title: 'Upload Artwork',
-            showLogo: false,
-          ),
-          body: Center(child: CircularProgressIndicator()),
-        ),
-      );
-    }
-
-    // Show upgrade prompt if user can't upload more artwork
-    if (!_canUpload && widget.artworkId == null) {
-      return MainLayout(
-        currentIndex: -1,
-        child: Scaffold(
-          appBar: const EnhancedUniversalHeader(
-            title: 'Upload Artwork',
-            showLogo: false,
-          ),
-          body: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.lock, size: 72, color: Colors.grey),
-                  const SizedBox(height: 24),
-                  const Text(
-                    'Free Plan Artwork Limit Reached',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'You\'ve reached the maximum of 5 artwork pieces for the Artist Basic Plan. '
-                    'Upgrade to Artist Pro for unlimited artwork uploads.',
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushReplacementNamed(
-                          context, '/artist/subscription');
-                    },
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 32,
-                        vertical: 16,
-                      ),
-                    ),
-                    child: Text('art_walk_upgrade_now'.tr()),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
     return MainLayout(
-        currentIndex: -1,
-        child: Scaffold(
-          appBar: EnhancedUniversalHeader(
-            title: widget.artworkId == null ? 'Upload Artwork' : 'Edit Artwork',
-            showLogo: false,
+      currentIndex: -1,
+      appBar: HudTopBar(
+        title:
+            widget.artworkId == null ? 'artwork_upload_title'.tr() : 'artwork_edit_title'.tr(),
+        showBackButton: true,
+        onBackPressed: () => Navigator.of(context).pop(),
+        actions: [
+          if (_isSaving)
+            const Padding(
+              padding: EdgeInsets.only(right: 12),
+              child: SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF22D3EE)),
+                ),
+              ),
+            ),
+        ],
+      ),
+      child: WorldBackground(
+        child: SafeArea(
+          child: _isLoading
+              ? const Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF22D3EE)),
+                  ),
+                )
+              : (!_canUpload && widget.artworkId == null)
+                  ? _buildUploadLimitReached()
+                  : _buildForm(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUploadLimitReached() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: GlassCard(
+          radius: 26,
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                height: 64,
+                width: 64,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withValues(alpha: 0.08),
+                ),
+                child: const Icon(Icons.lock, size: 32, color: Colors.white),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'artwork_upload_limit_title'.tr(),
+                textAlign: TextAlign.center,
+                style: GoogleFonts.spaceGrotesk(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'artwork_upload_limit_body'.tr(),
+                textAlign: TextAlign.center,
+                style: GoogleFonts.spaceGrotesk(
+                  color: Colors.white.withValues(alpha: 0.72),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 18),
+              GradientCTAButton(
+                height: 48,
+                text: 'art_walk_upgrade_now'.tr(),
+                icon: Icons.upgrade,
+                onPressed: () => Navigator.pushReplacementNamed(
+                  context,
+                  '/artist/subscription',
+                ),
+              ),
+            ],
           ),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Artwork Image
-                  Center(
-                    child: GestureDetector(
-                      onTap: _pickImage,
-                      child: Container(
-                        width: double.infinity,
-                        height: 240,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          borderRadius: BorderRadius.circular(8),
-                          image: _imageFile != null
-                              ? DecorationImage(
-                                  image: FileImage(_imageFile!),
-                                  fit: BoxFit.cover,
-                                )
-                              : ImageUrlValidator.isValidImageUrl(_imageUrl) &&
-                                      _isValidImageUrl(_imageUrl)
-                                  ? DecorationImage(
-                                      image: ImageUrlValidator.safeNetworkImage(
-                                          _imageUrl)!,
-                                      fit: BoxFit.cover,
-                                    )
-                                  : null,
-                        ),
-                        child: _imageFile == null && _imageUrl == null
-                            ? Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(Icons.add_photo_alternate,
-                                      size: 64),
-                                  const SizedBox(height: 8),
-                                  Text('art_walk_select_image'.tr()),
-                                ],
-                              )
-                            : null,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
+        ),
+      ),
+    );
+  }
 
-                  // Title
-                  TextFormField(
-                    controller: _titleController,
-                    decoration: const InputDecoration(
-                      labelText: 'Title',
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a title';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
+  Widget _buildForm() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildImagePicker(),
+            const SizedBox(height: 16),
+            _buildBasicInfo(),
+            const SizedBox(height: 16),
+            _buildMediumAndStyles(),
+            const SizedBox(height: 16),
+            _buildDetailsSection(),
+            const SizedBox(height: 16),
+            _buildTagsSection(),
+            const SizedBox(height: 16),
+            _buildSaleSection(),
+            const SizedBox(height: 20),
+            GradientCTAButton(
+              height: 52,
+              width: double.infinity,
+              text: _isSaving
+                  ? 'artwork_purchase_processing'.tr()
+                  : (widget.artworkId == null
+                      ? 'artwork_upload_button'.tr()
+                      : 'artwork_edit_save_button'.tr()),
+              icon: Icons.cloud_upload,
+              isLoading: _isSaving,
+              onPressed: _isSaving ? null : _saveArtwork,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
-                  // Description
-                  TextFormField(
-                    controller: _descriptionController,
-                    maxLines: 4,
-                    decoration: const InputDecoration(
-                      labelText: 'Description',
-                      border: OutlineInputBorder(),
-                      alignLabelWithHint: true,
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a description';
-                      }
-                      return null;
-                    },
+  Widget _buildImagePicker() {
+    return GlassCard(
+      radius: 26,
+      padding: const EdgeInsets.all(14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _SectionLabel(text: 'artwork_edit_image_label'.tr()),
+          const SizedBox(height: 12),
+          GestureDetector(
+            onTap: _pickImage,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(18),
+              child: Container(
+                height: 240,
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF0A1330), Color(0xFF07060F)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                  const SizedBox(height: 16),
-
-                  // Year
-                  TextFormField(
-                    controller: _yearController,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Year',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Medium dropdown
-                  DropdownButtonFormField<String>(
-                    initialValue: _medium.isEmpty ? null : _medium,
-                    decoration: const InputDecoration(
-                      labelText: 'Medium',
-                      filled: true,
-                      fillColor:
-                          ArtbeatColors.backgroundPrimary, // match login_screen
-                      border: OutlineInputBorder(),
-                    ),
-                    dropdownColor:
-                        ArtbeatColors.backgroundPrimary, // match login_screen
-                    style: const TextStyle(color: Colors.black),
-                    items: _availableMediums.map((medium) {
-                      return DropdownMenuItem<String>(
-                        value: medium,
-                        child: Text(medium,
-                            style: const TextStyle(color: Colors.black)),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      if (value != null) {
-                        setState(() {
-                          _medium = value;
-                        });
-                      }
-                    },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please select a medium';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Materials
-                  TextFormField(
-                    controller: _materialsController,
-                    decoration: const InputDecoration(
-                      labelText: 'Materials Used',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Location
-                  TextFormField(
-                    controller: _locationController,
-                    decoration: const InputDecoration(
-                      labelText: 'Location',
-                      border: OutlineInputBorder(),
-                      hintText: 'Where is this artwork displayed/stored?',
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Styles Multi-Select
-                  const Text(
-                    'Styles',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: _availableStyles.map((style) {
-                      final isSelected = _styles.contains(style);
-                      return FilterChip(
-                        label: Text(style),
-                        selected: isSelected,
-                        onSelected: (selected) {
-                          setState(() {
-                            if (selected) {
-                              _styles.add(style);
-                            } else {
-                              _styles.remove(style);
-                            }
-                          });
-                        },
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // For Sale switch
-                  SwitchListTile(
-                    title: Text('art_walk_available_for_sale'.tr()),
-                    value: _isForSale,
-                    onChanged: (value) {
-                      setState(() {
-                        _isForSale = value;
-                      });
-                    },
-                  ),
-
-                  // Price if for sale
-                  if (_isForSale)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: TextFormField(
-                        controller: _priceController,
-                        keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
-                          labelText: 'Price (USD)',
-                          border: OutlineInputBorder(),
-                          prefixText: '\$ ',
-                        ),
-                        validator: (value) {
-                          if (_isForSale && (value == null || value.isEmpty)) {
-                            return 'Please enter a price';
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                  const SizedBox(height: 16),
-
-                  // Tags section
-                  const Text(
-                    'Tags',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                          controller: _tagController,
-                          decoration: const InputDecoration(
-                            labelText: 'Add tags',
-                            border: OutlineInputBorder(),
-                            hintText: 'e.g. landscape, nature',
+                ),
+                child: _imageFile != null
+                    ? Image.file(_imageFile!, fit: BoxFit.cover)
+                    : (_imageUrl != null &&
+                            ImageUrlValidator.isValidImageUrl(_imageUrl!) &&
+                            _isValidImageUrl(_imageUrl))
+                        ? SecureNetworkImage(
+                            imageUrl: _imageUrl!,
+                            fit: BoxFit.cover,
+                            enableThumbnailFallback: true,
+                          )
+                        : Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.add_photo_alternate,
+                                  size: 48, color: Colors.white70),
+                              const SizedBox(height: 8),
+                              Text(
+                                'art_walk_select_image'.tr(),
+                                style: GoogleFonts.spaceGrotesk(
+                                  color: Colors.white.withValues(alpha: 0.8),
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
                           ),
-                          onEditingComplete: _addTag,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      IconButton(
-                        onPressed: _addTag,
-                        icon: const Icon(Icons.add),
-                        tooltip: 'Add tag',
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 4,
-                    children: _tags.map((tag) {
-                      return Chip(
-                        label: Text(tag),
-                        onDeleted: () => _removeTag(tag),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 32),
-
-                  // Save button
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _isSaving ? null : _saveArtwork,
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                      child: _isSaving
-                          ? const CircularProgressIndicator()
-                          : Text(
-                              widget.artworkId == null
-                                  ? 'Upload Artwork'
-                                  : 'Save Changes',
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                ],
               ),
             ),
           ),
-        ));
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBasicInfo() {
+    return GlassCard(
+      radius: 26,
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _SectionLabel(text: 'artwork_edit_basic_info'.tr()),
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: _titleController,
+            decoration: GlassInputDecoration.glass(
+              labelText: 'artwork_edit_title_label'.tr(),
+            ),
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+            ),
+            validator: (value) =>
+                value == null || value.isEmpty ? 'artwork_edit_title_error'.tr() : null,
+          ),
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: _descriptionController,
+            maxLines: 4,
+            decoration: GlassInputDecoration.glass(
+              labelText: 'artwork_edit_description_label'.tr(),
+            ),
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
+            validator: (value) => value == null || value.isEmpty
+                ? 'artwork_edit_description_error'.tr()
+                : null,
+          ),
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: _yearController,
+            keyboardType: TextInputType.number,
+            decoration: GlassInputDecoration.glass(
+              labelText: 'artwork_edit_year_label'.tr(),
+            ),
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMediumAndStyles() {
+    return GlassCard(
+      radius: 26,
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _SectionLabel(text: 'artwork_edit_medium_styles'.tr()),
+          const SizedBox(height: 12),
+          DropdownButtonFormField<String>(
+            initialValue: _medium.isEmpty ? null : _medium,
+            dropdownColor: const Color(0xFF07060F),
+            borderRadius: BorderRadius.circular(16),
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+              fontSize: 14,
+            ),
+            decoration: GlassInputDecoration.glass(
+              labelText: 'artwork_edit_medium_label'.tr(),
+            ),
+            items: _availableMediums
+                .map(
+                  (medium) => DropdownMenuItem<String>(
+                    value: medium,
+                    child: Text(medium),
+                  ),
+                )
+                .toList(),
+            onChanged: (value) {
+              if (value != null) {
+                setState(() => _medium = value);
+              }
+            },
+            validator: (value) =>
+                value == null || value.isEmpty ? 'artwork_edit_medium_error'.tr() : null,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'artwork_edit_styles_label'.tr(),
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white.withValues(alpha: 0.8),
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _availableStyles.map((style) {
+              final isSelected = _styles.contains(style);
+              return FilterChip(
+                label: Text(
+                  style,
+                  style: GoogleFonts.spaceGrotesk(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
+                  ),
+                ),
+                selected: isSelected,
+                onSelected: (selected) {
+                  setState(() {
+                    if (selected) {
+                      _styles.add(style);
+                    } else {
+                      _styles.remove(style);
+                    }
+                  });
+                },
+                backgroundColor: Colors.white.withValues(alpha: 0.06),
+                selectedColor: const Color(0xFF22D3EE).withValues(alpha: 0.28),
+                checkmarkColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18),
+                  side: BorderSide(color: Colors.white.withValues(alpha: 0.14)),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailsSection() {
+    return GlassCard(
+      radius: 26,
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _SectionLabel(text: 'artwork_edit_additional_details'.tr()),
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: _dimensionsController,
+            decoration: GlassInputDecoration.glass(
+              labelText: 'artwork_edit_dimensions_label'.tr(),
+              hintText: 'artwork_edit_dimensions_hint'.tr(),
+            ),
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: _materialsController,
+            decoration: GlassInputDecoration.glass(
+              labelText: 'artwork_edit_materials_label'.tr(),
+              hintText: 'artwork_edit_materials_hint'.tr(),
+            ),
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: _locationController,
+            decoration: GlassInputDecoration.glass(
+              labelText: 'artwork_edit_location_label'.tr(),
+              hintText: 'artwork_edit_location_hint'.tr(),
+            ),
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSaleSection() {
+    return GlassCard(
+      radius: 26,
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _SectionLabel(text: 'artwork_edit_sale_info'.tr()),
+          const SizedBox(height: 12),
+          _GlassSwitchRow(
+            label: 'art_walk_available_for_sale'.tr(),
+            value: _isForSale,
+            onChanged: (value) => setState(() => _isForSale = value),
+          ),
+          if (_isForSale) ...[
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: _priceController,
+              keyboardType: TextInputType.number,
+              decoration: GlassInputDecoration(
+                labelText: 'artwork_edit_price_label'.tr(),
+                prefixText: '\$ ',
+              ),
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+              ),
+              validator: (value) {
+                if (_isForSale && (value == null || value.isEmpty)) {
+                  return 'artwork_edit_price_error_required'.tr();
+                }
+                return null;
+              },
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTagsSection() {
+    return GlassCard(
+      radius: 26,
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _SectionLabel(text: 'artwork_edit_tags_label'.tr()),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: _tagController,
+                  decoration: GlassInputDecoration.glass(
+                    labelText: 'artwork_edit_tags_input'.tr(),
+                    hintText: 'artwork_edit_tags_hint'.tr(),
+                  ),
+                  style: GoogleFonts.spaceGrotesk(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  onEditingComplete: _addTag,
+                ),
+              ),
+              const SizedBox(width: 10),
+              GlassCard(
+                padding: const EdgeInsets.all(12),
+                radius: 16,
+                glassOpacity: 0.08,
+                borderOpacity: 0.18,
+                onTap: _addTag,
+                child: const Icon(Icons.add, color: Colors.white),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            children: _tags.map((tag) {
+              return GlassCard(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                radius: 16,
+                glassOpacity: 0.08,
+                borderOpacity: 0.18,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      tag,
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    GestureDetector(
+                      onTap: () => _removeTag(tag),
+                      child: const Icon(Icons.close,
+                          size: 14, color: Colors.white70),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
   }
 
   bool _isValidImageUrl(String? url) {
@@ -788,5 +929,67 @@ class _ArtworkUploadScreenState extends State<ArtworkUploadScreen> {
     return url.startsWith('http://') ||
         url.startsWith('https://') ||
         (url.startsWith('file:///') && url.length > 8);
+  }
+}
+
+class _SectionLabel extends StatelessWidget {
+  final String text;
+
+  const _SectionLabel({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: GoogleFonts.spaceGrotesk(
+        color: Colors.white.withValues(alpha: 0.92),
+        fontSize: 16,
+        fontWeight: FontWeight.w900,
+        letterSpacing: 0.3,
+      ),
+    );
+  }
+}
+
+class _GlassSwitchRow extends StatelessWidget {
+  final String label;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  const _GlassSwitchRow({
+    required this.label,
+    required this.value,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white,
+                fontSize: 13,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+          Switch(
+            value: value,
+            onChanged: onChanged,
+            activeThumbColor: const Color(0xFF22D3EE),
+          ),
+        ],
+      ),
+    );
   }
 }

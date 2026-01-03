@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:artbeat_core/artbeat_core.dart' show MainLayout, AppLogger;
+import 'package:artbeat_core/artbeat_core.dart'
+    show
+        AppLogger,
+        GlassCard,
+        GradientCTAButton,
+        HudTopBar,
+        MainLayout,
+        WorldBackground;
+import 'package:google_fonts/google_fonts.dart';
 import '../models/artwork_model.dart';
 import '../services/artwork_pagination_service.dart';
 import '../widgets/artwork_grid_widget.dart';
-import '../widgets/artwork_header.dart';
 
 /// Screen for displaying recently uploaded artwork
 class ArtworkRecentScreen extends StatefulWidget {
@@ -113,43 +120,144 @@ class _ArtworkRecentScreenState extends State<ArtworkRecentScreen> {
   Widget build(BuildContext context) {
     return MainLayout(
       currentIndex: 0,
-      appBar: ArtworkHeader(
+      appBar: HudTopBar(
         title: 'artwork_recent_title'.tr(),
         showBackButton: true,
-        showSearch: true,
         onBackPressed: () => Navigator.of(context).pop(),
-        onSearchPressed: () => Navigator.pushNamed(context, '/search'),
+        actions: [
+          IconButton(
+            onPressed: () => Navigator.pushNamed(context, '/search'),
+            icon: const Icon(Icons.search, color: Colors.white),
+          ),
+        ],
       ),
-      child: _buildContent(),
+      child: WorldBackground(
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+            child: Column(
+              children: [
+                _buildHero(),
+                const SizedBox(height: 12),
+                Expanded(child: _buildContent()),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHero() {
+    return GlassCard(
+      radius: 26,
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          Container(
+            height: 52,
+            width: 52,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFF22D3EE), Color(0xFF34D399)],
+              ),
+            ),
+            child: const Icon(Icons.schedule, color: Colors.white, size: 26),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'artwork_recent_title'.tr(),
+                  style: GoogleFonts.spaceGrotesk(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'artwork_recent_subtitle'.tr(),
+                  style: GoogleFonts.spaceGrotesk(
+                    color: Colors.white.withValues(alpha: 0.72),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    height: 1.35,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildContent() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF22D3EE)),
+        ),
+      );
     }
 
     if (_error != null) {
-      return Center(
+      return GlassCard(
+        radius: 26,
+        padding: const EdgeInsets.all(20),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(Icons.error_outline, size: 48, color: Colors.grey),
-            const SizedBox(height: 16),
-            Text(
-              'artwork_discover_error'.tr(),
-              style: Theme.of(context).textTheme.titleMedium,
+            Row(
+              children: [
+                Container(
+                  height: 40,
+                  width: 40,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withValues(alpha: 0.08),
+                  ),
+                  child: const Icon(
+                    Icons.error_outline,
+                    color: Color(0xFFFF3D8D),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'artwork_discover_error'.tr(),
+                    style: GoogleFonts.spaceGrotesk(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             Text(
               _error ?? 'error_unknown'.tr(),
-              style: Theme.of(context).textTheme.bodySmall,
-              textAlign: TextAlign.center,
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white.withValues(alpha: 0.76),
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
             ),
-            const SizedBox(height: 16),
-            ElevatedButton(
+            const SizedBox(height: 14),
+            GradientCTAButton(
+              height: 46,
+              text: 'artwork_retry_button'.tr(),
+              icon: Icons.refresh,
               onPressed: _loadInitialArtworks,
-              child: Text('artwork_retry_button'.tr()),
             ),
           ],
         ),
@@ -157,16 +265,55 @@ class _ArtworkRecentScreenState extends State<ArtworkRecentScreen> {
     }
 
     if (_recentArtworks.isEmpty) {
-      return Center(
+      return GlassCard(
+        radius: 26,
+        padding: const EdgeInsets.all(20),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(Icons.image_not_supported_outlined,
-                size: 48, color: Colors.grey),
-            const SizedBox(height: 16),
+            Row(
+              children: [
+                Container(
+                  height: 40,
+                  width: 40,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withValues(alpha: 0.08),
+                  ),
+                  child: const Icon(
+                    Icons.image_not_supported_outlined,
+                    color: Colors.white70,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'artwork_recent_no_results'.tr(),
+                    style: GoogleFonts.spaceGrotesk(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
             Text(
-              'artwork_recent_no_results'.tr(),
-              style: Theme.of(context).textTheme.titleMedium,
+              'artwork_recent_empty_hint'.tr(),
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white.withValues(alpha: 0.72),
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 12),
+            GradientCTAButton(
+              height: 44,
+              text: 'artwork_retry_button'.tr(),
+              icon: Icons.refresh,
+              onPressed: _loadInitialArtworks,
             ),
           ],
         ),

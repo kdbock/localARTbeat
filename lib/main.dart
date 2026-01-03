@@ -1,6 +1,4 @@
 // Copyright (c) 2025 ArtBeat. All rights reserved.
-import 'dart:io';
-
 import 'package:artbeat_art_walk/artbeat_art_walk.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_core/firebase_options.dart';
@@ -82,14 +80,14 @@ Future<void> main() async {
 
     try {
       await SecureFirebaseConfig.configureAppCheck(teamId: 'H49R32NPY6');
-    } catch (e) {
+    } on Object catch (e) {
       AppLogger.error('App Check activation failed', error: e);
     }
 
     // Auth safety
     try {
       await AuthSafetyService.initialize();
-    } catch (e) {
+    } on Object catch (e) {
       AppLogger.warning('⚠️ Auth Safety Service failed: $e');
     }
 
@@ -102,14 +100,14 @@ Future<void> main() async {
       } else {
         AppLogger.warning('⚠️ STRIPE_PUBLISHABLE_KEY missing');
       }
-    } catch (e) {
+    } on Object catch (e) {
       AppLogger.warning('⚠️ Stripe Safety Service failed: $e');
     }
 
     // In-app purchases
     try {
       await InAppPurchaseSetup().initialize();
-    } catch (e) {
+    } on Object catch (e) {
       AppLogger.warning('⚠️ IAP initialization failed: $e');
     }
 
@@ -124,7 +122,7 @@ Future<void> main() async {
         '🔍 Firebase app names: ${Firebase.apps.map((a) => a.name).toList()}',
       );
     }
-  } catch (e, stackTrace) {
+  } on Object catch (e, stackTrace) {
     CrashPreventionService.logCrashPrevention(
       operation: 'app_initialization',
       errorType: e.runtimeType.toString(),
@@ -155,7 +153,7 @@ Future<void> main() async {
                 const SizedBox(height: 8),
                 Text(e.toString(), textAlign: TextAlign.center),
                 const SizedBox(height: 16),
-                ElevatedButton(onPressed: main, child: const Text('Retry')),
+                const ElevatedButton(onPressed: main, child: Text('Retry')),
               ],
             ),
           ),
@@ -189,7 +187,7 @@ void _initializeNonCriticalServices() {
     try {
       await ImageManagementService().initialize();
       AppLogger.info('✅ Image management ready');
-    } catch (_) {}
+    } on Object catch (_) {}
 
     try {
       await messaging.NotificationService(
@@ -198,7 +196,7 @@ void _initializeNonCriticalServices() {
         },
       ).initialize();
       AppLogger.info('✅ Notifications ready');
-    } catch (_) {}
+    } on Object catch (_) {}
 
     try {
       final stepTrackingService = StepTrackingService();
@@ -206,7 +204,7 @@ void _initializeNonCriticalServices() {
       await stepTrackingService.initialize(challengeService: challengeService);
       await stepTrackingService.startTracking();
       AppLogger.info('✅ Step tracking active');
-    } catch (_) {}
+    } on Object catch (_) {}
   });
 }
 
@@ -216,6 +214,6 @@ void _initializeAppPermissions() {
     try {
       await AppPermissionService().initializePermissions();
       AppLogger.info('✅ Permissions initialized');
-    } catch (_) {}
+    } on Object catch (_) {}
   });
 }

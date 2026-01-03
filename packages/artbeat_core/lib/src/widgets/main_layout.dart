@@ -9,6 +9,7 @@ class MainLayout extends StatefulWidget {
   final Widget? drawer;
   final Widget? endDrawer;
   final GlobalKey<ScaffoldState>? scaffoldKey;
+  final Widget? floatingActionButton;
 
   const MainLayout({
     super.key,
@@ -19,6 +20,7 @@ class MainLayout extends StatefulWidget {
     this.drawer,
     this.endDrawer,
     this.scaffoldKey,
+    this.floatingActionButton,
   });
 
   @override
@@ -93,6 +95,7 @@ class _MainLayoutState extends State<MainLayout> {
       drawer: widget.drawer,
       endDrawer: widget.endDrawer,
       backgroundColor: const Color(0xFF07060F),
+      floatingActionButton: widget.floatingActionButton,
       body: widget.child,
       bottomNavigationBar: widget.currentIndex == -1
           ? null

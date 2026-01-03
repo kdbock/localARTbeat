@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:artbeat_art_walk/artbeat_art_walk.dart' show ChallengeService;
 import 'package:artbeat_artwork/artbeat_artwork.dart';
 import 'package:artbeat_artist/artbeat_artist.dart' as artist;
-import 'package:artbeat_core/artbeat_core.dart' hide ArtworkModel;
+import 'package:artbeat_core/artbeat_core.dart'
+  hide ArtworkModel, GlassInputDecoration;
 import 'package:share_plus/share_plus.dart';
-import 'package:artbeat_art_walk/artbeat_art_walk.dart' hide WorldBackground;
 import 'package:google_fonts/google_fonts.dart';
 
 /// Screen for viewing artwork details
@@ -380,140 +381,131 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
     return WorldBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
+        appBar: HudTopBar(
+          title: 'artwork_detail_title'.tr(),
+          showBackButton: true,
+          onBackPressed: () => Navigator.pop(context),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.share, color: Colors.white),
+              onPressed: _shareArtwork,
+            ),
+          ],
+        ),
         body: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Top App Bar
-              SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(14, 10, 14, 0),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back, color: Colors.white),
-                        onPressed: () => Navigator.pop(context),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(22),
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Color(0xFF0A1330), Color(0xFF07060F)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
                       ),
-                      Expanded(
-                        child: Text(
-                          'artwork_detail_title'.tr(),
-                          style: GoogleFonts.spaceGrotesk(
-                            color: Colors.white.withValues(alpha: 0.95),
-                            fontSize: 18,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 1.2,
+                    ),
+                    child: AspectRatio(
+                      aspectRatio: 4 / 3,
+                      child: SecureNetworkImage(
+                        imageUrl: artwork.imageUrl,
+                        fit: BoxFit.cover,
+                        enableThumbnailFallback: true,
+                        errorWidget: Container(
+                          color: Colors.black12,
+                          child: const Center(
+                            child: Icon(
+                              Icons.broken_image,
+                              size: 48,
+                              color: Colors.white54,
+                            ),
                           ),
-                          textAlign: TextAlign.center,
                         ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.share, color: Colors.white),
-                        onPressed: _shareArtwork,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              // Full-size artwork image
-              Container(
-                width: double.infinity,
-                constraints: BoxConstraints(
-                  maxHeight: MediaQuery.of(context).size.height * 0.6,
-                ),
-                child: SecureNetworkImage(
-                  imageUrl: artwork.imageUrl,
-                  fit: BoxFit.contain, // Show full image without cropping
-                  enableThumbnailFallback: true, // Enable fallback for artwork
-                  errorWidget: Container(
-                    height: 300,
-                    color: Colors.grey[300],
-                    child: const Icon(
-                      Icons.broken_image,
-                      size: 64,
-                      color: Colors.grey,
                     ),
                   ),
                 ),
-              ),
-
-              // Artwork details
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Title with artist name and price
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Title only
-                              Text(
-                                artwork.title,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 24,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              // Moderation Status Chip
-                              ArtworkModerationStatusChip(
-                                status: artwork.moderationStatus,
-                                showIcon: true,
-                              ),
-                              const SizedBox(height: 4),
-                              if (artwork.yearCreated != null)
+                const SizedBox(height: 16),
+                GlassCard(
+                  radius: 26,
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
                                 Text(
-                                  '${artwork.yearCreated}',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.grey[600],
+                                  artwork.title,
+                                  style: GoogleFonts.spaceGrotesk(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w900,
                                   ),
                                 ),
-                            ],
-                          ),
-                        ),
-                        // Show auction info or regular price
-                        if (artwork.auctionEnabled)
-                          _buildAuctionPriceDisplay(artwork)
-                        else if (artwork.isForSale)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.primary,
-                              borderRadius: BorderRadius.circular(20),
+                                const SizedBox(height: 6),
+                                ArtworkModerationStatusChip(
+                                  status: artwork.moderationStatus,
+                                  showIcon: true,
+                                ),
+                                if (artwork.yearCreated != null) ...[
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    '${artwork.yearCreated}',
+                                    style: GoogleFonts.spaceGrotesk(
+                                      color:
+                                          Colors.white.withValues(alpha: 0.7),
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ],
+                              ],
                             ),
-                            child: Text(
-                              '\$${artwork.price?.toStringAsFixed(2) ?? 'For Sale'}',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                                color: Colors.white,
+                          ),
+                          if (artwork.auctionEnabled)
+                            _buildAuctionPriceDisplay(artwork)
+                          else if (artwork.isForSale)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 10),
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [
+                                    Color(0xFF7C4DFF),
+                                    Color(0xFF22D3EE),
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                              child: Text(
+                                '\$${artwork.price?.toStringAsFixed(2) ?? 'For Sale'}',
+                                style: GoogleFonts.spaceGrotesk(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w800,
+                                ),
                               ),
                             ),
-                          ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Artist info (clickable profile section)
-                    if (artistProfile != null)
-                      InkWell(
-                        onTap: () {
-                          Navigator.pushNamed(
-                            context,
-                            '/artist/public-profile',
-                            arguments: {'artistId': artistProfile.id},
-                          );
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        ],
+                      ),
+                      const SizedBox(height: 14),
+                      if (artistProfile != null)
+                        InkWell(
+                          onTap: () {
+                            Navigator.pushNamed(
+                              context,
+                              '/artist/public-profile',
+                              arguments: {'artistId': artistProfile.id},
+                            );
+                          },
                           child: Row(
                             children: [
                               UserAvatar(
@@ -528,33 +520,33 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
                                   children: [
                                     Text(
                                       artistProfile.displayName,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 16,
+                                      style: GoogleFonts.spaceGrotesk(
+                                        color:
+                                            Colors.white.withValues(alpha: 0.9),
+                                        fontWeight: FontWeight.w800,
                                       ),
                                     ),
                                     if (artistProfile.location != null &&
                                         artistProfile.location!.isNotEmpty)
                                       Text(
                                         artistProfile.location!,
-                                        style: TextStyle(
+                                        style: GoogleFonts.spaceGrotesk(
+                                          color: Colors.white
+                                              .withValues(alpha: 0.7),
                                           fontSize: 12,
-                                          color: Colors.grey[600],
+                                          fontWeight: FontWeight.w600,
                                         ),
                                       ),
                                   ],
                                 ),
                               ),
-                              const Icon(Icons.chevron_right, size: 16),
+                              const Icon(Icons.chevron_right,
+                                  size: 18, color: Colors.white70),
                             ],
                           ),
-                        ),
-                      )
-                    else if (_fallbackArtistName != null)
-                      // Show basic artist info when profile is not available
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: Row(
+                        )
+                      else if (_fallbackArtistName != null)
+                        Row(
                           children: [
                             UserAvatar(
                               imageUrl: _fallbackArtistImageUrl,
@@ -562,144 +554,163 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
                               radius: 20,
                             ),
                             const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                _fallbackArtistName!,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 16,
-                                ),
+                            Text(
+                              _fallbackArtistName!,
+                              style: GoogleFonts.spaceGrotesk(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800,
                               ),
                             ),
                           ],
                         ),
-                      ),
-
-                    // Divider
-                    const Divider(height: 32),
-
-                    // Details section
-                    const Text(
-                      'Details',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                      ),
-                    ),
-
-                    // Artwork properties
-                    Padding(
-                      padding: const EdgeInsets.only(top: 12.0),
-                      child: _buildPropertyRow('Medium', artwork.medium),
-                    ),
-                    if (artwork.dimensions != null)
-                      _buildPropertyRow('Dimensions', artwork.dimensions!),
-                    _buildPropertyRow('Style', artwork.styles.join(', ')),
-
-                    // Divider
-                    const Divider(height: 32),
-
-                    // Description section
-                    const Text(
-                      'Description',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 12.0),
-                      child: Text(
-                        artwork.description,
-                        style: const TextStyle(height: 1.5),
-                      ),
-                    ),
-
-                    // Tags
-                    if (artwork.tags?.isNotEmpty ?? false) ...[
-                      const SizedBox(height: 16),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: artwork.tags!
-                            .map((tag) => Chip(
-                                  label: Text(tag),
-                                  backgroundColor: Theme.of(context)
-                                      .chipTheme
-                                      .backgroundColor,
-                                ))
-                            .toList(),
-                      ),
                     ],
-
-                    // Content engagement bar (rate/comment handled by ArtworkSocialWidget below)
-                    const SizedBox(height: 24),
-                    ContentEngagementBar(
-                      contentId: artwork.id,
-                      contentType: 'artwork',
-                      initialStats: artwork.engagementStats,
-                      showSecondaryActions: true,
-                      artistId: artwork.userId,
-                      artistName: _artist?.displayName ??
-                          _fallbackArtistName ??
-                          'Unknown Artist',
-                    ),
-
-                    // View count
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.visibility,
-                            size: 16, color: ArtbeatColors.darkGray),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${artwork.viewCount} views',
-                          style: const TextStyle(
-                            color: ArtbeatColors.darkGray,
-                            fontSize: 14,
-                          ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                GlassCard(
+                  radius: 26,
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Details',
+                        style: GoogleFonts.spaceGrotesk(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      _buildPropertyRow('Medium', artwork.medium),
+                      if (artwork.dimensions != null)
+                        _buildPropertyRow('Dimensions', artwork.dimensions!),
+                      _buildPropertyRow('Style', artwork.styles.join(', ')),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                GlassCard(
+                  radius: 26,
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Description',
+                        style: GoogleFonts.spaceGrotesk(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        artwork.description,
+                        style: GoogleFonts.spaceGrotesk(
+                          color: Colors.white.withValues(alpha: 0.82),
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          height: 1.5,
+                        ),
+                      ),
+                      if (artwork.tags?.isNotEmpty ?? false) ...[
+                        const SizedBox(height: 12),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: artwork.tags!
+                              .map(
+                                (tag) => Chip(
+                                  label: Text(tag),
+                                  backgroundColor: Colors.white
+                                      .withValues(alpha: 0.08),
+                                  labelStyle: GoogleFonts.spaceGrotesk(
+                                    color:
+                                        Colors.white.withValues(alpha: 0.85),
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                    side: BorderSide(
+                                      color: Colors.white
+                                          .withValues(alpha: 0.12),
+                                    ),
+                                  ),
+                                ),
+                              )
+                              .toList(),
                         ),
                       ],
-                    ),
-
-                    // Social Engagement Widget
-                    const SizedBox(height: 32),
-                    const Divider(height: 32),
-                    ArtworkSocialWidget(
-                      artworkId: artwork.id,
-                      artworkTitle: artwork.title,
-                      showComments: true,
-                      showRatings: true,
-                    ),
-
-                    // Action buttons
-                    const SizedBox(height: 32),
-                    if (artwork.auctionEnabled)
-                      _buildAuctionActionButtons(artwork)
-                    else if (artwork.isForSale)
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            // Navigate to purchase screen
-                            Navigator.pushNamed(
-                              context,
-                              '/artwork/purchase',
-                              arguments: {'artworkId': artwork.id},
-                            );
-                          },
-                          icon: const Icon(Icons.shopping_cart),
-                          label: Text('artwork_purchase_button'.tr()),
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                          ),
-                        ),
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 16),
+                GlassCard(
+                  radius: 26,
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ContentEngagementBar(
+                        contentId: artwork.id,
+                        contentType: 'artwork',
+                        initialStats: artwork.engagementStats,
+                        showSecondaryActions: true,
+                        artistId: artwork.userId,
+                        artistName: _artist?.displayName ??
+                            _fallbackArtistName ??
+                            'Unknown Artist',
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.visibility,
+                              size: 16, color: Colors.white70),
+                          const SizedBox(width: 6),
+                          Text(
+                            '${artwork.viewCount} views',
+                            style: GoogleFonts.spaceGrotesk(
+                              color: Colors.white.withValues(alpha: 0.8),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                GlassCard(
+                  radius: 26,
+                  padding: const EdgeInsets.all(16),
+                  child: ArtworkSocialWidget(
+                    artworkId: artwork.id,
+                    artworkTitle: artwork.title,
+                    showComments: true,
+                    showRatings: true,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                if (artwork.auctionEnabled)
+                  _buildAuctionActionButtons(artwork)
+                else if (artwork.isForSale)
+                  GradientCTAButton(
+                    height: 52,
+                    text: 'artwork_purchase_button'.tr(),
+                    icon: Icons.shopping_cart,
+                    onPressed: () {
+                      Navigator.pushNamed(
+                        context,
+                        '/artwork/purchase',
+                        arguments: {'artworkId': artwork.id},
+                      );
+                    },
+                  ),
+              ],
+            ),
           ),
         ),
       ),

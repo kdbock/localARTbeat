@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:artbeat_artwork/artbeat_artwork.dart';
 import 'package:artbeat_core/artbeat_core.dart' hide ArtworkModel;
@@ -299,57 +300,62 @@ class _ArtworkEditScreenState extends State<ArtworkEditScreen> {
   Widget build(BuildContext context) {
     return MainLayout(
       currentIndex: -1,
-      child: Scaffold(
-        appBar: EnhancedUniversalHeader(
-          title: 'artwork_edit_title'.tr(),
-          showLogo: false,
+      appBar: HudTopBar(
+        title: 'artwork_edit_title'.tr(),
+        showBackButton: true,
+        onBackPressed: () => Navigator.of(context).maybePop(),
+      ),
+      child: WorldBackground(
+        child: SafeArea(
+          child: _isLoading
+              ? const Center(
+                  child: CircularProgressIndicator(
+                    valueColor:
+                        AlwaysStoppedAnimation<Color>(Color(0xFF22D3EE)),
+                  ),
+                )
+              : _artwork == null
+                  ? Center(
+                      child: GlassCard(
+                        padding: const EdgeInsets.all(20),
+                        child: Text(
+                          'artwork_edit_not_found'.tr(),
+                          style: GoogleFonts.spaceGrotesk(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                    )
+                  : _buildEditForm(),
         ),
-        body: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : _artwork == null
-                ? Center(child: Text('artwork_edit_not_found'.tr()))
-                : _buildEditForm(),
       ),
     );
   }
 
   Widget _buildEditForm() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
       child: Form(
         key: _formKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Image section
             _buildImageSection(),
-            const SizedBox(height: 24),
-
-            // Basic information
+            const SizedBox(height: 16),
             _buildBasicInfoSection(),
-            const SizedBox(height: 24),
-
-            // Medium and styles
+            const SizedBox(height: 16),
             _buildMediumAndStylesSection(),
-            const SizedBox(height: 24),
-
-            // Additional details
+            const SizedBox(height: 16),
             _buildAdditionalDetailsSection(),
-            const SizedBox(height: 24),
-
-            // Tags
+            const SizedBox(height: 16),
             _buildTagsSection(),
-            const SizedBox(height: 24),
-
-            // Sale information
+            const SizedBox(height: 16),
             _buildSaleInfoSection(),
-            const SizedBox(height: 24),
-
-            // Privacy settings
+            const SizedBox(height: 16),
             _buildPrivacySection(),
-            const SizedBox(height: 32),
-
-            // Action buttons
+            const SizedBox(height: 20),
             _buildActionButtons(),
           ],
         ),
@@ -358,288 +364,369 @@ class _ArtworkEditScreenState extends State<ArtworkEditScreen> {
   }
 
   Widget _buildImageSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'artwork_edit_image_label'.tr(),
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 16),
-        Container(
-          height: 200,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade300),
-            borderRadius: BorderRadius.circular(8),
+    return GlassCard(
+      radius: 26,
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _SectionLabel(text: 'artwork_edit_image_label'.tr()),
+          const SizedBox(height: 12),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: Container(
+              height: 220,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF0A1330), Color(0xFF07060F)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: _newImageFile != null
+                  ? Image.file(_newImageFile!, fit: BoxFit.cover)
+                  : _artwork!.imageUrl.isNotEmpty
+                      ? SecureNetworkImage(
+                          imageUrl: _artwork!.imageUrl,
+                          fit: BoxFit.cover,
+                          enableThumbnailFallback: true,
+                          errorWidget: const Center(
+                            child: Icon(
+                              Icons.image,
+                              size: 64,
+                              color: Colors.white54,
+                            ),
+                          ),
+                        )
+                      : const Center(
+                          child: Icon(
+                            Icons.image,
+                            size: 64,
+                            color: Colors.white54,
+                          ),
+                        ),
+            ),
           ),
-          child: _newImageFile != null
-              ? Image.file(_newImageFile!, fit: BoxFit.cover)
-              : _artwork!.imageUrl.isNotEmpty
-                  ? SecureNetworkImage(
-                      imageUrl: _artwork!.imageUrl,
-                      fit: BoxFit.cover,
-                      enableThumbnailFallback:
-                          true, // Enable fallback for artwork
-                      errorWidget:
-                          const Icon(Icons.image, size: 64, color: Colors.grey),
-                    )
-                  : const Icon(Icons.image, size: 64, color: Colors.grey),
-        ),
-        const SizedBox(height: 16),
-        OutlinedButton.icon(
-          onPressed: _pickImage,
-          icon: const Icon(Icons.photo_library),
-          label: Text('artwork_edit_change_image'.tr()),
-        ),
-      ],
+          const SizedBox(height: 12),
+          GradientCTAButton(
+            height: 48,
+            text: 'artwork_edit_change_image'.tr(),
+            icon: Icons.photo_library_outlined,
+            onPressed: _pickImage,
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildBasicInfoSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'artwork_edit_basic_info'.tr(),
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 16),
-        TextFormField(
-          controller: _titleController,
-          decoration: InputDecoration(
-            labelText: 'artwork_edit_title_label'.tr(),
-            border: const OutlineInputBorder(),
+    return GlassCard(
+      radius: 26,
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _SectionLabel(text: 'artwork_edit_basic_info'.tr()),
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: _titleController,
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+            ),
+            decoration: GlassInputDecoration.glass(
+              labelText: 'artwork_edit_title_label'.tr(),
+            ),
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'artwork_edit_title_error'.tr();
+              }
+              return null;
+            },
           ),
-          validator: (value) {
-            if (value == null || value.trim().isEmpty) {
-              return 'artwork_edit_title_error'.tr();
-            }
-            return null;
-          },
-        ),
-        const SizedBox(height: 16),
-        TextFormField(
-          controller: _descriptionController,
-          decoration: InputDecoration(
-            labelText: 'artwork_edit_description_label'.tr(),
-            border: const OutlineInputBorder(),
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: _descriptionController,
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
+            maxLines: 3,
+            decoration: GlassInputDecoration.glass(
+              labelText: 'artwork_edit_description_label'.tr(),
+            ),
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'artwork_edit_description_error'.tr();
+              }
+              return null;
+            },
           ),
-          maxLines: 3,
-          validator: (value) {
-            if (value == null || value.trim().isEmpty) {
-              return 'artwork_edit_description_error'.tr();
-            }
-            return null;
-          },
-        ),
-      ],
+        ],
+      ),
     );
   }
 
   Widget _buildMediumAndStylesSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'artwork_edit_medium_styles'.tr(),
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 16),
-        DropdownButtonFormField<String>(
-          initialValue: _medium.isEmpty ? null : _medium,
-          decoration: InputDecoration(
-            labelText: 'artwork_edit_medium_label'.tr(),
-            border: const OutlineInputBorder(),
+    return GlassCard(
+      radius: 26,
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _SectionLabel(text: 'artwork_edit_medium_styles'.tr()),
+          const SizedBox(height: 12),
+          DropdownButtonFormField<String>(
+            dropdownColor: const Color(0xFF07060F),
+            borderRadius: BorderRadius.circular(16),
+            initialValue: _medium.isEmpty ? null : _medium,
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+              fontSize: 14,
+            ),
+            decoration: GlassInputDecoration.glass(
+              labelText: 'artwork_edit_medium_label'.tr(),
+            ),
+            items: _availableMediums
+                .map(
+                  (medium) => DropdownMenuItem<String>(
+                    value: medium,
+                    child: Text(medium),
+                  ),
+                )
+                .toList(),
+            onChanged: (value) {
+              setState(() {
+                _medium = value ?? '';
+              });
+            },
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'artwork_edit_medium_error'.tr();
+              }
+              return null;
+            },
           ),
-          items: _availableMediums.map((medium) {
-            return DropdownMenuItem(
-              value: medium,
-              child: Text(medium),
-            );
-          }).toList(),
-          onChanged: (value) {
-            setState(() {
-              _medium = value ?? '';
-            });
-          },
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return 'artwork_edit_medium_error'.tr();
-            }
-            return null;
-          },
-        ),
-        const SizedBox(height: 16),
-        Text('artwork_edit_styles_label'.tr()),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: _availableStyles.map((style) {
-            final isSelected = _styles.contains(style);
-            return FilterChip(
-              label: Text(style),
-              selected: isSelected,
-              onSelected: (selected) {
-                setState(() {
-                  if (selected) {
-                    _styles.add(style);
-                  } else {
-                    _styles.remove(style);
-                  }
-                });
-              },
-            );
-          }).toList(),
-        ),
-      ],
+          const SizedBox(height: 12),
+          Text(
+            'artwork_edit_styles_label'.tr(),
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white.withValues(alpha: 0.8),
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _availableStyles.map((style) {
+              final isSelected = _styles.contains(style);
+              return FilterChip(
+                label: Text(
+                  style,
+                  style: GoogleFonts.spaceGrotesk(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
+                  ),
+                ),
+                selected: isSelected,
+                onSelected: (selected) {
+                  setState(() {
+                    if (selected) {
+                      _styles.add(style);
+                    } else {
+                      _styles.remove(style);
+                    }
+                  });
+                },
+                backgroundColor: Colors.white.withValues(alpha: 0.06),
+                selectedColor: const Color(0xFF22D3EE).withValues(alpha: 0.28),
+                checkmarkColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18),
+                  side:
+                      BorderSide(color: Colors.white.withValues(alpha: 0.14)),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildAdditionalDetailsSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'artwork_edit_additional_details'.tr(),
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 16),
-        TextFormField(
-          controller: _dimensionsController,
-          decoration: InputDecoration(
-            labelText: 'artwork_edit_dimensions_label'.tr(),
-            hintText: 'artwork_edit_dimensions_hint'.tr(),
-            border: const OutlineInputBorder(),
-          ),
-        ),
-        const SizedBox(height: 16),
-        TextFormField(
-          controller: _materialsController,
-          decoration: InputDecoration(
-            labelText: 'artwork_edit_materials_label'.tr(),
-            hintText: 'artwork_edit_materials_hint'.tr(),
-            border: const OutlineInputBorder(),
-          ),
-        ),
-        const SizedBox(height: 16),
-        TextFormField(
-          controller: _locationController,
-          decoration: InputDecoration(
-            labelText: 'artwork_edit_location_label'.tr(),
-            hintText: 'artwork_edit_location_hint'.tr(),
-            border: const OutlineInputBorder(),
-          ),
-        ),
-        const SizedBox(height: 16),
-        TextFormField(
-          controller: _yearController,
-          decoration: InputDecoration(
-            labelText: 'artwork_edit_year_label'.tr(),
-            border: const OutlineInputBorder(),
-          ),
-          keyboardType: TextInputType.number,
-          validator: (value) {
-            if (value != null && value.isNotEmpty) {
-              final year = int.tryParse(value);
-              if (year == null || year < 1000 || year > DateTime.now().year) {
-                return 'artwork_edit_year_error'.tr();
-              }
-            }
-            return null;
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTagsSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'artwork_edit_tags_label'.tr(),
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 16),
-        TextFormField(
-          controller: _tagController,
-          decoration: InputDecoration(
-            labelText: 'artwork_edit_tags_input'.tr(),
-            hintText: 'artwork_edit_tags_hint'.tr(),
-            border: const OutlineInputBorder(),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSaleInfoSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'artwork_edit_sale_info'.tr(),
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 16),
-        SwitchListTile(
-          title: Text('artwork_edit_for_sale'.tr()),
-          value: _isForSale,
-          onChanged: (value) {
-            setState(() {
-              _isForSale = value;
-            });
-          },
-        ),
-        if (_isForSale) ...[
-          const SizedBox(height: 16),
+    return GlassCard(
+      radius: 26,
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _SectionLabel(text: 'artwork_edit_additional_details'.tr()),
+          const SizedBox(height: 12),
           TextFormField(
-            controller: _priceController,
-            decoration: InputDecoration(
-              labelText: 'artwork_edit_price_label'.tr(),
-              border: const OutlineInputBorder(),
+            controller: _dimensionsController,
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
+            decoration: GlassInputDecoration.glass(
+              labelText: 'artwork_edit_dimensions_label'.tr(),
+              hintText: 'artwork_edit_dimensions_hint'.tr(),
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: _materialsController,
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
+            decoration: GlassInputDecoration.glass(
+              labelText: 'artwork_edit_materials_label'.tr(),
+              hintText: 'artwork_edit_materials_hint'.tr(),
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: _locationController,
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
+            decoration: GlassInputDecoration.glass(
+              labelText: 'artwork_edit_location_label'.tr(),
+              hintText: 'artwork_edit_location_hint'.tr(),
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: _yearController,
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
             ),
             keyboardType: TextInputType.number,
+            decoration: GlassInputDecoration.glass(
+              labelText: 'artwork_edit_year_label'.tr(),
+            ),
             validator: (value) {
-              if (_isForSale && (value == null || value.trim().isEmpty)) {
-                return 'artwork_edit_price_error_required'.tr();
-              }
               if (value != null && value.isNotEmpty) {
-                final price = double.tryParse(value);
-                if (price == null || price <= 0) {
-                  return 'artwork_edit_price_error_invalid'.tr();
+                final year = int.tryParse(value);
+                if (year == null ||
+                    year < 1000 ||
+                    year > DateTime.now().year) {
+                  return 'artwork_edit_year_error'.tr();
                 }
               }
               return null;
             },
           ),
         ],
-      ],
+      ),
+    );
+  }
+
+  Widget _buildTagsSection() {
+    return GlassCard(
+      radius: 26,
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _SectionLabel(text: 'artwork_edit_tags_label'.tr()),
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: _tagController,
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
+            decoration: GlassInputDecoration.glass(
+              labelText: 'artwork_edit_tags_input'.tr(),
+              hintText: 'artwork_edit_tags_hint'.tr(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSaleInfoSection() {
+    return GlassCard(
+      radius: 26,
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _SectionLabel(text: 'artwork_edit_sale_info'.tr()),
+          const SizedBox(height: 12),
+          _GlassSwitchRow(
+            label: 'artwork_edit_for_sale'.tr(),
+            value: _isForSale,
+            onChanged: (value) {
+              setState(() {
+                _isForSale = value;
+              });
+            },
+          ),
+          if (_isForSale) ...[
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: _priceController,
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+              keyboardType: TextInputType.number,
+              decoration: GlassInputDecoration.glass(
+                labelText: 'artwork_edit_price_label'.tr(),
+              ),
+              validator: (value) {
+                if (_isForSale && (value == null || value.trim().isEmpty)) {
+                  return 'artwork_edit_price_error_required'.tr();
+                }
+                if (value != null && value.isNotEmpty) {
+                  final price = double.tryParse(value);
+                  if (price == null || price <= 0) {
+                    return 'artwork_edit_price_error_invalid'.tr();
+                  }
+                }
+                return null;
+              },
+            ),
+          ],
+        ],
+      ),
     );
   }
 
   Widget _buildPrivacySection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'artwork_edit_privacy'.tr(),
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 16),
-        SwitchListTile(
-          title: Text('artwork_edit_public_artwork'.tr()),
-          subtitle: Text('artwork_edit_public_subtitle'.tr()),
-          value: _isPublic,
-          onChanged: (value) {
-            setState(() {
-              _isPublic = value;
-            });
-          },
-        ),
-      ],
+    return GlassCard(
+      radius: 26,
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _SectionLabel(text: 'artwork_edit_privacy'.tr()),
+          const SizedBox(height: 12),
+          _GlassSwitchRow(
+            label: 'artwork_edit_public_artwork'.tr(),
+            subtitle: 'artwork_edit_public_subtitle'.tr(),
+            value: _isPublic,
+            onChanged: (value) {
+              setState(() {
+                _isPublic = value;
+              });
+            },
+          ),
+        ],
+      ),
     );
   }
 
@@ -648,36 +735,122 @@ class _ArtworkEditScreenState extends State<ArtworkEditScreen> {
       children: [
         SizedBox(
           width: double.infinity,
-          child: ElevatedButton(
+          child: GradientCTAButton(
+            height: 52,
+            text: 'artwork_edit_save_button'.tr(),
+            icon: Icons.check_rounded,
+            isLoading: _isSaving,
             onPressed: _isSaving ? null : _saveArtwork,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: ArtbeatColors.primary,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-            ),
-            child: _isSaving
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text('artwork_edit_save_button'.tr()),
           ),
         ),
         const SizedBox(height: 16),
         SizedBox(
           width: double.infinity,
-          child: OutlinedButton(
-            onPressed: _isSaving ? null : _deleteArtwork,
-            style: OutlinedButton.styleFrom(
-              foregroundColor: Colors.red,
-              side: const BorderSide(color: Colors.red),
-              padding: const EdgeInsets.symmetric(vertical: 16),
+          child: GlassCard(
+            padding: EdgeInsets.zero,
+            radius: 22,
+            glassOpacity: 0.08,
+            borderOpacity: 0.16,
+            onTap: _isSaving ? null : _deleteArtwork,
+            child: Container(
+              height: 52,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(color: Colors.red.withValues(alpha: 0.6)),
+              ),
+              child: Text(
+                'artwork_edit_delete_button'.tr(),
+                style: GoogleFonts.spaceGrotesk(
+                  color: Colors.red,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
             ),
-            child: Text('artwork_edit_delete_button'.tr()),
           ),
         ),
       ],
+    );
+  }
+}
+
+class _SectionLabel extends StatelessWidget {
+  final String text;
+
+  const _SectionLabel({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: GoogleFonts.spaceGrotesk(
+        color: Colors.white.withValues(alpha: 0.92),
+        fontSize: 16,
+        fontWeight: FontWeight.w900,
+        letterSpacing: 0.3,
+      ),
+    );
+  }
+}
+
+class _GlassSwitchRow extends StatelessWidget {
+  final String label;
+  final String? subtitle;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  const _GlassSwitchRow({
+    required this.label,
+    this.subtitle,
+    required this.value,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: GoogleFonts.spaceGrotesk(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle!,
+                    style: GoogleFonts.spaceGrotesk(
+                      color: Colors.white.withValues(alpha: 0.7),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          Switch(
+            value: value,
+            onChanged: onChanged,
+            activeThumbColor: const Color(0xFF22D3EE),
+          ),
+        ],
+      ),
     );
   }
 }

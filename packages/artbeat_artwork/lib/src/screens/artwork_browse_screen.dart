@@ -3,8 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:artbeat_core/artbeat_core.dart' show MainLayout, SecureNetworkImage;
-import 'package:artbeat_core/shared_widgets.dart';
+import 'package:artbeat_core/artbeat_core.dart'
+    show
+        GlassCard,
+        GlassInputDecoration,
+        GradientCTAButton,
+        HudTopBar,
+        MainLayout,
+        SecureNetworkImage,
+        WorldBackground;
 import 'package:artbeat_ads/artbeat_ads.dart';
 import '../models/artwork_model.dart';
 
@@ -21,10 +28,10 @@ class _ArtworkBrowseScreenState extends State<ArtworkBrowseScreen> {
   static const int _adCycleLength = _artworksPerAd + 1;
 
   final _searchController = TextEditingController();
-  String _selectedLocation = 'All';
-  String _selectedMedium = 'All';
-  List<String> _availableLocations = ['All'];
-  List<String> _availableMediums = ['All'];
+  String _selectedLocation = 'common_all'.tr();
+  String _selectedMedium = 'common_all'.tr();
+  List<String> _availableLocations = ['common_all'.tr()];
+  List<String> _availableMediums = ['common_all'.tr()];
   bool _isLoadingFilters = true;
 
   @override
@@ -50,8 +57,8 @@ class _ArtworkBrowseScreenState extends State<ArtworkBrowseScreen> {
           .where('isPublic', isEqualTo: true)
           .get();
 
-      final Set<String> locations = {'All'};
-      final Set<String> mediums = {'All'};
+      final Set<String> locations = {'common_all'.tr()};
+      final Set<String> mediums = {'common_all'.tr()};
 
       for (final doc in snapshot.docs) {
         final data = doc.data() as Map<String, dynamic>;
@@ -82,10 +89,10 @@ class _ArtworkBrowseScreenState extends State<ArtworkBrowseScreen> {
 
   List<String> _sortFilterOptions(Set<String> values) {
     final sorted = values
-        .where((value) => value != 'All')
+        .where((value) => value != 'common_all'.tr())
         .toList()
       ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
-    return ['All', ...sorted];
+    return ['common_all'.tr(), ...sorted];
   }
 
   @override
@@ -130,10 +137,43 @@ class _ArtworkBrowseScreenState extends State<ArtworkBrowseScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF7C4DFF),
+                  Color(0xFF22D3EE),
+                ],
+              ),
+            ),
+            child: Text(
+              'artwork_browse_title'.tr(),
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'artwork_browse_subtitle'.tr(),
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              color: Colors.white.withValues(alpha: 0.92),
+            ),
+          ),
+          const SizedBox(height: 6),
           Text(
             'artwork_search_hint'.tr(),
             style: GoogleFonts.spaceGrotesk(
-              fontSize: 13,
+              fontSize: 12,
               fontWeight: FontWeight.w600,
               color: Colors.white.withValues(alpha: 0.7),
             ),
@@ -184,15 +224,8 @@ class _ArtworkBrowseScreenState extends State<ArtworkBrowseScreen> {
         color: Colors.white,
       ),
       cursorColor: const Color(0xFF22D3EE),
-      decoration: InputDecoration(
-        filled: true,
-        fillColor: Colors.white.withValues(alpha: 0.06),
+      decoration: GlassInputDecoration.search(
         hintText: 'artwork_search_hint'.tr(),
-        hintStyle: GoogleFonts.spaceGrotesk(
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-          color: Colors.white.withValues(alpha: 0.5),
-        ),
         prefixIcon: const Icon(Icons.search, color: Colors.white70),
         suffixIcon: IconButton(
           icon: const Icon(Icons.close, color: Colors.white70),
@@ -203,18 +236,6 @@ class _ArtworkBrowseScreenState extends State<ArtworkBrowseScreen> {
             _searchController.clear();
             _performSearch();
           },
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(24),
-          borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.18)),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(24),
-          borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.18)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(24),
-          borderSide: const BorderSide(color: Color(0xFF22D3EE)),
         ),
       ),
       onSubmitted: (_) => _performSearch(),
@@ -274,20 +295,21 @@ class _ArtworkBrowseScreenState extends State<ArtworkBrowseScreen> {
               backgroundColor: Colors.white24,
             ),
           ],
-          if (_selectedLocation != 'All' || _selectedMedium != 'All') ...[
+          if (_selectedLocation != 'common_all'.tr() ||
+              _selectedMedium != 'common_all'.tr()) ...[
             const SizedBox(height: 12),
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children: [
-                if (_selectedLocation != 'All')
+                if (_selectedLocation != 'common_all'.tr())
                   _buildActiveFilterChip(_selectedLocation, () {
-                    setState(() => _selectedLocation = 'All');
+                    setState(() => _selectedLocation = 'common_all'.tr());
                     _performSearch();
                   }),
-                if (_selectedMedium != 'All')
+                if (_selectedMedium != 'common_all'.tr())
                   _buildActiveFilterChip(_selectedMedium, () {
-                    setState(() => _selectedMedium = 'All');
+                    setState(() => _selectedMedium = 'common_all'.tr());
                     _performSearch();
                   }),
               ],
@@ -307,7 +329,7 @@ class _ArtworkBrowseScreenState extends State<ArtworkBrowseScreen> {
   }) {
     final resolvedValue = options.contains(value)
         ? value
-        : (options.isNotEmpty ? options.first : 'All');
+        : (options.isNotEmpty ? options.first : 'common_all'.tr());
     return DropdownButtonFormField<String>(
       initialValue: resolvedValue,
       dropdownColor: const Color(0xFF07060F),
@@ -317,24 +339,9 @@ class _ArtworkBrowseScreenState extends State<ArtworkBrowseScreen> {
         fontWeight: FontWeight.w600,
         color: Colors.white,
       ),
-      decoration: InputDecoration(
+      decoration: GlassInputDecoration.glass(
         labelText: label,
-        labelStyle: GoogleFonts.spaceGrotesk(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: Colors.white.withValues(alpha: 0.65),
-        ),
         prefixIcon: Icon(icon, color: Colors.white70, size: 18),
-        filled: true,
-        fillColor: Colors.white.withValues(alpha: 0.05),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(24),
-          borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.22)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(24),
-          borderSide: const BorderSide(color: Color(0xFF22D3EE)),
-        ),
       ),
       onChanged: (newValue) {
         if (newValue == null) {
@@ -640,11 +647,11 @@ class _ArtworkBrowseScreenState extends State<ArtworkBrowseScreen> {
 
     query = query.where('isPublic', isEqualTo: true);
 
-    if (_selectedLocation != 'All') {
+    if (_selectedLocation != 'common_all'.tr()) {
       query = query.where('location', isEqualTo: _selectedLocation);
     }
 
-    if (_selectedMedium != 'All') {
+    if (_selectedMedium != 'common_all'.tr()) {
       query = query.where('medium', isEqualTo: _selectedMedium);
     }
 

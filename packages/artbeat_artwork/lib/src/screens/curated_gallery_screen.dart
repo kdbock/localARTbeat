@@ -1,5 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:artbeat_core/artbeat_core.dart'
+    show
+        GlassCard,
+        GradientCTAButton,
+        HudTopBar,
+        SecureNetworkImage,
+        WorldBackground;
 import 'package:artbeat_core/artbeat_core.dart' as core;
 import '../models/collection_model.dart';
 import '../services/collection_service.dart';
@@ -76,13 +84,14 @@ class _CuratedGalleryScreenState extends State<CuratedGalleryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('curated_gallery_title'.tr()),
-        backgroundColor: core.ArtbeatColors.primaryGreen,
-        foregroundColor: Colors.white,
+      backgroundColor: Colors.transparent,
+      appBar: HudTopBar(
+        title: 'curated_gallery_title'.tr(),
+        showBackButton: true,
+        onBackPressed: () => Navigator.of(context).pop(),
         actions: [
           PopupMenuButton<CollectionType?>(
-            icon: const Icon(Icons.filter_list),
+            icon: const Icon(Icons.filter_list, color: Colors.white),
             onSelected: _filterCollections,
             itemBuilder: (context) => [
               PopupMenuItem(
@@ -97,48 +106,83 @@ class _CuratedGalleryScreenState extends State<CuratedGalleryScreen> {
           ),
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _error != null
-              ? _buildErrorState()
-              : RefreshIndicator(
-                  onRefresh: _refreshCollections,
-                  child: _buildContent(),
-                ),
+      body: WorldBackground(
+        child: SafeArea(
+          child: _isLoading
+              ? const Center(
+                  child: CircularProgressIndicator(
+                    valueColor:
+                        AlwaysStoppedAnimation<Color>(Color(0xFF22D3EE)),
+                  ),
+                )
+              : _error != null
+                  ? _buildErrorState()
+                  : RefreshIndicator(
+                      onRefresh: _refreshCollections,
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(12, 8, 12, 16),
+                        child: _buildContent(),
+                      ),
+                    ),
+        ),
+      ),
     );
   }
 
   Widget _buildErrorState() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.error_outline,
-            size: 64,
-            color: Colors.grey[400],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'curated_gallery_error_loading'.tr(),
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: Colors.grey[600],
+      child: GlassCard(
+        radius: 26,
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  height: 40,
+                  width: 40,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withValues(alpha: 0.08),
+                  ),
+                  child: const Icon(
+                    Icons.error_outline,
+                    color: Color(0xFFFF3D8D),
+                  ),
                 ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            _error ?? 'curated_gallery_error_unknown'.tr(),
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[500],
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'curated_gallery_error_loading'.tr(),
+                    style: GoogleFonts.spaceGrotesk(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
                 ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: _loadCollections,
-            child: Text('curated_gallery_retry_button'.tr()),
-          ),
-        ],
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(
+              _error ?? 'curated_gallery_error_unknown'.tr(),
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white.withValues(alpha: 0.76),
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 14),
+            GradientCTAButton(
+              height: 46,
+              text: 'curated_gallery_retry_button'.tr(),
+              icon: Icons.refresh,
+              onPressed: _loadCollections,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -151,28 +195,57 @@ class _CuratedGalleryScreenState extends State<CuratedGalleryScreen> {
     return CustomScrollView(
       slivers: [
         if (_featuredCollections.isNotEmpty) ...[
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: GlassCard(
+              radius: 22,
+              padding: const EdgeInsets.all(14),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.star,
-                    color: Colors.amber[600],
-                    size: 24,
+                  Container(
+                    height: 44,
+                    width: 44,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [Color(0xFFFFC857), Color(0xFF22D3EE)],
+                      ),
+                    ),
+                    child: const Icon(Icons.star, color: Colors.white),
                   ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'curated_gallery_featured_section'.tr(),
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: core.ArtbeatColors.textPrimary,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'curated_gallery_featured_section'.tr(),
+                          style: GoogleFonts.spaceGrotesk(
+                            color: Colors.white,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w900,
+                          ),
                         ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'curated_gallery_subtitle'.tr(),
+                          style: GoogleFonts.spaceGrotesk(
+                            color: Colors.white.withValues(alpha: 0.72),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
           ),
+        ),
           SliverToBoxAdapter(
             child: SizedBox(
               height: 280,
@@ -191,23 +264,28 @@ class _CuratedGalleryScreenState extends State<CuratedGalleryScreen> {
         ],
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Row(
               children: [
-                const Icon(
-                  Icons.collections,
-                  color: core.ArtbeatColors.primaryGreen,
-                  size: 24,
+                Container(
+                  height: 40,
+                  width: 40,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withValues(alpha: 0.08),
+                  ),
+                  child: const Icon(Icons.collections, color: Colors.white70),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 10),
                 Text(
                   _filterType != null
                       ? '${_filterType!.displayName} Collections'
                       : 'curated_gallery_all_collections'.tr(),
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: core.ArtbeatColors.textPrimary,
-                      ),
+                  style: GoogleFonts.spaceGrotesk(
+                    color: Colors.white,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
               ],
             ),
@@ -221,9 +299,11 @@ class _CuratedGalleryScreenState extends State<CuratedGalleryScreen> {
                 padding: const EdgeInsets.all(32),
                 child: Text(
                   'curated_gallery_no_collections'.tr(),
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Colors.grey[600],
-                      ),
+                  style: GoogleFonts.spaceGrotesk(
+                    color: Colors.white.withValues(alpha: 0.74),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ),
@@ -253,108 +333,120 @@ class _CuratedGalleryScreenState extends State<CuratedGalleryScreen> {
 
   Widget _buildEmptyState() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.collections_outlined,
-            size: 64,
-            color: Colors.grey[400],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'curated_gallery_empty_title'.tr(),
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: Colors.grey[600],
+      child: GlassCard(
+        radius: 26,
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  height: 44,
+                  width: 44,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withValues(alpha: 0.08),
+                  ),
+                  child: const Icon(Icons.collections_outlined,
+                      color: Colors.white70),
                 ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'curated_gallery_empty_message'.tr(),
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[500],
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'curated_gallery_empty_title'.tr(),
+                    style: GoogleFonts.spaceGrotesk(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
                 ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: _loadCollections,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: core.ArtbeatColors.primaryGreen,
-              foregroundColor: Colors.white,
+              ],
             ),
-            child: Text('curated_gallery_refresh_button'.tr()),
-          ),
-        ],
+            const SizedBox(height: 8),
+            Text(
+              'curated_gallery_empty_message'.tr(),
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white.withValues(alpha: 0.72),
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 12),
+            GradientCTAButton(
+              height: 44,
+              text: 'curated_gallery_refresh_button'.tr(),
+              icon: Icons.refresh,
+              onPressed: _loadCollections,
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildFeaturedCollectionCard(CollectionModel collection) {
-    return Container(
+    return SizedBox(
       width: 240,
-      margin: const EdgeInsets.only(right: 16),
-      child: Card(
-        elevation: 8,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: InkWell(
-          onTap: () => _navigateToCollectionDetail(collection),
-          borderRadius: BorderRadius.circular(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Cover image placeholder
-              Container(
+      child: GlassCard(
+        margin: const EdgeInsets.only(right: 16),
+        radius: 22,
+        padding: EdgeInsets.zero,
+        onTap: () => _navigateToCollectionDetail(collection),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
+              child: SizedBox(
                 height: 140,
                 width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(16),
-                  ),
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      core.ArtbeatColors.primaryGreen.withValues(alpha: 0.7),
-                      core.ArtbeatColors.primaryGreen.withValues(alpha: 0.3),
-                    ],
-                  ),
-                ),
-                child: Stack(
-                  children: [
-                    if (collection.coverImageUrl?.isNotEmpty == true)
-                      ClipRRect(
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(16),
-                        ),
-                        child: Image.network(
-                          collection.coverImageUrl!,
-                          width: double.infinity,
-                          height: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
+                child: collection.coverImageUrl?.isNotEmpty == true
+                    ? SecureNetworkImage(
+                        imageUrl: collection.coverImageUrl!,
+                        fit: BoxFit.cover,
+                        enableThumbnailFallback: true,
                       )
-                    else
-                      const Center(
-                        child: Icon(
-                          Icons.collections,
-                          size: 48,
-                          color: Colors.white,
+                    : Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              const Color(0xFF22D3EE).withValues(alpha: 0.8),
+                              const Color(0xFF7C4DFF).withValues(alpha: 0.5),
+                            ],
+                          ),
+                        ),
+                        child: const Center(
+                          child: Icon(Icons.collections,
+                              size: 48, color: Colors.white),
                         ),
                       ),
-
-                    // Featured badge
-                    Positioned(
-                      top: 8,
-                      right: 8,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        collection.title,
+                        style: GoogleFonts.spaceGrotesk(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const Spacer(),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
                           color: Colors.amber[600],
                           borderRadius: BorderRadius.circular(12),
@@ -362,225 +454,175 @@ class _CuratedGalleryScreenState extends State<CuratedGalleryScreen> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(
-                              Icons.star,
-                              size: 14,
-                              color: Colors.white,
-                            ),
-                            const SizedBox(width: 2),
+                            const Icon(Icons.star,
+                                size: 12, color: Colors.white),
+                            const SizedBox(width: 4),
                             Text(
                               'curated_gallery_featured_badge'.tr(),
-                              style: const TextStyle(
+                              style: GoogleFonts.spaceGrotesk(
                                 color: Colors.white,
                                 fontSize: 10,
-                                fontWeight: FontWeight.bold,
+                                fontWeight: FontWeight.w800,
                               ),
                             ),
                           ],
                         ),
                       ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    collection.type.displayName,
+                    style: GoogleFonts.spaceGrotesk(
+                      color: Colors.white.withValues(alpha: 0.8),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  if (collection.description.isNotEmpty) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      collection.description,
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.white.withValues(alpha: 0.72),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
-                ),
-              ),
-
-              // Collection details
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  const SizedBox(height: 10),
+                  Row(
                     children: [
+                      const Icon(Icons.image, size: 14, color: Colors.white70),
+                      const SizedBox(width: 4),
                       Text(
-                        collection.title,
-                        style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        collection.type.displayName,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: core.ArtbeatColors.primaryGreen,
-                              fontWeight: FontWeight.w600,
-                            ),
-                      ),
-                      if (collection.description.isNotEmpty) ...[
-                        const SizedBox(height: 4),
-                        Expanded(
-                          child: Text(
-                            collection.description,
-                            style:
-                                Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: Colors.grey[600],
-                                    ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                        '${collection.artworkIds.length} artworks',
+                        style: GoogleFonts.spaceGrotesk(
+                          color: Colors.white.withValues(alpha: 0.78),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
                         ),
-                      ],
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.image,
-                            size: 14,
-                            color: Colors.grey[500],
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            '${collection.artworkIds.length} artworks',
-                            style: TextStyle(
-                              color: Colors.grey[500],
-                              fontSize: 12,
-                            ),
-                          ),
-                          const Spacer(),
-                          Icon(
-                            Icons.visibility,
-                            size: 14,
-                            color: Colors.grey[500],
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            '${collection.viewCount}',
-                            style: TextStyle(
-                              color: Colors.grey[500],
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
+                      ),
+                      const Spacer(),
+                      const Icon(Icons.visibility,
+                          size: 14, color: Colors.white70),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${collection.viewCount}',
+                        style: GoogleFonts.spaceGrotesk(
+                          color: Colors.white.withValues(alpha: 0.78),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ],
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 
   Widget _buildPublicCollectionCard(CollectionModel collection) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: InkWell(
-        onTap: () => _navigateToCollectionDetail(collection),
-        borderRadius: BorderRadius.circular(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Cover image placeholder
-            Expanded(
-              flex: 3,
-              child: Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(12),
-                  ),
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Theme.of(context).primaryColor.withValues(alpha: 0.7),
-                      Theme.of(context).primaryColor.withValues(alpha: 0.3),
-                    ],
-                  ),
-                ),
-                child: collection.coverImageUrl?.isNotEmpty == true
-                    ? ClipRRect(
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(12),
+    return GlassCard(
+      padding: EdgeInsets.zero,
+      radius: 18,
+      onTap: () => _navigateToCollectionDetail(collection),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+            child: SizedBox(
+              height: 140,
+              width: double.infinity,
+              child: collection.coverImageUrl?.isNotEmpty == true
+                  ? SecureNetworkImage(
+                      imageUrl: collection.coverImageUrl!,
+                      fit: BoxFit.cover,
+                      enableThumbnailFallback: true,
+                    )
+                  : Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            const Color(0xFF22D3EE).withValues(alpha: 0.8),
+                            const Color(0xFF34D399).withValues(alpha: 0.5),
+                          ],
                         ),
-                        child: Image.network(
-                          collection.coverImageUrl!,
-                          width: double.infinity,
-                          height: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
-                      )
-                    : const Center(
+                      ),
+                      child: const Center(
                         child: Icon(
                           Icons.collections,
                           size: 32,
                           color: Colors.white,
                         ),
                       ),
-              ),
-            ),
-
-            // Collection details
-            Expanded(
-              flex: 2,
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      collection.title,
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 2),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  collection.title,
+                  style: GoogleFonts.spaceGrotesk(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  collection.type.displayName,
+                  style: GoogleFonts.spaceGrotesk(
+                    color: Colors.white.withValues(alpha: 0.8),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    const Icon(Icons.image, size: 12, color: Colors.white70),
+                    const SizedBox(width: 4),
                     Text(
-                      collection.type.displayName,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: core.ArtbeatColors.primaryGreen,
-                            fontSize: 10,
-                          ),
+                      '${collection.artworkIds.length}',
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.white.withValues(alpha: 0.8),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                     const Spacer(),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.image,
-                          size: 12,
-                          color: Colors.grey[500],
-                        ),
-                        const SizedBox(width: 2),
-                        Expanded(
-                          child: Text(
-                            '${collection.artworkIds.length}',
-                            style: TextStyle(
-                              color: Colors.grey[500],
-                              fontSize: 10,
-                            ),
-                          ),
-                        ),
-                        Icon(
-                          Icons.visibility,
-                          size: 12,
-                          color: Colors.grey[500],
-                        ),
-                        const SizedBox(width: 2),
-                        Text(
-                          '${collection.viewCount}',
-                          style: TextStyle(
-                            color: Colors.grey[500],
-                            fontSize: 10,
-                          ),
-                        ),
-                      ],
+                    const Icon(Icons.visibility,
+                        size: 12, color: Colors.white70),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${collection.viewCount}',
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.white.withValues(alpha: 0.8),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ],
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
