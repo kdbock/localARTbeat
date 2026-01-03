@@ -75,6 +75,8 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
     final xpProgress = _rewardsService.getLevelProgress(xp, level);
     final streakDays = dashboardViewModel.loginStreak;
     final w = MediaQuery.of(context).size.width;
+    const horizontalPadding = 18.0;
+    final questButtonWidth = math.max(0.0, w - horizontalPadding * 2);
 
     return Scaffold(
       key: _scaffoldKey,
@@ -179,7 +181,7 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
 
                             index: 0,
 
-                            width: w,
+                            width: questButtonWidth,
 
                             title: 'animated_dashboard_capture_title'.tr(),
 
@@ -219,7 +221,7 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
 
                             index: 1,
 
-                            width: w,
+                            width: questButtonWidth,
 
                             title: 'animated_dashboard_discover_title'.tr(),
 
@@ -258,7 +260,7 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
 
                             index: 2,
 
-                            width: w,
+                            width: questButtonWidth,
 
                             title: 'animated_dashboard_explore_title'.tr(),
 
@@ -294,7 +296,7 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
 
                             index: 3,
 
-                            width: w,
+                            width: questButtonWidth,
 
                             title: 'animated_dashboard_connect_title'.tr(),
 
@@ -332,10 +334,8 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                               '/2025_modern_onboarding',
                             ),
 
-                            onBusiness: () => Navigator.pushNamed(
-                              context,
-                              '/local-business',
-                            ),
+                            onBusiness: () =>
+                                Navigator.pushNamed(context, '/local-business'),
                           ),
                         ),
 
@@ -795,7 +795,8 @@ class _QuestButtonState extends State<_QuestButton> {
                 ),
               ],
             ),
-          ));
+          ),
+        );
       },
     );
   }

@@ -1,10 +1,33 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:artbeat_core/artbeat_core.dart' as core;
-import '../../theme/community_colors.dart';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+
 import '../../models/studio_model.dart';
 import '../../services/firestore_service.dart';
+import '../../widgets/widgets.dart';
+
+class _StudioChatPalette {
+  static const Color textPrimary = Color(0xF2FFFFFF);
+  static const Color textSecondary = Color(0xB3FFFFFF);
+  static const Color textTertiary = Color(0x73FFFFFF);
+  static const Color accentPurple = Color(0xFF7C4DFF);
+  static const Color accentTeal = Color(0xFF22D3EE);
+  static const Color accentGreen = Color(0xFF34D399);
+
+  static const Gradient primaryGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      accentPurple,
+      accentTeal,
+      accentGreen,
+    ],
+  );
+}
 
 class StudioChatScreen extends StatefulWidget {
   final String studioId;
@@ -22,7 +45,9 @@ class _StudioChatScreenState extends State<StudioChatScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirestoreService _firestoreService = FirestoreService();
   final ScrollController _scrollController = ScrollController();
-  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+  final DateFormat _timestampFormatter = DateFormat('MMM d • HH:mm');
+
+  StreamSubscription<QuerySnapshot>? _onlineSubscription;
 
   StudioModel? _studio;
   bool _isLoading = true;
@@ -37,6 +62,7 @@ class _StudioChatScreenState extends State<StudioChatScreen> {
 
   @override
   void dispose() {
+    _onlineSubscription?.cancel();
     _messageController.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -54,130 +80,535 @@ class _StudioChatScreenState extends State<StudioChatScreen> {
     try {
       final studios = await _firestoreService.getStudios();
       final studio = studios.firstWhere((s) => s.id == widget.studioId);
+      if (!mounted) return;
       setState(() {
         _studio = studio;
         _isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() => _isLoading = false);
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error loading studio: $e')));
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'community_studio_chat.error_loading_studio'.tr(
+              namedArgs: {'error': e.toString()},
+            ),
+          ),
+        ),
+      );
     }
   }
 
   void _setupOnlineStatus() {
-    // Set up online status tracking for studio members
     final user = _auth.currentUser;
-    if (user != null) {
-      _firestore
-          .collection('studios')
-          .doc(widget.studioId)
-          .collection('online_users')
-          .doc(user.uid)
-          .set({'online': true, 'lastSeen': FieldValue.serverTimestamp()});
+    if (user == null) return;
 
-      // Listen for online status changes
-      _firestore
-          .collection('studios')
-          .doc(widget.studioId)
-          .collection('online_users')
-          .snapshots()
-          .listen((snapshot) {
-            final onlineUsers = <String, bool>{};
-            for (final doc in snapshot.docs) {
-              onlineUsers[doc.id] = doc.data()['online'] as bool? ?? false;
-            }
-            setState(() => _onlineUsers = onlineUsers);
-          });
-    }
+    final studioDoc = _firestore.collection('studios').doc(widget.studioId);
+    studioDoc.collection('online_users').doc(user.uid).set({
+          'online': true,
+          'lastSeen': FieldValue.serverTimestamp(),
+        });
+
+    _onlineSubscription = studioDoc
+        .collection('online_users')
+        .snapshots()
+        .listen((snapshot) {
+      final onlineUsers = <String, bool>{};
+      for (final doc in snapshot.docs) {
+        onlineUsers[doc.id] = (doc.data()['online'] as bool?) ?? false;
+      }
+      if (mounted) {
+        setState(() => _onlineUsers = onlineUsers);
+      }
+    });
   }
 
   Future<void> _sendMessage() async {
-    if (_messageController.text.trim().isEmpty) return;
+    final text = _messageController.text.trim();
+    if (text.isEmpty) return;
 
     final user = _auth.currentUser;
-    if (user != null) {
-      try {
-        await _firestore
-            .collection('studios')
-            .doc(widget.studioId)
-            .collection('messages')
-            .add({
-              'text': _messageController.text.trim(),
-              'senderId': user.uid,
-              'senderName': user.displayName ?? 'Anonymous',
-              'timestamp': FieldValue.serverTimestamp(),
-              'messageType': 'text',
-            });
-        _messageController.clear();
+    if (user == null) return;
 
-        // Scroll to bottom after sending message
-        Future.delayed(const Duration(milliseconds: 100), () {
-          if (_scrollController.hasClients) {
-            _scrollController.animateTo(
-              0,
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeOut,
-            );
-          }
-        });
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Error sending message: $e')));
-        }
+    try {
+      await _firestore
+          .collection('studios')
+          .doc(widget.studioId)
+          .collection('messages')
+          .add({
+        'text': text,
+        'senderId': user.uid,
+        'senderName':
+            user.displayName ?? 'community_studio_chat.unknown_sender'.tr(),
+        'timestamp': FieldValue.serverTimestamp(),
+        'messageType': 'text',
+      });
+      _messageController.clear();
+      await Future<void>.delayed(const Duration(milliseconds: 120));
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          0,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
       }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'community_studio_chat.error_sending_message'.tr(
+              namedArgs: {'error': e.toString()},
+            ),
+          ),
+        ),
+      );
     }
   }
 
-  Widget _buildMessageBubble(DocumentSnapshot messageDoc) {
-    final message = messageDoc.data() as Map<String, dynamic>;
-    final isCurrentUser = message['senderId'] == _auth.currentUser?.uid;
-    final timestamp = (message['timestamp'] as Timestamp?)?.toDate();
+  @override
+  Widget build(BuildContext context) {
+    final studioName = _studio?.name.trim().isNotEmpty == true
+        ? _studio!.name
+        : 'community_studio_chat.generic_studio'.tr();
+
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      appBar: HudTopBar(
+        title: 'community_studio_chat.app_bar'
+            .tr(namedArgs: {'studio': studioName}),
+        glassBackground: true,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: FittedBox(child: _buildOnlineBadge()),
+          ),
+        ],
+      ),
+      body: WorldBackground(
+        child: SafeArea(
+          bottom: false,
+          child: _isLoading
+              ? _buildLoadingState()
+              : _buildChatBody(context, studioName),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return const Center(
+      child: CircularProgressIndicator(
+        valueColor: AlwaysStoppedAnimation<Color>(
+          _StudioChatPalette.accentTeal,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChatBody(BuildContext context, String studioName) {
+    final bottomInset = MediaQuery.of(context).padding.bottom;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      child: Column(
+        children: [
+          if (_studio != null) _buildStudioHero(studioName),
+          if (_studio != null) const SizedBox(height: 16),
+          Expanded(child: _buildMessagesCard()),
+          const SizedBox(height: 16),
+          _buildComposer(context),
+          SizedBox(height: bottomInset + 8),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOnlineBadge() {
+    final onlineCount =
+        _onlineUsers.values.where((isOnline) => isOnline).length.toString();
+
+    return GradientBadge(
+      text: 'community_studio_chat.online_count'
+          .tr(namedArgs: {'count': onlineCount}),
+      icon: Icons.bolt_rounded,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+    );
+  }
+
+  Widget _buildStudioHero(String studioName) {
+    final memberCount = _studio?.memberList.length ?? 0;
+    final description = _studio?.description.trim().isNotEmpty == true
+        ? _studio!.description.trim()
+        : 'community_studio_chat.description_fallback'.tr();
+    final privacyType = (_studio?.privacyType.toLowerCase() ?? 'public') ==
+            'private'
+        ? 'community_studio_chat.privacy_private'
+        : 'community_studio_chat.privacy_public';
+
+    return GlassCard(
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              _buildStudioMonogram(studioName),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      studioName,
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900,
+                        color: _StudioChatPalette.textPrimary,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'community_studio_chat.members_label'.tr(
+                        namedArgs: {'count': memberCount.toString()},
+                      ),
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: _StudioChatPalette.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            description,
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: _StudioChatPalette.textSecondary,
+              height: 1.6,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              GradientBadge(
+                text: 'community_studio_chat.live_badge'.tr(),
+                icon: Icons.wifi_tethering,
+              ),
+              GradientBadge(
+                text: privacyType.tr(),
+                icon: (_studio?.privacyType.toLowerCase() ?? 'public') ==
+                        'private'
+                    ? Icons.lock
+                    : Icons.explore,
+              ),
+              GradientBadge(
+                text: 'community_studio_chat.online_count'.tr(
+                  namedArgs: {
+                    'count': _onlineUsers.values
+                        .where((isOnline) => isOnline)
+                        .length
+                        .toString(),
+                  },
+                ),
+                icon: Icons.bolt,
+              ),
+            ],
+          ),
+          if (_studio?.tags.isNotEmpty == true) ...[
+            const SizedBox(height: 16),
+            Text(
+              'community_studio_chat.tags_label'.tr(),
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+                color: _StudioChatPalette.textTertiary,
+                letterSpacing: 0.6,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: _studio!.tags.take(6).map((tag) {
+                return GradientBadge(
+                  text: '#$tag',
+                  icon: Icons.tag,
+                  fontSize: 10,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                );
+              }).toList(),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStudioMonogram(String studioName) {
+    final letter = studioName.trim().isNotEmpty
+        ? studioName.trim()[0].toUpperCase()
+        : 'A';
+
+    return Container(
+      width: 56,
+      height: 56,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: _StudioChatPalette.primaryGradient,
+        boxShadow: [
+          BoxShadow(
+            color: _StudioChatPalette.accentPurple.withValues(alpha: 0.4),
+            blurRadius: 24,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        letter,
+        style: GoogleFonts.spaceGrotesk(
+          fontSize: 22,
+          fontWeight: FontWeight.w900,
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMessagesCard() {
+    return GlassCard(
+      margin: EdgeInsets.zero,
+      padding: EdgeInsets.zero,
+      child: StreamBuilder<QuerySnapshot>(
+        stream: _firestore
+            .collection('studios')
+            .doc(widget.studioId)
+            .collection('messages')
+            .orderBy('timestamp', descending: true)
+            .limit(50)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return _buildSectionLoadingState();
+          }
+
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return _buildEmptyState();
+          }
+
+          final messages = snapshot.data!.docs;
+
+          return ListView.builder(
+            controller: _scrollController,
+            reverse: true,
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            itemCount: messages.length,
+            itemBuilder: (context, index) {
+              return _buildMessageBubble(messages[index]);
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildSectionLoadingState() {
+    return const SizedBox(
+      height: 200,
+      child: Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(
+            _StudioChatPalette.accentPurple,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.chat_bubble_outline,
+            size: 64,
+            color: Colors.white.withValues(alpha: 0.3),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'community_studio_chat.empty_title'.tr(),
+            textAlign: TextAlign.center,
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              color: _StudioChatPalette.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'community_studio_chat.empty_subtitle'.tr(),
+            textAlign: TextAlign.center,
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: _StudioChatPalette.textSecondary,
+              height: 1.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMessageBubble(QueryDocumentSnapshot<Object?> messageDoc) {
+    final data = messageDoc.data() as Map<String, dynamic>? ?? {};
+    final isCurrentUser = data['senderId'] == _auth.currentUser?.uid;
+    final timestamp = (data['timestamp'] as Timestamp?)?.toDate();
+    final senderName = (data['senderName'] as String?)?.trim();
+    final resolvedSender = senderName?.isNotEmpty == true
+        ? senderName!
+        : 'community_studio_chat.unknown_sender'.tr();
+
+    final borderRadius = BorderRadius.only(
+      topLeft: const Radius.circular(20),
+      topRight: const Radius.circular(20),
+      bottomLeft: Radius.circular(isCurrentUser ? 20 : 4),
+      bottomRight: Radius.circular(isCurrentUser ? 4 : 20),
+    );
 
     return Align(
-      alignment: isCurrentUser ? Alignment.centerRight : Alignment.centerLeft,
+      alignment:
+          isCurrentUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-        constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * 0.75,
+        margin: EdgeInsetsDirectional.only(
+          top: 8,
+          bottom: 8,
+          start: isCurrentUser ? 64 : 0,
+          end: isCurrentUser ? 0 : 64,
         ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         decoration: BoxDecoration(
-          color: isCurrentUser ? CommunityColors.primary : Colors.grey.shade200,
-          borderRadius: BorderRadius.circular(16),
+          gradient: isCurrentUser ? _StudioChatPalette.primaryGradient : null,
+          color: isCurrentUser ? null : Colors.white.withValues(alpha: 0.08),
+          borderRadius: borderRadius,
+          border: Border.all(
+            color: isCurrentUser
+                ? Colors.white.withValues(alpha: 0.3)
+                : Colors.white.withValues(alpha: 0.12),
+          ),
+          boxShadow: isCurrentUser
+              ? [
+                  BoxShadow(
+                    color:
+                        _StudioChatPalette.accentPurple.withValues(alpha: 0.35),
+                    blurRadius: 24,
+                    offset: const Offset(0, 10),
+                  ),
+                ]
+              : null,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (!isCurrentUser)
+            if (!isCurrentUser) ...[
               Text(
-                message['senderName'] as String? ?? 'Unknown',
-                style: TextStyle(
+                resolvedSender,
+                style: GoogleFonts.spaceGrotesk(
                   fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: isCurrentUser ? Colors.white70 : Colors.black54,
+                  fontWeight: FontWeight.w700,
+                  color: _StudioChatPalette.textSecondary,
+                  letterSpacing: 0.4,
                 ),
               ),
+              const SizedBox(height: 8),
+            ],
             Text(
-              message['text'] as String? ?? '',
-              style: TextStyle(
-                color: isCurrentUser ? Colors.white : Colors.black,
-                fontSize: 16,
+              (data['text'] as String?) ?? '',
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color:
+                    isCurrentUser ? Colors.white : _StudioChatPalette.textPrimary,
+                height: 1.4,
               ),
             ),
-            if (timestamp != null)
+            if (timestamp != null) ...[
+              const SizedBox(height: 8),
               Text(
                 _formatTimestamp(timestamp),
-                style: TextStyle(
-                  fontSize: 10,
-                  color: isCurrentUser ? Colors.white70 : Colors.black45,
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: isCurrentUser
+                      ? Colors.white.withValues(alpha: 0.8)
+                      : _StudioChatPalette.textTertiary,
+                  letterSpacing: 0.3,
                 ),
               ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildComposer(BuildContext context) {
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+
+    return AnimatedPadding(
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeOut,
+      padding: EdgeInsets.only(bottom: bottomInset),
+      child: GlassCard(
+        margin: EdgeInsets.zero,
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Expanded(
+              child: GlassTextField(
+                controller: _messageController,
+                maxLines: 4,
+                keyboardType: TextInputType.multiline,
+                hintText: 'community_studio_chat.input_hint'.tr(),
+                onSubmitted: (_) => _sendMessage(),
+                decoration: GlassInputDecoration.glass(
+                  hintText: 'community_studio_chat.input_hint'.tr(),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            ValueListenableBuilder<TextEditingValue>(
+              valueListenable: _messageController,
+              builder: (context, value, _) {
+                final canSend = value.text.trim().isNotEmpty;
+                return GradientCTAButton(
+                  width: 128,
+                  height: 52,
+                  text: 'community_studio_chat.send_cta'.tr(),
+                  icon: Icons.send_rounded,
+                  onPressed: canSend ? _sendMessage : null,
+                );
+              },
+            ),
           ],
         ),
       ),
@@ -189,210 +620,21 @@ class _StudioChatScreenState extends State<StudioChatScreen> {
     final difference = now.difference(timestamp);
 
     if (difference.inDays > 0) {
-      return '${timestamp.day}/${timestamp.month} ${timestamp.hour}:${timestamp.minute.toString().padLeft(2, '0')}';
-    } else if (difference.inHours > 0) {
-      return '${difference.inHours}h ago';
-    } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}m ago';
-    } else {
-      return 'Just now';
-    }
-  }
-
-  Widget _buildOnlineIndicator() {
-    final onlineCount = _onlineUsers.values.where((online) => online).length;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.green.shade100,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.circle, color: Colors.green, size: 12),
-          const SizedBox(width: 4),
-          Text(
-            '$onlineCount online',
-            style: const TextStyle(
-              fontSize: 12,
-              color: Colors.green,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      final formatted = _timestampFormatter.format(timestamp);
+      return 'community_studio_chat.full_timestamp'
+          .tr(namedArgs: {'date': formatted});
     }
 
-    return core.MainLayout(
-      scaffoldKey: scaffoldKey,
-      currentIndex: -1, // Detail screen
-      appBar: core.EnhancedUniversalHeader(
-        title: _studio?.name ?? 'Studio Chat',
-        backgroundGradient: CommunityColors.communityGradient,
-        titleGradient: const LinearGradient(
-          colors: [Colors.white, Colors.white],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        foregroundColor: Colors.white,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: _buildOnlineIndicator(),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          // Studio info header
-          if (_studio != null)
-            Container(
-              padding: const EdgeInsets.all(16),
-              color: Colors.grey.shade50,
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    backgroundColor: CommunityColors.primary,
-                    child: Text(
-                      _studio!.name.substring(0, 1).toUpperCase(),
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _studio!.name,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          '${_studio!.memberList.length} members',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey.shade600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
+    if (difference.inHours > 0) {
+      return 'community_studio_chat.hours_ago'
+          .tr(namedArgs: {'hours': difference.inHours.toString()});
+    }
 
-          // Messages list
-          Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: _firestore
-                  .collection('studios')
-                  .doc(widget.studioId)
-                  .collection('messages')
-                  .orderBy('timestamp', descending: true)
-                  .limit(50)
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+    if (difference.inMinutes > 0) {
+      return 'community_studio_chat.minutes_ago'
+          .tr(namedArgs: {'minutes': difference.inMinutes.toString()});
+    }
 
-                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.chat_bubble_outline,
-                          size: 64,
-                          color: Colors.grey,
-                        ),
-                        SizedBox(height: 16),
-                        Text(
-                          'No messages yet',
-                          style: TextStyle(color: Colors.grey, fontSize: 16),
-                        ),
-                        Text(
-                          'Start the conversation!',
-                          style: TextStyle(color: Colors.grey, fontSize: 14),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
-                final messages = snapshot.data!.docs;
-
-                return ListView.builder(
-                  controller: _scrollController,
-                  reverse: true,
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  itemCount: messages.length,
-                  itemBuilder: (context, index) {
-                    return _buildMessageBubble(messages[index]);
-                  },
-                );
-              },
-            ),
-          ),
-
-          // Message input
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border(top: BorderSide(color: Colors.grey.shade200)),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _messageController,
-                    decoration: InputDecoration(
-                      hintText: 'Type your message...',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(24),
-                        borderSide: BorderSide.none,
-                      ),
-                      filled: true,
-                      fillColor: Colors.grey.shade100,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                    ),
-                    maxLines: null,
-                    textInputAction: TextInputAction.send,
-                    onSubmitted: (_) => _sendMessage(),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  decoration: const BoxDecoration(
-                    color: CommunityColors.primary,
-                    shape: BoxShape.circle,
-                  ),
-                  child: IconButton(
-                    icon: const Icon(Icons.send, color: Colors.white),
-                    onPressed: _sendMessage,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+    return 'community_studio_chat.just_now'.tr();
   }
 }

@@ -163,6 +163,8 @@ class GlassTextField extends StatelessWidget {
     this.validator,
     this.autofocus = false,
     this.enabled = true,
+    this.focusNode,
+    this.decoration,
   });
 
   final TextEditingController? controller;
@@ -179,6 +181,8 @@ class GlassTextField extends StatelessWidget {
   final FormFieldValidator<String>? validator;
   final bool autofocus;
   final bool enabled;
+  final FocusNode? focusNode;
+  final InputDecoration? decoration;
 
   @override
   Widget build(BuildContext context) {
@@ -191,19 +195,21 @@ class GlassTextField extends StatelessWidget {
       onSubmitted: onSubmitted,
       autofocus: autofocus,
       enabled: enabled,
+      focusNode: focusNode,
       style: GoogleFonts.spaceGrotesk(
         fontSize: 14,
         fontWeight: FontWeight.w600,
         color: Colors.white,
       ),
       cursorColor: const Color(0xFF22D3EE),
-      decoration: GlassInputDecoration(
-        hintText: hintText,
-        labelText: labelText,
-        errorText: errorText,
-        prefixIcon: prefixIcon,
-        suffixIcon: suffixIcon,
-      ),
+      decoration: decoration ??
+          GlassInputDecoration(
+            hintText: hintText,
+            labelText: labelText,
+            errorText: errorText,
+            prefixIcon: prefixIcon,
+            suffixIcon: suffixIcon,
+          ),
     );
   }
 }

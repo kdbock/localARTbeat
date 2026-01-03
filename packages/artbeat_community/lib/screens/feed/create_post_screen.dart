@@ -9,11 +9,16 @@ import 'package:image_editor_plus/image_editor_plus.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../services/art_community_service.dart';
 import '../../services/firebase_storage_service.dart';
 import '../../services/moderation_service.dart';
 import '../../models/post_model.dart';
-import 'package:artbeat_core/artbeat_core.dart';
+import '../../widgets/gradient_badge.dart';
+import '../../widgets/gradient_cta_button.dart';
+import '../../widgets/glass_input_decoration.dart';
+import 'package:artbeat_core/artbeat_core.dart'
+    hide GradientBadge, GradientCTAButton, GlassInputDecoration;
 
 /// Enhanced create post screen with multimedia support and AI moderation
 class CreatePostScreen extends StatefulWidget {
@@ -62,6 +67,12 @@ class _CreatePostScreenState extends State<CreatePostScreen>
   bool _isArtistPost = false;
   double _uploadProgress = 0.0;
   double _videoUploadProgress = 0.0;
+
+  bool get _hasAnyMediaSelected =>
+      _selectedImages.isNotEmpty ||
+      _selectedVideo != null ||
+      _selectedAudio != null ||
+      _prefilledImageUrl != null;
 
   VideoPlayerController? _videoController;
   AudioPlayer? _audioPlayer;
@@ -168,8 +179,8 @@ class _CreatePostScreenState extends State<CreatePostScreen>
             );
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Image skipped due to size limit'),
+                SnackBar(
+                  content: Text('create_post_image_skipped_size'.tr()),
                 ),
               );
             }
@@ -192,7 +203,15 @@ class _CreatePostScreenState extends State<CreatePostScreen>
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error picking images: $e')));
+        ).showSnackBar(
+          SnackBar(
+            content: Text(
+              'create_post_error_pick_images'.tr(
+                namedArgs: {'error': e.toString()},
+              ),
+            ),
+          ),
+        );
       }
     } finally {
       if (mounted) {
@@ -239,7 +258,11 @@ class _CreatePostScreenState extends State<CreatePostScreen>
           debugPrint('DEBUG: Video file too large');
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Video file too large (max 50MB)')),
+              SnackBar(
+                content: Text(
+                  'create_post_error_video_size'.tr(namedArgs: {'limit': '50MB'}),
+                ),
+              ),
             );
           }
         }
@@ -251,7 +274,15 @@ class _CreatePostScreenState extends State<CreatePostScreen>
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error picking video: $e')));
+        ).showSnackBar(
+          SnackBar(
+            content: Text(
+              'create_post_error_pick_video'.tr(
+                namedArgs: {'error': e.toString()},
+              ),
+            ),
+          ),
+        );
       }
     } finally {
       if (mounted) {
@@ -292,7 +323,11 @@ class _CreatePostScreenState extends State<CreatePostScreen>
           debugPrint('DEBUG: Audio file too large');
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Audio file too large (max 10MB)')),
+              SnackBar(
+                content: Text(
+                  'create_post_error_audio_size'.tr(namedArgs: {'limit': '10MB'}),
+                ),
+              ),
             );
           }
         }
@@ -304,7 +339,15 @@ class _CreatePostScreenState extends State<CreatePostScreen>
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error picking audio: $e')));
+        ).showSnackBar(
+          SnackBar(
+            content: Text(
+              'create_post_error_pick_audio'.tr(
+                namedArgs: {'error': e.toString()},
+              ),
+            ),
+          ),
+        );
       }
     } finally {
       if (mounted) {
@@ -341,7 +384,15 @@ class _CreatePostScreenState extends State<CreatePostScreen>
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error editing image: $e')));
+        ).showSnackBar(
+          SnackBar(
+            content: Text(
+              'create_post_error_edit_image'.tr(
+                namedArgs: {'error': e.toString()},
+              ),
+            ),
+          ),
+        );
       }
     }
   }
@@ -354,9 +405,9 @@ class _CreatePostScreenState extends State<CreatePostScreen>
         'DEBUG: Post submission already in progress, ignoring duplicate tap',
       );
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please wait while your post is being created...'),
-          duration: Duration(seconds: 2),
+        SnackBar(
+          content: Text('create_post_guard_message'.tr()),
+          duration: const Duration(seconds: 2),
         ),
       );
       return;
@@ -377,7 +428,9 @@ class _CreatePostScreenState extends State<CreatePostScreen>
         _selectedVideo == null &&
         _selectedAudio == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please add some content or media')),
+        SnackBar(
+          content: Text('create_post_validation_missing_content'.tr()),
+        ),
       );
       return;
     }
@@ -556,8 +609,8 @@ class _CreatePostScreenState extends State<CreatePostScreen>
           SnackBar(
             content: Text(
               widget.postToEdit != null
-                  ? 'Post updated successfully!'
-                  : 'Post created successfully!',
+                  ? 'create_post_toast_updated'.tr()
+                  : 'create_post_toast_created'.tr(),
             ),
             backgroundColor: Colors.green,
           ),
@@ -566,13 +619,25 @@ class _CreatePostScreenState extends State<CreatePostScreen>
       } else {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('Failed to create post')));
+        ).showSnackBar(
+          SnackBar(
+            content: Text('create_post_error_failed'.tr()),
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error creating post: $e')));
+        ).showSnackBar(
+          SnackBar(
+            content: Text(
+              'create_post_error_generic'.tr(
+                namedArgs: {'error': e.toString()},
+              ),
+            ),
+          ),
+        );
       }
     } finally {
       if (mounted) {
@@ -608,80 +673,119 @@ class _CreatePostScreenState extends State<CreatePostScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        title: Text(
-          widget.postToEdit != null
-              ? 'Edit Post'
-              : 'screen_title_create_post'.tr(),
-          style: const TextStyle(fontWeight: FontWeight.w600),
+    final isEditing = widget.postToEdit != null;
+    final title =
+        isEditing ? 'create_post_edit_title'.tr() : 'screen_title_create_post'.tr();
+    final actionLabel =
+        isEditing ? 'create_post_update_cta'.tr() : 'create_post_publish_cta'.tr();
+
+    return WorldBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: HudTopBar(
+          title: title,
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: GradientCTAButton(
+                text: actionLabel,
+                onPressed:
+                    (_isLoading || _isUploadingMedia) ? null : _createPostWithGuard,
+                isLoading: _isLoading || _isUploadingMedia,
+                height: 44,
+                width: 160,
+              ),
+            ),
+          ],
         ),
-        backgroundColor: ArtbeatColors.primaryPurple,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 16, top: 8, bottom: 8),
-            child: ElevatedButton(
-              onPressed: (_isLoading || _isUploadingMedia)
-                  ? null
-                  : _createPostWithGuard,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: ArtbeatColors.primaryPurple,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _buildUserInfoSection(),
+                    const SizedBox(height: 16),
+                    _buildContentInput(),
+                    const SizedBox(height: 16),
+                    _buildMediaSelectionButtons(),
+                    if (_hasAnyMediaSelected) ...[
+                      const SizedBox(height: 16),
+                      _buildMediaPreview(),
+                    ],
+                    const SizedBox(height: 16),
+                    _buildTagsInput(),
+                    const SizedBox(height: 16),
+                    _buildPostOptions(),
+                    if (_isUploadingMedia) ...[
+                      const SizedBox(height: 16),
+                      _buildUploadProgress(),
+                    ],
+                  ],
                 ),
               ),
-              child: _isLoading || _isUploadingMedia
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : Text(
-                      widget.postToEdit != null ? 'Update' : 'Post',
-                      style: const TextStyle(fontWeight: FontWeight.w600),
-                    ),
             ),
           ),
-        ],
+        ),
       ),
-      body: FadeTransition(
-        opacity: _fadeAnimation,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // User info section
-              _buildUserInfoSection(),
-              const SizedBox(height: 20),
+    );
+  }
 
-              // Content input
-              _buildContentInput(),
-              const SizedBox(height: 20),
+  TextStyle _grotesk(double size, FontWeight weight, {double opacity = 0.92}) {
+    return GoogleFonts.spaceGrotesk(
+      fontSize: size,
+      fontWeight: weight,
+      color: Colors.white.withValues(alpha: opacity),
+      letterSpacing: 0.3,
+    );
+  }
 
-              // Media selection buttons
-              _buildMediaSelectionButtons(),
-              const SizedBox(height: 20),
+  Widget _sectionHeader(String title, [String? subtitle]) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: _grotesk(18, FontWeight.w800)),
+        if (subtitle != null && subtitle.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Text(subtitle, style: _grotesk(13, FontWeight.w600, opacity: 0.7)),
+        ],
+      ],
+    );
+  }
 
-              // Selected media preview
-              _buildMediaPreview(),
+  String _mediaCountLabel(int current, int max) {
+    return 'create_post_media_counter'.tr(
+      namedArgs: {
+        'current': current.toString(),
+        'max': max.toString(),
+      },
+    );
+  }
 
-              // Tags input
-              _buildTagsInput(),
-              const SizedBox(height: 20),
-
-              // Post options
-              _buildPostOptions(),
-
-              // Upload progress
-              if (_isUploadingMedia) _buildUploadProgress(),
-            ],
+  Widget _buildIconActionButton({
+    required IconData icon,
+    required VoidCallback onTap,
+    Color? background,
+    Color iconColor = Colors.white,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(22),
+        child: Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: background ?? Colors.black.withValues(alpha: 0.55),
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
           ),
+          child: Icon(icon, color: iconColor, size: 20),
         ),
       ),
     );
@@ -689,67 +793,77 @@ class _CreatePostScreenState extends State<CreatePostScreen>
 
   Widget _buildUserInfoSection() {
     final user = FirebaseAuth.instance.currentUser;
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+    return GlassCard(
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 28,
+                backgroundColor: Colors.white.withValues(alpha: 0.08),
+                backgroundImage: ImageUrlValidator.safeNetworkImage(user?.photoURL),
+                child: !ImageUrlValidator.isValidImageUrl(user?.photoURL)
+                    ? const Icon(Icons.person, color: Colors.white, size: 24)
+                    : null,
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      user?.displayName ?? 'create_post_anonymous_user'.tr(),
+                      style: _grotesk(18, FontWeight.w700),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'create_post_hero_subtitle'.tr(),
+                      style: _grotesk(13, FontWeight.w600, opacity: 0.7),
+                    ),
+                  ],
+                ),
+              ),
+              if (_isArtistPost)
+                GradientBadge(
+                  text: 'create_post_artist_badge'.tr(),
+                  icon: Icons.auto_awesome,
+                ),
+            ],
           ),
+          if (widget.isDiscussionPost) ...[
+            const SizedBox(height: 16),
+            GradientBadge(
+              text: 'create_post_discussion_badge'.tr(),
+              icon: Icons.forum_outlined,
+            ),
+          ],
         ],
       ),
-      child: Row(
+    );
+  }
+
+  Widget _buildContentInput() {
+    return GlassCard(
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(
-            radius: 24,
-            backgroundColor: ArtbeatColors.primaryPurple.withValues(alpha: 0.1),
-            backgroundImage: ImageUrlValidator.safeNetworkImage(user?.photoURL),
-            child: !ImageUrlValidator.isValidImageUrl(user?.photoURL)
-                ? const Icon(
-                    Icons.person,
-                    color: ArtbeatColors.primaryPurple,
-                    size: 24,
-                  )
-                : null,
+          _sectionHeader(
+            'create_post_story_title'.tr(),
+            'create_post_story_subtitle'.tr(),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  user?.displayName ?? 'Anonymous User',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
-                  ),
-                ),
-                if (_isArtistPost)
-                  Container(
-                    margin: const EdgeInsets.only(top: 4),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: ArtbeatColors.primaryGreen.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Text(
-                      'Artist',
-                      style: TextStyle(
-                        color: ArtbeatColors.primaryGreen,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-              ],
+          const SizedBox(height: 16),
+          TextField(
+            controller: _contentController,
+            maxLines: 6,
+            style: _grotesk(15, FontWeight.w600),
+            cursorColor: const Color(0xFF22D3EE),
+            decoration: GlassInputDecoration(
+              hintText: 'create_post_content_hint'.tr(),
             ),
           ),
         ],
@@ -757,67 +871,51 @@ class _CreatePostScreenState extends State<CreatePostScreen>
     );
   }
 
-  Widget _buildContentInput() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+  Widget _buildMediaSelectionButtons() {
+    return GlassCard(
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _sectionHeader(
+            'create_post_media_title'.tr(),
+            'create_post_media_subtitle'.tr(),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              _buildMediaButton(
+                icon: Icons.photo_library_outlined,
+                label: 'create_post_media_images_label'.tr(),
+                subtitle: _mediaCountLabel(_selectedImages.length, 4),
+                isActive: _selectedImages.isNotEmpty,
+                onTap: _pickImages,
+              ),
+              const SizedBox(width: 16),
+              _buildMediaButton(
+                icon: Icons.videocam_outlined,
+                label: 'create_post_media_video_label'.tr(),
+                subtitle: _selectedVideo == null
+                    ? _mediaCountLabel(0, 1)
+                    : _mediaCountLabel(1, 1),
+                isActive: _selectedVideo != null,
+                onTap: _pickVideo,
+              ),
+              const SizedBox(width: 16),
+              _buildMediaButton(
+                icon: Icons.audiotrack,
+                label: 'create_post_media_audio_label'.tr(),
+                subtitle: _selectedAudio == null
+                    ? _mediaCountLabel(0, 1)
+                    : _mediaCountLabel(1, 1),
+                isActive: _selectedAudio != null,
+                onTap: _pickAudio,
+              ),
+            ],
           ),
         ],
       ),
-      child: TextField(
-        controller: _contentController,
-        maxLines: 6,
-        enableInteractiveSelection: false,
-        decoration: InputDecoration(
-          hintText: 'Share your thoughts, artwork, or creative process...',
-          hintStyle: TextStyle(color: Colors.grey[500], fontSize: 16),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.all(16),
-        ),
-        style: const TextStyle(fontSize: 16),
-      ),
-    );
-  }
-
-  Widget _buildMediaSelectionButtons() {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildMediaButton(
-            icon: Icons.photo_library,
-            label: 'Images',
-            subtitle: '${_selectedImages.length}/4',
-            onTap: _pickImages,
-            isActive: _selectedImages.isNotEmpty,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildMediaButton(
-            icon: Icons.videocam,
-            label: 'Video',
-            subtitle: _selectedVideo != null ? '1' : '0',
-            onTap: _pickVideo,
-            isActive: _selectedVideo != null,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildMediaButton(
-            icon: Icons.audiotrack,
-            label: 'Audio',
-            subtitle: _selectedAudio != null ? '1' : '0',
-            onTap: _pickAudio,
-            isActive: _selectedAudio != null,
-          ),
-        ),
-      ],
     );
   }
 
@@ -825,136 +923,126 @@ class _CreatePostScreenState extends State<CreatePostScreen>
     required IconData icon,
     required String label,
     required String subtitle,
-    required VoidCallback onTap,
     required bool isActive,
+    required VoidCallback onTap,
   }) {
-    return GestureDetector(
-      onTap: _isPickingMedia ? null : onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: isActive
-              ? ArtbeatColors.primaryPurple.withValues(alpha: 0.1)
-              : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isActive ? ArtbeatColors.primaryPurple : Colors.grey[300]!,
-            width: isActive ? 2 : 1,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            Icon(
-              icon,
-              color: isActive ? ArtbeatColors.primaryPurple : Colors.grey[600],
-              size: 24,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: TextStyle(
-                fontWeight: FontWeight.w500,
+    final buttonColor =
+        isActive ? Colors.white.withValues(alpha: 0.18) : Colors.white.withValues(alpha: 0.08);
+
+    return Expanded(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: _isPickingMedia ? null : onTap,
+          borderRadius: BorderRadius.circular(24),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            height: 128,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              color: buttonColor,
+              border: Border.all(
                 color: isActive
-                    ? ArtbeatColors.primaryPurple
-                    : Colors.grey[700],
+                    ? const Color(0xFF22D3EE)
+                    : Colors.white.withValues(alpha: 0.18),
+                width: 1.5,
               ),
+              boxShadow: isActive
+                  ? [
+                      BoxShadow(
+                        color: const Color(0xFF22D3EE).withValues(alpha: 0.35),
+                        blurRadius: 28,
+                        offset: const Offset(0, 12),
+                      ),
+                    ]
+                  : null,
             ),
-            Text(
-              subtitle,
-              style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, color: Colors.white, size: 28),
+                const SizedBox(height: 12),
+                Text(label, style: _grotesk(15, FontWeight.w700)),
+                const SizedBox(height: 8),
+                Text(
+                  subtitle,
+                  style: _grotesk(12, FontWeight.w600, opacity: 0.7),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildMediaPreview() {
-    if (_selectedImages.isEmpty &&
-        _selectedVideo == null &&
-        _selectedAudio == null &&
-        _prefilledImageUrl == null) {
-      return const SizedBox.shrink();
-    }
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 20),
+    return GlassCard(
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Media Preview',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 12),
-
-          // Pre-filled image preview (from discovery)
-          if (_prefilledImageUrl != null) _buildPrefilledImagePreview(),
-
-          // Images preview
-          if (_selectedImages.isNotEmpty) _buildImagesPreview(),
-
-          // Video preview
-          if (_selectedVideo != null) _buildVideoPreview(),
-
-          // Audio preview
+          _sectionHeader('create_post_media_preview_title'.tr()),
+          const SizedBox(height: 16),
+          if (_prefilledImageUrl != null) ...[
+            _buildPrefilledImagePreview(),
+            const SizedBox(height: 16),
+          ],
+          if (_selectedImages.isNotEmpty) ...[
+            _buildImagesPreview(),
+            if (_selectedVideo != null || _selectedAudio != null)
+              const SizedBox(height: 16),
+          ],
+          if (_selectedVideo != null) ...[
+            _buildVideoPreview(),
+            if (_selectedAudio != null) const SizedBox(height: 16),
+          ],
           if (_selectedAudio != null) _buildAudioPreview(),
         ],
       ),
     );
   }
 
-  /// Build preview for pre-filled image from discovery
   Widget _buildPrefilledImagePreview() {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+    return SizedBox(
+      height: 168,
       child: Stack(
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: CachedNetworkImage(
-              imageUrl: _prefilledImageUrl!,
-              width: 120,
-              height: 120,
-              fit: BoxFit.cover,
-              placeholder: (context, url) => Container(
-                width: 120,
-                height: 120,
-                color: Colors.grey[300],
-                child: const Center(child: CircularProgressIndicator()),
-              ),
-              errorWidget: (context, url, error) => Container(
-                width: 120,
-                height: 120,
-                color: Colors.grey[300],
-                child: const Icon(Icons.broken_image, color: Colors.red),
+          Positioned.fill(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: CachedNetworkImage(
+                imageUrl: _prefilledImageUrl!,
+                fit: BoxFit.cover,
+                placeholder: (context, _) => Container(
+                  color: Colors.white.withValues(alpha: 0.08),
+                  alignment: Alignment.center,
+                  child: const CircularProgressIndicator(),
+                ),
+                errorWidget: (context, url, error) => Container(
+                  color: Colors.white.withValues(alpha: 0.08),
+                  alignment: Alignment.center,
+                  child: const Icon(Icons.broken_image, color: Colors.white),
+                ),
               ),
             ),
           ),
           Positioned(
-            top: 4,
-            right: 4,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: ArtbeatColors.primaryPurple,
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: const Text(
-                'Discovery',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+            top: 16,
+            left: 16,
+            child: GradientBadge(
+              text: 'create_post_prefilled_badge'.tr(),
+              icon: Icons.auto_awesome,
+            ),
+          ),
+          Positioned(
+            top: 16,
+            right: 16,
+            child: _buildIconActionButton(
+              icon: Icons.close,
+              onTap: () => setState(() => _prefilledImageUrl = null),
             ),
           ),
         ],
@@ -964,50 +1052,49 @@ class _CreatePostScreenState extends State<CreatePostScreen>
 
   Widget _buildImagesPreview() {
     return SizedBox(
-      height: 120,
-      child: ListView.builder(
+      height: 168,
+      child: ListView.separated(
         scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
         itemCount: _selectedImages.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 16),
         itemBuilder: (context, index) {
-          return Container(
-            margin: const EdgeInsets.only(right: 12),
+          return SizedBox(
+            width: 152,
             child: Stack(
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.file(
-                    _selectedImages[index],
-                    width: 120,
-                    height: 120,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      // Fallback for decompression errors
-                      return Container(
-                        width: 120,
-                        height: 120,
-                        color: Colors.grey[300],
-                        child: const Icon(
-                          Icons.broken_image,
-                          color: Colors.red,
-                        ),
-                      );
-                    },
+                Positioned.fill(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(24),
+                    child: Image.file(
+                      _selectedImages[index],
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: Colors.white.withValues(alpha: 0.08),
+                          alignment: Alignment.center,
+                          child: const Icon(Icons.broken_image, color: Colors.white),
+                        );
+                      },
+                    ),
                   ),
                 ),
                 Positioned(
-                  top: 4,
-                  right: 4,
-                  child: IconButton(
-                    icon: const Icon(Icons.edit, size: 20),
-                    onPressed: () => _editImage(index),
+                  top: 12,
+                  right: 12,
+                  child: _buildIconActionButton(
+                    icon: Icons.edit,
+                    onTap: () => _editImage(index),
+                    background: Colors.black.withValues(alpha: 0.55),
                   ),
                 ),
                 Positioned(
-                  bottom: 4,
-                  right: 4,
-                  child: IconButton(
-                    icon: const Icon(Icons.close, color: Colors.red, size: 20),
-                    onPressed: () => _removeImage(index),
+                  bottom: 12,
+                  right: 12,
+                  child: _buildIconActionButton(
+                    icon: Icons.close,
+                    onTap: () => _removeImage(index),
+                    background: const Color(0xFFFF3D8D).withValues(alpha: 0.7),
                   ),
                 ),
               ],
@@ -1020,51 +1107,50 @@ class _CreatePostScreenState extends State<CreatePostScreen>
 
   Widget _buildVideoPreview() {
     if (_videoController == null || !_videoController!.value.isInitialized) {
-      return Container(
-        height: 120,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: Colors.grey[300],
-          borderRadius: BorderRadius.circular(8),
+      return SizedBox(
+        height: 192,
+        child: Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation(Colors.white.withValues(alpha: 0.7)),
+          ),
         ),
-        child: const Center(child: CircularProgressIndicator()),
       );
     }
 
-    return Container(
-      height: 120,
-      margin: const EdgeInsets.only(bottom: 12),
+    return SizedBox(
+      height: 192,
       child: Stack(
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: AspectRatio(
-              aspectRatio: _videoController!.value.aspectRatio,
-              child: VideoPlayer(_videoController!),
-            ),
-          ),
-          Positioned(
-            top: 4,
-            right: 4,
-            child: GestureDetector(
-              onTap: _removeVideo,
-              child: Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: Colors.red.withValues(alpha: 0.8),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: const Icon(Icons.close, color: Colors.white, size: 16),
+          Positioned.fill(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: AspectRatio(
+                aspectRatio: _videoController!.value.aspectRatio,
+                child: VideoPlayer(_videoController!),
               ),
             ),
           ),
-          const Positioned(
-            bottom: 8,
-            left: 8,
-            child: Icon(
-              Icons.play_circle_filled,
-              color: Colors.white,
-              size: 32,
+          Positioned(
+            top: 16,
+            right: 16,
+            child: _buildIconActionButton(
+              icon: Icons.close,
+              onTap: _removeVideo,
+            ),
+          ),
+          Positioned(
+            bottom: 16,
+            left: 16,
+            child: _buildIconActionButton(
+              icon: _videoController!.value.isPlaying ? Icons.pause : Icons.play_arrow,
+              onTap: () {
+                if (_videoController!.value.isPlaying) {
+                  _videoController!.pause();
+                } else {
+                  _videoController!.play();
+                }
+                setState(() {});
+              },
             ),
           ),
         ],
@@ -1075,19 +1161,24 @@ class _CreatePostScreenState extends State<CreatePostScreen>
   Widget _buildAudioPreview() {
     return Container(
       padding: const EdgeInsets.all(16),
-      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(8),
+        color: Colors.white.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
-          const Icon(Icons.audiotrack, color: Colors.grey),
-          const SizedBox(width: 12),
-          const Expanded(child: Text('Audio file selected')),
-          GestureDetector(
+          const Icon(Icons.audiotrack, color: Colors.white),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              'create_post_audio_selected_label'.tr(),
+              style: _grotesk(14, FontWeight.w600),
+            ),
+          ),
+          _buildIconActionButton(
+            icon: Icons.close,
             onTap: _removeAudio,
-            child: const Icon(Icons.close, color: Colors.red),
           ),
         ],
       ),
@@ -1095,64 +1186,71 @@ class _CreatePostScreenState extends State<CreatePostScreen>
   }
 
   Widget _buildTagsInput() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+    return GlassCard(
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _sectionHeader(
+            'create_post_tags_title'.tr(),
+            'create_post_tags_support'.tr(),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _tagsController,
+            style: _grotesk(14, FontWeight.w600),
+            cursorColor: const Color(0xFF22D3EE),
+            decoration: GlassInputDecoration(
+              labelText: 'create_post_tags_label'.tr(),
+              hintText: 'create_post_tags_hint'.tr(),
+              prefixIcon: const Icon(Icons.tag, color: Colors.white),
+            ),
           ),
         ],
-      ),
-      child: TextField(
-        controller: _tagsController,
-        enableInteractiveSelection: false,
-        decoration: InputDecoration(
-          labelText: 'Tags',
-          hintText: 'art, digital, painting, creative (separate by comma)',
-          hintStyle: TextStyle(color: Colors.grey[500]),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.all(16),
-          prefixIcon: const Icon(Icons.tag, color: ArtbeatColors.primaryPurple),
-        ),
       ),
     );
   }
 
   Widget _buildPostOptions() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+    return GlassCard(
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Post Options',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          _sectionHeader(
+            'create_post_options_title'.tr(),
+            'create_post_options_subtitle'.tr(),
           ),
-          const SizedBox(height: 12),
-          SwitchListTile(
-            title: const Text('Mark as Artist Post'),
-            subtitle: const Text('Show this as professional artwork'),
-            value: _isArtistPost,
-            onChanged: (value) {
-              setState(() => _isArtistPost = value);
-            },
-            activeThumbColor: ArtbeatColors.primaryPurple,
-            contentPadding: EdgeInsets.zero,
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'create_post_artist_toggle_title'.tr(),
+                      style: _grotesk(15, FontWeight.w700),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'create_post_artist_toggle_subtitle'.tr(),
+                      style: _grotesk(13, FontWeight.w600, opacity: 0.7),
+                    ),
+                  ],
+                ),
+              ),
+              Switch(
+                value: _isArtistPost,
+                onChanged: (value) => setState(() => _isArtistPost = value),
+                activeThumbColor: const Color(0xFF22D3EE),
+                activeTrackColor: const Color(0xFF22D3EE).withValues(alpha: 0.4),
+                inactiveThumbColor: Colors.white,
+                inactiveTrackColor: Colors.white.withValues(alpha: 0.2),
+              ),
+            ],
           ),
         ],
       ),
@@ -1160,79 +1258,29 @@ class _CreatePostScreenState extends State<CreatePostScreen>
   }
 
   Widget _buildUploadProgress() {
-    // Show video upload progress if video is being uploaded
-    if (_selectedVideo != null && _videoUploadProgress > 0) {
-      return Container(
-        margin: const EdgeInsets.only(top: 20),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            const Text(
-              'Uploading video...',
-              style: TextStyle(fontWeight: FontWeight.w500),
-            ),
-            const SizedBox(height: 12),
-            LinearProgressIndicator(
-              value: _videoUploadProgress,
-              backgroundColor: Colors.grey[300],
-              valueColor: const AlwaysStoppedAnimation<Color>(
-                ArtbeatColors.primaryPurple,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '${(_videoUploadProgress * 100).toInt()}%',
-              style: TextStyle(color: Colors.grey[600], fontSize: 12),
-            ),
-          ],
-        ),
-      );
-    }
+    final isVideoUpload = _selectedVideo != null && _videoUploadProgress > 0;
+    final progressValue = isVideoUpload ? _videoUploadProgress : _uploadProgress;
+    final title = isVideoUpload
+        ? 'create_post_uploading_video_title'.tr()
+        : 'create_post_uploading_media_title'.tr();
 
-    // Show general media upload progress
-    return Container(
-      margin: const EdgeInsets.only(top: 20),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+    return GlassCard(
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.all(24),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Uploading media...',
-            style: TextStyle(fontWeight: FontWeight.w500),
-          ),
-          const SizedBox(height: 12),
+          Text(title, style: _grotesk(15, FontWeight.w700)),
+          const SizedBox(height: 16),
           LinearProgressIndicator(
-            value: _uploadProgress,
-            backgroundColor: Colors.grey[300],
-            valueColor: const AlwaysStoppedAnimation<Color>(
-              ArtbeatColors.primaryPurple,
-            ),
+            value: progressValue,
+            backgroundColor: Colors.white.withValues(alpha: 0.2),
+            valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF22D3EE)),
           ),
           const SizedBox(height: 8),
           Text(
-            '${(_uploadProgress * 100).toInt()}%',
-            style: TextStyle(color: Colors.grey[600], fontSize: 12),
+            '${(progressValue * 100).toInt()}%',
+            style: _grotesk(12, FontWeight.w600, opacity: 0.7),
           ),
         ],
       ),

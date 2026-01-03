@@ -24,118 +24,54 @@ Add new widgets if needed from design_guide.md
 Packages:
 Community screens and widgets
 
-## Community Screens
+## Artwork Screens
+screens
+- [ ] advanced_artwork_search_screen.dart
+- [ ]  artist_artwork_management_screen.dart
+- [ ]  artwork_analytics_dashboard.dart
+- [ ] artwork_browse_screen.dart
+- [ ] artwork_detail_screen.dart
+- [ ]  artwork_discovery_screen.dart
+- [ ] artwork_edit_screen.dart
+- [ ] artwork_featured_screen.dart
+- [ ] artwork_moderation_screen.dart
+- [ ] artwork_purchase_screen.dart
+- [ ] artwork_recent_screen.dart
+- [ ] artwork_trending_screen.dart
+- [ ] artwork_upload_screen.dart
+- [ ] auction_management_modal.dart
+- [ ] auction_win_screen.dart
+- [ ] audio_content_detail_screen.dart
+- [ ] audio_content_upload_screen.dart
+- [ ] curated_gallery_screen.dart
+- [ ] enhanced_artwork_upload_screen.dart
+- [ ] my_bids_screen.dart
+- [ ] place_bid_modal.dart
+- [ ] portfolio_management_screen.dart
+- [ ] screens.dart
+- [ ] upload_choice_screen.dart
+- [ ] video_content_upload_screen.dart
+- [ ] written_content_detail_screen.dart
+- [ ] written_content_discovery_screen.dart
+- [ ] written_content_upload_screen.dart
 
+widgets
+- [ ] artwork_discovery_widget.dart
+- [ ] artwork_grid_widget.dart
+- [ ] artwork_header.dart
+- [ ] artwork_moderation_status_chip.dart
+- [ ] artwork_social_widget.dart
+- [ ] local_artwork_row_widget.dart
+- [ ] widgets.dart
 ### Main Screens
 
-- [x] art_community_hub.dart (ArtCommunityHub - used in main router)
-- [x] artist_feed_screen.dart (ArtistFeedScreen - used in art_community_hub.dart)
-- [x] artist_onboarding_screen.dart (ArtistOnboardingScreen - used in art_community_hub.dart and artbeat_artist)
-- [x] create_art_post_screen.dart (CreateArtPostScreen - used in unified_community_hub.dart and enhanced_community_feed_screen.dart)
-
-### Commissions
-
-- [x] commissions/artist_commission_settings_screen.dart (ArtistCommissionSettingsScreen - used in commission_hub_screen.dart)
-- [x] commissions/artist_selection_screen.dart (ArtistSelectionScreen - used in direct_commissions_screen.dart)
-- [x] commissions/commission_analytics_dashboard.dart (CommissionAnalyticsDashboard - used in commission_hub_screen.dart)
-- [x] commissions/commission_analytics_screen.dart (CommissionAnalyticsScreen - not used)
-- [x] commissions/commission_detail_screen.dart (CommissionDetailScreen - used in commission_hub_screen.dart and direct_commissions_screen.dart)
-- [x] commissions/commission_dispute_screen.dart (CommissionDisputeScreen - used in commission_hub_screen.dart)
-- [x] commissions/commission_gallery_screen.dart (CommissionGalleryScreen - used in commission_hub_screen.dart and commission_request_screen.dart)
-- [x] commissions/commission_hub_screen.dart (CommissionHubScreen - used in main router)
-- [x] commissions/commission_progress_tracker.dart (CommissionProgressTracker - used in commission_hub_screen.dart)
-- [x] commissions/commission_rating_screen.dart (CommissionRatingScreen - used in commission_hub_screen.dart)
-- [x] commissions/commission_request_screen.dart (CommissionRequestScreen - used in main router)
-- [x] commissions/commission_setup_wizard_screen.dart (CommissionSetupWizardScreen - used in commission_hub_screen.dart and artbeat_artist)
-- [x] commissions/commission_templates_browser.dart (CommissionTemplatesBrowser - used in commission_request_screen.dart and commission_hub_screen.dart)
-- [ ] commissions/direct_commissions_screen.dart (DirectCommissionsScreen - used in main router)
-
-### Feed
-
-- [ ] feed/artist_community_feed_screen.dart (ArtistCommunityFeedScreen - used in artist_list_widget.dart and art_community_hub.dart)
-- [ ] feed/comments_screen.dart (CommentsScreen - used in art_community_hub.dart and group_feed_widget.dart)
-- [ ] feed/create_group_post_screen.dart (CreateGroupPostScreen - used in main router)
-- [ ] feed/create_post_screen.dart (CreatePostScreen - used in main router)
-- [ ] feed/enhanced_community_feed_screen.dart (EnhancedCommunityFeedScreen - used in community_drawer.dart)
-- [ ] feed/group_feed_screen.dart (GroupFeedScreen - used in art_community_hub.dart)
-- [ ] feed/social_engagement_demo_screen.dart (SocialEngagementDemoScreen - used in art_community_hub.dart)
-- [ ] feed/trending_content_screen.dart (TrendingContentScreen - used in main router)
-
-### Gifts
-
-- [ ] gifts/gift_rules_screen.dart (GiftRulesScreen - used in gifts_screen.dart)
-- [ ] gifts/gifts_screen.dart (ViewReceivedGiftsScreen - used in main router)
-
-### Moderation
-
-- [ ] moderation/moderation_queue_screen.dart (ModerationQueueScreen - used in main router)
-
-### Portfolios
-
-- [ ] portfolios/artist_portfolio_screen.dart (ArtistPortfolioScreen - not used)
-- [ ] portfolios/portfolios_screen.dart (PortfoliosScreen - used in main router)
-
-### Posts
-
-- [ ] posts/user_posts_screen.dart (UserPostsScreen - used in art_community_hub.dart)
-
-### Settings
-
-- [ ] settings/quiet_mode_screen.dart (QuietModeScreen - used in main router)
 
 ### Studios
 
-- [ ] studios/create_studio_screen.dart (CreateStudioScreen - not used)
-- [ ] studios/studio_chat_screen.dart (StudioChatScreen - used in studio_discovery_screen.dart and studios_screen.dart)
-- [ ] studios/studio_discovery_screen.dart (StudioDiscoveryScreen - not used)
-- [ ] studios/studio_management_screen.dart (StudioManagementScreen - not used)
+- [x] studios/studio_chat_screen.dart (StudioChatScreen - used in studio_discovery_screen.dart and studios_screen.dart)
 - [ ] studios/studios_screen.dart (StudiosScreen - used in main router)
 
-**Note:** All items need to be refactored to implement the Local ARTbeat design_guide.md. Checked items were previously marked as "used" but all need design implementation.
 
-## Central Theme Widgets (Add to artbeat_community/lib/widgets)
-
-Create these reusable widgets for consistent Local ARTbeat design:
-
-- [x] world_background.dart (AuthWorldBackground - animated blob background with vignette)
-- [x] glass_card.dart (GlassCard/GlassPanel - blurred glass container)
-- [x] gradient_badge.dart (GradientBadge - gradient accent badges/chips)
-- [x] hud_top_bar.dart (HudTopBar - top navigation bar)
-- [x] hud_button.dart (HudButton - primary/secondary CTA buttons)
-- [x] glass_input_decoration.dart (GlassInputDecoration - themed text inputs)
-- [x] drawer_section.dart (DrawerSection - drawer section headers)
-- [x] drawer_item_pill.dart (DrawerItemPill - drawer navigation items)
-
-## Community Widgets
-
-- [x] activity_card.dart
-- [x] applause_button.dart
-- [x] art_critique_slider.dart
-- [x] art_gallery_widgets.dart
-- [x] artist_avatar.dart
-- [x] artist_list_widget.dart
-- [x] artwork_card_widget.dart
-- [x] avatar_widget.dart
-- [x] canvas_feed.dart
-- [x] comments_modal.dart
-- [x] commission_artists_browser.dart
-- [x] commission_filter_dialog.dart
-- [x] community_drawer.dart
-- [x] community_header.dart
-- [x] create_post_fab.dart
-- [x] critique_card.dart
-- [x] enhanced_artwork_card.dart
-- [x] enhanced_post_card.dart
-- [x] feedback_thread_widget.dart
-- [x] fullscreen_image_viewer.dart
-- [x] gift_card_widget.dart
-- [x] group_feed_widget.dart
-- [x] group_post_card.dart
-- [x] mini_artist_card.dart
-- [x] post_card.dart
-- [x] post_detail_modal.dart
-- [x] report_dialog.dart
-- [x] widgets.dart
 
 Local ARTbeat UI Design Guide (v1) 0) Brand + vibe
 

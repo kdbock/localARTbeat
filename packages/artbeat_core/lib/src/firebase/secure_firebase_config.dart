@@ -1,6 +1,5 @@
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/foundation.dart';
-import '../utils/logger.dart';
 
 /// Handles Firebase App Check configuration ONLY
 class SecureFirebaseConfig {
@@ -10,25 +9,23 @@ class SecureFirebaseConfig {
   static String? _teamId;
 
   /// Store Team ID (optional, informational only)
-  static Future<void> configureAppCheck({
-    required String teamId,
-  }) async {
+  static Future<void> configureAppCheck({required String teamId}) async {
     _teamId = teamId;
 
-    // App Check intentionally disabled for this build
-    _appCheckInitialized = false;
+    await FirebaseAppCheck.instance.activate(
+      providerApple: const AppleAppAttestProvider(), // ✅ Use `const` and correct param
+    );
 
-    if (kDebugMode) {
-      AppLogger.auth('🔐 App Check is disabled');
-    }
+    _appCheckInitialized = true;
   }
+
 
   /// Debug helpers (safe)
   static Map<String, dynamic> getStatus() => {
-        'appCheckInitialized': _appCheckInitialized,
-        'appsCount': 0, // intentionally not reading Firebase.apps here
-        'teamId': _teamId,
-      };
+    'appCheckInitialized': _appCheckInitialized,
+    'appsCount': 0, // intentionally not reading Firebase.apps here
+    'teamId': _teamId,
+  };
 
   static Future<bool> testStorageAccess() async {
     try {
@@ -42,7 +39,7 @@ class SecureFirebaseConfig {
   static Future<Map<String, dynamic>> validateAppCheck() async {
     return {
       'initialized': _appCheckInitialized,
-      'disabled': true,
+      'disabled': !_appCheckInitialized,
     };
   }
 }

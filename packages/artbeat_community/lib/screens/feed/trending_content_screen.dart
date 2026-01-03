@@ -7,6 +7,7 @@ import 'package:artbeat_core/artbeat_core.dart';
 import '../../models/post_model.dart';
 import '../../widgets/post_card.dart';
 import '../../widgets/community_drawer.dart';
+import 'comments_screen.dart';
 
 class TrendingContentScreen extends StatefulWidget {
   const TrendingContentScreen({super.key});
@@ -28,14 +29,20 @@ class _TrendingContentScreenState extends State<TrendingContentScreen> {
   String _selectedTimeFrame = 'Week';
   String _selectedCategory = 'All';
 
-  final List<String> _timeFrames = ['Day', 'Week', 'Month', 'All Time'];
-  final List<String> _categories = [
-    'All',
-    'Painting',
-    'Digital',
-    'Photography',
-    'Sculpture',
-    'Mixed Media',
+  static const List<_FilterOption> _timeFrames = [
+    _FilterOption('Day', 'trending_content.timeframe_day'),
+    _FilterOption('Week', 'trending_content.timeframe_week'),
+    _FilterOption('Month', 'trending_content.timeframe_month'),
+    _FilterOption('All Time', 'trending_content.timeframe_all'),
+  ];
+
+  static const List<_FilterOption> _categories = [
+    _FilterOption('All', 'trending_content.category_all'),
+    _FilterOption('Painting', 'trending_content.category_painting'),
+    _FilterOption('Digital', 'trending_content.category_digital'),
+    _FilterOption('Photography', 'trending_content.category_photography'),
+    _FilterOption('Sculpture', 'trending_content.category_sculpture'),
+    _FilterOption('Mixed Media', 'trending_content.category_mixed_media'),
   ];
 
   @override
@@ -222,6 +229,14 @@ class _TrendingContentScreenState extends State<TrendingContentScreen> {
     _loadTrendingContent();
   }
 
+  Future<void> _openCommentsScreen(PostModel post) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => CommentsScreen(post: post),
+      ),
+    );
+  }
+
   void _onTimeFrameSelected(String value) {
     if (_selectedTimeFrame == value) return;
     setState(() => _selectedTimeFrame = value);
@@ -279,7 +294,7 @@ class _TrendingContentScreenState extends State<TrendingContentScreen> {
           IconButton(
             onPressed: () => _scaffoldKey.currentState?.openDrawer(),
             icon: const Icon(Icons.menu, color: Colors.white),
-            tooltip: 'Open navigation',
+            tooltip: 'trending_content.tooltip_open_navigation'.tr(),
           ),
           const SizedBox(width: 8),
           Expanded(
@@ -297,7 +312,7 @@ class _TrendingContentScreenState extends State<TrendingContentScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Exploration powered by applause + recency',
+                  'trending_content.screen_subtitle'.tr(),
                   style: GoogleFonts.spaceGrotesk(
                     color: _Palette.textSecondary,
                     fontSize: 13,
@@ -309,7 +324,7 @@ class _TrendingContentScreenState extends State<TrendingContentScreen> {
             ),
           ),
           IconButton(
-            tooltip: 'Refresh',
+            tooltip: 'trending_content.tooltip_refresh'.tr(),
             icon: const Icon(Icons.refresh, color: Colors.white),
             onPressed: _isLoading ? null : _loadTrendingContent,
           ),
@@ -343,9 +358,7 @@ class _TrendingContentScreenState extends State<TrendingContentScreen> {
                 onUserTap: (userId) {
                   AppLogger.info('Navigate to user profile: $userId');
                 },
-                onComment: (postId) {
-                  AppLogger.info('Navigate to comments for post: $postId');
-                },
+                onComment: (_) => _openCommentsScreen(post),
                 onToggleExpand: () {
                   AppLogger.info('Toggle expand for post: ${post.id}');
                 },
@@ -362,6 +375,10 @@ class _TrendingContentScreenState extends State<TrendingContentScreen> {
   }
 
   Widget _buildHeroCard() {
+    final storiesValue = _trendingPosts.isEmpty
+        ? 'trending_content.loading'.tr()
+        : _trendingPosts.length.toString();
+
     return GlassCard(
       padding: const EdgeInsets.all(20),
       showAccentGlow: true,
@@ -394,7 +411,7 @@ class _TrendingContentScreenState extends State<TrendingContentScreen> {
                         color: Colors.white, size: 18),
                     const SizedBox(width: 6),
                     Text(
-                      'Trending Pulse',
+                      'trending_content.hero_badge_title'.tr(),
                       style: GoogleFonts.spaceGrotesk(
                         color: Colors.white,
                         fontSize: 13,
@@ -411,7 +428,7 @@ class _TrendingContentScreenState extends State<TrendingContentScreen> {
           ),
           const SizedBox(height: 14),
           Text(
-            'Curated by the community in real-time.',
+            'trending_content.hero_headline'.tr(),
             style: GoogleFonts.spaceGrotesk(
               color: _Palette.textPrimary,
               fontSize: 18,
@@ -421,7 +438,7 @@ class _TrendingContentScreenState extends State<TrendingContentScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Applause velocity + fresh posts = your creative radar.',
+            'trending_content.hero_subheadline'.tr(),
             style: GoogleFonts.spaceGrotesk(
               color: _Palette.textSecondary,
               fontSize: 14,
@@ -434,13 +451,17 @@ class _TrendingContentScreenState extends State<TrendingContentScreen> {
             spacing: 8,
             runSpacing: 8,
             children: [
-              _buildBadge('Timeframe', _selectedTimeFrame),
-              _buildBadge('Category', _selectedCategory),
               _buildBadge(
-                'Stories',
-                _trendingPosts.isEmpty
-                    ? 'Loading'
-                    : _trendingPosts.length.toString(),
+                'trending_content.hero_badge_timeframe'.tr(),
+                _localizedOptionValue(_selectedTimeFrame, _timeFrames),
+              ),
+              _buildBadge(
+                'trending_content.hero_badge_category'.tr(),
+                _localizedOptionValue(_selectedCategory, _categories),
+              ),
+              _buildBadge(
+                'trending_content.hero_badge_stories'.tr(),
+                storiesValue,
               ),
             ],
           ),
@@ -457,7 +478,7 @@ class _TrendingContentScreenState extends State<TrendingContentScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Tune the signal',
+            'trending_content.filters_title'.tr(),
             style: GoogleFonts.spaceGrotesk(
               color: _Palette.textPrimary,
               fontSize: 16,
@@ -467,7 +488,7 @@ class _TrendingContentScreenState extends State<TrendingContentScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Blend freshness, applause, and category focus without leaving the vibe.',
+            'trending_content.filters_description'.tr(),
             style: GoogleFonts.spaceGrotesk(
               color: _Palette.textSecondary,
               fontSize: 13,
@@ -477,22 +498,22 @@ class _TrendingContentScreenState extends State<TrendingContentScreen> {
           ),
           const SizedBox(height: 14),
           _buildFilterGroup(
-            label: 'Time frame',
+            labelKey: 'trending_content.filters_timeframe_label',
             options: _timeFrames,
-            selected: _selectedTimeFrame,
+            selectedValue: _selectedTimeFrame,
             onSelected: _onTimeFrameSelected,
           ),
           const SizedBox(height: 12),
           _buildFilterGroup(
-            label: 'Category',
+            labelKey: 'trending_content.filters_category_label',
             options: _categories,
-            selected: _selectedCategory,
+            selectedValue: _selectedCategory,
             onSelected: _onCategorySelected,
           ),
           const SizedBox(height: 16),
           HudButton.primary(
             onPressed: _applyFilters,
-            text: 'Refresh trending',
+            text: 'trending_content.filters_refresh_button'.tr(),
             icon: Icons.bolt,
             height: 48,
           ),
@@ -502,16 +523,16 @@ class _TrendingContentScreenState extends State<TrendingContentScreen> {
   }
 
   Widget _buildFilterGroup({
-    required String label,
-    required List<String> options,
-    required String selected,
+    required String labelKey,
+    required List<_FilterOption> options,
+    required String selectedValue,
     required ValueChanged<String> onSelected,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          label,
+          labelKey.tr(),
           style: GoogleFonts.spaceGrotesk(
             color: _Palette.textPrimary,
             fontSize: 13,
@@ -527,8 +548,8 @@ class _TrendingContentScreenState extends State<TrendingContentScreen> {
               .map(
                 (option) => _buildFilterChip(
                   option: option,
-                  selected: option == selected,
-                  onTap: () => onSelected(option),
+                  selected: option.value == selectedValue,
+                  onTap: () => onSelected(option.value),
                 ),
               )
               .toList(),
@@ -538,7 +559,7 @@ class _TrendingContentScreenState extends State<TrendingContentScreen> {
   }
 
   Widget _buildFilterChip({
-    required String option,
+    required _FilterOption option,
     required bool selected,
     required VoidCallback onTap,
   }) {
@@ -570,7 +591,7 @@ class _TrendingContentScreenState extends State<TrendingContentScreen> {
               : null,
         ),
         child: Text(
-          option,
+          option.labelKey.tr(),
           style: GoogleFonts.spaceGrotesk(
             color: Colors.white,
             fontSize: 13,
@@ -580,6 +601,17 @@ class _TrendingContentScreenState extends State<TrendingContentScreen> {
         ),
       ),
     );
+  }
+
+  String _localizedOptionValue(
+    String value,
+    List<_FilterOption> options,
+  ) {
+    final match = options.firstWhere(
+      (option) => option.value == value,
+      orElse: () => options.first,
+    );
+    return match.labelKey.tr();
   }
 
   Widget _buildBadge(String label, String value) {
@@ -640,7 +672,7 @@ class _TrendingContentScreenState extends State<TrendingContentScreen> {
           ),
           const SizedBox(height: 14),
           Text(
-            'No trending content found',
+            'trending_content.empty_title'.tr(),
             style: GoogleFonts.spaceGrotesk(
               color: _Palette.textPrimary,
               fontSize: 18,
@@ -650,7 +682,7 @@ class _TrendingContentScreenState extends State<TrendingContentScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Try a broader timeframe or peek back later.',
+            'trending_content.empty_subtitle'.tr(),
             textAlign: TextAlign.center,
             style: GoogleFonts.spaceGrotesk(
               color: _Palette.textSecondary,
@@ -662,7 +694,7 @@ class _TrendingContentScreenState extends State<TrendingContentScreen> {
           const SizedBox(height: 12),
           HudButton.secondary(
             onPressed: _applyFilters,
-            text: 'Refresh feed',
+            text: 'trending_content.empty_refresh_button'.tr(),
             icon: Icons.refresh,
             height: 46,
           ),
@@ -697,4 +729,11 @@ class _Palette {
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
       );
+}
+
+class _FilterOption {
+  final String value;
+  final String labelKey;
+
+  const _FilterOption(this.value, this.labelKey);
 }

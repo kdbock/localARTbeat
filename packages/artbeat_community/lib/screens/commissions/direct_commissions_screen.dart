@@ -401,8 +401,10 @@ class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
 
   Tab _buildTabChip({required IconData icon, required String label}) {
     return Tab(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Container(
+        alignment: Alignment.center,
+        constraints: const BoxConstraints(minHeight: 48),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -419,40 +421,7 @@ class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
     final bottomInset = MediaQuery.of(context).padding.bottom + 160;
 
     if (commissions.isEmpty) {
-      return Center(
-        child: GlassCard(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.auto_awesome,
-                size: 48,
-                color: Colors.white.withValues(alpha: 0.85),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'direct_commissions_empty_title'.tr(),
-                style: GoogleFonts.spaceGrotesk(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'direct_commissions_empty_body'.tr(),
-                textAlign: TextAlign.center,
-                style: GoogleFonts.spaceGrotesk(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white.withValues(alpha: 0.72),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
+      return _buildEmptyState();
     }
 
     return RefreshIndicator(
@@ -472,9 +441,54 @@ class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
     );
   }
 
+  Widget _buildEmptyState() {
+    return Center(
+      child: GlassCard(
+        showAccentGlow: true,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.auto_awesome,
+              size: 48,
+              color: Colors.white.withValues(alpha: 0.85),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'direct_commissions_empty_title'.tr(),
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'direct_commissions_empty_body'.tr(),
+              textAlign: TextAlign.center,
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Colors.white.withValues(alpha: 0.72),
+              ),
+            ),
+            const SizedBox(height: 24),
+            GradientCTAButton(
+              text: 'direct_commissions_empty_cta'.tr(),
+              icon: Icons.add,
+              onPressed: _isLoading ? null : _showArtistSelection,
+              isLoading: _isLoading,
+              height: 48,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildCommissionCard(DirectCommissionModel commission) {
     final isArtist = _isUserArtist(commission);
-    final statusColor = _getStatusColor(commission.status);
     final budgetValue = commission.totalPrice > 0
         ? _currencyFormatter.format(commission.totalPrice)
         : null;
@@ -527,28 +541,7 @@ class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
                         ],
                       ),
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: statusColor.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(24),
-                        border: Border.all(
-                          color: statusColor.withValues(alpha: 0.32),
-                        ),
-                      ),
-                      child: Text(
-                        _localizedStatus(commission.status),
-                        style: GoogleFonts.spaceGrotesk(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w800,
-                          color: statusColor,
-                          letterSpacing: 0.4,
-                        ),
-                      ),
-                    ),
+                    _buildStatusBadge(commission.status),
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -626,6 +619,50 @@ class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
         ),
       ),
     );
+  }
+
+  Widget _buildStatusBadge(CommissionStatus status) {
+    final label = _localizedStatus(status);
+    const EdgeInsets padding = EdgeInsets.symmetric(
+      horizontal: 16,
+      vertical: 6,
+    );
+
+    switch (status) {
+      case CommissionStatus.pending:
+      case CommissionStatus.quoted:
+      case CommissionStatus.revision:
+        return WarningBadge(
+          text: label,
+          icon: Icons.pending_actions,
+          padding: padding,
+          borderRadius: 24,
+          fontSize: 12,
+          letterSpacing: 0.4,
+        );
+      case CommissionStatus.accepted:
+      case CommissionStatus.inProgress:
+      case CommissionStatus.completed:
+      case CommissionStatus.delivered:
+        return SuccessBadge(
+          text: label,
+          icon: Icons.verified,
+          padding: padding,
+          borderRadius: 24,
+          fontSize: 12,
+          letterSpacing: 0.4,
+        );
+      case CommissionStatus.cancelled:
+      case CommissionStatus.disputed:
+        return ErrorBadge(
+          text: label,
+          icon: Icons.report_problem_rounded,
+          padding: padding,
+          borderRadius: 24,
+          fontSize: 12,
+          letterSpacing: 0.4,
+        );
+    }
   }
 
   Widget _buildMetricChip({
@@ -743,7 +780,8 @@ class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
     if (commission.status == CommissionStatus.pending && isArtist) {
       buttonWidgets.add(
         Expanded(
-          child: HudButton(isPrimary: false,
+          child: HudButton(
+            isPrimary: false,
             onPressed: () => _provideQuote(commission),
             text: 'direct_commissions_action_provide_quote'.tr(),
             icon: Icons.request_quote,
@@ -756,7 +794,8 @@ class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
     if (commission.status == CommissionStatus.quoted && !isArtist) {
       buttonWidgets.add(
         Expanded(
-          child: HudButton(isPrimary: true,
+          child: HudButton(
+            isPrimary: true,
             onPressed: () => _acceptCommission(commission),
             text: 'direct_commissions_action_accept_quote'.tr(),
             icon: Icons.check,
@@ -769,7 +808,8 @@ class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
     if (commission.status == CommissionStatus.inProgress && isArtist) {
       buttonWidgets.add(
         Expanded(
-          child: HudButton(isPrimary: true,
+          child: HudButton(
+            isPrimary: true,
             onPressed: () => _markCompleted(commission),
             text: 'direct_commissions_action_mark_complete'.tr(),
             icon: Icons.done,
@@ -834,29 +874,6 @@ class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
         return 'commission_type_portrait'.tr();
       case CommissionType.commercial:
         return 'commission_type_commercial'.tr();
-    }
-  }
-
-  Color _getStatusColor(CommissionStatus status) {
-    switch (status) {
-      case CommissionStatus.pending:
-        return const Color(0xFFFFC857);
-      case CommissionStatus.quoted:
-        return const Color(0xFF7C4DFF);
-      case CommissionStatus.accepted:
-        return const Color(0xFF34D399);
-      case CommissionStatus.inProgress:
-        return const Color(0xFF22D3EE);
-      case CommissionStatus.revision:
-        return const Color(0xFFFF3D8D);
-      case CommissionStatus.completed:
-        return const Color(0xFF34D399);
-      case CommissionStatus.delivered:
-        return const Color(0xFF22D3EE);
-      case CommissionStatus.cancelled:
-        return const Color(0xFFFF3D8D);
-      case CommissionStatus.disputed:
-        return const Color(0xFFFB7185);
     }
   }
 
@@ -1084,13 +1101,15 @@ class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    HudButton(isPrimary: false,
+                    HudButton(
+                      isPrimary: false,
                       onPressed: () => Navigator.of(context).pop(),
                       text: 'common_cancel'.tr(),
                       height: 48,
                     ),
                     const SizedBox(width: 16),
-                    HudButton(isPrimary: true,
+                    HudButton(
+                      isPrimary: true,
                       onPressed: () async {
                         if (titleController.text.isEmpty ||
                             descriptionController.text.isEmpty ||
@@ -1692,7 +1711,8 @@ class _QuoteProvisionDialogState extends State<_QuoteProvisionDialog> {
                                 color: Colors.white,
                               ),
                             ),
-                            HudButton(isPrimary: false,
+                            HudButton(
+                              isPrimary: false,
                               onPressed: _addMilestone,
                               text: 'direct_commissions_quote_add_milestone'
                                   .tr(),
@@ -1745,7 +1765,8 @@ class _QuoteProvisionDialogState extends State<_QuoteProvisionDialog> {
                 child: Row(
                   children: [
                     Expanded(
-                      child: HudButton(isPrimary: false,
+                      child: HudButton(
+                        isPrimary: false,
                         onPressed: _isSubmitting
                             ? null
                             : () => Navigator.of(context).pop(),
@@ -1755,7 +1776,8 @@ class _QuoteProvisionDialogState extends State<_QuoteProvisionDialog> {
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: HudButton(isPrimary: true,
+                      child: HudButton(
+                        isPrimary: true,
                         onPressed: _isSubmitting ? null : _submitQuote,
                         text: 'direct_commissions_quote_submit'.tr(),
                         icon: Icons.send,

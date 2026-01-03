@@ -1,6 +1,8 @@
 import 'dart:io';
+import 'dart:typed_data';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:video_player/video_player.dart';
@@ -8,11 +10,11 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:image_editor_plus/image_editor_plus.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:artbeat_core/artbeat_core.dart';
+import '../../models/group_models.dart';
 import '../../services/art_community_service.dart';
 import '../../services/firebase_storage_service.dart';
 import '../../services/moderation_service.dart';
-import '../../models/group_models.dart';
-import 'package:artbeat_core/artbeat_core.dart';
 
 /// Enhanced create group post screen with multimedia support and AI moderation
 class CreateGroupPostScreen extends StatefulWidget {
@@ -113,11 +115,10 @@ class _CreateGroupPostScreenState extends State<CreateGroupPostScreen>
         }
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error picking images: $e')));
-      }
+      _showThemedSnackBar(
+        'create_group_post_images_error',
+        namedArgs: {'error': '$e'},
+      );
     } finally {
       if (mounted) {
         setState(() => _isPickingMedia = false);
@@ -151,19 +152,14 @@ class _CreateGroupPostScreenState extends State<CreateGroupPostScreen>
           await _videoController!.initialize();
           setState(() {});
         } else {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Video file too large (max 50MB)')),
-            );
-          }
+          _showThemedSnackBar('create_group_post_video_size_error');
         }
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error picking video: $e')));
-      }
+      _showThemedSnackBar(
+        'create_group_post_video_error',
+        namedArgs: {'error': '$e'},
+      );
     } finally {
       if (mounted) {
         setState(() => _isPickingMedia = false);
@@ -192,19 +188,14 @@ class _CreateGroupPostScreenState extends State<CreateGroupPostScreen>
             _selectedVideo = null; // Clear video when audio is selected
           });
         } else {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Audio file too large (max 10MB)')),
-            );
-          }
+          _showThemedSnackBar('create_group_post_audio_size_error');
         }
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error picking audio: $e')));
-      }
+      _showThemedSnackBar(
+        'create_group_post_audio_error',
+        namedArgs: {'error': '$e'},
+      );
     } finally {
       if (mounted) {
         setState(() => _isPickingMedia = false);
@@ -237,11 +228,10 @@ class _CreateGroupPostScreenState extends State<CreateGroupPostScreen>
         });
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error editing image: $e')));
-      }
+      _showThemedSnackBar(
+        'create_group_post_image_edit_error',
+        namedArgs: {'error': '$e'},
+      );
     }
   }
 
@@ -249,11 +239,9 @@ class _CreateGroupPostScreenState extends State<CreateGroupPostScreen>
   Future<void> _createPostWithGuard() async {
     // Double-check guard: prevent any concurrent post submissions
     if (_postSubmissionInProgress) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please wait while your post is being created...'),
-          duration: Duration(seconds: 2),
-        ),
+      _showThemedSnackBar(
+        'create_group_post_submission_pending',
+        duration: const Duration(seconds: 2),
       );
       return;
     }
@@ -272,9 +260,7 @@ class _CreateGroupPostScreenState extends State<CreateGroupPostScreen>
         _selectedImages.isEmpty &&
         _selectedVideo == null &&
         _selectedAudio == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please add some content or media')),
-      );
+      _showThemedSnackBar('create_group_post_missing_content');
       return;
     }
 
@@ -298,16 +284,11 @@ class _CreateGroupPostScreenState extends State<CreateGroupPostScreen>
       );
 
       if (!moderationResult.isApproved) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Content moderation failed: ${moderationResult.reason}',
-              ),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
+        _showThemedSnackBar(
+          'create_group_post_moderation_failed',
+          namedArgs: {'reason': moderationResult.reason ?? ''},
+          backgroundColor: Colors.red,
+        );
         // Reset loading state before returning
         if (mounted) {
           setState(() {
@@ -341,21 +322,17 @@ class _CreateGroupPostScreenState extends State<CreateGroupPostScreen>
             },
           );
         } catch (e) {
-          final errorMessage =
+          final errorKey =
               e.toString().contains('App Check') ||
                   e.toString().contains('cannot parse response')
-              ? 'Video upload failed due to authentication issue. Please try again or contact support.'
-              : 'Video upload failed. Please check your connection and try again.';
+              ? 'create_group_post_video_auth_error'
+              : 'create_group_post_video_upload_error';
 
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(errorMessage),
-                backgroundColor: Colors.orange,
-                duration: const Duration(seconds: 5),
-              ),
-            );
-          }
+          _showThemedSnackBar(
+            errorKey,
+            backgroundColor: Colors.orange,
+            duration: const Duration(seconds: 5),
+          );
           videoUrl = null;
         } finally {
           if (mounted) {
@@ -412,22 +389,18 @@ class _CreateGroupPostScreenState extends State<CreateGroupPostScreen>
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text(
-            'Post created successfully! It may take a moment to appear in your feeds.',
-          ),
-          backgroundColor: _getGroupColor(),
-          duration: const Duration(seconds: 5),
-        ),
+      _showThemedSnackBar(
+        'create_group_post_success',
+        backgroundColor: _getGroupColor(),
+        duration: const Duration(seconds: 5),
       );
       Navigator.pop(context, true);
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error creating post: $e')));
-      }
+      _showThemedSnackBar(
+        'create_group_post_failure',
+        namedArgs: {'error': '$e'},
+        backgroundColor: Colors.red,
+      );
     } finally {
       if (mounted) {
         setState(() {
@@ -473,18 +446,11 @@ class _CreateGroupPostScreenState extends State<CreateGroupPostScreen>
     }
   }
 
-  String _getGroupDisplayName() {
-    switch (widget.groupType) {
-      case GroupType.artist:
-        return 'Artist';
-      case GroupType.event:
-        return 'Event';
-      case GroupType.artWalk:
-        return 'Art Walk';
-      case GroupType.artistWanted:
-        return 'Artist Wanted';
-    }
-  }
+  String _getGroupDisplayName() =>
+      'create_group_post_group_${widget.groupType.value}'.tr();
+
+  String _getGroupDescription() =>
+      'create_group_post_group_${widget.groupType.value}_description'.tr();
 
   IconData _getGroupIcon() {
     switch (widget.groupType) {
@@ -499,169 +465,166 @@ class _CreateGroupPostScreenState extends State<CreateGroupPostScreen>
     }
   }
 
-  String _getPostTypeTitle() {
-    switch (widget.postType) {
-      case 'artwork':
-        return 'Share Artwork';
-      case 'process':
-        return 'Process Video';
-      case 'update':
-        return 'Artist Update';
-      case 'hosting':
-        return 'Hosting Event';
-      case 'attending':
-        return 'Attending Event';
-      case 'photos':
-        return 'Event Photos';
-      case 'artwalk':
-        return 'Art Walk Adventure';
-      case 'route':
-        return 'New Route';
-      case 'project':
-        return 'Project Request';
-      case 'services':
-        return 'Offer Services';
-      default:
-        return 'Create Post';
-    }
+  LinearGradient get _groupGradient => LinearGradient(
+    colors: [
+      _getGroupColor(),
+      _getGroupColor().withValues(alpha: 0.6),
+      const Color(0xFF22D3EE),
+    ],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  bool get _hasSelectedMedia =>
+      _selectedImages.isNotEmpty ||
+      _selectedVideo != null ||
+      _selectedAudio != null;
+
+  String _localizedOrDefault(String key, String fallbackKey) {
+    final value = key.tr();
+    return value == key ? fallbackKey.tr() : value;
   }
 
-  String _getContentHint() {
-    switch (widget.postType) {
-      case 'artwork':
-        return 'Describe your artwork, inspiration, or technique...';
-      case 'process':
-        return 'Share details about your creative process...';
-      case 'update':
-        return 'What\'s on your mind? Share with fellow artists...';
-      case 'hosting':
-        return 'Tell us about your event - what, when, where...';
-      case 'attending':
-        return 'Why are you excited about this event?...';
-      case 'photos':
-        return 'Share your experience at this event...';
-      case 'artwalk':
-        return 'Describe your art walk route and discoveries...';
-      case 'route':
-        return 'Describe the route, highlights, and difficulty...';
-      case 'project':
-        return 'Describe your project, timeline, and requirements...';
-      case 'services':
-        return 'Describe your skills, experience, and availability...';
-      default:
-        return 'Share your thoughts...';
-    }
-  }
+  String _getPostTypeTitle() => _localizedOrDefault(
+    'create_group_post_type_${widget.postType}_title',
+    'create_group_post_type_default_title',
+  );
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        title: Text(
-          'Create ${_getGroupDisplayName()} Post',
-          style: const TextStyle(fontWeight: FontWeight.w600),
-        ),
-        backgroundColor: _getGroupColor(),
-        foregroundColor: Colors.white,
-        elevation: 0,
-        actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 16, top: 8, bottom: 8),
-            child: ElevatedButton(
-              onPressed: (_isLoading || _isUploadingMedia)
-                  ? null
-                  : _createPostWithGuard,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: _getGroupColor(),
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-              ),
-              child: _isLoading || _isUploadingMedia
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Text(
-                      'Post',
-                      style: TextStyle(fontWeight: FontWeight.w600),
-                    ),
-            ),
-          ),
-        ],
-      ),
-      body: FadeTransition(
-        opacity: _fadeAnimation,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Post type header
-              _buildPostTypeHeader(),
-              const SizedBox(height: 20),
+  String _getContentHint() => _localizedOrDefault(
+    'create_group_post_type_${widget.postType}_hint',
+    'create_group_post_type_default_hint',
+  );
 
-              // User info section
-              _buildUserInfoSection(),
-              const SizedBox(height: 20),
+  String _mediaCountLabel(int count, int max) => 'create_group_post_media_count'
+      .tr(namedArgs: {'count': '$count', 'max': '$max'});
 
-              // Content input
-              _buildContentInput(),
-              const SizedBox(height: 20),
-
-              // Media selection buttons
-              _buildMediaSelectionButtons(),
-              const SizedBox(height: 20),
-
-              // Selected media preview
-              _buildMediaPreview(),
-
-              // Tags input
-              _buildTagsInput(),
-              const SizedBox(height: 20),
-
-              // Upload progress
-              if (_isUploadingMedia) _buildUploadProgress(),
-            ],
+  void _showThemedSnackBar(
+    String key, {
+    Map<String, String>? namedArgs,
+    Color? backgroundColor,
+    Duration? duration,
+  }) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: backgroundColor,
+        duration: duration ?? const Duration(seconds: 4),
+        content: Text(
+          key.tr(namedArgs: namedArgs ?? const <String, String>{}),
+          style: GoogleFonts.spaceGrotesk(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
           ),
         ),
       ),
     );
   }
 
-  Widget _buildPostTypeHeader() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: _getGroupColor().withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _getGroupColor().withValues(alpha: 0.2)),
+  @override
+  Widget build(BuildContext context) {
+    final isBusy = _isLoading || _isUploadingMedia;
+    return WorldBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: HudTopBar(
+          title: 'create_group_post_title'.tr(
+            namedArgs: {'group': _getGroupDisplayName()},
+          ),
+          glassBackground: true,
+        ),
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            child: Column(
+              children: [
+                Expanded(
+                  child: FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: ListView(
+                      physics: const BouncingScrollPhysics(),
+                      children: [
+                        _buildHeroCard(),
+                        const SizedBox(height: 16),
+                        _buildUserCard(),
+                        const SizedBox(height: 16),
+                        _buildContentCard(),
+                        const SizedBox(height: 16),
+                        _buildMediaCard(),
+                        if (_hasSelectedMedia) ...[
+                          const SizedBox(height: 16),
+                          _buildMediaPreviewCard(),
+                        ],
+                        const SizedBox(height: 16),
+                        _buildTagsCard(),
+                        if (_isUploadingMedia) ...[
+                          const SizedBox(height: 16),
+                          _buildUploadProgressCard(),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                GradientCTAButton(
+                  text: 'create_group_post_submit'.tr(),
+                  icon: Icons.auto_awesome,
+                  onPressed: isBusy ? null : _createPostWithGuard,
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
+    );
+  }
+
+  Widget _buildHeroCard() {
+    return GlassCard(
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.all(20),
+      showAccentGlow: true,
+      accentColor: _getGroupColor(),
       child: Row(
         children: [
-          Icon(_getGroupIcon(), color: _getGroupColor(), size: 24),
-          const SizedBox(width: 12),
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              gradient: _groupGradient,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: _getGroupColor().withValues(alpha: 0.25),
+                  blurRadius: 32,
+                  offset: const Offset(0, 16),
+                ),
+              ],
+            ),
+            child: Icon(_getGroupIcon(), color: Colors.white, size: 28),
+          ),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   _getPostTypeTitle(),
-                  style: TextStyle(
+                  style: GoogleFonts.spaceGrotesk(
                     fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: _getGroupColor(),
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                    letterSpacing: 0.4,
                   ),
                 ),
+                const SizedBox(height: 6),
                 Text(
-                  'Share with the ${_getGroupDisplayName().toLowerCase()} community',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: ArtbeatColors.textSecondary,
+                  _getGroupDescription(),
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white.withValues(alpha: 0.72),
+                    height: 1.3,
                   ),
                 ),
               ],
@@ -672,47 +635,45 @@ class _CreateGroupPostScreenState extends State<CreateGroupPostScreen>
     );
   }
 
-  Widget _buildUserInfoSection() {
+  Widget _buildUserCard() {
     final user = FirebaseAuth.instance.currentUser;
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+    return GlassCard(
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.all(20),
       child: Row(
         children: [
           CircleAvatar(
-            radius: 24,
-            backgroundColor: _getGroupColor().withValues(alpha: 0.1),
+            radius: 28,
+            backgroundColor: Colors.white.withValues(alpha: 0.08),
             backgroundImage: ImageUrlValidator.safeNetworkImage(user?.photoURL),
             child: !ImageUrlValidator.isValidImageUrl(user?.photoURL)
-                ? Icon(Icons.person, color: _getGroupColor(), size: 24)
+                ? const Icon(Icons.person, color: Colors.white, size: 24)
                 : null,
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  user?.displayName ?? 'Anonymous User',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
+                  user?.displayName ?? 'create_group_post_anonymous'.tr(),
+                  style: GoogleFonts.spaceGrotesk(
                     fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
                   ),
                 ),
+                const SizedBox(height: 4),
                 Text(
-                  'Posting to ${_getGroupDisplayName()}',
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  'create_group_post_user_subtitle'.tr(
+                    namedArgs: {'group': _getGroupDisplayName()},
+                  ),
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white.withValues(alpha: 0.7),
+                  ),
                 ),
               ],
             ),
@@ -722,148 +683,98 @@ class _CreateGroupPostScreenState extends State<CreateGroupPostScreen>
     );
   }
 
-  Widget _buildContentInput() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: TextField(
-        controller: _contentController,
-        maxLines: 6,
-        decoration: InputDecoration(
-          hintText: _getContentHint(),
-          hintStyle: TextStyle(color: Colors.grey[500], fontSize: 16),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.all(16),
-        ),
-        style: const TextStyle(fontSize: 16),
-      ),
-    );
-  }
-
-  Widget _buildMediaSelectionButtons() {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildMediaButton(
-            icon: Icons.photo_library,
-            label: 'Images',
-            subtitle: '${_selectedImages.length}/4',
-            onTap: _pickImages,
-            isActive: _selectedImages.isNotEmpty,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildMediaButton(
-            icon: Icons.videocam,
-            label: 'Video',
-            subtitle: _selectedVideo != null ? '1' : '0',
-            onTap: _pickVideo,
-            isActive: _selectedVideo != null,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildMediaButton(
-            icon: Icons.audiotrack,
-            label: 'Audio',
-            subtitle: _selectedAudio != null ? '1' : '0',
-            onTap: _pickAudio,
-            isActive: _selectedAudio != null,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMediaButton({
-    required IconData icon,
-    required String label,
-    required String subtitle,
-    required VoidCallback onTap,
-    required bool isActive,
-  }) {
-    return GestureDetector(
-      onTap: _isPickingMedia ? null : onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: isActive
-              ? _getGroupColor().withValues(alpha: 0.1)
-              : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isActive ? _getGroupColor() : Colors.grey[300]!,
-            width: isActive ? 2 : 1,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            Icon(
-              icon,
-              color: isActive ? _getGroupColor() : Colors.grey[600],
-              size: 24,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: TextStyle(
-                fontWeight: FontWeight.w500,
-                color: isActive ? _getGroupColor() : Colors.grey[700],
-              ),
-            ),
-            Text(
-              subtitle,
-              style: TextStyle(fontSize: 12, color: Colors.grey[500]),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMediaPreview() {
-    if (_selectedImages.isEmpty &&
-        _selectedVideo == null &&
-        _selectedAudio == null) {
-      return const SizedBox.shrink();
-    }
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 20),
+  Widget _buildContentCard() {
+    return GlassCard(
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Media Preview',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-          ),
+          _buildSectionLabel('create_group_post_content_label'.tr()),
           const SizedBox(height: 12),
+          GlassTextField(
+            controller: _contentController,
+            hintText: _getContentHint(),
+            maxLines: 6,
+          ),
+          const SizedBox(height: 8),
+          _buildHelperText('create_group_post_content_helper'.tr()),
+        ],
+      ),
+    );
+  }
 
-          // Images preview
+  Widget _buildMediaCard() {
+    return GlassCard(
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionLabel('create_group_post_media_title'.tr()),
+          const SizedBox(height: 6),
+          _buildHelperText('create_group_post_media_description'.tr()),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _MediaActionButton(
+                  icon: Icons.photo_library,
+                  label: 'create_group_post_media_images'.tr(),
+                  subtitle: _mediaCountLabel(_selectedImages.length, 4),
+                  onTap: _isPickingMedia ? null : _pickImages,
+                  isActive: _selectedImages.isNotEmpty,
+                  accentColor: _getGroupColor(),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _MediaActionButton(
+                  icon: Icons.videocam,
+                  label: 'create_group_post_media_video'.tr(),
+                  subtitle: _mediaCountLabel(_selectedVideo == null ? 0 : 1, 1),
+                  onTap: _isPickingMedia ? null : _pickVideo,
+                  isActive: _selectedVideo != null,
+                  accentColor: _getGroupColor(),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _MediaActionButton(
+                  icon: Icons.audiotrack,
+                  label: 'create_group_post_media_audio'.tr(),
+                  subtitle: _mediaCountLabel(_selectedAudio == null ? 0 : 1, 1),
+                  onTap: _isPickingMedia ? null : _pickAudio,
+                  isActive: _selectedAudio != null,
+                  accentColor: _getGroupColor(),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMediaPreviewCard() {
+    return GlassCard(
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionLabel('create_group_post_media_preview_title'.tr()),
+          const SizedBox(height: 12),
           if (_selectedImages.isNotEmpty) _buildImagesPreview(),
-
-          // Video preview
-          if (_selectedVideo != null) _buildVideoPreview(),
-
-          // Audio preview
-          if (_selectedAudio != null) _buildAudioPreview(),
+          if (_selectedVideo != null) ...[
+            if (_selectedImages.isNotEmpty) const SizedBox(height: 12),
+            _buildVideoPreview(),
+          ],
+          if (_selectedAudio != null) ...[
+            if (_selectedImages.isNotEmpty || _selectedVideo != null)
+              const SizedBox(height: 12),
+            _buildAudioPreview(),
+          ],
         ],
       ),
     );
@@ -872,52 +783,72 @@ class _CreateGroupPostScreenState extends State<CreateGroupPostScreen>
   Widget _buildImagesPreview() {
     return SizedBox(
       height: 120,
-      child: ListView.builder(
+      child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: _selectedImages.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 12),
         itemBuilder: (context, index) {
-          return Container(
-            margin: const EdgeInsets.only(right: 12),
-            child: Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.file(
-                    _selectedImages[index],
-                    width: 120,
-                    height: 120,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        width: 120,
-                        height: 120,
-                        color: Colors.grey[300],
-                        child: const Icon(
-                          Icons.broken_image,
-                          color: Colors.red,
-                        ),
-                      );
-                    },
+          return Stack(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Image.file(
+                  _selectedImages[index],
+                  width: 120,
+                  height: 120,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      width: 120,
+                      height: 120,
+                      color: Colors.black.withValues(alpha: 0.2),
+                      child: const Icon(
+                        Icons.broken_image,
+                        color: Colors.white,
+                      ),
+                    );
+                  },
+                ),
+              ),
+              Positioned(
+                top: 8,
+                left: 8,
+                child: GestureDetector(
+                  onTap: () => _editImage(index),
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.6),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.edit,
+                      size: 16,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
-                Positioned(
-                  top: 4,
-                  right: 4,
-                  child: IconButton(
-                    icon: const Icon(Icons.edit, size: 20),
-                    onPressed: () => _editImage(index),
+              ),
+              Positioned(
+                top: 8,
+                right: 8,
+                child: GestureDetector(
+                  onTap: () => _removeImage(index),
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withValues(alpha: 0.85),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.close,
+                      size: 16,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
-                Positioned(
-                  bottom: 4,
-                  right: 4,
-                  child: IconButton(
-                    icon: const Icon(Icons.close, color: Colors.red, size: 20),
-                    onPressed: () => _removeImage(index),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           );
         },
       ),
@@ -926,51 +857,37 @@ class _CreateGroupPostScreenState extends State<CreateGroupPostScreen>
 
   Widget _buildVideoPreview() {
     if (_videoController == null || !_videoController!.value.isInitialized) {
-      return Container(
+      return SizedBox(
         height: 120,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: Colors.grey[300],
-          borderRadius: BorderRadius.circular(8),
+        child: Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(_getGroupColor()),
+          ),
         ),
-        child: const Center(child: CircularProgressIndicator()),
       );
     }
 
-    return Container(
-      height: 120,
-      margin: const EdgeInsets.only(bottom: 12),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
       child: Stack(
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: AspectRatio(
-              aspectRatio: _videoController!.value.aspectRatio,
-              child: VideoPlayer(_videoController!),
-            ),
+          AspectRatio(
+            aspectRatio: _videoController!.value.aspectRatio,
+            child: VideoPlayer(_videoController!),
           ),
           Positioned(
-            top: 4,
-            right: 4,
+            top: 12,
+            right: 12,
             child: GestureDetector(
               onTap: _removeVideo,
               child: Container(
-                padding: const EdgeInsets.all(4),
+                padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: Colors.red.withValues(alpha: 0.8),
-                  borderRadius: BorderRadius.circular(4),
+                  color: Colors.red.withValues(alpha: 0.85),
+                  shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.close, color: Colors.white, size: 16),
+                child: const Icon(Icons.close, size: 18, color: Colors.white),
               ),
-            ),
-          ),
-          const Positioned(
-            bottom: 8,
-            left: 8,
-            child: Icon(
-              Icons.play_circle_filled,
-              color: Colors.white,
-              size: 32,
             ),
           ),
         ],
@@ -980,125 +897,215 @@ class _CreateGroupPostScreenState extends State<CreateGroupPostScreen>
 
   Widget _buildAudioPreview() {
     return Container(
-      padding: const EdgeInsets.all(16),
-      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(8),
+        color: Colors.white.withValues(alpha: 0.04),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
       ),
       child: Row(
         children: [
-          const Icon(Icons.audiotrack, color: Colors.grey),
+          const Icon(Icons.audiotrack, color: Colors.white),
           const SizedBox(width: 12),
-          const Expanded(child: Text('Audio file selected')),
+          Expanded(
+            child: Text(
+              'create_group_post_media_audio_selected'.tr(),
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
+            ),
+          ),
           GestureDetector(
             onTap: _removeAudio,
-            child: const Icon(Icons.close, color: Colors.red),
+            child: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.red.withValues(alpha: 0.85),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.close, size: 16, color: Colors.white),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildTagsInput() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+  Widget _buildTagsCard() {
+    return GlassCard(
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionLabel('create_group_post_tags_label'.tr()),
+          const SizedBox(height: 12),
+          GlassTextField(
+            controller: _tagsController,
+            hintText: 'create_group_post_tags_hint'.tr(),
+            prefixIcon: const Icon(Icons.tag, color: Colors.white),
           ),
+          const SizedBox(height: 8),
+          _buildHelperText('create_group_post_tags_helper'.tr()),
         ],
-      ),
-      child: TextField(
-        controller: _tagsController,
-        decoration: InputDecoration(
-          labelText: 'Tags',
-          hintText: 'art, digital, painting, creative (separate by comma)',
-          hintStyle: TextStyle(color: Colors.grey[500]),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.all(16),
-          prefixIcon: Icon(Icons.tag, color: _getGroupColor()),
-        ),
       ),
     );
   }
 
-  Widget _buildUploadProgress() {
-    // Show video upload progress if video is being uploaded
+  Widget _buildUploadProgressCard() {
     if (_selectedVideo != null && _videoUploadProgress > 0) {
-      return Container(
-        margin: const EdgeInsets.only(top: 20),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
+      return GlassCard(
+        margin: EdgeInsets.zero,
+        padding: const EdgeInsets.all(20),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Uploading video...',
-              style: TextStyle(fontWeight: FontWeight.w500),
-            ),
+            _buildSectionLabel('create_group_post_upload_video'.tr()),
             const SizedBox(height: 12),
             LinearProgressIndicator(
               value: _videoUploadProgress,
-              backgroundColor: Colors.grey[300],
+              backgroundColor: Colors.white.withValues(alpha: 0.12),
               valueColor: AlwaysStoppedAnimation<Color>(_getGroupColor()),
             ),
             const SizedBox(height: 8),
             Text(
-              '${(_videoUploadProgress * 100).toInt()}%',
-              style: TextStyle(color: Colors.grey[600], fontSize: 12),
+              'create_group_post_upload_percent'.tr(
+                namedArgs: {
+                  'percent': '${(_videoUploadProgress * 100).toInt()}',
+                },
+              ),
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: Colors.white.withValues(alpha: 0.7),
+              ),
             ),
           ],
         ),
       );
     }
 
-    // Show general media upload progress
-    return Container(
-      margin: const EdgeInsets.only(top: 20),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+    return GlassCard(
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.all(20),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Uploading media...',
-            style: TextStyle(fontWeight: FontWeight.w500),
-          ),
+          _buildSectionLabel('create_group_post_upload_media'.tr()),
           const SizedBox(height: 12),
           LinearProgressIndicator(
             value: _uploadProgress,
-            backgroundColor: Colors.grey[300],
+            backgroundColor: Colors.white.withValues(alpha: 0.12),
             valueColor: AlwaysStoppedAnimation<Color>(_getGroupColor()),
           ),
           const SizedBox(height: 8),
           Text(
-            '${(_uploadProgress * 100).toInt()}%',
-            style: TextStyle(color: Colors.grey[600], fontSize: 12),
+            'create_group_post_upload_percent'.tr(
+              namedArgs: {'percent': '${(_uploadProgress * 100).toInt()}'},
+            ),
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: Colors.white.withValues(alpha: 0.7),
+            ),
           ),
         ],
+      ),
+    );
+  }
+
+  Text _buildSectionLabel(String text) {
+    return Text(
+      text,
+      style: GoogleFonts.spaceGrotesk(
+        fontSize: 15,
+        fontWeight: FontWeight.w800,
+        color: Colors.white,
+      ),
+    );
+  }
+
+  Text _buildHelperText(String text) {
+    return Text(
+      text,
+      style: GoogleFonts.spaceGrotesk(
+        fontSize: 12,
+        fontWeight: FontWeight.w600,
+        color: Colors.white.withValues(alpha: 0.72),
+        height: 1.3,
+      ),
+    );
+  }
+}
+
+class _MediaActionButton extends StatelessWidget {
+  const _MediaActionButton({
+    required this.icon,
+    required this.label,
+    required this.subtitle,
+    required this.onTap,
+    required this.isActive,
+    required this.accentColor,
+  });
+
+  final IconData icon;
+  final String label;
+  final String subtitle;
+  final VoidCallback? onTap;
+  final bool isActive;
+  final Color accentColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final disabled = onTap == null;
+    return GestureDetector(
+      onTap: disabled ? null : onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isActive ? accentColor : Colors.white.withValues(alpha: 0.2),
+            width: isActive ? 1.5 : 1,
+          ),
+          color: isActive
+              ? Colors.white.withValues(alpha: 0.08)
+              : Colors.white.withValues(alpha: 0.04),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: disabled
+                  ? Colors.white.withValues(alpha: 0.4)
+                  : Colors.white,
+              size: 26,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: Colors.white.withValues(alpha: 0.7),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
