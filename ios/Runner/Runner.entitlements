@@ -4,6 +4,8 @@
 <dict>
 	<key>aps-environment</key>
 	<string>development</string>
+	<key>com.apple.developer.devicecheck.appattest-environment</key>
+	<string>development</string>
 	<key>com.apple.developer.team-identifier</key>
 	<string>H49R32NPY6</string>
 </dict>

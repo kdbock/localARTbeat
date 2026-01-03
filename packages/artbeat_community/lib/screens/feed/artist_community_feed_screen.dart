@@ -1,18 +1,20 @@
-import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:provider/provider.dart';
-import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_core/src/services/in_app_gift_service.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-import '../../models/group_models.dart';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:artbeat_core/artbeat_core.dart' hide GradientBadge;
+import 'package:artbeat_core/src/services/in_app_gift_service.dart';
+
 import '../../models/direct_commission_model.dart';
+import '../../models/group_models.dart';
 import '../../services/direct_commission_service.dart';
-import '../../widgets/group_post_card.dart';
-import '../../widgets/post_detail_modal.dart';
-import '../../theme/community_colors.dart';
+import '../../widgets/widgets.dart';
 
 import 'create_group_post_screen.dart';
 
@@ -129,7 +131,9 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
       // debugPrint('Error loading artist posts: $e');
       setState(() {
         _hasError = true;
-        _errorMessage = 'Failed to load posts: ${e.toString()}';
+        _errorMessage = 'artist_feed_load_error'.tr(
+          namedArgs: {'error': e.toString()},
+        );
         _isLoading = false;
       });
     }
@@ -176,9 +180,13 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
     } catch (e) {
       // debugPrint('Error loading more posts: $e');
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error loading more posts: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'artist_feed_load_more_error'.tr(namedArgs: {'error': '$e'}),
+            ),
+          ),
+        );
       }
     } finally {
       if (mounted) {
@@ -216,15 +224,21 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
       });
 
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('❤️ Appreciated!')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('artist_feed_appreciate_success'.tr()),
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Failed to appreciate: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'artist_feed_appreciate_error'.tr(namedArgs: {'error': '$e'}),
+            ),
+          ),
+        );
       }
     }
   }
@@ -245,9 +259,11 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
       final postDoc = await postRef.get();
       if (!postDoc.exists) {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('Post not found')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('artist_feed_feature_missing'.tr()),
+            ),
+          );
         }
         return;
       }
@@ -256,16 +272,22 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
       await postRef.update({'isFeatured': true});
 
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Post featured!')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('artist_feed_feature_success'.tr()),
+          ),
+        );
       }
     } catch (e) {
       // debugPrint('Error featuring post: $e');
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Failed to feature post: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'artist_feed_feature_error'.tr(namedArgs: {'error': '$e'}),
+            ),
+          ),
+        );
       }
     }
   }
@@ -300,17 +322,25 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
 
   void _handleShare(BaseGroupPost post) async {
     try {
-      final shareText =
-          '${post.content}\n\nShared from ARTbeat by ${post.userName}';
+      final shareText = 'artist_feed_share_text'.tr(
+        namedArgs: {
+          'content': post.content,
+          'artist': post.userName,
+        },
+      );
       await SharePlus.instance.share(ShareParams(text: shareText));
 
       // Update share count in Firestore
       await _updateShareCount(post.id);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Failed to share: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'artist_feed_share_error'.tr(namedArgs: {'error': '$e'}),
+            ),
+          ),
+        );
       }
     }
   }
@@ -352,20 +382,22 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
   }
 
   void _handleArtistLike() {
-    // Handle liking the artist profile
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('❤️ Liked ${widget.artist.displayName}!'),
+        content: Text(
+          'artist_feed_like_toast'.tr(namedArgs: {'name': widget.artist.displayName}),
+        ),
         duration: const Duration(seconds: 2),
       ),
     );
   }
 
   void _handleArtistFollow() {
-    // Handle following the artist
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('👤 Following ${widget.artist.displayName}!'),
+        content: Text(
+          'artist_feed_follow_toast'.tr(namedArgs: {'name': widget.artist.displayName}),
+        ),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -373,9 +405,9 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
 
   void _handleArtistGift() async {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Processing gift...'),
-        duration: Duration(seconds: 1),
+      SnackBar(
+        content: Text('artist_feed_gift_processing'.tr()),
+        duration: const Duration(seconds: 1),
       ),
     );
 
@@ -385,85 +417,135 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
 
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Gift purchase initiated! 🎁'),
-          backgroundColor: Colors.green,
-          duration: Duration(seconds: 2),
+        SnackBar(
+          content: Text('artist_feed_gift_success'.tr()),
+          backgroundColor: const Color(0xFF34D399),
+          duration: const Duration(seconds: 2),
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Unable to send gift. Please try again.'),
-          backgroundColor: Colors.red,
-          duration: Duration(seconds: 2),
+        SnackBar(
+          content: Text('artist_feed_gift_error'.tr()),
+          backgroundColor: const Color(0xFFFF3D8D),
+          duration: const Duration(seconds: 2),
         ),
       );
     }
   }
 
   void _handleArtistSponsor() {
-    // Handle sponsoring the artist
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            const Icon(
-              Icons.volunteer_activism,
-              color: ArtbeatColors.primaryGreen,
-            ),
-            const SizedBox(width: 8),
-            Text('Sponsor ${widget.artist.displayName}'),
-          ],
-        ),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Support this artist\'s creative journey!',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            ),
-            SizedBox(height: 12),
-            Text(
-              'Choose a sponsorship tier:',
-              style: TextStyle(color: ArtbeatColors.textSecondary),
-            ),
-            SizedBox(height: 16),
-            // Add sponsorship tier options here
-            Text('🥉 Bronze Supporter - \$5/month'),
-            SizedBox(height: 8),
-            Text('🥈 Silver Patron - \$15/month'),
-            SizedBox(height: 8),
-            Text('🥇 Gold Benefactor - \$50/month'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    '🎉 Thank you for sponsoring ${widget.artist.displayName}!',
-                  ),
-                  duration: const Duration(seconds: 3),
+      builder: (context) {
+        final tiers = [
+          'artist_feed_sponsor_tier_bronze'.tr(),
+          'artist_feed_sponsor_tier_silver'.tr(),
+          'artist_feed_sponsor_tier_gold'.tr(),
+        ];
+
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.all(16),
+          child: GlassPanel(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.volunteer_activism, color: Color(0xFF34D399)),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'artist_feed_sponsor_title'.tr(
+                          namedArgs: {'name': widget.artist.displayName},
+                        ),
+                        style: GoogleFonts.spaceGrotesk(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: ArtbeatColors.primaryGreen,
-              foregroundColor: Colors.white,
+                const SizedBox(height: 12),
+                Text(
+                  'artist_feed_sponsor_intro'.tr(),
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white.withValues(alpha: 0.75),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'artist_feed_sponsor_choose_tier'.tr(),
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white.withValues(alpha: 0.65),
+                    letterSpacing: 0.4,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                ...tiers.map(
+                  (tier) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: GlassCard(
+                      padding: const EdgeInsets.all(16),
+                      child: Text(
+                        tier,
+                        style: GoogleFonts.spaceGrotesk(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: HudButton(
+                        isPrimary: false,
+                        text: 'common_cancel'.tr(),
+                        onPressed: () => Navigator.pop(context),
+                        height: 48,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: GradientCTAButton(
+                        text: 'artist_feed_sponsor_cta'.tr(),
+                        icon: Icons.volunteer_activism,
+                        onPressed: () {
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'artist_feed_sponsor_thanks'.tr(
+                                  namedArgs: {'name': widget.artist.displayName},
+                                ),
+                              ),
+                              duration: const Duration(seconds: 3),
+                            ),
+                          );
+                        },
+                        height: 48,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            child: const Text('Sponsor'),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -476,115 +558,85 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
   }
 
   Widget _buildArtistHeader() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: const [
-          BoxShadow(
-            color: Color.fromRGBO(0, 0, 0, 0.05),
-            blurRadius: 8,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    final headlineStyle = GoogleFonts.spaceGrotesk(
+      fontSize: 20,
+      fontWeight: FontWeight.w900,
+      color: Colors.white,
+    );
+    final bodyStyle = GoogleFonts.spaceGrotesk(
+      fontSize: 13,
+      fontWeight: FontWeight.w600,
+      color: Colors.white.withValues(alpha: 0.75),
+    );
+
+    return GlassCard(
+      showAccentGlow: true,
+      padding: const EdgeInsets.all(24),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Artist Avatar
               CircleAvatar(
                 radius: 40,
                 backgroundImage: ImageUrlValidator.safeNetworkImage(
                   widget.artist.profileImageUrl,
                 ),
-                child:
-                    !ImageUrlValidator.isValidImageUrl(
-                      widget.artist.profileImageUrl,
-                    )
-                    ? const Icon(
-                        Icons.person,
-                        size: 40,
-                        color: ArtbeatColors.textSecondary,
-                      )
+                child: !ImageUrlValidator.isValidImageUrl(
+                  widget.artist.profileImageUrl,
+                )
+                    ? const Icon(Icons.person, size: 36, color: Colors.white)
                     : null,
               ),
               const SizedBox(width: 16),
-
-              // Artist Info
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Show verification badge if verified
-                    if (widget.artist.isVerified) ...[
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: ArtbeatColors.success.withValues(alpha: 0.1),
-                          borderRadius: const BorderRadius.all(
-                            Radius.circular(12),
-                          ),
-                          border: Border.all(
-                            color: ArtbeatColors.success.withValues(alpha: 0.3),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            widget.artist.displayName,
+                            style: headlineStyle,
                           ),
                         ),
-                        child: const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.verified,
-                              size: 16,
-                              color: ArtbeatColors.success,
+                        if (widget.artist.isVerified)
+                          GradientBadge(
+                            text: 'artist_feed_verified_badge'.tr(),
+                            icon: Icons.verified,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
                             ),
-                            SizedBox(width: 4),
-                            Text(
-                              'Verified Artist',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: ArtbeatColors.success,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                    ],
+                          ),
+                      ],
+                    ),
                     if (widget.artist.location?.isNotEmpty == true) ...[
+                      const SizedBox(height: 8),
                       Row(
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.location_on,
                             size: 16,
-                            color: ArtbeatColors.textSecondary,
+                            color: Colors.white.withValues(alpha: 0.7),
                           ),
-                          const SizedBox(width: 4),
+                          const SizedBox(width: 6),
                           Expanded(
                             child: Text(
-                              widget.artist.location ?? '',
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: ArtbeatColors.textSecondary,
-                              ),
+                              widget.artist.location!,
+                              style: bodyStyle,
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
                     ],
                     if (widget.artist.bio?.isNotEmpty == true) ...[
+                      const SizedBox(height: 8),
                       Text(
                         widget.artist.bio!,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: ArtbeatColors.textPrimary,
-                        ),
+                        style: bodyStyle,
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -594,8 +646,6 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
               ),
             ],
           ),
-
-          // Mediums and Styles
           if (widget.artist.mediums.isNotEmpty ||
               widget.artist.styles.isNotEmpty) ...[
             const SizedBox(height: 16),
@@ -603,117 +653,62 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
               spacing: 8,
               runSpacing: 8,
               children: [
-                ...widget.artist.mediums.map(
-                  (medium) => _buildTag(medium, ArtbeatColors.primaryPurple),
-                ),
-                ...widget.artist.styles.map(
-                  (style) => _buildTag(style, ArtbeatColors.accentGold),
-                ),
+                ...widget.artist.mediums
+                    .map((medium) => _buildTag(medium, const Color(0xFF7C4DFF))),
+                ...widget.artist.styles
+                    .map((style) => _buildTag(style, const Color(0xFFFFC857))),
               ],
             ),
           ],
-
-          // Enhanced Artist Engagement Bar
-          const SizedBox(height: 20),
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            decoration: BoxDecoration(
-              color: ArtbeatColors.backgroundSecondary.withValues(alpha: 0.5),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: ArtbeatColors.textSecondary.withValues(alpha: 0.1),
-              ),
-            ),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const SizedBox(width: 16),
-                  // Like/Follow Artist
-                  _buildModernEngagementButton(
-                    icon: Icons.favorite,
-                    label: 'Like',
-                    color: Colors.red,
-                    onPressed: () => _handleArtistLike(),
+          const SizedBox(height: 24),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _buildPrimaryAction(
+                  icon: Icons.favorite,
+                  label: 'artist_feed_action_like'.tr(),
+                  onPressed: _handleArtistLike,
+                ),
+                if (!_isCurrentUserArtist)
+                  _buildPrimaryAction(
+                    icon: Icons.person_add,
+                    label: 'artist_feed_action_follow'.tr(),
+                    onPressed: _handleArtistFollow,
                   ),
-                  const SizedBox(width: 12),
-
-                  // Follow Artist
-                  if (!_isCurrentUserArtist) ...[
-                    _buildModernEngagementButton(
-                      icon: Icons.person_add,
-                      label: 'Follow',
-                      color: ArtbeatColors.primaryPurple,
-                      onPressed: () => _handleArtistFollow(),
-                    ),
-                    const SizedBox(width: 12),
-                  ],
-
-                  // Gift to Artist
-                  _buildModernEngagementButton(
-                    icon: Icons.card_giftcard,
-                    label: 'Gift',
-                    color: ArtbeatColors.accentGold,
-                    onPressed: () => _handleArtistGift(),
+                _buildPrimaryAction(
+                  icon: Icons.card_giftcard,
+                  label: 'artist_feed_action_gift'.tr(),
+                  onPressed: _handleArtistGift,
+                ),
+                _buildPrimaryAction(
+                  icon: Icons.volunteer_activism,
+                  label: 'artist_feed_action_sponsor'.tr(),
+                  onPressed: _handleArtistSponsor,
+                  isPrimary: true,
+                ),
+                if (!_isCurrentUserArtist)
+                  _buildPrimaryAction(
+                    icon: Icons.message,
+                    label: 'artist_feed_action_message'.tr(),
+                    onPressed: _handleDirectMessage,
                   ),
-                  const SizedBox(width: 12),
-
-                  // Sponsor Artist
-                  _buildModernEngagementButton(
-                    icon: Icons.volunteer_activism,
-                    label: 'Sponsor',
-                    color: ArtbeatColors.primaryGreen,
-                    onPressed: () => _handleArtistSponsor(),
-                  ),
-                  const SizedBox(width: 12),
-
-                  // Message Artist
-                  if (!_isCurrentUserArtist) ...[
-                    _buildModernEngagementButton(
-                      icon: Icons.message,
-                      label: 'Message',
-                      color: ArtbeatColors.secondaryTeal,
-                      onPressed: _handleDirectMessage,
-                    ),
-                    const SizedBox(width: 12),
-                  ],
-
-                  // Commission Request
-                  _buildModernEngagementButton(
-                    icon: Icons.palette,
-                    label: 'Commission',
-                    color: ArtbeatColors.accentOrange,
-                    onPressed: _handleCommissionRequest,
-                  ),
-                  const SizedBox(width: 16),
-                ],
-              ),
+                _buildPrimaryAction(
+                  icon: Icons.palette,
+                  label: 'artist_feed_action_commission'.tr(),
+                  onPressed: _handleCommissionRequest,
+                  isPrimary: true,
+                ),
+              ],
             ),
           ),
-
-          // Create Post Button (only for the artist viewing their own feed)
           if (_isCurrentUserArtist) ...[
-            const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: _showCreatePostOptions,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: ArtbeatColors.primaryPurple,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                icon: const Icon(Icons.add),
-                label: const Text(
-                  'Create New Post',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                ),
-              ),
+            const SizedBox(height: 24),
+            GradientCTAButton(
+              text: 'artist_feed_create_post_cta'.tr(),
+              icon: Icons.add,
+              onPressed: _showCreatePostOptions,
+              height: 52,
             ),
           ],
         ],
@@ -725,53 +720,62 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: const BorderRadius.all(Radius.circular(12)),
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Text(
         text,
-        style: TextStyle(
+        style: GoogleFonts.spaceGrotesk(
           fontSize: 12,
-          fontWeight: FontWeight.w500,
+          fontWeight: FontWeight.w700,
           color: color,
         ),
       ),
     );
   }
 
-  Widget _buildModernEngagementButton({
+  Widget _buildPrimaryAction({
     required IconData icon,
     required String label,
-    required Color color,
     required VoidCallback onPressed,
+    bool isPrimary = false,
   }) {
-    return InkWell(
-      onTap: onPressed,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        width: 70, // Fixed width to prevent overflow
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: color.withValues(alpha: 0.2), width: 1),
-        ),
+    return Padding(
+      padding: const EdgeInsets.only(right: 12),
+      child: HudButton(
+        isPrimary: isPrimary,
+        icon: icon,
+        text: label,
+        onPressed: onPressed,
+        height: 48,
+        width: 160,
+      ),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return Center(
+      child: GlassCard(
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: color, size: 20),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                color: color,
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
+            const SizedBox(
+              width: 48,
+              height: 48,
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF22D3EE)),
               ),
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'artist_feed_loading_label'.tr(),
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
             ),
           ],
         ),
@@ -779,86 +783,82 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
     );
   }
 
-  Widget _buildLoadingState() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(
-              ArtbeatColors.primaryPurple,
-            ),
-          ),
-          SizedBox(height: 16),
-          Text(
-            'Loading artist posts...',
-            style: TextStyle(fontSize: 16, color: ArtbeatColors.textSecondary),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildErrorState() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.error_outline,
-            size: 64,
-            color: ArtbeatColors.textSecondary,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            _errorMessage ?? 'Something went wrong',
-            style: const TextStyle(
-              fontSize: 16,
-              color: ArtbeatColors.textSecondary,
+      child: GlassCard(
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.error_outline, size: 48, color: Colors.white),
+            const SizedBox(height: 16),
+            Text(
+              _errorMessage ?? 'artist_feed_error_generic'.tr(),
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: _loadArtistPosts,
-            child: const Text('Try Again'),
-          ),
-        ],
+            const SizedBox(height: 16),
+            HudButton(
+              isPrimary: true,
+              text: 'artist_feed_error_retry'.tr(),
+              onPressed: _loadArtistPosts,
+              height: 48,
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildEmptyState() {
+    final title = 'artist_feed_empty_title'.tr(
+      namedArgs: {'name': widget.artist.displayName},
+    );
+    final subtitle = _isCurrentUserArtist
+        ? 'artist_feed_empty_artist_prompt'.tr()
+        : 'artist_feed_empty_viewer_prompt'.tr();
+
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.palette,
-            size: 64,
-            color: ArtbeatColors.textSecondary,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            '${widget.artist.displayName} hasn\'t posted yet',
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: ArtbeatColors.textPrimary,
+      child: GlassCard(
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.auto_awesome, size: 48, color: Colors.white),
+            const SizedBox(height: 16),
+            Text(
+              title,
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 18,
+                fontWeight: FontWeight.w900,
+                color: Colors.white,
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            _isCurrentUserArtist
-                ? 'Tap the + button to share your first artwork!'
-                : 'Check back later for new artwork!',
-            style: const TextStyle(
-              fontSize: 14,
-              color: ArtbeatColors.textSecondary,
+            const SizedBox(height: 8),
+            Text(
+              subtitle,
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.white.withValues(alpha: 0.75),
+              ),
+              textAlign: TextAlign.center,
             ),
-          ),
-        ],
+            if (_isCurrentUserArtist) ...[
+              const SizedBox(height: 24),
+              GradientCTAButton(
+                text: 'artist_feed_create_post_cta'.tr(),
+                icon: Icons.add,
+                onPressed: _showCreatePostOptions,
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }
@@ -870,63 +870,53 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
       backgroundColor: Colors.transparent,
       builder: (context) => DraggableScrollableSheet(
         initialChildSize: 0.6,
-        maxChildSize: 0.8,
+        maxChildSize: 0.85,
         minChildSize: 0.3,
-        builder: (context, scrollController) => Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: Column(
-            children: [
-              // Handle bar
-              Container(
-                width: 40,
-                height: 4,
-                margin: const EdgeInsets.only(top: 12),
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
+        builder: (context, scrollController) => Padding(
+          padding: const EdgeInsets.all(16),
+          child: GlassPanel(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              children: [
+                Container(
+                  width: 48,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
-              ),
-
-              // Header
-              Padding(
-                padding: const EdgeInsets.all(20),
-                child: Row(
+                Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: ArtbeatColors.primaryPurple.withValues(
-                          alpha: 0.1,
-                        ),
-                        borderRadius: BorderRadius.circular(8),
+                        color: Colors.white.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(16),
                       ),
-                      child: const Icon(
-                        Icons.palette,
-                        color: ArtbeatColors.primaryPurple,
-                        size: 24,
-                      ),
+                      child: const Icon(Icons.palette, color: Colors.white),
                     ),
                     const SizedBox(width: 16),
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Create Artist Post',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: ArtbeatColors.textPrimary,
+                            'artist_feed_create_sheet_title'.tr(),
+                            style: GoogleFonts.spaceGrotesk(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
                             ),
                           ),
+                          const SizedBox(height: 4),
                           Text(
-                            'Share your artwork with the community',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: ArtbeatColors.textSecondary,
+                            'artist_feed_create_sheet_subtitle'.tr(),
+                            style: GoogleFonts.spaceGrotesk(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white.withValues(alpha: 0.7),
                             ),
                           ),
                         ],
@@ -934,39 +924,40 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
                     ),
                   ],
                 ),
-              ),
-
-              // Create options
-              Expanded(
-                child: ListView(
-                  controller: scrollController,
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  children: [
-                    _buildCreateOption(
-                      icon: Icons.photo_camera,
-                      title: 'Share Artwork',
-                      subtitle: 'Post photos of your latest creation',
-                      color: ArtbeatColors.primaryPurple,
-                      postType: 'artwork',
-                    ),
-                    _buildCreateOption(
-                      icon: Icons.video_camera_back,
-                      title: 'Process Video',
-                      subtitle: 'Share your creative process',
-                      color: ArtbeatColors.primaryGreen,
-                      postType: 'process',
-                    ),
-                    _buildCreateOption(
-                      icon: Icons.text_fields,
-                      title: 'Artist Update',
-                      subtitle: 'Share thoughts or updates',
-                      color: ArtbeatColors.secondaryTeal,
-                      postType: 'update',
-                    ),
-                  ],
+                const SizedBox(height: 24),
+                Expanded(
+                  child: ListView(
+                    controller: scrollController,
+                    children: [
+                      _buildCreateOption(
+                        icon: Icons.photo_camera,
+                        title: 'artist_feed_create_option_artwork_title'.tr(),
+                        subtitle:
+                            'artist_feed_create_option_artwork_subtitle'.tr(),
+                        color: const Color(0xFF7C4DFF),
+                        postType: 'artwork',
+                      ),
+                      _buildCreateOption(
+                        icon: Icons.video_camera_back,
+                        title: 'artist_feed_create_option_process_title'.tr(),
+                        subtitle:
+                            'artist_feed_create_option_process_subtitle'.tr(),
+                        color: const Color(0xFF22D3EE),
+                        postType: 'process',
+                      ),
+                      _buildCreateOption(
+                        icon: Icons.text_fields,
+                        title: 'artist_feed_create_option_update_title'.tr(),
+                        subtitle:
+                            'artist_feed_create_option_update_subtitle'.tr(),
+                        color: const Color(0xFFFFC857),
+                        postType: 'update',
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -980,11 +971,12 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
     required Color color,
     required String postType,
   }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Material(
-        color: Colors.transparent,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: GlassCard(
+        padding: const EdgeInsets.all(16),
         child: InkWell(
+          borderRadius: BorderRadius.circular(24),
           onTap: () async {
             final result = await Navigator.push(
               context,
@@ -995,55 +987,47 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
                 ),
               ),
             );
-            // Refresh the feed if a post was created
             if (result == true) {
               _loadArtistPosts();
             }
           },
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: color.withValues(alpha: 0.2)),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(icon, color: color, size: 20),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(16),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: ArtbeatColors.textPrimary,
-                        ),
+                child: Icon(icon, color: color, size: 20),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
                       ),
-                      Text(
-                        subtitle,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: ArtbeatColors.textSecondary,
-                        ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white.withValues(alpha: 0.75),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                Icon(Icons.arrow_forward_ios, size: 16, color: color),
-              ],
-            ),
+              ),
+              Icon(Icons.chevron_right, color: color),
+            ],
           ),
         ),
       ),
@@ -1055,51 +1039,81 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
 
     showDialog<void>(
       context: context,
-      builder: (BuildContext context) {
+      builder: (context) {
         return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: const Text('Search Posts'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    controller: searchController,
-                    decoration: const InputDecoration(
-                      hintText:
-                          'Search by content, artist, location, artwork...',
-                      prefixIcon: Icon(Icons.search),
+          builder: (context, setModalState) {
+            return Dialog(
+              backgroundColor: Colors.transparent,
+              insetPadding: const EdgeInsets.all(16),
+              child: GlassPanel(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.search, color: Colors.white.withValues(alpha: 0.8)),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            'artist_feed_search_title'.tr(),
+                            style: GoogleFonts.spaceGrotesk(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    onChanged: (value) {
-                      setState(
-                        () {},
-                      ); // Trigger rebuild for real-time filtering
-                      _filterPosts(value);
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Search in: Content, Artist Name, Location, Artwork Title, Description, Medium, Style, Tags',
-                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    searchController.dispose();
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('Close'),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: searchController,
+                      decoration: GlassInputDecoration(
+                        hintText: 'artist_feed_search_hint'.tr(),
+                        prefixIcon: const Icon(Icons.search, color: Colors.white),
+                      ),
+                      onChanged: (value) {
+                        setModalState(() {});
+                        _filterPosts(value);
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'artist_feed_search_scope'.tr(),
+                        style: GoogleFonts.spaceGrotesk(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white.withValues(alpha: 0.65),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: HudButton(
+                            isPrimary: false,
+                            text: 'common_close'.tr(),
+                            onPressed: () {
+                              searchController.dispose();
+                              Navigator.of(context).pop();
+                            },
+                            height: 48,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              ],
+              ),
             );
           },
         );
       },
-    ).then((_) {
-      searchController.dispose();
-    });
+    ).then((_) => searchController.dispose());
   }
 
   void _filterPosts(String query) {
@@ -1139,190 +1153,146 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: CommunityColors.communityGradient,
+      backgroundColor: Colors.transparent,
+      appBar: HudTopBar(
+        title: 'artist_feed_title'.tr(
+          namedArgs: {'name': widget.artist.displayName},
+        ),
+        glassBackground: true,
+        actions: [
+          IconButton(
+            tooltip: 'artist_feed_search_tooltip'.tr(),
+            icon: const Icon(Icons.search, color: Colors.white),
+            onPressed: _showSearchDialog,
           ),
+          IconButton(
+            tooltip: 'artist_feed_messages_tooltip'.tr(),
+            icon: const Icon(Icons.message, color: Colors.white),
+            onPressed: () => Navigator.pushNamed(context, '/messaging'),
+          ),
+        ],
+      ),
+      body: WorldBackground(
+        child: SafeArea(
+          bottom: false,
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              // Header row with back button, title, and actions
               Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        '${widget.artist.displayName}\'s Feed',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.search, color: Colors.white),
-                      onPressed: _showSearchDialog,
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.message, color: Colors.white),
-                      onPressed: () =>
-                          Navigator.pushNamed(context, '/messaging'),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                    ),
-                  ],
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                child: _buildArtistHeader(),
+              ),
+              Expanded(
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  child: _buildFeedContent(),
                 ),
               ),
             ],
           ),
         ),
-        toolbarHeight: 64, // Height for header
-      ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: CommunityColors.communityBackgroundGradient,
-        ),
-        child: Column(
-          children: [
-            // Artist header
-            _buildArtistHeader(),
-
-            // Posts list
-            Expanded(
-              child: _isLoading
-                  ? _buildLoadingState()
-                  : _hasError
-                  ? _buildErrorState()
-                  : _filteredPosts.isEmpty && !_isLoading
-                  ? _buildEmptyState()
-                  : RefreshIndicator(
-                      onRefresh: _loadArtistPosts,
-                      child: ListView.builder(
-                        controller: _scrollController,
-                        padding: const EdgeInsets.all(16),
-                        itemCount:
-                            _filteredPosts.length + (_isLoadingMore ? 1 : 0),
-                        itemBuilder: (context, index) {
-                          if (index == _filteredPosts.length) {
-                            return const Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(16),
-                                child: CircularProgressIndicator(),
-                              ),
-                            );
-                          }
-
-                          final post = _filteredPosts[index];
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 16),
-                            child: Column(
-                              children: [
-                                GroupPostCard(
-                                  post: post,
-                                  groupType: GroupType.artist,
-                                  onAppreciate: () => _handleAppreciate(post),
-                                  onComment: () => _handleComment(post),
-                                  onFeature: () => _handleFeature(post),
-                                  onGift: () => _handleGift(post),
-                                  onShare: () => _handleShare(post),
-                                ),
-                                // Additional engagement buttons for artist posts
-                                if (!_isCurrentUserArtist ||
-                                    post.userId !=
-                                        FirebaseAuth.instance.currentUser?.uid)
-                                  Container(
-                                    margin: const EdgeInsets.only(top: 8),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 8,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey.withValues(
-                                        alpha: 0.05,
-                                      ),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        _buildEngagementButton(
-                                          icon: Icons.attach_money,
-                                          label: 'Sponsor',
-                                          color: Colors.green,
-                                          onTap: () => _handleSponsor(post),
-                                        ),
-                                        _buildEngagementButton(
-                                          icon: Icons.work_outline,
-                                          label: 'Commission',
-                                          color: Colors.purple,
-                                          onTap: () => _handleCommission(post),
-                                        ),
-                                        _buildEngagementButton(
-                                          icon: Icons.message_outlined,
-                                          label: 'Message',
-                                          color: Colors.blue,
-                                          onTap: () => _handleDirectMessage(),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-            ),
-          ],
-        ),
       ),
     );
   }
 
-  Widget _buildEngagementButton({
-    required IconData icon,
-    required String label,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
+  Widget _buildFeedContent() {
+    if (_isLoading) {
+      return _buildLoadingState();
+    }
+    if (_hasError) {
+      return _buildErrorState();
+    }
+    if (_filteredPosts.isEmpty) {
+      return _buildEmptyState();
+    }
+
+    return RefreshIndicator(
+      color: const Color(0xFF7C4DFF),
+      onRefresh: _loadArtistPosts,
+      child: ListView.builder(
+        controller: _scrollController,
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+        itemCount: _filteredPosts.length + (_isLoadingMore ? 1 : 0),
+        itemBuilder: (context, index) {
+          if (index == _filteredPosts.length) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Center(
+                child: CircularProgressIndicator(
+                  valueColor: const AlwaysStoppedAnimation<Color>(
+                    Color(0xFF22D3EE),
+                  ),
+                  backgroundColor: Colors.white.withValues(alpha: 0.12),
+                ),
+              ),
+            );
+          }
+
+          final post = _filteredPosts[index];
+          final showEngagement = !_isCurrentUserArtist ||
+              post.userId != FirebaseAuth.instance.currentUser?.uid;
+
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: GlassCard(
+              padding: const EdgeInsets.all(0),
+              child: Column(
+                children: [
+                  GroupPostCard(
+                    post: post,
+                    groupType: GroupType.artist,
+                    onAppreciate: () => _handleAppreciate(post),
+                    onComment: () => _handleComment(post),
+                    onFeature: () => _handleFeature(post),
+                    onGift: () => _handleGift(post),
+                    onShare: () => _handleShare(post),
+                  ),
+                  if (showEngagement)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                      child: _buildInlineEngagementRow(post),
+                    ),
+                ],
+              ),
             ),
-            child: Icon(icon, size: 16, color: color),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 10,
-              color: color,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
+          );
+        },
       ),
+    );
+  }
+
+  Widget _buildInlineEngagementRow(ArtistGroupPost post) {
+    return Row(
+      children: [
+        Expanded(
+          child: HudButton(
+            isPrimary: false,
+            icon: Icons.volunteer_activism,
+            text: 'artist_feed_action_sponsor'.tr(),
+            onPressed: () => _handleSponsor(post),
+            height: 48,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: HudButton(
+            isPrimary: true,
+            icon: Icons.work_outline,
+            text: 'artist_feed_action_commission'.tr(),
+            onPressed: () => _handleCommission(post),
+            height: 48,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: HudButton(
+            isPrimary: false,
+            icon: Icons.message_outlined,
+            text: 'artist_feed_action_message'.tr(),
+            onPressed: _handleDirectMessage,
+            height: 48,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -1359,22 +1329,43 @@ class _CommissionRequestDialogState extends State<_CommissionRequestDialog> {
       // Show image source selection dialog
       final ImageSource? source = await showDialog<ImageSource>(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Select Image Source'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: const Text('Gallery'),
-                onTap: () => Navigator.pop(context, ImageSource.gallery),
-              ),
-              ListTile(
-                leading: const Icon(Icons.camera_alt),
-                title: const Text('Camera'),
-                onTap: () => Navigator.pop(context, ImageSource.camera),
-              ),
-            ],
+        builder: (context) => Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.all(24),
+          child: GlassPanel(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'artist_feed_reference_source_title'.tr(),
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _buildImageSourceTile(
+                  icon: Icons.photo_library,
+                  label: 'artist_feed_reference_gallery'.tr(),
+                  onTap: () => Navigator.pop(context, ImageSource.gallery),
+                ),
+                const SizedBox(height: 12),
+                _buildImageSourceTile(
+                  icon: Icons.camera_alt,
+                  label: 'artist_feed_reference_camera'.tr(),
+                  onTap: () => Navigator.pop(context, ImageSource.camera),
+                ),
+                const SizedBox(height: 16),
+                HudButton(
+                  isPrimary: false,
+                  text: 'common_cancel'.tr(),
+                  onPressed: () => Navigator.pop(context),
+                  height: 44,
+                ),
+              ],
+            ),
           ),
         ),
       );
@@ -1416,10 +1407,10 @@ class _CommissionRequestDialogState extends State<_CommissionRequestDialog> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Reference image uploaded successfully'),
-          backgroundColor: ArtbeatColors.success,
-          duration: Duration(seconds: 2),
+        SnackBar(
+          content: Text('artist_feed_reference_upload_success'.tr()),
+          backgroundColor: const Color(0xFF34D399),
+          duration: const Duration(seconds: 2),
         ),
       );
     } catch (e) {
@@ -1431,12 +1422,44 @@ class _CommissionRequestDialogState extends State<_CommissionRequestDialog> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to upload image: $e'),
-          backgroundColor: ArtbeatColors.error,
+          content: Text(
+            'artist_feed_reference_upload_error'.tr(namedArgs: {'error': '$e'}),
+          ),
+          backgroundColor: const Color(0xFFFF3D8D),
           duration: const Duration(seconds: 3),
         ),
       );
     }
+  }
+
+  Widget _buildImageSourceTile({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return GlassCard(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Row(
+          children: [
+            Icon(icon, color: Colors.white),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                label,
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _removeReferenceImage(int index) {
@@ -1449,10 +1472,10 @@ class _CommissionRequestDialogState extends State<_CommissionRequestDialog> {
     // Validate description
     if (_descriptionController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please describe your commission project'),
-          backgroundColor: ArtbeatColors.error,
-          duration: Duration(seconds: 2),
+        SnackBar(
+          content: Text('artist_feed_commission_missing_description'.tr()),
+          backgroundColor: const Color(0xFFFF3D8D),
+          duration: const Duration(seconds: 2),
         ),
       );
       return;
@@ -1464,12 +1487,15 @@ class _CommissionRequestDialogState extends State<_CommissionRequestDialog> {
 
     try {
       // Create commission request
+      final requesterName = FirebaseAuth.instance.currentUser?.displayName ??
+          'artist_feed_commission_request_client'.tr();
       final commissionId = await _commissionService.createCommissionRequest(
         artistId: widget.artist.userId,
         artistName: widget.artist.displayName,
         type: CommissionType.digital, // Default type, can be customized
-        title:
-            'Commission Request from ${FirebaseAuth.instance.currentUser?.displayName ?? "Client"}',
+        title: 'artist_feed_commission_request_title'.tr(
+          namedArgs: {'name': requesterName},
+        ),
         description: _descriptionController.text.trim(),
         specs: CommissionSpecs(
           size: 'To be determined',
@@ -1497,10 +1523,11 @@ class _CommissionRequestDialogState extends State<_CommissionRequestDialog> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '🎨 Commission request sent to ${widget.artist.displayName}! '
-            'They\'ll respond within 24-48 hours.',
+            'artist_feed_commission_success'.tr(
+              namedArgs: {'name': widget.artist.displayName},
+            ),
           ),
-          backgroundColor: ArtbeatColors.success,
+          backgroundColor: const Color(0xFF34D399),
           duration: const Duration(seconds: 4),
         ),
       );
@@ -1515,8 +1542,10 @@ class _CommissionRequestDialogState extends State<_CommissionRequestDialog> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to submit commission request: $e'),
-          backgroundColor: ArtbeatColors.error,
+          content: Text(
+            'artist_feed_commission_error'.tr(namedArgs: {'error': '$e'}),
+          ),
+          backgroundColor: const Color(0xFFFF3D8D),
           duration: const Duration(seconds: 3),
         ),
       );
@@ -1527,224 +1556,193 @@ class _CommissionRequestDialogState extends State<_CommissionRequestDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Row(
-        children: [
-          const Icon(Icons.palette, color: ArtbeatColors.accentGold),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              'Commission ${widget.artist.displayName}',
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: ArtbeatColors.textPrimary,
-              ),
-            ),
-          ),
-        ],
-      ),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Artist availability banner
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: ArtbeatColors.accentGold.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: ArtbeatColors.accentGold.withValues(alpha: 0.3),
-                ),
-              ),
-              child: Row(
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.all(16),
+      child: GlassPanel(
+        padding: const EdgeInsets.all(24),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
                 children: [
-                  const Icon(
-                    Icons.check_circle,
-                    color: ArtbeatColors.success,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
+                  const Icon(Icons.palette, color: Color(0xFFFFC857)),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      '${widget.artist.displayName} is available for commissions!',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: ArtbeatColors.textPrimary,
+                      'artist_feed_commission_dialog_title'.tr(
+                        namedArgs: {'name': widget.artist.displayName},
+                      ),
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
                       ),
                     ),
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: 16),
-
-            // Project details section
-            const Text(
-              'Project Details',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: ArtbeatColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _descriptionController,
-              maxLines: 4,
-              enabled: !_isSubmitting,
-              decoration: InputDecoration(
-                hintText:
-                    'Describe your commission project, style preferences, size, timeline, and budget...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                filled: true,
-                fillColor: ArtbeatColors.surface,
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Reference images section
-            const Text(
-              'Reference Images (Optional)',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: ArtbeatColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 8),
-
-            // Upload button
-            InkWell(
-              onTap: _isSubmitting || _isUploadingImage
-                  ? null
-                  : _pickAndUploadImage,
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: ArtbeatColors.textSecondary.withValues(alpha: 0.3),
-                  ),
-                  borderRadius: const BorderRadius.all(Radius.circular(8)),
-                ),
+              const SizedBox(height: 16),
+              GlassCard(
+                padding: const EdgeInsets.all(12),
                 child: Row(
                   children: [
-                    Icon(
-                      Icons.image,
-                      color: _isUploadingImage
-                          ? ArtbeatColors.textSecondary.withValues(alpha: 0.5)
-                          : ArtbeatColors.textSecondary,
-                      size: 24,
-                    ),
-                    const SizedBox(width: 12),
+                    const Icon(Icons.check_circle, color: Color(0xFF34D399)),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        _isUploadingImage
-                            ? 'Uploading...'
-                            : 'Upload reference images',
-                        style: TextStyle(
-                          color: _isUploadingImage
-                              ? ArtbeatColors.textSecondary.withValues(
-                                  alpha: 0.5,
-                                )
-                              : ArtbeatColors.textSecondary,
-                          fontSize: 14,
+                        'artist_feed_commission_banner'.tr(
+                          namedArgs: {'name': widget.artist.displayName},
+                        ),
+                        style: GoogleFonts.spaceGrotesk(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
                         ),
                       ),
                     ),
-                    if (_isUploadingImage)
-                      const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    else
-                      const Icon(
-                        Icons.add_photo_alternate,
-                        color: ArtbeatColors.primaryPurple,
-                        size: 24,
-                      ),
                   ],
                 ),
               ),
-            ),
-
-            // Display uploaded images
-            if (_referenceImageUrls.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: _referenceImageUrls.asMap().entries.map((entry) {
-                  final index = entry.key;
-                  final url = entry.value;
-                  return Stack(
+              const SizedBox(height: 24),
+              Text(
+                'artist_feed_commission_details_title'.tr(),
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 8),
+              GlassTextField(
+                controller: _descriptionController,
+                maxLines: 4,
+                enabled: !_isSubmitting,
+                decoration: GlassInputDecoration(
+                  hintText: 'artist_feed_commission_details_placeholder'.tr(),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'artist_feed_reference_section_title'.tr(),
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 8),
+              InkWell(
+                onTap: _isSubmitting || _isUploadingImage
+                    ? null
+                    : _pickAndUploadImage,
+                child: GlassCard(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
                     children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.network(
-                          url,
-                          width: 80,
-                          height: 80,
-                          fit: BoxFit.cover,
+                      Icon(
+                        Icons.image,
+                        color: Colors.white.withValues(
+                          alpha: _isUploadingImage ? 0.4 : 0.8,
                         ),
                       ),
-                      Positioned(
-                        top: 4,
-                        right: 4,
-                        child: GestureDetector(
-                          onTap: () => _removeReferenceImage(index),
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: const BoxDecoration(
-                              color: Colors.red,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.close,
-                              color: Colors.white,
-                              size: 16,
-                            ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          _isUploadingImage
+                              ? 'artist_feed_reference_uploading'.tr()
+                              : 'artist_feed_reference_upload_cta'.tr(),
+                          style: GoogleFonts.spaceGrotesk(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white.withValues(alpha: 0.8),
                           ),
                         ),
                       ),
+                      if (_isUploadingImage)
+                        const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      else
+                        const Icon(Icons.add_photo_alternate, color: Colors.white),
                     ],
-                  );
-                }).toList(),
+                  ),
+                ),
+              ),
+              if (_referenceImageUrls.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: _referenceImageUrls.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final url = entry.value;
+                    return Stack(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.network(
+                            url,
+                            width: 80,
+                            height: 80,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        Positioned(
+                          top: 4,
+                          right: 4,
+                          child: GestureDetector(
+                            onTap: () => _removeReferenceImage(index),
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: const BoxDecoration(
+                                color: Colors.black54,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.close,
+                                size: 14,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  }).toList(),
+                ),
+              ],
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: HudButton(
+                      isPrimary: false,
+                      text: 'common_cancel'.tr(),
+                      onPressed: _isSubmitting ? null : () => Navigator.pop(context),
+                      height: 48,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: GradientCTAButton(
+                      text: 'artist_feed_commission_send_cta'.tr(),
+                      icon: Icons.send,
+                      onPressed: _isSubmitting ? null : _submitCommissionRequest,
+                      isLoading: _isSubmitting,
+                      height: 48,
+                    ),
+                  ),
+                ],
               ),
             ],
-          ],
+          ),
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: _isSubmitting ? null : () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-        ElevatedButton(
-          onPressed: _isSubmitting ? null : _submitCommissionRequest,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: ArtbeatColors.primaryPurple,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          ),
-          child: _isSubmitting
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                  ),
-                )
-              : const Text('Send Request'),
-        ),
-      ],
     );
   }
 }

@@ -10,19 +10,29 @@ import '../models/comment_model.dart';
 class FeedbackThreadWidget extends StatelessWidget {
   final List<CommentModel> comments;
   final void Function(CommentModel) onReply;
+  final ScrollController? controller;
+  final EdgeInsetsGeometry? padding;
 
   const FeedbackThreadWidget({
     super.key,
     required this.comments,
     required this.onReply,
+    this.controller,
+    this.padding,
   });
 
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
+      controller: controller,
+      padding: padding ?? const EdgeInsets.symmetric(vertical: 8),
+      physics: const BouncingScrollPhysics(
+        parent: AlwaysScrollableScrollPhysics(),
+      ),
       itemCount: comments.length,
       itemBuilder: (context, index) {
         final comment = comments[index];
+        final typeLabel = _localizedCommentType(comment.type);
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: GlassCard(
@@ -49,14 +59,14 @@ class FeedbackThreadWidget extends StatelessWidget {
                               style: GoogleFonts.spaceGrotesk(
                                 fontWeight: FontWeight.w900,
                                 fontSize: 16,
-                                color: const Color(0xFF92FFFFFF),
+                                color: const Color(0xFFE6FFFFFF),
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
                             Text(
                               timeago.format(comment.createdAt.toDate()),
                               style: GoogleFonts.spaceGrotesk(
-                                color: const Color(0xFF45FFFFFF),
+                                color: const Color(0xB3FFFFFF),
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -68,23 +78,19 @@ class FeedbackThreadWidget extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Padding(
-                    padding: const EdgeInsets.only(
-                      left: 52,
-                    ), // Align with content above
+                    padding: const EdgeInsets.only(left: 52),
                     child: Text(
                       comment.content,
                       style: GoogleFonts.spaceGrotesk(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: const Color(0xFF70FFFFFF),
+                        color: const Color(0xC0FFFFFF),
                       ),
                     ),
                   ),
                   const SizedBox(height: 8),
                   Padding(
-                    padding: const EdgeInsets.only(
-                      left: 52,
-                    ), // Align with content above
+                    padding: const EdgeInsets.only(left: 52),
                     child: Row(
                       children: [
                         HudButton(
@@ -94,7 +100,7 @@ class FeedbackThreadWidget extends StatelessWidget {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            comment.type,
+                            typeLabel,
                             style: GoogleFonts.spaceGrotesk(
                               color: const Color(0xFF22D3EE),
                               fontSize: 12,
@@ -113,5 +119,20 @@ class FeedbackThreadWidget extends StatelessWidget {
         );
       },
     );
+  }
+
+  String _localizedCommentType(String type) {
+    final normalized = type
+        .trim()
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^a-z0-9]+'), '_')
+        .replaceAll(RegExp('_+'), '_')
+        .replaceAll(RegExp(r'^_|_$'), '');
+    if (normalized.isEmpty) {
+      return type;
+    }
+    final key = 'comments_type_$normalized';
+    final localized = key.tr();
+    return localized == key ? type : localized;
   }
 }

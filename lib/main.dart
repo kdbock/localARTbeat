@@ -66,9 +66,24 @@ Future<void> main() async {
 
     // 🔥 FIREBASE MUST EXIST BEFORE ANYTHING ELSE
     if (Firebase.apps.isEmpty) {
-      await Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform,
-      );
+      try {
+        await Firebase.initializeApp(
+          options: DefaultFirebaseOptions.currentPlatform,
+        );
+      } on FirebaseException catch (error) {
+        if (error.code != 'duplicate-app') {
+          rethrow;
+        }
+        AppLogger.warning(
+          'Duplicate Firebase initialization avoided: ${error.message}',
+        );
+      }
+    }
+
+    try {
+      await SecureFirebaseConfig.configureAppCheck(teamId: 'H49R32NPY6');
+    } catch (e) {
+      AppLogger.error('App Check activation failed', error: e);
     }
 
     // Auth safety

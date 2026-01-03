@@ -168,7 +168,7 @@ class ArtBattleService {
         '[ArtBattle] submitVote callable match=$matchId artwork=$chosenArtworkId user=$userId',
       );
 
-      await callable.call({
+      await callable.call<void>({
         'battleId': matchId,
         'artworkIdChosen': chosenArtworkId,
       });

@@ -1,4 +1,8 @@
-const { onRequest, onCall } = require("firebase-functions/v2/https");
+const { 
+  onRequest, 
+  onCall, 
+  HttpsError 
+} = require("firebase-functions/v2/https");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { setGlobalOptions } = require("firebase-functions/v2");
 const admin = require("firebase-admin");
@@ -2131,24 +2135,25 @@ exports.closeAuction = onSchedule("every 1 minutes", async (event) => {
 });
 
 exports.submitArtBattleVote = onCall(async (request) => {
+  const { data, auth } = request;
+
+  console.log("submitArtBattleVote called", {
+    uid: auth?.uid,
+    battleId: data?.battleId,
+    artworkIdChosen: data?.artworkIdChosen,
+  });
+
+  if (!auth) {
+    throw new HttpsError("unauthenticated", "User must be logged in");
+  }
+
+  const { battleId, artworkIdChosen } = data ?? {};
+
   try {
-    const { data, auth } = request;
-
-    if (!auth) {
-      throw new HttpsError(
-        "unauthenticated",
-        "User must be authenticated"
-      );
-    }
-
     const userId = auth.uid;
-    const { battleId, artworkIdChosen } = data;
 
     if (!battleId || !artworkIdChosen) {
-      throw new HttpsError(
-        "invalid-argument",
-        "Missing required fields"
-      );
+      throw new HttpsError("invalid-argument", "Missing required fields");
     }
 
     // Get the battle
@@ -2204,11 +2209,7 @@ exports.submitArtBattleVote = onCall(async (request) => {
       .firestore()
       .collection("art_battle_votes")
       .where("userId", "==", userId)
-      .where(
-        "timestamp",
-        ">",
-        admin.firestore.Timestamp.fromMillis(oneHourAgo)
-      )
+      .where("timestamp", ">", admin.firestore.Timestamp.fromMillis(oneHourAgo))
       .get();
 
     if (hourlyVotesQuery.docs.length >= 50) {
@@ -2224,11 +2225,7 @@ exports.submitArtBattleVote = onCall(async (request) => {
       .collection("art_battle_votes")
       .where("userId", "==", userId)
       .where("artworkIdChosen", "==", artworkIdChosen)
-      .where(
-        "timestamp",
-        ">",
-        admin.firestore.Timestamp.fromMillis(oneHourAgo)
-      )
+      .where("timestamp", ">", admin.firestore.Timestamp.fromMillis(oneHourAgo))
       .get();
 
     // Reduce vote weight if user has voted for same artwork multiple times recently
