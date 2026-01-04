@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../services/subscription_service.dart' as artist_subscription;
+import 'package:google_fonts/google_fonts.dart';
 
 /// Widget that displays artist social statistics
 class ArtistSocialStatsWidget extends StatefulWidget {
@@ -49,32 +51,33 @@ class _ArtistSocialStatsWidgetState extends State<ArtistSocialStatsWidget> {
         final avgEngagement = (stats['averageEngagement'] as int?) ?? 0;
 
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Flexible(
+              Expanded(
                 child: _buildStatCard(
                   icon: Icons.people,
-                  label: 'Followers',
+                  label: 'artist_artist_public_profile_stat_followers',
                   value: '$totalFollowers',
-                  color: Colors.blue,
+                  color: const Color(0xFF22D3EE),
                 ),
               ),
-              Flexible(
+              const SizedBox(width: 10),
+              Expanded(
                 child: _buildStatCard(
                   icon: Icons.favorite,
-                  label: 'Total Engagement',
+                  label: 'artist_artist_public_profile_stat_total_engagement',
                   value: '$totalEngagement',
-                  color: Colors.red,
+                  color: const Color(0xFFFF3D8D),
                 ),
               ),
-              Flexible(
+              const SizedBox(width: 10),
+              Expanded(
                 child: _buildStatCard(
                   icon: Icons.trending_up,
-                  label: 'Avg Engagement',
+                  label: 'artist_artist_public_profile_stat_avg_engagement',
                   value: '$avgEngagement',
-                  color: Colors.green,
+                  color: const Color(0xFF7C4DFF),
                 ),
               ),
             ],
@@ -91,33 +94,49 @@ class _ArtistSocialStatsWidgetState extends State<ArtistSocialStatsWidget> {
     required Color color,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8),
+        color: Colors.white.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: color.withValues(alpha: 0.3),
-          width: 1,
+          color: Colors.white.withValues(alpha: 0.12),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.28),
+            blurRadius: 18,
+            offset: const Offset(0, 12),
+          ),
+        ],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: color, size: 20),
-          const SizedBox(height: 4),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: color.withValues(alpha: 0.16),
+            ),
+            child: Icon(icon, color: color, size: 18),
+          ),
+          const SizedBox(height: 10),
           Text(
             value,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: color,
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 16,
+              fontWeight: FontWeight.w900,
+              color: Colors.white,
             ),
           ),
+          const SizedBox(height: 4),
           Text(
-            label,
-            style: TextStyle(
-              fontSize: 11,
-              color: Colors.grey[600],
+            label.tr(),
+            textAlign: TextAlign.center,
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 11.5,
+              color: Colors.white.withValues(alpha: 0.68),
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],
@@ -127,13 +146,14 @@ class _ArtistSocialStatsWidgetState extends State<ArtistSocialStatsWidget> {
 
   Widget _buildLoadingState() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _buildShimmerCard(),
-          _buildShimmerCard(),
-          _buildShimmerCard(),
+          Expanded(child: _buildShimmerCard()),
+          const SizedBox(width: 10),
+          Expanded(child: _buildShimmerCard()),
+          const SizedBox(width: 10),
+          Expanded(child: _buildShimmerCard()),
         ],
       ),
     );
@@ -141,11 +161,13 @@ class _ArtistSocialStatsWidgetState extends State<ArtistSocialStatsWidget> {
 
   Widget _buildShimmerCard() {
     return Container(
-      width: 70,
-      height: 70,
+      height: 124,
       decoration: BoxDecoration(
-        color: Colors.grey[300],
-        borderRadius: BorderRadius.circular(8),
+        color: Colors.white.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.12),
+        ),
       ),
     );
   }
