@@ -10,7 +10,7 @@ Widgets: /lib/src/widgets/
 
 Refactor checklist (first-impression priority)
 - [x] artist_browse_screen.dart (public discovery entry)
-- [ ] artist_public_profile_screen.dart
+- [x] artist_public_profile_screen.dart
 - [ ] artist_onboarding_screen.dart / modern_2025_onboarding_screen.dart
 - [ ] artist_dashboard_screen.dart
 - [x] curated_gallery_screen.dart (artbeat_artwork)
