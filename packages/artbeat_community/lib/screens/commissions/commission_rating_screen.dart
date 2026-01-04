@@ -122,7 +122,7 @@ class _CommissionRatingScreenState extends State<CommissionRatingScreen> {
         backgroundColor: Colors.transparent,
         appBar: HudTopBar(
           title: 'commission_rating_title'.tr(),
-          glassBackground: true,
+          glassBackground: true, subtitle: '',
         ),
         body: SafeArea(
           child: SingleChildScrollView(

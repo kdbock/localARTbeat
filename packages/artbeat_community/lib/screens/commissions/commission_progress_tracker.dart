@@ -36,7 +36,7 @@ class CommissionProgressTracker extends StatelessWidget {
       backgroundColor: Colors.transparent,
       appBar: HudTopBar(
         title: 'commission_progress_app_bar'.tr(),
-        glassBackground: true,
+        glassBackground: true, subtitle: '',
       ),
       body: WorldBackground(
         child: SafeArea(

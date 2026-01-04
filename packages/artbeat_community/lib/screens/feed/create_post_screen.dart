@@ -696,7 +696,7 @@ class _CreatePostScreenState extends State<CreatePostScreen>
                 width: 160,
               ),
             ),
-          ],
+          ], subtitle: '',
         ),
         body: SafeArea(
           child: Padding(

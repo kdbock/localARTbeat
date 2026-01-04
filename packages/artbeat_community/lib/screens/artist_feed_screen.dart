@@ -294,7 +294,7 @@ class _ArtistFeedScreenState extends State<ArtistFeedScreen> {
             icon: const Icon(Icons.refresh, color: Colors.white),
             onPressed: _isLoading ? null : _loadArtistAndPosts,
           ),
-        ],
+        ], subtitle: '',
       ),
       body: WorldBackground(
         child: SafeArea(

@@ -298,7 +298,7 @@ class _ArtworkModerationScreenState extends State<ArtworkModerationScreen> {
                 ),
               ),
             ),
-        ],
+        ], subtitle: '',
       ),
       floatingActionButton: selectedCount > 0
           ? FloatingActionButton.extended(

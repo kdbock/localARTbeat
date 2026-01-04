@@ -192,7 +192,7 @@ class _PortfoliosScreenState extends State<PortfoliosScreen> {
             icon: const Icon(Icons.refresh, color: Colors.white),
             onPressed: _isLoading ? null : _loadPortfolios,
           ),
-        ],
+        ], subtitle: '',
       ),
       body: WorldBackground(
         child: SafeArea(
@@ -596,7 +596,7 @@ class _PortfolioDetailsScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: HudTopBar(title: displayName, glassBackground: true),
+      appBar: HudTopBar(title: displayName, glassBackground: true, subtitle: '',),
       body: WorldBackground(
         child: SafeArea(
           child: SingleChildScrollView(

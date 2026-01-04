@@ -62,7 +62,7 @@ class _CommissionAnalyticsDashboardState
         backgroundColor: Colors.transparent,
         appBar: HudTopBar(
           title: 'commission_analytics_title'.tr(),
-          glassBackground: true,
+          glassBackground: true, subtitle: '',
         ),
         body: SafeArea(
           child: _isLoading

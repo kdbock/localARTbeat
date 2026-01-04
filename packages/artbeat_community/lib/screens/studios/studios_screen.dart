@@ -122,7 +122,7 @@ class _StudiosScreenState extends State<StudiosScreen> {
             icon: const Icon(Icons.refresh, color: Colors.white),
             onPressed: _isLoading ? null : _loadStudios,
           ),
-        ],
+        ], subtitle: '',
       ),
       child: WorldBackground(
         child: SafeArea(

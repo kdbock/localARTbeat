@@ -531,7 +531,7 @@ class _CreateGroupPostScreenState extends State<CreateGroupPostScreen>
           title: 'create_group_post_title'.tr(
             namedArgs: {'group': _getGroupDisplayName()},
           ),
-          glassBackground: true,
+          glassBackground: true, subtitle: '',
         ),
         body: SafeArea(
           child: Padding(

@@ -303,7 +303,7 @@ class _ArtworkEditScreenState extends State<ArtworkEditScreen> {
       appBar: HudTopBar(
         title: 'artwork_edit_title'.tr(),
         showBackButton: true,
-        onBackPressed: () => Navigator.of(context).maybePop(),
+        onBackPressed: () => Navigator.of(context).maybePop(), subtitle: '',
       ),
       child: WorldBackground(
         child: SafeArea(

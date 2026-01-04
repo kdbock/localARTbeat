@@ -203,7 +203,7 @@ class _ModerationQueueScreenState extends State<ModerationQueueScreen>
               icon: const Icon(Icons.refresh, color: Colors.white),
               onPressed: _isLoading ? null : _loadModerationQueue,
             ),
-          ],
+          ], subtitle: '',
         ),
         body: SafeArea(
           child: Padding(

@@ -22,7 +22,7 @@ class UploadChoiceScreen extends StatelessWidget {
       appBar: HudTopBar(
         title: 'upload_choice_title'.tr(),
         showBackButton: true,
-        onBackPressed: () => Navigator.of(context).pop(),
+        onBackPressed: () => Navigator.of(context).pop(), subtitle: '',
       ),
       child: WorldBackground(
         child: SafeArea(

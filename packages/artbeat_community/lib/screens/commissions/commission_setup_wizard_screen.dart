@@ -343,7 +343,7 @@ class _CommissionSetupWizardScreenState
             title: widget.mode == SetupMode.firstTime
                 ? 'commission_setup_title'.tr()
                 : 'commission_setup_edit_title'.tr(),
-            glassBackground: true,
+            glassBackground: true, subtitle: '',
           ),
           body: SafeArea(
             child: _isLoading

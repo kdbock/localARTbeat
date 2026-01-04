@@ -151,7 +151,7 @@ class _ViewReceivedGiftsScreenState extends State<ViewReceivedGiftsScreen> {
             icon: const Icon(Icons.rule_rounded, color: Colors.white),
             onPressed: _openGiftRules,
           ),
-        ],
+        ], subtitle: '',
       ),
       body: WorldBackground(
         child: SafeArea(

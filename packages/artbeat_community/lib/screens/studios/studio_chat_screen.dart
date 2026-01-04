@@ -184,7 +184,7 @@ class _StudioChatScreenState extends State<StudioChatScreen> {
             padding: const EdgeInsets.only(right: 12),
             child: FittedBox(child: _buildOnlineBadge()),
           ),
-        ],
+        ], subtitle: '',
       ),
       body: WorldBackground(
         child: SafeArea(

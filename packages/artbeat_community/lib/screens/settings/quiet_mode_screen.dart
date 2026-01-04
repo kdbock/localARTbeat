@@ -124,7 +124,7 @@ class _QuietModeScreenState extends State<QuietModeScreen> {
         appBar: HudTopBar(
           title: 'screen_title_quiet_mode'.tr(),
           glassBackground: true,
-          showBackButton: true,
+          showBackButton: true, subtitle: '',
         ),
         body: SafeArea(
           child: _isLoading

@@ -108,7 +108,7 @@ class _ArtworkBrowseScreenState extends State<ArtworkBrowseScreen> {
             onPressed: () => Navigator.pushNamed(context, '/search'),
             icon: const Icon(Icons.search, color: Colors.white),
           ),
-        ],
+        ], subtitle: '',
       ),
       child: WorldBackground(
         child: SafeArea(

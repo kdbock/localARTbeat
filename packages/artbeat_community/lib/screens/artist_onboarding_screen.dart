@@ -336,7 +336,7 @@ class _ArtistOnboardingScreenState extends State<ArtistOnboardingScreen> {
         backgroundColor: Colors.transparent,
         appBar: HudTopBar(
           title: 'artist_onboarding_title'.tr(),
-          glassBackground: true,
+          glassBackground: true, subtitle: '',
         ),
         body: SafeArea(
           child: Padding(

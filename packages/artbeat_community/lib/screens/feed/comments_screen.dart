@@ -264,7 +264,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
             tooltip: 'comments_refresh_tooltip'.tr(),
             onPressed: _isLoading ? null : _loadComments,
           ),
-        ],
+        ], subtitle: '',
       ),
       body: WorldBackground(
         child: SafeArea(
