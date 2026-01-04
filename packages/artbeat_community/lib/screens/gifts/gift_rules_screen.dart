@@ -14,7 +14,7 @@ class GiftRulesScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
         appBar: HudTopBar(
           title: 'gift_rules.title'.tr(),
-          glassBackground: true,
+          glassBackground: true, subtitle: '',
         ),
         body: SafeArea(
           child: SingleChildScrollView(

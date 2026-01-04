@@ -279,7 +279,7 @@ class _CreateArtPostScreenState extends State<CreateArtPostScreen> {
         backgroundColor: Colors.transparent,
         appBar: HudTopBar(
           title: 'create_art_post_title'.tr(),
-          glassBackground: true,
+          glassBackground: true, subtitle: '',
         ),
         body: SafeArea(
           child: Padding(

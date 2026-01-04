@@ -231,7 +231,7 @@ class _ArtistCommissionSettingsScreenState
         backgroundColor: Colors.transparent,
         appBar: HudTopBar(
           title: 'commission_settings_title'.tr(),
-          glassBackground: true,
+          glassBackground: true, subtitle: '',
         ),
         body: SafeArea(
           child: _isLoading

@@ -169,7 +169,7 @@ class _CommissionDetailScreenState extends State<CommissionDetailScreen>
                 onSelected: _handleMenuAction,
                 itemBuilder: (context) => _buildMenuItems(commission),
               ),
-          ],
+          ], subtitle: '',
         ),
         body: SafeArea(
           child: commission == null

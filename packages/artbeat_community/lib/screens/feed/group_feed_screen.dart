@@ -232,7 +232,7 @@ class _GroupFeedScreenState extends State<GroupFeedScreen> {
             onPressed:
                 (_isLoading || _checkingMembership) ? null : _loadGroupPosts,
           ),
-        ],
+        ], subtitle: '',
       ),
       body: WorldBackground(
         child: SafeArea(

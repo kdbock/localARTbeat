@@ -130,7 +130,7 @@ class _CommissionDisputeScreenState extends State<CommissionDisputeScreen> {
         backgroundColor: Colors.transparent,
         appBar: HudTopBar(
           title: 'commission_dispute_title'.tr(),
-          glassBackground: true,
+          glassBackground: true, subtitle: '',
         ),
         body: SafeArea(
           child: SingleChildScrollView(

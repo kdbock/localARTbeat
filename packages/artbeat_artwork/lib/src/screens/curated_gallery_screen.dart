@@ -8,7 +8,6 @@ import 'package:artbeat_core/artbeat_core.dart'
         HudTopBar,
         SecureNetworkImage,
         WorldBackground;
-import 'package:artbeat_core/artbeat_core.dart' as core;
 import '../models/collection_model.dart';
 import '../services/collection_service.dart';
 
@@ -104,7 +103,7 @@ class _CuratedGalleryScreenState extends State<CuratedGalleryScreen> {
                   )),
             ],
           ),
-        ],
+        ], subtitle: '',
       ),
       body: WorldBackground(
         child: SafeArea(
@@ -206,9 +205,9 @@ class _CuratedGalleryScreenState extends State<CuratedGalleryScreen> {
                   Container(
                     height: 44,
                     width: 44,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       shape: BoxShape.circle,
-                      gradient: const LinearGradient(
+                      gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [Color(0xFFFFC857), Color(0xFF22D3EE)],

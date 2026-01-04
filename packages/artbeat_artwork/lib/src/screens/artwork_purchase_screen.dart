@@ -164,7 +164,7 @@ class _ArtworkPurchaseScreenState extends State<ArtworkPurchaseScreen> {
       appBar: HudTopBar(
         title: 'artwork_purchase_title'.tr(),
         showBackButton: true,
-        onBackPressed: () => Navigator.pop(context),
+        onBackPressed: () => Navigator.pop(context), subtitle: '',
       ),
       child: WorldBackground(
         child: SafeArea(

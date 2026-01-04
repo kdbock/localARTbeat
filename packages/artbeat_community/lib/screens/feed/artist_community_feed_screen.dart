@@ -1170,7 +1170,7 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
             icon: const Icon(Icons.message, color: Colors.white),
             onPressed: () => Navigator.pushNamed(context, '/messaging'),
           ),
-        ],
+        ], subtitle: '',
       ),
       body: WorldBackground(
         child: SafeArea(

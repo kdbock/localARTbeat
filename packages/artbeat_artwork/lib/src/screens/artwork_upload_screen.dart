@@ -436,7 +436,7 @@ class _ArtworkUploadScreenState extends State<ArtworkUploadScreen> {
                 ),
               ),
             ),
-        ],
+        ], subtitle: '',
       ),
       child: WorldBackground(
         child: SafeArea(

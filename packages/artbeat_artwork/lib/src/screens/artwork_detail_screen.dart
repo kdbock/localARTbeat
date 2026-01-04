@@ -390,7 +390,7 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
               icon: const Icon(Icons.share, color: Colors.white),
               onPressed: _shareArtwork,
             ),
-          ],
+          ], subtitle: '',
         ),
         body: SingleChildScrollView(
           child: Padding(

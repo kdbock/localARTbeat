@@ -129,7 +129,7 @@ class _ArtworkTrendingScreenState extends State<ArtworkTrendingScreen> {
             onPressed: () => Navigator.pushNamed(context, '/search'),
             icon: const Icon(Icons.search, color: Colors.white),
           ),
-        ],
+        ], subtitle: '',
       ),
       child: WorldBackground(
         child: SafeArea(

@@ -159,7 +159,7 @@ class _CommissionTemplatesBrowserState extends State<CommissionTemplatesBrowser>
             tooltip: tr('commission_templates_refresh_tooltip'),
             onPressed: _isLoading ? null : _loadTemplates,
           ),
-        ],
+        ], subtitle: '',
       ),
       body: WorldBackground(
         child: SafeArea(

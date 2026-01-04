@@ -138,7 +138,7 @@ class _DirectCommissionsScreenState extends State<DirectCommissionsScreen>
             icon: const Icon(Icons.refresh, color: Colors.white),
             onPressed: _isLoading ? null : _loadCommissions,
           ),
-        ],
+        ], subtitle: '',
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: Padding(

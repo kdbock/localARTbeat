@@ -1611,8 +1611,14 @@
   "curated_gallery_error_unknown": "خطأ غير معروف",
   "curated_gallery_featured_badge": "مميز",
   "curated_gallery_featured_section": "المعارض المميزة",
+  "curated_gallery_filter_caption": "امزج المجموعات المنسقة والمعارض والتعاون حسب مزاجك.",
   "curated_gallery_filter_all": "جميع الأنواع",
+  "curated_gallery_filter_title": "تصفية حسب نوع المجموعة",
+  "curated_gallery_loading": "جارٍ تحميل المعارض...",
   "curated_gallery_no_collections": "لم يتم العثور على مجموعات",
+  "curated_gallery_type_filter_label": "مجموعات {type}",
+  "curated_gallery_artwork_count": "{count} عمل فني",
+  "curated_gallery_view_count": "{count} مشاهدة",
   "curated_gallery_refresh_button": "تحديث",
   "curated_gallery_retry_button": "إعادة المحاولة",
   "curated_gallery_title": "المعارض المنسقة",
@@ -4727,5 +4733,11 @@
   "auction_manage_update_success": "تم حفظ إعدادات المزاد",
   "auction_manage_required_price": "يرجى إدخال سعر البداية",
   "curated_gallery_subtitle": "اختيارات من القيّمين والمجتمع.",
-  "curated_gallery_empty_hint": "تحقق لاحقًا لمجموعات منسقة جديدة — الإصدارات الجديدة تظهر هنا أولاً."
+  "curated_gallery_empty_hint": "تحقق لاحقًا لمجموعات منسقة جديدة — الإصدارات الجديدة تظهر هنا أولاً.",
+  "collection_type_personal": "مجموعة شخصية",
+  "collection_type_portfolio": "معرض أعمال",
+  "collection_type_curated": "معرض منسق",
+  "collection_type_exhibition": "معرض افتراضي",
+  "collection_type_series": "سلسلة أعمال",
+  "collection_type_collaborative": "مجموعة تعاونية"
 }

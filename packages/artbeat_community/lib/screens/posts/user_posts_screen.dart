@@ -102,7 +102,7 @@ class _UserPostsScreenState extends State<UserPostsScreen> {
             padding: const EdgeInsets.all(8),
             constraints: const BoxConstraints(minHeight: 44, minWidth: 44),
           ),
-        ],
+        ], subtitle: '',
       ),
       body: WorldBackground(
         child: SafeArea(

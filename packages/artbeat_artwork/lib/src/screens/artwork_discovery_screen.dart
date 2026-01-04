@@ -94,7 +94,7 @@ class _ArtworkDiscoveryScreenState extends State<ArtworkDiscoveryScreen>
             tooltip: 'artwork_discover_loading'.tr(),
             onPressed: _loadDiscoveryContent,
           ),
-        ],
+        ], subtitle: '',
       ),
       child: WorldBackground(
         child: SafeArea(

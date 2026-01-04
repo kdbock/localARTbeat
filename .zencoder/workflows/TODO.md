@@ -8,15 +8,28 @@ Screens: /lib/src/screens/
 
 Widgets: /lib/src/widgets/
 
+Refactor checklist (first-impression priority)
+- [x] artist_browse_screen.dart (public discovery entry)
+- [ ] artist_public_profile_screen.dart
+- [ ] artist_onboarding_screen.dart / modern_2025_onboarding_screen.dart
+- [ ] artist_dashboard_screen.dart
+- [x] curated_gallery_screen.dart (artbeat_artwork)
+- [ ] artwork_detail_screen.dart (artbeat_artwork)
+- [ ] artist_subscription_cta_widget.dart / local_artists_row_widget.dart
+- [ ] artist_header.dart / artist_social_stats_widget.dart
+- [ ] upcoming_events_row_widget.dart / top_followers_widget.dart
+- [ ] artwork_moderation_screen.dart (artbeat_artwork)
+
 Refactoring Tasks
 // Refactor the widget/screen to match Local ARTbeat design_guide.md:
 // - WorldBackground + GlassCard layout
 // - Typography with GoogleFonts.spaceGrotesk
 // - GradientCTAButton for main actions
 // - tr() localization for all text
-// - add the keys to en.json
+// - add the keys to en.json, es.json, fr.json, de.json, pt.json, zh.json, ar.json
 // - Touch targets ≥ 44px, spacing multiple of 8
 // - Replace Material defaults with shared UI components
+// - When a screen/widget is finished: run `flutter analyze` and clear all errors/warnings/infos, then mark it [x] in the checklist
 design_guide.md /Users/kristybock/artbeat/.zencoder/workflows/design_guide.md
 
 Add new widgets if needed from design_guide.md
@@ -26,7 +39,7 @@ Package: artbeat_artist
 ├── screens
 │   │   │   ├── analytics_dashboard_screen.dart
 │   │   │   ├── artist_approved_ads_screen.dart
-│   │   │   ├── artist_browse_screen.dart
+│   │   │  x ├── artist_browse_screen.dart
 │   │   │   ├── artist_dashboard_screen.dart
 │   │   │   ├── artist_journey_screen.dart
 │   │   │   ├── artist_list_screen.dart

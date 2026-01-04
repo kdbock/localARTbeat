@@ -136,7 +136,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         child: HudTopBar(
           title: 'notifications_title'.tr(),
           onBackPressed: () => Navigator.of(context).maybePop(),
-          actions: showActions ? _buildHudActions() : const [],
+          actions: showActions ? _buildHudActions() : const [], subtitle: '',
         ),
       );
 

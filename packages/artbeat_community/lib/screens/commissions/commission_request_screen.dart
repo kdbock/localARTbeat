@@ -273,7 +273,7 @@ class _CommissionRequestScreenState extends State<CommissionRequestScreen> {
             onPressed: _openGallery,
           ),
           const SizedBox(width: 8),
-        ],
+        ], subtitle: '',
       ),
       body: WorldBackground(
         child: SafeArea(
