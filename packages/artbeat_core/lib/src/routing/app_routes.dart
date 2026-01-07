@@ -110,7 +110,6 @@ class AppRoutes {
   static const String captureSettings = '/capture/settings';
   static const String captureAdminModeration = '/capture/admin/moderation';
   static const String captureMap = '/capture/map';
-  static const String captureGallery = '/capture/gallery';
   static const String captureEdit = '/capture/edit';
   static const String captureCreate = '/capture/create';
   static const String capturePublic = '/capture/public';
@@ -219,6 +218,9 @@ class AppRoutes {
   static const String settingsPrivacy = '/settings/privacy';
   static const String settingsNotifications = '/settings/notifications';
   static const String settingsSecurity = '/settings/security';
+  static const String settingsLanguage = '/settings/language';
+  static const String settingsTheme = '/settings/theme';
+  static const String settingsStorage = '/settings/storage';
 
   // Other routes
   static const String achievements = '/achievements';
@@ -248,4 +250,5 @@ class AppRoutes {
 
   // In-app purchase routes
   static const String inAppPurchaseDemo = '/in-app-purchase-demo';
+  static const String localBusiness = '/local-business';
 }

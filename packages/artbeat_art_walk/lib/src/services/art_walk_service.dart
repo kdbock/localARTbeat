@@ -228,24 +228,43 @@ class ArtWalkService {
 
       debugPrint('🎯 [DEBUG] Found ${clusters.length} art clusters');
 
+      if (clusters.isEmpty) return [];
+
+      // Collect all unique primary art IDs to fetch in batch
+      final primaryArtIds =
+          clusters
+              .map((c) => c.primaryArtId)
+              .where((id) => id.isNotEmpty)
+              .toSet()
+              .toList();
+
+      if (primaryArtIds.isEmpty) return [];
+
       final List<PublicArtModel> nearbyArt = [];
 
-      // For each cluster, get the primary art piece
-      for (final cluster in clusters) {
+      // Firestore whereIn supports up to 30 elements
+      // Using batch queries to avoid N+1 problem
+      for (var i = 0; i < primaryArtIds.length; i += 30) {
+        final end =
+            (i + 30 < primaryArtIds.length) ? i + 30 : primaryArtIds.length;
+        final chunk = primaryArtIds.sublist(i, end);
+
         try {
-          final primaryArt = await getPublicArtById(cluster.primaryArtId);
-          if (primaryArt != null) {
-            nearbyArt.add(primaryArt);
-          }
-        } catch (e) {
-          core.AppLogger.error(
-            '❌ [DEBUG] Error getting primary art for cluster ${cluster.id}: $e',
+          final snapshot =
+              await _publicArtCollection
+                  .where(FieldPath.documentId, whereIn: chunk)
+                  .get();
+
+          nearbyArt.addAll(
+            snapshot.docs.map((doc) => PublicArtModel.fromFirestore(doc)),
           );
+        } catch (e) {
+          core.AppLogger.error('❌ [DEBUG] Error in batch fetch of art: $e');
         }
       }
 
       core.AppLogger.info(
-        '🎯 [DEBUG] Found ${nearbyArt.length} primary art pieces from clusters',
+        '🎯 [DEBUG] Found ${nearbyArt.length} primary art pieces from clusters using batch fetch',
       );
       return nearbyArt;
     } catch (e) {
@@ -622,87 +641,78 @@ class ArtWalkService {
         return [];
       }
 
-      // Fetch all art pieces in the walk from Firestore in parallel
-      final List<Future<PublicArtModel?>> artFutures = [];
+      // Fetch all art pieces in the walk from Firestore in batches to avoid N+1 queries
+      final List<PublicArtModel> artPieces = [];
+      final List<String> allIds = walk.artworkIds.where((id) => id.isNotEmpty).toList();
 
-      for (final artId in walk.artworkIds) {
-        if (artId.isEmpty) {
-          _logger.w('Empty art ID found in walk: $walkId');
-          continue;
+      if (allIds.isEmpty) return [];
+
+      // We need to check both collections for each ID.
+      // To optimize, we'll try to fetch all from publicArt first, then whatever is missing from captures.
+      
+      final List<PublicArtModel> foundArt = [];
+      final Set<String> missingIds = Set.from(allIds);
+
+      // Batch fetch from publicArt
+      for (var i = 0; i < allIds.length; i += 30) {
+        final end = (i + 30 < allIds.length) ? i + 30 : allIds.length;
+        final chunk = allIds.sublist(i, end);
+        
+        try {
+          final snapshot = await _publicArtCollection.where(FieldPath.documentId, whereIn: chunk).get();
+          for (final doc in snapshot.docs) {
+            final art = PublicArtModel.fromFirestore(doc);
+            if (_isValidPublicArt(art)) {
+              foundArt.add(art);
+              missingIds.remove(art.id);
+            }
+          }
+        } catch (e) {
+          _logger.w('Error batch fetching from publicArt: $e');
         }
-
-        artFutures.add(_getArtPieceById(artId));
       }
 
-      final artResults = await Future.wait(artFutures);
+      // Batch fetch remaining from captures
+      if (missingIds.isNotEmpty) {
+        final List<String> remainingList = missingIds.toList();
+        for (var i = 0; i < remainingList.length; i += 30) {
+          final end = (i + 30 < remainingList.length) ? i + 30 : remainingList.length;
+          final chunk = remainingList.sublist(i, end);
+          
+          try {
+            final snapshot = await _capturesCollection.where(FieldPath.documentId, whereIn: chunk).get();
+            for (final doc in snapshot.docs) {
+              final capture = CaptureModel.fromFirestore(
+                doc as DocumentSnapshot<Map<String, dynamic>>,
+                null,
+              );
+              final art = _convertCaptureToPublicArt(capture);
+              if (_isValidPublicArt(art)) {
+                foundArt.add(art);
+                missingIds.remove(art.id);
+              }
+            }
+          } catch (e) {
+            _logger.w('Error batch fetching from captures: $e');
+          }
+        }
+      }
 
-      final List<PublicArtModel> artPieces = [];
-      int successCount = 0;
-      int errorCount = 0;
-
-      for (final art in artResults) {
+      // Restore original order
+      for (final id in allIds) {
+        final art = foundArt.where((a) => a.id == id).firstOrNull;
         if (art != null) {
           artPieces.add(art);
-          successCount++;
-        } else {
-          errorCount++;
         }
       }
 
       _logger.i(
-        'Loaded $successCount art pieces for walk $walkId (${errorCount} errors)',
+        'Loaded ${artPieces.length} art pieces for walk $walkId using batch fetch (${allIds.length - artPieces.length} missing)',
       );
       return artPieces;
     } catch (e) {
       _logger.e('Error getting art in walk: $e');
       return [];
-    }
-  }
-
-  Future<PublicArtModel?> _getArtPieceById(String artId) async {
-    try {
-      // First try to get from publicArt collection
-      var artDoc = await _publicArtCollection.doc(artId).get();
-      if (artDoc.exists && artDoc.data() != null) {
-        try {
-          final publicArt = PublicArtModel.fromFirestore(artDoc);
-          // Validate the art piece has valid coordinates
-          if (_isValidPublicArt(publicArt)) {
-            return publicArt;
-          } else {
-            _logger.w('Invalid public art data for ID: $artId');
-          }
-        } catch (parseError) {
-          _logger.w('Error parsing public art $artId: $parseError');
-        }
-      }
-
-      // If not found in publicArt, try captures collection
-      artDoc = await _capturesCollection.doc(artId).get();
-      if (artDoc.exists && artDoc.data() != null) {
-        try {
-          final capture = CaptureModel.fromFirestore(
-            artDoc as DocumentSnapshot<Map<String, dynamic>>,
-            null,
-          );
-          // Convert CaptureModel to PublicArtModel for consistency
-          final publicArt = _convertCaptureToPublicArt(capture);
-          if (_isValidPublicArt(publicArt)) {
-            return publicArt;
-          } else {
-            _logger.w('Invalid converted art data for capture ID: $artId');
-          }
-        } catch (parseError) {
-          _logger.w('Error parsing capture $artId: $parseError');
-        }
-      }
-
-      // If not found in either collection, log but continue
-      _logger.i('Art piece not found: $artId (may have been deleted)');
-      return null;
-    } catch (artError) {
-      _logger.w('Error getting art piece $artId: $artError');
-      return null;
     }
   }
 
@@ -720,15 +730,16 @@ class ArtWalkService {
             .map((doc) => ArtWalkModel.fromFirestore(doc))
             .toList();
 
-        // Cache each art walk
+        // Background cache each art walk instead of blocking the main list
         for (final walk in walks) {
-          try {
-            final artPieces = await getArtInWalk(walk.id);
-            await _cacheService.cacheArtWalk(walk, artPieces);
-          } catch (cacheError) {
-            _logger.w('Error caching art walk: $cacheError');
-            // Continue even if caching fails
-          }
+          unawaited(() async {
+            try {
+              final artPieces = await getArtInWalk(walk.id);
+              await _cacheService.cacheArtWalk(walk, artPieces);
+            } catch (cacheError) {
+              _logger.w('Error caching art walk: $cacheError');
+            }
+          }());
         }
 
         return walks;
@@ -763,15 +774,16 @@ class ArtWalkService {
             .map((doc) => ArtWalkModel.fromFirestore(doc))
             .toList();
 
-        // Cache each art walk
+        // Background cache each art walk
         for (final walk in walks) {
-          try {
-            final artPieces = await getArtInWalk(walk.id);
-            await _cacheService.cacheArtWalk(walk, artPieces);
-          } catch (cacheError) {
-            _logger.w('Error caching art walk: $cacheError');
-            // Continue even if caching fails
-          }
+          unawaited(() async {
+            try {
+              final artPieces = await getArtInWalk(walk.id);
+              await _cacheService.cacheArtWalk(walk, artPieces);
+            } catch (cacheError) {
+              _logger.w('Error caching art walk: $cacheError');
+            }
+          }());
         }
 
         return walks;
@@ -798,29 +810,7 @@ class ArtWalkService {
 
   /// Get public art pieces for an art walk
   Future<List<PublicArtModel>> getPublicArtForWalk(String walkId) async {
-    try {
-      // First get the art walk to access its art IDs
-      final walkDoc = await _artWalksCollection.doc(walkId).get();
-      if (!walkDoc.exists) {
-        throw Exception('Art walk not found');
-      }
-
-      final artWalk = ArtWalkModel.fromFirestore(walkDoc);
-      final List<PublicArtModel> artPieces = [];
-
-      // Get each art piece by ID
-      for (final artId in artWalk.artworkIds) {
-        final art = await getPublicArtById(artId);
-        if (art != null) {
-          artPieces.add(art);
-        }
-      }
-
-      return artPieces;
-    } catch (e) {
-      _logger.e('Error getting public art for walk $walkId: $e');
-      return [];
-    }
+    return getArtInWalk(walkId);
   }
 
   /// Get art walks by ZIP codes (for region-based filtering)
@@ -846,12 +836,18 @@ class ArtWalkService {
           .map((doc) => ArtWalkModel.fromFirestore(doc))
           .toList();
 
-      // Cache individual walks for offline use
+      // Background cache individual walks for offline use
       for (final walk in artWalks) {
-        // Get the art pieces for each walk
-        final artPieces = await getPublicArtForWalk(walk.id);
-        // Cache the walk with its art pieces
-        await _cacheService.cacheArtWalk(walk, artPieces);
+        unawaited(() async {
+          try {
+            // Get the art pieces for each walk
+            final artPieces = await getArtInWalk(walk.id);
+            // Cache the walk with its art pieces
+            await _cacheService.cacheArtWalk(walk, artPieces);
+          } catch (e) {
+            _logger.w('Error background caching walk: $e');
+          }
+        }());
       }
 
       return artWalks;

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_artwork/artbeat_artwork.dart';
+import 'package:artbeat_core/artbeat_core.dart' hide ArtworkModel;
 
 /// Screen for discovering written content (books, stories, etc.)
 class WrittenContentDiscoveryScreen extends StatefulWidget {
@@ -15,6 +16,7 @@ class _WrittenContentDiscoveryScreenState
     extends State<WrittenContentDiscoveryScreen>
     with SingleTickerProviderStateMixin {
   final ArtworkService _artworkService = ArtworkService();
+  final ArtistService _artistService = ArtistService();
 
   late TabController _tabController;
   List<ArtworkModel> _allWrittenContent = [];
@@ -22,6 +24,9 @@ class _WrittenContentDiscoveryScreenState
   List<ArtworkModel> _completedBooks = [];
   bool _isLoading = true;
   String? _error;
+
+  // Cache for artist names
+  final Map<String, String> _artistNameCache = {};
 
   // Filter options
   String _selectedGenre = 'All';
@@ -138,8 +143,9 @@ class _WrittenContentDiscoveryScreenState
         });
         break;
       case 'Highest Rated':
-        // TODO: Implement rating sorting when ratings are available
-        filtered.sort((a, b) => b.viewCount.compareTo(a.viewCount));
+        // If averageRating is not available, fallback to likeCount or another metric
+        filtered.sort((a, b) =>
+            b.engagementStats.likeCount.compareTo(a.engagementStats.likeCount));
         break;
       case 'Most Viewed':
         filtered.sort((a, b) => b.viewCount.compareTo(a.viewCount));
@@ -170,7 +176,11 @@ class _WrittenContentDiscoveryScreenState
           IconButton(
             icon: const Icon(Icons.search),
             onPressed: () {
-              // TODO: Navigate to search screen
+              Navigator.pushNamed(
+                context,
+                AppRoutes.artworkSearch,
+                arguments: {'query': ''},
+              );
             },
           ),
         ],
@@ -241,184 +251,133 @@ class _WrittenContentDiscoveryScreenState
     );
   }
 
+  Future<String> _getArtistName(String artistProfileId) async {
+    if (_artistNameCache.containsKey(artistProfileId)) {
+      return _artistNameCache[artistProfileId]!;
+    }
+
+    final profile = await _artistService.getArtistProfileById(artistProfileId);
+    final name = profile?.displayName ?? 'Unknown Author';
+    _artistNameCache[artistProfileId] = name;
+    return name;
+  }
+
   Widget _buildContentCard(ArtworkModel artwork) {
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () => _navigateToDetail(artwork),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Cover image
-            Expanded(
-              flex: 3,
-              child: artwork.imageUrl.isNotEmpty
-                  ? Image.network(
-                      artwork.imageUrl,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      errorBuilder: (context, error, stackTrace) => Container(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .surfaceContainerHighest,
-                        child: const Icon(Icons.book, size: 48),
-                      ),
-                    )
-                  : Container(
-                      color:
-                          Theme.of(context).colorScheme.surfaceContainerHighest,
-                      child: const Icon(Icons.book, size: 48),
-                    ),
-            ),
-
-            // Content info
-            Expanded(
-              flex: 2,
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Title
-                    Text(
-                      artwork.title,
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
+    return FutureBuilder<String>(
+      future: _getArtistName(artwork.artistProfileId),
+      builder: (context, snapshot) {
+        final authorName = snapshot.data ?? 'Loading...';
+        return Card(
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: () => _navigateToDetail(artwork),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Cover image
+                Expanded(
+                  flex: 3,
+                  child: artwork.imageUrl.isNotEmpty
+                      ? Image.network(
+                          artwork.imageUrl,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          errorBuilder: (context, error, stackTrace) =>
+                              Container(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerHighest,
+                            child: const Icon(Icons.book, size: 48),
                           ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                        )
+                      : Container(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHighest,
+                          child: const Icon(Icons.book, size: 48),
+                        ),
+                ),
 
-                    const SizedBox(height: 4),
-
-                    // Author (placeholder for now)
-                    Text(
-                      'Unknown Author', // TODO: Get author name from artist profile
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-
-                    const Spacer(),
-
-                    // Status indicators
-                    Row(
+                // Content info
+                Expanded(
+                  flex: 2,
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (artwork.isSerializing == true) ...[
-                          Icon(
-                            Icons.schedule,
-                            size: 16,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Ongoing',
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                        ] else ...[
-                          Icon(
-                            Icons.check_circle,
-                            size: 16,
-                            color: Theme.of(context).colorScheme.secondary,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Complete',
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                        ],
+                        // Title
+                        Text(
+                          artwork.title,
+                          style:
+                              Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+
+                        const SizedBox(height: 4),
+
+                        // Author
+                        Text(
+                          authorName,
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+
                         const Spacer(),
-                        if (artwork.isForSale == true)
-                          Icon(
-                            Icons.attach_money,
-                            size: 16,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
+
+                        // Status indicators
+                        Row(
+                          children: [
+                            if (artwork.isSerializing == true) ...[
+                              Icon(
+                                Icons.schedule,
+                                size: 16,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Ongoing',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ] else ...[
+                              Icon(
+                                Icons.check_circle,
+                                size: 16,
+                                color: Theme.of(context).colorScheme.secondary,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Complete',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ],
+                            const Spacer(),
+                            if (artwork.isForSale == true)
+                              Icon(
+                                Icons.attach_money,
+                                size: 16,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                          ],
+                        ),
                       ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-
-            // Content info
-            Expanded(
-              flex: 2,
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Title
-                    Text(
-                      artwork.title,
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-
-                    const SizedBox(height: 4),
-
-                    // Author (placeholder for now)
-                    Text(
-                      'Unknown Author', // TODO: Get author name from artist profile
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-
-                    const Spacer(),
-
-                    // Status indicators
-                    Row(
-                      children: [
-                        if (artwork.isSerializing) ...[
-                          Icon(
-                            Icons.schedule,
-                            size: 16,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Ongoing',
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                        ] else ...[
-                          Icon(
-                            Icons.check_circle,
-                            size: 16,
-                            color: Theme.of(context).colorScheme.secondary,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Complete',
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                        ],
-                        const Spacer(),
-                        if (artwork.isForSale)
-                          Icon(
-                            Icons.attach_money,
-                            size: 16,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 

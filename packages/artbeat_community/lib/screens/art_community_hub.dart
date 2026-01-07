@@ -26,7 +26,6 @@ import '../src/services/moderation_service.dart';
 import '../widgets/enhanced_post_card.dart';
 import '../widgets/activity_card.dart';
 import '../widgets/mini_artist_card.dart';
-import '../widgets/comments_modal.dart';
 import '../widgets/community_hud_drawer.dart';
 import '../widgets/commission_artists_browser.dart';
 import '../widgets/fullscreen_image_viewer.dart';
@@ -1357,27 +1356,6 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
     }
   }
 
-  void _handleComment(PostModel post) {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('community_hub_sign_in_comment'.tr())),
-      );
-      return;
-    }
-
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => CommentsModal(
-        post: post,
-        communityService: widget.communityService,
-        onCommentAdded: () => loadPosts(widget.communityService),
-      ),
-    );
-  }
-
   void _handleShare(PostModel post) async {
     // keep your existing implementation
     try {
@@ -1606,9 +1584,9 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
                     padding: const EdgeInsets.only(bottom: 16),
                     child: EnhancedPostCard(
                       post: item,
+                      communityService: widget.communityService,
                       onTap: () => _handlePostTap(item),
                       onLike: () => _handleLike(item),
-                      onComment: () => _handleComment(item),
                       onShare: () => _handleShare(item),
                       onImageTap: (String imageUrl, int imgIndex) =>
                           _showFullscreenImage(

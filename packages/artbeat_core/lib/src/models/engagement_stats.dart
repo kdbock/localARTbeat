@@ -8,6 +8,10 @@ class EngagementStats {
   final int celebrateCount;
   final int likeCount;
   final int commentCount;
+  final int seenCount;
+  final int followCount;
+  final double averageRating;
+  final int totalRatings;
   final DateTime lastUpdated;
 
   EngagementStats({
@@ -18,6 +22,10 @@ class EngagementStats {
     this.celebrateCount = 0,
     this.likeCount = 0,
     this.commentCount = 0,
+    this.seenCount = 0,
+    this.followCount = 0,
+    this.averageRating = 0.0,
+    this.totalRatings = 0,
     required this.lastUpdated,
   });
 
@@ -30,6 +38,10 @@ class EngagementStats {
       celebrateCount: json['celebrateCount'] as int? ?? 0,
       likeCount: json['likeCount'] as int? ?? 0,
       commentCount: json['commentCount'] as int? ?? 0,
+      seenCount: json['seenCount'] as int? ?? 0,
+      followCount: json['followCount'] as int? ?? 0,
+      averageRating: (json['averageRating'] as num? ?? 0.0).toDouble(),
+      totalRatings: json['totalRatings'] as int? ?? 0,
       lastUpdated: json['lastUpdated'] != null
           ? (json['lastUpdated'] as Timestamp).toDate()
           : DateTime.now(),
@@ -45,6 +57,10 @@ class EngagementStats {
       'celebrateCount': celebrateCount,
       'likeCount': likeCount,
       'commentCount': commentCount,
+      'seenCount': seenCount,
+      'followCount': followCount,
+      'averageRating': averageRating,
+      'totalRatings': totalRatings,
       'lastUpdated': Timestamp.fromDate(lastUpdated),
     };
   }

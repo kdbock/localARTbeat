@@ -134,6 +134,7 @@ class _DiscoveryCaptureModalState extends State<DiscoveryCaptureModal> {
             children: [
               CachedNetworkImage(
                 imageUrl: widget.art.imageUrl,
+                memCacheHeight: 400,
                 imageBuilder: (context, imageProvider) => Container(
                   height: 180,
                   decoration: BoxDecoration(

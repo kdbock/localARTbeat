@@ -59,7 +59,7 @@ class _ArtWalkHeaderState extends State<ArtWalkHeader> {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(30),
             child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
               child: Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,

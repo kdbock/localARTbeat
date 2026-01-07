@@ -17,6 +17,7 @@ export 'map_floating_menu.dart';
 export 'new_achievement_dialog.dart';
 export 'offline_art_walk_widget.dart';
 export 'offline_map_fallback.dart';
+export 'public_art_card.dart';
 export 'public_art_search_filter.dart';
 export 'turn_by_turn_navigation_widget.dart';
 export 'zip_code_search_box.dart';

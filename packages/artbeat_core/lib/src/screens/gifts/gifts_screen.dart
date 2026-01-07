@@ -228,7 +228,7 @@ class _GiftsScreenState extends State<GiftsScreen> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(36),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 28, sigmaY: 28),
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
           width: double.infinity,
           padding: const EdgeInsets.all(28),
@@ -837,7 +837,7 @@ class _GiftsScreenState extends State<GiftsScreen> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(30),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
           width: double.infinity,
           padding: padding,

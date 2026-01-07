@@ -212,7 +212,7 @@ class _QuestHistoryScreenState extends State<QuestHistoryScreen>
           ClipRRect(
             borderRadius: BorderRadius.circular(24),
             child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 18.0, sigmaY: 18.0),
+              filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
               child: Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(

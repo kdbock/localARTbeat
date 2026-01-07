@@ -13,6 +13,7 @@ export 'src/firebase/secure_firebase_config.dart';
 export 'src/theme/artbeat_colors.dart' show ArtbeatColors;
 export 'src/theme/artbeat_components.dart' show ArtbeatComponents;
 export 'src/theme/artbeat_theme.dart' show ArtbeatTheme;
+export 'src/theme/theme_provider.dart' show ArtbeatThemeProvider;
 export 'src/theme/artbeat_typography.dart' show ArtbeatTypography;
 export 'src/theme/design_system.dart'
     show

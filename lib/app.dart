@@ -55,19 +55,7 @@ class MyApp extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) => FutureBuilder(
-    builder: (context, snapshot) {
-      if (snapshot.hasError) {
-        return MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: Text('Error initializing app: ${snapshot.error}'),
-            ),
-          ),
-        );
-      }
-
-      return ErrorBoundary(
+  Widget build(BuildContext context) => ErrorBoundary(
         onError: (error, stackTrace) {
           // Filter out expected 404 errors for missing artwork images
           final errorString = error.toString();
@@ -260,6 +248,4 @@ class MyApp extends StatelessWidget {
           ),
         ),
       );
-    }, future: null,
-  );
 }

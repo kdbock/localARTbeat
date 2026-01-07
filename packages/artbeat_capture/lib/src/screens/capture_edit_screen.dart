@@ -2,19 +2,16 @@ import 'dart:io';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:artbeat_core/artbeat_core.dart' show AppLogger;
 import 'package:artbeat_capture/artbeat_capture.dart';
 
 
 class CaptureEditScreen extends StatefulWidget {
-  final File initialImage;
-  final String initialTitle;
-  final String initialDescription;
+  final CaptureModel capture;
 
   const CaptureEditScreen({
     super.key,
-    required this.initialImage,
-    required this.initialTitle,
-    required this.initialDescription,
+    required this.capture,
   });
 
   @override
@@ -25,21 +22,34 @@ class _CaptureEditScreenState extends State<CaptureEditScreen> {
   late TextEditingController _titleController;
   late TextEditingController _descriptionController;
   late File _imageFile;
+  bool _isNewImage = false;
 
   bool _isSaving = false;
 
   @override
   void initState() {
     super.initState();
-    _titleController = TextEditingController(text: widget.initialTitle);
+    _titleController = TextEditingController(text: widget.capture.title);
     _descriptionController = TextEditingController(
-      text: widget.initialDescription,
+      text: widget.capture.description,
     );
-    _imageFile = widget.initialImage;
+    // Placeholder - will be shown using NetworkImage if not new
+    _imageFile = File(''); 
   }
 
   Future<void> _pickNewImage() async {
-    // TODO: Add your camera/gallery service
+    final File? result = await Navigator.of(context).push<File>(
+      MaterialPageRoute(
+        builder: (context) => const CaptureScreen(isPicker: true),
+      ),
+    );
+
+    if (result != null) {
+      setState(() {
+        _imageFile = result;
+        _isNewImage = true;
+      });
+    }
   }
 
   Future<void> _saveChanges() async {
@@ -53,16 +63,40 @@ class _CaptureEditScreenState extends State<CaptureEditScreen> {
     setState(() => _isSaving = true);
 
     try {
-      // TODO: Update capture in backend
-      // await CaptureService().update(...);
+      final captureService = CaptureService();
+      final updates = <String, dynamic>{
+        'title': _titleController.text.trim(),
+        'description': _descriptionController.text.trim(),
+      };
 
-      Navigator.pop(context);
+      if (_isNewImage) {
+        final storageService = StorageService();
+        final newImageUrl = await storageService.uploadCaptureImage(
+          _imageFile,
+          widget.capture.userId,
+        );
+        updates['imageUrl'] = newImageUrl;
+      }
+
+      await captureService.updateCapture(widget.capture.id, updates);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('capture_edit_success'.tr())),
+        );
+        Navigator.pop(context, true);
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('capture_edit_error_generic'.tr())),
-      );
+      AppLogger.error('Error saving capture changes: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('capture_edit_error_generic'.tr())),
+        );
+      }
     } finally {
-      setState(() => _isSaving = false);
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
     }
   }
 
@@ -115,12 +149,24 @@ class _CaptureEditScreenState extends State<CaptureEditScreen> {
                                   borderRadius: BorderRadius.circular(22),
                                   child: Stack(
                                     children: [
-                                      Image.file(
-                                        _imageFile,
-                                        width: double.infinity,
-                                        height: 200,
-                                        fit: BoxFit.cover,
-                                      ),
+                                      _isNewImage 
+                                        ? Image.file(
+                                            _imageFile,
+                                            width: double.infinity,
+                                            height: 200,
+                                            fit: BoxFit.cover,
+                                          )
+                                        : Image.network(
+                                            widget.capture.imageUrl,
+                                            width: double.infinity,
+                                            height: 200,
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (context, error, stackTrace) => Container(
+                                              height: 200,
+                                              color: Colors.grey[900],
+                                              child: const Icon(Icons.error, color: Colors.white70),
+                                            ),
+                                          ),
                                       Positioned.fill(
                                         child: Container(
                                           color: Colors.black.withAlpha(

@@ -43,7 +43,7 @@ class EventsHeader extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return ClipRRect(
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
           height: kToolbarHeight + 6,
           padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -149,7 +149,7 @@ class EventsHeader extends StatelessWidget implements PreferredSizeWidget {
       builder: (context) => ClipRRect(
         borderRadius: const BorderRadius.vertical(top: Radius.circular(26)),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
           child: Container(
             padding: const EdgeInsets.only(bottom: 20),
             decoration: BoxDecoration(

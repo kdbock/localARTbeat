@@ -234,7 +234,7 @@ class _CommissionArtistsBrowserState extends State<CommissionArtistsBrowser> {
           )
         else
           SizedBox(
-            height: 280,
+            height: 300,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -281,9 +281,11 @@ class _CommissionArtistsBrowserState extends State<CommissionArtistsBrowser> {
         onTap: () => _handleCommissionRequest(artist),
         child: GlassCard(
           borderRadius: 24,
+          padding: EdgeInsets.zero,
+          margin: EdgeInsets.zero,
           child: SizedBox(
             width: 180,
-            height: 260,
+            height: 280,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

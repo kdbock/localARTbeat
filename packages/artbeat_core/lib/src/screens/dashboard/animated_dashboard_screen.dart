@@ -421,7 +421,7 @@ class _TitleBlock extends StatelessWidget {
           return ClipRRect(
             borderRadius: BorderRadius.circular(18),
             child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+              filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
               child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
@@ -597,7 +597,7 @@ class _QuestButtonState extends State<_QuestButton> {
               children: [
                 // Base glass panel
                 BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+                  filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
                   child: Container(
                     width: widget.width,
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
@@ -906,7 +906,7 @@ class _ChipButtonState extends State<_ChipButton> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(18),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+          filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
           child: Material(
             color: Colors.white.withValues(alpha: 0.06),
             child: InkWell(
@@ -988,7 +988,7 @@ class _HUDPill extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(18),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+          filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
             decoration: BoxDecoration(
@@ -1014,7 +1014,7 @@ class _IconPill extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(18),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+        filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
         child: Material(
           color: Colors.white.withValues(alpha: 0.06),
           child: InkWell(
@@ -1334,7 +1334,7 @@ class _QuestWorldPainter extends CustomPainter {
       ..strokeWidth = 22
       ..strokeCap = StrokeCap.round
       ..color = const Color(0xFF22D3EE).withValues(alpha: 0.06)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 14);
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
 
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: maxR * 0.95),
@@ -1431,7 +1431,7 @@ class _QuestWorldPainter extends CustomPainter {
       ..shader = RadialGradient(
         colors: [color.withValues(alpha: 0.26), color.withValues(alpha: 0.0)],
       ).createShader(Rect.fromCircle(center: center, radius: radius))
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 70);
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 15);
 
     canvas.drawCircle(center, radius, paint);
   }
