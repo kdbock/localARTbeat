@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:artbeat_admin/artbeat_admin.dart' as admin;
 import 'package:artbeat_ads/artbeat_ads.dart' as ads;
@@ -197,7 +196,7 @@ class AppRouter {
           child: const InAppPurchaseDemoScreen(),
         );
 
-      case '/local-business':
+      case core.AppRoutes.localBusiness:
         return RouteUtils.createMainLayoutRoute(
           child: const sponsorships.LocalBusinessScreen(),
         );
@@ -1214,6 +1213,16 @@ class AppRouter {
           ),
         );
 
+      case core.AppRoutes.settingsLanguage:
+        return RouteUtils.createSimpleRoute(
+          child: const settings_pkg.LanguageSettingsScreen(),
+        );
+
+      case core.AppRoutes.settingsTheme:
+        return RouteUtils.createSimpleRoute(
+          child: const settings_pkg.ThemeSettingsScreen(),
+        );
+
       case core.AppRoutes.paymentSettings:
         return RouteUtils.createMainLayoutRoute(
           appBar: RouteUtils.createAppBar('Payment Settings'),
@@ -1579,7 +1588,6 @@ class AppRouter {
       case core.AppRoutes.capturePending:
       case core.AppRoutes.captureMap:
       case core.AppRoutes.captureApproved:
-      case core.AppRoutes.captureGallery:
       case core.AppRoutes.capturePublic:
         return RouteUtils.createMainLayoutRoute(
           child: Builder(
@@ -1603,7 +1611,6 @@ class AppRouter {
                   switch (settings.name) {
                     case core.AppRoutes.captures:
                     case core.AppRoutes.captureMap:
-                    case core.AppRoutes.captureGallery:
                     case core.AppRoutes.capturePublic:
                       return capture.CapturesListScreen(captures: captures);
                     case core.AppRoutes.captureMyCaptures:
@@ -1699,9 +1706,7 @@ class AppRouter {
         // Provide required arguments for CaptureEditScreen
         return RouteUtils.createMainLayoutRoute(
           child: capture.CaptureEditScreen(
-            initialImage: File.fromUri(Uri.parse(captureModel.imageUrl)),
-            initialTitle: captureModel.title ?? '',
-            initialDescription: captureModel.description ?? '',
+            capture: captureModel,
           ),
         );
 

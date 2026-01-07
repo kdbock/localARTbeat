@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../utils/logger.dart';
+import '../utils/env_loader.dart';
 
 /// Service for managing configuration and environment variables securely
 class ConfigService {
@@ -10,13 +10,14 @@ class ConfigService {
   ConfigService._();
 
   bool _isInitialized = false;
+  final EnvLoader _envLoader = EnvLoader();
 
   /// Initialize the config service
   Future<void> initialize() async {
     if (_isInitialized) return;
 
     try {
-      await dotenv.load(fileName: '.env');
+      await _envLoader.init();
       _isInitialized = true;
       if (kDebugMode) {
         AppLogger.info('✅ ConfigService initialized successfully');
@@ -24,19 +25,19 @@ class ConfigService {
     } catch (e) {
       // Log the error but don't fail the app initialization
       if (kDebugMode) {
-        AppLogger.warning('⚠️ Failed to load .env file: $e');
+        AppLogger.warning('⚠️ Failed to initialize ConfigService: $e');
         AppLogger.info('💡 App will continue with default configuration');
       }
-      // Mark as initialized even if .env loading failed to prevent retries
+      // Mark as initialized even if loading failed to prevent retries
       _isInitialized = true;
-      // Don't rethrow - allow app to continue without .env file
     }
   }
 
   /// Get a configuration value securely
   String? get(String key) {
     try {
-      return dotenv.env[key];
+      final value = _envLoader.get(key);
+      return value.isEmpty ? null : value;
     } catch (e) {
       AppLogger.error('Error getting config value for $key: $e');
       return null;

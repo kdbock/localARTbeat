@@ -536,7 +536,7 @@ class _SubscriptionPurchaseScreenState
     return ClipRRect(
       borderRadius: BorderRadius.circular(34),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
           width: double.infinity,
           padding: padding,

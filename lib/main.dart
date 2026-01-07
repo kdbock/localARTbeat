@@ -1,4 +1,6 @@
 // Copyright (c) 2025 ArtBeat. All rights reserved.
+import 'dart:async';
+
 import 'package:artbeat_art_walk/artbeat_art_walk.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_core/firebase_options.dart';
@@ -55,64 +57,7 @@ Future<void> main() async {
     // Lifecycle manager (non-blocking)
     AppLifecycleManager().initialize();
 
-    // Parallel critical startup tasks
-    await Future.wait([
-      ConfigService.instance.initialize(),
-      MapsConfig.initialize(),
-      EnvLoader().init(),
-    ]);
-
-    // 🔥 FIREBASE MUST EXIST BEFORE ANYTHING ELSE
-    if (Firebase.apps.isEmpty) {
-      try {
-        await Firebase.initializeApp(
-          options: DefaultFirebaseOptions.currentPlatform,
-        );
-      } on FirebaseException catch (error) {
-        if (error.code != 'duplicate-app') {
-          rethrow;
-        }
-        AppLogger.warning(
-          'Duplicate Firebase initialization avoided: ${error.message}',
-        );
-      }
-    }
-
-    try {
-      await SecureFirebaseConfig.configureAppCheck(teamId: 'H49R32NPY6');
-    } on Object catch (e) {
-      AppLogger.error('App Check activation failed', error: e);
-    }
-
-    // Auth safety
-    try {
-      await AuthSafetyService.initialize();
-    } on Object catch (e) {
-      AppLogger.warning('⚠️ Auth Safety Service failed: $e');
-    }
-
-    // Stripe safety
-    try {
-      final env = EnvLoader();
-      final stripeKey = env.get('STRIPE_PUBLISHABLE_KEY');
-      if (stripeKey.isNotEmpty) {
-        await StripeSafetyService.initialize(publishableKey: stripeKey);
-      } else {
-        AppLogger.warning('⚠️ STRIPE_PUBLISHABLE_KEY missing');
-      }
-    } on Object catch (e) {
-      AppLogger.warning('⚠️ Stripe Safety Service failed: $e');
-    }
-
-    // In-app purchases
-    try {
-      await InAppPurchaseSetup().initialize();
-    } on Object catch (e) {
-      AppLogger.warning('⚠️ IAP initialization failed: $e');
-    }
-
-    _initializeNonCriticalServices();
-    _initializeAppPermissions();
+    await _initializeCoreServices();
 
     PerformanceMonitor.endTimer('app_startup');
 
@@ -179,6 +124,69 @@ Future<void> main() async {
       child: MyApp(),
     ),
   );
+
+  // Heavy and network-bound setup continues after first frame
+  unawaited(_kickOffDeferredInits());
+}
+
+Future<void> _initializeCoreServices() async {
+  await Future.wait([
+    _guardedInit(ConfigService.instance.initialize, 'ConfigService'),
+    _guardedInit(MapsConfig.initialize, 'MapsConfig'),
+    _guardedInit(EnvLoader().init, 'EnvLoader'),
+    _guardedInit(() async {
+      if (Firebase.apps.isEmpty) {
+        await Firebase.initializeApp(
+          options: DefaultFirebaseOptions.currentPlatform,
+        );
+      }
+      // Initialize App Check IMMEDIATELY after Firebase Core
+      // This prevents permission denied errors during initial data fetching
+      await SecureFirebaseConfig.configureAppCheck(teamId: 'H49R32NPY6');
+    }, 'Firebase & App Check'),
+  ]);
+}
+
+Future<void> _kickOffDeferredInits() async {
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    unawaited(_runDeferredInits());
+  });
+}
+
+Future<void> _runDeferredInits() async {
+  // Parallelize critical but deferred services
+  await Future.wait([
+    _guardedInit(AuthSafetyService.initialize, 'Auth Safety'),
+    _guardedInit(() async {
+      final env = EnvLoader();
+      final stripeKey = env.get('STRIPE_PUBLISHABLE_KEY');
+      if (stripeKey.isNotEmpty) {
+        await StripeSafetyService.initialize(publishableKey: stripeKey);
+      } else {
+        AppLogger.warning('⚠️ STRIPE_PUBLISHABLE_KEY missing');
+      }
+    }, 'Stripe Safety'),
+    _guardedInit(() => InAppPurchaseSetup().initialize(), 'IAP'),
+  ]);
+
+  // Existing non-critical background tasks
+  _initializeNonCriticalServices();
+  _initializeAppPermissions();
+}
+
+Future<void> _guardedInit(
+  Future<void> Function() action,
+  String label, {
+  Duration timeout = const Duration(seconds: 4),
+}) async {
+  try {
+    await action().timeout(timeout);
+  } on TimeoutException {
+    AppLogger.warning('⚠️ $label init timed out after ${timeout.inSeconds}s');
+  } on Object catch (e, stack) {
+    AppLogger.warning('⚠️ $label init skipped: $e');
+    AppLogger.error('$label init error', error: e, stackTrace: stack);
+  }
 }
 
 /// Background services

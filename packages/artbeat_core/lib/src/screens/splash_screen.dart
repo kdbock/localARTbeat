@@ -77,8 +77,8 @@ class _SplashScreenState extends State<SplashScreen>
 
   Future<void> _checkAuthAndNavigate() async {
     if (_hasNavigated) return;
-
-    await Future<void>.delayed(const Duration(seconds: 5));
+    // Short delay only to let the first frame paint; don't block startup
+    await Future<void>.delayed(const Duration(milliseconds: 300));
     if (!mounted || _hasNavigated) return;
 
     try {
@@ -195,7 +195,7 @@ class _SplashScreenState extends State<SplashScreen>
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(32),
                         child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                           child: Container(
                             width: math.min(320, size.width * 0.78),
                             padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
@@ -438,7 +438,7 @@ class _SplashWorldPainter extends CustomPainter {
       ..shader = RadialGradient(
         colors: [color.withValues(alpha: 0.22), color.withValues(alpha: 0.0)],
       ).createShader(Rect.fromCircle(center: center, radius: radius))
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 70);
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 15);
 
     canvas.drawCircle(center, radius, paint);
   }

@@ -365,6 +365,7 @@ class _SocialFeedWidgetState extends State<SocialFeedWidget> {
               child: CachedNetworkImage(
                 imageUrl: imageUrls.first.toString(),
                 fit: BoxFit.cover,
+                memCacheWidth: 600,
                 placeholder: (context, url) => Container(
                   color: Colors.black.withValues(alpha: 0.2),
                   child: const Center(child: CircularProgressIndicator()),
@@ -677,7 +678,7 @@ class _CommentsBottomSheetState extends State<_CommentsBottomSheet> {
     return ClipRRect(
       borderRadius: const BorderRadius.vertical(top: Radius.circular(26)),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
           height: media.size.height * 0.7,
           padding: EdgeInsets.only(
@@ -872,7 +873,7 @@ class _GlassCard extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(26),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
           padding: padding,
           decoration: BoxDecoration(

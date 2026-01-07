@@ -937,6 +937,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen> {
                             child: Image.network(
                               event.eventBannerUrl,
                               fit: BoxFit.cover,
+                              cacheWidth: 600,
                               loadingBuilder:
                                   (context, child, loadingProgress) {
                                     if (loadingProgress == null) return child;
@@ -1478,6 +1479,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen> {
                           child: Image.network(
                             event.eventBannerUrl,
                             fit: BoxFit.cover,
+                            cacheWidth: 600,
                             loadingBuilder: (context, child, loadingProgress) {
                               if (loadingProgress == null) return child;
                               return Container(

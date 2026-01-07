@@ -14,6 +14,18 @@ subprojects {
 }
 subprojects {
     project.evaluationDependsOn(":app")
+    
+    configurations.all {
+        resolutionStrategy {
+            force("androidx.concurrent:concurrent-futures:1.1.0")
+            force("org.jspecify:jspecify:1.0.0")
+            eachDependency {
+                if (requested.group == "androidx.camera") {
+                    useVersion("1.5.0-alpha02")
+                }
+            }
+        }
+    }
 }
 
 tasks.register<Delete>("clean") {

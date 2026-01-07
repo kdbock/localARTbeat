@@ -217,7 +217,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
     return ClipRRect(
       borderRadius: BorderRadius.circular(28),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
@@ -283,7 +283,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
     return ClipRRect(
       borderRadius: BorderRadius.circular(34),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(34),
@@ -566,7 +566,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
     return ClipRRect(
       borderRadius: BorderRadius.circular(34),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
           width: double.infinity,
           padding: padding,

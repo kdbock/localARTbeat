@@ -2,13 +2,9 @@ import 'dart:io';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:artbeat_capture/artbeat_capture.dart' as capture_widgets;
 import 'package:artbeat_capture/artbeat_capture.dart';
-import 'package:artbeat_core/artbeat_core.dart' show AppLogger, CaptureStatus;
 
 class CaptureUploadScreen extends StatefulWidget {
   final File? initialImage;
@@ -24,7 +20,7 @@ class _CaptureUploadScreenState extends State<CaptureUploadScreen> {
   final TextEditingController _descriptionController = TextEditingController();
 
   File? _selectedImage;
-  bool _isSubmitting = false;
+  final bool _isSubmitting = false;
 
   @override
   void initState() {
@@ -33,8 +29,17 @@ class _CaptureUploadScreenState extends State<CaptureUploadScreen> {
   }
 
   Future<void> _pickImage() async {
-    // TODO integrate your camera/gallery service here.
-    // For now just placeholder.
+    final File? result = await Navigator.of(context).push<File>(
+      MaterialPageRoute(
+        builder: (context) => const capture_widgets.CaptureScreen(isPicker: true),
+      ),
+    );
+
+    if (result != null) {
+      setState(() {
+        _selectedImage = result;
+      });
+    }
   }
 
   Future<void> _submit() async {
@@ -45,97 +50,22 @@ class _CaptureUploadScreenState extends State<CaptureUploadScreen> {
       return;
     }
 
-    if (_titleController.text.isEmpty) {
+    if (_titleController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('capture_upload_error_title_required'.tr())),
       );
       return;
     }
 
-    setState(() => _isSubmitting = true);
-
-    try {
-      // Get current user
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        throw Exception('User not authenticated');
-      }
-
-      // Get current location
-      Position? position;
-      try {
-        final serviceEnabled = await Geolocator.isLocationServiceEnabled();
-        if (serviceEnabled) {
-          final permission = await Geolocator.checkPermission();
-          if (permission == LocationPermission.denied) {
-            final newPermission = await Geolocator.requestPermission();
-            if (newPermission != LocationPermission.denied) {
-              position = await Geolocator.getCurrentPosition(
-                locationSettings: const LocationSettings(
-                  accuracy: LocationAccuracy.high,
-                ),
-              );
-            }
-          } else if (permission != LocationPermission.denied) {
-            position = await Geolocator.getCurrentPosition(
-              locationSettings: const LocationSettings(
-                accuracy: LocationAccuracy.high,
-              ),
-            );
-          }
-        }
-      } catch (e) {
-        AppLogger.warning('Could not get location for capture: $e');
-        // Continue without location
-      }
-
-      // Upload image
-      final storageService = StorageService();
-      final imageUrl = await storageService.uploadCaptureImage(
-        _selectedImage!,
-        user.uid,
-      );
-
-      // Create capture model
-      final capture = CaptureModel(
-        id: '', // Will be set by Firestore
-        userId: user.uid,
-        imageUrl: imageUrl,
-        createdAt: DateTime.now(),
-        title: _titleController.text.trim(),
-        description: _descriptionController.text.trim().isNotEmpty
-            ? _descriptionController.text.trim()
-            : null,
-        location: position != null
-            ? GeoPoint(position.latitude, position.longitude)
-            : null,
-        isPublic: true, // Default to public for now
-        status: CaptureStatus.approved, // Captures are approved by default
-      );
-
-      // Save to Firestore
-      final captureService = CaptureService();
-      await captureService.createCapture(capture);
-
-      // Success - navigate back
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('capture_upload_success'.tr())));
-        Navigator.pop(context);
-      }
-    } catch (e) {
-      AppLogger.error('Error submitting capture: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('capture_upload_error_generic'.tr())),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isSubmitting = false);
-      }
-    }
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => CaptureViewScreen(
+          imageFile: _selectedImage!,
+          title: _titleController.text.trim(),
+          description: _descriptionController.text.trim(),
+        ),
+      ),
+    );
   }
 
   @override

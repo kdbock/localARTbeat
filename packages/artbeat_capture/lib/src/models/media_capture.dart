@@ -18,7 +18,7 @@ extension MediaTypeExtension on MediaType {
 }
 
 /// Enum for capture sources
-enum CaptureSource { camera, gallery }
+enum CaptureSource { camera }
 
 /// Extension for CaptureSource enum
 extension CaptureSourceExtension on CaptureSource {
@@ -26,10 +26,8 @@ extension CaptureSourceExtension on CaptureSource {
     switch (value) {
       case 'CaptureSource.camera':
         return CaptureSource.camera;
-      case 'CaptureSource.gallery':
-        return CaptureSource.gallery;
       default:
-        return CaptureSource.gallery;
+        return CaptureSource.camera;
     }
   }
 
@@ -37,8 +35,6 @@ extension CaptureSourceExtension on CaptureSource {
     switch (this) {
       case CaptureSource.camera:
         return 'Camera';
-      case CaptureSource.gallery:
-        return 'Gallery';
     }
   }
 }

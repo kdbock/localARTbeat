@@ -684,7 +684,7 @@ class _QuestAmbientPainter extends CustomPainter {
       ..shader = RadialGradient(
         colors: [color.withValues(alpha: 0.22), color.withValues(alpha: 0.0)],
       ).createShader(Rect.fromCircle(center: center, radius: radius))
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 70);
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 15);
 
     canvas.drawCircle(center, radius, paint);
   }

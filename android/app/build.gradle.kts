@@ -59,8 +59,8 @@ android {
         applicationId = "com.wordnerd.artbeat"
         minSdk = 24  // Android 7.0 (2016) - Explicit minimum for Firebase compatibility
         targetSdk = 36  // Updated to match compileSdk
-        versionCode = 89
-        versionName = "2.4.6"
+        versionCode = 90
+        versionName = "2.4.7"
         
         // Enable multidex for large app
         multiDexEnabled = true
@@ -121,4 +121,9 @@ dependencies {
     // Ensure AndroidX compatibility
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
     implementation("androidx.activity:activity-ktx:1.10.0")
+    
+    // Fix for camera_android_camerax compilation error
+    implementation("androidx.concurrent:concurrent-futures:1.1.0")
+    implementation("org.jspecify:jspecify:1.0.0")
+
 }

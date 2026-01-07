@@ -29,12 +29,14 @@ class RiskAssessment {
 class PaymentResult {
   final bool success;
   final String? paymentIntentId;
+  final String? clientSecret;
   final String? error;
   final RiskAssessment? riskAssessment;
 
   PaymentResult({
     required this.success,
     this.paymentIntentId,
+    this.clientSecret,
     this.error,
     this.riskAssessment,
   });
@@ -439,6 +441,7 @@ class UnifiedPaymentService {
           return PaymentResult(
             success: true,
             paymentIntentId: (data['paymentIntentId'] as String?) ?? '',
+            clientSecret: (data['clientSecret'] as String?) ?? '',
           );
         } else {
           _logPaymentEvent('gift', amount, 'failed');
@@ -482,6 +485,7 @@ class UnifiedPaymentService {
         return PaymentResult(
           success: true,
           paymentIntentId: (data['paymentIntentId'] as String?) ?? '',
+          clientSecret: (data['clientSecret'] as String?) ?? '',
         );
       } else {
         _logPaymentEvent('ad', amount, 'failed');
@@ -566,6 +570,7 @@ class UnifiedPaymentService {
         return PaymentResult(
           success: true,
           paymentIntentId: (data['paymentIntentId'] as String?) ?? '',
+          clientSecret: (data['clientSecret'] as String?) ?? '',
         );
       } else {
         _logPaymentEvent('artwork_sale', amount, 'failed');
@@ -944,6 +949,55 @@ class UnifiedPaymentService {
     } catch (e) {
       AppLogger.error('Error setting up payment sheet: $e');
       rethrow;
+    }
+  }
+
+  /// Initialize payment sheet for a one-time payment
+  Future<void> initPaymentSheetForPayment({
+    required String paymentIntentClientSecret,
+    String? customerId,
+    String? customerEphemeralKeySecret,
+  }) async {
+    try {
+      final paymentArgs = {
+        'paymentIntentClientSecret': paymentIntentClientSecret,
+        if (customerId != null) 'customerId': customerId,
+      };
+
+      if (!CrashPreventionService.validateStripePaymentArgs(paymentArgs)) {
+        throw Exception('Invalid payment parameters');
+      }
+
+      await CrashPreventionService.safeExecute(
+        operation: () => Stripe.instance.initPaymentSheet(
+          paymentSheetParameters: SetupPaymentSheetParameters(
+            paymentIntentClientSecret: paymentIntentClientSecret,
+            customerId: customerId,
+            customerEphemeralKeySecret: customerEphemeralKeySecret,
+            style: ThemeMode.system,
+            merchantDisplayName: 'ARTbeat',
+          ),
+        ),
+        operationName: 'initPaymentSheetForPayment',
+      );
+    } catch (e) {
+      AppLogger.error('Error initializing payment sheet: $e');
+      rethrow;
+    }
+  }
+
+  /// Present the payment sheet to the user
+  Future<void> presentPaymentSheet() async {
+    try {
+      await Stripe.instance.presentPaymentSheet();
+    } catch (e) {
+      if (e is StripeException) {
+        AppLogger.warning('Stripe payment sheet error: ${e.error.localizedMessage}');
+        rethrow;
+      } else {
+        AppLogger.error('Error presenting payment sheet: $e');
+        rethrow;
+      }
     }
   }
 

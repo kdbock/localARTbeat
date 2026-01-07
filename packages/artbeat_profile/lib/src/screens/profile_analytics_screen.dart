@@ -209,7 +209,7 @@ class _ProfileAnalyticsScreenState extends State<ProfileAnalyticsScreen> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(24),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
           child: Container(
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.06),

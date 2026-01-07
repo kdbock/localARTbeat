@@ -6,7 +6,6 @@ import 'package:artbeat_core/artbeat_core.dart';
 
 import '../models/post_model.dart';
 import '../services/art_community_service.dart';
-import '../widgets/comments_modal.dart';
 import '../widgets/enhanced_post_card.dart';
 import '../widgets/fullscreen_image_viewer.dart';
 import '../widgets/post_detail_modal.dart';
@@ -152,30 +151,6 @@ class _ArtistFeedScreenState extends State<ArtistFeedScreen> {
     } catch (e) {
       AppLogger.error('Error handling like: $e');
     }
-  }
-
-  void _handleComment(PostModel post) {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('community_artist_feed.sign_in_comment'.tr()),
-        ),
-      );
-      return;
-    }
-
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => CommentsModal(
-        post: post,
-        communityService: _communityService,
-        onCommentAdded: _loadArtistAndPosts,
-      ),
-    );
   }
 
   void _handleShare(PostModel post) async {
@@ -331,9 +306,9 @@ class _ArtistFeedScreenState extends State<ArtistFeedScreen> {
             padding: const EdgeInsets.only(bottom: 16),
             child: EnhancedPostCard(
               post: post,
+              communityService: _communityService,
               onTap: () => _handlePostTap(post),
               onLike: () => _handleLike(post),
-              onComment: () => _handleComment(post),
               onShare: () => _handleShare(post),
               onImageTap: (imageUrl, index) =>
                   _showFullscreenImage(imageUrl, index, post.imageUrls),

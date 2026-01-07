@@ -316,7 +316,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(28),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
           child: ExpansionTile(
             backgroundColor: Colors.white.withValues(alpha: 0.04),
             collapsedBackgroundColor: Colors.white.withValues(alpha: 0.02),
@@ -363,7 +363,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(34),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
           width: double.infinity,
           padding: padding,

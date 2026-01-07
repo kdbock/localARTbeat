@@ -108,6 +108,20 @@ class ArtistService {
     }
   }
 
+  /// Get a single artist profile by ID
+  Future<ArtistProfileModel?> getArtistProfileById(String id) async {
+    try {
+      final doc = await _firestore.collection('artistProfiles').doc(id).get();
+      if (doc.exists) {
+        return ArtistProfileModel.fromFirestore(doc);
+      }
+      return null;
+    } catch (e) {
+      AppLogger.error('Error getting artist profile $id: $e');
+      return null;
+    }
+  }
+
   Future<List<ArtistModel>> searchArtists(String query) async {
     Query artistsQuery = _firestore.collection('artists');
 

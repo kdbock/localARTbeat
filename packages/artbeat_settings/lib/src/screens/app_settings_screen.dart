@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:artbeat_core/artbeat_core.dart' hide HudTopBar;
+import 'package:firebase_auth/firebase_auth.dart';
 import '../widgets/hud_top_bar.dart';
-
 import '../widgets/settings_category_header.dart';
 import '../widgets/settings_list_item.dart';
 import '../widgets/settings_section_card.dart';
@@ -52,9 +53,14 @@ class AppSettingsScreen extends StatelessWidget {
                               SettingsListItem(
                                 icon: Icons.language_rounded,
                                 title: 'Language',
-                                subtitle: 'English',
+                                subtitle: Localizations.localeOf(
+                                  context,
+                                ).languageCode.toUpperCase(),
                                 onTap: () {
-                                  // TODO: Navigate to language screen
+                                  Navigator.pushNamed(
+                                    context,
+                                    AppRoutes.settingsLanguage,
+                                  );
                                 },
                               ),
                               SettingsListItem(
@@ -62,7 +68,10 @@ class AppSettingsScreen extends StatelessWidget {
                                 title: 'Appearance',
                                 subtitle: 'System Default',
                                 onTap: () {
-                                  // TODO: Theme switcher
+                                  Navigator.pushNamed(
+                                    context,
+                                    AppRoutes.settingsTheme,
+                                  );
                                 },
                               ),
                               SettingsListItem(
@@ -70,7 +79,14 @@ class AppSettingsScreen extends StatelessWidget {
                                 title: 'Storage Usage',
                                 subtitle: '1.2 MB',
                                 onTap: () {
-                                  // TODO: Show storage usage screen
+                                  // Storage usage screen could be implemented similarly
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        'Storage details coming soon',
+                                      ),
+                                    ),
+                                  );
                                 },
                               ),
                             ],
@@ -88,7 +104,7 @@ class AppSettingsScreen extends StatelessWidget {
                                 onTap: () {
                                   Navigator.pushNamed(
                                     context,
-                                    '/settings/privacy',
+                                    AppRoutes.settingsPrivacy,
                                   );
                                 },
                               ),
@@ -96,9 +112,7 @@ class AppSettingsScreen extends StatelessWidget {
                                 icon: Icons.logout_rounded,
                                 title: 'Sign Out',
                                 destructive: true,
-                                onTap: () {
-                                  // TODO: Handle sign out
-                                },
+                                onTap: () => _handleSignOut(context),
                               ),
                             ],
                           ),
@@ -113,5 +127,42 @@ class AppSettingsScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _handleSignOut(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Sign Out'),
+        content: const Text('Are you sure you want to sign out?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Sign Out', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      try {
+        await FirebaseAuth.instance.signOut();
+        if (context.mounted) {
+          Navigator.of(
+            context,
+          ).pushNamedAndRemoveUntil(AppRoutes.login, (route) => false);
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Error signing out: $e')));
+        }
+      }
+    }
   }
 }

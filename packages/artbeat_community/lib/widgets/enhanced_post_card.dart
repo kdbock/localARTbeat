@@ -10,9 +10,13 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../models/post_model.dart';
+import '../models/art_models.dart';
+import '../services/art_community_service.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:easy_localization/easy_localization.dart';
 import '../src/widgets/user_action_menu.dart';
 
 /// Local ARTbeat tokens (scoped to this file)
@@ -120,6 +124,7 @@ class _GradientIconChip extends StatelessWidget {
 /// Enhanced post card that supports images, video, and audio
 class EnhancedPostCard extends StatefulWidget {
   final PostModel post;
+  final ArtCommunityService? communityService;
   final VoidCallback? onTap;
   final VoidCallback? onLike;
   final VoidCallback? onComment;
@@ -132,6 +137,7 @@ class EnhancedPostCard extends StatefulWidget {
   const EnhancedPostCard({
     super.key,
     required this.post,
+    this.communityService,
     this.onTap,
     this.onLike,
     this.onComment,
@@ -154,6 +160,12 @@ class _EnhancedPostCardState extends State<EnhancedPostCard> {
   Duration _audioDuration = Duration.zero;
   Duration _audioPosition = Duration.zero;
 
+  bool _showComments = false;
+  List<ArtComment> _comments = [];
+  bool _isLoadingComments = false;
+  bool _isSubmittingComment = false;
+  final TextEditingController _commentController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -164,7 +176,86 @@ class _EnhancedPostCardState extends State<EnhancedPostCard> {
   void dispose() {
     _videoController?.dispose();
     _audioPlayer?.dispose();
+    _commentController.dispose();
     super.dispose();
+  }
+
+  Future<void> _toggleComments() async {
+    if (widget.communityService == null) {
+      widget.onComment?.call();
+      return;
+    }
+
+    setState(() {
+      _showComments = !_showComments;
+    });
+
+    if (_showComments && _comments.isEmpty) {
+      await _loadComments();
+    }
+  }
+
+  Future<void> _loadComments() async {
+    if (widget.communityService == null) return;
+
+    setState(() => _isLoadingComments = true);
+    try {
+      final comments = await widget.communityService!.getComments(
+        widget.post.id,
+      );
+      if (mounted) {
+        setState(() {
+          _comments = comments;
+          _isLoadingComments = false;
+        });
+      }
+    } catch (e) {
+      AppLogger.error('Error loading comments in EnhancedPostCard: $e');
+      if (mounted) {
+        setState(() => _isLoadingComments = false);
+      }
+    }
+  }
+
+  Future<void> _addComment() async {
+    if (widget.communityService == null) return;
+
+    final content = _commentController.text.trim();
+    if (content.isEmpty) return;
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('community_hub_sign_in_comment'.tr())),
+      );
+      return;
+    }
+
+    setState(() => _isSubmittingComment = true);
+
+    try {
+      final commentId = await widget.communityService!.addComment(
+        widget.post.id,
+        content,
+      );
+
+      if (commentId != null) {
+        _commentController.clear();
+        await _loadComments();
+        // We don't call widget.onCommentAdded because it's handled internally
+      }
+    } catch (e) {
+      AppLogger.error('Error adding comment in EnhancedPostCard: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to add comment')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmittingComment = false);
+      }
+    }
   }
 
   Future<void> _initializeMedia() async {
@@ -240,9 +331,205 @@ class _EnhancedPostCardState extends State<EnhancedPostCard> {
             if (widget.post.tags.isNotEmpty) _buildTags(),
 
             _buildEngagementActions(),
+
+            if (_showComments) _buildCommentsSection(),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildCommentsSection() {
+    return _Glass(
+      radius: 0,
+      blur: 10,
+      fillAlpha: 0.04,
+      borderAlpha: 0.08,
+      shadow: false,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Divider(color: Colors.white10),
+          const SizedBox(height: 8),
+          if (_isLoadingComments)
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.all(20),
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation(_LAB.teal),
+                ),
+              ),
+            )
+          else if (_comments.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Center(
+                child: Text(
+                  'comments_modal_no_comments_title'.tr(),
+                  style: const TextStyle(
+                    color: _LAB.textTertiary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            )
+          else
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _comments.length,
+              itemBuilder: (context, index) {
+                final comment = _comments[index];
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CircleAvatar(
+                        radius: 12,
+                        backgroundColor: _LAB.glassFill(0.2),
+                        backgroundImage: ImageUrlValidator.safeNetworkImage(
+                          comment.userAvatarUrl,
+                        ),
+                        child: !ImageUrlValidator.isValidImageUrl(
+                          comment.userAvatarUrl,
+                        )
+                            ? Text(
+                                comment.userName.isNotEmpty
+                                    ? comment.userName[0].toUpperCase()
+                                    : 'U',
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: _LAB.textPrimary,
+                                ),
+                              )
+                            : null,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  comment.userName,
+                                  style: const TextStyle(
+                                    color: _LAB.textPrimary,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  timeago.format(comment.createdAt),
+                                  style: const TextStyle(
+                                    color: _LAB.textTertiary,
+                                    fontSize: 10,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              comment.content,
+                              style: const TextStyle(
+                                color: _LAB.textSecondary,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          const SizedBox(height: 12),
+          _buildCommentInput(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCommentInput() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return const SizedBox.shrink();
+
+    return Row(
+      children: [
+        CircleAvatar(
+          radius: 14,
+          backgroundColor: _LAB.glassFill(0.2),
+          backgroundImage: ImageUrlValidator.safeNetworkImage(user.photoURL),
+          child: !ImageUrlValidator.isValidImageUrl(user.photoURL)
+              ? Text(
+                  (user.displayName?.isNotEmpty == true
+                          ? user.displayName![0]
+                          : 'U')
+                      .toUpperCase(),
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: _LAB.textPrimary,
+                  ),
+                )
+              : null,
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.75),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+            ),
+            child: TextField(
+              controller: _commentController,
+              cursorColor: _LAB.purple,
+              style: const TextStyle(
+                color: Color(0xFF1A1A1A),
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+              decoration: InputDecoration(
+                hintText: 'comments_modal_add_comment_hint'.tr(),
+                hintStyle: TextStyle(
+                  color: Colors.black.withValues(alpha: 0.5),
+                  fontSize: 13,
+                ),
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
+              ),
+              maxLines: null,
+              textCapitalization: TextCapitalization.sentences,
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        IconButton(
+          onPressed: _isSubmittingComment ? null : _addComment,
+          icon: _isSubmittingComment
+              ? const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation(_LAB.teal),
+                  ),
+                )
+              : const Icon(Icons.send, color: _LAB.teal, size: 20),
+        ),
+      ],
     );
   }
 
@@ -767,7 +1054,7 @@ class _EnhancedPostCardState extends State<EnhancedPostCard> {
             _actionButton(
               icon: Icons.chat_bubble_outline,
               label: widget.post.engagementStats.commentCount.toString(),
-              onTap: widget.onComment,
+              onTap: _toggleComments,
               color: _LAB.teal,
             ),
             const SizedBox(width: 18),

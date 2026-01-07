@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../models/post_model.dart';
+import '../../services/art_community_service.dart';
 import '../../widgets/enhanced_post_card.dart';
 import '../../widgets/gradient_badge.dart';
 import '../../widgets/post_detail_modal.dart';
@@ -32,6 +33,7 @@ class UserPostsScreen extends StatefulWidget {
 }
 
 class _UserPostsScreenState extends State<UserPostsScreen> {
+  final ArtCommunityService _communityService = ArtCommunityService();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -43,6 +45,12 @@ class _UserPostsScreenState extends State<UserPostsScreen> {
   void initState() {
     super.initState();
     _loadUserPosts();
+  }
+
+  @override
+  void dispose() {
+    _communityService.dispose();
+    super.dispose();
   }
 
   Future<void> _loadUserPosts() async {
@@ -364,6 +372,7 @@ class _UserPostsScreenState extends State<UserPostsScreen> {
             padding: const EdgeInsets.only(bottom: 16),
             child: EnhancedPostCard(
               post: post,
+              communityService: _communityService,
               onTap: () => _openPost(post),
               onEdit: () => _handleEdit(post),
               onDelete: () => _showDeleteDialog(post),

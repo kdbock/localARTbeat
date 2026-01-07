@@ -1,3 +1,4 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'logger.dart';
 
 /// Utility class for loading environment variables and configuration
@@ -13,33 +14,40 @@ class EnvLoader {
   /// Initialize environment variables
   Future<void> init() async {
     try {
-      // TODO: Load from secure environment configuration
-      // For production, these should come from:
-      // - Flutter's --dart-define flags during build
-      // - Platform-specific secure storage
-      // - Remote config (Firebase Remote Config)
-      // NEVER hardcode production secrets!
+      // Load from .env file if it exists
+      try {
+        await dotenv.load(fileName: '.env');
+        _envVars.addAll(dotenv.env);
+      } catch (e) {
+        AppLogger.warning('⚠️ Could not load .env file, using environment defines: $e');
+      }
 
-      _envVars.addAll({
-        'API_BASE_URL': const String.fromEnvironment(
-          'API_BASE_URL',
-          defaultValue: 'https://api.artbeat.app',
-        ),
-        'GOOGLE_MAPS_API_KEY': const String.fromEnvironment(
-          'GOOGLE_MAPS_API_KEY',
-          defaultValue: '',
-        ),
-        'STRIPE_PUBLISHABLE_KEY': const String.fromEnvironment(
-          'STRIPE_PUBLISHABLE_KEY',
-          defaultValue: '',
-        ),
-        'FIREBASE_REGION': const String.fromEnvironment(
-          'FIREBASE_REGION',
-          defaultValue: 'us-central1',
-        ),
-      });
+      // Merge with String.fromEnvironment for build-time overrides
+      // This allows both .env files and --dart-define to work together
+      final List<String> keysToCheck = [
+        'API_BASE_URL',
+        'GOOGLE_MAPS_API_KEY',
+        'STRIPE_PUBLISHABLE_KEY',
+        'FIREBASE_REGION',
+        'FIREBASE_API_KEY',
+        'FIREBASE_APP_ID',
+        'FIREBASE_MESSAGING_SENDER_ID',
+        'FIREBASE_PROJECT_ID',
+        'FIREBASE_STORAGE_BUCKET',
+      ];
 
-      AppLogger.info('✅ Environment variables loaded successfully');
+      for (final key in keysToCheck) {
+        final envValue = String.fromEnvironment(key);
+        if (envValue.isNotEmpty) {
+          _envVars[key] = envValue;
+        }
+      }
+
+      // Set defaults for critical values if still empty
+      _envVars.putIfAbsent('API_BASE_URL', () => 'https://api.artbeat.app');
+      _envVars.putIfAbsent('FIREBASE_REGION', () => 'us-central1');
+
+      AppLogger.info('✅ Environment variables loaded successfully (${_envVars.length} variables)');
     } catch (e) {
       AppLogger.error('❌ Error loading environment variables: $e');
     }

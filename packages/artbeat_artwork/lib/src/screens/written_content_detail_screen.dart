@@ -29,6 +29,7 @@ class _WrittenContentDetailScreenState
   final artist.SubscriptionService _subscriptionService =
       artist.SubscriptionService();
   final artist.AnalyticsService _analyticsService = artist.AnalyticsService();
+  final UnifiedPaymentService _paymentService = UnifiedPaymentService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   bool _isLoading = true;
@@ -517,11 +518,60 @@ class _WrittenContentDetailScreenState
   }
 
   Future<void> _purchaseContent() async {
-    // TODO: Implement purchase flow
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-          content: Text('art_walk_purchase_functionality_coming_soon'.tr())),
-    );
+    if (_artwork == null) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // 1. Create payment intent on the backend
+      final result = await _paymentService.processArtworkSalePayment(
+        artworkId: widget.artworkId,
+        amount: _artwork!.price ?? 0.0,
+        artistId: _artwork!.artistProfileId,
+      );
+
+      if (!result.success || result.clientSecret == null) {
+        throw Exception(result.error ?? 'Failed to initialize payment');
+      }
+
+      // 2. Initialize the payment sheet
+      await _paymentService.initPaymentSheetForPayment(
+        paymentIntentClientSecret: result.clientSecret!,
+        // customerId would be fetched from user profile if needed
+      );
+
+      // 3. Present the payment sheet
+      await _paymentService.presentPaymentSheet();
+
+      // 4. Verification - the backend should handle the webhook,
+      // but we can refresh local state
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Payment successful!')),
+      );
+
+      // Reload content to check for updated access
+      await _loadContent();
+    } catch (e) {
+      late final String errorMessage;
+      if (e is StripeException) {
+        errorMessage =
+            e.error?.localizedMessage?.toString() ?? 'Payment failed';
+      } else {
+        errorMessage = e.toString();
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Purchase failed: $errorMessage')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -558,4 +608,8 @@ class _WrittenContentDetailScreenState
       ),
     );
   }
+}
+
+class StripeException {
+  get error => null;
 }

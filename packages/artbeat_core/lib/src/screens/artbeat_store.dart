@@ -160,7 +160,7 @@ class _ArtbeatStoreScreenState extends State<ArtbeatStoreScreen>
     return ClipRRect(
       borderRadius: BorderRadius.circular(32),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 28, sigmaY: 28),
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
           width: double.infinity,
           padding: const EdgeInsets.all(28),
@@ -367,7 +367,7 @@ class _ArtbeatStoreScreenState extends State<ArtbeatStoreScreen>
     return ClipRRect(
       borderRadius: BorderRadius.circular(26),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
           decoration: BoxDecoration(
@@ -436,7 +436,7 @@ class _ArtbeatStoreScreenState extends State<ArtbeatStoreScreen>
     return ClipRRect(
       borderRadius: BorderRadius.circular(34),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 26, sigmaY: 26),
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(34),

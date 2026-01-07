@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:artbeat_artwork/artbeat_artwork.dart';
@@ -34,6 +35,8 @@ class _AudioContentDetailScreenState extends State<AudioContentDetailScreen> {
   String? _fallbackArtistName;
   bool _isOwner = false;
   bool _hasAccess = false;
+  bool _isLiked = false;
+  int _likeCount = 0;
 
   // Audio player
   final AudioPlayer _audioPlayer = AudioPlayer();
@@ -95,10 +98,15 @@ class _AudioContentDetailScreenState extends State<AudioContentDetailScreen> {
       }
 
       _artwork = artwork;
+      _likeCount = artwork.likeCount;
 
       // Check ownership and access
       final currentUser = _auth.currentUser;
       _isOwner = currentUser?.uid == artwork.artistProfileId;
+
+      if (currentUser != null) {
+        _isLiked = await _artworkService.hasLiked(widget.artworkId);
+      }
 
       // Load artist info
       try {
@@ -160,6 +168,30 @@ class _AudioContentDetailScreenState extends State<AudioContentDetailScreen> {
 
   Future<void> _seekTo(Duration position) async {
     await _audioPlayer.seek(position);
+  }
+
+  Future<void> _toggleFavorite() async {
+    if (_auth.currentUser == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please log in to favorite artwork')),
+      );
+      return;
+    }
+
+    try {
+      final isLiked = await _artworkService.toggleLike(widget.artworkId);
+      setState(() {
+        _isLiked = isLiked;
+        _likeCount = isLiked ? _likeCount + 1 : _likeCount - 1;
+      });
+      HapticFeedback.lightImpact();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update favorite: $e')),
+        );
+      }
+    }
   }
 
   String _formatDuration(Duration duration) {
@@ -446,20 +478,38 @@ class _AudioContentDetailScreenState extends State<AudioContentDetailScreen> {
 
                       const SizedBox(width: 16),
 
-                      // Favorite button (placeholder)
-                      IconButton(
-                        onPressed: () {
-                          // TODO: Implement favorite functionality
-                        },
-                        icon: const Icon(Icons.favorite_border),
-                        tooltip: 'Add to favorites',
+                      // Favorite button
+                      Column(
+                        children: [
+                          IconButton(
+                            onPressed: _toggleFavorite,
+                            icon: Icon(
+                              _isLiked ? Icons.favorite : Icons.favorite_border,
+                              color: _isLiked ? Colors.red : null,
+                            ),
+                            tooltip: _isLiked
+                                ? 'Remove from favorites'
+                                : 'Add to favorites',
+                          ),
+                          Text(
+                            _likeCount.toString(),
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        ],
                       ),
 
                       if (_isOwner) ...[
                         const SizedBox(width: 16),
                         IconButton(
                           onPressed: () {
-                            // TODO: Navigate to edit screen
+                            Navigator.pushNamed(
+                              context,
+                              AppRoutes.artworkEdit,
+                              arguments: {
+                                'artworkId': artwork.id,
+                                'artwork': artwork,
+                              },
+                            );
                           },
                           icon: const Icon(Icons.edit),
                           tooltip: 'Edit',

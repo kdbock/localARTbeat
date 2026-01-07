@@ -1,5 +1,4 @@
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -102,47 +101,18 @@ class AppLifecycleManager extends WidgetsBindingObserver {
 
   /// Ensure Firestore connection is healthy
   void _ensureFirestoreConnection() {
-    try {
-      // Always re-enable network after resume to ensure proper connection
-      _reconnectFirestore();
-      if (kDebugMode) {
-        AppLogger.info('✅ Firestore connection re-established');
-      }
-    } on Exception catch (e) {
-      if (kDebugMode) {
-        AppLogger.error('❌ Firestore connection issue: $e');
-      }
-    }
-  }
-
-  /// Attempt to reconnect Firestore
-  void _reconnectFirestore() {
-    try {
-      // Enable network to restore connection after background
-      FirebaseFirestore.instance.enableNetwork();
-      if (kDebugMode) {
-        AppLogger.network('🔄 Firestore network re-enabled');
-      }
-    } on Exception catch (e) {
-      if (kDebugMode) {
-        AppLogger.error('❌ Failed to re-enable Firestore network: $e');
-      }
+    // Previously toggled Firestore network; that caused reconnect stalls.
+    // Rely on Firestore's own reconnect instead of forcing enable/disable.
+    if (kDebugMode) {
+      AppLogger.info('✅ Firestore connection check (no network toggle)');
     }
   }
 
   /// Save state before going to background
   void _saveStateForBackground() {
-    // This is where you would save any critical state
-    // For now, we'll just ensure Firestore operations are completed
-    try {
-      FirebaseFirestore.instance.disableNetwork();
-      if (kDebugMode) {
-        AppLogger.info('💾 Firestore network disabled for background');
-      }
-    } on Exception catch (e) {
-      if (kDebugMode) {
-        AppLogger.error('❌ Error disabling Firestore network: $e');
-      }
+    // Avoid disabling Firestore network on pause; let SDK manage connectivity.
+    if (kDebugMode) {
+      AppLogger.info('💾 Background state saved (network left intact)');
     }
   }
 

@@ -710,6 +710,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
     return Image.network(
       url,
       fit: BoxFit.cover,
+      cacheWidth: 800,
       errorBuilder: (_, _, _) {
         return Container(
           decoration: const BoxDecoration(

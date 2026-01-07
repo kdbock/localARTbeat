@@ -253,6 +253,7 @@ class _FeaturedArtistScreenState extends State<FeaturedArtistScreen> {
                         ? CachedNetworkImage(
                             imageUrl: artist.profileImageUrl!,
                             fit: BoxFit.cover,
+                            memCacheWidth: 200,
                             placeholder: (context, url) =>
                                 const CircularProgressIndicator(),
                             errorWidget: (context, url, error) => const Icon(
@@ -407,6 +408,7 @@ class _FeaturedArtistScreenState extends State<FeaturedArtistScreen> {
                           width: double.infinity,
                           height: double.infinity,
                           fit: BoxFit.cover,
+                          memCacheWidth: 600,
                           errorWidget: (context, url, error) => const Center(
                             child: Icon(Icons.image,
                                 color: Colors.white, size: 40),

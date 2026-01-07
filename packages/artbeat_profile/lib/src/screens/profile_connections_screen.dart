@@ -221,7 +221,7 @@ class _ProfileConnectionsScreenState extends State<ProfileConnectionsScreen>
       child: ClipRRect(
         borderRadius: BorderRadius.circular(24),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
           child: Container(
             height: 60,
             decoration: BoxDecoration(

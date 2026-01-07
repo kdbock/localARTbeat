@@ -50,7 +50,7 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
         child: ClipRRect(
           borderRadius: BorderRadius.circular(24),
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+            filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
             child: Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
@@ -394,7 +394,7 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(16),
                           child: BackdropFilter(
-                            filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+                            filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
                             child: Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 14,
@@ -522,7 +522,7 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
           child: ClipRRect(
             borderRadius: BorderRadius.circular(18),
             child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+              filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
               child: Container(
                 padding: const EdgeInsets.all(innerPad),
                 decoration: BoxDecoration(
@@ -2463,7 +2463,7 @@ class _ExploreWorldPainter extends CustomPainter {
       ..strokeWidth = 22
       ..strokeCap = StrokeCap.round
       ..color = const Color(0xFF22D3EE).withValues(alpha: 0.06)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 14);
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
 
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: maxR * 0.95),
@@ -2554,7 +2554,7 @@ class _ExploreWorldPainter extends CustomPainter {
       ..shader = RadialGradient(
         colors: [color.withValues(alpha: 0.26), color.withValues(alpha: 0.0)],
       ).createShader(Rect.fromCircle(center: center, radius: radius))
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 70);
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 15);
 
     canvas.drawCircle(center, radius, paint);
   }

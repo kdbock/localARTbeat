@@ -215,27 +215,15 @@ class _SearchResultsScreenState extends State<SearchResultsScreen>
       ),
       itemBuilder: (context, index) {
         final publicArt = _publicArtResults[index];
-        // TODO: Replace with actual PublicArtCard if available
-        return Card(
-          child: InkWell(
-            onTap: () {
-              Navigator.pushNamed(
-                context,
-                '/public-art/detail',
-                arguments: {'publicArtId': publicArt.id},
-              );
-            },
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(publicArt.title, style: AppTextStyles.bodyBold),
-                Text(
-                  publicArt.artistName ?? '',
-                  style: AppTextStyles.bodySmall,
-                ),
-              ],
-            ),
-          ),
+        return PublicArtCard(
+          publicArt: publicArt,
+          onTap: () {
+            Navigator.pushNamed(
+              context,
+              '/public-art/detail',
+              arguments: {'publicArtId': publicArt.id},
+            );
+          },
         );
       },
     );

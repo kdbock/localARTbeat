@@ -102,23 +102,30 @@ class DashboardViewModel extends ChangeNotifier {
 
     try {
       debugPrint('🔍 DashboardViewModel: Starting initialization...');
-      _resetLoadingStates();
+      _resetLoadingStates(notify: false);
       // First load current user since other operations depend on it
       await _loadCurrentUser();
       AppLogger.info('👤 Current user loaded: ${_currentUser?.id}');
 
+      // Start location loading
+      final locationLoad = _loadLocation(notify: false);
+
       // Then load all other data in parallel
       await Future.wait<void>([
-        _loadEvents(),
-        _loadArtwork(),
-        _loadArtists(),
-        _loadLocation(),
-        _loadAchievements(),
-        _loadLocalCaptures(),
-        _loadPosts(),
-        _loadActivities(),
-        _loadUserProgress(),
-        _loadTodaysChallenge(),
+        locationLoad,
+        _loadEvents(notify: false),
+        _loadArtwork(notify: false),
+        _loadArtists(notify: false),
+        _loadAchievements(notify: false),
+        _loadLocalCaptures(notify: false),
+        _loadPosts(notify: false),
+        _loadUserProgress(notify: false),
+        _loadTodaysChallenge(notify: false),
+        // Activities depend on location for "nearby" features
+        (() async {
+          await locationLoad;
+          await _loadActivities(notify: false);
+        })(),
       ]);
       debugPrint('🔍 DashboardViewModel: ✅ Initialization complete');
     } catch (e, stack) {
@@ -132,7 +139,7 @@ class DashboardViewModel extends ChangeNotifier {
     }
   }
 
-  void _resetLoadingStates() {
+  void _resetLoadingStates({bool notify = true}) {
     _isLoadingEvents = true;
     _isLoadingUpcomingEvents = true;
     _isLoadingArtwork = true;
@@ -143,7 +150,7 @@ class DashboardViewModel extends ChangeNotifier {
     _isLoadingPosts = true;
     _isLoadingActivities = true;
     _isLoadingUserProgress = true;
-    _safeNotifyListeners();
+    if (notify) _safeNotifyListeners();
   }
 
   /// Safely notify listeners, catching disposal errors
@@ -238,19 +245,25 @@ class DashboardViewModel extends ChangeNotifier {
     }
 
     try {
-      _resetLoadingStates();
+      _resetLoadingStates(notify: false);
       await _loadCurrentUser();
 
+      final locationLoad = _loadLocation(notify: true);
+
       await Future.wait<void>([
-        _loadEvents(),
-        _loadArtwork(),
-        _loadArtists(),
-        _loadLocation(),
-        _loadAchievements(),
-        _loadLocalCaptures(),
-        _loadPosts(),
-        _loadActivities(),
-        _loadUserProgress(),
+        locationLoad,
+        _loadEvents(notify: true),
+        _loadArtwork(notify: true),
+        _loadArtists(notify: true),
+        _loadAchievements(notify: true),
+        _loadLocalCaptures(notify: true),
+        _loadPosts(notify: true),
+        _loadUserProgress(notify: true),
+        // Activities depend on location for "nearby" features
+        (() async {
+          await locationLoad;
+          await _loadActivities(notify: true);
+        })(),
       ]);
     } catch (e, stack) {
       AppLogger.error('❌ Error refreshing dashboard: $e');
@@ -260,7 +273,7 @@ class DashboardViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> _loadAchievements() async {
+  Future<void> _loadAchievements({bool notify = true}) async {
     try {
       if (_currentUser == null) {
         _achievements = [];
@@ -276,14 +289,14 @@ class DashboardViewModel extends ChangeNotifier {
       _achievements = [];
     } finally {
       _isLoadingAchievements = false;
-      _safeNotifyListeners();
+      if (notify) _safeNotifyListeners();
     }
   }
 
-  Future<void> _loadEvents() async {
+  Future<void> _loadEvents({bool notify = true}) async {
     try {
       _isLoadingEvents = true;
-      _safeNotifyListeners();
+      if (notify) _safeNotifyListeners();
 
       final events = await _eventService.getUpcomingPublicEvents();
       _events = events
@@ -318,14 +331,14 @@ class DashboardViewModel extends ChangeNotifier {
       _events = [];
     } finally {
       _isLoadingEvents = false;
-      _safeNotifyListeners();
+      if (notify) _safeNotifyListeners();
     }
   }
 
-  Future<void> _loadArtwork() async {
+  Future<void> _loadArtwork({bool notify = true}) async {
     try {
       _isLoadingArtwork = true;
-      _safeNotifyListeners();
+      if (notify) _safeNotifyListeners();
 
       // Try featured artwork first, fallback to public artwork
       var artworkServiceModels = await _artworkService.getFeaturedArtwork();
@@ -365,14 +378,14 @@ class DashboardViewModel extends ChangeNotifier {
       _artwork = [];
     } finally {
       _isLoadingArtwork = false;
-      _safeNotifyListeners();
+      if (notify) _safeNotifyListeners();
     }
   }
 
-  Future<void> _loadArtists() async {
+  Future<void> _loadArtists({bool notify = true}) async {
     try {
       _isLoadingArtists = true;
-      _safeNotifyListeners();
+      if (notify) _safeNotifyListeners();
 
       final profileService = artist_profile.ArtistProfileService();
       final featuredArtists = await profileService.getFeaturedArtists(
@@ -392,14 +405,14 @@ class DashboardViewModel extends ChangeNotifier {
       _artists = [];
     } finally {
       _isLoadingArtists = false;
-      _safeNotifyListeners();
+      if (notify) _safeNotifyListeners();
     }
   }
 
-  Future<void> _loadLocalCaptures() async {
+  Future<void> _loadLocalCaptures({bool notify = true}) async {
     try {
       _isLoadingLocalCaptures = true;
-      _safeNotifyListeners();
+      if (notify) _safeNotifyListeners();
 
       // Get all captures
       final allCaptures = await _captureService.getAllCaptures();
@@ -414,14 +427,14 @@ class DashboardViewModel extends ChangeNotifier {
       _localCaptures = [];
     } finally {
       _isLoadingLocalCaptures = false;
-      _safeNotifyListeners();
+      if (notify) _safeNotifyListeners();
     }
   }
 
-  Future<void> _loadPosts() async {
+  Future<void> _loadPosts({bool notify = true}) async {
     try {
       _isLoadingPosts = true;
-      _safeNotifyListeners();
+      if (notify) _safeNotifyListeners();
 
       // Load recent posts from community service
       final posts = await _communityService.getFeed(limit: 10);
@@ -435,14 +448,14 @@ class DashboardViewModel extends ChangeNotifier {
       _posts = [];
     } finally {
       _isLoadingPosts = false;
-      _safeNotifyListeners();
+      if (notify) _safeNotifyListeners();
     }
   }
 
-  Future<void> _loadActivities() async {
+  Future<void> _loadActivities({bool notify = true}) async {
     try {
       _isLoadingActivities = true;
-      _safeNotifyListeners();
+      if (notify) _safeNotifyListeners();
 
       debugPrint('🔍 DashboardViewModel: Starting to load activities');
 
@@ -523,17 +536,17 @@ class DashboardViewModel extends ChangeNotifier {
       _activities = [];
     } finally {
       _isLoadingActivities = false;
-      _safeNotifyListeners();
+      if (notify) _safeNotifyListeners();
       debugPrint(
         '🔍 DashboardViewModel: Finished loading activities, total: ${_activities.length}',
       );
     }
   }
 
-  Future<void> _loadLocation() async {
+  Future<void> _loadLocation({bool notify = true}) async {
     try {
       _isLoadingLocation = true;
-      _safeNotifyListeners();
+      if (notify) _safeNotifyListeners();
 
       // Use shorter timeout for better UX - if location takes too long, fallback faster
       final position =
@@ -578,7 +591,7 @@ class DashboardViewModel extends ChangeNotifier {
       }
     } finally {
       _isLoadingLocation = false;
-      _safeNotifyListeners();
+      if (notify) _safeNotifyListeners();
     }
   }
 
@@ -631,7 +644,7 @@ class DashboardViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> _loadTodaysChallenge() async {
+  Future<void> _loadTodaysChallenge({bool notify = true}) async {
     try {
       debugPrint('🎯 DashboardViewModel: Loading today\'s challenge');
       // Temporarily disable service call for testing
@@ -663,6 +676,8 @@ class DashboardViewModel extends ChangeNotifier {
       debugPrint('🎯 DashboardViewModel: ❌ Error loading challenge: $e');
       AppLogger.error('Error loading today\'s challenge: $e');
       _todaysChallenge = null;
+    } finally {
+      if (notify) _safeNotifyListeners();
     }
   }
 
@@ -709,7 +724,7 @@ class DashboardViewModel extends ChangeNotifier {
     return null;
   }
 
-  Future<void> _loadUserProgress() async {
+  Future<void> _loadUserProgress({bool notify = true}) async {
     try {
       if (_currentUser == null) {
         _totalDiscoveries = 0;
@@ -753,7 +768,7 @@ class DashboardViewModel extends ChangeNotifier {
       _loginStreak = 0;
     } finally {
       _isLoadingUserProgress = false;
-      _safeNotifyListeners();
+      if (notify) _safeNotifyListeners();
     }
   }
 

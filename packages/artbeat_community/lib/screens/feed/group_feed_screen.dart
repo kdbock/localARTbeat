@@ -7,6 +7,7 @@ import 'package:artbeat_core/artbeat_core.dart';
 
 import '../../models/group_models.dart';
 import '../../models/post_model.dart';
+import '../../services/art_community_service.dart';
 import '../../widgets/enhanced_post_card.dart';
 import 'create_group_post_screen.dart';
 
@@ -34,6 +35,7 @@ class GroupFeedScreen extends StatefulWidget {
 }
 
 class _GroupFeedScreenState extends State<GroupFeedScreen> {
+  final ArtCommunityService _communityService = ArtCommunityService();
   List<PostModel> _posts = [];
   bool _isLoading = true;
   bool _isMember = false;
@@ -48,6 +50,12 @@ class _GroupFeedScreenState extends State<GroupFeedScreen> {
     _checkMembership();
     _loadGroupType();
     _loadGroupPosts();
+  }
+
+  @override
+  void dispose() {
+    _communityService.dispose();
+    super.dispose();
   }
 
   Future<void> _checkMembership() async {
@@ -277,8 +285,8 @@ class _GroupFeedScreenState extends State<GroupFeedScreen> {
             padding: const EdgeInsets.only(bottom: 16),
             child: EnhancedPostCard(
               post: post,
+              communityService: _communityService,
               onLike: () => _handleLike(post),
-              onComment: () => _handleComment(post),
               onShare: () => _handleShare(post),
             ),
           ),
@@ -645,10 +653,6 @@ class _GroupFeedScreenState extends State<GroupFeedScreen> {
 
   void _handleLike(PostModel post) {
     AppLogger.info('Liked post: ${post.id}');
-  }
-
-  void _handleComment(PostModel post) {
-    AppLogger.info('Commented on post: ${post.id}');
   }
 
   void _handleShare(PostModel post) {

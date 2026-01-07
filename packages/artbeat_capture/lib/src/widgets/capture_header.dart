@@ -221,14 +221,6 @@ class _CaptureHeaderState extends State<CaptureHeader> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.photo_library, color: _headerColor),
-              title: Text('capture_menu_photo_gallery'.tr()),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.pushNamed(context, AppRoutes.captureGallery);
-              },
-            ),
-            ListTile(
               leading: const Icon(Icons.edit, color: _headerColor),
               title: Text('capture_menu_edit_photos'.tr()),
               onTap: () {

@@ -93,12 +93,9 @@ class _ArtBattleScreenState extends State<ArtBattleScreen> {
         }
       }
     } catch (e) {
-      setState(() => _isLoading = false);
-      debugPrint('[ArtBattle] Error loading match: $e');
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
               e.toString().contains('permission-denied')
@@ -108,6 +105,7 @@ class _ArtBattleScreenState extends State<ArtBattleScreen> {
           ),
         );
       }
+      debugPrint('[ArtBattle] Error loading match: $e');
     }
   }
 
@@ -188,8 +186,7 @@ class _ArtBattleScreenState extends State<ArtBattleScreen> {
   }
 
   void _openLocalBusiness() {
-    Navigator.of(context).maybePop();
-    // TODO: Wire to local business screen route when available.
+    Navigator.of(context).pushNamed(AppRoutes.localBusiness);
   }
 
   @override
@@ -432,7 +429,7 @@ class _SponsorCTA extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(18),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Material(
           color: Colors.white.withValues(alpha: 0.08),
           child: InkWell(
@@ -548,7 +545,7 @@ class _GlassIconButton extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(18),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Material(
           color: Colors.white.withValues(alpha: 0.08),
           child: InkWell(
