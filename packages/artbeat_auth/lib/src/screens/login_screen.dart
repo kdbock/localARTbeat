@@ -9,7 +9,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../services/auth_service.dart';
-import 'package:artbeat_core/artbeat_core.dart' show ArtbeatInput;
+import 'package:artbeat_core/artbeat_core.dart' show AppLogger, ArtbeatInput;
 import '../constants/routes.dart';
 
 /// Login screen with email/password authentication (Quest theme)
@@ -170,11 +170,17 @@ class _LoginScreenState extends State<LoginScreen>
         errorMessage = 'auth_apple_signin_not_available'.tr();
       }
 
+      AppLogger.error('❌ Apple Sign-In failed in UI: $e');
+
+      final failureTemplate = 'auth_apple_signin_failed'.tr();
+      final failureMessage =
+          failureTemplate == 'auth_apple_signin_failed'
+              ? 'Apple Sign-In failed: $errorMessage'
+              : failureTemplate.replaceAll('{error}', errorMessage);
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            'auth_apple_signin_failed'.tr().replaceAll('{error}', errorMessage),
-          ),
+          content: Text(failureMessage),
           backgroundColor: Colors.red,
           duration: const Duration(seconds: 5),
         ),
