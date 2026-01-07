@@ -3,6 +3,7 @@ import 'dart:math';
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -327,6 +328,15 @@ class AuthService {
       AuthorizationCredentialAppleID? appleCredential;
       try {
         AppLogger.debug('🔄 Requesting Apple ID credential...');
+        final webAuthOptions =
+            kIsWeb
+                ? WebAuthenticationOptions(
+                  clientId: 'com.wordnerd.artbeat', // Your Services ID
+                  redirectUri: Uri.parse(
+                    'https://wordnerd-artbeat.firebaseapp.com/__/auth/handler',
+                  ),
+                )
+                : null;
         appleCredential =
             await SignInWithApple.getAppleIDCredential(
               scopes: [
@@ -334,13 +344,8 @@ class AuthService {
                 AppleIDAuthorizationScopes.fullName,
               ],
               nonce: nonce,
-              // Ensure we're using the correct service identifier
-              webAuthenticationOptions: WebAuthenticationOptions(
-                clientId: 'com.wordnerd.artbeat', // Your Services ID
-                redirectUri: Uri.parse(
-                  'https://wordnerd-artbeat.firebaseapp.com/__/auth/handler',
-                ),
-              ),
+              // Web auth options are only required for web flows.
+              webAuthenticationOptions: webAuthOptions,
             ).timeout(
               const Duration(
                 seconds: 45,
