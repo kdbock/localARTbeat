@@ -130,17 +130,18 @@ class EventModerationService {
       }
 
       // Get events that need review
+      // We query recent events and filter in-memory to handle missing moderationStatus fields
       final query = await _firestore
           .collection('events')
-          .where(
-            'moderationStatus',
-            whereIn: ['flagged', 'under_review', 'pending'],
-          )
-          .orderBy('lastModerated', descending: true)
-          .limit(50)
+          .orderBy('createdAt', descending: true)
+          .limit(100)
           .get();
 
-      return query.docs.map(ArtbeatEvent.fromFirestore).toList();
+      return query.docs
+          .map(ArtbeatEvent.fromFirestore)
+          .where((event) =>
+              ['flagged', 'under_review', 'pending'].contains(event.moderationStatus))
+          .toList();
     } on FirebaseException catch (e) {
       _logger.e(
         'Firebase error getting pending events: ${e.message}',
@@ -149,6 +150,41 @@ class EventModerationService {
       return [];
     } on Exception catch (e) {
       _logger.e('Error getting pending events: $e', error: e);
+      return [];
+    }
+  }
+
+  /// Get all approved events
+  Future<List<ArtbeatEvent>> getApprovedEvents() async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('User not authenticated');
+
+    try {
+      // Check moderation permissions
+      final userDoc = await _firestore.collection('users').doc(user.uid).get();
+      final userData = userDoc.data();
+
+      if (userData == null || !_hasModeratorPermissions(userData)) {
+        throw Exception('Insufficient permissions to view approved events');
+      }
+
+      // Get approved events
+      final query = await _firestore
+          .collection('events')
+          .where('moderationStatus', isEqualTo: 'approved')
+          .orderBy('createdAt', descending: true)
+          .limit(50)
+          .get();
+
+      return query.docs.map(ArtbeatEvent.fromFirestore).toList();
+    } on FirebaseException catch (e) {
+      _logger.e(
+        'Firebase error getting approved events: ${e.message}',
+        error: e,
+      );
+      return [];
+    } on Exception catch (e) {
+      _logger.e('Error getting approved events: $e', error: e);
       return [];
     }
   }
@@ -276,7 +312,7 @@ class EventModerationService {
 
   /// Helper: Check if user has moderator permissions
   bool _hasModeratorPermissions(Map<String, dynamic> userData) {
-    final role = userData['role'] as String?;
+    final role = (userData['userType'] ?? userData['role']) as String?;
     return role == 'admin' || role == 'moderator';
   }
 

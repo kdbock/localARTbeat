@@ -94,6 +94,8 @@ dependencies:
     path: ../artbeat_profile
   artbeat_settings:
     path: ../artbeat_settings
+  artbeat_sponsorships:
+    path: ../artbeat_sponsorships
 
 dev_dependencies:
   flutter_test:

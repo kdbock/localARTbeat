@@ -6,6 +6,8 @@ import 'package:confetti/confetti.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:artbeat_sponsorships/artbeat_sponsorships.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 // import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_art_walk/src/models/public_art_model.dart';
@@ -175,6 +177,21 @@ class _DiscoveryCaptureModalState extends State<DiscoveryCaptureModal> {
                     textAlign: TextAlign.center,
                   ),
                 ),
+              const SizedBox(height: 16),
+              // Sponsor Banner
+              SponsorBanner(
+                placementKey: SponsorshipPlacements.captureDetailBanner,
+                userLocation: LatLng(
+                  widget.userPosition.latitude,
+                  widget.userPosition.longitude,
+                ),
+                padding: EdgeInsets.zero,
+                showPlaceholder: true,
+                onPlaceholderTap: () => Navigator.pushNamed(
+                  context,
+                  '/capture-sponsorship',
+                ),
+              ),
               const SizedBox(height: 24),
               if (!_captured)
                 GradientCTAButton(

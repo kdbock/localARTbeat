@@ -1,6 +1,23 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Flagged Events (Admin only)
+    match /flaggedEvents/{docId} {
+      allow read, list: if isAdmin(request.auth.uid);
+      allow create, update, delete: if isAdmin(request.auth.uid);
+    }
+
+    // Pending Events (Admin only)
+    match /pendingEvents/{docId} {
+      allow read, list: if isAdmin(request.auth.uid);
+      allow create, update, delete: if isAdmin(request.auth.uid);
+    }
+
+    // Moderation Analytics (Admin only)
+    match /moderationAnalytics/{docId} {
+      allow read, list: if isAdmin(request.auth.uid);
+      allow create, update, delete: if isAdmin(request.auth.uid);
+    }
     function isAuthenticated() {
       return request.auth != null;
     }

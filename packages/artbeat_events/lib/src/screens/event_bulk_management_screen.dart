@@ -11,7 +11,6 @@ import '../widgets/widgets.dart';
 import '../models/artbeat_event.dart';
 import '../services/event_bulk_management_service.dart';
 
-
 class EventBulkManagementScreen extends StatefulWidget {
   const EventBulkManagementScreen({super.key});
 
@@ -448,12 +447,5 @@ class _EventBulkManagementScreenState extends State<EventBulkManagementScreen> {
 
   // ---------------- Dialogs -----------------
 
-
-
-
   // ---------------- Bulk Ops -----------------
-
-
-
-
 }

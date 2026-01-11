@@ -115,6 +115,22 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
   bool _isPublic = true;
   bool _reminderEnabled = true;
   List<String> _tags = [];
+  String _category = 'Tour';
+  String _artistHeadshotFit = 'cover';
+  String _eventBannerFit = 'cover';
+  String _imageFit = 'cover';
+  final List<String> _categories = [
+    'Tour',
+    'Exhibition',
+    'Workshop',
+    'Opening',
+    'Fair',
+    'Class',
+    'Performance',
+    'Talk',
+    'Networking',
+    'Other',
+  ];
 
   // Recurring event fields
   bool _isRecurring = false;
@@ -167,6 +183,10 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
       _isPublic = event.isPublic;
       _reminderEnabled = event.reminderEnabled;
       _tags = List.from(event.tags);
+      _category = event.category;
+      _artistHeadshotFit = event.artistHeadshotFit;
+      _eventBannerFit = event.eventBannerFit;
+      _imageFit = event.imageFit;
       _isRecurring = event.isRecurring;
       _recurrencePattern = event.recurrencePattern ?? 'daily';
       _recurrenceIntervalController.text =
@@ -291,8 +311,79 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
               return null;
             },
           ),
+          const SizedBox(height: 16),
+          // Category Dropdown
+          DropdownButtonFormField<String>(
+            initialValue: _category,
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white.withValues(alpha: 0.92),
+              fontWeight: FontWeight.w600,
+            ),
+            dropdownColor: Colors.grey[900],
+            decoration: _glassInputDecoration('Category'),
+            items: _categories.map((String category) {
+              return DropdownMenuItem<String>(
+                value: category,
+                child: Text(category),
+              );
+            }).toList(),
+            onChanged: (String? newValue) {
+              if (newValue != null) {
+                setState(() {
+                  _category = newValue;
+                });
+              }
+            },
+          ),
         ],
       ),
+    );
+  }
+
+  BoxFit _getBoxFit(String fit) {
+    switch (fit) {
+      case 'cover':
+        return BoxFit.cover;
+      case 'contain':
+        return BoxFit.contain;
+      case 'fill':
+        return BoxFit.fill;
+      case 'fitWidth':
+        return BoxFit.fitWidth;
+      case 'fitHeight':
+        return BoxFit.fitHeight;
+      case 'scaleDown':
+        return BoxFit.scaleDown;
+      case 'none':
+        return BoxFit.none;
+      default:
+        return BoxFit.cover;
+    }
+  }
+
+  Widget _buildFitSelector(String currentFit, Function(String) onChanged) {
+    return DropdownButton<String>(
+      value: currentFit,
+      dropdownColor: Colors.grey[900],
+      style: GoogleFonts.spaceGrotesk(color: Colors.white, fontSize: 12),
+      underline: const SizedBox(),
+      items: [
+        'cover',
+        'contain',
+        'fill',
+        'fitWidth',
+        'fitHeight',
+        'scaleDown',
+        'none'
+      ].map((fit) {
+        return DropdownMenuItem<String>(
+          value: fit,
+          child: Text(fit.toUpperCase()),
+        );
+      }).toList(),
+      onChanged: (val) {
+        if (val != null) onChanged(val);
+      },
     );
   }
 
@@ -315,35 +406,182 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
             const SizedBox(height: 16),
 
             // Artist Headshot
-            _buildImageUploadSection(
-              title: 'events_artist_headshot'.tr(),
-              image: _artistHeadshot,
-              onImageSelected: (file) => setState(() => _artistHeadshot = file),
+            Row(
+              children: [
+                Column(
+                  children: [
+                    Text(
+                      'events_artist_headshot'.tr(),
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white70,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    GestureDetector(
+                      onTap: () async {
+                        final image = await _imagePicker.pickImage(
+                            source: ImageSource.gallery);
+                        if (image != null) {
+                          setState(() => _artistHeadshot = File(image.path));
+                        }
+                      },
+                      child: Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white.withValues(alpha: 0.06),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.12),
+                            width: 1.5,
+                          ),
+                        ),
+                        child: _artistHeadshot != null
+                            ? ClipOval(
+                                child: Image.file(
+                                  _artistHeadshot!,
+                                  fit: _getBoxFit(_artistHeadshotFit),
+                                ),
+                              )
+                            : (widget.initialEvent?.artistHeadshotUrl != null &&
+                                    widget.initialEvent!.artistHeadshotUrl
+                                        .isNotEmpty)
+                                ? ClipOval(
+                                    child: Image.network(
+                                      widget.initialEvent!.artistHeadshotUrl,
+                                      fit: _getBoxFit(_artistHeadshotFit),
+                                    ),
+                                  )
+                                : const Icon(Icons.person,
+                                    size: 40, color: Colors.white30),
+                      ),
+                    ),
+                    _buildFitSelector(_artistHeadshotFit, (val) {
+                      setState(() => _artistHeadshotFit = val);
+                    }),
+                  ],
+                ),
+                const SizedBox(width: 20),
+                Expanded(
+                  child: Text(
+                    'Artist headshot as seen in app (CircleAvatar). Tap to change.',
+                    style: GoogleFonts.spaceGrotesk(
+                        fontSize: 12, color: Colors.white38),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
 
             // Event Banner
-            _buildImageUploadSection(
-              title: 'events_event_banner'.tr(),
-              image: _eventBanner,
-              onImageSelected: (file) => setState(() => _eventBanner = file),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'events_event_banner'.tr(),
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white70,
+                      ),
+                    ),
+                    _buildFitSelector(_eventBannerFit, (val) {
+                      setState(() => _eventBannerFit = val);
+                    }),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                GestureDetector(
+                  onTap: () async {
+                    final image = await _imagePicker.pickImage(
+                        source: ImageSource.gallery);
+                    if (image != null) {
+                      setState(() => _eventBanner = File(image.path));
+                    }
+                  },
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(28),
+                    child: Container(
+                      width: double.infinity,
+                      height: 180, // Scaled down from 260 for form usability
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.06),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.12),
+                          width: 1.5,
+                        ),
+                      ),
+                      child: _eventBanner != null
+                          ? Image.file(
+                              _eventBanner!,
+                              fit: _getBoxFit(_eventBannerFit),
+                            )
+                          : (widget.initialEvent?.eventBannerUrl != null &&
+                                  widget.initialEvent!.eventBannerUrl
+                                      .isNotEmpty)
+                              ? Image.network(
+                                  widget.initialEvent!.eventBannerUrl,
+                                  fit: _getBoxFit(_eventBannerFit),
+                                )
+                              : const Center(
+                                  child: Icon(Icons.image,
+                                      size: 48, color: Colors.white30)),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Event banner as seen in hero section (Rounded 28). Tap to change.',
+                  style: GoogleFonts.spaceGrotesk(
+                      fontSize: 11, color: Colors.white38),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
 
             // Additional Event Images
-            Text(
-              'events_additional_images'.tr(),
-              style: GoogleFonts.spaceGrotesk(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: Colors.white.withValues(alpha: 0.85),
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'events_additional_images'.tr(),
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white.withValues(alpha: 0.85),
+                  ),
+                ),
+                _buildFitSelector(_imageFit, (val) {
+                  setState(() => _imageFit = val);
+                }),
+              ],
             ),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children: [
+                // Network images if editing
+                if (widget.initialEvent != null)
+                  ...widget.initialEvent!.imageUrls.map(
+                    (url) => Stack(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.network(url,
+                              width: 80, height: 80, fit: _getBoxFit(_imageFit)),
+                        ),
+                        // Note: For now we don't handle removing existing network images individually in this form
+                        // but they are shown to reflect the app appearance
+                      ],
+                    ),
+                  ),
+                // New local images
                 ..._eventImages.map(
                   (image) => _buildImagePreview(image, () {
                     setState(() => _eventImages.remove(image));
@@ -362,71 +600,6 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildImageUploadSection({
-    required String title,
-    required File? image,
-    required Function(File?) onImageSelected,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: GoogleFonts.spaceGrotesk(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            color: Colors.white.withValues(alpha: 0.85),
-          ),
-        ),
-        const SizedBox(height: 8),
-        GestureDetector(
-          onTap: () async {
-            final pickedImage = await _imagePicker.pickImage(
-              source: ImageSource.gallery,
-            );
-            if (pickedImage != null) {
-              onImageSelected(File(pickedImage.path));
-            }
-          },
-          child: Container(
-            height: 120,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.06),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.12),
-                width: 1.5,
-              ),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: image != null
-                ? ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: Image.file(image, fit: BoxFit.cover),
-                  )
-                : Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.add_photo_alternate,
-                        size: 48,
-                        color: Colors.white.withValues(alpha: 0.5),
-                      ),
-                      Text(
-                        'events_tap_to_select_image'.tr(),
-                        style: GoogleFonts.spaceGrotesk(
-                          color: Colors.white.withValues(alpha: 0.7),
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-          ),
-        ),
-      ],
     );
   }
 
@@ -1489,14 +1662,14 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
       return;
     }
 
-    if (_artistHeadshot == null) {
+    if (_artistHeadshot == null && widget.initialEvent?.artistHeadshotUrl == null) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('events_select_headshot'.tr())));
       return;
     }
 
-    if (_eventBanner == null) {
+    if (_eventBanner == null && widget.initialEvent?.eventBannerUrl == null) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('events_select_banner'.tr())));
@@ -1522,27 +1695,34 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
     final eventId =
         widget.initialEvent?.id ??
         DateTime.now().millisecondsSinceEpoch.toString();
-    String headshotUrl = '';
-    String bannerUrl = '';
-    List<String> imageUrls = [];
+    String headshotUrl = widget.initialEvent?.artistHeadshotUrl ?? '';
+    String bannerUrl = widget.initialEvent?.eventBannerUrl ?? '';
+    List<String> imageUrls = widget.initialEvent?.imageUrls ?? [];
     try {
       // Use debug_uploads path for more reliable web uploads
-      headshotUrl = await _uploadImageToStorage(
-        _artistHeadshot!,
-        'debug_uploads/events/$userId/$eventId/headshot.jpg',
-      );
-      bannerUrl = await _uploadImageToStorage(
-        _eventBanner!,
-        'debug_uploads/events/$userId/$eventId/banner.jpg',
-      );
-      imageUrls = await Future.wait(
-        _eventImages.asMap().entries.map(
-          (entry) => _uploadImageToStorage(
-            entry.value,
-            'debug_uploads/events/$userId/$eventId/image_${entry.key}.jpg',
+      if (_artistHeadshot != null) {
+        headshotUrl = await _uploadImageToStorage(
+          _artistHeadshot!,
+          'debug_uploads/events/$userId/$eventId/headshot.jpg',
+        );
+      }
+      if (_eventBanner != null) {
+        bannerUrl = await _uploadImageToStorage(
+          _eventBanner!,
+          'debug_uploads/events/$userId/$eventId/banner.jpg',
+        );
+      }
+      if (_eventImages.isNotEmpty) {
+        final newImageUrls = await Future.wait(
+          _eventImages.asMap().entries.map(
+            (entry) => _uploadImageToStorage(
+              entry.value,
+              'debug_uploads/events/$userId/$eventId/image_${entry.key}_${DateTime.now().millisecondsSinceEpoch}.jpg',
+            ),
           ),
-        ),
-      );
+        );
+        imageUrls = [...imageUrls, ...newImageUrls];
+      }
     } on Exception catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -1571,6 +1751,10 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
           isPublic: _isPublic,
           maxAttendees: int.parse(_maxAttendeesController.text),
           tags: _tags,
+          category: _category,
+          artistHeadshotFit: _artistHeadshotFit,
+          eventBannerFit: _eventBannerFit,
+          imageFit: _imageFit,
           contactEmail: _contactEmailController.text.trim(),
           contactPhone: _contactPhoneController.text.trim().isEmpty
               ? null
@@ -1597,6 +1781,10 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
           isPublic: _isPublic,
           maxAttendees: int.parse(_maxAttendeesController.text),
           tags: _tags,
+          category: _category,
+          artistHeadshotFit: _artistHeadshotFit,
+          eventBannerFit: _eventBannerFit,
+          imageFit: _imageFit,
           contactEmail: _contactEmailController.text.trim(),
           contactPhone: _contactPhoneController.text.trim().isEmpty
               ? null

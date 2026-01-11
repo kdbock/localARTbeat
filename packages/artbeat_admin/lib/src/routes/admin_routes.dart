@@ -7,6 +7,8 @@ import '../screens/admin_security_center_screen.dart';
 import '../screens/admin_system_monitoring_screen.dart';
 import '../screens/admin_payment_screen.dart';
 import '../screens/migration_screen.dart';
+import '../screens/events_coming_soon_screen.dart';
+import 'package:artbeat_events/src/screens/event_moderation_dashboard_screen.dart';
 import '../models/user_admin_model.dart';
 import 'package:easy_localization/easy_localization.dart';
 
@@ -59,6 +61,16 @@ class AdminRoutes {
   /// Generate routes for the admin system
   static Route<dynamic>? generateRoute(RouteSettings settings) {
     switch (settings.name) {
+      case '/admin/event-moderation-dashboard':
+        return MaterialPageRoute<void>(
+          builder: (_) => const EventModerationDashboardScreen(),
+          settings: settings,
+        );
+      case '/admin/events-coming-soon':
+        return MaterialPageRoute<void>(
+          builder: (_) => const EventsComingSoonScreen(),
+          settings: settings,
+        );
       // All main admin functionality now routes to the modern unified dashboard
       case dashboard:
         return MaterialPageRoute<void>(

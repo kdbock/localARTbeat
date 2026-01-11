@@ -5,20 +5,20 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:artbeat_artist/artbeat_artist.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
 
-/// Advanced Analytics Dashboard for galleries to track performance metrics
-class GalleryAnalyticsDashboardScreen extends StatefulWidget {
-  const GalleryAnalyticsDashboardScreen({super.key});
+/// Visibility Hub for galleries to track performance and discovery
+class GalleryVisibilityHubScreen extends StatefulWidget {
+  const GalleryVisibilityHubScreen({super.key});
 
   @override
-  State<GalleryAnalyticsDashboardScreen> createState() =>
-      _GalleryAnalyticsDashboardScreenState();
+  State<GalleryVisibilityHubScreen> createState() =>
+      _GalleryVisibilityHubScreenState();
 }
 
-class _GalleryAnalyticsDashboardScreenState
-    extends State<GalleryAnalyticsDashboardScreen> {
+class _GalleryVisibilityHubScreenState
+    extends State<GalleryVisibilityHubScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final SubscriptionService _subscriptionService = SubscriptionService();
-  final AnalyticsService _analyticsService = AnalyticsService();
+  final VisibilityService _visibilityService = VisibilityService();
 
   bool _isLoading = true;
   bool _isPremiumGallery = false;
@@ -118,7 +118,7 @@ class _GalleryAnalyticsDashboardScreenState
       }
 
       // Get gallery analytics overview
-      final galleryAnalytics = await _analyticsService.getGalleryAnalytics(
+      final galleryAnalytics = await _visibilityService.getGalleryAnalytics(
         galleryProfileId: galleryProfileId,
         startDate: startDate,
         endDate: now,
@@ -126,21 +126,21 @@ class _GalleryAnalyticsDashboardScreenState
 
       // Get artist performance data
       final artistPerformance =
-          await _analyticsService.getArtistPerformanceAnalytics(
+          await _visibilityService.getArtistPerformanceAnalytics(
         galleryProfileId: galleryProfileId,
         startDate: startDate,
         endDate: now,
       );
 
       // Get commission metrics
-      final commissionMetrics = await _analyticsService.getCommissionMetrics(
+      final commissionMetrics = await _visibilityService.getCommissionMetrics(
         galleryProfileId: galleryProfileId,
         startDate: startDate,
         endDate: now,
       );
 
       // Get revenue data for chart
-      final revenueData = await _analyticsService.getRevenueTimelineData(
+      final revenueData = await _visibilityService.getRevenueTimelineData(
         galleryProfileId: galleryProfileId,
         startDate: startDate,
         endDate: now,
@@ -411,7 +411,7 @@ class _GalleryAnalyticsDashboardScreenState
                 ),
                 const SizedBox(height: 24),
                 const Text(
-                  'Gallery Analytics Dashboard',
+                  'Gallery Visibility Hub',
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
@@ -465,7 +465,7 @@ class _GalleryAnalyticsDashboardScreenState
     return core.MainLayout(
       currentIndex: -1, // Gallery analytics doesn't use bottom navigation
       appBar: core.EnhancedUniversalHeader(
-        title: 'Gallery Analytics',
+        title: 'Gallery Insights',
         showBackButton: true,
         showSearch: false,
         showDeveloperTools: false,

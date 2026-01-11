@@ -1,6 +1,27 @@
 {
   "indexes": [
     {
+      "collectionGroup": "flaggedEvents",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "timestamp", "order": "DESCENDING" },
+        { "fieldPath": "flagType", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "pendingEvents",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "createdAt", "order": "DESCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "moderationAnalytics",
+      "queryScope": "COLLECTION",
+      "fields": [{ "fieldPath": "updatedAt", "order": "DESCENDING" }]
+    },
+    {
       "collectionGroup": "ads",
       "queryScope": "COLLECTION",
       "fields": [

@@ -5,7 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../models/subscription_model.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
 import '../services/subscription_service.dart' as artist_service;
-import '../services/analytics_service.dart';
+import '../services/visibility_service.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:logger/logger.dart';
 
@@ -24,7 +24,7 @@ class _SubscriptionAnalyticsScreenState
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final artist_service.SubscriptionService _subscriptionService =
       artist_service.SubscriptionService();
-  final AnalyticsService _analyticsService = AnalyticsService();
+  final VisibilityService _visibilityService = VisibilityService();
   final Logger _logger = Logger();
 
   bool _isLoading = true;
@@ -132,19 +132,19 @@ class _SubscriptionAnalyticsScreenState
 
     try {
       // Get profile views analytics
-      final profileAnalytics = await _analyticsService.getProfileAnalytics(
+      final profileAnalytics = await _visibilityService.getProfileAnalytics(
         startDate: _startDate,
         endDate: _endDate,
       );
 
       // Get artwork views analytics
-      final artworkAnalytics = await _analyticsService.getArtworkAnalytics(
+      final artworkAnalytics = await _visibilityService.getArtworkAnalytics(
         startDate: _startDate,
         endDate: _endDate,
       );
 
       // Get follower analytics
-      final followerAnalytics = await _analyticsService.getFollowerAnalytics(
+      final followerAnalytics = await _visibilityService.getFollowerAnalytics(
         startDate: _startDate,
         endDate: _endDate,
       );

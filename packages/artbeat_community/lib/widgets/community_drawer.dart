@@ -103,7 +103,7 @@ class _CommunityDrawerState extends State<CommunityDrawer> {
       _DrawerEntry(
         icon: Icons.brush,
         titleBuilder: (_) => 'Become an Artist',
-        screenBuilder: () => const artist.Modern2025OnboardingScreen(),
+        screenBuilder: () => const artist.ArtistOnboardScreen(),
       ),
     ];
 

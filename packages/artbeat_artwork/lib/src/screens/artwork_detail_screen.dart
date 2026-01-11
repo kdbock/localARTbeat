@@ -26,7 +26,7 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
   final ArtworkService _artworkService = ArtworkService();
   final artist.SubscriptionService _subscriptionService =
       artist.SubscriptionService();
-  final artist.AnalyticsService _analyticsService = artist.AnalyticsService();
+  final artist.VisibilityService _visibilityService = artist.VisibilityService();
   final AuctionService _auctionService = AuctionService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -57,7 +57,7 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
 
       // Track artwork view for analytics if artwork exists
       if (artwork != null) {
-        _analyticsService.trackArtworkView(
+        _visibilityService.trackArtworkView(
           artworkId: widget.artworkId,
           artistId: artwork.userId,
         );

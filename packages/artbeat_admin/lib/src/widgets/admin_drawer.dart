@@ -155,6 +155,13 @@ class AdminDrawer extends StatelessWidget {
                     ),
                     _buildDrawerItem(
                       context,
+                      icon: Icons.event,
+                      title: 'Event Moderation Dashboard',
+                      route: '/admin/event-moderation-dashboard',
+                      subtitle: 'Review and moderate events',
+                    ),
+                    _buildDrawerItem(
+                      context,
                       icon: Icons.photo_library,
                       title: 'admin_drawer_menu_capture_moderation'.tr(),
                       route: '/capture/admin/moderation',

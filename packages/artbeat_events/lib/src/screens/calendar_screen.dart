@@ -9,7 +9,6 @@ import '../widgets/widgets.dart';
 import '../models/artbeat_event.dart';
 import '../services/event_service.dart';
 
-
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
 

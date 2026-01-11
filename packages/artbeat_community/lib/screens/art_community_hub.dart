@@ -32,11 +32,10 @@ import '../widgets/fullscreen_image_viewer.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_artwork/artbeat_artwork.dart';
 import 'package:artbeat_artist/artbeat_artist.dart'
-    show Modern2025OnboardingScreen;
+    show ArtistOnboardScreen;
 import 'package:google_fonts/google_fonts.dart';
 
 import 'art_battle_screen.dart';
-import 'artist_onboarding_screen.dart';
 import 'artist_feed_screen.dart';
 import 'feed/comments_screen.dart';
 import 'feed/create_post_screen.dart';
@@ -735,7 +734,7 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
         screen = const ArtworkBrowseScreen();
         break;
       case CommunityHudDestination.artistOnboarding:
-        screen = const Modern2025OnboardingScreen();
+        screen = const ArtistOnboardScreen();
         break;
       case CommunityHudDestination.leaderboard:
         screen = const LeaderboardScreen();
@@ -1782,13 +1781,13 @@ class _ArtistsGalleryTabState extends State<ArtistsGalleryTab> {
                 const SizedBox(height: 14),
                 HudButton.primary(
                   onPressed: () async {
-                    final result = await Navigator.push<bool>(
+                    await Navigator.push<void>(
                       context,
-                      MaterialPageRoute<bool>(
-                        builder: (context) => const ArtistOnboardingScreen(),
+                      MaterialPageRoute<void>(
+                        builder: (context) => const ArtistOnboardScreen(),
                       ),
                     );
-                    if (result == true && mounted) _loadArtists();
+                    if (mounted) _loadArtists();
                   },
                   text: 'community_hub_artists_empty_cta'.tr(),
                 ),

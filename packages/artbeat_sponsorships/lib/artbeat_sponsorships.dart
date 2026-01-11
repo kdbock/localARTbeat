@@ -1,5 +1,7 @@
 library artbeat_sponsorships;
 
+export 'src/models/sponsorship.dart';
+export 'src/models/sponsorship_tier.dart';
 // Screens – Business entry
 export 'src/screens/local_business_screen.dart';
 export 'src/screens/sponsorships/art_walk_sponsorship_screen.dart';
@@ -12,6 +14,7 @@ export 'src/screens/sponsorships/sponsorship_dashboard_screen.dart';
 export 'src/screens/sponsorships/sponsorship_detail_screen.dart';
 export 'src/screens/sponsorships/sponsorship_review_screen.dart';
 export 'src/screens/sponsorships/title_sponsorship_screen.dart';
+export 'src/utils/sponsorship_placements.dart';
 export 'src/widgets/sponsor_banner.dart';
 // (Optional future exports)
 // export 'src/services/sponsor_service.dart';

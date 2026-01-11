@@ -14,7 +14,7 @@ import 'package:artbeat_community/artbeat_community.dart'
 import 'package:url_launcher/url_launcher.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/subscription_service.dart' as artist_subscription;
-import '../services/analytics_service.dart';
+import '../services/visibility_service.dart';
 import '../widgets/top_followers_widget.dart';
 import '../widgets/artist_social_stats_widget.dart';
 import '../widgets/design_system.dart';
@@ -37,7 +37,7 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
   final artist_subscription.SubscriptionService _subscriptionService =
       artist_subscription.SubscriptionService();
   final artwork.ArtworkService _artworkService = artwork.ArtworkService();
-  final AnalyticsService _analyticsService = AnalyticsService();
+  final VisibilityService _visibilityService = VisibilityService();
   final DirectCommissionService _commissionService = DirectCommissionService();
 
   bool _isLoading = true;
@@ -85,7 +85,7 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
       }
 
       // Track profile view for analytics if profile exists
-      _analyticsService.trackArtistProfileView(
+      _visibilityService.trackArtistProfileView(
         artistProfileId: artistProfile.id,
         artistId: artistProfile.userId,
       );

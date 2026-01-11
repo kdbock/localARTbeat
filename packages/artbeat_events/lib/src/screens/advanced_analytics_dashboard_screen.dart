@@ -6,7 +6,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_core/artbeat_core.dart' hide GradientCTAButton;
 import '../widgets/widgets.dart';
 
-
 import '../services/event_analytics_service_phase3.dart';
 
 /// Local ARTbeat — Advanced Analytics Dashboard (Phase 3)

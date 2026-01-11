@@ -7,7 +7,7 @@ class EarningsModel {
   final double totalEarnings;
   final double availableBalance;
   final double pendingBalance;
-  final double giftEarnings;
+  final double promotionSupportEarnings;
   final double sponsorshipEarnings;
   final double commissionEarnings;
   final double subscriptionEarnings;
@@ -22,7 +22,7 @@ class EarningsModel {
     required this.totalEarnings,
     required this.availableBalance,
     required this.pendingBalance,
-    required this.giftEarnings,
+    required this.promotionSupportEarnings,
     required this.sponsorshipEarnings,
     required this.commissionEarnings,
     required this.subscriptionEarnings,
@@ -41,7 +41,7 @@ class EarningsModel {
       totalEarnings: (data['totalEarnings'] as num?)?.toDouble() ?? 0.0,
       availableBalance: (data['availableBalance'] as num?)?.toDouble() ?? 0.0,
       pendingBalance: (data['pendingBalance'] as num?)?.toDouble() ?? 0.0,
-      giftEarnings: (data['giftEarnings'] as num?)?.toDouble() ?? 0.0,
+      promotionSupportEarnings: (data['promotionSupportEarnings'] as num? ?? data['giftEarnings'] as num?)?.toDouble() ?? 0.0,
       sponsorshipEarnings:
           (data['sponsorshipEarnings'] as num?)?.toDouble() ?? 0.0,
       commissionEarnings:
@@ -69,7 +69,7 @@ class EarningsModel {
       'totalEarnings': totalEarnings,
       'availableBalance': availableBalance,
       'pendingBalance': pendingBalance,
-      'giftEarnings': giftEarnings,
+      'promotionSupportEarnings': promotionSupportEarnings,
       'sponsorshipEarnings': sponsorshipEarnings,
       'commissionEarnings': commissionEarnings,
       'subscriptionEarnings': subscriptionEarnings,
@@ -97,7 +97,7 @@ class EarningsModel {
     if (totalEarnings == 0) return {};
 
     return {
-      'Gifts': (giftEarnings / totalEarnings) * 100,
+      'Promotion Support': (promotionSupportEarnings / totalEarnings) * 100,
       'Sponsorships': (sponsorshipEarnings / totalEarnings) * 100,
       'Commissions': (commissionEarnings / totalEarnings) * 100,
       'Subscriptions': (subscriptionEarnings / totalEarnings) * 100,

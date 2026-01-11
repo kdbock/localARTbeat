@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fl_chart/fl_chart.dart';
 
 // Import the models and services from our packages
-import 'package:artbeat_artist/src/services/analytics_service.dart';
+import 'package:artbeat_artist/src/services/visibility_service.dart';
 import 'package:artbeat_artist/src/services/artwork_service.dart';
 import 'package:artbeat_artist/src/models/artwork_model.dart';
 import 'package:artbeat_artist/src/services/subscription_service.dart'
@@ -13,21 +13,21 @@ import 'package:artbeat_core/artbeat_core.dart' as core;
 import 'package:artbeat_core/src/widgets/secure_network_image.dart';
 // Import provider for subscriptions
 
-/// Analytics Dashboard Screen for Artists with Pro and Gallery plans
-class AnalyticsDashboardScreen extends StatefulWidget {
-  const AnalyticsDashboardScreen({super.key});
+/// Visibility Insights Screen for Artists with Pro and Gallery plans
+class VisibilityInsightsScreen extends StatefulWidget {
+  const VisibilityInsightsScreen({super.key});
 
   @override
-  State<AnalyticsDashboardScreen> createState() =>
-      _AnalyticsDashboardScreenState();
+  State<VisibilityInsightsScreen> createState() =>
+      _VisibilityInsightsScreenState();
 }
 
-class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> {
+class _VisibilityInsightsScreenState extends State<VisibilityInsightsScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final artist_subscription.SubscriptionService _subscriptionService =
       artist_subscription.SubscriptionService();
   final ArtworkService _artworkService = ArtworkService();
-  final AnalyticsService _analyticsService = AnalyticsService();
+  final VisibilityService _visibilityService = VisibilityService();
 
   bool _isLoading = true;
   bool _hasProAccess = false;
@@ -64,13 +64,13 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> {
       // Load analytics data based on subscription
       Map<String, dynamic> analyticsData;
       if (hasProAccess) {
-        analyticsData = await _analyticsService.getArtistAnalyticsData(
+        analyticsData = await _visibilityService.getArtistAnalyticsData(
           userId,
           _startDate,
           _endDate,
         );
       } else {
-        analyticsData = await _analyticsService.getBasicArtistAnalyticsData(
+        analyticsData = await _visibilityService.getBasicArtistAnalyticsData(
           userId,
           _startDate,
           _endDate,
@@ -130,7 +130,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> {
     return core.MainLayout(
       currentIndex: -1,
       appBar: core.EnhancedUniversalHeader(
-        title: 'Analytics Dashboard',
+        title: 'Views & Interest',
         showLogo: false,
         showBackButton: true,
         actions: <Widget>[
@@ -151,7 +151,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> {
                   children: <Widget>[
                     _buildDateRangeSelector(),
                     const SizedBox(height: 16),
-                    _buildOverviewMetrics(),
+                    _buildOverviewInterest(),
                     const SizedBox(height: 24),
                     _buildVisitorsChart(),
                     const SizedBox(height: 24),
@@ -209,7 +209,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> {
     );
   }
 
-  Widget _buildOverviewMetrics() {
+  Widget _buildOverviewInterest() {
     // Safely extract int values from analytics with proper type handling
     int getIntValue(String key) {
       final dynamic value = _analytics[key];
@@ -228,22 +228,22 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text(
-          tr('art_walk_overview'),
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        const Text(
+          'Overview Interest',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
         Row(
           children: <Widget>[
-            _buildMetricCard('Profile Views', profileViews, Icons.visibility),
-            _buildMetricCard('Artwork Views', artworkViews, Icons.image),
+            _buildMetricCard('Gallery Views', profileViews, Icons.visibility),
+            _buildMetricCard('Interest in Work', artworkViews, Icons.image),
           ],
         ),
         const SizedBox(height: 8),
         Row(
           children: <Widget>[
-            _buildMetricCard('Favorites', favorites, Icons.favorite),
-            _buildMetricCard('Lead Clicks', leadClicks, Icons.link),
+            _buildMetricCard('People who saved your work', favorites, Icons.favorite),
+            _buildMetricCard('Inquiries', leadClicks, Icons.link),
           ],
         ),
       ],
@@ -314,7 +314,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             const Text(
-              'Profile Visitors',
+              'Gallery Visitors',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),

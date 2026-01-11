@@ -19,11 +19,15 @@ class SponsorBanner extends StatefulWidget {
     required this.placementKey,
     this.userLocation,
     this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    this.showPlaceholder = false,
+    this.onPlaceholderTap,
   });
 
   final String placementKey;
   final LatLng? userLocation;
   final EdgeInsets padding;
+  final bool showPlaceholder;
+  final VoidCallback? onPlaceholderTap;
 
   @override
   State<SponsorBanner> createState() => _SponsorBannerState();
@@ -89,8 +93,20 @@ class _SponsorBannerState extends State<SponsorBanner> {
 
   @override
   Widget build(BuildContext context) {
-    // Never reserve space while loading or if empty
-    if (_isLoading || _sponsor == null) {
+    // Never reserve space while loading
+    if (_isLoading) {
+      return const SizedBox.shrink();
+    }
+
+    if (_sponsor == null) {
+      if (widget.showPlaceholder) {
+        return Padding(
+          padding: widget.padding,
+          child: SponsorPlaceholder(
+            onTap: widget.onPlaceholderTap,
+          ),
+        );
+      }
       return const SizedBox.shrink();
     }
 
@@ -243,6 +259,73 @@ class _CompactBanner extends StatelessWidget {
           sponsor.bannerUrl ?? sponsor.logoUrl,
           height: 56,
           fit: BoxFit.cover,
+        ),
+      ),
+    );
+}
+
+/// A placeholder shown when no sponsor is active, encouraging businesses to sponsor.
+class SponsorPlaceholder extends StatelessWidget {
+  const SponsorPlaceholder({super.key, this.onTap});
+
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 60,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.1),
+            width: 1.5,
+          ),
+          color: Colors.white.withValues(alpha: 0.05),
+        ),
+        child: Row(
+          children: [
+            const SizedBox(width: 16),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.add_business,
+                color: Colors.white70,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Sponsor this space',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  Text(
+                    'Connect with local art explorers',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: Colors.white60,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(
+              Icons.chevron_right,
+              color: Colors.white38,
+            ),
+            const SizedBox(width: 12),
+          ],
         ),
       ),
     );

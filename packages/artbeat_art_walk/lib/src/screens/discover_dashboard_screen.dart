@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:artbeat_sponsorships/artbeat_sponsorships.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
@@ -760,7 +761,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
       radius: 30,
       colors: const [Color(0x19090E1F), Color(0x1910152B)],
       child: SizedBox(
-        height: 400,
+        height: 540,
         child: ClipRRect(
           borderRadius: BorderRadius.circular(30),
           child: Stack(
@@ -913,6 +914,22 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
                         ],
                       ),
                     ),
+                    const SizedBox(height: 16),
+                    // Sponsor Banner
+                    if (_currentPosition != null)
+                      SponsorBanner(
+                        placementKey: SponsorshipPlacements.discoverRadarBanner,
+                        userLocation: LatLng(
+                          _currentPosition!.latitude,
+                          _currentPosition!.longitude,
+                        ),
+                        padding: EdgeInsets.zero,
+                        showPlaceholder: true,
+                        onPlaceholderTap: () => Navigator.pushNamed(
+                          context,
+                          '/discover-sponsorship',
+                        ),
+                      ),
                     const SizedBox(height: ArtWalkDesignSystem.paddingL),
                     GradientCTAButton(
                       label: 'art_walk_dashboard_discovery_button'.tr(),

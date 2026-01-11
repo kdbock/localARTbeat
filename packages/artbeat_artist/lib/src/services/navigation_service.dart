@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import '../screens/screens.dart';
-import '../screens/earnings/artist_earnings_dashboard.dart';
-import '../screens/earnings/payout_request_screen.dart';
-import 'package:artbeat_core/artbeat_core.dart' as core;
 
 /// Service for handling navigation within the artist module
 class NavigationService {
@@ -10,12 +7,12 @@ class NavigationService {
   factory NavigationService() => _instance;
   NavigationService._internal();
 
-  /// Navigate to artist dashboard
-  static Future<void> navigateToArtistDashboard(BuildContext context) async {
+  /// Navigate to gallery hub
+  static Future<void> navigateToGalleryHub(BuildContext context) async {
     await Navigator.push<void>(
       context,
       MaterialPageRoute<void>(
-          builder: (context) => const ArtistDashboardScreen()),
+          builder: (context) => const GalleryHubScreen()),
     );
   }
 
@@ -28,21 +25,21 @@ class NavigationService {
     );
   }
 
-  /// Navigate to earnings dashboard
+  /// Navigate to earnings hub
   static Future<void> navigateToEarnings(BuildContext context) async {
     await Navigator.push<void>(
       context,
       MaterialPageRoute<void>(
-          builder: (context) => const ArtistEarningsDashboard()),
+          builder: (context) => const ArtistEarningsHub()),
     );
   }
 
-  /// Navigate to analytics dashboard
-  static Future<void> navigateToAnalytics(BuildContext context) async {
+  /// Navigate to visibility insights
+  static Future<void> navigateToVisibility(BuildContext context) async {
     await Navigator.push<void>(
       context,
       MaterialPageRoute<void>(
-          builder: (context) => const AnalyticsDashboardScreen()),
+          builder: (context) => const VisibilityInsightsScreen()),
     );
   }
 
@@ -100,20 +97,16 @@ class NavigationService {
     );
   }
 
-  /// Navigate to artist onboarding (requires user for traditional onboarding)
+  /// Navigate to artist onboarding
   static Future<void> navigateToOnboarding(
     BuildContext context, {
-    required core.UserModel user,
-    bool useModern = true,
     VoidCallback? onComplete,
   }) async {
-    final screen = useModern
-        ? const Modern2025OnboardingScreen()
-        : ArtistOnboardingScreen(user: user, onComplete: onComplete);
-
     await Navigator.push<void>(
       context,
-      MaterialPageRoute<void>(builder: (context) => screen),
+      MaterialPageRoute<void>(
+        builder: (context) => const ArtistOnboardScreen(),
+      ),
     );
   }
 

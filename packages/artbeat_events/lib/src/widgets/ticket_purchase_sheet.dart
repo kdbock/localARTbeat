@@ -9,7 +9,6 @@ import '../models/ticket_type.dart';
 import '../services/event_service.dart';
 import '../services/event_notification_service.dart';
 
-
 class TicketPurchaseSheet extends StatefulWidget {
   final ArtbeatEvent event;
   final TicketType ticketType;

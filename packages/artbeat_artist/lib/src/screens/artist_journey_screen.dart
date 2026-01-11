@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
 import 'package:firebase_auth/firebase_auth.dart';
-import 'modern_2025_onboarding_screen.dart';
-import 'artist_onboarding_screen.dart';
+import 'artist_onboard_screen.dart';
 
 /// Comprehensive artist journey screen that guides users through becoming an artist
 /// This replaces the direct jump to subscription and provides better UX
@@ -329,9 +328,9 @@ class _ArtistJourneyScreenState extends State<ArtistJourneyScreen> {
             const SizedBox(height: 20),
             _buildChangeItem(
               icon: Icons.dashboard,
-              title: 'Dashboard',
+              title: 'Hub',
               before: 'Discover & Browse',
-              after: 'Artist Management Hub',
+              after: 'Gallery Hub',
               color: Colors.green,
             ),
             const SizedBox(height: 20),
@@ -339,7 +338,7 @@ class _ArtistJourneyScreenState extends State<ArtistJourneyScreen> {
               icon: Icons.menu,
               title: 'Navigation',
               before: 'Basic Features',
-              after: 'Artist Tools & Analytics',
+              after: 'Artist Tools & Visibility',
               color: Colors.orange,
             ),
             const SizedBox(height: 20),
@@ -513,13 +512,12 @@ class _ArtistJourneyScreenState extends State<ArtistJourneyScreen> {
                   title: 'Free Plan',
                   price: 'Free',
                   description:
-                      'Perfect for getting started with your artistic journey',
+                      'Perfect for getting started and exploring local discovery',
                   features: [
-                    'Up to 3 artworks',
-                    '0.5GB storage',
-                    '5 AI credits/month',
-                    'Basic community access',
-                    'Mobile app access',
+                    'Up to 10 artworks',
+                    'Appear on Discovery Map',
+                    'Standard Local Reach',
+                    'Community Support',
                   ],
                   isRecommended: true,
                   isSelected: _selectedPlan == 'Free Plan',
@@ -530,12 +528,11 @@ class _ArtistJourneyScreenState extends State<ArtistJourneyScreen> {
                   title: 'Starter Plan',
                   price: '\$4.99/month',
                   description:
-                      'Ideal for artists ready to sell their first pieces',
+                      'Ideal for artists ready to reach more people nearby',
                   features: [
                     'Up to 25 artworks',
-                    '5GB storage',
-                    '50 AI credits/month',
-                    'Basic analytics',
+                    'Enhanced Local Discovery',
+                    'Direct Interest Messaging',
                     'Email support',
                   ],
                   isRecommended: false,
@@ -546,15 +543,12 @@ class _ArtistJourneyScreenState extends State<ArtistJourneyScreen> {
                 _buildPlanPreview(
                   title: 'Creator Plan',
                   price: '\$12.99/month',
-                  description: 'For established artists growing their business',
+                  description: 'For full-time artists seeking maximum visibility',
                   features: [
                     'Up to 100 artworks',
-                    '25GB storage',
-                    '200 AI credits/month',
-                    'Advanced analytics',
-                    'Featured placement',
-                    'Event creation',
-                    'Priority support',
+                    'Featured Placement (3-5x reach)',
+                    'Launch Unlimited Sales',
+                    'Priority Artist Support',
                   ],
                   isRecommended: false,
                   isSelected: _selectedPlan == 'Creator Plan',
@@ -564,16 +558,12 @@ class _ArtistJourneyScreenState extends State<ArtistJourneyScreen> {
                 _buildPlanPreview(
                   title: 'Business Plan',
                   price: '\$29.99/month',
-                  description: 'For galleries and professional art businesses',
+                  description: 'For galleries and professional art collectives',
                   features: [
                     'Unlimited artworks',
-                    '100GB storage',
-                    '500 AI credits/month',
+                    'Gallery/Collective management',
                     'Team collaboration (5 users)',
-                    'Custom branding',
-                    'API access',
-                    'Advanced reporting',
-                    'Dedicated support',
+                    'Dedicated Success Manager',
                   ],
                   isRecommended: false,
                   isSelected: _selectedPlan == 'Business Plan',
@@ -818,28 +808,13 @@ class _ArtistJourneyScreenState extends State<ArtistJourneyScreen> {
       }
 
       if (mounted) {
-        // Step 1: Modern onboarding
+        // Updated 2025: Use the single comprehensive ArtistOnboardScreen
+        // which now handles both persona setup and plan selection
         await Navigator.push<void>(
           context,
           MaterialPageRoute<void>(
-            builder: (context) => Modern2025OnboardingScreen(
-              // After completion, go to artist profile setup
+            builder: (context) => ArtistOnboardScreen(
               key: UniqueKey(),
-            ),
-          ),
-        );
-
-        // Step 2: Artist profile setup
-        await Navigator.push<void>(
-          // ignore: use_build_context_synchronously
-          context,
-          MaterialPageRoute<void>(
-            builder: (context) => ArtistOnboardingScreen(
-              user: userData,
-              onComplete: () {
-                // After profile setup, go to dashboard or next step
-                Navigator.pushReplacementNamed(context, '/dashboard');
-              },
             ),
           ),
         );
@@ -885,25 +860,13 @@ class _ArtistJourneyScreenState extends State<ArtistJourneyScreen> {
       if (userData == null) throw Exception('User data not found');
 
       if (mounted) {
+        // Updated 2025: Use the single comprehensive ArtistOnboardScreen
         await Navigator.push<void>(
           context,
           MaterialPageRoute<void>(
-            builder: (context) => Modern2025OnboardingScreen(
+            builder: (context) => ArtistOnboardScreen(
               key: UniqueKey(),
               preselectedPlan: planName,
-            ),
-          ),
-        );
-
-        await Navigator.push<void>(
-          // ignore: use_build_context_synchronously
-          context,
-          MaterialPageRoute<void>(
-            builder: (context) => ArtistOnboardingScreen(
-              user: userData,
-              onComplete: () {
-                Navigator.pushReplacementNamed(context, '/dashboard');
-              },
             ),
           ),
         );

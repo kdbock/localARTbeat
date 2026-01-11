@@ -25,8 +25,7 @@ class UserEventsDashboardScreen extends StatefulWidget {
       _UserEventsDashboardScreenState();
 }
 
-class _UserEventsDashboardScreenState
-    extends State<UserEventsDashboardScreen> {
+class _UserEventsDashboardScreenState extends State<UserEventsDashboardScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   bool _isLoading = true;
@@ -62,8 +61,7 @@ class _UserEventsDashboardScreenState
           .limit(50)
           .get();
 
-      final allEvents =
-          query.docs.map(ArtbeatEvent.fromFirestore).toList();
+      final allEvents = query.docs.map(ArtbeatEvent.fromFirestore).toList();
 
       final featured = <ArtbeatEvent>[];
       final upcoming = <ArtbeatEvent>[];
@@ -154,8 +152,9 @@ class _UserEventsDashboardScreenState
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(
-          valueColor:
-              AlwaysStoppedAnimation<Color>(ArtbeatColors.primaryPurple),
+          valueColor: AlwaysStoppedAnimation<Color>(
+            ArtbeatColors.primaryPurple,
+          ),
         ),
       );
     }
@@ -193,7 +192,8 @@ class _UserEventsDashboardScreenState
       );
     }
 
-    final isEmpty = _todayEvents.isEmpty &&
+    final isEmpty =
+        _todayEvents.isEmpty &&
         _featuredEvents.isEmpty &&
         _thisWeekEvents.isEmpty &&
         _upcomingEvents.isEmpty;
@@ -303,11 +303,7 @@ class _UserEventsDashboardScreenState
     );
   }
 
-  Widget _buildSectionHeader(
-    String title,
-    IconData icon,
-    Color color,
-  ) {
+  Widget _buildSectionHeader(String title, IconData icon, Color color) {
     return Row(
       children: [
         Container(
@@ -331,9 +327,7 @@ class _UserEventsDashboardScreenState
           onPressed: () => Navigator.pushNamed(context, '/events/all'),
           child: Text(
             'events_view_all'.tr(),
-            style: const TextStyle(
-              color: ArtbeatColors.primaryPurple,
-            ),
+            style: const TextStyle(color: ArtbeatColors.primaryPurple),
           ),
         ),
       ],
@@ -341,66 +335,56 @@ class _UserEventsDashboardScreenState
   }
 
   Widget _horizontalList(List<ArtbeatEvent> events) => SizedBox(
-        height: 200,
-        child: ListView.separated(
-          scrollDirection: Axis.horizontal,
-          itemCount: events.length,
-          separatorBuilder: (_, _) => const SizedBox(width: 12),
-          itemBuilder: (_, i) => SizedBox(
-            width: 260,
-            child: _compactCard(events[i]),
-          ),
-        ),
-      );
+    height: 200,
+    child: ListView.separated(
+      scrollDirection: Axis.horizontal,
+      itemCount: events.length,
+      separatorBuilder: (_, _) => const SizedBox(width: 12),
+      itemBuilder: (_, i) =>
+          SizedBox(width: 260, child: _compactCard(events[i])),
+    ),
+  );
 
   Widget _featuredList(List<ArtbeatEvent> events) => SizedBox(
-        height: 240,
-        child: ListView.separated(
-          scrollDirection: Axis.horizontal,
-          itemCount: events.length,
-          separatorBuilder: (_, _) => const SizedBox(width: 16),
-          itemBuilder: (_, i) => SizedBox(
-            width: 300,
-            child: _featuredCard(events[i]),
-          ),
-        ),
-      );
+    height: 240,
+    child: ListView.separated(
+      scrollDirection: Axis.horizontal,
+      itemCount: events.length,
+      separatorBuilder: (_, _) => const SizedBox(width: 16),
+      itemBuilder: (_, i) =>
+          SizedBox(width: 300, child: _featuredCard(events[i])),
+    ),
+  );
 
   Widget _gridEvents(List<ArtbeatEvent> events) => GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: events.length.clamp(0, 4),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-          childAspectRatio: 0.9,
-        ),
-        itemBuilder: (_, i) => _gridCard(events[i]),
-      );
+    shrinkWrap: true,
+    physics: const NeverScrollableScrollPhysics(),
+    itemCount: events.length.clamp(0, 4),
+    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      crossAxisCount: 2,
+      crossAxisSpacing: 12,
+      mainAxisSpacing: 12,
+      childAspectRatio: 0.9,
+    ),
+    itemBuilder: (_, i) => _gridCard(events[i]),
+  );
 
   Widget _verticalList(List<ArtbeatEvent> events) => Column(
-        children: events.take(6).map((e) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: _listCard(e),
-          );
-        }).toList(),
+    children: events.take(6).map((e) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 10),
+        child: _listCard(e),
       );
+    }).toList(),
+  );
 
   Widget _emptyBadge(String text) => Text(
-        text,
-        style: GoogleFonts.spaceGrotesk(
-          fontSize: 12,
-          color: Colors.grey[400],
-        ),
-      );
+    text,
+    style: GoogleFonts.spaceGrotesk(fontSize: 12, color: Colors.grey[400]),
+  );
 
-  Widget _emptyIcon(IconData icon) => Icon(
-        icon,
-        color: Colors.grey[400],
-        size: 22,
-      );
+  Widget _emptyIcon(IconData icon) =>
+      Icon(icon, color: Colors.grey[400], size: 22);
 
   Widget _buildEmptyState() {
     return Center(
@@ -462,130 +446,120 @@ class _UserEventsDashboardScreenState
       intl.DateFormat('MMM dd, h:mm a').format(dt);
 
   Widget _compactCard(ArtbeatEvent e) => GlassCard(
-        child: InkWell(
-          onTap: () => Navigator.pushNamed(
-            context,
-            '/events/detail',
-            arguments: {'eventId': e.id},
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(_eventIcon(e.category),
-                    color: ArtbeatColors.primaryPurple),
-                const SizedBox(height: 6),
-                Text(
-                  e.title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.spaceGrotesk(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(_formatDate(e.dateTime)),
-                const Spacer(),
-                if (e.hasFreeTickets)
-                  _emptyBadge('events_badge_free'.tr()),
-              ],
+    child: InkWell(
+      onTap: () => Navigator.pushNamed(
+        context,
+        '/events/detail',
+        arguments: {'eventId': e.id},
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(_eventIcon(e.category), color: ArtbeatColors.primaryPurple),
+            const SizedBox(height: 6),
+            Text(
+              e.title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
             ),
-          ),
+            const SizedBox(height: 4),
+            Text(_formatDate(e.dateTime)),
+            const Spacer(),
+            if (e.hasFreeTickets) _emptyBadge('events_badge_free'.tr()),
+          ],
         ),
-      );
+      ),
+    ),
+  );
 
   Widget _featuredCard(ArtbeatEvent e) => GlassCard(
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                ArtbeatColors.primaryPurple.withValues(alpha: 0.15),
-                ArtbeatColors.secondaryTeal.withValues(alpha: 0.15),
-              ],
-            ),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: InkWell(
-            onTap: () => Navigator.pushNamed(
-              context,
-              '/events/detail',
-              arguments: {'eventId': e.id},
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _emptyBadge('events_badge_featured'.tr()),
-                  const SizedBox(height: 6),
-                  Text(
-                    e.title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.spaceGrotesk(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 18,
-                    ),
-                  ),
-                  const Spacer(),
-                  Text(_formatDate(e.dateTime)),
-                ],
+    child: Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            ArtbeatColors.primaryPurple.withValues(alpha: 0.15),
+            ArtbeatColors.secondaryTeal.withValues(alpha: 0.15),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: InkWell(
+        onTap: () => Navigator.pushNamed(
+          context,
+          '/events/detail',
+          arguments: {'eventId': e.id},
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _emptyBadge('events_badge_featured'.tr()),
+              const SizedBox(height: 6),
+              Text(
+                e.title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.spaceGrotesk(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 18,
+                ),
               ),
-            ),
+              const Spacer(),
+              Text(_formatDate(e.dateTime)),
+            ],
           ),
         ),
-      );
+      ),
+    ),
+  );
 
   Widget _gridCard(ArtbeatEvent e) => GlassCard(
-        child: InkWell(
-          onTap: () => Navigator.pushNamed(
-            context,
-            '/events/detail',
-            arguments: {'eventId': e.id},
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _emptyIcon(_eventIcon(e.category)),
-                const SizedBox(height: 6),
-                Text(
-                  e.title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const Spacer(),
-                Text(_formatDate(e.dateTime)),
-              ],
-            ),
-          ),
+    child: InkWell(
+      onTap: () => Navigator.pushNamed(
+        context,
+        '/events/detail',
+        arguments: {'eventId': e.id},
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _emptyIcon(_eventIcon(e.category)),
+            const SizedBox(height: 6),
+            Text(e.title, maxLines: 2, overflow: TextOverflow.ellipsis),
+            const Spacer(),
+            Text(_formatDate(e.dateTime)),
+          ],
         ),
-      );
+      ),
+    ),
+  );
 
   Widget _listCard(ArtbeatEvent e) => GlassCard(
-        child: ListTile(
-          onTap: () => Navigator.pushNamed(
-            context,
-            '/events/detail',
-            arguments: {'eventId': e.id},
-          ),
-          leading: _emptyIcon(_eventIcon(e.category)),
-          title: Text(e.title),
-          subtitle: Text(_formatDate(e.dateTime)),
-          trailing: const Icon(Icons.chevron_right),
-        ),
-      );
+    child: ListTile(
+      onTap: () => Navigator.pushNamed(
+        context,
+        '/events/detail',
+        arguments: {'eventId': e.id},
+      ),
+      leading: _emptyIcon(_eventIcon(e.category)),
+      title: Text(e.title),
+      subtitle: Text(_formatDate(e.dateTime)),
+      trailing: const Icon(Icons.chevron_right),
+    ),
+  );
 
   /// SHEETS
 
   void _openSearchSheet() {
     GlassBottomSheet.show(
       context: context,
-      child: EventsListScreen(
-        title: 'events_search_title'.tr(),
-      ),
+      child: EventsListScreen(title: 'events_search_title'.tr()),
     );
   }
 
