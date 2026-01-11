@@ -28,7 +28,7 @@ class _WrittenContentDetailScreenState
   final ChapterService _chapterService = ChapterService();
   final artist.SubscriptionService _subscriptionService =
       artist.SubscriptionService();
-  final artist.AnalyticsService _analyticsService = artist.AnalyticsService();
+  final artist.VisibilityService _visibilityService = artist.VisibilityService();
   final UnifiedPaymentService _paymentService = UnifiedPaymentService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -130,7 +130,7 @@ class _WrittenContentDetailScreenState
           artwork.price == 0;
 
       // Track view analytics
-      await _analyticsService.trackArtworkView(
+      await _visibilityService.trackArtworkView(
         artworkId: widget.artworkId,
         artistId: artwork.artistProfileId,
       );

@@ -14,16 +14,14 @@ class GradientCTAButton extends StatelessWidget {
     this.gradient = const LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
-      colors: [
-        Color(0xFF7C4DFF),
-        Color(0xFF22D3EE),
-        Color(0xFF34D399),
-      ],
+      colors: [Color(0xFF7C4DFF), Color(0xFF22D3EE), Color(0xFF34D399)],
     ),
     this.isLoading = false,
-  })  : assert(text != null || label != null,
-            'Provide either text or label to GradientCTAButton'),
-        text = text ?? label!;
+  }) : assert(
+         text != null || label != null,
+         'Provide either text or label to GradientCTAButton',
+       ),
+       text = text ?? label!;
 
   final String text;
   final VoidCallback? onPressed;

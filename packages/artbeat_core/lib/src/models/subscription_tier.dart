@@ -6,7 +6,7 @@ enum SubscriptionTier {
   free('free', 'Free'),
   starter('starter', 'Starter'),
   creator('creator', 'Creator'),
-  business('business', 'Business'),
+  business('business', 'Gallery / Collective'),
   enterprise('enterprise', 'Enterprise');
 
   final String apiName;
@@ -52,55 +52,46 @@ enum SubscriptionTier {
     switch (this) {
       case SubscriptionTier.free:
         return [
-          'Up to 3 artworks',
-          '0.5GB storage',
-          '5 AI credits/month',
-          'Basic analytics',
-          'Community features',
+          'Up to 10 artworks',
+          'Appear on Local Discovery Map',
+          'Standard Local Reach',
+          'Community Support',
+          '0.5GB Secure Storage',
         ];
       case SubscriptionTier.starter:
         return [
           'Up to 25 artworks',
-          '5GB storage',
-          '50 AI credits/month',
-          'Basic analytics',
-          'Community features',
+          'Enhanced Local Discovery',
+          'Direct Interest Messaging',
           'Email support',
+          '5GB Secure Storage',
         ];
       case SubscriptionTier.creator:
         return [
           'Up to 100 artworks',
-          '25GB storage',
-          '200 AI credits/month',
-          'Advanced analytics',
-          'Featured placement',
-          'Event creation',
-          'Priority support',
-          'All Starter features',
+          'Featured Placement (3-5x more views)',
+          'Launch Unlimited Sale Events',
+          'Prioritized Discovery',
+          'Priority Artist Support',
+          '25GB Secure Storage',
         ];
       case SubscriptionTier.business:
         return [
           'Unlimited artworks',
-          '100GB storage',
-          '500 AI credits/month',
+          'Gallery/Collective management',
           'Team collaboration (up to 5 users)',
-          'Custom branding',
-          'API access',
-          'Advanced reporting',
-          'Dedicated support',
-          'All Creator features',
+          'Custom Branding for your Studio',
+          'Advanced Discovery Insights',
+          '100GB Secure Storage',
+          'Dedicated Success Manager',
         ];
       case SubscriptionTier.enterprise:
         return [
           'Unlimited everything',
-          'Unlimited storage',
-          'Unlimited AI credits',
-          'Unlimited team members',
-          'Custom integrations',
-          'White-label options',
-          'Enterprise security',
-          'Dedicated account manager',
-          'All Business features',
+          'White-label Gallery Experience',
+          'Custom Integrations',
+          'Enterprise Security',
+          'Dedicated Account Manager',
         ];
     }
   }

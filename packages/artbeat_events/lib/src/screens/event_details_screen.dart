@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:artbeat_sponsorships/artbeat_sponsorships.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:share_plus/share_plus.dart' as share_plus;
 import 'package:firebase_auth/firebase_auth.dart';
@@ -118,6 +119,15 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
               child: Column(
                 children: [
                   _buildHeroSection(),
+
+                  SponsorBanner(
+                    placementKey: SponsorshipPlacements.eventHeader,
+                    padding: const EdgeInsets.only(top: 16),
+                    showPlaceholder: true,
+                    onPlaceholderTap: () =>
+                        Navigator.pushNamed(context, '/event-sponsorship'),
+                  ),
+
                   const SizedBox(height: 18),
                   _buildSummaryCard(),
                   const SizedBox(height: 16),
@@ -198,6 +208,27 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
     );
   }
 
+  BoxFit _getBoxFit(String fit) {
+    switch (fit) {
+      case 'cover':
+        return BoxFit.cover;
+      case 'contain':
+        return BoxFit.contain;
+      case 'fill':
+        return BoxFit.fill;
+      case 'fitWidth':
+        return BoxFit.fitWidth;
+      case 'fitHeight':
+        return BoxFit.fitHeight;
+      case 'scaleDown':
+        return BoxFit.scaleDown;
+      case 'none':
+        return BoxFit.none;
+      default:
+        return BoxFit.cover;
+    }
+  }
+
   Widget _buildHeroSection() {
     final event = _event!;
     final bannerUrl = event.eventBannerUrl.isNotEmpty
@@ -216,6 +247,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                 imageUrl: bannerUrl,
                 width: double.infinity,
                 height: double.infinity,
+                fit: _getBoxFit(event.eventBannerFit),
               )
             else
               _buildHeroFallback(event.category),
@@ -420,12 +452,20 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
 
     return Row(
       children: [
-        CircleAvatar(
-          radius: 20,
-          backgroundColor: Colors.white.withValues(alpha: 0.12),
-          backgroundImage: hasImage
-              ? ImageUrlValidator.safeNetworkImage(event.artistHeadshotUrl)
-              : null,
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.white.withValues(alpha: 0.12),
+            image: hasImage
+                ? DecorationImage(
+                    image:
+                        ImageUrlValidator.safeNetworkImage(event.artistHeadshotUrl)!,
+                    fit: _getBoxFit(event.artistHeadshotFit),
+                  )
+                : null,
+          ),
           child: hasImage
               ? null
               : const Icon(Icons.person, color: Colors.white70, size: 18),

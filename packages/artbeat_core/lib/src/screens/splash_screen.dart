@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:artbeat_sponsorships/artbeat_sponsorships.dart';
 
 import '../utils/user_sync_helper.dart';
 import '../utils/performance_monitor.dart';
@@ -338,6 +339,17 @@ class _SplashScreenState extends State<SplashScreen>
                   },
                 ),
               ],
+            ),
+          ),
+
+          // Title Sponsor Placeholder
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 40 + MediaQuery.of(context).padding.bottom,
+            child: const SponsorBanner(
+              placementKey: SponsorshipPlacements.splash,
+              showPlaceholder: true,
             ),
           ),
         ],

@@ -18,7 +18,7 @@ The comprehensive artist and gallery management system for the ARTbeat platform.
 - ✅ **Portfolio Management**: Unlimited artwork showcase with categorization
 - ✅ **Subscription Tiers**: Free, Starter, Creator, Business, and Enterprise plans with feature gating
 - ✅ **Earnings & Payouts**: Comprehensive financial management with Stripe integration
-- ✅ **Analytics Dashboard**: Professional analytics with chart visualizations
+- ✅ **Analytics Hub**: Professional analytics with chart visualizations
 
 ### Business & Monetization
 
@@ -80,7 +80,7 @@ artbeat_artist/
 | **EarningsService**       | Financial tracking | 500+  | ⭐⭐⭐⭐⭐ |
 | **SubscriptionService**   | Subscription logic | 300+  | ⭐⭐⭐⭐⭐ |
 | **AnalyticsService**      | Analytics tracking | 250+  | ⭐⭐⭐⭐⭐ |
-| **ArtistDashboardScreen** | Main interface     | 1,066 | ⭐⭐⭐⭐⭐ |
+| **ArtistHubScreen** | Main interface     | 1,066 | ⭐⭐⭐⭐⭐ |
 
 ### Subscription System
 
@@ -162,7 +162,7 @@ final artistProfile = await profileService.createArtistProfile(
 // Navigate to AI-driven onboarding experience
 Navigator.of(context).push(
   MaterialPageRoute(
-    builder: (context) => const Modern2025OnboardingScreen(
+    builder: (context) => const ArtistOnboardScreen(
       preselectedPlan: 'creator', // Optional plan pre-selection
     ),
   ),
@@ -208,7 +208,7 @@ final isActive = subscription.isActive;
 final daysRemaining = subscription.daysRemaining;
 ```
 
-### Analytics Dashboard
+### Analytics Hub
 
 ```dart
 // Load comprehensive analytics
@@ -395,24 +395,24 @@ class PayoutModel {
 
 | Screen                         | Purpose             | Lines | Quality    |
 | ------------------------------ | ------------------- | ----- | ---------- |
-| **ArtistDashboardScreen**      | Main artist hub     | 1,066 | ⭐⭐⭐⭐⭐ |
-| **Modern2025OnboardingScreen** | AI-driven setup     | 1,027 | ⭐⭐⭐⭐⭐ |
-| **ArtistEarningsDashboard**    | Financial overview  | 613   | ⭐⭐⭐⭐⭐ |
-| **AnalyticsDashboardScreen**   | Performance metrics | 400+  | ⭐⭐⭐⭐⭐ |
+| **ArtistHubScreen**      | Main artist hub     | 1,066 | ⭐⭐⭐⭐⭐ |
+| **ArtistOnboardScreen** | AI-driven setup     | 1,027 | ⭐⭐⭐⭐⭐ |
+| **ArtistEarningsHub**    | Financial overview  | 613   | ⭐⭐⭐⭐⭐ |
+| **AnalyticsHubScreen**   | Performance metrics | 400+  | ⭐⭐⭐⭐⭐ |
 | **ArtistProfileEditScreen**    | Profile management  | 350+  | ⭐⭐⭐⭐⭐ |
 
 ### Specialized Screens
 
 **Earnings Management:**
 
-- **ArtistEarningsDashboard**: Comprehensive financial overview
-- **ArtworkSalesDashboard**: Sales tracking and analytics
+- **ArtistEarningsHub**: Comprehensive financial overview
+- **ArtworkSalesHub**: Sales tracking and analytics
 - **PayoutRequestScreen**: Payout management interface
 - **PayoutAccountsScreen**: Bank account management
 
 **Business Features:**
 
-- **GalleryAnalyticsDashboard**: Gallery partnership analytics
+- **GalleryAnalyticsHub**: Gallery partnership analytics
 - **GalleryArtistsManagementScreen**: Multi-artist management (Business/Enterprise tiers)
 - **SubscriptionAnalyticsScreen**: Subscription performance tracking
 - **EventCreationScreen**: Art event management
@@ -426,7 +426,7 @@ class PayoutModel {
 - Smart plan recommendations based on user profile
 - Progressive disclosure of features
 
-**Artist Dashboard:**
+**Artist Hub:**
 
 - Real-time earnings tracking with visual charts
 - Recent activity feed with social engagement

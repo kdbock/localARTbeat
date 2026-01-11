@@ -99,7 +99,7 @@ class AppRouter {
 
       case '/2025_modern_onboarding':
         return RouteUtils.createSimpleRoute(
-          child: const artist.Modern2025OnboardingScreen(),
+          child: const artist.ArtistOnboardScreen(),
         );
 
       case '/debug/payment':
@@ -126,7 +126,7 @@ class AppRouter {
 
       case core.AppRoutes.artistDashboard:
         return RouteUtils.createMainNavRoute(
-          child: const artist.ArtistDashboardScreen(),
+          child: const artist.GalleryHubScreen(),
         );
 
       case core.AppRoutes.artworkBrowse:
@@ -332,11 +332,11 @@ class AppRouter {
     switch (settings.name) {
       case '/artist/signup':
         return RouteUtils.createSimpleRoute(
-          child: const artist.Modern2025OnboardingScreen(),
+          child: const artist.ArtistOnboardScreen(),
         );
       case core.AppRoutes.artistDashboard:
         return RouteUtils.createMainNavRoute(
-          child: const artist.ArtistDashboardScreen(),
+          child: const artist.GalleryHubScreen(),
         );
 
       case core.AppRoutes.artistOnboarding:
@@ -352,13 +352,7 @@ class AppRouter {
                   return const Center(child: CircularProgressIndicator());
                 }
 
-                final user = RouteUtils.createUserModelFromFirebase(
-                  firebaseUser,
-                );
-                return artist.ArtistOnboardingScreen(
-                  user: user,
-                  onComplete: () => Navigator.of(context).pop(),
-                );
+                return const artist.ArtistOnboardScreen();
               },
             ),
           ),
@@ -389,7 +383,7 @@ class AppRouter {
 
       case core.AppRoutes.artistAnalytics:
         return RouteUtils.createMainLayoutRoute(
-          child: const artist.AnalyticsDashboardScreen(),
+          child: const artist.VisibilityInsightsScreen(),
         );
 
       case core.AppRoutes.artistArtwork:
@@ -418,7 +412,7 @@ class AppRouter {
 
       case core.AppRoutes.artistEarnings:
         return RouteUtils.createMainLayoutRoute(
-          child: const artist.ArtistEarningsDashboard(),
+          child: const artist.ArtistEarningsHub(),
         );
 
       case core.AppRoutes.artistPayoutRequest:
@@ -557,7 +551,7 @@ class AppRouter {
 
       case core.AppRoutes.galleryAnalytics:
         return RouteUtils.createMainLayoutRoute(
-          child: const artist.GalleryAnalyticsDashboardScreen(),
+          child: const artist.GalleryVisibilityHubScreen(),
         );
 
       default:
@@ -1858,7 +1852,7 @@ class AppRouter {
 
       case core.AppRoutes.subscriptionPlans:
         return RouteUtils.createSimpleRoute(
-          child: const artist.Modern2025OnboardingScreen(
+          child: const artist.ArtistOnboardScreen(
             preselectedPlan: 'creator plan',
           ),
         );

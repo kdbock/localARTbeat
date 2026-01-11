@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -14,7 +13,9 @@ class EventCard extends StatelessWidget {
   final bool showArtistInfo;
   final bool compact;
 
-  static final intl.DateFormat _fullDate = intl.DateFormat('EEE, MMM d • h:mm a');
+  static final intl.DateFormat _fullDate = intl.DateFormat(
+    'EEE, MMM d • h:mm a',
+  );
 
   const EventCard({
     super.key,
@@ -86,12 +87,11 @@ class EventCard extends StatelessWidget {
                     ),
                   ),
                 ],
-                if (showArtistInfo && hostName != null && hostName.isNotEmpty) ...[
+                if (showArtistInfo &&
+                    hostName != null &&
+                    hostName.isNotEmpty) ...[
                   const SizedBox(height: 14),
-                  _HostRow(
-                    name: hostName,
-                    avatarUrl: event.artistHeadshotUrl,
-                  ),
+                  _HostRow(name: hostName, avatarUrl: event.artistHeadshotUrl),
                 ],
               ],
             ),
@@ -107,9 +107,7 @@ class EventCard extends StatelessWidget {
               child: Wrap(
                 spacing: 8,
                 runSpacing: 6,
-                children: [
-                  for (final tag in tags) _TagChip(label: tag.tr()),
-                ],
+                children: [for (final tag in tags) _TagChip(label: tag.tr())],
               ),
             ),
           Padding(
@@ -289,9 +287,7 @@ class _TagChip extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.12),
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
       ),
       child: Text(
         label,
@@ -312,7 +308,8 @@ class _TicketInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final available = (event.totalAvailableTickets - event.totalTicketsSold).clamp(0, 9999);
+    final available = (event.totalAvailableTickets - event.totalTicketsSold)
+        .clamp(0, 9999);
     final hasPaid = event.hasPaidTickets;
     final hasFreeOnly = event.hasFreeTickets && !hasPaid;
     final lowestPrice = _lowestPaidPrice();

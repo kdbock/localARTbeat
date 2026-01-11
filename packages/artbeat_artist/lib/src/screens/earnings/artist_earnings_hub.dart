@@ -7,15 +7,15 @@ import '../../models/payout_model.dart';
 import 'payout_request_screen.dart';
 import 'payout_accounts_screen.dart';
 
-class ArtistEarningsDashboard extends StatefulWidget {
-  const ArtistEarningsDashboard({super.key});
+class ArtistEarningsHub extends StatefulWidget {
+  const ArtistEarningsHub({super.key});
 
   @override
-  State<ArtistEarningsDashboard> createState() =>
-      _ArtistEarningsDashboardState();
+  State<ArtistEarningsHub> createState() =>
+      _ArtistEarningsHubState();
 }
 
-class _ArtistEarningsDashboardState extends State<ArtistEarningsDashboard>
+class _ArtistEarningsHubState extends State<ArtistEarningsHub>
     with SingleTickerProviderStateMixin {
   final EarningsService _earningsService = EarningsService();
   final _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -90,7 +90,7 @@ class _ArtistEarningsDashboardState extends State<ArtistEarningsDashboard>
       currentIndex: 1, // Artist tab
       scaffoldKey: _scaffoldKey,
       appBar: const core.EnhancedUniversalHeader(
-        title: 'Earnings Dashboard',
+        title: 'Earnings Hub',
         showBackButton: true,
         showSearch: false,
         showDeveloperTools: true,
@@ -118,7 +118,7 @@ class _ArtistEarningsDashboardState extends State<ArtistEarningsDashboard>
             TabBar(
               controller: _tabController,
               tabs: const [
-                Tab(icon: Icon(Icons.analytics), text: 'Overview'),
+                Tab(icon: Icon(Icons.insights), text: 'Overview'),
                 Tab(icon: Icon(Icons.receipt), text: 'Transactions'),
                 Tab(icon: Icon(Icons.account_balance), text: 'Payouts'),
               ],
@@ -231,7 +231,7 @@ class _ArtistEarningsDashboardState extends State<ArtistEarningsDashboard>
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  tr('art_walk_total_earnings'),
+                  'Total Support',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -253,8 +253,8 @@ class _ArtistEarningsDashboardState extends State<ArtistEarningsDashboard>
             children: [
               Expanded(
                 child: _buildEarningsCard(
-                  'Available',
-                  '\$${_earnings!.availableBalance.toStringAsFixed(2)}',
+                  'Promotion Credits',
+                  '${_earnings!.availableBalance.toInt()} (≈${((_earnings!.availableBalance) * 100).toInt()} views)',
                   Colors.white.withValues(alpha: 0.9),
                   Colors.green[700]!,
                 ),
@@ -262,7 +262,7 @@ class _ArtistEarningsDashboardState extends State<ArtistEarningsDashboard>
               const SizedBox(width: 12),
               Expanded(
                 child: _buildEarningsCard(
-                  'Pending',
+                  'Processing',
                   '\$${_earnings!.pendingBalance.toStringAsFixed(2)}',
                   Colors.white.withValues(alpha: 0.9),
                   Colors.orange[700]!,
@@ -329,8 +329,8 @@ class _ArtistEarningsDashboardState extends State<ArtistEarningsDashboard>
 
     final breakdown = [
       {
-        'label': 'Gifts',
-        'amount': _earnings!.giftEarnings,
+        'label': 'Promotion Support',
+        'amount': _earnings!.promotionSupportEarnings,
         'color': Colors.pink
       },
       {
@@ -339,7 +339,7 @@ class _ArtistEarningsDashboardState extends State<ArtistEarningsDashboard>
         'color': Colors.purple
       },
       {
-        'label': 'Commissions',
+        'label': 'Commission Work',
         'amount': _earnings!.commissionEarnings,
         'color': Colors.blue
       },
@@ -506,7 +506,8 @@ class _ArtistEarningsDashboardState extends State<ArtistEarningsDashboard>
 
     switch (transaction.type) {
       case 'gift':
-        icon = Icons.card_giftcard;
+      case 'promotion_credit':
+        icon = Icons.auto_awesome;
         color = Colors.pink;
         break;
       case 'sponsorship':

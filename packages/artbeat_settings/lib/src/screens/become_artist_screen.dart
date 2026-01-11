@@ -66,7 +66,7 @@ class BecomeArtistScreen extends StatelessWidget {
                     Navigator.of(context).push(
                       MaterialPageRoute<void>(
                         builder: (context) =>
-                            const Modern2025OnboardingScreen(),
+                            const ArtistOnboardScreen(),
                       ),
                     );
                   },

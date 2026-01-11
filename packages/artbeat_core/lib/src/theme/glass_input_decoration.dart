@@ -30,69 +30,69 @@ class GlassInputDecoration extends InputDecoration {
     TextStyle? labelStyle,
     TextStyle? errorStyle,
   }) : super(
-          fillColor: fillColor ?? Colors.white.withAlpha(15),
-          hintStyle:
-              hintStyle ??
-              GoogleFonts.spaceGrotesk(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: Colors.white.withAlpha(179),
-              ),
-          labelStyle:
-              labelStyle ??
-              GoogleFonts.spaceGrotesk(
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-                color: Colors.white.withAlpha(179),
-                letterSpacing: 0.5,
-              ),
-          errorStyle:
-              errorStyle ??
-              GoogleFonts.spaceGrotesk(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFFFF3D8D),
-              ),
-          border:
-              border ??
-              OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(
-                  color: Colors.white.withAlpha(31),
-                  width: 1,
-                ),
-              ),
-          enabledBorder:
-              enabledBorder ??
-              OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(
-                  color: Colors.white.withAlpha(31),
-                  width: 1,
-                ),
-              ),
-          focusedBorder:
-              focusedBorder ??
-              OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(color: Color(0xFF22D3EE), width: 2),
-              ),
-          errorBorder:
-              errorBorder ??
-              OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(
-                  color: Color(0xFFFF3D8D),
-                  width: 1.5,
-                ),
-              ),
-          focusedErrorBorder:
-              focusedErrorBorder ??
-              OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(color: Color(0xFFFF3D8D), width: 2),
-              ),
-        );
+         fillColor: fillColor ?? Colors.white.withAlpha(15),
+         hintStyle:
+             hintStyle ??
+             GoogleFonts.spaceGrotesk(
+               fontSize: 14,
+               fontWeight: FontWeight.w600,
+               color: Colors.white.withAlpha(179),
+             ),
+         labelStyle:
+             labelStyle ??
+             GoogleFonts.spaceGrotesk(
+               fontSize: 12,
+               fontWeight: FontWeight.w800,
+               color: Colors.white.withAlpha(179),
+               letterSpacing: 0.5,
+             ),
+         errorStyle:
+             errorStyle ??
+             GoogleFonts.spaceGrotesk(
+               fontSize: 12,
+               fontWeight: FontWeight.w600,
+               color: const Color(0xFFFF3D8D),
+             ),
+         border:
+             border ??
+             OutlineInputBorder(
+               borderRadius: BorderRadius.circular(16),
+               borderSide: BorderSide(
+                 color: Colors.white.withAlpha(31),
+                 width: 1,
+               ),
+             ),
+         enabledBorder:
+             enabledBorder ??
+             OutlineInputBorder(
+               borderRadius: BorderRadius.circular(16),
+               borderSide: BorderSide(
+                 color: Colors.white.withAlpha(31),
+                 width: 1,
+               ),
+             ),
+         focusedBorder:
+             focusedBorder ??
+             OutlineInputBorder(
+               borderRadius: BorderRadius.circular(16),
+               borderSide: const BorderSide(color: Color(0xFF22D3EE), width: 2),
+             ),
+         errorBorder:
+             errorBorder ??
+             OutlineInputBorder(
+               borderRadius: BorderRadius.circular(16),
+               borderSide: const BorderSide(
+                 color: Color(0xFFFF3D8D),
+                 width: 1.5,
+               ),
+             ),
+         focusedErrorBorder:
+             focusedErrorBorder ??
+             OutlineInputBorder(
+               borderRadius: BorderRadius.circular(16),
+               borderSide: const BorderSide(color: Color(0xFFFF3D8D), width: 2),
+             ),
+       );
 
   /// Creates a glass input decoration with custom styling
   factory GlassInputDecoration.glass({
@@ -202,7 +202,8 @@ class GlassTextField extends StatelessWidget {
         color: Colors.white,
       ),
       cursorColor: const Color(0xFF22D3EE),
-      decoration: decoration ??
+      decoration:
+          decoration ??
           GlassInputDecoration(
             hintText: hintText,
             labelText: labelText,

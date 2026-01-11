@@ -828,70 +828,73 @@ class _HeaderUserBlock extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(right: 70),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (modeChip != null) ...[modeChip!, const SizedBox(height: 10)],
-          Row(
-            children: [
-              UserAvatar(
-                imageUrl: profileUrl,
-                displayName: displayName,
-                radius: 16,
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      displayName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.spaceGrotesk(
-                        color: Colors.white.withValues(alpha: 0.95),
-                        fontWeight: FontWeight.w900,
-                        fontSize: 14,
-                        letterSpacing: -0.2,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.spaceGrotesk(
-                        color: Colors.white.withValues(alpha: 0.60),
-                        fontWeight: FontWeight.w700,
-                        fontSize: 11.5,
-                      ),
-                    ),
-                  ],
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (modeChip != null) ...[modeChip!, const SizedBox(height: 10)],
+            Row(
+              children: [
+                UserAvatar(
+                  imageUrl: profileUrl,
+                  displayName: displayName,
+                  radius: 16,
                 ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 10),
-
-          // Role badge row
-          Row(
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              if (role != null)
-                Flexible(
-                  child: _NeonChip(
-                    label: role!.toUpperCase(),
-                    accent: const Color(0xFF7C4DFF),
-                    icon: Icons.verified_rounded,
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        displayName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.spaceGrotesk(
+                          color: Colors.white.withValues(alpha: 0.95),
+                          fontWeight: FontWeight.w900,
+                          fontSize: 14,
+                          letterSpacing: -0.2,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.spaceGrotesk(
+                          color: Colors.white.withValues(alpha: 0.60),
+                          fontWeight: FontWeight.w700,
+                          fontSize: 11.5,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              if (role != null) const SizedBox(width: 8),
-              if (showRoleToggle && roleToggle != null)
-                Flexible(child: roleToggle!),
-            ],
-          ),
-        ],
+              ],
+            ),
+
+            const SizedBox(height: 10),
+
+            // Role badge row
+            Row(
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                if (role != null)
+                  Flexible(
+                    child: _NeonChip(
+                      label: role!.toUpperCase(),
+                      accent: const Color(0xFF7C4DFF),
+                      icon: Icons.verified_rounded,
+                    ),
+                  ),
+                if (role != null) const SizedBox(width: 8),
+                if (showRoleToggle && roleToggle != null)
+                  Flexible(child: roleToggle!),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

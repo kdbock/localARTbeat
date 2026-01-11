@@ -4,14 +4,14 @@ import 'package:artbeat_core/artbeat_core.dart' as core;
 import '../../services/earnings_service.dart';
 import '../../models/earnings_model.dart';
 
-class ArtworkSalesDashboard extends StatefulWidget {
-  const ArtworkSalesDashboard({super.key});
+class ArtworkSalesHub extends StatefulWidget {
+  const ArtworkSalesHub({super.key});
 
   @override
-  State<ArtworkSalesDashboard> createState() => _ArtworkSalesDashboardState();
+  State<ArtworkSalesHub> createState() => _ArtworkSalesHubState();
 }
 
-class _ArtworkSalesDashboardState extends State<ArtworkSalesDashboard>
+class _ArtworkSalesHubState extends State<ArtworkSalesHub>
     with SingleTickerProviderStateMixin {
   final EarningsService _earningsService = EarningsService();
   final _scaffoldKey = GlobalKey<ScaffoldState>();

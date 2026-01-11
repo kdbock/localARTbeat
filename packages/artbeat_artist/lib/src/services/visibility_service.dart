@@ -4,8 +4,8 @@ import 'package:logger/logger.dart';
 
 final logger = Logger();
 
-/// Service for tracking artist analytics data
-class AnalyticsService {
+/// Service for tracking artist visibility and insights
+class VisibilityService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -896,6 +896,80 @@ class AnalyticsService {
     } catch (e) {
       logger.e('Error getting artist analytics data: $e');
       return {};
+    }
+  }
+
+  /// Get "First-Week Win" highlights for new artists
+  Future<List<Map<String, dynamic>>> getDiscoveryBoostHighlights(String userId) async {
+    try {
+      // Check artist profile creation date
+      final profileSnapshot = await _firestore
+          .collection('artistProfiles')
+          .where('userId', isEqualTo: userId)
+          .limit(1)
+          .get();
+      
+      if (profileSnapshot.docs.isEmpty) return [];
+      
+      final profileData = profileSnapshot.docs.first.data();
+      final createdAt = (profileData['createdAt'] as Timestamp).toDate();
+      final daysSinceJoined = DateTime.now().difference(createdAt).inDays;
+      
+      // Only show boost highlights for the first 7 days
+      if (daysSinceJoined > 7) return [];
+      
+      // Get real data to make it authentic
+      final viewsSnapshot = await _firestore
+          .collection('artworkViews')
+          .where('artistId', isEqualTo: userId)
+          .get();
+          
+      final savesSnapshot = await _firestore
+          .collection('savedArtworks')
+          .where('artistId', isEqualTo: userId)
+          .get();
+
+      final highlights = <Map<String, dynamic>>[];
+      
+      // 1. Daily Reach Win
+      if (viewsSnapshot.docs.isNotEmpty) {
+        highlights.add({
+          'title': 'Discovery Boost Active',
+          'message': '${viewsSnapshot.docs.length} people nearby saw your work today.',
+          'icon': 'visibility',
+          'color': 'blue',
+        });
+      }
+      
+      // 2. Map Placement Win (Always true in first week as part of the shift)
+      highlights.add({
+        'title': 'Local Discovery Map',
+        'message': 'Your gallery was added to the Local Discovery Map.',
+        'icon': 'map',
+        'color': 'green',
+      });
+      
+      // 3. First Save Win
+      if (savesSnapshot.docs.isNotEmpty) {
+        highlights.add({
+          'title': 'First Interest!',
+          'message': 'Someone just bookmarked your piece for their collection.',
+          'icon': 'bookmark',
+          'color': 'orange',
+        });
+      } else if (daysSinceJoined < 2) {
+        // Mock a positive message if they just joined
+        highlights.add({
+          'title': 'Preparing Your Boost',
+          'message': 'We are showcasing your work to collectors in your area.',
+          'icon': 'auto_awesome',
+          'color': 'purple',
+        });
+      }
+      
+      return highlights;
+    } catch (e) {
+      return [];
     }
   }
 

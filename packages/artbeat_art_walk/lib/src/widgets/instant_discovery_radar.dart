@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:artbeat_sponsorships/artbeat_sponsorships.dart';
 import 'package:artbeat_art_walk/src/models/public_art_model.dart';
 import 'package:artbeat_art_walk/src/services/instant_discovery_service.dart';
 import 'package:artbeat_art_walk/src/theme/art_walk_design_system.dart';
@@ -206,6 +208,19 @@ class _InstantDiscoveryRadarState extends State<InstantDiscoveryRadar>
               children: [_buildStatsWidget(), _buildMiniMapWidget()],
             ),
           ),
+          // Sponsor Banner
+          SponsorBanner(
+            placementKey: SponsorshipPlacements.discoverRadarBanner,
+            userLocation: LatLng(
+              widget.userPosition.latitude,
+              widget.userPosition.longitude,
+            ),
+            showPlaceholder: true,
+            onPlaceholderTap: () => Navigator.pushNamed(
+              context,
+              '/discover-sponsorship',
+            ),
+          ),
           // Art list
           _buildArtList(),
         ],
@@ -322,14 +337,14 @@ class _InstantDiscoveryRadarState extends State<InstantDiscoveryRadar>
           ),
           child: Stack(
             children: [
-              // Pulse rings for close art
+              // 1. Pulse rings for close art (bottom) - IgnorePointer is now inside
               ..._buildPulseRings(),
-              // Art pins with enhanced effects
+              // 2. Discovery trails (visual paths) - These are CustomPaint, not Positioned
+              ..._buildDiscoveryTrails().map((w) => IgnorePointer(child: w)),
+              // 3. User position (center) with compass
+              Center(child: IgnorePointer(child: _buildEnhancedUserPin())),
+              // 4. Art pins with enhanced effects (top - most interactive)
               ...widget.nearbyArt.map((art) => _buildEnhancedArtPin(art)),
-              // User position (center) with compass
-              Center(child: _buildEnhancedUserPin()),
-              // Discovery trails
-              ..._buildDiscoveryTrails(),
             ],
           ),
         );
@@ -475,18 +490,20 @@ class _InstantDiscoveryRadarState extends State<InstantDiscoveryRadar>
                   0.5 + (normalizedDistance * 0.45 * math.sin(angleRadians));
 
               return Positioned.fill(
-                child: Align(
-                  alignment: Alignment((x - 0.5) * 2, (y - 0.5) * 2),
-                  child: Container(
-                    width: 60 + (_pulseController.value * 20),
-                    height: 60 + (_pulseController.value * 20),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: ArtWalkDesignSystem.accentOrange.withValues(
-                          alpha: 0.3 * (1 - _pulseController.value),
+                child: IgnorePointer(
+                  child: Align(
+                    alignment: Alignment((x - 0.5) * 2, (y - 0.5) * 2),
+                    child: Container(
+                      width: 60 + (_pulseController.value * 20),
+                      height: 60 + (_pulseController.value * 20),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: ArtWalkDesignSystem.accentOrange.withValues(
+                            alpha: 0.3 * (1 - _pulseController.value),
+                          ),
+                          width: 2,
                         ),
-                        width: 2,
                       ),
                     ),
                   ),

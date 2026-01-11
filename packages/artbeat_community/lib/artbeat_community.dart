@@ -23,7 +23,6 @@ export 'services/firebase_storage_service.dart';
 export 'widgets/art_gallery_widgets.dart';
 export 'screens/art_community_hub.dart';
 export 'screens/create_art_post_screen.dart';
-export 'screens/artist_onboarding_screen.dart';
 export 'screens/art_battle_screen.dart';
 
 // Services

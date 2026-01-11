@@ -25,7 +25,7 @@ class EarningsService {
           totalEarnings: 0.0,
           availableBalance: 0.0,
           pendingBalance: 0.0,
-          giftEarnings: 0.0,
+          promotionSupportEarnings: 0.0,
           sponsorshipEarnings: 0.0,
           commissionEarnings: 0.0,
           subscriptionEarnings: 0.0,
@@ -110,7 +110,7 @@ class EarningsService {
       // Calculate statistics
       final stats = {
         'totalEarnings': 0.0,
-        'giftEarnings': 0.0,
+        'promotionSupportEarnings': 0.0,
         'sponsorshipEarnings': 0.0,
         'commissionEarnings': 0.0,
         'subscriptionEarnings': 0.0,
@@ -128,7 +128,9 @@ class EarningsService {
         // Breakdown by source
         switch (transaction.type) {
           case 'gift':
-            stats['giftEarnings'] = (stats['giftEarnings'] as double) + amount;
+          case 'promotion_credit':
+            stats['promotionSupportEarnings'] =
+                (stats['promotionSupportEarnings'] as double) + amount;
             break;
           case 'sponsorship':
             stats['sponsorshipEarnings'] =
@@ -376,7 +378,7 @@ class EarningsService {
             totalEarnings: amount,
             availableBalance: amount,
             pendingBalance: 0.0,
-            giftEarnings: type == 'gift' ? amount : 0.0,
+            promotionSupportEarnings: (type == 'gift' || type == 'promotion_credit') ? amount : 0.0,
             sponsorshipEarnings: type == 'sponsorship' ? amount : 0.0,
             commissionEarnings: type == 'commission' ? amount : 0.0,
             subscriptionEarnings: type == 'subscription' ? amount : 0.0,
@@ -410,7 +412,8 @@ class EarningsService {
           // Update specific earning type
           switch (type) {
             case 'gift':
-              updates['giftEarnings'] = FieldValue.increment(amount);
+            case 'promotion_credit':
+              updates['promotionSupportEarnings'] = FieldValue.increment(amount);
               break;
             case 'sponsorship':
               updates['sponsorshipEarnings'] = FieldValue.increment(amount);
@@ -465,7 +468,7 @@ class EarningsService {
         'currentMonthEarnings': currentMonthEarnings,
         'growthPercentage': growthPercentage,
         'earningsBreakdown': {
-          'gifts': earnings.giftEarnings,
+          'promotion_support': earnings.promotionSupportEarnings,
           'sponsorships': earnings.sponsorshipEarnings,
           'commissions': earnings.commissionEarnings,
           'subscriptions': earnings.subscriptionEarnings,

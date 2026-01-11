@@ -13,6 +13,9 @@ class ArtbeatEvent {
   final List<String> imageUrls; // multiple event images
   final String artistHeadshotUrl;
   final String eventBannerUrl;
+  final String artistHeadshotFit;
+  final String eventBannerFit;
+  final String imageFit;
   final DateTime dateTime;
   final String location;
   final List<TicketType> ticketTypes;
@@ -28,6 +31,8 @@ class ArtbeatEvent {
   final DateTime createdAt;
   final DateTime updatedAt;
   final String category; // Added category field
+  final String moderationStatus; // pending, approved, rejected, flagged, under_review
+  final DateTime? lastModerated;
 
   // Recurring event fields
   final bool isRecurring;
@@ -50,6 +55,9 @@ class ArtbeatEvent {
     required this.imageUrls,
     required this.artistHeadshotUrl,
     required this.eventBannerUrl,
+    this.artistHeadshotFit = 'cover',
+    this.eventBannerFit = 'cover',
+    this.imageFit = 'cover',
     required this.dateTime,
     required this.location,
     required this.ticketTypes,
@@ -65,6 +73,8 @@ class ArtbeatEvent {
     required this.createdAt,
     required this.updatedAt,
     required this.category,
+    this.moderationStatus = 'pending',
+    this.lastModerated,
     this.isRecurring = false,
     this.recurrencePattern,
     this.recurrenceInterval,
@@ -84,6 +94,9 @@ class ArtbeatEvent {
     required List<String> imageUrls,
     required String artistHeadshotUrl,
     required String eventBannerUrl,
+    String artistHeadshotFit = 'cover',
+    String eventBannerFit = 'cover',
+    String imageFit = 'cover',
     required DateTime dateTime,
     required String location,
     required List<TicketType> ticketTypes,
@@ -111,6 +124,9 @@ class ArtbeatEvent {
       imageUrls: imageUrls,
       artistHeadshotUrl: artistHeadshotUrl,
       eventBannerUrl: eventBannerUrl,
+      artistHeadshotFit: artistHeadshotFit,
+      eventBannerFit: eventBannerFit,
+      imageFit: imageFit,
       dateTime: dateTime,
       location: location,
       ticketTypes: ticketTypes,
@@ -146,6 +162,9 @@ class ArtbeatEvent {
       imageUrls: _parseStringList(data['imageUrls']),
       artistHeadshotUrl: data['artistHeadshotUrl']?.toString() ?? '',
       eventBannerUrl: data['eventBannerUrl']?.toString() ?? '',
+      artistHeadshotFit: data['artistHeadshotFit']?.toString() ?? 'cover',
+      eventBannerFit: data['eventBannerFit']?.toString() ?? 'cover',
+      imageFit: data['imageFit']?.toString() ?? 'cover',
       dateTime: _parseDateTime(data['dateTime']),
       location: data['location']?.toString() ?? '',
       ticketTypes: _parseTicketTypes(data['ticketTypes']),
@@ -161,6 +180,10 @@ class ArtbeatEvent {
       createdAt: _parseDateTime(data['createdAt']),
       updatedAt: _parseDateTime(data['updatedAt']),
       category: data['category']?.toString() ?? 'Other', // Default category
+      moderationStatus: data['moderationStatus']?.toString() ?? 'pending',
+      lastModerated: data['lastModerated'] != null
+          ? _parseDateTime(data['lastModerated'])
+          : null,
       isRecurring: data['isRecurring'] as bool? ?? false,
       recurrencePattern: data['recurrencePattern']?.toString(),
       recurrenceInterval: data['recurrenceInterval'] as int?,
@@ -185,6 +208,9 @@ class ArtbeatEvent {
       imageUrls: _parseStringList(data['imageUrls']),
       artistHeadshotUrl: data['artistHeadshotUrl']?.toString() ?? '',
       eventBannerUrl: data['eventBannerUrl']?.toString() ?? '',
+      artistHeadshotFit: data['artistHeadshotFit']?.toString() ?? 'cover',
+      eventBannerFit: data['eventBannerFit']?.toString() ?? 'cover',
+      imageFit: data['imageFit']?.toString() ?? 'cover',
       dateTime: _parseDateTime(data['dateTime']),
       location: data['location']?.toString() ?? '',
       ticketTypes: _parseTicketTypes(data['ticketTypes']),
@@ -200,6 +226,10 @@ class ArtbeatEvent {
       createdAt: _parseDateTime(data['createdAt']),
       updatedAt: _parseDateTime(data['updatedAt']),
       category: data['category']?.toString() ?? 'Other',
+      moderationStatus: data['moderationStatus']?.toString() ?? 'pending',
+      lastModerated: data['lastModerated'] != null
+          ? _parseDateTime(data['lastModerated'])
+          : null,
       isRecurring: data['isRecurring'] as bool? ?? false,
       recurrencePattern: data['recurrencePattern']?.toString(),
       recurrenceInterval: data['recurrenceInterval'] as int?,
@@ -223,6 +253,9 @@ class ArtbeatEvent {
       'imageUrls': imageUrls,
       'artistHeadshotUrl': artistHeadshotUrl,
       'eventBannerUrl': eventBannerUrl,
+      'artistHeadshotFit': artistHeadshotFit,
+      'eventBannerFit': eventBannerFit,
+      'imageFit': imageFit,
       'dateTime': Timestamp.fromDate(dateTime),
       'location': location,
       'ticketTypes': ticketTypes.map((t) => t.toMap()).toList(),
@@ -238,6 +271,9 @@ class ArtbeatEvent {
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
       'category': category, // Added category field
+      'moderationStatus': moderationStatus,
+      'lastModerated':
+          lastModerated != null ? Timestamp.fromDate(lastModerated!) : null,
       'isRecurring': isRecurring,
       'recurrencePattern': recurrencePattern,
       'recurrenceInterval': recurrenceInterval,
@@ -264,6 +300,9 @@ class ArtbeatEvent {
     List<String>? imageUrls,
     String? artistHeadshotUrl,
     String? eventBannerUrl,
+    String? artistHeadshotFit,
+    String? eventBannerFit,
+    String? imageFit,
     DateTime? dateTime,
     String? location,
     List<TicketType>? ticketTypes,
@@ -279,6 +318,8 @@ class ArtbeatEvent {
     DateTime? createdAt,
     DateTime? updatedAt,
     String? category,
+    String? moderationStatus,
+    DateTime? lastModerated,
     bool? isRecurring,
     String? recurrencePattern,
     int? recurrenceInterval,
@@ -297,6 +338,9 @@ class ArtbeatEvent {
       imageUrls: imageUrls ?? this.imageUrls,
       artistHeadshotUrl: artistHeadshotUrl ?? this.artistHeadshotUrl,
       eventBannerUrl: eventBannerUrl ?? this.eventBannerUrl,
+      artistHeadshotFit: artistHeadshotFit ?? this.artistHeadshotFit,
+      eventBannerFit: eventBannerFit ?? this.eventBannerFit,
+      imageFit: imageFit ?? this.imageFit,
       dateTime: dateTime ?? this.dateTime,
       location: location ?? this.location,
       ticketTypes: ticketTypes ?? this.ticketTypes,
@@ -312,6 +356,8 @@ class ArtbeatEvent {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? DateTime.now(),
       category: category ?? this.category, // Added category field
+      moderationStatus: moderationStatus ?? this.moderationStatus,
+      lastModerated: lastModerated ?? this.lastModerated,
       isRecurring: isRecurring ?? this.isRecurring,
       recurrencePattern: recurrencePattern ?? this.recurrencePattern,
       recurrenceInterval: recurrenceInterval ?? this.recurrenceInterval,

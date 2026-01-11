@@ -10,29 +10,30 @@ import '../widgets/local_galleries_widget.dart';
 import '../widgets/upcoming_events_row_widget.dart';
 import '../widgets/artist_subscription_cta_widget.dart';
 import '../services/earnings_service.dart';
-import '../services/analytics_service.dart';
+import '../services/visibility_service.dart';
 import '../models/earnings_model.dart';
 
-class ArtistDashboardScreen extends StatefulWidget {
-  const ArtistDashboardScreen({super.key});
+class GalleryHubScreen extends StatefulWidget {
+  const GalleryHubScreen({super.key});
 
   @override
-  State<ArtistDashboardScreen> createState() => _ArtistDashboardScreenState();
+  State<GalleryHubScreen> createState() => _GalleryHubScreenState();
 }
 
-class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
+class _GalleryHubScreenState extends State<GalleryHubScreen> {
   final _scrollController = ScrollController();
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   // Services
   final EarningsService _earningsService = EarningsService();
-  final AnalyticsService _analyticsService = AnalyticsService();
+  final VisibilityService _analyticsService = VisibilityService();
 
   bool _isLoading = true;
   String? _error;
   EarningsModel? _earnings;
   Map<String, dynamic> _analytics = {};
   List<ActivityModel> _recentActivities = [];
+  List<Map<String, dynamic>> _discoveryHighlights = [];
 
   @override
   void initState() {
@@ -55,16 +56,24 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
 
       // Load real data from services
       final earnings = await _earningsService.getArtistEarnings();
-      final analytics = await _loadAnalyticsData();
+      final analytics = await _loadVisibilityData();
 
       // Load recent activities from various sources
       final activities = await _loadRecentActivities();
+      
+      // Load discovery boost highlights
+      final userId = _analyticsService.getCurrentUserId();
+      List<Map<String, dynamic>> highlights = [];
+      if (userId != null) {
+        highlights = await _analyticsService.getDiscoveryBoostHighlights(userId);
+      }
 
       if (mounted) {
         setState(() {
           _earnings = earnings;
           _analytics = analytics;
           _recentActivities = activities;
+          _discoveryHighlights = highlights;
           _isLoading = false;
         });
       }
@@ -78,7 +87,7 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
     }
   }
 
-  Future<Map<String, dynamic>> _loadAnalyticsData() async {
+  Future<Map<String, dynamic>> _loadVisibilityData() async {
     try {
       final userId = _analyticsService.getCurrentUserId();
       if (userId == null) return {};
@@ -266,8 +275,8 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
 
         activities.add(ActivityModel(
           type: ActivityType.gift,
-          title: 'Gift Received',
-          description: 'Received a gift of \$${amount.toStringAsFixed(2)}',
+          title: 'Support Received',
+          description: 'Received \$${amount.toStringAsFixed(2)} in Promotion Support',
           timeAgo: _formatTimeAgo(purchasedAt),
           timestamp: purchasedAt,
         ));
@@ -450,20 +459,20 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return core.MainLayout(
-      currentIndex: 1, // Artist Dashboard tab in bottom navigation
+      currentIndex: 1, // Gallery Hub tab in bottom navigation
       scaffoldKey: _scaffoldKey,
       appBar: const ArtistHeader(
-        title: 'Artist Dashboard',
+        title: 'My Gallery Hub',
         showBackButton: false,
         showSearch: false,
         showDeveloper: true,
       ),
       drawer: const core.ArtbeatDrawer(),
-      child: _buildDashboardContent(),
+      child: _buildHubContent(),
     );
   }
 
-  Widget _buildDashboardContent() {
+  Widget _buildHubContent() {
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -480,7 +489,7 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              tr('art_walk_error_loading_dashboard'),
+              tr('art_walk_error_loading_hub'),
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
@@ -523,6 +532,12 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
               padding: const EdgeInsets.all(16.0),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
+                  // Discovery Boost Section for New Artists
+                  if (_discoveryHighlights.isNotEmpty) ...[
+                    _buildDiscoveryBoostSection(),
+                    const SizedBox(height: 24),
+                  ],
+
                   // Stats Overview Section
                   Text(
                     tr('art_walk_overview'),
@@ -540,15 +555,15 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
                     mainAxisSpacing: 16,
                     children: [
                       _buildStatCard(
-                        'Total Earnings',
+                        'Total Support',
                         '\$${_earnings?.totalEarnings.toStringAsFixed(2) ?? '0.00'}',
                         Icons.attach_money,
                         Colors.green,
                       ),
                       _buildStatCard(
-                        'Available Balance',
-                        '\$${_earnings?.availableBalance.toStringAsFixed(2) ?? '0.00'}',
-                        Icons.account_balance_wallet,
+                        'Promotion Credits',
+                        '${_earnings?.availableBalance.toInt() ?? 0} (≈${((_earnings?.availableBalance ?? 0) * 100).toInt()} views)',
+                        Icons.auto_awesome,
                         Colors.teal,
                       ),
                       _buildStatCard(
@@ -564,13 +579,13 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
                         Colors.indigo,
                       ),
                       _buildStatCard(
-                        'Gift Earnings',
-                        '\$${_earnings?.giftEarnings.toStringAsFixed(2) ?? '0.00'}',
+                        'Promotion Support',
+                        '\$${_earnings?.promotionSupportEarnings.toStringAsFixed(2) ?? '0.00'}',
                         Icons.card_giftcard,
                         Colors.purple,
                       ),
                       _buildStatCard(
-                        'Commission Earnings',
+                        'Commission Work',
                         '\$${_earnings?.commissionEarnings.toStringAsFixed(2) ?? '0.00'}',
                         Icons.work,
                         Colors.amber,
@@ -582,7 +597,7 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
                         Colors.orange,
                       ),
                       _buildStatCard(
-                        'Pending Balance',
+                        'Processing',
                         '\$${_earnings?.pendingBalance.toStringAsFixed(2) ?? '0.00'}',
                         Icons.pending,
                         Colors.red,
@@ -708,7 +723,7 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
                           Navigator.pushNamed(context, '/artist/activity');
                         },
                         child: Text(tr(
-                            'artist_artist_dashboard_text_view_all_activity')),
+                            'artist_artist_hub_text_view_all_activity')),
                       ),
                     ),
                   ],
@@ -786,9 +801,9 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
             Expanded(
               child: _buildThemedActionButton(
                 context,
-                title: 'View Analytics',
-                subtitle: 'Track your performance',
-                icon: Icons.analytics,
+                title: 'Views & Interest',
+                subtitle: 'Track your gallery reach',
+                icon: Icons.visibility,
                 gradient: const LinearGradient(
                   colors: [Colors.green, Colors.teal],
                   begin: Alignment.topLeft,
@@ -1039,6 +1054,102 @@ class _ArtistDashboardScreenState extends State<ArtistDashboardScreen> {
     Navigator.pop(context);
     // Navigate to general post creation screen
     Navigator.pushNamed(context, '/community/create');
+  }
+
+  Widget _buildDiscoveryBoostSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(Icons.auto_awesome, color: Colors.amber, size: 20),
+            const SizedBox(width: 8),
+            Text(
+              'Your Studio Launch Wins',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.amber.shade800,
+                  ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 110,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: _discoveryHighlights.length,
+            itemBuilder: (context, index) {
+              final highlight = _discoveryHighlights[index];
+              final color = _getHighlightColor(highlight['color'] as String);
+              
+              return Container(
+                width: 240,
+                margin: const EdgeInsets.only(right: 12),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: color.withValues(alpha: 0.3)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(_getHighlightIcon(highlight['icon'] as String), 
+                             color: color, size: 18),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            highlight['title'] as String,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: color,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      highlight['message'] as String,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: color.withValues(alpha: 0.9),
+                        fontWeight: FontWeight.w500,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Color _getHighlightColor(String colorName) {
+    switch (colorName) {
+      case 'blue': return Colors.blue.shade700;
+      case 'green': return Colors.green.shade700;
+      case 'orange': return Colors.orange.shade700;
+      case 'purple': return Colors.purple.shade700;
+      default: return Colors.blue.shade700;
+    }
+  }
+
+  IconData _getHighlightIcon(String iconName) {
+    switch (iconName) {
+      case 'visibility': return Icons.visibility;
+      case 'map': return Icons.map;
+      case 'bookmark': return Icons.bookmark;
+      case 'auto_awesome': return Icons.auto_awesome;
+      default: return Icons.info;
+    }
   }
 
   Widget _buildThemedActionButton(

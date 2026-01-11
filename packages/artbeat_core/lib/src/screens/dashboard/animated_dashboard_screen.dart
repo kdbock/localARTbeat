@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:artbeat_sponsorships/artbeat_sponsorships.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flag/flag.dart';
 import 'package:provider/provider.dart';
@@ -158,6 +159,12 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                         onTap: () =>
                             Navigator.pushNamed(context, '/old-dashboard'),
                       ),
+                    ),
+
+                    const SponsorBanner(
+                      placementKey: SponsorshipPlacements.dashboardTop,
+                      padding: EdgeInsets.symmetric(vertical: 8),
+                      showPlaceholder: true,
                     ),
 
                     const SizedBox(height: 14),
@@ -337,6 +344,12 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                             onBusiness: () =>
                                 Navigator.pushNamed(context, '/local-business'),
                           ),
+                        ),
+
+                        const SponsorBanner(
+                          placementKey: SponsorshipPlacements.dashboardFooter,
+                          padding: EdgeInsets.symmetric(vertical: 8),
+                          showPlaceholder: true,
                         ),
 
                         const SizedBox(height: 16),

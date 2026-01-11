@@ -12,6 +12,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_capture/artbeat_capture.dart';
 import 'package:artbeat_art_walk/src/widgets/art_walk_drawer.dart';
+import 'package:artbeat_sponsorships/artbeat_sponsorships.dart';
 
 import 'package:artbeat_art_walk/src/theme/art_walk_design_system.dart';
 
@@ -1060,6 +1061,23 @@ class CaptureDetailBottomSheet extends StatelessWidget {
                     ],
                   ),
                 ],
+                const SizedBox(height: 16),
+                // Sponsor Banner
+                SponsorBanner(
+                  placementKey: SponsorshipPlacements.captureDetailBanner,
+                  userLocation: capture.location != null
+                      ? LatLng(
+                          capture.location!.latitude,
+                          capture.location!.longitude,
+                        )
+                      : null,
+                  padding: EdgeInsets.zero,
+                  showPlaceholder: true,
+                  onPlaceholderTap: () => Navigator.pushNamed(
+                    context,
+                    '/capture-sponsorship',
+                  ),
+                ),
                 const SizedBox(height: 24),
                 SizedBox(
                   width: double.infinity,

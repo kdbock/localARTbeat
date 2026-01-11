@@ -7,6 +7,7 @@ import 'package:share_plus/share_plus.dart' as share_plus;
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 import 'package:artbeat_art_walk/artbeat_art_walk.dart';
+import 'package:artbeat_sponsorships/artbeat_sponsorships.dart';
 import 'package:artbeat_core/artbeat_core.dart'
     hide GlassCard, WorldBackground, HudTopBar, GradientCTAButton;
 import 'package:logger/logger.dart';
@@ -535,6 +536,15 @@ class _ArtWalkDetailScreenState extends State<ArtWalkDetailScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildHeroSection(),
+
+              SponsorBanner(
+                placementKey: SponsorshipPlacements.artWalkHeader,
+                padding: const EdgeInsets.only(top: 16),
+                showPlaceholder: true,
+                onPlaceholderTap: () =>
+                    Navigator.pushNamed(context, '/art-walk-sponsorship'),
+              ),
+
               const SizedBox(height: 24),
               _buildStatsSection(),
               const SizedBox(height: 16),

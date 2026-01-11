@@ -7,6 +7,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:artbeat_sponsorships/artbeat_sponsorships.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_art_walk/artbeat_art_walk.dart';
 
@@ -286,7 +287,7 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
     return SliverAppBar(
       pinned: false,
       floating: false,
-      expandedHeight: 400,
+      expandedHeight: 520,
       toolbarHeight: 80.0,
       backgroundColor: Colors.transparent,
       elevation: 0,
@@ -299,9 +300,10 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
             padding: const EdgeInsets.fromLTRB(18, 10, 18, 0),
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final showSearchInput = constraints.maxHeight > 140;
-                final showLocationPill = constraints.maxHeight > 260;
-                final showQuickStats = constraints.maxHeight > 320;
+                final showSponsor = constraints.maxHeight > 180;
+                final showSearchInput = constraints.maxHeight > 220;
+                final showLocationPill = constraints.maxHeight > 340;
+                final showQuickStats = constraints.maxHeight > 400;
 
                 return Column(
                   mainAxisSize: MainAxisSize.min,
@@ -387,6 +389,15 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
                         ),
                       ],
                     ),
+
+                    // Sponsor Banner
+                    if (showSponsor)
+                      const SponsorBanner(
+                        placementKey: SponsorshipPlacements.dashboardTop,
+                        padding: EdgeInsets.only(top: 12),
+                        showPlaceholder: true,
+                      ),
+
                     if (showSearchInput) ...[
                       const SizedBox(height: 12),
                       GestureDetector(
@@ -1910,6 +1921,13 @@ class _CommunityTab extends StatelessWidget {
 
         // Conversion zone (from deleted)
         SliverToBoxAdapter(child: DashboardArtistCtaSection(viewModel: vm)),
+
+        const SliverToBoxAdapter(
+          child: SponsorBanner(
+            placementKey: SponsorshipPlacements.dashboardFooter,
+            showPlaceholder: true,
+          ),
+        ),
 
         const SliverToBoxAdapter(child: SizedBox(height: 110)),
       ],
