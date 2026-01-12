@@ -20,16 +20,18 @@ class SecureFirebaseConfig {
 
       if (useDebugProvider) {
         await FirebaseAppCheck.instance.activate(
+          // ignore: deprecated_member_use
           androidProvider: AndroidProvider.debug,
+          // ignore: deprecated_member_use
           appleProvider: AppleProvider.debug,
         );
-        debugPrint('🔐 AppCheck initialized in DEBUG mode');
       } else {
         await FirebaseAppCheck.instance.activate(
+          // ignore: deprecated_member_use
           androidProvider: AndroidProvider.playIntegrity,
+          // ignore: deprecated_member_use
           appleProvider: AppleProvider.appAttestWithDeviceCheckFallback,
         );
-        debugPrint('🔐 AppCheck initialized with Attest/Integrity');
       }
     } catch (e) {
       debugPrint('⚠️ AppCheck activation failed: $e');

@@ -76,7 +76,7 @@ class _TicketPurchaseSheetState extends State<TicketPurchaseSheet> {
         builder: (context, scrollController) {
           return ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-            child: BackdropFilter(
+            child: SafeBackdropFilter(
               filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
               child: Container(
                 decoration: BoxDecoration(

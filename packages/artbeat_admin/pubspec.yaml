@@ -13,6 +13,8 @@ dependencies:
     sdk: flutter
   artbeat_core:
     path: ../artbeat_core
+  artbeat_events:
+    path: ../artbeat_events
   artbeat_ads:
     path: ../artbeat_ads
   artbeat_capture:

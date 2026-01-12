@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../widgets/safe_backdrop_filter.dart';
 
 class GlassCard extends StatelessWidget {
   final Widget child;
@@ -54,36 +55,38 @@ class GlassCard extends StatelessWidget {
     final shadowList =
         shadows ?? (shadow != null ? <BoxShadow>[shadow!] : null);
 
+    final cardBody = Container(
+      padding: padding,
+      decoration: BoxDecoration(
+        color: effectiveGlassColor,
+        borderRadius: borderRadiusGeometry,
+        border: Border.all(
+          color: effectiveBorderColor,
+        ),
+        boxShadow: shadowList ??
+            [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.35),
+                blurRadius: 26,
+                offset: const Offset(0, 16),
+              ),
+              if (showAccentGlow)
+                BoxShadow(
+                  color: (accentColor ?? const Color(0xFF00FD8A))
+                      .withValues(alpha: 0.25),
+                  blurRadius: 32,
+                  spreadRadius: 2,
+                ),
+            ],
+      ),
+      child: child,
+    );
+
     Widget content = ClipRRect(
       borderRadius: borderRadiusGeometry,
-      child: BackdropFilter(
+      child: SafeBackdropFilter(
         filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-        child: Container(
-          padding: padding,
-          decoration: BoxDecoration(
-            color: effectiveGlassColor,
-            borderRadius: borderRadiusGeometry,
-            border: Border.all(
-              color: effectiveBorderColor,
-            ),
-            boxShadow: shadowList ??
-                [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.35),
-                    blurRadius: 26,
-                    offset: const Offset(0, 16),
-                  ),
-                  if (showAccentGlow)
-                    BoxShadow(
-                      color: (accentColor ?? const Color(0xFF00FD8A))
-                          .withValues(alpha: 0.25),
-                      blurRadius: 32,
-                      spreadRadius: 2,
-                    ),
-                ],
-          ),
-          child: child,
-        ),
+        child: cardBody,
       ),
     );
 

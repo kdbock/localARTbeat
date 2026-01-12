@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:artbeat_core/artbeat_core.dart';
 import '../models/artbeat_event.dart';
 import '../widgets/events_drawer.dart';
 import 'events_list_screen.dart';
@@ -1482,7 +1483,7 @@ class _Glass extends StatelessWidget {
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(radius),
-      child: BackdropFilter(
+      child: SafeBackdropFilter(
         filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
         child: Container(
           padding: padding,

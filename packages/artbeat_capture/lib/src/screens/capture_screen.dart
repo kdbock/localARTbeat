@@ -27,7 +27,7 @@ class _CaptureScreenState extends State<CaptureScreen> {
 
   Future<void> _initializeCamera() async {
     setState(() => _isInitializing = true);
-    final success = await _cameraService.initialize();
+    await _cameraService.initialize();
     if (mounted) {
       setState(() => _isInitializing = false);
     }

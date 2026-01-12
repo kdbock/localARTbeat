@@ -547,6 +547,7 @@ class _WrittenContentDetailScreenState
 
       // 4. Verification - the backend should handle the webhook,
       // but we can refresh local state
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Payment successful!')),
       );
@@ -562,6 +563,7 @@ class _WrittenContentDetailScreenState
         errorMessage = e.toString();
       }
 
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Purchase failed: $errorMessage')),
       );
@@ -611,5 +613,5 @@ class _WrittenContentDetailScreenState
 }
 
 class StripeException {
-  get error => null;
+  dynamic get error => null;
 }

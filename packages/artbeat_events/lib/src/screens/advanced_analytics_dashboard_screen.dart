@@ -162,6 +162,7 @@ class _AdvancedAnalyticsDashboardScreenState
               title: widget.artistId == null
                   ? 'event_analytics_platform'.tr()
                   : 'event_analytics_my'.tr(),
+              showBack: true,
               rightAction: _buildPeriodSelector(),
               onBack: () => Navigator.pop(context),
             ),

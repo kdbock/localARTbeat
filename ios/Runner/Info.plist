@@ -69,6 +69,8 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>FLTEnableImpeller</key>
+	<false/>
 	<key>GMSApiKey</key>
 	<string>AIzaSyBvmSCvenoo9u-eXNzKm_oDJJJjC0MbqHA</string>
 	<key>io.flutter.plugins.googlemaps.API_KEY</key>

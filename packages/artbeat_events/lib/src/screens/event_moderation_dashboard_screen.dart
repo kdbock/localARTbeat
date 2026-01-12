@@ -88,6 +88,7 @@ class _EventModerationDashboardScreenState
             children: [
               EventsHudTopBar(
                 title: 'event_mod_title'.tr(),
+                showBack: true,
                 onBack: () => Navigator.pop(context),
               ),
 
