@@ -75,6 +75,7 @@ class _EventBulkManagementScreenState extends State<EventBulkManagementScreen> {
           children: [
             EventsHudTopBar(
               title: 'event_bulk_title'.tr(),
+              showBack: true,
               onBack: () => Navigator.pop(context),
             ),
             Expanded(

@@ -166,7 +166,7 @@ class TicketType {
 
   /// Convert TicketType to Map (for Firestore)
   Map<String, dynamic> toMap() {
-    return {
+    final map = {
       'id': id,
       'name': name,
       'description': description,
@@ -179,6 +179,9 @@ class TicketType {
       'benefits': benefits,
       'metadata': metadata,
     };
+    // Remove null values to prevent iOS crash in cloud_firestore plugin
+    map.removeWhere((key, value) => value == null);
+    return map;
   }
 
   /// Create a copy of this TicketType with the given fields replaced

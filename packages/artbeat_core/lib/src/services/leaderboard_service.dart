@@ -167,7 +167,7 @@ class LeaderboardService extends ChangeNotifier {
     String? currentUserId,
   }) async {
     try {
-      AppLogger.info('🏆 Getting leaderboard for ${category.displayName}');
+      AppLogger.info('🏆 Getting leaderboard for ${category.displayName} from collection: ${_usersCollection.path}');
 
       Query query;
 
@@ -197,6 +197,7 @@ class LeaderboardService extends ChangeNotifier {
       }
 
       final snapshot = await query.get();
+      AppLogger.info('🏆 Firestore returned ${snapshot.docs.length} documents for ${category.displayName}');
 
       final List<LeaderboardEntry> entries = [];
 
@@ -209,19 +210,31 @@ class LeaderboardService extends ChangeNotifier {
         entries.add(entry);
 
         // Debug logging
-        debugPrint(
-          '🏆 Entry ${i + 1}: ${entry.fullName ?? entry.username} - Value: ${entry.value}',
+        AppLogger.info(
+          '🏆 Entry ${i + 1}: ID: ${doc.id}, Name: ${entry.fullName ?? entry.username}, XP: ${entry.experiencePoints}, Value: ${entry.value}',
         );
       }
 
-      AppLogger.info('🏆 Found ${entries.length} leaderboard entries');
-      debugPrint(
-        '🏆 Final order: ${entries.map((e) => '${e.fullName ?? e.username}(${e.value})').join(', ')}',
-      );
+      AppLogger.info('🏆 Found ${entries.length} leaderboard entries total');
       return entries;
     } catch (e) {
       AppLogger.error('❌ Error getting leaderboard: $e');
-      return [];
+      // If the ordered query fails (e.g. index missing), try a simple fetch as last resort
+      try {
+        AppLogger.warning('🏆 Trying fallback simple fetch for ${category.displayName}...');
+        final fallbackSnapshot = await _usersCollection.limit(limit).get();
+        final List<LeaderboardEntry> fallbackEntries = [];
+        for (int i = 0; i < fallbackSnapshot.docs.length; i++) {
+          final doc = fallbackSnapshot.docs[i];
+          final userData = doc.data() as Map<String, dynamic>;
+          userData['id'] = doc.id;
+          fallbackEntries.add(LeaderboardEntry.fromUserData(userData, category, i + 1));
+        }
+        return fallbackEntries;
+      } catch (fallbackError) {
+        AppLogger.error('❌ Fallback fetch also failed: $fallbackError');
+        return [];
+      }
     }
   }
 

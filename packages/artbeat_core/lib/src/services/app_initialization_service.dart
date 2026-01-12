@@ -1,5 +1,6 @@
 import 'image_management_service.dart';
 import '../utils/logger.dart';
+import '../utils/device_utils.dart';
 
 /// Service to handle app initialization tasks
 class AppInitializationService {
@@ -21,6 +22,9 @@ class AppInitializationService {
     AppLogger.info('🚀 Initializing ARTbeat Core Services...');
 
     try {
+      // Initialize device info
+      await DeviceUtils.initialize();
+
       // Initialize image management service
       await ImageManagementService().initialize();
 

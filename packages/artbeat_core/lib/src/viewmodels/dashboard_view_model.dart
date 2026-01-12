@@ -743,6 +743,12 @@ class DashboardViewModel extends ChangeNotifier {
         try {
           final loginResult = await rewardsService.processDailyLogin(userId);
           loginStreak = (loginResult['streak'] as int?) ?? 0;
+          
+          // If a new login was processed today, refresh the user model to get updated XP/Level
+          if (loginResult['alreadyLoggedIn'] == false) {
+            AppLogger.info('✨ Daily login processed, refreshing user data...');
+            await _loadCurrentUser();
+          }
         } catch (e) {
           AppLogger.error('❌ Error getting login streak: $e');
         }

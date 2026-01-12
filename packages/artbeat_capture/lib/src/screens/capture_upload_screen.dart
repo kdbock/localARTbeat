@@ -30,7 +30,7 @@ class _CaptureUploadScreenState extends State<CaptureUploadScreen> {
 
   Future<void> _pickImage() async {
     final File? result = await Navigator.of(context).push<File>(
-      MaterialPageRoute(
+      MaterialPageRoute<File>(
         builder: (context) => const capture_widgets.CaptureScreen(isPicker: true),
       ),
     );
@@ -58,7 +58,7 @@ class _CaptureUploadScreenState extends State<CaptureUploadScreen> {
     }
 
     Navigator.of(context).push(
-      MaterialPageRoute(
+      MaterialPageRoute<void>(
         builder: (context) => CaptureViewScreen(
           imageFile: _selectedImage!,
           title: _titleController.text.trim(),

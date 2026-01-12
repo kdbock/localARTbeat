@@ -9,3 +9,4 @@ export 'location_utils.dart';
 export 'connectivity_utils.dart';
 export 'permission_utils.dart';
 export 'distance_utils.dart';
+export 'device_utils.dart';

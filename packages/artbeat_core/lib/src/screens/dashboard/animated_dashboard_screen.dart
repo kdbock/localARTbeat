@@ -8,6 +8,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flag/flag.dart';
 import 'package:provider/provider.dart';
 import 'package:artbeat_core/src/theme/artbeat_colors.dart';
+import 'package:artbeat_core/src/services/leaderboard_service.dart';
+import 'package:artbeat_core/src/utils/logger.dart';
 import 'package:artbeat_core/src/widgets/artbeat_drawer.dart';
 import 'package:artbeat_capture/artbeat_capture.dart';
 import 'package:artbeat_art_walk/artbeat_art_walk.dart' as artWalkLib;
@@ -74,7 +76,10 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
     final level = user?.level ?? 1;
     final xp = user?.experiencePoints ?? 0;
     final xpProgress = _rewardsService.getLevelProgress(xp, level);
-    final streakDays = dashboardViewModel.loginStreak;
+    final streakDays = math.max(
+      dashboardViewModel.loginStreak,
+      dashboardViewModel.currentStreak,
+    );
     final w = MediaQuery.of(context).size.width;
     const horizontalPadding = 18.0;
     final questButtonWidth = math.max(0.0, w - horizontalPadding * 2);
@@ -125,9 +130,8 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
 
                       child: _GameHUD(
                         level: level,
-
+                        xp: xp,
                         xpProgress: xpProgress,
-
                         streakDays: streakDays,
 
                         onMenu: _openDrawer,
@@ -352,6 +356,11 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                           showPlaceholder: true,
                         ),
 
+                        _LeaderboardSection(
+                          intro: _intro,
+                          index: 5,
+                        ),
+
                         const SizedBox(height: 16),
                       ],
                     ),
@@ -372,6 +381,7 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
 
 class _GameHUD extends StatelessWidget {
   final int level;
+  final int xp;
   final double xpProgress;
   final int streakDays;
   final VoidCallback onMenu;
@@ -381,6 +391,7 @@ class _GameHUD extends StatelessWidget {
 
   const _GameHUD({
     required this.level,
+    required this.xp,
     required this.xpProgress,
     required this.streakDays,
     required this.onMenu,
@@ -400,7 +411,9 @@ class _GameHUD extends StatelessWidget {
             children: [
               _LevelBadge(level: level),
               const SizedBox(width: 10),
-              Expanded(child: _XPBar(progress: xpProgress)),
+              Expanded(
+                child: _XPBar(progress: xpProgress, xp: xp, level: level),
+              ),
               const SizedBox(width: 10),
               _Streak(streakDays: streakDays),
               const SizedBox(width: 10),
@@ -1003,7 +1016,7 @@ class _HUDPill extends StatelessWidget {
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.06),
               borderRadius: BorderRadius.circular(18),
@@ -1060,7 +1073,7 @@ class _LevelBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
         gradient: LinearGradient(
@@ -1087,21 +1100,45 @@ class _LevelBadge extends StatelessWidget {
 
 class _XPBar extends StatelessWidget {
   final double progress;
-  const _XPBar({required this.progress});
+  final int xp;
+  final int level;
+  const _XPBar({
+    required this.progress,
+    required this.xp,
+    required this.level,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'animated_dashboard_xp_label'.tr(),
-          style: GoogleFonts.spaceGrotesk(
-            color: Colors.white.withValues(alpha: 0.65),
-            fontSize: 10.5,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 1.0,
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Flexible(
+              child: Text(
+                'animated_dashboard_xp_label'.tr(),
+                style: GoogleFonts.spaceGrotesk(
+                  color: Colors.white.withValues(alpha: 0.65),
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.0,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Text(
+              '$xp XP',
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white.withValues(alpha: 0.85),
+                fontSize: 10.5,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 6),
         ClipRRect(
@@ -1138,7 +1175,7 @@ class _Streak extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
         color: Colors.white.withValues(alpha: 0.08),
@@ -1568,8 +1605,8 @@ class _StampPopIn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final start = 0.18 + index * 0.09;
-    final end = start + 0.42;
+    final start = (0.18 + index * 0.09).clamp(0.0, 1.0);
+    final end = (start + 0.42).clamp(0.0, 1.0);
 
     final fade = CurvedAnimation(
       parent: intro,
@@ -1597,6 +1634,356 @@ class _StampPopIn extends StatelessWidget {
           angle: tilt.value,
           child: Transform.scale(scale: pop.value, child: child),
         ),
+      ),
+    );
+  }
+}
+
+class _LeaderboardSection extends StatefulWidget {
+  final AnimationController intro;
+  final int index;
+
+  const _LeaderboardSection({
+    required this.intro,
+    required this.index,
+  });
+
+  @override
+  State<_LeaderboardSection> createState() => _LeaderboardSectionState();
+}
+
+class _LeaderboardSectionState extends State<_LeaderboardSection> {
+  final LeaderboardService _leaderboardService = LeaderboardService();
+  List<LeaderboardEntry> _topUsers = [];
+  bool _isLoading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    if (!mounted) return;
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    try {
+      AppLogger.info('🏆 Dashboard: Fetching Hall of Legends (XP)...');
+      List<LeaderboardEntry> users = await _leaderboardService.getLeaderboard(
+        LeaderboardCategory.totalXP,
+        limit: 25,
+      );
+      
+      // If XP leaderboard is empty, try a different category as fallback to see if we get ANYTHING
+      if (users.isEmpty) {
+        AppLogger.warning('🏆 Dashboard: XP Leaderboard empty, trying level fallback...');
+        users = await _leaderboardService.getLeaderboard(
+          LeaderboardCategory.level,
+          limit: 25,
+        );
+      }
+
+      if (mounted) {
+        setState(() {
+          _topUsers = users;
+          _isLoading = false;
+        });
+        AppLogger.info('🏆 Dashboard: Hall of Legends loaded with ${users.length} users');
+      }
+    } catch (e) {
+      AppLogger.error('❌ Dashboard: Error loading Hall of Legends: $e');
+      if (mounted) {
+        setState(() {
+          _error = 'Unable to load legends';
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _StampPopIn(
+      intro: widget.intro,
+      index: widget.index,
+      child: Container(
+        margin: const EdgeInsets.only(top: 12),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.12),
+          ),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.white.withValues(alpha: 0.05),
+              Colors.white.withValues(alpha: 0.02),
+            ],
+          ),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _LeaderboardHeader(),
+                if (_isLoading)
+                  const Padding(
+                    padding: EdgeInsets.all(40.0),
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: ArtbeatColors.primaryPurple,
+                      ),
+                    ),
+                  )
+                else if (_error != null)
+                  Padding(
+                    padding: const EdgeInsets.all(40.0),
+                    child: Center(
+                      child: Column(
+                        children: [
+                          Text(
+                            _error!,
+                            style: GoogleFonts.spaceGrotesk(
+                              color: Colors.white.withValues(alpha: 0.5),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: _loadData,
+                            child: const Text('Retry'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                else if (_topUsers.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.all(40.0),
+                    child: Center(
+                      child: Text(
+                        'No legends yet...',
+                        style: GoogleFonts.spaceGrotesk(
+                          color: Colors.white.withValues(alpha: 0.5),
+                        ),
+                      ),
+                    ),
+                  )
+                else
+                  ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+                    itemCount: _topUsers.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 10),
+                    itemBuilder: (context, index) {
+                      return _LeaderboardItem(
+                        entry: _topUsers[index],
+                        rank: index + 1,
+                      );
+                    },
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LeaderboardHeader extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: ArtbeatColors.primaryPurple.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: ArtbeatColors.primaryPurple.withValues(alpha: 0.2),
+                  blurRadius: 12,
+                  spreadRadius: 2,
+                ),
+              ],
+            ),
+            child: const Icon(
+              Icons.emoji_events_rounded,
+              color: ArtbeatColors.accentYellow,
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'HALL OF LEGENDS',
+                  style: GoogleFonts.spaceGrotesk(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+                Text(
+                  'TOP 25 ARTBEAT EXPLORERS',
+                  style: GoogleFonts.spaceGrotesk(
+                    color: ArtbeatColors.secondaryTeal,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 2.0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LeaderboardItem extends StatelessWidget {
+  final LeaderboardEntry entry;
+  final int rank;
+
+  const _LeaderboardItem({required this.entry, required this.rank});
+
+  @override
+  Widget build(BuildContext context) {
+    final isTop3 = rank <= 3;
+    final color = _getRankColor();
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      decoration: BoxDecoration(
+        color: isTop3 
+          ? color.withValues(alpha: 0.08) 
+          : Colors.white.withValues(alpha: 0.04),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isTop3 
+            ? color.withValues(alpha: 0.3) 
+            : Colors.white.withValues(alpha: 0.08),
+        ),
+        boxShadow: isTop3 ? [
+          BoxShadow(
+            color: color.withValues(alpha: 0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ] : null,
+      ),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 32,
+            child: Text(
+              '#$rank',
+              style: GoogleFonts.spaceGrotesk(
+                color: color,
+                fontWeight: FontWeight.w900,
+                fontSize: 14,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          _AvatarCircle(url: entry.profileImageUrl, color: color),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  entry.displayName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.spaceGrotesk(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                  ),
+                ),
+                Text(
+                  'LEVEL ${entry.level}',
+                  style: GoogleFonts.spaceGrotesk(
+                    color: Colors.white.withValues(alpha: 0.5),
+                    fontWeight: FontWeight.w800,
+                    fontSize: 10,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                '${entry.experiencePoints}',
+                style: GoogleFonts.spaceGrotesk(
+                  color: ArtbeatColors.accentYellow,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 14,
+                ),
+              ),
+              Text(
+                'XP',
+                style: GoogleFonts.spaceGrotesk(
+                  color: Colors.white.withValues(alpha: 0.3),
+                  fontWeight: FontWeight.w800,
+                  fontSize: 9,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _getRankColor() {
+    if (rank == 1) return const Color(0xFFFFD700); // Gold
+    if (rank == 2) return const Color(0xFFC0C0C0); // Silver
+    if (rank == 3) return const Color(0xFFCD7F32); // Bronze
+    return Colors.white.withValues(alpha: 0.6);
+  }
+}
+
+class _AvatarCircle extends StatelessWidget {
+  final String? url;
+  final Color color;
+
+  const _AvatarCircle({this.url, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 36,
+      height: 36,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: color.withValues(alpha: 0.5), width: 2),
+      ),
+      child: CircleAvatar(
+        backgroundColor: Colors.white.withValues(alpha: 0.1),
+        backgroundImage: url != null ? NetworkImage(url!) : null,
+        child: url == null
+            ? Icon(Icons.person, size: 20, color: color.withValues(alpha: 0.5))
+            : null,
       ),
     );
   }
