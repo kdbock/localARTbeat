@@ -4,8 +4,8 @@ version: 1.0.1
 publish_to: none # This package is not intended for publishing
 
 environment:
-  sdk: ">=3.8.0 <4.0.0"
-  flutter: ">=3.35.0"
+  sdk: ">=3.10.0 <4.0.0"
+  flutter: ">=3.38.0"
 
 dependencies:
   flutter:
@@ -21,7 +21,7 @@ dependencies:
   flutter_stripe: ^12.1.0
 
   # Notifications
-  flutter_local_notifications: ^18.0.1
+  flutter_local_notifications: ^19.5.0
   awesome_notifications: ^0.10.1
 
   # Image handling
@@ -31,7 +31,7 @@ dependencies:
 
   # Date/time handling
   intl: ^0.20.2
-  timezone: ^0.9.4
+  timezone: ^0.10.0
 
   # Chart visualization for analytics
   fl_chart: ^0.69.0
@@ -47,12 +47,12 @@ dependencies:
 
   # Logging
   logger: ^2.4.0
-  
+
   # Localization
   easy_localization: ^3.0.7
 
   # Fonts
-  google_fonts: ^6.1.0
+  google_fonts: ^7.0.2
 
   # Local packages
   artbeat_core:

@@ -6,7 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:google_sign_in/google_sign_in.dart' as gsi;
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:crypto/crypto.dart';
 import './fresh_apple_signin.dart';
@@ -17,13 +17,15 @@ class AuthService {
   late FirebaseFirestore _firestore;
 
   /// Initialize Google Sign-In with proper error handling
-  /// Late-init to prevent null reference crashes during app startup
-  late final GoogleSignIn _googleSignIn;
+  /// Now uses the singleton instance in 7.x
+  gsi.GoogleSignIn get _googleSignIn => gsi.GoogleSignIn.instance;
 
   /// Constructor with optional dependencies for testing
   AuthService({FirebaseAuth? auth, FirebaseFirestore? firestore}) {
     _auth = auth ?? FirebaseAuth.instance;
     _firestore = firestore ?? FirebaseFirestore.instance;
+    // Note: initialize is now async, so we trigger it here
+    // but individual methods will also ensure it's ready
     _initializeGoogleSignIn();
   }
 
@@ -177,17 +179,15 @@ class AuthService {
   }
 
   /// Constructor with dependencies - ensures Google Sign-In is properly initialized
-  void _initializeGoogleSignIn() {
+  Future<void> _initializeGoogleSignIn() async {
     try {
-      // Initialize with email scope to prevent SignInHubActivity crashes
-      _googleSignIn = GoogleSignIn(scopes: ['email', 'profile']);
+      // Scopes are now requested during authorization, not initialization in 7.x
+      await _googleSignIn.initialize();
       AppLogger.info(
-        '✅ Google Sign-In initialized with email and profile scopes',
+        '✅ Google Sign-In initialized',
       );
     } catch (e) {
       AppLogger.error('⚠️ Error initializing Google Sign-In: $e');
-      // Fall back to default initialization
-      _googleSignIn = GoogleSignIn();
     }
   }
 
@@ -200,9 +200,12 @@ class AuthService {
 
       // Pre-validate that we can proceed with Google Sign-In
       try {
+        // Ensure initialized
+        await _initializeGoogleSignIn();
+        
         // Check if user is already signed in
-        final isSignedIn = await _googleSignIn.isSignedIn();
-        if (isSignedIn) {
+        final event = await _googleSignIn.attemptLightweightAuthentication();
+        if (event is gsi.GoogleSignInAuthenticationEventSignIn) {
           // Sign out first to get fresh credentials
           await _googleSignIn.signOut();
           AppLogger.info('ℹ️ Previous Google Sign-In session cleared');
@@ -212,49 +215,37 @@ class AuthService {
       }
 
       // Trigger the authentication flow with error handling
-      GoogleSignInAccount? googleUser;
-      try {
-        googleUser = await _googleSignIn.signIn();
-      } catch (e) {
-        AppLogger.error(
-          'Google Sign-In flow failed (SignInHubActivity crash possible): $e',
-        );
-
-        // Check if this looks like a null object reference crash
-        if (e.toString().contains('null') || e.toString().contains('Null')) {
-          throw Exception(
-            'Google Sign-In configuration error. Please ensure Google Services are properly configured in your app.',
-          );
-        }
-        rethrow;
-      }
-
-      if (googleUser == null) {
-        AppLogger.info('ℹ️ Google Sign-In was cancelled by user');
-        throw Exception('Google Sign-In was cancelled by user');
-      }
-
+      // Returns a GoogleSignInAccount directly in 7.x authenticate()
+      final googleUser = await _googleSignIn.authenticate();
+      
       AppLogger.info('✅ Google Sign-In successful for: ${googleUser.email}');
-
-      // Obtain the auth details from the request
-      GoogleSignInAuthentication googleAuth;
-      try {
-        googleAuth = await googleUser.authentication;
-      } catch (e) {
-        AppLogger.error('Failed to obtain Google authentication: $e');
-        throw Exception('Failed to obtain Google authentication credentials');
+      
+      // Obtain the auth details (contains idToken)
+      final googleAuth = await googleUser.authentication;
+      
+      // Obtain the authorization details (contains accessToken)
+      // In 7.x, authentication and authorization are separate steps
+      var clientAuth = await googleUser.authorizationClient.authorizationForScopes(['email', 'profile']);
+      
+      // If not already authorized, request scopes
+      if (clientAuth == null) {
+        AppLogger.info('🔄 Requesting authorization scopes for accessToken');
+        clientAuth = await googleUser.authorizationClient.authorizeScopes(['email', 'profile']);
       }
+      
+      final accessToken = clientAuth.accessToken;
+      final idToken = googleAuth.idToken;
 
       // Validate we have required tokens
-      if (googleAuth.accessToken == null || googleAuth.idToken == null) {
-        AppLogger.error('Google authentication tokens are null');
+      if (accessToken.isEmpty || idToken == null) {
+        AppLogger.error('Google authentication tokens are missing');
         throw Exception('Invalid Google authentication tokens received');
       }
 
       // Create a new credential
       final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken!,
-        idToken: googleAuth.idToken!,
+        accessToken: accessToken,
+        idToken: idToken,
       );
 
       // Sign in to Firebase with the Google credential
@@ -273,7 +264,7 @@ class AuthService {
       // Update Firebase user's displayName with Google profile name
       if (userCredential.user != null && googleUser.displayName != null) {
         try {
-          await userCredential.user!.updateDisplayName(googleUser.displayName);
+          await userCredential.user!.updateDisplayName(googleUser.displayName!);
           AppLogger.info(
             '✅ Display name set from Google profile: ${googleUser.displayName}',
           );
@@ -328,15 +319,14 @@ class AuthService {
       AuthorizationCredentialAppleID? appleCredential;
       try {
         AppLogger.debug('🔄 Requesting Apple ID credential...');
-        final webAuthOptions =
-            kIsWeb
-                ? WebAuthenticationOptions(
-                  clientId: 'com.wordnerd.artbeat', // Your Services ID
-                  redirectUri: Uri.parse(
-                    'https://wordnerd-artbeat.firebaseapp.com/__/auth/handler',
-                  ),
-                )
-                : null;
+        final webAuthOptions = kIsWeb
+            ? WebAuthenticationOptions(
+                clientId: 'com.wordnerd.artbeat', // Your Services ID
+                redirectUri: Uri.parse(
+                  'https://wordnerd-artbeat.firebaseapp.com/__/auth/handler',
+                ),
+              )
+            : null;
         appleCredential =
             await SignInWithApple.getAppleIDCredential(
               scopes: [

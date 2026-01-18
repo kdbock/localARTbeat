@@ -1,5 +1,5 @@
 import * as functions from "firebase-functions";
-import { onCall } from "firebase-functions/v2/https";
+import {onCall} from "firebase-functions/v2/https";
 import * as admin from "firebase-admin";
 import Stripe from "stripe";
 
@@ -170,7 +170,7 @@ export const createCommissionRequest = onCall(
         title,
       });
 
-      return { commissionId: commissionRef.id };
+      return {commissionId: commissionRef.id};
     } catch (error) {
       console.error("Error creating commission request:", error);
       throw new functions.https.HttpsError(
@@ -235,13 +235,13 @@ export const submitCommissionQuote = onCall(
       }
 
       await commissionRef.update({
-        status: "quoted",
+        "status": "quoted",
         totalPrice,
-        depositAmount: depositAmount || totalPrice * 0.5,
-        finalAmount: finalAmount || totalPrice * 0.5,
-        milestones: milestones || [],
+        "depositAmount": depositAmount || totalPrice * 0.5,
+        "finalAmount": finalAmount || totalPrice * 0.5,
+        "milestones": milestones || [],
         "metadata.quotedAt": new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        "updatedAt": new Date().toISOString(),
       });
 
       if (message) {
@@ -254,7 +254,7 @@ export const submitCommissionQuote = onCall(
         totalPrice,
       });
 
-      return { success: true };
+      return {success: true};
     } catch (error) {
       console.error("Error submitting quote:", error);
       throw new functions.https.HttpsError(
@@ -281,7 +281,7 @@ export const acceptCommissionQuote = onCall(
         );
       }
 
-      const { commissionId } = request.data;
+      const {commissionId} = request.data;
 
       if (!commissionId) {
         throw new functions.https.HttpsError(
@@ -349,9 +349,9 @@ export const acceptCommissionQuote = onCall(
       });
 
       await commissionRef.update({
-        status: "accepted",
+        "status": "accepted",
         "metadata.acceptedAt": new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        "updatedAt": new Date().toISOString(),
       });
 
       await sendCommissionNotification(commission.artistId, "quote_accepted", {
@@ -390,7 +390,7 @@ export const handleDepositPayment = onCall(
         );
       }
 
-      const { paymentIntentId } = request.data;
+      const {paymentIntentId} = request.data;
 
       if (!paymentIntentId) {
         throw new functions.https.HttpsError(
@@ -427,9 +427,9 @@ export const handleDepositPayment = onCall(
       const commission = commissionDoc.data() as DirectCommissionData;
 
       await commissionRef.update({
-        status: "inProgress",
+        "status": "inProgress",
         "metadata.startedAt": new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        "updatedAt": new Date().toISOString(),
       });
 
       await createEarningsRecord({
@@ -451,7 +451,7 @@ export const handleDepositPayment = onCall(
         }
       );
 
-      return { success: true };
+      return {success: true};
     } catch (error) {
       console.error("Error handling deposit payment:", error);
       throw new functions.https.HttpsError(
@@ -478,7 +478,7 @@ export const completeCommission = onCall(
         );
       }
 
-      const { commissionId, deliveryFiles } = request.data;
+      const {commissionId, deliveryFiles} = request.data;
 
       if (!commissionId) {
         throw new functions.https.HttpsError(
@@ -509,9 +509,9 @@ export const completeCommission = onCall(
       }
 
       await commissionRef.update({
-        status: "completed",
+        "status": "completed",
         "metadata.completedAt": new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        "updatedAt": new Date().toISOString(),
       });
 
       if (deliveryFiles && deliveryFiles.length > 0) {
@@ -558,12 +558,12 @@ export const completeCommission = onCall(
 
       return {
         success: true,
-        finalPaymentIntent: finalPaymentIntent
-          ? {
-              clientSecret: finalPaymentIntent.client_secret,
-              paymentIntentId: finalPaymentIntent.id,
-            }
-          : null,
+        finalPaymentIntent: finalPaymentIntent ?
+          {
+            clientSecret: finalPaymentIntent.client_secret,
+            paymentIntentId: finalPaymentIntent.id,
+          } :
+          null,
       };
     } catch (error) {
       console.error("Error completing commission:", error);
@@ -591,7 +591,7 @@ export const handleFinalPayment = onCall(
         );
       }
 
-      const { paymentIntentId } = request.data;
+      const {paymentIntentId} = request.data;
 
       if (!paymentIntentId) {
         throw new functions.https.HttpsError(
@@ -628,9 +628,9 @@ export const handleFinalPayment = onCall(
       const commission = commissionDoc.data() as DirectCommissionData;
 
       await commissionRef.update({
-        status: "delivered",
+        "status": "delivered",
         "metadata.deliveredAt": new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        "updatedAt": new Date().toISOString(),
       });
 
       await createEarningsRecord({
@@ -661,7 +661,7 @@ export const handleFinalPayment = onCall(
         }
       );
 
-      return { success: true };
+      return {success: true};
     } catch (error) {
       console.error("Error handling final payment:", error);
       throw new functions.https.HttpsError(

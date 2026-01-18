@@ -38,7 +38,7 @@ class ArtBattleService {
       baseQuery = baseQuery.where('medium', isEqualTo: medium);
     }
 
-    // First attempt: only pull clearly eligible statuses
+    // First attempt: only pull clearly eligible statuses from 'artwork'
     try {
       final snapshot = await baseQuery
           .where('artBattleStatus', whereIn: preferredStatuses)
@@ -54,12 +54,32 @@ class ArtBattleService {
       // If the filtered query fails (e.g., missing index), fall through to the broader pull.
     }
 
-    // Fallback: any enabled artwork that isn't explicitly opted out
-    final fallbackSnapshot = await baseQuery.limit(limit * 2).get();
-    return fallbackSnapshot.docs
-        .map((doc) => ArtworkModel.fromFirestore(doc))
-        .where((artwork) => artwork.artBattleStatus != ArtBattleStatus.opted_out)
-        .toList();
+    // Fallback 1: any enabled artwork from 'artwork'
+    try {
+      final fallbackSnapshot = await baseQuery.limit(limit * 2).get();
+      final results = fallbackSnapshot.docs
+          .map((doc) => ArtworkModel.fromFirestore(doc))
+          .where(
+            (artwork) => artwork.artBattleStatus != ArtBattleStatus.opted_out,
+          )
+          .toList();
+      if (results.length >= 2) return results;
+    } catch (_) {}
+
+    // Fallback 2: check 'artworks' collection (legacy/analytics)
+    try {
+      final legacySnapshot = await _firestore
+          .collection('artworks')
+          .where('artBattleEnabled', isEqualTo: true)
+          .limit(limit)
+          .get();
+      final legacyResults = legacySnapshot.docs
+          .map((doc) => ArtworkModel.fromFirestore(doc))
+          .toList();
+      if (legacyResults.length >= 2) return legacyResults;
+    } catch (_) {}
+
+    return [];
   }
 
   // Generate a battle matchup

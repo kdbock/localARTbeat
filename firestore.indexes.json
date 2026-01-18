@@ -183,6 +183,23 @@
       "collectionGroup": "artwork",
       "queryScope": "COLLECTION",
       "fields": [
+        { "fieldPath": "artBattleEnabled", "order": "ASCENDING" },
+        { "fieldPath": "artBattleStatus", "order": "ASCENDING" },
+        { "fieldPath": "artBattleScore", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "art_battle_votes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "timestamp", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "artwork",
+      "queryScope": "COLLECTION",
+      "fields": [
         { "fieldPath": "contentType", "order": "ASCENDING" },
         { "fieldPath": "createdAt", "order": "DESCENDING" }
       ]

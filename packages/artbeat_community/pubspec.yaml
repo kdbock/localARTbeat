@@ -4,8 +4,8 @@ version: 0.0.2
 publish_to: "none"
 
 environment:
-  sdk: ">=3.8.0 <4.0.0"
-  flutter: ">=3.35.0"
+  sdk: ">=3.10.0 <4.0.0"
+  flutter: ">=3.38.0"
 
 dependencies:
   flutter:
@@ -50,9 +50,9 @@ dependencies:
   flutter_image_compress: ^2.3.0
   video_player: ^2.8.2
   audioplayers: ^6.0.0
-  google_fonts: ^6.1.0
+  google_fonts: ^7.0.2
   image_editor_plus: ^1.0.4
-  file_picker: ^8.0.0+1
+  file_picker: ^10.3.8
   easy_localization: ^3.0.7
 
 flutter:

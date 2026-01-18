@@ -110,12 +110,22 @@ class _ArtBattleScreenState extends State<ArtBattleScreen> {
   }
 
   Future<ArtworkModel?> _loadArtwork(String id) async {
-    final doc = await FirebaseFirestore.instance
-        .collection('artwork')
-        .doc(id)
-        .get();
-    if (doc.exists) {
-      return ArtworkModel.fromFirestore(doc);
+    try {
+      // Try primary 'artwork' collection first
+      final doc =
+          await FirebaseFirestore.instance.collection('artwork').doc(id).get();
+      if (doc.exists) {
+        return ArtworkModel.fromFirestore(doc);
+      }
+
+      // Fallback to 'artworks' collection (legacy/analytics)
+      final docPlural =
+          await FirebaseFirestore.instance.collection('artworks').doc(id).get();
+      if (docPlural.exists) {
+        return ArtworkModel.fromFirestore(docPlural);
+      }
+    } catch (e) {
+      debugPrint('[ArtBattle] Error loading artwork $id: $e');
     }
     return null;
   }
@@ -319,13 +329,12 @@ class _ArtworkCard extends StatelessWidget {
           fit: StackFit.expand,
           children: [
             Container(color: const Color(0xFF07060F)),
-            CachedNetworkImage(
+            SecureNetworkImage(
               imageUrl: artwork.imageUrl,
               fit: BoxFit.cover,
-              placeholder: (context, url) =>
-                  const Center(child: CircularProgressIndicator()),
-              errorWidget: (context, url, error) =>
-                  const Center(child: Icon(Icons.error)),
+              enableThumbnailFallback: true,
+              placeholder: const Center(child: CircularProgressIndicator()),
+              errorWidget: const Center(child: Icon(Icons.error, color: Colors.white)),
             ),
             Container(
               decoration: BoxDecoration(

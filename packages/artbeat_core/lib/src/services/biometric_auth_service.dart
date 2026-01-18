@@ -132,11 +132,8 @@ class BiometricAuthService {
 
       final authenticated = await _localAuth.authenticate(
         localizedReason: reason,
-        options: AuthenticationOptions(
-          useErrorDialogs: useErrorDialogs,
-          stickyAuth: stickyAuth,
-          biometricOnly: biometricOnly,
-        ),
+        biometricOnly: biometricOnly,
+        persistAcrossBackgrounding: stickyAuth,
       );
 
       if (authenticated) {

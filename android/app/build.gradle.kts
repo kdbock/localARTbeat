@@ -59,8 +59,8 @@ android {
         applicationId = "com.wordnerd.artbeat"
         minSdk = 24  // Android 7.0 (2016) - Explicit minimum for Firebase compatibility
         targetSdk = 36  // Updated to match compileSdk
-        versionCode = 92
-        versionName = "2.4.9"
+        versionCode = 94
+        versionName = "2.5.1"
         
         // Enable multidex for large app
         multiDexEnabled = true
@@ -108,7 +108,7 @@ flutter {
 
 dependencies {
     // Core library desugaring for flutter_local_notifications
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
     
     // Multidex support
     implementation("androidx.multidex:multidex:2.0.1")

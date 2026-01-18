@@ -10,13 +10,17 @@ class SecureFirebaseConfig {
   static bool _appCheckInitialized = false;
   static String? _teamId;
 
-  /// Store Team ID (optional, informational only)
-  static Future<void> configureAppCheck({required String teamId}) async {
+  /// Configure App Check with optional business verification
+  static Future<void> configureAppCheck({
+    required String teamId,
+    bool forceDebug = false,
+  }) async {
     _teamId = teamId;
 
     try {
-      // On simulator/dev use debug provider to avoid App Attest failures (403)
-      const bool useDebugProvider = kDebugMode;
+      // If forceDebug is true, use debug provider even in release mode
+      // This is helpful for developers without business registration
+      final bool useDebugProvider = kDebugMode || forceDebug;
 
       if (useDebugProvider) {
         await FirebaseAppCheck.instance.activate(
@@ -25,6 +29,7 @@ class SecureFirebaseConfig {
           // ignore: deprecated_member_use
           appleProvider: AppleProvider.debug,
         );
+        debugPrint('🛡️ AppCheck activated with DEBUG provider');
       } else {
         await FirebaseAppCheck.instance.activate(
           // ignore: deprecated_member_use
@@ -32,6 +37,7 @@ class SecureFirebaseConfig {
           // ignore: deprecated_member_use
           appleProvider: AppleProvider.appAttestWithDeviceCheckFallback,
         );
+        debugPrint('🛡️ AppCheck activated with PRODUCTION providers');
       }
     } catch (e) {
       debugPrint('⚠️ AppCheck activation failed: $e');

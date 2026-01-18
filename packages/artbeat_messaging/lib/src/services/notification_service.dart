@@ -457,8 +457,6 @@ class NotificationService {
         ),
         payload: payload,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
       );
     } catch (e) {
       AppLogger.error('Error scheduling notification: $e');

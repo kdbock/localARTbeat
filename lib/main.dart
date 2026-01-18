@@ -142,7 +142,11 @@ Future<void> _initializeCoreServices() async {
       }
       // Initialize App Check IMMEDIATELY after Firebase Core
       // This prevents permission denied errors during initial data fetching
-      await SecureFirebaseConfig.configureAppCheck(teamId: 'H49R32NPY6');
+      // forceDebug: true is used because production App Check requires business registration
+      await SecureFirebaseConfig.configureAppCheck(
+        teamId: 'H49R32NPY6',
+        forceDebug: true,
+      );
     }, 'Firebase & App Check'),
   ]);
 }

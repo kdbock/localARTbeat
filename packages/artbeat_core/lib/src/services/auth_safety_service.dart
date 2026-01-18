@@ -8,9 +8,11 @@ class AuthSafetyService {
   AuthSafetyService._internal();
 
   static bool _isInitialized = false;
-  static GoogleSignIn? _googleSignIn;
   static bool _googleSignInAvailable = false;
   static bool _initialized = false;
+  static GoogleSignInAccount? _lastAuthenticatedUser;
+
+  static GoogleSignIn get _googleSignIn => GoogleSignIn.instance;
 
   /// Initialize authentication safety service
   static Future<void> initialize() async {
@@ -24,7 +26,17 @@ class AuthSafetyService {
 
       // Initialize Google Sign-In with null safety
       try {
-        _googleSignIn = GoogleSignIn(scopes: ['email', 'profile']);
+        await GoogleSignIn.instance.initialize();
+        
+        // Listen to authentication events to track the current user
+        GoogleSignIn.instance.authenticationEvents.listen((event) {
+          if (event is GoogleSignInAuthenticationEventSignIn) {
+            _lastAuthenticatedUser = event.user;
+          } else if (event is GoogleSignInAuthenticationEventSignOut) {
+            _lastAuthenticatedUser = null;
+          }
+        });
+        
         _googleSignInAvailable = true;
         AppLogger.info('✅ Google Sign-In initialized');
       } catch (e) {
@@ -55,34 +67,36 @@ class AuthSafetyService {
         throw Exception('Auth Safety Service not initialized');
       }
 
-      if (!_googleSignInAvailable || _googleSignIn == null) {
+      if (!_googleSignInAvailable) {
         throw Exception('Google Sign-In not available');
       }
 
       AppLogger.info('🔐 Attempting safe Google Sign-In...');
 
       // Check if already signed in
-      final currentUser = _googleSignIn!.currentUser;
+      final currentUser = _lastAuthenticatedUser;
       if (currentUser != null) {
         AppLogger.info('✅ User already signed in: ${currentUser.email}');
         return currentUser;
       }
 
-      // Attempt sign in
-      final account = await _googleSignIn!.signIn().timeout(
+      // Attempt sign in using authenticate() for 7.x
+      final account = await _googleSignIn.authenticate().timeout(
         timeout,
         onTimeout: () {
           throw TimeoutException('Google Sign-In timed out', timeout);
         },
       );
 
-      if (account != null) {
-        AppLogger.info('✅ Google Sign-In successful: ${account.email}');
-      } else {
-        AppLogger.info('ℹ️ Google Sign-In was cancelled by user');
-      }
-
+      AppLogger.info('✅ Google Sign-In successful: ${account.email}');
       return account;
+    } on GoogleSignInException catch (e) {
+      if (e.code == GoogleSignInExceptionCode.canceled) {
+        AppLogger.info('ℹ️ Google Sign-In was cancelled by user');
+      } else {
+        _handleAuthError('google_sign_in', e.toString(), e);
+      }
+      return null;
     } on TimeoutException catch (e) {
       _handleAuthError(
         'google_sign_in',
@@ -99,13 +113,13 @@ class AuthSafetyService {
   /// Safely sign out from Google
   static Future<bool> safeGoogleSignOut() async {
     try {
-      if (!_initialized || _googleSignIn == null) {
+      if (!_initialized || !_googleSignInAvailable) {
         AppLogger.warning('⚠️ Cannot sign out: Service not initialized');
         return false;
       }
 
       AppLogger.info('🔐 Signing out from Google...');
-      await _googleSignIn!.signOut();
+      await _googleSignIn.signOut();
       AppLogger.info('✅ Successfully signed out from Google');
       return true;
     } catch (e) {
@@ -117,13 +131,13 @@ class AuthSafetyService {
   /// Safely disconnect Google account
   static Future<bool> safeGoogleDisconnect() async {
     try {
-      if (!_initialized || _googleSignIn == null) {
+      if (!_initialized || !_googleSignInAvailable) {
         AppLogger.warning('⚠️ Cannot disconnect: Service not initialized');
         return false;
       }
 
       AppLogger.info('🔐 Disconnecting Google account...');
-      await _googleSignIn!.disconnect();
+      await _googleSignIn.disconnect();
       AppLogger.info('✅ Successfully disconnected Google account');
       return true;
     } catch (e) {
@@ -135,10 +149,10 @@ class AuthSafetyService {
   /// Get current Google Sign-In user safely
   static GoogleSignInAccount? getCurrentUser() {
     try {
-      if (!_initialized || _googleSignIn == null) {
+      if (!_initialized || !_googleSignInAvailable) {
         return null;
       }
-      return _googleSignIn!.currentUser;
+      return _lastAuthenticatedUser;
     } catch (e) {
       AppLogger.error('❌ Error getting current Google user: $e');
       return null;
@@ -148,7 +162,7 @@ class AuthSafetyService {
   /// Check if user is signed in with Google
   static bool get isGoogleSignedIn {
     try {
-      return _googleSignIn?.currentUser != null;
+      return _lastAuthenticatedUser != null;
     } catch (e) {
       return false;
     }
@@ -211,7 +225,7 @@ class AuthSafetyService {
   /// Reset auth safety service (for testing or recovery)
   static void reset() {
     _isInitialized = false;
-    _googleSignIn = null;
+    _lastAuthenticatedUser = null;
     _googleSignInAvailable = false;
     _initialized = false;
     AppLogger.info('🔐 Auth Safety Service reset');

@@ -1,18 +1,18 @@
-const { 
-  onRequest, 
-  onCall, 
-  HttpsError 
+const {
+  onRequest,
+  onCall,
+  HttpsError,
 } = require("firebase-functions/v2/https");
-const { onSchedule } = require("firebase-functions/v2/scheduler");
-const { setGlobalOptions } = require("firebase-functions/v2");
+const {onSchedule} = require("firebase-functions/v2/scheduler");
+const {setGlobalOptions} = require("firebase-functions/v2");
 const admin = require("firebase-admin");
-const { defineSecret } = require("firebase-functions/params");
-const cors = require("cors")({ origin: true });
+const {defineSecret} = require("firebase-functions/params");
+const cors = require("cors")({origin: true});
 const https = require("https");
 const crypto = require("crypto");
 
 // Set global options for all functions
-setGlobalOptions({ maxInstances: 10 });
+setGlobalOptions({maxInstances: 10});
 
 // Define secret for Stripe
 const stripeSecretKey = defineSecret("STRIPE_SECRET_KEY");
@@ -199,7 +199,7 @@ exports.fixLeaderboardData = onRequest((request, response) => {
       response.status(200).send(summary);
     } catch (error) {
       console.error("❌ Error fixing leaderboard data:", error);
-      response.status(500).send({ error: error.message });
+      response.status(500).send({error: error.message});
     }
   });
 });
@@ -222,7 +222,7 @@ exports.fixUserData = onRequest((request, response) => {
 
       if (usersSnapshot.empty) {
         console.log(`❌ ${userName} not found`);
-        return response.status(404).send({ error: `${userName} not found` });
+        return response.status(404).send({error: `${userName} not found`});
       }
 
       const userDoc = usersSnapshot.docs[0];
@@ -309,7 +309,7 @@ exports.fixUserData = onRequest((request, response) => {
       response.status(200).send(summary);
     } catch (error) {
       console.error("❌ Error fixing Julie data:", error);
-      response.status(500).send({ error: error.message });
+      response.status(500).send({error: error.message});
     }
   });
 });
@@ -361,7 +361,7 @@ exports.testLeaderboardQuery = onRequest((request, response) => {
       });
     } catch (error) {
       console.error("❌ Error testing queries:", error);
-      response.status(500).send({ error: error.message, stack: error.stack });
+      response.status(500).send({error: error.message, stack: error.stack});
     }
   });
 });
@@ -477,7 +477,7 @@ exports.debugUsers = onRequest((request, response) => {
       });
     } catch (error) {
       console.error("❌ Error debugging users:", error);
-      response.status(500).send({ error: error.message });
+      response.status(500).send({error: error.message});
     }
   });
 });
@@ -490,16 +490,16 @@ exports.debugUsers = onRequest((request, response) => {
  */
 function calculateLevel(xp) {
   const levelSystem = {
-    1: { minXP: 0, maxXP: 199 },
-    2: { minXP: 200, maxXP: 499 },
-    3: { minXP: 500, maxXP: 999 },
-    4: { minXP: 1000, maxXP: 1499 },
-    5: { minXP: 1500, maxXP: 2499 },
-    6: { minXP: 2500, maxXP: 3999 },
-    7: { minXP: 4000, maxXP: 5999 },
-    8: { minXP: 6000, maxXP: 7999 },
-    9: { minXP: 8000, maxXP: 9999 },
-    10: { minXP: 10000, maxXP: 999999 },
+    1: {minXP: 0, maxXP: 199},
+    2: {minXP: 200, maxXP: 499},
+    3: {minXP: 500, maxXP: 999},
+    4: {minXP: 1000, maxXP: 1499},
+    5: {minXP: 1500, maxXP: 2499},
+    6: {minXP: 2500, maxXP: 3999},
+    7: {minXP: 4000, maxXP: 5999},
+    8: {minXP: 6000, maxXP: 7999},
+    9: {minXP: 8000, maxXP: 9999},
+    10: {minXP: 10000, maxXP: 999999},
   };
 
   for (let level = 10; level >= 1; level--) {
@@ -515,7 +515,7 @@ function calculateLevel(xp) {
  * Create a new customer in Stripe
  */
 exports.createCustomer = onRequest(
-  { secrets: [stripeSecretKey] },
+  {secrets: [stripeSecretKey]},
   (request, response) => {
     cors(request, response, async () => {
       try {
@@ -527,7 +527,7 @@ exports.createCustomer = onRequest(
         const authHeader = request.headers.authorization;
         if (!authHeader || !authHeader.startsWith("Bearer ")) {
           console.log("❌ No valid auth header found");
-          return response.status(401).send({ error: "Unauthorized" });
+          return response.status(401).send({error: "Unauthorized"});
         }
 
         const idToken = authHeader.split("Bearer ")[1];
@@ -541,10 +541,10 @@ exports.createCustomer = onRequest(
         const stripe = require("stripe")(stripeSecretKey.value());
 
         if (request.method !== "POST") {
-          return response.status(405).send({ error: "Method Not Allowed" });
+          return response.status(405).send({error: "Method Not Allowed"});
         }
 
-        const { email, userId } = request.body;
+        const {email, userId} = request.body;
 
         if (!email || !userId) {
           return response.status(400).send({
@@ -554,7 +554,7 @@ exports.createCustomer = onRequest(
 
         // Verify the userId matches the authenticated user
         if (userId !== authUserId) {
-          return response.status(403).send({ error: "Forbidden" });
+          return response.status(403).send({error: "Forbidden"});
         }
 
         // Create customer
@@ -573,7 +573,7 @@ exports.createCustomer = onRequest(
         });
       } catch (error) {
         console.error("Error creating customer:", error);
-        response.status(500).send({ error: error.message });
+        response.status(500).send({error: error.message});
       }
     });
   }
@@ -583,7 +583,7 @@ exports.createCustomer = onRequest(
  * Create a setup intent for adding payment methods
  */
 exports.createSetupIntent = onRequest(
-  { secrets: [stripeSecretKey] },
+  {secrets: [stripeSecretKey]},
   (request, response) => {
     cors(request, response, async () => {
       try {
@@ -595,7 +595,7 @@ exports.createSetupIntent = onRequest(
         const authHeader = request.headers.authorization;
         if (!authHeader || !authHeader.startsWith("Bearer ")) {
           console.log("❌ No valid auth header found");
-          return response.status(401).send({ error: "Unauthorized" });
+          return response.status(401).send({error: "Unauthorized"});
         }
 
         const idToken = authHeader.split("Bearer ")[1];
@@ -608,10 +608,10 @@ exports.createSetupIntent = onRequest(
         const stripe = require("stripe")(stripeSecretKey.value());
 
         if (request.method !== "POST") {
-          return response.status(405).send({ error: "Method Not Allowed" });
+          return response.status(405).send({error: "Method Not Allowed"});
         }
 
-        const { customerId } = request.body;
+        const {customerId} = request.body;
 
         if (!customerId) {
           return response.status(400).send({
@@ -630,7 +630,7 @@ exports.createSetupIntent = onRequest(
         });
       } catch (error) {
         console.error("Error creating setup intent:", error);
-        response.status(500).send({ error: error.message });
+        response.status(500).send({error: error.message});
       }
     });
   }
@@ -641,7 +641,7 @@ exports.createSetupIntent = onRequest(
  * (no stored payment methods)
  */
 exports.createPaymentIntent = onRequest(
-  { secrets: [stripeSecretKey] },
+  {secrets: [stripeSecretKey]},
   (request, response) => {
     cors(request, response, async () => {
       try {
@@ -653,7 +653,7 @@ exports.createPaymentIntent = onRequest(
         const authHeader = request.headers.authorization;
         if (!authHeader || !authHeader.startsWith("Bearer ")) {
           console.log("❌ No valid auth header found");
-          return response.status(401).send({ error: "Unauthorized" });
+          return response.status(401).send({error: "Unauthorized"});
         }
 
         const idToken = authHeader.split("Bearer ")[1];
@@ -666,7 +666,7 @@ exports.createPaymentIntent = onRequest(
         const stripe = require("stripe")(stripeSecretKey.value());
 
         if (request.method !== "POST") {
-          return response.status(405).send({ error: "Method Not Allowed" });
+          return response.status(405).send({error: "Method Not Allowed"});
         }
 
         const {
@@ -711,7 +711,7 @@ exports.createPaymentIntent = onRequest(
         });
       } catch (error) {
         console.error("❌ Error creating payment intent:", error);
-        response.status(500).send({ error: error.message });
+        response.status(500).send({error: error.message});
       }
     });
   }
@@ -721,7 +721,7 @@ exports.createPaymentIntent = onRequest(
  * Get payment methods for a customer
  */
 exports.getPaymentMethods = onRequest(
-  { secrets: [stripeSecretKey] },
+  {secrets: [stripeSecretKey]},
   (request, response) => {
     cors(request, response, async () => {
       try {
@@ -733,7 +733,7 @@ exports.getPaymentMethods = onRequest(
         const authHeader = request.headers.authorization;
         if (!authHeader || !authHeader.startsWith("Bearer ")) {
           console.log("❌ No valid auth header found");
-          return response.status(401).send({ error: "Unauthorized" });
+          return response.status(401).send({error: "Unauthorized"});
         }
 
         const idToken = authHeader.split("Bearer ")[1];
@@ -746,10 +746,10 @@ exports.getPaymentMethods = onRequest(
         const stripe = require("stripe")(stripeSecretKey.value());
 
         if (request.method !== "POST") {
-          return response.status(405).send({ error: "Method Not Allowed" });
+          return response.status(405).send({error: "Method Not Allowed"});
         }
 
-        const { customerId } = request.body;
+        const {customerId} = request.body;
 
         if (!customerId) {
           return response.status(400).send({
@@ -770,7 +770,7 @@ exports.getPaymentMethods = onRequest(
         });
       } catch (error) {
         console.error("❌ Error getting payment methods:", error);
-        response.status(500).send({ error: error.message });
+        response.status(500).send({error: error.message});
       }
     });
   }
@@ -780,7 +780,7 @@ exports.getPaymentMethods = onRequest(
  * Update customer information
  */
 exports.updateCustomer = onRequest(
-  { secrets: [stripeSecretKey] },
+  {secrets: [stripeSecretKey]},
   (request, response) => {
     cors(request, response, async () => {
       try {
@@ -792,7 +792,7 @@ exports.updateCustomer = onRequest(
         const authHeader = request.headers.authorization;
         if (!authHeader || !authHeader.startsWith("Bearer ")) {
           console.log("❌ No valid auth header found");
-          return response.status(401).send({ error: "Unauthorized" });
+          return response.status(401).send({error: "Unauthorized"});
         }
 
         const idToken = authHeader.split("Bearer ")[1];
@@ -805,10 +805,10 @@ exports.updateCustomer = onRequest(
         const stripe = require("stripe")(stripeSecretKey.value());
 
         if (request.method !== "POST") {
-          return response.status(405).send({ error: "Method Not Allowed" });
+          return response.status(405).send({error: "Method Not Allowed"});
         }
 
-        const { customerId, email, name, defaultPaymentMethod } = request.body;
+        const {customerId, email, name, defaultPaymentMethod} = request.body;
 
         if (!customerId) {
           return response.status(400).send({
@@ -833,7 +833,7 @@ exports.updateCustomer = onRequest(
         });
       } catch (error) {
         console.error("Error updating customer:", error);
-        response.status(500).send({ error: error.message });
+        response.status(500).send({error: error.message});
       }
     });
   }
@@ -843,7 +843,7 @@ exports.updateCustomer = onRequest(
  * Detach a payment method from a customer
  */
 exports.detachPaymentMethod = onRequest(
-  { secrets: [stripeSecretKey] },
+  {secrets: [stripeSecretKey]},
   (request, response) => {
     cors(request, response, async () => {
       try {
@@ -855,7 +855,7 @@ exports.detachPaymentMethod = onRequest(
         const authHeader = request.headers.authorization;
         if (!authHeader || !authHeader.startsWith("Bearer ")) {
           console.log("❌ No valid auth header found");
-          return response.status(401).send({ error: "Unauthorized" });
+          return response.status(401).send({error: "Unauthorized"});
         }
 
         const idToken = authHeader.split("Bearer ")[1];
@@ -868,10 +868,10 @@ exports.detachPaymentMethod = onRequest(
         const stripe = require("stripe")(stripeSecretKey.value());
 
         if (request.method !== "POST") {
-          return response.status(405).send({ error: "Method Not Allowed" });
+          return response.status(405).send({error: "Method Not Allowed"});
         }
 
-        const { paymentMethodId } = request.body;
+        const {paymentMethodId} = request.body;
 
         if (!paymentMethodId) {
           return response.status(400).send({
@@ -889,7 +889,7 @@ exports.detachPaymentMethod = onRequest(
         });
       } catch (error) {
         console.error("Error detaching payment method:", error);
-        response.status(500).send({ error: error.message });
+        response.status(500).send({error: error.message});
       }
     });
   }
@@ -899,17 +899,17 @@ exports.detachPaymentMethod = onRequest(
  * Create a subscription
  */
 exports.createSubscription = onRequest(
-  { secrets: [stripeSecretKey] },
+  {secrets: [stripeSecretKey]},
   (request, response) => {
     cors(request, response, async () => {
       try {
         const stripe = require("stripe")(stripeSecretKey.value());
 
         if (request.method !== "POST") {
-          return response.status(405).send({ error: "Method Not Allowed" });
+          return response.status(405).send({error: "Method Not Allowed"});
         }
 
-        const { customerId, priceId, paymentMethodId } = request.body;
+        const {customerId, priceId, paymentMethodId} = request.body;
 
         if (!customerId || !priceId) {
           return response.status(400).send({
@@ -919,7 +919,7 @@ exports.createSubscription = onRequest(
 
         const subscription = await stripe.subscriptions.create({
           customer: customerId,
-          items: [{ price: priceId }],
+          items: [{price: priceId}],
           default_payment_method: paymentMethodId,
           expand: ["latest_invoice.payment_intent"],
         });
@@ -934,7 +934,7 @@ exports.createSubscription = onRequest(
         });
       } catch (error) {
         console.error("Error creating subscription:", error);
-        response.status(500).send({ error: error.message });
+        response.status(500).send({error: error.message});
       }
     });
   }
@@ -944,17 +944,17 @@ exports.createSubscription = onRequest(
  * Cancel a subscription
  */
 exports.cancelSubscription = onRequest(
-  { secrets: [stripeSecretKey] },
+  {secrets: [stripeSecretKey]},
   (request, response) => {
     cors(request, response, async () => {
       try {
         const stripe = require("stripe")(stripeSecretKey.value());
 
         if (request.method !== "POST") {
-          return response.status(405).send({ error: "Method Not Allowed" });
+          return response.status(405).send({error: "Method Not Allowed"});
         }
 
-        const { subscriptionId, cancelAtPeriodEnd } = request.body;
+        const {subscriptionId, cancelAtPeriodEnd} = request.body;
 
         if (!subscriptionId) {
           return response.status(400).send({
@@ -977,7 +977,7 @@ exports.cancelSubscription = onRequest(
         });
       } catch (error) {
         console.error("Error canceling subscription:", error);
-        response.status(500).send({ error: error.message });
+        response.status(500).send({error: error.message});
       }
     });
   }
@@ -987,17 +987,17 @@ exports.cancelSubscription = onRequest(
  * Change subscription tier
  */
 exports.changeSubscriptionTier = onRequest(
-  { secrets: [stripeSecretKey] },
+  {secrets: [stripeSecretKey]},
   (request, response) => {
     cors(request, response, async () => {
       try {
         const stripe = require("stripe")(stripeSecretKey.value());
 
         if (request.method !== "POST") {
-          return response.status(405).send({ error: "Method Not Allowed" });
+          return response.status(405).send({error: "Method Not Allowed"});
         }
 
-        const { subscriptionId, newPriceId } = request.body;
+        const {subscriptionId, newPriceId} = request.body;
 
         if (!subscriptionId || !newPriceId) {
           return response.status(400).send({
@@ -1030,7 +1030,7 @@ exports.changeSubscriptionTier = onRequest(
         });
       } catch (error) {
         console.error("Error changing subscription tier:", error);
-        response.status(500).send({ error: error.message });
+        response.status(500).send({error: error.message});
       }
     });
   }
@@ -1040,7 +1040,7 @@ exports.changeSubscriptionTier = onRequest(
  * Process gift payment after payment intent is confirmed
  */
 exports.processGiftPayment = onRequest(
-  { secrets: [stripeSecretKey] },
+  {secrets: [stripeSecretKey]},
   (request, response) => {
     cors(request, response, async () => {
       try {
@@ -1051,7 +1051,7 @@ exports.processGiftPayment = onRequest(
         const authHeader = request.headers.authorization;
         if (!authHeader || !authHeader.startsWith("Bearer ")) {
           console.log("❌ No valid auth header found");
-          return response.status(401).send({ error: "Unauthorized" });
+          return response.status(401).send({error: "Unauthorized"});
         }
 
         const idToken = authHeader.split("Bearer ")[1];
@@ -1062,7 +1062,7 @@ exports.processGiftPayment = onRequest(
         const stripe = require("stripe")(stripeSecretKey.value());
 
         if (request.method !== "POST") {
-          return response.status(405).send({ error: "Method Not Allowed" });
+          return response.status(405).send({error: "Method Not Allowed"});
         }
 
         const {
@@ -1188,7 +1188,7 @@ exports.processGiftPayment = onRequest(
         });
       } catch (error) {
         console.error("❌ Error processing gift payment:", error);
-        response.status(500).send({ error: error.message });
+        response.status(500).send({error: error.message});
       }
     });
   }
@@ -1198,7 +1198,7 @@ exports.processGiftPayment = onRequest(
  * Process subscription payment after payment intent is confirmed
  */
 exports.processSubscriptionPayment = onRequest(
-  { secrets: [stripeSecretKey] },
+  {secrets: [stripeSecretKey]},
   (request, response) => {
     cors(request, response, async () => {
       try {
@@ -1208,7 +1208,7 @@ exports.processSubscriptionPayment = onRequest(
         // Verify Firebase Auth token
         const authHeader = request.headers.authorization;
         if (!authHeader || !authHeader.startsWith("Bearer ")) {
-          return response.status(401).send({ error: "Unauthorized" });
+          return response.status(401).send({error: "Unauthorized"});
         }
 
         const idToken = authHeader.split("Bearer ")[1];
@@ -1218,10 +1218,10 @@ exports.processSubscriptionPayment = onRequest(
         const stripe = require("stripe")(stripeSecretKey.value());
 
         if (request.method !== "POST") {
-          return response.status(405).send({ error: "Method Not Allowed" });
+          return response.status(405).send({error: "Method Not Allowed"});
         }
 
-        const { paymentIntentId, tier, priceAmount, billingCycle } =
+        const {paymentIntentId, tier, priceAmount, billingCycle} =
           request.body;
 
         if (!paymentIntentId || !tier || !priceAmount) {
@@ -1281,7 +1281,7 @@ exports.processSubscriptionPayment = onRequest(
         });
       } catch (error) {
         console.error("❌ Error processing subscription payment:", error);
-        response.status(500).send({ error: error.message });
+        response.status(500).send({error: error.message});
       }
     });
   }
@@ -1291,7 +1291,7 @@ exports.processSubscriptionPayment = onRequest(
  * Process ad payment after payment intent is confirmed
  */
 exports.processAdPayment = onRequest(
-  { secrets: [stripeSecretKey] },
+  {secrets: [stripeSecretKey]},
   (request, response) => {
     cors(request, response, async () => {
       try {
@@ -1301,7 +1301,7 @@ exports.processAdPayment = onRequest(
         // Verify Firebase Auth token
         const authHeader = request.headers.authorization;
         if (!authHeader || !authHeader.startsWith("Bearer ")) {
-          return response.status(401).send({ error: "Unauthorized" });
+          return response.status(401).send({error: "Unauthorized"});
         }
 
         const idToken = authHeader.split("Bearer ")[1];
@@ -1311,7 +1311,7 @@ exports.processAdPayment = onRequest(
         const stripe = require("stripe")(stripeSecretKey.value());
 
         if (request.method !== "POST") {
-          return response.status(405).send({ error: "Method Not Allowed" });
+          return response.status(405).send({error: "Method Not Allowed"});
         }
 
         const {
@@ -1373,7 +1373,7 @@ exports.processAdPayment = onRequest(
         });
       } catch (error) {
         console.error("❌ Error processing ad payment:", error);
-        response.status(500).send({ error: error.message });
+        response.status(500).send({error: error.message});
       }
     });
   }
@@ -1383,7 +1383,7 @@ exports.processAdPayment = onRequest(
  * Process sponsorship payment after payment intent is confirmed
  */
 exports.processSponsorshipPayment = onRequest(
-  { secrets: [stripeSecretKey] },
+  {secrets: [stripeSecretKey]},
   (request, response) => {
     cors(request, response, async () => {
       try {
@@ -1393,7 +1393,7 @@ exports.processSponsorshipPayment = onRequest(
         // Verify Firebase Auth token
         const authHeader = request.headers.authorization;
         if (!authHeader || !authHeader.startsWith("Bearer ")) {
-          return response.status(401).send({ error: "Unauthorized" });
+          return response.status(401).send({error: "Unauthorized"});
         }
 
         const idToken = authHeader.split("Bearer ")[1];
@@ -1403,7 +1403,7 @@ exports.processSponsorshipPayment = onRequest(
         const stripe = require("stripe")(stripeSecretKey.value());
 
         if (request.method !== "POST") {
-          return response.status(405).send({ error: "Method Not Allowed" });
+          return response.status(405).send({error: "Method Not Allowed"});
         }
 
         const {
@@ -1504,7 +1504,7 @@ exports.processSponsorshipPayment = onRequest(
         });
       } catch (error) {
         console.error("❌ Error processing sponsorship payment:", error);
-        response.status(500).send({ error: error.message });
+        response.status(500).send({error: error.message});
       }
     });
   }
@@ -1514,7 +1514,7 @@ exports.processSponsorshipPayment = onRequest(
  * Process commission payment after payment intent is confirmed
  */
 exports.processCommissionPayment = onRequest(
-  { secrets: [stripeSecretKey] },
+  {secrets: [stripeSecretKey]},
   (request, response) => {
     cors(request, response, async () => {
       try {
@@ -1524,7 +1524,7 @@ exports.processCommissionPayment = onRequest(
         // Verify Firebase Auth token
         const authHeader = request.headers.authorization;
         if (!authHeader || !authHeader.startsWith("Bearer ")) {
-          return response.status(401).send({ error: "Unauthorized" });
+          return response.status(401).send({error: "Unauthorized"});
         }
 
         const idToken = authHeader.split("Bearer ")[1];
@@ -1534,7 +1534,7 @@ exports.processCommissionPayment = onRequest(
         const stripe = require("stripe")(stripeSecretKey.value());
 
         if (request.method !== "POST") {
-          return response.status(405).send({ error: "Method Not Allowed" });
+          return response.status(405).send({error: "Method Not Allowed"});
         }
 
         const {
@@ -1615,7 +1615,7 @@ exports.processCommissionPayment = onRequest(
         });
       } catch (error) {
         console.error("❌ Error processing commission payment:", error);
-        response.status(500).send({ error: error.message });
+        response.status(500).send({error: error.message});
       }
     });
   }
@@ -1625,17 +1625,17 @@ exports.processCommissionPayment = onRequest(
  * Request a refund
  */
 exports.requestRefund = onRequest(
-  { secrets: [stripeSecretKey] },
+  {secrets: [stripeSecretKey]},
   (request, response) => {
     cors(request, response, async () => {
       try {
         const stripe = require("stripe")(stripeSecretKey.value());
 
         if (request.method !== "POST") {
-          return response.status(405).send({ error: "Method Not Allowed" });
+          return response.status(405).send({error: "Method Not Allowed"});
         }
 
-        const { paymentId, subscriptionId, userId, reason, additionalDetails } =
+        const {paymentId, subscriptionId, userId, reason, additionalDetails} =
           request.body;
 
         if (!paymentId || !userId || !reason) {
@@ -1677,7 +1677,7 @@ exports.requestRefund = onRequest(
         });
       } catch (error) {
         console.error("Error requesting refund:", error);
-        response.status(500).send({ error: error.message });
+        response.status(500).send({error: error.message});
       }
     });
   }
@@ -1688,11 +1688,11 @@ exports.requestRefund = onRequest(
  * Handles both production and sandbox environments
  */
 exports.validateAppleReceipt = onRequest(
-  { secrets: [stripeSecretKey] },
+  {secrets: [stripeSecretKey]},
   (request, response) => {
     cors(request, response, async () => {
       try {
-        const { receiptData, userId, productId } = request.body;
+        const {receiptData, userId, productId} = request.body;
 
         if (!receiptData || !userId || !productId) {
           return response.status(400).send({
@@ -1769,7 +1769,7 @@ exports.validateAppleReceipt = onRequest(
         });
       } catch (error) {
         console.error("Error validating Apple receipt:", error);
-        response.status(500).send({ error: error.message });
+        response.status(500).send({error: error.message});
       }
     });
   }
@@ -1779,19 +1779,19 @@ exports.validateAppleReceipt = onRequest(
  * Validate receipt with Apple's servers
  * @param {string} receiptData - Base64 encoded receipt data
  * @param {boolean} isSandbox - Whether to use sandbox environment
- * @returns {Promise<Object>} Validation result
+ * @return {Promise<Object>} Validation result
  */
 async function validateReceiptWithApple(receiptData, isSandbox = false) {
-  const url = isSandbox
-    ? "https://sandbox.itunes.apple.com/verifyReceipt"
-    : "https://buy.itunes.apple.com/verifyReceipt";
+  const url = isSandbox ?
+    "https://sandbox.itunes.apple.com/verifyReceipt" :
+    "https://buy.itunes.apple.com/verifyReceipt";
 
   const password = process.env.APPLE_SHARED_SECRET || ""; // You'll need to set this
 
   return new Promise((resolve, reject) => {
     const postData = JSON.stringify({
       "receipt-data": receiptData,
-      password: password,
+      "password": password,
       "exclude-old-transactions": true,
     });
 
@@ -1848,7 +1848,7 @@ async function validateReceiptWithApple(receiptData, isSandbox = false) {
 /**
  * Get human-readable error message for Apple status codes
  * @param {number} statusCode - Apple status code
- * @returns {string} Error message
+ * @return {string} Error message
  */
 function getAppleErrorMessage(statusCode) {
   const errorMessages = {
@@ -1883,24 +1883,24 @@ exports.placeBid = onRequest((request, response) => {
     try {
       // Only allow POST requests
       if (request.method !== "POST") {
-        return response.status(405).send({ error: "Method not allowed" });
+        return response.status(405).send({error: "Method not allowed"});
       }
 
       // Verify authentication
       if (!request.auth) {
-        return response.status(401).send({ error: "Authentication required" });
+        return response.status(401).send({error: "Authentication required"});
       }
 
-      const { artworkId, amount } = request.body;
+      const {artworkId, amount} = request.body;
       const userId = request.auth.uid;
 
       if (!artworkId || !amount) {
-        return response.status(400).send({ error: "Missing required fields" });
+        return response.status(400).send({error: "Missing required fields"});
       }
 
       const bidAmount = parseFloat(amount);
       if (isNaN(bidAmount) || bidAmount <= 0) {
-        return response.status(400).send({ error: "Invalid bid amount" });
+        return response.status(400).send({error: "Invalid bid amount"});
       }
 
       // Get artwork data
@@ -1911,26 +1911,26 @@ exports.placeBid = onRequest((request, response) => {
       const artworkDoc = await artworkRef.get();
 
       if (!artworkDoc.exists) {
-        return response.status(404).send({ error: "Artwork not found" });
+        return response.status(404).send({error: "Artwork not found"});
       }
 
       const artwork = artworkDoc.data();
 
       // Validate auction is active
       if (!artwork.auctionEnabled || artwork.auctionStatus !== "open") {
-        return response.status(400).send({ error: "Auction is not active" });
+        return response.status(400).send({error: "Auction is not active"});
       }
 
       // Check if auction has ended
       if (artwork.auctionEnd && artwork.auctionEnd.toDate() < new Date()) {
-        return response.status(400).send({ error: "Auction has ended" });
+        return response.status(400).send({error: "Auction has ended"});
       }
 
       // Check if user is the artist
       if (artwork.userId === userId) {
         return response
           .status(400)
-          .send({ error: "Cannot bid on own artwork" });
+          .send({error: "Cannot bid on own artwork"});
       }
 
       // Get current highest bid
@@ -1940,7 +1940,7 @@ exports.placeBid = onRequest((request, response) => {
       // Validate bid amount
       if (bidAmount <= currentHighestBid) {
         return response.status(400).send({
-          error: `Bid must be higher than current highest bid of \$${currentHighestBid}`,
+          error: `Bid must be higher than current highest bid of $${currentHighestBid}`,
         });
       }
 
@@ -1972,7 +1972,7 @@ exports.placeBid = onRequest((request, response) => {
           currentData.currentHighestBid || currentData.startingPrice || 0;
 
         if (bidAmount <= currentHighest) {
-          throw new Error(`Bid must be higher than \$${currentHighest}`);
+          throw new Error(`Bid must be higher than $${currentHighest}`);
         }
 
         // Add the bid
@@ -1983,7 +1983,7 @@ exports.placeBid = onRequest((request, response) => {
       });
 
       console.log(
-        `✅ Bid placed: User ${userId} bid \$${bidAmount} on artwork ${artworkId}`
+        `✅ Bid placed: User ${userId} bid $${bidAmount} on artwork ${artworkId}`
       );
 
       response.status(200).send({
@@ -2110,9 +2110,9 @@ exports.closeAuction = onSchedule("every 1 minutes", async (event) => {
         .firestore()
         .collection("notifications")
         .doc();
-      const artistMessage = winner
-        ? `Your artwork "${artwork.title}" was sold for \$${finalPrice}!`
-        : `The auction for "${artwork.title}" ended without meeting the reserve price.`;
+      const artistMessage = winner ?
+        `Your artwork "${artwork.title}" was sold for $${finalPrice}!` :
+        `The auction for "${artwork.title}" ended without meeting the reserve price.`;
       batch.set(artistNotificationRef, {
         userId: artwork.userId,
         type: winner ? "auction_sold" : "auction_ended",
@@ -2135,7 +2135,7 @@ exports.closeAuction = onSchedule("every 1 minutes", async (event) => {
 });
 
 exports.submitArtBattleVote = onCall(async (request) => {
-  const { data, auth } = request;
+  const {data, auth} = request;
 
   console.log("submitArtBattleVote called", {
     uid: auth?.uid,
@@ -2147,7 +2147,7 @@ exports.submitArtBattleVote = onCall(async (request) => {
     throw new HttpsError("unauthenticated", "User must be logged in");
   }
 
-  const { battleId, artworkIdChosen } = data ?? {};
+  const {battleId, artworkIdChosen} = data ?? {};
 
   try {
     const userId = auth.uid;
@@ -2184,16 +2184,12 @@ exports.submitArtBattleVote = onCall(async (request) => {
     const tenSecondsAgo = now - 10000;
     const oneHourAgo = now - 3600000;
 
-    // Check for rapid voting (last 10 seconds)
+    // Check for rapid voting (last 10 seconds) - Simple check
     const recentVotesQuery = await admin
       .firestore()
       .collection("art_battle_votes")
       .where("userId", "==", userId)
-      .where(
-        "timestamp",
-        ">",
-        admin.firestore.Timestamp.fromMillis(tenSecondsAgo)
-      )
+      .where("timestamp", ">", admin.firestore.Timestamp.fromMillis(tenSecondsAgo))
       .limit(1)
       .get();
 
@@ -2219,21 +2215,10 @@ exports.submitArtBattleVote = onCall(async (request) => {
       );
     }
 
-    // Check for repetitive voting patterns (same artwork multiple times)
-    const recentArtworkVotes = await admin
-      .firestore()
-      .collection("art_battle_votes")
-      .where("userId", "==", userId)
-      .where("artworkIdChosen", "==", artworkIdChosen)
-      .where("timestamp", ">", admin.firestore.Timestamp.fromMillis(oneHourAgo))
-      .get();
-
-    // Reduce vote weight if user has voted for same artwork multiple times recently
+    // Reduce vote weight if user has voted many times in the last hour
     let voteWeight = 1;
-    if (recentArtworkVotes.docs.length > 10) {
-      voteWeight = 0.2; // Further reduce for excessive repetition
-    } else if (recentArtworkVotes.docs.length > 5) {
-      voteWeight = 0.5; // Reduce influence of repetitive voting
+    if (hourlyVotesQuery.docs.length > 20) {
+      voteWeight = 0.5;
     }
 
     // Update battle with winner
@@ -2242,52 +2227,55 @@ exports.submitArtBattleVote = onCall(async (request) => {
     });
 
     // Update winner artwork
-    const winnerDoc = await admin
-      .firestore()
-      .collection("artworks")
-      .doc(artworkIdChosen)
-      .get();
+    let winnerRef = admin.firestore()
+      .collection("artwork")
+      .doc(artworkIdChosen);
+    let winnerDoc = await winnerRef.get();
+
+    if (!winnerDoc.exists) {
+      // Fallback to 'artworks' (plural)
+      winnerRef = admin.firestore().collection("artworks").doc(artworkIdChosen);
+      winnerDoc = await winnerRef.get();
+    }
+
     if (winnerDoc.exists) {
       const winnerData = winnerDoc.data();
       const currentScore = winnerData.artBattleScore || 0;
       const currentWins = winnerData.artBattleWins || 0;
       const currentAppearances = winnerData.artBattleAppearances || 0;
 
-      await admin
-        .firestore()
-        .collection("artworks")
-        .doc(artworkIdChosen)
-        .update({
-          artBattleScore: currentScore + voteWeight,
-          artBattleWins: currentWins + 1,
-          artBattleAppearances: currentAppearances + 1,
-          artBattleLastWinAt: admin.firestore.FieldValue.serverTimestamp(),
-          artBattleLastShownAt: admin.firestore.FieldValue.serverTimestamp(),
-        });
+      await winnerRef.update({
+        artBattleScore: currentScore + voteWeight,
+        artBattleWins: currentWins + 1,
+        artBattleAppearances: currentAppearances + 1,
+        artBattleLastWinAt: admin.firestore.FieldValue.serverTimestamp(),
+        artBattleLastShownAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
     }
 
     // Update loser artwork
     const loserId =
-      battle.artworkAId === artworkIdChosen
-        ? battle.artworkBId
-        : battle.artworkAId;
-    const loserDoc = await admin
-      .firestore()
-      .collection("artworks")
-      .doc(loserId)
-      .get();
+      battle.artworkAId === artworkIdChosen ?
+        battle.artworkBId :
+        battle.artworkAId;
+
+    let loserRef = admin.firestore().collection("artwork").doc(loserId);
+    let loserDoc = await loserRef.get();
+
+    if (!loserDoc.exists) {
+      // Fallback to 'artworks' (plural)
+      loserRef = admin.firestore().collection("artworks").doc(loserId);
+      loserDoc = await loserRef.get();
+    }
+
     if (loserDoc.exists) {
       const loserData = loserDoc.data();
       const currentAppearances = loserData.artBattleAppearances || 0;
 
-      await admin
-        .firestore()
-        .collection("artworks")
-        .doc(loserId)
-        .update({
-          artBattleAppearances: currentAppearances + 1,
-          artBattleLastShownAt: admin.firestore.FieldValue.serverTimestamp(),
-        });
+      await loserRef.update({
+        artBattleAppearances: currentAppearances + 1,
+        artBattleLastShownAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
     }
 
     // Record the vote
@@ -2299,7 +2287,7 @@ exports.submitArtBattleVote = onCall(async (request) => {
       voteWeight,
     });
 
-    return { success: true };
+    return {success: true};
   } catch (error) {
     console.error("Error submitting art battle vote:", error);
     throw new HttpsError("internal", "Internal server error");

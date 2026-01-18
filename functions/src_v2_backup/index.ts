@@ -1,6 +1,6 @@
 import * as functions from "firebase-functions";
-import { onRequest } from "firebase-functions/v2/https";
-import { onSchedule } from "firebase-functions/v2/scheduler";
+import {onRequest} from "firebase-functions/v2/https";
+import {onSchedule} from "firebase-functions/v2/scheduler";
 import * as admin from "firebase-admin";
 import Stripe from "stripe";
 
@@ -83,11 +83,11 @@ export const createCustomer = onRequest(
 
     try {
       if (request.method !== "POST") {
-        response.status(405).send({ error: "Method Not Allowed" });
+        response.status(405).send({error: "Method Not Allowed"});
         return;
       }
 
-      const { email, userId } = request.body;
+      const {email, userId} = request.body;
 
       if (!email || !userId) {
         response.status(400).send({
@@ -110,7 +110,7 @@ export const createCustomer = onRequest(
       });
     } catch (error) {
       console.error("Error creating customer:", error);
-      response.status(500).send({ error: (error as Error).message });
+      response.status(500).send({error: (error as Error).message});
     }
   }
 );
@@ -129,11 +129,11 @@ export const createSetupIntent = onRequest(
 
     try {
       if (request.method !== "POST") {
-        response.status(405).send({ error: "Method Not Allowed" });
+        response.status(405).send({error: "Method Not Allowed"});
         return;
       }
 
-      const { customerId } = request.body;
+      const {customerId} = request.body;
 
       if (!customerId) {
         response.status(400).send({
@@ -152,7 +152,7 @@ export const createSetupIntent = onRequest(
       });
     } catch (error) {
       console.error("Error creating setup intent:", error);
-      response.status(500).send({ error: (error as Error).message });
+      response.status(500).send({error: (error as Error).message});
     }
   }
 );
@@ -171,11 +171,11 @@ export const getPaymentMethods = onRequest(
 
     try {
       if (request.method !== "POST") {
-        response.status(405).send({ error: "Method Not Allowed" });
+        response.status(405).send({error: "Method Not Allowed"});
         return;
       }
 
-      const { customerId } = request.body;
+      const {customerId} = request.body;
 
       if (!customerId) {
         response.status(400).send({
@@ -194,7 +194,7 @@ export const getPaymentMethods = onRequest(
       });
     } catch (error) {
       console.error("Error getting payment methods:", error);
-      response.status(500).send({ error: (error as Error).message });
+      response.status(500).send({error: (error as Error).message});
     }
   }
 );
@@ -213,11 +213,11 @@ export const createSubscription = onRequest(
 
     try {
       if (request.method !== "POST") {
-        response.status(405).send({ error: "Method Not Allowed" });
+        response.status(405).send({error: "Method Not Allowed"});
         return;
       }
 
-      const { customerId, priceId, userId } = request.body;
+      const {customerId, priceId, userId} = request.body;
 
       if (!customerId || !priceId || !userId) {
         response.status(400).send({
@@ -228,7 +228,7 @@ export const createSubscription = onRequest(
 
       const subscription = await stripe.subscriptions.create({
         customer: customerId,
-        items: [{ price: priceId }],
+        items: [{price: priceId}],
         payment_behavior: "default_incomplete",
         expand: ["latest_invoice.payment_intent"],
         metadata: {
@@ -242,9 +242,9 @@ export const createSubscription = onRequest(
         typeof subscription.latest_invoice === "object" &&
         "payment_intent" in subscription.latest_invoice &&
         subscription.latest_invoice.payment_intent &&
-        typeof subscription.latest_invoice.payment_intent === "object"
-          ? subscription.latest_invoice.payment_intent.client_secret || ""
-          : "";
+        typeof subscription.latest_invoice.payment_intent === "object" ?
+          subscription.latest_invoice.payment_intent.client_secret || "" :
+          "";
 
       response.status(200).send({
         subscriptionId: subscription.id,
@@ -253,7 +253,7 @@ export const createSubscription = onRequest(
       });
     } catch (error) {
       console.error("Error creating subscription:", error);
-      response.status(500).send({ error: (error as Error).message });
+      response.status(500).send({error: (error as Error).message});
     }
   }
 );
