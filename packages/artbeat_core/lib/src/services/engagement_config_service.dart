@@ -18,7 +18,7 @@ class EngagementConfigService {
         return [
           EngagementType.like,
           EngagementType.share,
-          EngagementType.gift,
+          EngagementType.boost,
           EngagementType.commission,
         ];
       case 'artist':
@@ -26,7 +26,7 @@ class EngagementConfigService {
         return [
           EngagementType.like,
           EngagementType.follow,
-          EngagementType.gift,
+          EngagementType.boost,
           EngagementType.sponsor,
           EngagementType.message,
           EngagementType.commission,
@@ -82,7 +82,7 @@ class EngagementConfigService {
         return [
           EngagementType.like,
           EngagementType.share,
-          EngagementType.gift,
+          EngagementType.boost,
           EngagementType.commission,
         ];
       case 'artist':
@@ -90,7 +90,7 @@ class EngagementConfigService {
         return [
           EngagementType.like,
           EngagementType.follow,
-          EngagementType.gift,
+          EngagementType.boost,
           EngagementType.message,
         ];
       case 'event':
@@ -128,7 +128,7 @@ class EngagementConfigService {
   /// Check if engagement type requires special handling (e.g., payment, forms)
   static bool requiresSpecialHandling(EngagementType engagementType) {
     switch (engagementType) {
-      case EngagementType.gift:
+      case EngagementType.boost:
       case EngagementType.sponsor:
       case EngagementType.commission:
       case EngagementType.message:
@@ -163,7 +163,7 @@ class EngagementConfigService {
       case EngagementType.rate:
       case EngagementType.review:
       case EngagementType.follow:
-      case EngagementType.gift:
+      case EngagementType.boost:
       case EngagementType.sponsor:
       case EngagementType.message:
         return true;

@@ -4,7 +4,7 @@ import 'package:share_plus/share_plus.dart';
 import '../models/engagement_model.dart';
 import '../services/engagement_config_service.dart';
 import '../services/content_engagement_service.dart';
-import '../services/in_app_gift_service.dart';
+import '../services/artist_boost_service.dart';
 
 /// Content-specific engagement bar for ARTbeat content types
 /// Replaces the universal engagement bar with content-specific engagement options
@@ -42,7 +42,7 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
   late EngagementStats _stats;
   final Map<EngagementType, bool> _userEngagements = {};
   bool _isLoading = false;
-  final InAppGiftService _giftService = InAppGiftService();
+  final ArtistBoostService _boostService = ArtistBoostService();
 
   @override
   void initState() {
@@ -150,9 +150,8 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
       case EngagementType.share:
         message = 'Demo share feature! 📤';
         break;
-      case EngagementType.gift:
-        message =
-            'Demo gift feature! 🎁 (Gift functionality available in full app)';
+      case EngagementType.boost:
+        message = newEngagementState ? 'Demo boosted! 🚀' : 'Demo unboosted';
         break;
       case EngagementType.commission:
         message =
@@ -177,8 +176,8 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
 
   Future<void> _handleSpecialEngagement(EngagementType type) async {
     switch (type) {
-      case EngagementType.gift:
-        await _showGiftDialog();
+      case EngagementType.boost:
+        await _showBoostDialog();
         break;
       case EngagementType.sponsor:
         await _showSponsorDialog();
@@ -256,9 +255,9 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
               .clamp(0, double.infinity)
               .toInt(),
         );
-      case EngagementType.gift:
+      case EngagementType.boost:
         return _stats.copyWith(
-          giftCount: (_stats.giftCount + increment)
+          boostCount: (_stats.boostCount + increment)
               .clamp(0, double.infinity)
               .toInt(),
         );
@@ -418,8 +417,8 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
         return Icons.rate_review; // review icon
       case EngagementType.follow:
         return Icons.person_add; // follow icon
-      case EngagementType.gift:
-        return Icons.card_giftcard; // gift icon
+      case EngagementType.boost:
+        return Icons.rocket_launch; // boost icon
       case EngagementType.sponsor:
         return Icons.volunteer_activism; // sponsor icon
       case EngagementType.message:
@@ -539,11 +538,11 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
     }
   }
 
-  Future<void> _showGiftDialog() async {
+  Future<void> _showBoostDialog() async {
     if (widget.artistId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Cannot send gift - artist not found.'),
+          content: Text('Cannot send boost - artist not found.'),
           backgroundColor: Colors.red,
         ),
       );
@@ -552,19 +551,19 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Processing gift...'),
+        content: Text('Processing boost...'),
         duration: Duration(seconds: 1),
       ),
     );
 
-    final success = await _giftService.purchaseQuickGift(widget.artistId!);
+    final success = await _boostService.purchaseQuickBoost(widget.artistId!);
 
     if (!mounted) return;
 
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Gift purchase initiated! 🎁'),
+          content: Text('Boost purchase initiated! 🚀'),
           backgroundColor: Colors.green,
           duration: Duration(seconds: 2),
         ),
@@ -572,7 +571,7 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Unable to send gift. Please try again.'),
+          content: Text('Unable to send boost. Please try again.'),
           backgroundColor: Colors.red,
           duration: Duration(seconds: 2),
         ),
@@ -816,8 +815,8 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
           case EngagementType.review:
             message = 'Review submitted successfully!';
             break;
-          case EngagementType.gift:
-            message = 'Gift sent to the artist!';
+          case EngagementType.boost:
+            message = 'Boost sent to the artist! 🚀';
             break;
           case EngagementType.share:
             message = 'Thank you for sharing!';
@@ -972,7 +971,7 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'For now, you can show support by liking their work and sending gifts.',
+                        'For now, you can show support by liking their work and boosting them.',
                         style: TextStyle(color: Colors.pink.shade700),
                       ),
                     ),
@@ -990,10 +989,10 @@ class _ContentEngagementBarState extends State<ContentEngagementBar> {
               ElevatedButton.icon(
                 onPressed: () {
                   Navigator.pop(context);
-                  _showGiftDialog();
+                  _showBoostDialog();
                 },
-                icon: const Icon(Icons.card_giftcard, size: 16),
-                label: const Text('Send Gift'),
+                icon: const Icon(Icons.rocket_launch, size: 16),
+                label: const Text('Boost Artist'),
               )
             else
               ElevatedButton(

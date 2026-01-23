@@ -1089,6 +1089,8 @@ class _MediaActionButton extends StatelessWidget {
             Text(
               label,
               textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: GoogleFonts.spaceGrotesk(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
@@ -1098,6 +1100,9 @@ class _MediaActionButton extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               subtitle,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: GoogleFonts.spaceGrotesk(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,

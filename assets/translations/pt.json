@@ -826,6 +826,8 @@
   "art_walk_art_walk_edit_error_error_picking_image": "Erro ao escolher imagem: $e",
   "art_walk_art_walk_edit_error_error_updating_art": "Erro ao atualizar caminhada de arte: $e",
   "art_walk_art_walk_edit_success_art_walk_deleted": "Caminhada de arte excluída com sucesso",
+  "art_walk_edit": "Editar",
+  "art_walk_delete": "Excluir",
   "art_walk_art_walk_edit_success_artwork_added_to": "Obra adicionada à caminhada de arte com sucesso",
   "art_walk_art_walk_edit_text_add_artwork": "Adicionar Obra",
   "art_walk_art_walk_edit_text_add_artwork_20": "Adicionar Obra",
@@ -2062,7 +2064,11 @@
     "winning": "Vencendo",
     "won": "Venceu",
     "you_are_winning": "Você está vencendo!",
-    "your_bid": "Seu lance"
+    "your_bid": "Seu lance",
+    "manage_auction": "Gerenciar Leilão",
+    "enable_auction": "Ativar Leilão",
+    "enable_description": "Permitir que licitantes façam lances nesta obra de arte",
+    "save_settings": "Salvar Configurações"
   },
   "auction_manage_cancel": "Cancelar",
   "auction_manage_end_time": "Fim do leilão",

@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// Enum for different types of in-app purchases
 enum PurchaseType {
-  consumable, // Ads, gifts - can be purchased multiple times
+  consumable, // Ads, boosts - can be purchased multiple times
   nonConsumable, // One-time purchases like premium features
   subscription, // Recurring subscriptions
 }
@@ -10,7 +10,7 @@ enum PurchaseType {
 /// Enum for purchase categories
 enum PurchaseCategory {
   ads, // Advertisement purchases
-  gifts, // Gift purchases
+  boosts, // Boost purchases
   subscription, // Subscription purchases
   premium, // Premium features
 }
@@ -242,8 +242,8 @@ class SubscriptionDetails {
   bool get isCancelled => status == 'cancelled';
 }
 
-/// Model for gift purchases using in-app purchases
-class InAppGiftPurchase {
+/// Model for boost purchases using in-app purchases
+class ArtistBoostPurchase {
   final String id;
   final String senderId;
   final String recipientId;
@@ -255,7 +255,7 @@ class InAppGiftPurchase {
   final String status;
   final String? transactionId;
 
-  InAppGiftPurchase({
+  ArtistBoostPurchase({
     required this.id,
     required this.senderId,
     required this.recipientId,
@@ -268,9 +268,9 @@ class InAppGiftPurchase {
     this.transactionId,
   });
 
-  factory InAppGiftPurchase.fromFirestore(DocumentSnapshot doc) {
+  factory ArtistBoostPurchase.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
-    return InAppGiftPurchase(
+    return ArtistBoostPurchase(
       id: doc.id,
       senderId: data['senderId'] as String,
       recipientId: data['recipientId'] as String,

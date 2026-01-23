@@ -9,7 +9,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:artbeat_core/artbeat_core.dart' hide GradientBadge;
-import 'package:artbeat_core/src/services/in_app_gift_service.dart';
 
 import '../../models/direct_commission_model.dart';
 import '../../models/group_models.dart';
@@ -43,7 +42,7 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
   final int _postsPerPage = 10;
   late ScrollController _scrollController;
   bool _isCurrentUserArtist = false;
-  final InAppGiftService _giftService = InAppGiftService();
+  final ArtistBoostService _giftService = ArtistBoostService();
 
   @override
   void initState() {
@@ -292,14 +291,14 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
     }
   }
 
-  void _handleGift(BaseGroupPost post) {
+  void _handleBoost(BaseGroupPost post) {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (context) => GiftSelectionWidget(
+      builder: (context) => ArtistBoostWidget(
         recipientId: post.userId,
         recipientName: post.userName,
       ),
@@ -307,8 +306,8 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
   }
 
   void _handleSponsor(BaseGroupPost post) {
-    // Redirect to gift system (sponsorship removed for simplicity)
-    _handleGift(post);
+    // Redirect to boost system
+    _handleBoost(post);
   }
 
   void _handleCommission(BaseGroupPost post) {
@@ -411,7 +410,7 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
       ),
     );
 
-    final success = await _giftService.purchaseQuickGift(widget.artist.userId);
+    final success = await _giftService.purchaseQuickBoost(widget.artist.userId);
 
     if (!mounted) return;
 
@@ -1243,7 +1242,7 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
                     onAppreciate: () => _handleAppreciate(post),
                     onComment: () => _handleComment(post),
                     onFeature: () => _handleFeature(post),
-                    onGift: () => _handleGift(post),
+                    onBoost: () => _handleBoost(post),
                     onShare: () => _handleShare(post),
                   ),
                   if (showEngagement)

@@ -27,3 +27,4 @@ export 'place_bid_modal.dart';
 export 'my_bids_screen.dart';
 export 'auction_win_screen.dart';
 export 'auction_management_modal.dart';
+export 'auction_setup_wizard_screen.dart';

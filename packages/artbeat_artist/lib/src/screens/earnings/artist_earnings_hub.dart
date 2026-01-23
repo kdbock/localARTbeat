@@ -24,9 +24,11 @@ class _ArtistEarningsHubState extends State<ArtistEarningsHub>
   EarningsModel? _earnings;
   List<EarningsTransaction> _recentTransactions = [];
   List<PayoutModel> _recentPayouts = [];
-  // Map<String, dynamic> _earningsSummary = {}; // Removed unused field
+  int _artistXP = 0;
   bool _isLoading = true;
   String? _errorMessage;
+
+  final core.ArtistBoostService _giftService = core.ArtistBoostService();
 
   @override
   void initState() {
@@ -64,10 +66,18 @@ class _ArtistEarningsHubState extends State<ArtistEarningsHub>
       final payouts = await _earningsService.getPayoutHistory(limit: 5);
       core.AppLogger.info('✅ Payouts loaded: ${payouts.length} items');
 
+      // Fetch Artist XP
+      int artistXP = 0;
+      final userId = core.UserService().currentUser?.uid;
+      if (userId != null) {
+        artistXP = await _giftService.getArtistXPBalance(userId);
+      }
+
       setState(() {
         _earnings = earnings;
         _recentTransactions = transactions;
         _recentPayouts = payouts;
+        _artistXP = artistXP;
         _isLoading = false;
       });
 
@@ -231,7 +241,7 @@ class _ArtistEarningsHubState extends State<ArtistEarningsHub>
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'Total Support',
+                  'Career Earnings',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -253,10 +263,10 @@ class _ArtistEarningsHubState extends State<ArtistEarningsHub>
             children: [
               Expanded(
                 child: _buildEarningsCard(
-                  'Promotion Credits',
-                  '${_earnings!.availableBalance.toInt()} (≈${((_earnings!.availableBalance) * 100).toInt()} views)',
+                  'Artist XP',
+                  '$_artistXP XP',
                   Colors.white.withValues(alpha: 0.9),
-                  Colors.green[700]!,
+                  Colors.blue[700]!,
                 ),
               ),
               const SizedBox(width: 12),
@@ -329,7 +339,7 @@ class _ArtistEarningsHubState extends State<ArtistEarningsHub>
 
     final breakdown = [
       {
-        'label': 'Promotion Support',
+        'label': 'Boost Earnings',
         'amount': _earnings!.promotionSupportEarnings,
         'color': Colors.pink
       },

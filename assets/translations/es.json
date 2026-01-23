@@ -826,6 +826,8 @@
   "art_walk_art_walk_edit_error_error_picking_image": "Error al seleccionar imagen: $e",
   "art_walk_art_walk_edit_error_error_updating_art": "Error al actualizar ruta de arte: $e",
   "art_walk_art_walk_edit_success_art_walk_deleted": "Paseo de Arte eliminado exitosamente",
+  "art_walk_edit": "Editar",
+  "art_walk_delete": "Eliminar",
   "art_walk_art_walk_edit_success_artwork_added_to": "Obra de Arte added to art walk successfully",
   "art_walk_art_walk_edit_text_add_artwork": "Agregar Artwork",
   "art_walk_art_walk_edit_text_add_artwork_20": "Agregar Artwork",
@@ -2062,7 +2064,11 @@
     "winning": "Winning",
     "won": "Won",
     "you_are_winning": "You are winning!",
-    "your_bid": "Your bid"
+    "your_bid": "Your bid",
+    "manage_auction": "Gestionar Subasta",
+    "enable_auction": "Habilitar Subasta",
+    "enable_description": "Permitir a los postores ofertar por esta obra de arte",
+    "save_settings": "Guardar Configuración"
   },
   "auction_manage_cancel": "Cancelar",
   "auction_manage_end_time": "Fin de la subasta",

@@ -22,8 +22,8 @@ class ArtworkService {
   final EnhancedStorageService _enhancedStorage = EnhancedStorageService();
 
   // Collection references
-  final CollectionReference _artworkCollection =
-      FirebaseFirestore.instance.collection('artwork');
+  final CollectionReference _artworkCollection = FirebaseFirestore.instance
+      .collection('artwork');
 
   /// Get the current authenticated user's ID
   String? getCurrentUserId() {
@@ -62,7 +62,8 @@ class ArtworkService {
         final artworkCount = snapshot.count ?? 0;
         if (artworkCount >= 5) {
           throw Exception(
-              'You have reached the maximum number of artworks for the basic tier. Please upgrade to upload more artwork.');
+            'You have reached the maximum number of artworks for the basic tier. Please upgrade to upload more artwork.',
+          );
         }
       }
     } catch (e) {
@@ -96,8 +97,9 @@ class ArtworkService {
       await _checkUploadLimit();
 
       // Get artist profile ID
-      final artistProfile =
-          await _subscriptionService.getArtistProfileByUserId(userId);
+      final artistProfile = await _subscriptionService.getArtistProfileByUserId(
+        userId,
+      );
       if (artistProfile == null) {
         throw Exception('Artist profile not found. Please create one first.');
       }
@@ -162,7 +164,8 @@ class ArtworkService {
         }
       } catch (e) {
         AppLogger.warning(
-            'Failed to post social activity for artwork upload: $e');
+          'Failed to post social activity for artwork upload: $e',
+        );
       }
 
       return docRef.id;
@@ -188,10 +191,12 @@ class ArtworkService {
 
   /// Get artwork by artist profile ID
   Future<List<ArtworkModel>> getArtworkByArtistProfileId(
-      String artistProfileId) async {
+    String artistProfileId,
+  ) async {
     try {
       debugPrint(
-          '🔍 ArtworkService: Querying artwork for artistProfileId: $artistProfileId');
+        '🔍 ArtworkService: Querying artwork for artistProfileId: $artistProfileId',
+      );
 
       // First get the artist profile to get the userId
       final artistProfileDoc = await FirebaseFirestore.instance
@@ -211,7 +216,8 @@ class ArtworkService {
       }
 
       debugPrint(
-          '🔍 ArtworkService: Found userId: $userId for artistProfileId: $artistProfileId');
+        '🔍 ArtworkService: Found userId: $userId for artistProfileId: $artistProfileId',
+      );
 
       // Try querying by artistProfileId first (for newer artwork)
       final snapshot = await _artworkCollection
@@ -219,17 +225,21 @@ class ArtworkService {
           .get();
 
       debugPrint(
-          '📊 ArtworkService: Found ${snapshot.docs.length} artwork documents by artistProfileId');
+        '📊 ArtworkService: Found ${snapshot.docs.length} artwork documents by artistProfileId',
+      );
 
-      final List<ArtworkModel> artworks =
-          snapshot.docs.map((doc) => ArtworkModel.fromFirestore(doc)).toList();
+      final List<ArtworkModel> artworks = snapshot.docs
+          .map((doc) => ArtworkModel.fromFirestore(doc))
+          .toList();
 
       // Also query by artistId (for legacy artwork that might use this field)
-      final legacySnapshot =
-          await _artworkCollection.where('artistId', isEqualTo: userId).get();
+      final legacySnapshot = await _artworkCollection
+          .where('artistId', isEqualTo: userId)
+          .get();
 
       debugPrint(
-          '📊 ArtworkService: Found ${legacySnapshot.docs.length} artwork documents by artistId (legacy)');
+        '📊 ArtworkService: Found ${legacySnapshot.docs.length} artwork documents by artistId (legacy)',
+      );
 
       if (legacySnapshot.docs.isNotEmpty) {
         final legacyArtworks = legacySnapshot.docs
@@ -239,11 +249,13 @@ class ArtworkService {
       }
 
       // Also query by userId as final fallback
-      final userSnapshot =
-          await _artworkCollection.where('userId', isEqualTo: userId).get();
+      final userSnapshot = await _artworkCollection
+          .where('userId', isEqualTo: userId)
+          .get();
 
       debugPrint(
-          '📊 ArtworkService: Found ${userSnapshot.docs.length} artwork documents by userId');
+        '📊 ArtworkService: Found ${userSnapshot.docs.length} artwork documents by userId',
+      );
 
       if (userSnapshot.docs.isNotEmpty) {
         final userArtworks = userSnapshot.docs
@@ -262,11 +274,57 @@ class ArtworkService {
       artworks.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
       debugPrint(
-          '🖼️ ArtworkService: Total unique artworks found: ${artworks.length}');
+        '🖼️ ArtworkService: Total unique artworks found: ${artworks.length}',
+      );
 
       return artworks;
     } catch (e) {
       AppLogger.error('❌ Error getting artist artwork: $e');
+      return [];
+    }
+  }
+
+  /// Get artwork by user ID (simpler method for current user)
+  Future<List<ArtworkModel>> getArtworkByUserId(String userId) async {
+    try {
+      debugPrint('🔍 ArtworkService: Querying artwork for userId: $userId');
+
+      // Try querying by userId first (new field)
+      var snapshot = await _artworkCollection
+          .where('userId', isEqualTo: userId)
+          .orderBy('createdAt', descending: true)
+          .get();
+
+      debugPrint(
+        '📊 ArtworkService: Found ${snapshot.docs.length} artwork documents with userId',
+      );
+
+      // If no results, try legacy artistId field
+      if (snapshot.docs.isEmpty) {
+        debugPrint('🔍 ArtworkService: Trying legacy artistId field...');
+        snapshot = await _artworkCollection
+            .where('artistId', isEqualTo: userId)
+            .orderBy('createdAt', descending: true)
+            .get();
+        debugPrint(
+          '📊 ArtworkService: Found ${snapshot.docs.length} artwork documents with artistId',
+        );
+      }
+
+      final artworks = snapshot.docs
+          .map((doc) => ArtworkModel.fromFirestore(doc))
+          .toList();
+
+      // Debug log artwork details
+      for (var artwork in artworks) {
+        debugPrint(
+          '🎨 Artwork: ${artwork.title} | imageUrl: "${artwork.imageUrl}" | additionalImages: ${artwork.additionalImageUrls.length}',
+        );
+      }
+
+      return artworks;
+    } catch (e) {
+      AppLogger.error('❌ Error getting artwork by userId: $e');
       return [];
     }
   }
@@ -417,8 +475,10 @@ class ArtworkService {
     }
 
     try {
-      final likeRef =
-          _artworkCollection.doc(artworkId).collection('likes').doc(userId);
+      final likeRef = _artworkCollection
+          .doc(artworkId)
+          .collection('likes')
+          .doc(userId);
 
       final likeDoc = await likeRef.get();
 
@@ -480,20 +540,23 @@ class ArtworkService {
   /// Search artwork by query
   Future<List<ArtworkModel>> searchArtwork(String query) async {
     try {
-      final snapshot =
-          await _artworkCollection.where('isPublic', isEqualTo: true).get();
+      final snapshot = await _artworkCollection
+          .where('isPublic', isEqualTo: true)
+          .get();
 
       final lowercaseQuery = query.toLowerCase();
-      return snapshot.docs
-          .map((doc) => ArtworkModel.fromFirestore(doc))
-          .where((artwork) {
+      return snapshot.docs.map((doc) => ArtworkModel.fromFirestore(doc)).where((
+        artwork,
+      ) {
         return artwork.title.toLowerCase().contains(lowercaseQuery) ||
             artwork.description.toLowerCase().contains(lowercaseQuery) ||
             artwork.medium.toLowerCase().contains(lowercaseQuery) ||
-            artwork.styles
-                .any((style) => style.toLowerCase().contains(lowercaseQuery)) ||
+            artwork.styles.any(
+              (style) => style.toLowerCase().contains(lowercaseQuery),
+            ) ||
             (artwork.tags?.any(
-                    (tag) => tag.toLowerCase().contains(lowercaseQuery)) ??
+                  (tag) => tag.toLowerCase().contains(lowercaseQuery),
+                ) ??
                 false);
       }).toList();
     } catch (e) {
@@ -552,7 +615,8 @@ class ArtworkService {
         artworks.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
         debugPrint(
-            'Fallback query successful: loaded ${artworks.length} artworks');
+          'Fallback query successful: loaded ${artworks.length} artworks',
+        );
         return artworks;
       } catch (fallbackError) {
         AppLogger.error('Fallback query also failed: $fallbackError');
@@ -586,7 +650,8 @@ class ArtworkService {
         artworks.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
         debugPrint(
-            'Fallback query successful: loaded ${artworks.length} artworks');
+          'Fallback query successful: loaded ${artworks.length} artworks',
+        );
         return artworks;
       } catch (fallbackError) {
         AppLogger.error('Fallback query also failed: $fallbackError');
@@ -635,8 +700,9 @@ class ArtworkService {
           .limit(limit)
           .get();
 
-      List<ArtworkModel> artworks =
-          snapshot.docs.map((doc) => ArtworkModel.fromFirestore(doc)).toList();
+      List<ArtworkModel> artworks = snapshot.docs
+          .map((doc) => ArtworkModel.fromFirestore(doc))
+          .toList();
 
       // Apply client-side filters that Firestore doesn't support well
       if (query != null && query.isNotEmpty) {
@@ -646,9 +712,11 @@ class ArtworkService {
               artwork.description.toLowerCase().contains(lowercaseQuery) ||
               artwork.medium.toLowerCase().contains(lowercaseQuery) ||
               artwork.styles.any(
-                  (style) => style.toLowerCase().contains(lowercaseQuery)) ||
+                (style) => style.toLowerCase().contains(lowercaseQuery),
+              ) ||
               (artwork.tags?.any(
-                      (tag) => tag.toLowerCase().contains(lowercaseQuery)) ??
+                    (tag) => tag.toLowerCase().contains(lowercaseQuery),
+                  ) ??
                   false) ||
               (artwork.materials?.toLowerCase().contains(lowercaseQuery) ??
                   false);
@@ -663,15 +731,17 @@ class ArtworkService {
 
       if (minPrice != null) {
         artworks = artworks
-            .where((artwork) =>
-                artwork.price != null && artwork.price! >= minPrice)
+            .where(
+              (artwork) => artwork.price != null && artwork.price! >= minPrice,
+            )
             .toList();
       }
 
       if (maxPrice != null) {
         artworks = artworks
-            .where((artwork) =>
-                artwork.price != null && artwork.price! <= maxPrice)
+            .where(
+              (artwork) => artwork.price != null && artwork.price! <= maxPrice,
+            )
             .toList();
       }
 
@@ -718,7 +788,9 @@ class ArtworkService {
 
   /// Save a search query for the current user
   Future<void> saveSearch(
-      String searchName, Map<String, dynamic> searchCriteria) async {
+    String searchName,
+    Map<String, dynamic> searchCriteria,
+  ) async {
     final userId = getCurrentUserId();
     if (userId == null) return;
 
@@ -750,10 +822,7 @@ class ArtworkService {
 
       return snapshot.docs.map((doc) {
         final data = doc.data();
-        return {
-          'id': doc.id,
-          ...data,
-        };
+        return {'id': doc.id, ...data};
       }).toList();
     } catch (e) {
       AppLogger.error('Error getting saved searches: $e');
@@ -780,9 +849,7 @@ class ArtworkService {
       await FirebaseFirestore.instance
           .collection('saved_searches')
           .doc(searchId)
-          .update({
-        'lastUsed': FieldValue.serverTimestamp(),
-      });
+          .update({'lastUsed': FieldValue.serverTimestamp()});
     } catch (e) {
       AppLogger.error('Error updating saved search usage: $e');
     }
@@ -860,7 +927,8 @@ class ArtworkService {
         final allArtwork = await getAllPublicArtwork(limit: limit * 2);
         final writtenContent = allArtwork
             .where(
-                (artwork) => artwork.contentType == ArtworkContentType.written)
+              (artwork) => artwork.contentType == ArtworkContentType.written,
+            )
             .where((artwork) {
               if (!includeSerialized && !includeCompleted) return false;
               if (!includeSerialized) return !artwork.isSerializing;

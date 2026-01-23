@@ -4,7 +4,7 @@ import '../models/subscription_tier.dart';
 import '../utils/logger.dart';
 import 'in_app_purchase_service.dart';
 import 'in_app_subscription_service.dart';
-import 'in_app_gift_service.dart';
+import 'artist_boost_service.dart';
 import 'in_app_ad_service.dart';
 import 'payment_strategy_service.dart';
 import 'subscription_service.dart';
@@ -19,7 +19,7 @@ class InAppPurchaseManager {
   final InAppPurchaseService _purchaseService = InAppPurchaseService();
   final InAppSubscriptionService _subscriptionService =
       InAppSubscriptionService();
-  final InAppGiftService _giftService = InAppGiftService();
+  final ArtistBoostService _boostService = ArtistBoostService();
   final InAppAdService _adService = InAppAdService();
   final PaymentStrategyService _paymentStrategy = PaymentStrategyService();
   final SubscriptionService _coreSubscriptionService = SubscriptionService();
@@ -71,8 +71,8 @@ class InAppPurchaseManager {
         case PurchaseCategory.subscription:
           _handleSubscriptionPurchase(purchase);
           break;
-        case PurchaseCategory.gifts:
-          _handleGiftPurchase(purchase);
+        case PurchaseCategory.boosts:
+          _handleBoostPurchase(purchase);
           break;
         case PurchaseCategory.ads:
           _handleAdPurchase(purchase);
@@ -144,16 +144,16 @@ class InAppPurchaseManager {
     }
   }
 
-  /// Handle gift purchase
-  void _handleGiftPurchase(CompletedPurchase purchase) {
-    // Extract gift metadata
+  /// Handle boost purchase
+  void _handleBoostPurchase(CompletedPurchase purchase) {
+    // Extract boost metadata
     final metadata = purchase.metadata;
     final recipientId = metadata['recipientId'] as String?;
     final message = metadata['message'] as String?;
 
     if (recipientId == null || recipientId.isEmpty) {
       AppLogger.error(
-        '❌ Gift purchase missing recipientId: ${purchase.productId}',
+        '❌ Boost purchase missing recipientId: ${purchase.productId}',
       );
       AppLogger.error('Metadata: $metadata');
       return;
@@ -161,21 +161,21 @@ class InAppPurchaseManager {
 
     if (message == null || message.isEmpty) {
       AppLogger.warning(
-        '⚠️ Gift purchase missing message, using default: ${purchase.productId}',
+        '⚠️ Boost purchase missing message, using default: ${purchase.productId}',
       );
     }
 
     try {
-      _giftService.completeGiftPurchase(
+      _boostService.completeBoostPurchase(
         senderId: purchase.userId,
         recipientId: recipientId,
         productId: purchase.productId,
         transactionId: purchase.transactionId ?? purchase.purchaseId,
-        message: message ?? 'A gift from an ArtBeat supporter!',
+        message: message ?? 'A boost from an ArtBeat supporter!',
       );
-      AppLogger.info('✅ Gift purchase completed successfully');
+      AppLogger.info('✅ Boost purchase completed successfully');
     } catch (e) {
-      AppLogger.error('❌ Error completing gift purchase: $e');
+      AppLogger.error('❌ Error completing boost purchase: $e');
     }
   }
 
@@ -233,57 +233,57 @@ class InAppPurchaseManager {
     return _subscriptionService.getAllSubscriptionPricing();
   }
 
-  // Gift methods
-  Future<bool> purchaseGift({
+  // Boost methods
+  Future<bool> purchaseBoost({
     required String recipientId,
-    required String giftProductId,
+    required String boostProductId,
     required String message,
     Map<String, dynamic>? metadata,
   }) {
-    // Check if IAP should be used for gifts in messaging module
+    // Check if IAP should be used for boosts in messaging module
     final paymentMethod = _paymentStrategy.getPaymentMethod(
-      PurchaseType.nonConsumable, // Gifts are typically non-consumable
+      PurchaseType.nonConsumable, // Boosts are typically non-consumable
       ArtbeatModule.messaging,
     );
 
     if (paymentMethod != PaymentMethod.iap) {
       AppLogger.warning(
-        'Gift purchase should use $paymentMethod but IAP manager was called',
+        'Boost purchase should use $paymentMethod but IAP manager was called',
       );
-      // For now, proceed with IAP for digital-only gifts
-      // Stripe would be used for gifts that result in payouts
+      // For now, proceed with IAP for digital-only boosts
+      // Stripe would be used for boosts that result in payouts
     }
 
-    return _giftService.purchaseGift(
+    return _boostService.purchaseBoost(
       recipientId: recipientId,
-      giftProductId: giftProductId,
+      boostProductId: boostProductId,
       message: message,
       metadata: metadata,
     );
   }
 
-  List<Map<String, dynamic>> getAvailableGifts() {
-    return _giftService.getAvailableGifts();
+  List<Map<String, dynamic>> getAvailableBoosts() {
+    return _boostService.getAvailableBoosts();
   }
 
-  Future<List<InAppGiftPurchase>> getSentGifts(String userId) {
-    return _giftService.getSentGifts(userId);
+  Future<List<ArtistBoostPurchase>> getSentBoosts(String userId) {
+    return _boostService.getSentBoosts(userId);
   }
 
-  Future<List<InAppGiftPurchase>> getReceivedGifts(String userId) {
-    return _giftService.getReceivedGifts(userId);
+  Future<List<ArtistBoostPurchase>> getReceivedBoosts(String userId) {
+    return _boostService.getReceivedBoosts(userId);
   }
 
-  Future<int> getGiftCreditsBalance(String userId) {
-    return _giftService.getGiftCreditsBalance(userId);
+  Future<int> getBoostCreditsBalance(String userId) {
+    return _boostService.getArtistXPBalance(userId);
   }
 
-  Future<bool> useGiftCredits(String userId, int amount) {
-    return _giftService.useGiftCredits(userId, amount);
+  Future<bool> useBoostCredits(String userId, int amount) {
+    return _boostService.useArtistXP(userId, amount);
   }
 
-  Future<Map<String, dynamic>> getGiftStatistics(String userId) {
-    return _giftService.getGiftStatistics(userId);
+  Future<Map<String, dynamic>> getBoostStatistics(String userId) {
+    return _boostService.getBoostStatistics(userId);
   }
 
   // Ad methods

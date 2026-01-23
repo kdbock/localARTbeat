@@ -1,20 +1,18 @@
 // ignore_for_file: implementation_imports, cascade_invocations
 
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_core/src/services/in_app_gift_service.dart';
-import 'package:artbeat_core/src/services/in_app_purchase_service.dart';
 import 'package:flutter/material.dart';
 
-/// Simple debug screen to test gift functionality
-class DebugGiftTestScreen extends StatefulWidget {
-  const DebugGiftTestScreen({super.key});
+/// Simple debug screen to test artist boost functionality
+class DebugArtistBoostTestScreen extends StatefulWidget {
+  const DebugArtistBoostTestScreen({super.key});
 
   @override
-  State<DebugGiftTestScreen> createState() => _DebugGiftTestScreenState();
+  State<DebugArtistBoostTestScreen> createState() => _DebugArtistBoostTestScreenState();
 }
 
-class _DebugGiftTestScreenState extends State<DebugGiftTestScreen> {
-  final InAppGiftService _giftService = InAppGiftService();
+class _DebugArtistBoostTestScreenState extends State<DebugArtistBoostTestScreen> {
+  final ArtistBoostService _boostService = ArtistBoostService();
   final InAppPurchaseService _purchaseService = InAppPurchaseService();
   String _status = 'Checking...';
   bool _isLoading = false;
@@ -28,7 +26,7 @@ class _DebugGiftTestScreenState extends State<DebugGiftTestScreen> {
   Future<void> _checkStatus() async {
     setState(() {
       _isLoading = true;
-      _status = 'Checking gift system status...';
+      _status = 'Checking boost system status...';
     });
 
     final buffer = StringBuffer();
@@ -37,19 +35,19 @@ class _DebugGiftTestScreenState extends State<DebugGiftTestScreen> {
     buffer
       ..writeln('🛒 In-App Purchase Service:')
       ..writeln('   Available: ${_purchaseService.isAvailable}')
-      // Check gift service availability
-      ..writeln('\n🎁 Gift Service:')
-      ..writeln('   Available: ${_giftService.isAvailable}')
-      // Check available gift products
-      ..writeln('\n📦 Available Gift Products:');
-    final giftProducts = [
-      'artbeat_gift_small',
-      'artbeat_gift_medium',
-      'artbeat_gift_large',
-      'artbeat_gift_premium',
+      // Check boost service availability
+      ..writeln('\n⚡ Artist Boost Service:')
+      ..writeln('   Available: ${_boostService.isAvailable}')
+      // Check available boost products
+      ..writeln('\n📦 Available Boost Products:');
+    final boostProducts = [
+      'artbeat_boost_quick_spark',
+      'artbeat_boost_neon_surge',
+      'artbeat_boost_titan_overdrive',
+      'artbeat_boost_mythic_expansion',
     ];
-    for (final productId in giftProducts) {
-      final details = _giftService.getGiftProductDetails(productId);
+    for (final productId in boostProducts) {
+      final details = _boostService.getBoostProductDetails(productId);
       if (details != null) {
         buffer.writeln(
           '   ✅ $productId: \$${details['amount']} - ${details['title']}',
@@ -61,7 +59,7 @@ class _DebugGiftTestScreenState extends State<DebugGiftTestScreen> {
 
     // Check store products
     buffer.writeln('\n🏪 Store Products:');
-    final storeProducts = _purchaseService.getGiftProducts();
+    final storeProducts = _purchaseService.getBoostProducts();
     if (storeProducts.isEmpty) {
       buffer.writeln('   ❌ No products loaded from store');
     } else {
@@ -78,34 +76,34 @@ class _DebugGiftTestScreenState extends State<DebugGiftTestScreen> {
     });
   }
 
-  Future<void> _testGiftPurchase() async {
+  Future<void> _testBoostPurchase() async {
     setState(() {
       _isLoading = true;
-      _status = 'Testing gift purchase...';
+      _status = 'Testing boost purchase...';
     });
 
     try {
       // Test with a dummy recipient ID (use your own user ID for testing)
       const testRecipientId = 'test_recipient_id';
-      const testGiftId = 'artbeat_gift_small';
+      const testBoostId = 'artbeat_boost_quick_spark';
 
-      AppLogger.info('🧪 Testing gift purchase...');
+      AppLogger.info('🧪 Testing boost purchase...');
 
-      final success = await _giftService.purchaseGift(
+      final success = await _boostService.purchaseBoost(
         recipientId: testRecipientId,
-        giftProductId: testGiftId,
-        message: 'Test gift purchase',
+        boostProductId: testBoostId,
+        message: 'Test boost purchase',
       );
 
       setState(() {
         _status = success
-            ? '✅ Gift purchase test successful!'
-            : '❌ Gift purchase test failed - check logs for details';
+            ? '✅ Boost purchase test successful!'
+            : '❌ Boost purchase test failed - check logs for details';
         _isLoading = false;
       });
     } on Exception catch (e) {
       setState(() {
-        _status = '❌ Gift purchase test error: $e';
+        _status = '❌ Boost purchase test error: $e';
         _isLoading = false;
       });
     }
@@ -114,8 +112,9 @@ class _DebugGiftTestScreenState extends State<DebugGiftTestScreen> {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
-      title: const Text('Gift Debug Test'),
-      backgroundColor: Colors.amber,
+      title: const Text('Artist Boost Debug Test'),
+      backgroundColor: ArtbeatColors.primary,
+      foregroundColor: Colors.white,
     ),
     body: Padding(
       padding: const EdgeInsets.all(16),
@@ -123,7 +122,7 @@ class _DebugGiftTestScreenState extends State<DebugGiftTestScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Gift System Debug',
+            'Artist Boost System Debug',
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: 16),
@@ -156,11 +155,12 @@ class _DebugGiftTestScreenState extends State<DebugGiftTestScreen> {
               const SizedBox(width: 8),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: _isLoading ? null : _testGiftPurchase,
+                  onPressed: _isLoading ? null : _testBoostPurchase,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.amber,
+                    backgroundColor: ArtbeatColors.primary,
+                    foregroundColor: Colors.white,
                   ),
-                  child: const Text('Test Gift Purchase'),
+                  child: const Text('Test Boost Purchase'),
                 ),
               ),
             ],

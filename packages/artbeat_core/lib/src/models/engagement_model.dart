@@ -56,7 +56,7 @@ enum EngagementType {
   rate('rate'),
   review('review'),
   follow('follow'),
-  gift('gift'),
+  boost('boost'),
   sponsor('sponsor'),
   message('message'),
   commission('commission'); // available for commission
@@ -65,6 +65,7 @@ enum EngagementType {
   final String value;
 
   static EngagementType fromString(String value) {
+    if (value == 'gift') return EngagementType.boost;
     return EngagementType.values.firstWhere(
       (type) => type.value == value,
       orElse: () => EngagementType.like,
@@ -90,8 +91,8 @@ enum EngagementType {
         return 'Review';
       case EngagementType.follow:
         return 'Follow';
-      case EngagementType.gift:
-        return 'Gift';
+      case EngagementType.boost:
+        return 'Boost';
       case EngagementType.sponsor:
         return 'Sponsor';
       case EngagementType.message:
@@ -120,8 +121,8 @@ enum EngagementType {
         return 'rate_review'; // review icon
       case EngagementType.follow:
         return 'person_add'; // follow icon
-      case EngagementType.gift:
-        return 'card_giftcard'; // gift icon
+      case EngagementType.boost:
+        return 'rocket_launch'; // boost icon
       case EngagementType.sponsor:
         return 'volunteer_activism'; // sponsor icon
       case EngagementType.message:
@@ -150,8 +151,8 @@ enum EngagementType {
         return 'reviewed';
       case EngagementType.follow:
         return 'followed';
-      case EngagementType.gift:
-        return 'sent a gift to';
+      case EngagementType.boost:
+        return 'boosted';
       case EngagementType.sponsor:
         return 'sponsored';
       case EngagementType.message:
@@ -172,11 +173,11 @@ class EngagementStats {
   final int rateCount;
   final int reviewCount;
   final int followCount;
-  final int giftCount;
+  final int boostCount;
   final int sponsorCount;
   final int messageCount;
   final int commissionCount;
-  final double totalGiftValue; // Total monetary value of gifts received
+  final double totalBoostValue; // Total monetary value of boosts received
   final double
   totalSponsorValue; // Total monetary value of sponsorships received
   final DateTime lastUpdated;
@@ -190,11 +191,11 @@ class EngagementStats {
     this.rateCount = 0,
     this.reviewCount = 0,
     this.followCount = 0,
-    this.giftCount = 0,
+    this.boostCount = 0,
     this.sponsorCount = 0,
     this.messageCount = 0,
     this.commissionCount = 0,
-    this.totalGiftValue = 0.0,
+    this.totalBoostValue = 0.0,
     this.totalSponsorValue = 0.0,
     required this.lastUpdated,
   });
@@ -217,11 +218,11 @@ class EngagementStats {
       reviewCount: data['reviewCount'] as int? ?? 0,
       followCount:
           data['followCount'] as int? ?? data['connectCount'] as int? ?? 0,
-      giftCount: data['giftCount'] as int? ?? 0,
+      boostCount: data['boostCount'] as int? ?? data['giftCount'] as int? ?? 0,
       sponsorCount: data['sponsorCount'] as int? ?? 0,
       messageCount: data['messageCount'] as int? ?? 0,
       commissionCount: data['commissionCount'] as int? ?? 0,
-      totalGiftValue: (data['totalGiftValue'] as num?)?.toDouble() ?? 0.0,
+      totalBoostValue: (data['totalBoostValue'] as num? ?? data['totalGiftValue'] as num?)?.toDouble() ?? 0.0,
       totalSponsorValue: (data['totalSponsorValue'] as num?)?.toDouble() ?? 0.0,
       lastUpdated:
           (data['lastUpdated'] as Timestamp?)?.toDate() ?? DateTime.now(),
@@ -238,11 +239,11 @@ class EngagementStats {
       rateCount: data['rateCount'] as int? ?? 0,
       reviewCount: data['reviewCount'] as int? ?? 0,
       followCount: data['followCount'] as int? ?? 0,
-      giftCount: data['giftCount'] as int? ?? 0,
+      boostCount: data['boostCount'] as int? ?? data['giftCount'] as int? ?? 0,
       sponsorCount: data['sponsorCount'] as int? ?? 0,
       messageCount: data['messageCount'] as int? ?? 0,
       commissionCount: data['commissionCount'] as int? ?? 0,
-      totalGiftValue: (data['totalGiftValue'] as num?)?.toDouble() ?? 0.0,
+      totalBoostValue: (data['totalBoostValue'] as num? ?? data['totalGiftValue'] as num?)?.toDouble() ?? 0.0,
       totalSponsorValue: (data['totalSponsorValue'] as num?)?.toDouble() ?? 0.0,
       lastUpdated: data['lastUpdated'] is Timestamp
           ? (data['lastUpdated'] as Timestamp).toDate()
@@ -261,11 +262,11 @@ class EngagementStats {
       'rateCount': rateCount,
       'reviewCount': reviewCount,
       'followCount': followCount,
-      'giftCount': giftCount,
+      'boostCount': boostCount,
       'sponsorCount': sponsorCount,
       'messageCount': messageCount,
       'commissionCount': commissionCount,
-      'totalGiftValue': totalGiftValue,
+      'totalBoostValue': totalBoostValue,
       'totalSponsorValue': totalSponsorValue,
       'lastUpdated': Timestamp.fromDate(lastUpdated),
     };
@@ -281,11 +282,11 @@ class EngagementStats {
       'rateCount': rateCount,
       'reviewCount': reviewCount,
       'followCount': followCount,
-      'giftCount': giftCount,
+      'boostCount': boostCount,
       'sponsorCount': sponsorCount,
       'messageCount': messageCount,
       'commissionCount': commissionCount,
-      'totalGiftValue': totalGiftValue,
+      'totalBoostValue': totalBoostValue,
       'totalSponsorValue': totalSponsorValue,
       'lastUpdated': lastUpdated.toIso8601String(),
     };
@@ -300,11 +301,11 @@ class EngagementStats {
     int? rateCount,
     int? reviewCount,
     int? followCount,
-    int? giftCount,
+    int? boostCount,
     int? sponsorCount,
     int? messageCount,
     int? commissionCount,
-    double? totalGiftValue,
+    double? totalBoostValue,
     double? totalSponsorValue,
     DateTime? lastUpdated,
   }) {
@@ -317,11 +318,11 @@ class EngagementStats {
       rateCount: rateCount ?? this.rateCount,
       reviewCount: reviewCount ?? this.reviewCount,
       followCount: followCount ?? this.followCount,
-      giftCount: giftCount ?? this.giftCount,
+      boostCount: boostCount ?? this.boostCount,
       sponsorCount: sponsorCount ?? this.sponsorCount,
       messageCount: messageCount ?? this.messageCount,
       commissionCount: commissionCount ?? this.commissionCount,
-      totalGiftValue: totalGiftValue ?? this.totalGiftValue,
+      totalBoostValue: totalBoostValue ?? this.totalBoostValue,
       totalSponsorValue: totalSponsorValue ?? this.totalSponsorValue,
       lastUpdated: lastUpdated ?? this.lastUpdated,
     );
@@ -337,7 +338,7 @@ class EngagementStats {
       rateCount +
       reviewCount +
       followCount +
-      giftCount +
+      boostCount +
       sponsorCount +
       messageCount +
       commissionCount;
@@ -363,8 +364,8 @@ class EngagementStats {
         return reviewCount;
       case EngagementType.follow:
         return followCount;
-      case EngagementType.gift:
-        return giftCount;
+      case EngagementType.boost:
+        return boostCount;
       case EngagementType.sponsor:
         return sponsorCount;
       case EngagementType.message:

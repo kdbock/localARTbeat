@@ -350,9 +350,9 @@ class ContentEngagementService extends ChangeNotifier {
           followCount: stats.followCount + 1,
           lastUpdated: DateTime.now(),
         );
-      case EngagementType.gift:
+      case EngagementType.boost:
         return stats.copyWith(
-          giftCount: stats.giftCount + 1,
+          boostCount: stats.boostCount + 1,
           lastUpdated: DateTime.now(),
         );
       case EngagementType.sponsor:
@@ -421,9 +421,9 @@ class ContentEngagementService extends ChangeNotifier {
               .toInt(),
           lastUpdated: DateTime.now(),
         );
-      case EngagementType.gift:
+      case EngagementType.boost:
         return stats.copyWith(
-          giftCount: (stats.giftCount - 1).clamp(0, double.infinity).toInt(),
+          boostCount: (stats.boostCount - 1).clamp(0, double.infinity).toInt(),
           lastUpdated: DateTime.now(),
         );
       case EngagementType.sponsor:

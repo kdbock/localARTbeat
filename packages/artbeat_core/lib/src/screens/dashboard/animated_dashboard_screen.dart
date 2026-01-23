@@ -342,7 +342,7 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                           child: _BottomChips(
                             onArtist: () => Navigator.pushNamed(
                               context,
-                              '/2025_modern_onboarding',
+                              '/artist/onboarding/welcome',
                             ),
 
                             onBusiness: () =>
@@ -1129,13 +1129,17 @@ class _XPBar extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            const SizedBox(width: 4),
-            Text(
-              '$xp XP',
-              style: GoogleFonts.spaceGrotesk(
-                color: Colors.white.withValues(alpha: 0.85),
-                fontSize: 10.5,
-                fontWeight: FontWeight.w900,
+            const SizedBox(width: 2),
+            Flexible(
+              child: Text(
+                '$xp XP',
+                style: GoogleFonts.spaceGrotesk(
+                  color: Colors.white.withValues(alpha: 0.85),
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w900,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],

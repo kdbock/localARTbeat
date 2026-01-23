@@ -107,9 +107,9 @@ class _InAppPurchaseDemoScreenState extends State<InAppPurchaseDemoScreen> {
           ),
           const SizedBox(height: 24),
 
-          // Gifts section
+          // Artist Boosts section
           const Text(
-            'Gifts',
+            'Artist Boosts',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
@@ -120,20 +120,20 @@ class _InAppPurchaseDemoScreenState extends State<InAppPurchaseDemoScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Send Credits as Gifts',
+                    'Power Up Artists with Boosts',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 12),
                   const Text(
-                    'Send credits to other users as gifts of appreciation.',
+                    'Send power-ups to artists to boost their visibility and earn XP.',
                     style: TextStyle(fontSize: 14),
                   ),
                   const SizedBox(height: 12),
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: _isInitialized ? _showGiftPurchase : null,
-                      child: const Text('Send a Gift'),
+                      onPressed: _isInitialized ? _showBoostPurchase : null,
+                      child: const Text('Send a Boost'),
                     ),
                   ),
                 ],
@@ -204,13 +204,13 @@ class _InAppPurchaseDemoScreenState extends State<InAppPurchaseDemoScreen> {
     ),
   );
 
-  void _showGiftPurchase() {
+  void _showBoostPurchase() {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Send a Gift'),
+        title: const Text('Send an Artist Boost'),
         content: const Text(
-          'Choose a gift amount and send it to another user.',
+          'Choose a boost tier to power up this artist.',
         ),
         actions: [
           TextButton(
@@ -222,12 +222,12 @@ class _InAppPurchaseDemoScreenState extends State<InAppPurchaseDemoScreen> {
               Navigator.of(context).pop();
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Opening gift purchase screen...'),
-                  backgroundColor: Colors.blue,
+                  content: Text('Opening boost purchase screen...'),
+                  backgroundColor: ArtbeatColors.primary,
                 ),
               );
             },
-            child: const Text('Send Gift'),
+            child: const Text('Send Boost'),
           ),
         ],
       ),

@@ -963,11 +963,20 @@ class _CreatePostScreenState extends State<CreatePostScreen>
               children: [
                 Icon(icon, color: Colors.white, size: 28),
                 const SizedBox(height: 12),
-                Text(label, style: _grotesk(15, FontWeight.w700)),
+                Text(
+                  label,
+                  style: _grotesk(15, FontWeight.w700),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
                 const SizedBox(height: 8),
                 Text(
                   subtitle,
                   style: _grotesk(12, FontWeight.w600, opacity: 0.7),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),

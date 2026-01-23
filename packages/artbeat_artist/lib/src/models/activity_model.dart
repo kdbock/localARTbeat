@@ -1,27 +1,13 @@
 import 'package:flutter/material.dart';
 
 enum ActivityType {
-  sale(
-    icon: Icons.attach_money,
-    color: Colors.green,
-  ),
-  commission(
-    icon: Icons.brush,
-    color: Colors.blue,
-  ),
-  gift(
-    icon: Icons.card_giftcard,
-    color: Colors.purple,
-  ),
-  sponsorship(
-    icon: Icons.handshake,
-    color: Colors.orange,
-  );
+  sale(icon: Icons.attach_money, color: Colors.green),
+  commission(icon: Icons.brush, color: Colors.blue),
+  gift(icon: Icons.bolt, color: Color(0xFF00F5FF)),
+  sponsorship(icon: Icons.handshake, color: Colors.orange),
+  auction(icon: Icons.gavel, color: Colors.purple);
 
-  const ActivityType({
-    required this.icon,
-    required this.color,
-  });
+  const ActivityType({required this.icon, required this.color});
 
   final IconData icon;
   final Color color;

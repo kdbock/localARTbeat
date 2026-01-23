@@ -17,9 +17,9 @@ class _ArtbeatStoreScreenState extends State<ArtbeatStoreScreen>
 
   final List<_StoreQuickAction> _actions = const [
     _StoreQuickAction(
-      title: 'Visibility Gifts',
+      title: 'Visibility Boosts',
       subtitle: 'Fans send boosts that spotlight artists, artwork, and events',
-      icon: Icons.card_giftcard_rounded,
+      icon: Icons.rocket_launch,
       accent: ArtbeatColors.primaryPurple,
       tabIndex: 0,
     ),
@@ -211,7 +211,7 @@ class _ArtbeatStoreScreenState extends State<ArtbeatStoreScreen>
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Gifts help fans feature artists, surface artwork and events, and fuel the ad tools creators rely on.',
+                          'Boosts help fans feature artists, surface artwork and events, and fuel the ad tools creators rely on.',
                           style: GoogleFonts.spaceGrotesk(
                             fontSize: 15,
                             fontWeight: FontWeight.w500,
@@ -408,7 +408,7 @@ class _ArtbeatStoreScreenState extends State<ArtbeatStoreScreen>
               fontWeight: FontWeight.w600,
             ),
             tabs: [
-              _buildTab('Gifts', Icons.card_giftcard_rounded),
+              _buildTab('Boosts', Icons.rocket_launch),
               _buildTab('Ads', Icons.ads_click_rounded),
               _buildTab('Subscriptions', Icons.workspace_premium_rounded),
             ],
@@ -446,7 +446,7 @@ class _ArtbeatStoreScreenState extends State<ArtbeatStoreScreen>
           child: TabBarView(
             controller: _tabController,
             children: const [
-              GiftsScreen(showAppBar: false),
+              ArtistBoostsScreen(showAppBar: false),
               AdsScreen(),
               SubscriptionsScreen(showAppBar: false),
             ],

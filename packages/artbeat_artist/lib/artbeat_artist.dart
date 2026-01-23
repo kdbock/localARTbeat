@@ -14,6 +14,7 @@ export 'src/screens/visibility_insights_screen.dart';
 export 'src/screens/artist_approved_ads_screen.dart';
 export 'src/screens/artist_browse_screen.dart';
 export 'src/screens/gallery_hub_screen.dart';
+export 'src/screens/auction_hub_screen.dart';
 export 'src/screens/artist_profile_edit_screen.dart';
 export 'src/screens/artist_public_profile_screen.dart';
 // import removed: use artwork_browse_screen from artbeat_artwork package instead

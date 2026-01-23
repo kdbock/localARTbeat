@@ -13,7 +13,7 @@ import '../screens/feed/trending_content_screen.dart';
 import '../screens/portfolios/portfolios_screen.dart';
 import '../screens/studios/studios_screen.dart';
 import '../screens/commissions/commission_hub_screen.dart';
-import '../screens/gifts/gifts_screen.dart';
+import '../screens/boosts/boosts_screen.dart';
 import '../screens/art_battle_screen.dart';
 
 import '../src/screens/community_artists_screen.dart';
@@ -119,9 +119,9 @@ class _CommunityDrawerState extends State<CommunityDrawer> {
         screenBuilder: () => const CommissionHubScreen(),
       ),
       _DrawerEntry(
-        icon: Icons.card_giftcard,
-        titleBuilder: (_) => 'community_drawer_gifts'.tr(),
-        screenBuilder: () => const ViewReceivedGiftsScreen(),
+        icon: Icons.bolt,
+        titleBuilder: (_) => 'community_drawer_boosts'.tr(),
+        screenBuilder: () => const ViewReceivedBoostsScreen(),
       ),
     ];
 

@@ -826,6 +826,8 @@
   "art_walk_art_walk_edit_error_error_picking_image": "Fehler picking image: $e",
   "art_walk_art_walk_edit_error_error_updating_art": "Fehler updating art walk: $e",
   "art_walk_art_walk_edit_success_art_walk_deleted": "Art Walk erfolgreich gelöscht",
+  "art_walk_edit": "Bearbeiten",
+  "art_walk_delete": "Löschen",
   "art_walk_art_walk_edit_success_artwork_added_to": "Kunstwerk erfolgreich zum Art Walk hinzugefügt",
   "art_walk_art_walk_edit_text_add_artwork": "Kunstwerk hinzufügen",
   "art_walk_art_walk_edit_text_add_artwork_20": "Kunstwerk hinzufügen",
@@ -3054,7 +3056,11 @@
     "written_content_upload_volume_hint": "z. B. 1 für Band 1",
     "written_content_upload_volume_label": "Bandnummer (optional)",
     "you_are_winning": "Du liegst vorne!",
-    "your_bid": "Dein Gebot"
+    "your_bid": "Dein Gebot",
+    "manage_auction": "Auktion verwalten",
+    "enable_auction": "Auktion aktivieren",
+    "enable_description": "Bietern erlauben, auf dieses Kunstwerk zu bieten",
+    "save_settings": "Einstellungen speichern"
   },
   "auction_manage_cancel": "Abbrechen",
   "auction_manage_end_time": "Auktionsende",

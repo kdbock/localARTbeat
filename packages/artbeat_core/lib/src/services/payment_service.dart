@@ -5,7 +5,7 @@ import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:http/http.dart' as http;
 import '../models/subscription_tier.dart';
 import '../models/payment_method_model.dart';
-import '../models/gift_model.dart';
+import '../models/artist_boost_model.dart';
 import '../models/gift_subscription_model.dart';
 import '../utils/env_loader.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -40,8 +40,8 @@ class PaymentService {
         'https://us-central1-wordnerd-artbeat.cloudfunctions.net/createSetupIntent',
     'createPaymentIntent':
         'https://us-central1-wordnerd-artbeat.cloudfunctions.net/createPaymentIntent',
-    'processGiftPayment':
-        'https://us-central1-wordnerd-artbeat.cloudfunctions.net/processGiftPayment',
+    'processBoostPayment':
+        'https://us-central1-wordnerd-artbeat.cloudfunctions.net/processBoostPayment',
     'processSubscriptionPayment':
         'https://us-central1-wordnerd-artbeat.cloudfunctions.net/processSubscriptionPayment',
     'processAdPayment':
@@ -586,9 +586,9 @@ class PaymentService {
     }
   }
 
-  /// Process a gift payment and create gift record
-  Future<Map<String, dynamic>> processGiftPayment(
-    GiftModel gift, {
+  /// Process a boost payment and create boost record
+  Future<Map<String, dynamic>> processBoostPayment(
+    ArtistBoostModel boost, {
     required String paymentMethodId,
     String? message,
   }) async {
@@ -600,30 +600,30 @@ class PaymentService {
 
       // Process payment through Firebase Function
       final response = await _httpClient.post(
-        Uri.parse('$_baseUrl/process-gift-payment'),
+        Uri.parse('$_baseUrl/process-boost-payment'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
-          'senderId': gift.senderId,
-          'recipientId': gift.recipientId,
-          'amount': gift.amount,
+          'senderId': boost.senderId,
+          'recipientId': boost.recipientId,
+          'amount': boost.amount,
           'paymentMethodId': paymentMethodId,
-          'giftType': gift.giftType,
+          'boostType': boost.boostType,
           if (message != null) 'message': message,
         }),
       );
 
       if (response.statusCode != 200) {
-        throw Exception('Failed to process gift payment');
+        throw Exception('Failed to process boost payment');
       }
 
       final data = json.decode(response.body) as Map<String, dynamic>;
 
-      // Create gift record in Firestore
-      await _firestore.collection('gifts').add({
-        'senderId': gift.senderId,
-        'recipientId': gift.recipientId,
-        'amount': gift.amount,
-        'giftType': gift.giftType,
+      // Create boost record in Firestore
+      await _firestore.collection('boosts').add({
+        'senderId': boost.senderId,
+        'recipientId': boost.recipientId,
+        'amount': boost.amount,
+        'boostType': boost.boostType,
         'paymentIntentId': data['paymentIntentId'],
         'status': 'completed',
         'createdAt': FieldValue.serverTimestamp(),
@@ -631,13 +631,13 @@ class PaymentService {
 
       // Create earnings transaction for the recipient
       await _createEarningsTransaction(
-        artistId: gift.recipientId,
-        type: 'gift',
-        amount: gift.amount,
-        fromUserId: gift.senderId,
-        description: 'Gift received: ${gift.giftType}',
+        artistId: boost.recipientId,
+        type: 'boost',
+        amount: boost.amount,
+        fromUserId: boost.senderId,
+        description: 'Boost received: ${boost.boostType}',
         metadata: {
-          'giftType': gift.giftType,
+          'boostType': boost.boostType,
           'paymentIntentId': data['paymentIntentId'],
           if (message != null) 'message': message,
         },
@@ -645,53 +645,53 @@ class PaymentService {
 
       return data;
     } catch (e) {
-      AppLogger.error('Error processing gift payment: $e');
+      AppLogger.error('Error processing boost payment: $e');
       rethrow;
     }
   }
 
-  /// Get list of gifts sent by the current user
-  Future<List<GiftModel>> getSentGifts() async {
+  /// Get list of boosts sent by the current user
+  Future<List<ArtistBoostModel>> getSentBoosts() async {
     try {
       final userId = _auth.currentUser?.uid;
       if (userId == null) {
         throw Exception('User not authenticated');
       }
 
-      final QuerySnapshot giftsSnapshot = await _firestore
-          .collection('gifts')
+      final QuerySnapshot boostsSnapshot = await _firestore
+          .collection('boosts')
           .where('senderId', isEqualTo: userId)
           .orderBy('createdAt', descending: true)
           .get();
 
-      return giftsSnapshot.docs
-          .map((doc) => GiftModel.fromFirestore(doc))
+      return boostsSnapshot.docs
+          .map((doc) => ArtistBoostModel.fromFirestore(doc))
           .toList();
     } catch (e) {
-      AppLogger.error('Error getting sent gifts: $e');
+      AppLogger.error('Error getting sent boosts: $e');
       rethrow;
     }
   }
 
-  /// Get list of gifts received by the current user
-  Future<List<GiftModel>> getReceivedGifts() async {
+  /// Get list of boosts received by the current user
+  Future<List<ArtistBoostModel>> getReceivedBoosts() async {
     try {
       final userId = _auth.currentUser?.uid;
       if (userId == null) {
         throw Exception('User not authenticated');
       }
 
-      final QuerySnapshot giftsSnapshot = await _firestore
-          .collection('gifts')
+      final QuerySnapshot boostsSnapshot = await _firestore
+          .collection('boosts')
           .where('recipientId', isEqualTo: userId)
           .orderBy('createdAt', descending: true)
           .get();
 
-      return giftsSnapshot.docs
-          .map((doc) => GiftModel.fromFirestore(doc))
+      return boostsSnapshot.docs
+          .map((doc) => ArtistBoostModel.fromFirestore(doc))
           .toList();
     } catch (e) {
-      AppLogger.error('Error getting received gifts: $e');
+      AppLogger.error('Error getting received boosts: $e');
       rethrow;
     }
   }
@@ -1006,11 +1006,11 @@ class PaymentService {
     }
   }
 
-  /// Process enhanced gift payment with gift types
-  Future<Map<String, dynamic>> processEnhancedGiftPayment({
+  /// Process enhanced boost payment with boost types
+  Future<Map<String, dynamic>> processEnhancedBoostPayment({
     required String recipientId,
     required String paymentMethodId,
-    required String giftType,
+    required String boostType,
     required double amount,
     String? message,
   }) async {
@@ -1021,30 +1021,30 @@ class PaymentService {
       }
 
       final response = await _httpClient.post(
-        Uri.parse('$_baseUrl/processGiftPayment'),
+        Uri.parse('$_baseUrl/processBoostPayment'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'senderId': userId,
           'recipientId': recipientId,
           'amount': amount,
           'paymentMethodId': paymentMethodId,
-          'giftType': giftType,
+          'boostType': boostType,
           if (message != null) 'message': message,
         }),
       );
 
       if (response.statusCode != 200) {
-        throw Exception('Failed to process gift payment');
+        throw Exception('Failed to process boost payment');
       }
 
       final data = json.decode(response.body) as Map<String, dynamic>;
 
-      // Create gift record in Firestore
-      await _firestore.collection('gifts').add({
+      // Create boost record in Firestore
+      await _firestore.collection('boosts').add({
         'senderId': userId,
         'recipientId': recipientId,
         'amount': amount,
-        'giftType': giftType,
+        'boostType': boostType,
         'paymentIntentId': data['paymentIntentId'],
         'status': 'completed',
         'message': message ?? '',
@@ -1053,19 +1053,19 @@ class PaymentService {
 
       return data;
     } catch (e) {
-      AppLogger.error('Error processing enhanced gift payment: $e');
+      AppLogger.error('Error processing enhanced boost payment: $e');
       rethrow;
     }
   }
 
-  /// Get available gift types and their prices
+  /// Get available boost types and their prices
   /// Matches App Store Connect IAP configuration
-  Map<String, double> getGiftTypes() {
+  Map<String, double> getBoostTypes() {
     return {
-      'Small Gift (50 Credits)': 4.99,
-      'Medium Gift (100 Credits)': 9.99,
-      'Large Gift (250 Credits)': 24.99,
-      'Premium Gift (500 Credits)': 49.99,
+      'Small Boost (50 Credits)': 4.99,
+      'Medium Boost (100 Credits)': 9.99,
+      'Large Boost (250 Credits)': 24.99,
+      'Premium Boost (500 Credits)': 49.99,
     };
   }
 
@@ -1318,7 +1318,7 @@ class PaymentService {
             'totalEarnings': amount,
             'availableBalance': amount,
             'pendingBalance': 0.0,
-            'giftEarnings': type == 'gift' ? amount : 0.0,
+            'boostEarnings': type == 'boost' ? amount : 0.0,
             'sponsorshipEarnings': type == 'sponsorship' ? amount : 0.0,
             'commissionEarnings': type == 'commission' ? amount : 0.0,
             'subscriptionEarnings': type == 'subscription' ? amount : 0.0,
@@ -1346,8 +1346,8 @@ class PaymentService {
 
           // Update specific earning type
           switch (type) {
-            case 'gift':
-              updates['giftEarnings'] = FieldValue.increment(amount);
+            case 'boost':
+              updates['boostEarnings'] = FieldValue.increment(amount);
               break;
             case 'sponsorship':
               updates['sponsorshipEarnings'] = FieldValue.increment(amount);
@@ -1392,8 +1392,8 @@ class PaymentService {
     }
   }
 
-  /// Process custom gift payment with flexible amounts
-  Future<Map<String, dynamic>> processCustomGiftPayment({
+  /// Process custom boost payment with flexible amounts
+  Future<Map<String, dynamic>> processCustomBoostPayment({
     required String recipientId,
     required double amount,
     required String paymentMethodId,
@@ -1406,7 +1406,7 @@ class PaymentService {
       }
 
       final response = await _httpClient.post(
-        Uri.parse('$_baseUrl/processCustomGiftPayment'),
+        Uri.parse('$_baseUrl/processCustomBoostPayment'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'senderId': userId,
@@ -1418,12 +1418,12 @@ class PaymentService {
       );
 
       if (response.statusCode != 200) {
-        throw Exception('Failed to process custom gift payment');
+        throw Exception('Failed to process custom boost payment');
       }
 
       return json.decode(response.body) as Map<String, dynamic>;
     } catch (e) {
-      AppLogger.error('Error processing custom gift payment: $e');
+      AppLogger.error('Error processing custom boost payment: $e');
       rethrow;
     }
   }
@@ -1804,11 +1804,11 @@ class PaymentService {
     }
   }
 
-  /// Process direct gift payment (no stored payment methods required)
-  Future<Map<String, dynamic>> processDirectGiftPayment({
+  /// Process direct boost payment (no stored payment methods required)
+  Future<Map<String, dynamic>> processDirectBoostPayment({
     required String recipientId,
     required double amount,
-    required String giftType,
+    required String boostType,
     String? message,
     String? campaignId,
   }) async {
@@ -1819,26 +1819,26 @@ class PaymentService {
       }
 
       debugPrint(
-        '🎁 Starting direct gift payment for \$${amount.toStringAsFixed(2)}',
+        '🚀 Starting direct boost payment for \$${amount.toStringAsFixed(2)}',
       );
       debugPrint(
-        '🎁 Parameters - recipientId: $recipientId, giftType: $giftType, message: $message, campaignId: $campaignId',
+        '🚀 Parameters - recipientId: $recipientId, boostType: $boostType, message: $message, campaignId: $campaignId',
       );
 
       final idToken = await _auth.currentUser!.getIdToken();
       String? paymentIntentId;
 
-      // Handle free gifts (100% off coupons)
+      // Handle free boosts (100% off coupons)
       if (amount <= 0.0) {
-        AppLogger.info('🎁 Processing free gift (100% off coupon applied)');
+        AppLogger.info('🚀 Processing free boost (100% off coupon applied)');
 
-        // Skip payment intent creation for free gifts
-        // Send directly to backend with special free gift flag
+        // Skip payment intent creation for free boosts
+        // Send directly to backend with special free boost flag
         final requestBody = <String, dynamic>{
           'recipientId': recipientId,
           'amount': 0.0, // Free amount
-          'giftType': giftType,
-          'isFreeGift': true, // Flag to indicate this is a free gift
+          'boostType': boostType,
+          'isFreeBoost': true, // Flag to indicate this is a free boost
           'skipPaymentValidation':
               true, // Tell backend to skip payment intent validation
         };
@@ -1852,14 +1852,14 @@ class PaymentService {
         }
 
         debugPrint(
-          '🎁 Sending free gift request body: ${json.encode(requestBody)}',
+          '🚀 Sending free boost request body: ${json.encode(requestBody)}',
         );
         AppLogger.info(
-          '🎁 Endpoint URL: ${_functionUrls['processGiftPayment']}',
+          '🚀 Endpoint URL: ${_functionUrls['processBoostPayment']}',
         );
 
         final processResponse = await _httpClient.post(
-          Uri.parse(_functionUrls['processGiftPayment']!),
+          Uri.parse(_functionUrls['processBoostPayment']!),
           headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer $idToken',
@@ -1868,32 +1868,32 @@ class PaymentService {
         );
 
         AppLogger.info(
-          '🎁 Backend response status: ${processResponse.statusCode}',
+          '🚀 Backend response status: ${processResponse.statusCode}',
         );
-        AppLogger.info('🎁 Backend response body: ${processResponse.body}');
+        AppLogger.info('🚀 Backend response body: ${processResponse.body}');
 
         if (processResponse.statusCode != 200) {
           final errorData = json.decode(processResponse.body);
-          AppLogger.error('🎁 Backend error data: $errorData');
-          throw Exception('Failed to process free gift: ${errorData['error']}');
+          AppLogger.error('🚀 Backend error data: $errorData');
+          throw Exception('Failed to process free boost: ${errorData['error']}');
         }
 
         final processData =
             json.decode(processResponse.body) as Map<String, dynamic>;
         debugPrint(
-          '🎉 Free gift processed successfully: ${processData['giftId']}',
+          '🎉 Free boost processed successfully: ${processData['boostId']}',
         );
 
         return {
           'status': 'success',
-          'giftId': processData['giftId'],
-          'paymentIntentId': null, // No payment intent for free gifts
-          'message': 'Free gift sent successfully!',
-          'isFreeGift': true,
+          'boostId': processData['boostId'],
+          'paymentIntentId': null, // No payment intent for free boosts
+          'message': 'Free boost sent successfully!',
+          'isFreeBoost': true,
         };
       }
 
-      // Step 1: Create payment intent for paid gifts
+      // Step 1: Create payment intent for paid boosts
       final paymentIntentResponse = await _httpClient.post(
         Uri.parse(_functionUrls['createPaymentIntent']!),
         headers: {
@@ -1902,10 +1902,10 @@ class PaymentService {
         },
         body: json.encode({
           'amount': amount,
-          'description': 'ArtBeat Gift: $giftType',
+          'description': 'ArtBeat Boost: $boostType',
           'metadata': {
             'recipientId': recipientId,
-            'giftType': giftType,
+            'boostType': boostType,
             'senderId': userId,
             if (campaignId != null) 'campaignId': campaignId,
           },
@@ -1935,7 +1935,7 @@ class PaymentService {
         };
 
         if (!CrashPreventionService.validateStripePaymentArgs(paymentArgs)) {
-          throw Exception('Invalid payment parameters for gift purchase');
+          throw Exception('Invalid payment parameters for boost purchase');
         }
 
         // Additional validation for Android Payment Sheet args
@@ -1957,7 +1957,7 @@ class PaymentService {
           );
         } on StripeException catch (e) {
           AppLogger.error(
-            'Stripe initPaymentSheet failed for gift: ${e.error.code} - ${e.error.localizedMessage}',
+            'Stripe initPaymentSheet failed for boost: ${e.error.code} - ${e.error.localizedMessage}',
           );
           rethrow;
         }
@@ -1980,7 +1980,7 @@ class PaymentService {
               errorLocalizedMsg.contains('mandate') ||
               errorMsg.contains('IllegalStateException')) {
             AppLogger.error(
-              'BACS PAYMENT METHOD CRASH: BacsMandateConfirmationActivity failed for gift - falling back',
+              'BACS PAYMENT METHOD CRASH: BacsMandateConfirmationActivity failed for boost - falling back',
             );
             throw Exception(
               'Bank transfer payment method is temporarily unavailable. Please try another payment method.',
@@ -2000,9 +2000,9 @@ class PaymentService {
         }
       }
 
-      // Step 3: Process the gift on the backend
+      // Step 3: Process the boost on the backend
       final processResponse = await _httpClient.post(
-        Uri.parse(_functionUrls['processGiftPayment']!),
+        Uri.parse(_functionUrls['processBoostPayment']!),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $idToken',
@@ -2011,39 +2011,39 @@ class PaymentService {
           'paymentIntentId': paymentIntentId,
           'recipientId': recipientId,
           'amount': amount,
-          'giftType': giftType,
+          'boostType': boostType,
           'message': message,
           'campaignId': campaignId,
-          'isFreeGift': false,
+          'isFreeBoost': false,
         }),
       );
 
       if (processResponse.statusCode != 200) {
         final errorData = json.decode(processResponse.body);
-        throw Exception('Failed to process gift: ${errorData['error']}');
+        throw Exception('Failed to process boost: ${errorData['error']}');
       }
 
       final processData =
           json.decode(processResponse.body) as Map<String, dynamic>;
       AppLogger.info(
-        '🎉 Gift processed successfully: ${processData['giftId']}',
+        '🎉 Boost processed successfully: ${processData['boostId']}',
       );
 
       return {
         'status': 'success',
-        'giftId': processData['giftId'],
+        'boostId': processData['boostId'],
         'paymentIntentId': paymentIntentId,
-        'message': 'Gift sent successfully!',
-        'isFreeGift': false,
+        'message': 'Boost sent successfully!',
+        'isFreeBoost': false,
       };
     } catch (e) {
-      AppLogger.error('❌ Error processing direct gift payment: $e');
+      AppLogger.error('❌ Error processing direct boost payment: $e');
 
       // Return error details for better user experience
       return {
         'status': 'error',
         'error': e.toString(),
-        'message': 'Failed to process gift payment. Please try again.',
+        'message': 'Failed to process boost payment. Please try again.',
       };
     }
   }

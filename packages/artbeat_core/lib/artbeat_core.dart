@@ -38,6 +38,7 @@ export 'src/services/user_service.dart' show UserService;
 export 'src/services/connectivity_service.dart' show ConnectivityService;
 export 'src/services/subscription_service.dart' show SubscriptionService;
 export 'src/services/artist_service.dart' show ArtistService;
+export 'src/services/artist_boost_service.dart' show ArtistBoostService;
 export 'src/services/artist_feature_service.dart' show ArtistFeatureService;
 export 'src/services/unified_payment_service.dart'
     show
@@ -54,6 +55,7 @@ export 'src/services/payment_service.dart' show PaymentService;
 export 'src/services/enhanced_payment_service_working.dart'
     show EnhancedPaymentService;
 // Deprecated: GiftPurchaseScreen removed (legacy basic screen, use EnhancedGiftPurchaseScreen)
+export 'src/services/in_app_purchase_service.dart' show InAppPurchaseService;
 export 'src/services/in_app_purchase_manager.dart'
     show InAppPurchaseManager, PurchaseEvent, PurchaseEventType;
 export 'src/services/in_app_purchase_setup.dart' show InAppPurchaseSetup;
@@ -123,7 +125,7 @@ export 'src/screens/leaderboard_screen.dart' show LeaderboardScreen;
 export 'src/screens/help_support_screen.dart' show HelpSupportScreen;
 export 'src/screens/subscriptions/subscriptions_screen.dart'
     show SubscriptionsScreen;
-export 'src/screens/gifts/gifts_screen.dart' show GiftsScreen;
+export 'src/screens/boosts/artist_boosts_screen.dart' show ArtistBoostsScreen;
 export 'src/screens/ads/ads_screen.dart' show AdsScreen;
 
 // Export Core Models
@@ -219,8 +221,15 @@ export 'src/screens/full_browse_screen.dart' show FullBrowseScreen;
 export 'src/screens/terms_of_service_screen.dart' show TermsOfServiceScreen;
 export 'src/screens/privacy_policy_screen.dart' show PrivacyPolicyScreen;
 
+// Export Artist Onboarding Screens
+export 'src/screens/artist_onboarding/artist_onboarding_screens.dart';
+
 // Export ViewModels
 export 'src/viewmodels/dashboard_view_model.dart' show DashboardViewModel;
+export 'src/viewmodels/artist_onboarding/artist_onboarding_view_model.dart';
+
+// Export Models
+export 'src/models/artist_onboarding/artist_onboarding_data.dart';
 
 // Export Providers
 export 'src/providers/messaging_provider.dart' show MessagingProvider;

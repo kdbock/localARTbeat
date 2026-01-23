@@ -45,13 +45,10 @@ class ArtworkGridWidget extends StatelessWidget {
               crossAxisSpacing: 16,
               mainAxisSpacing: 16,
             ),
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final artwork = artworks[index];
-                return _buildArtworkCard(context, artwork);
-              },
-              childCount: artworks.length,
-            ),
+            delegate: SliverChildBuilderDelegate((context, index) {
+              final artwork = artworks[index];
+              return _buildArtworkCard(context, artwork);
+            }, childCount: artworks.length),
           ),
         ),
         const SliverToBoxAdapter(
@@ -62,10 +59,7 @@ class ArtworkGridWidget extends StatelessWidget {
 
     // Return with or without RefreshIndicator based on whether onRefresh is provided
     if (onRefresh != null) {
-      return RefreshIndicator(
-        onRefresh: onRefresh!,
-        child: scrollView,
-      );
+      return RefreshIndicator(onRefresh: onRefresh!, child: scrollView);
     } else {
       return scrollView;
     }
@@ -74,9 +68,7 @@ class ArtworkGridWidget extends StatelessWidget {
   Widget _buildArtworkCard(BuildContext context, ArtworkModel artwork) {
     return Card(
       elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Stack(
         children: [
           InkWell(
@@ -148,8 +140,10 @@ class ArtworkGridWidget extends StatelessWidget {
                         children: [
                           const Icon(Icons.delete, size: 18, color: Colors.red),
                           const SizedBox(width: 8),
-                          Text('art_walk_delete'.tr(),
-                              style: const TextStyle(color: Colors.red)),
+                          Text(
+                            'art_walk_delete'.tr(),
+                            style: const TextStyle(color: Colors.red),
+                          ),
                         ],
                       ),
                     ),
@@ -163,14 +157,22 @@ class ArtworkGridWidget extends StatelessWidget {
   }
 
   Widget _buildArtworkImage(ArtworkModel artwork) {
+    // Collect valid URLs
+    final validUrls = <String>[
+      if (artwork.imageUrl.isNotEmpty &&
+          artwork.imageUrl.trim().isNotEmpty &&
+          Uri.tryParse(artwork.imageUrl)?.hasScheme == true)
+        artwork.imageUrl,
+      ...artwork.additionalImageUrls.where(
+        (url) =>
+            url.isNotEmpty &&
+            url.trim().isNotEmpty &&
+            Uri.tryParse(url)?.hasScheme == true,
+      ),
+    ];
+
     return _MultiUrlImageLoader(
-      urls: [
-        if (artwork.imageUrl.isNotEmpty &&
-            Uri.tryParse(artwork.imageUrl)?.hasScheme == true)
-          artwork.imageUrl,
-        ...artwork.additionalImageUrls.where(
-            (url) => url.isNotEmpty && Uri.tryParse(url)?.hasScheme == true),
-      ],
+      urls: validUrls,
       width: double.infinity,
       fit: BoxFit.cover,
     );
@@ -183,9 +185,9 @@ class ArtworkGridWidget extends StatelessWidget {
         // Title
         Text(
           artwork.title,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -196,8 +198,8 @@ class ArtworkGridWidget extends StatelessWidget {
           Text(
             artwork.medium,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: core.ArtbeatColors.textSecondary,
-                ),
+              color: core.ArtbeatColors.textSecondary,
+            ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -212,9 +214,9 @@ class ArtworkGridWidget extends StatelessWidget {
               Text(
                 '\$${artwork.price!.toStringAsFixed(2)}',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: core.ArtbeatColors.primaryGreen,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  color: core.ArtbeatColors.primaryGreen,
+                  fontWeight: FontWeight.bold,
+                ),
               )
             else
               Text(
@@ -228,18 +230,11 @@ class ArtworkGridWidget extends StatelessWidget {
             // View count
             Row(
               children: [
-                Icon(
-                  Icons.visibility,
-                  size: 12,
-                  color: Colors.grey[600],
-                ),
+                Icon(Icons.visibility, size: 12, color: Colors.grey[600]),
                 const SizedBox(width: 2),
                 Text(
                   '${artwork.viewCount}',
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 10,
-                  ),
+                  style: TextStyle(color: Colors.grey[600], fontSize: 10),
                 ),
               ],
             ),
@@ -250,7 +245,10 @@ class ArtworkGridWidget extends StatelessWidget {
   }
 
   void _handleMenuAction(
-      BuildContext context, String action, ArtworkModel artwork) {
+    BuildContext context,
+    String action,
+    ArtworkModel artwork,
+  ) {
     switch (action) {
       case 'edit':
         if (onArtworkEdit != null) {
@@ -271,15 +269,18 @@ class ArtworkGridWidget extends StatelessWidget {
   }
 
   Future<void> _showDeleteConfirmation(
-      BuildContext context, ArtworkModel artwork) async {
+    BuildContext context,
+    ArtworkModel artwork,
+  ) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text('art_walk_delete_artwork'.tr()),
         content: Text(
-          'art_walk_delete_confirmation_message'
-              .tr()
-              .replaceAll('{title}', artwork.title),
+          'art_walk_delete_confirmation_message'.tr().replaceAll(
+            '{title}',
+            artwork.title,
+          ),
         ),
         actions: [
           TextButton(
@@ -288,9 +289,7 @@ class ArtworkGridWidget extends StatelessWidget {
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.red,
-            ),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: Text('art_walk_delete'.tr()),
           ),
         ],
@@ -329,6 +328,13 @@ class _MultiUrlImageLoaderState extends State<_MultiUrlImageLoader> {
     }
 
     final currentUrl = widget.urls[_currentUrlIndex];
+
+    // Extra safety: if URL is empty or invalid, skip to placeholder
+    if (currentUrl.isEmpty ||
+        currentUrl.trim().isEmpty ||
+        Uri.tryParse(currentUrl)?.hasScheme != true) {
+      return _buildImagePlaceholder();
+    }
 
     return core.SecureNetworkImage(
       imageUrl: currentUrl,

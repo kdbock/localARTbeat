@@ -274,11 +274,11 @@ class _SocialEngagementDemoScreenState
       rateCount: 12,
       reviewCount: 5,
       followCount: 89,
-      giftCount: 7,
+      boostCount: 7,
       sponsorCount: 3,
       messageCount: 11,
       commissionCount: 2,
-      totalGiftValue: 125.50,
+      totalBoostValue: 125.50,
       totalSponsorValue: 450.00,
       lastUpdated: DateTime.now(),
     );

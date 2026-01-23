@@ -17,11 +17,6 @@
       ]
     },
     {
-      "collectionGroup": "moderationAnalytics",
-      "queryScope": "COLLECTION",
-      "fields": [{ "fieldPath": "updatedAt", "order": "DESCENDING" }]
-    },
-    {
       "collectionGroup": "ads",
       "queryScope": "COLLECTION",
       "fields": [
@@ -520,6 +515,14 @@
       ]
     },
     {
+      "collectionGroup": "events",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "isPublic", "order": "ASCENDING" },
+        { "fieldPath": "startDate", "order": "ASCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "artworkViews",
       "queryScope": "COLLECTION",
       "fields": [
@@ -972,6 +975,14 @@
       ]
     },
     {
+      "collectionGroup": "events",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "tags", "arrayConfig": "CONTAINS" },
+        { "fieldPath": "startDate", "order": "ASCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "captures",
       "queryScope": "COLLECTION",
       "fields": [
@@ -1094,6 +1105,14 @@
       "fields": [
         { "fieldPath": "status", "order": "ASCENDING" },
         { "fieldPath": "saleDate", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "artwork_sales",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "artistId", "order": "ASCENDING" },
+        { "fieldPath": "soldAt", "order": "DESCENDING" }
       ]
     },
     {
@@ -1304,7 +1323,7 @@
       ]
     },
     {
-      "collectionGroup": "gifts",
+      "collectionGroup": "boosts",
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "status", "order": "ASCENDING" },
@@ -1335,6 +1354,54 @@
         { "fieldPath": "artBattleEnabled", "order": "ASCENDING" },
         { "fieldPath": "artBattleStatus", "order": "ASCENDING" },
         { "fieldPath": "artBattleScore", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "commission_requests",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "artistId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "boosts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "recipientId", "order": "ASCENDING" },
+        { "fieldPath": "purchaseDate", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "gifts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "purchaseDate", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "artwork_sales",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "artistID", "order": "ASCENDING" },
+        { "fieldPath": "soldAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "event_flags",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "timestamp", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "events",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "moderationStatus", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
       ]
     }
   ],

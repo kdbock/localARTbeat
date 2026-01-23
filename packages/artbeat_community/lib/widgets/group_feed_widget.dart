@@ -307,14 +307,14 @@ class _GroupFeedWidgetState extends State<GroupFeedWidget>
     }
   }
 
-  void _handleGift(BaseGroupPost post) {
+  void _handleBoost(BaseGroupPost post) {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (context) => GiftSelectionWidget(
+      builder: (context) => ArtistBoostWidget(
         recipientId: post.userId,
         recipientName: post.userName,
       ),
@@ -505,7 +505,7 @@ class _GroupFeedWidgetState extends State<GroupFeedWidget>
               onAppreciate: () => _handleAppreciate(post),
               onComment: () => _handleComment(post),
               onFeature: () => _handleFeature(post),
-              onGift: () => _handleGift(post),
+              onBoost: () => _handleBoost(post),
               onShare: () => _handleShare(post),
             ),
           );

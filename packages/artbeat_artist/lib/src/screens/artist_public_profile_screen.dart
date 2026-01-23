@@ -23,10 +23,7 @@ import '../widgets/design_system.dart';
 class ArtistPublicProfileScreen extends StatefulWidget {
   final String userId;
 
-  const ArtistPublicProfileScreen({
-    super.key,
-    required this.userId,
-  });
+  const ArtistPublicProfileScreen({super.key, required this.userId});
 
   @override
   State<ArtistPublicProfileScreen> createState() =>
@@ -66,8 +63,9 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
       // Current user ID retrieved
 
       // Get artist profile by user ID
-      final artistProfile =
-          await _subscriptionService.getArtistProfileByUserId(widget.userId);
+      final artistProfile = await _subscriptionService.getArtistProfileByUserId(
+        widget.userId,
+      );
 
       // Artist profile query completed
 
@@ -76,8 +74,10 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-                content: Text(tr(
-                    'artist_artist_public_profile_text_artist_profile_not'))),
+              content: Text(
+                tr('artist_artist_public_profile_text_artist_profile_not'),
+              ),
+            ),
           );
           Navigator.pop(context);
         }
@@ -93,8 +93,9 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
       // Get artist's artwork using the artist profile document ID
       // debugPrint(
       //     '🔍 ArtistPublicProfileScreen: About to query artwork with artistProfileId: ${artistProfile.id}');
-      final artwork =
-          await _artworkService.getArtworkByArtistProfileId(artistProfile.id);
+      final artwork = await _artworkService.getArtworkByArtistProfileId(
+        artistProfile.id,
+      );
 
       // debugPrint(
       //     '🖼️ ArtistPublicProfileScreen: Found ${artwork.length} artworks');
@@ -112,8 +113,8 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
       // Load commission settings for this artist
       ArtistCommissionSettings? commissionSettings;
       try {
-        commissionSettings =
-            await _commissionService.getArtistCommissionSettings(widget.userId);
+        commissionSettings = await _commissionService
+            .getArtistCommissionSettings(widget.userId);
       } catch (e) {
         // Artist may not have commission settings - that's OK
       }
@@ -135,8 +136,10 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(tr(
-                  'artist_artist_public_profile_error_error_loading_artist'))),
+            content: Text(
+              tr('artist_artist_public_profile_error_error_loading_artist'),
+            ),
+          ),
         );
         setState(() {
           _isLoading = false;
@@ -151,8 +154,10 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content:
-                  Text(tr('artist_artist_public_profile_text_please_log_in'))),
+            content: Text(
+              tr('artist_artist_public_profile_text_please_log_in'),
+            ),
+          ),
         );
       }
       return;
@@ -172,7 +177,8 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(tr('admin_unified_admin_dashboard_error_error_e'))),
+            content: Text(tr('admin_unified_admin_dashboard_error_error_e')),
+          ),
         );
       }
     }
@@ -190,8 +196,10 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content:
-                  Text(tr('artist_artist_public_profile_text_could_not_open'))),
+            content: Text(
+              tr('artist_artist_public_profile_text_could_not_open'),
+            ),
+          ),
         );
       }
     }
@@ -265,7 +273,8 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       SectionHeader(
-                        title: 'artist_artist_public_profile_section_about'.tr(),
+                        title: 'artist_artist_public_profile_section_about'
+                            .tr(),
                         accentColor: const Color(0xFF22D3EE),
                       ),
                       const SizedBox(height: 12),
@@ -287,8 +296,9 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               SectionHeader(
-                                title: 'artist_artist_public_profile_section_commissions'
-                                    .tr(),
+                                title:
+                                    'artist_artist_public_profile_section_commissions'
+                                        .tr(),
                                 accentColor: const Color(0xFF7C4DFF),
                               ),
                               const SizedBox(height: 12),
@@ -309,8 +319,9 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       SectionHeader(
-                        title: 'artist_artist_public_profile_section_specialties'
-                            .tr(),
+                        title:
+                            'artist_artist_public_profile_section_specialties'
+                                .tr(),
                         accentColor: const Color(0xFF34D399),
                       ),
                       const SizedBox(height: 10),
@@ -328,8 +339,9 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
-                              backgroundColor:
-                                  Colors.white.withValues(alpha: 0.08),
+                              backgroundColor: Colors.white.withValues(
+                                alpha: 0.08,
+                              ),
                               side: BorderSide(
                                 color: Colors.white.withValues(alpha: 0.15),
                               ),
@@ -345,11 +357,13 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
-                              backgroundColor:
-                                  const Color(0xFF22D3EE).withValues(alpha: 0.15),
+                              backgroundColor: const Color(
+                                0xFF22D3EE,
+                              ).withValues(alpha: 0.15),
                               side: BorderSide(
-                                color:
-                                    const Color(0xFF22D3EE).withValues(alpha: 0.3),
+                                color: const Color(
+                                  0xFF22D3EE,
+                                ).withValues(alpha: 0.3),
                               ),
                             ),
                           ),
@@ -357,7 +371,8 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
                       ),
                       const SizedBox(height: 16),
                       SectionHeader(
-                        title: 'artist_artist_public_profile_section_connect'.tr(),
+                        title: 'artist_artist_public_profile_section_connect'
+                            .tr(),
                         accentColor: const Color(0xFF7C4DFF),
                       ),
                       const SizedBox(height: 10),
@@ -380,7 +395,8 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
                                   'artist_artist_public_profile_tooltip_instagram',
                               color: const Color(0xFFFF3D8D),
                               onTap: () => _launchUrl(
-                                  'https://instagram.com/${socialLinks['instagram']}'),
+                                'https://instagram.com/${socialLinks['instagram']}',
+                              ),
                             ),
                           if (_hasLink(socialLinks['facebook']))
                             _buildSocialButton(
@@ -397,7 +413,8 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
                                   'artist_artist_public_profile_tooltip_twitter',
                               color: const Color(0xFF1DA1F2),
                               onTap: () => _launchUrl(
-                                  'https://twitter.com/${socialLinks['twitter']}'),
+                                'https://twitter.com/${socialLinks['twitter']}',
+                              ),
                             ),
                           if (_hasLink(socialLinks['etsy']))
                             _buildSocialButton(
@@ -422,7 +439,8 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       SectionHeader(
-                        title: 'artist_artist_public_profile_section_artwork'.tr(),
+                        title: 'artist_artist_public_profile_section_artwork'
+                            .tr(),
                         accentColor: const Color(0xFFFFC857),
                       ),
                       Text(
@@ -460,18 +478,15 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
                   : SliverGrid(
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 12,
-                        mainAxisSpacing: 12,
-                        childAspectRatio: 0.8,
-                      ),
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          final artwork = _artwork[index];
-                          return _buildArtworkItem(artwork);
-                        },
-                        childCount: _artwork.length,
-                      ),
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
+                            childAspectRatio: 0.8,
+                          ),
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        final artwork = _artwork[index];
+                        return _buildArtworkItem(artwork);
+                      }, childCount: _artwork.length),
                     )),
             ),
           ],
@@ -535,15 +550,19 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
                               padding: const EdgeInsets.only(top: 4.0),
                               child: Row(
                                 children: [
-                                  const Icon(Icons.location_on,
-                                      size: 16, color: Colors.white70),
+                                  const Icon(
+                                    Icons.location_on,
+                                    size: 16,
+                                    color: Colors.white70,
+                                  ),
                                   const SizedBox(width: 6),
                                   Expanded(
                                     child: Text(
                                       artist.location!,
                                       style: GoogleFonts.spaceGrotesk(
-                                        color:
-                                            Colors.white.withValues(alpha: 0.7),
+                                        color: Colors.white.withValues(
+                                          alpha: 0.7,
+                                        ),
                                         fontSize: 14,
                                         fontWeight: FontWeight.w600,
                                       ),
@@ -573,13 +592,14 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
                                       Text(
                                         artist.userType == UserType.gallery
                                             ? 'artist_artist_public_profile_badge_premium_gallery'
-                                                .tr()
+                                                  .tr()
                                             : artist.subscriptionTier ==
-                                                    SubscriptionTier.creator
-                                                ? 'artist_artist_public_profile_badge_creator_plan'
-                                                    .tr()
-                                                : artist.subscriptionTier
-                                                    .displayName,
+                                                  SubscriptionTier.creator
+                                            ? 'artist_artist_public_profile_badge_creator_plan'
+                                                  .tr()
+                                            : artist
+                                                  .subscriptionTier
+                                                  .displayName,
                                         style: GoogleFonts.spaceGrotesk(
                                           fontWeight: FontWeight.w800,
                                           color: Colors.white,
@@ -593,10 +613,15 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
                                   false)
                                 GradientBadge(
                                   gradient: const LinearGradient(
-                                    colors: [Color(0xFF34D399), Color(0xFF22D3EE)],
+                                    colors: [
+                                      Color(0xFF34D399),
+                                      Color(0xFF22D3EE),
+                                    ],
                                   ),
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 6),
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
@@ -606,12 +631,15 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
                                         color: Colors.white,
                                       ),
                                       const SizedBox(width: 6),
-                                      Text(
-                                        tr('art_walk_accepting_commissions'),
-                                        style: GoogleFonts.spaceGrotesk(
-                                          color: Colors.white,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w800,
+                                      Flexible(
+                                        child: Text(
+                                          tr('art_walk_accepting_commissions'),
+                                          style: GoogleFonts.spaceGrotesk(
+                                            color: Colors.white,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w800,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
                                         ),
                                       ),
                                     ],
@@ -637,7 +665,8 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
   }
 
   Widget _buildCoverImage(ArtistProfileModel artist) {
-    final hasCover = artist.coverImageUrl != null &&
+    final hasCover =
+        artist.coverImageUrl != null &&
         artist.coverImageUrl!.isNotEmpty &&
         Uri.tryParse(artist.coverImageUrl!)?.hasScheme == true;
 
@@ -655,8 +684,9 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
                       color: Colors.white.withValues(alpha: 0.04),
                       child: const Center(
                         child: CircularProgressIndicator(
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(Color(0xFF22D3EE)),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Color(0xFF22D3EE),
+                          ),
                         ),
                       ),
                     ),
@@ -677,11 +707,7 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
                       ),
                     ),
                     child: const Center(
-                      child: Icon(
-                        Icons.image,
-                        size: 48,
-                        color: Colors.white38,
-                      ),
+                      child: Icon(Icons.image, size: 48, color: Colors.white38),
                     ),
                   ),
           ),
@@ -763,8 +789,9 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
     final settings = _commissionSettings;
     if (settings == null) return const SizedBox.shrink();
 
-    final availableTypes =
-        settings.availableTypes.map((t) => t.displayName).toList();
+    final availableTypes = settings.availableTypes
+        .map((t) => t.displayName)
+        .toList();
     final hasPrice = settings.basePrice > 0;
     final hasTurnaround = settings.averageTurnaroundDays > 0;
 
@@ -840,8 +867,10 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
               children: availableTypes
                   .map(
                     (type) => Container(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.07),
                         borderRadius: BorderRadius.circular(14),
@@ -910,9 +939,7 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.12),
-            ),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -958,7 +985,8 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
                   // Image
                   SizedBox(
                     width: double.infinity,
-                    child: artwork.imageUrl.isNotEmpty &&
+                    child:
+                        artwork.imageUrl.isNotEmpty &&
                             Uri.tryParse(artwork.imageUrl)?.hasScheme == true
                         ? SecureNetworkImage(
                             imageUrl: artwork.imageUrl,
@@ -1004,7 +1032,9 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
                       right: 8,
                       child: GradientBadge(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         radius: 12,
                         gradient: const LinearGradient(
                           colors: [Color(0xFFFFC857), Color(0xFFFF3D8D)],
@@ -1062,15 +1092,17 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
 
     // Debug: Add logging to understand what's happening
     AppLogger.info(
-        '🎁 Gift action triggered for artist: ${_artistProfile!.userId}');
+      '🎁 Gift action triggered for artist: ${_artistProfile!.userId}',
+    );
     AppLogger.info('🎁 Artist name: ${_artistProfile!.displayName}');
 
     // Check if user is authenticated
     if (_currentUserId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content:
-              Text(tr('artist_artist_public_profile_text_please_log_in_8')),
+          content: Text(
+            tr('artist_artist_public_profile_text_please_log_in_8'),
+          ),
           backgroundColor: Colors.red,
         ),
       );
@@ -1081,8 +1113,9 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
     if (_currentUserId == _artistProfile!.userId) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content:
-              Text(tr('artist_artist_public_profile_text_you_cannot_send')),
+          content: Text(
+            tr('artist_artist_public_profile_text_you_cannot_send'),
+          ),
           backgroundColor: Colors.orange,
         ),
       );
@@ -1095,7 +1128,7 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (context) => GiftSelectionWidget(
+      builder: (context) => ArtistBoostWidget(
         recipientId: _artistProfile!.userId,
         recipientName: _artistProfile!.displayName,
       ),

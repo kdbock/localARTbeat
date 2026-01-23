@@ -21,9 +21,9 @@ export 'feed/enhanced_community_feed_screen.dart';
 // Moderation screens
 export 'moderation/moderation_queue_screen.dart';
 
-// Gift screens
-export 'gifts/gifts_screen.dart' show ViewReceivedGiftsScreen;
-export 'gifts/gift_rules_screen.dart';
+// Boost screens
+export 'boosts/boosts_screen.dart' show ViewReceivedBoostsScreen;
+export 'boosts/boost_rules_screen.dart';
 
 // Portfolio screens
 export 'portfolios/portfolios_screen.dart';

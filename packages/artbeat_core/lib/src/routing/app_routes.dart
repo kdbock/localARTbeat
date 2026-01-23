@@ -49,6 +49,16 @@ class AppRoutes {
   // Artist routes
   static const String artistDashboard = '/artist/dashboard';
   static const String artistOnboarding = '/artist/onboarding';
+  static const String artistOnboardingWelcome = '/artist/onboarding/welcome';
+  static const String artistOnboardingIntroduction =
+      '/artist/onboarding/introduction';
+  static const String artistOnboardingStory = '/artist/onboarding/story';
+  static const String artistOnboardingArtwork = '/artist/onboarding/artwork';
+  static const String artistOnboardingFeatured = '/artist/onboarding/featured';
+  static const String artistOnboardingBenefits = '/artist/onboarding/benefits';
+  static const String artistOnboardingSelection =
+      '/artist/onboarding/selection';
+  static const String artistOnboardingComplete = '/artist/onboarding/complete';
   static const String artistProfileEdit = '/artist/profile-edit';
   static const String artistPublicProfile = '/artist/public-profile';
   static const String artistAnalytics = '/artist/analytics';
@@ -85,7 +95,7 @@ class AppRoutes {
   static const String subscriptionComparison = '/subscription/comparison';
   static const String subscriptionPlans = '/subscription/plans';
   static const String subscriptions = '/iap/subscriptions';
-  static const String gifts = '/iap/gifts';
+  static const String boosts = '/iap/boosts';
   static const String ads = '/iap/ads';
 
   // Payment routes
@@ -151,7 +161,7 @@ class AppRoutes {
   static const String communityPostDetail = '/community/post-detail';
   static const String communityPosts = '/community/posts';
   static const String communityStudios = '/community/studios';
-  static const String communityGifts = '/community/gifts';
+  static const String communityBoosts = '/community/boosts';
   static const String communityPortfolios = '/community/portfolios';
   static const String communityModeration = '/community/moderation';
   static const String communitySponsorships = '/community/sponsorships';

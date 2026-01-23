@@ -118,7 +118,7 @@ enum PaymentMethod {
 /// Enum for revenue stream types
 enum RevenueStream {
   subscription, // Subscriptions (IAP + Stripe)
-  gifts, // Gifts to other users (IAP + Stripe)
+  boosts, // Boosts to other users (IAP + Stripe)
   ads, // Advertising (Stripe only)
   commissions, // Artist commissions (Stripe only)
   artwork, // Artist artwork sales (Stripe only)
@@ -173,8 +173,8 @@ class UnifiedPaymentService {
         'https://us-central1-wordnerd-artbeat.cloudfunctions.net/createSetupIntent',
     'createPaymentIntent':
         'https://us-central1-wordnerd-artbeat.cloudfunctions.net/createPaymentIntent',
-    'processGiftPayment':
-        'https://us-central1-wordnerd-artbeat.cloudfunctions.net/processGiftPayment',
+    'processBoostPayment':
+        'https://us-central1-wordnerd-artbeat.cloudfunctions.net/processBoostPayment',
     'processSubscriptionPayment':
         'https://us-central1-wordnerd-artbeat.cloudfunctions.net/processSubscriptionPayment',
     'processAdPayment':
@@ -340,7 +340,7 @@ class UnifiedPaymentService {
       case PurchaseType.consumable:
         return PaymentMethod.iap; // Digital perks
       case PurchaseType.nonConsumable:
-        return PaymentMethod.stripe; // Gifts that may result in payouts
+        return PaymentMethod.stripe; // Boosts that may result in payouts
       case PurchaseType.subscription:
         return PaymentMethod.iap;
     }
@@ -407,13 +407,13 @@ class UnifiedPaymentService {
     }
   }
 
-  /// Process gift payment (IAP + Stripe support)
-  Future<PaymentResult> processGiftPayment({
+  /// Process boost payment (IAP + Stripe support)
+  Future<PaymentResult> processBoostPayment({
     required String recipientId,
     required double amount,
     required PaymentMethod method,
     String? paymentMethodId,
-    String? giftMessage,
+    String? boostMessage,
   }) async {
     try {
       final userId = _auth.currentUser?.uid;
@@ -422,38 +422,38 @@ class UnifiedPaymentService {
       if (method == PaymentMethod.iap) {
         return PaymentResult(
           success: true,
-          paymentIntentId: 'iap-gift-${DateTime.now().millisecondsSinceEpoch}',
+          paymentIntentId: 'iap-boost-${DateTime.now().millisecondsSinceEpoch}',
         );
       } else {
         final response = await _makeAuthenticatedRequest(
-          functionKey: 'processGiftPayment',
+          functionKey: 'processBoostPayment',
           body: {
             'recipientId': recipientId,
             'amount': amount,
             if (paymentMethodId != null) 'paymentMethodId': paymentMethodId,
-            if (giftMessage != null) 'giftMessage': giftMessage,
+            if (boostMessage != null) 'boostMessage': boostMessage,
           },
         );
 
         if (response.statusCode == 200) {
           final data = json.decode(response.body) as Map<String, dynamic>;
-          _logPaymentEvent('gift', amount, 'success');
+          _logPaymentEvent('boost', amount, 'success');
           return PaymentResult(
             success: true,
             paymentIntentId: (data['paymentIntentId'] as String?) ?? '',
             clientSecret: (data['clientSecret'] as String?) ?? '',
           );
         } else {
-          _logPaymentEvent('gift', amount, 'failed');
+          _logPaymentEvent('boost', amount, 'failed');
           return PaymentResult(
             success: false,
-            error: 'Failed to process gift payment',
+            error: 'Failed to process boost payment',
           );
         }
       }
     } catch (e) {
-      AppLogger.error('Error processing gift: $e');
-      _logPaymentEvent('gift', 0, 'error');
+      AppLogger.error('Error processing boost: $e');
+      _logPaymentEvent('boost', 0, 'error');
       return PaymentResult(success: false, error: e.toString());
     }
   }

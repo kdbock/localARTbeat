@@ -2062,7 +2062,11 @@
     "winning": "Winning",
     "won": "Won",
     "you_are_winning": "You are winning!",
-    "your_bid": "Your bid"
+    "your_bid": "Your bid",
+    "manage_auction": "Gérer l'enchère",
+    "enable_auction": "Activer l'enchère",
+    "enable_description": "Autoriser les enchérisseurs à placer des enchères sur cette œuvre",
+    "save_settings": "Enregistrer les paramètres"
   },
   "auction_manage_cancel": "Annuler",
   "auction_manage_end_time": "Fin de l'enchère",

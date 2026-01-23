@@ -120,8 +120,8 @@ class EnhancedPaymentService {
         'https://us-central1-wordnerd-artbeat.cloudfunctions.net/createSetupIntent',
     'createPaymentIntent':
         'https://us-central1-wordnerd-artbeat.cloudfunctions.net/createPaymentIntent',
-    'processGiftPayment':
-        'https://us-central1-wordnerd-artbeat.cloudfunctions.net/processGiftPayment',
+    'processBoostPayment':
+        'https://us-central1-wordnerd-artbeat.cloudfunctions.net/processBoostPayment',
     'processSubscriptionPayment':
         'https://us-central1-wordnerd-artbeat.cloudfunctions.net/processSubscriptionPayment',
     'processAdPayment':

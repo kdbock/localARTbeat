@@ -6,11 +6,11 @@ enum FeatureType {
   adRotation, // Artist ads in rotation
 }
 
-/// Represents an active feature granted by a gift
+/// Represents an active feature granted by an artist boost
 class ArtistFeature {
   final String id;
   final String artistId;
-  final String giftId;
+  final String boostId;
   final String purchaserId;
   final FeatureType type;
   final DateTime startDate;
@@ -22,7 +22,7 @@ class ArtistFeature {
   ArtistFeature({
     required this.id,
     required this.artistId,
-    required this.giftId,
+    required this.boostId,
     required this.purchaserId,
     required this.type,
     required this.startDate,
@@ -37,7 +37,7 @@ class ArtistFeature {
     return ArtistFeature(
       id: doc.id,
       artistId: data['artistId'] as String,
-      giftId: data['giftId'] as String,
+      boostId: data['boostId'] as String? ?? data['giftId'] as String? ?? '',
       purchaserId: data['purchaserId'] as String,
       type: _parseFeatureType(data['type'] as String),
       startDate: (data['startDate'] as Timestamp).toDate(),
@@ -51,7 +51,7 @@ class ArtistFeature {
   Map<String, dynamic> toFirestore() {
     return {
       'artistId': artistId,
-      'giftId': giftId,
+      'boostId': boostId,
       'purchaserId': purchaserId,
       'type': _featureTypeToString(type),
       'startDate': Timestamp.fromDate(startDate),
@@ -110,7 +110,7 @@ class ArtistFeature {
   ArtistFeature copyWith({
     String? id,
     String? artistId,
-    String? giftId,
+    String? boostId,
     String? purchaserId,
     FeatureType? type,
     DateTime? startDate,
@@ -122,7 +122,7 @@ class ArtistFeature {
     return ArtistFeature(
       id: id ?? this.id,
       artistId: artistId ?? this.artistId,
-      giftId: giftId ?? this.giftId,
+      boostId: boostId ?? this.boostId,
       purchaserId: purchaserId ?? this.purchaserId,
       type: type ?? this.type,
       startDate: startDate ?? this.startDate,
@@ -134,29 +134,29 @@ class ArtistFeature {
   }
 }
 
-/// Configuration for different gift tiers
-class GiftTierConfig {
-  final String giftId;
+/// Configuration for different boost tiers
+class BoostTierConfig {
+  final String boostId;
   final double price;
   final int credits;
   final Map<FeatureType, Duration> features;
 
-  const GiftTierConfig({
-    required this.giftId,
+  const BoostTierConfig({
+    required this.boostId,
     required this.price,
     required this.credits,
     required this.features,
   });
 
-  static const supporter = GiftTierConfig(
-    giftId: 'artbeat_gift_small',
+  static const supporter = BoostTierConfig(
+    boostId: 'artbeat_gift_small',
     price: 4.99,
     credits: 50,
     features: {FeatureType.artistFeatured: Duration(days: 30)},
   );
 
-  static const fan = GiftTierConfig(
-    giftId: 'artbeat_gift_medium',
+  static const fan = BoostTierConfig(
+    boostId: 'artbeat_gift_medium',
     price: 9.99,
     credits: 100,
     features: {
@@ -165,8 +165,8 @@ class GiftTierConfig {
     },
   );
 
-  static const patron = GiftTierConfig(
-    giftId: 'artbeat_gift_large',
+  static const patron = BoostTierConfig(
+    boostId: 'artbeat_gift_large',
     price: 24.99,
     credits: 250,
     features: {
@@ -176,8 +176,8 @@ class GiftTierConfig {
     },
   );
 
-  static const benefactor = GiftTierConfig(
-    giftId: 'artbeat_gift_premium',
+  static const benefactor = BoostTierConfig(
+    boostId: 'artbeat_gift_premium',
     price: 49.99,
     credits: 500,
     features: {
@@ -187,8 +187,8 @@ class GiftTierConfig {
     },
   );
 
-  static GiftTierConfig? fromGiftId(String giftId) {
-    switch (giftId) {
+  static BoostTierConfig? fromBoostId(String boostId) {
+    switch (boostId) {
       case 'artbeat_gift_small':
         return supporter;
       case 'artbeat_gift_medium':

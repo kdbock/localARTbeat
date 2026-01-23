@@ -4,6 +4,7 @@
 export 'visibility_insights_screen.dart';
 export 'artist_browse_screen.dart';
 export 'gallery_hub_screen.dart';
+export 'auction_hub_screen.dart';
 export 'artist_profile_edit_screen.dart';
 export 'artist_public_profile_screen.dart';
 export 'event_creation_screen.dart';

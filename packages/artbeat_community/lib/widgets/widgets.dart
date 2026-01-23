@@ -25,7 +25,7 @@ export 'enhanced_artwork_card.dart';
 export 'enhanced_post_card.dart';
 export 'feedback_thread_widget.dart';
 export 'fullscreen_image_viewer.dart';
-export 'gift_card_widget.dart';
+export 'boost_card_widget.dart';
 export 'group_feed_widget.dart';
 export 'group_post_card.dart';
 export 'mini_artist_card.dart';

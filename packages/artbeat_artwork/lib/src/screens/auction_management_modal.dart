@@ -7,10 +7,7 @@ import 'package:artbeat_core/artbeat_core.dart' show GlassCard;
 class AuctionManagementModal extends StatefulWidget {
   final ArtworkModel artwork;
 
-  const AuctionManagementModal({
-    super.key,
-    required this.artwork,
-  });
+  const AuctionManagementModal({super.key, required this.artwork});
 
   @override
   State<AuctionManagementModal> createState() => _AuctionManagementModalState();
@@ -157,8 +154,10 @@ class _AuctionManagementModalState extends State<AuctionManagementModal> {
                             ),
                             IconButton(
                               onPressed: () => Navigator.of(context).pop(),
-                              icon:
-                                  const Icon(Icons.close, color: Colors.white),
+                              icon: const Icon(
+                                Icons.close,
+                                color: Colors.white,
+                              ),
                             ),
                           ],
                         ),
@@ -170,12 +169,44 @@ class _AuctionManagementModalState extends State<AuctionManagementModal> {
                           children: [
                             ClipRRect(
                               borderRadius: BorderRadius.circular(8),
-                              child: Image.network(
-                                widget.artwork.imageUrl,
-                                width: 60,
-                                height: 60,
-                                fit: BoxFit.cover,
-                              ),
+                              child:
+                                  widget.artwork.imageUrl.isNotEmpty &&
+                                      widget.artwork.imageUrl
+                                          .trim()
+                                          .isNotEmpty &&
+                                      Uri.tryParse(
+                                            widget.artwork.imageUrl,
+                                          )?.hasScheme ==
+                                          true
+                                  ? Image.network(
+                                      widget.artwork.imageUrl,
+                                      width: 60,
+                                      height: 60,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                            return Container(
+                                              width: 60,
+                                              height: 60,
+                                              color: Colors.grey[800],
+                                              child: const Icon(
+                                                Icons.image_not_supported,
+                                                color: Colors.grey,
+                                                size: 30,
+                                              ),
+                                            );
+                                          },
+                                    )
+                                  : Container(
+                                      width: 60,
+                                      height: 60,
+                                      color: Colors.grey[800],
+                                      child: const Icon(
+                                        Icons.image_not_supported,
+                                        color: Colors.grey,
+                                        size: 30,
+                                      ),
+                                    ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
@@ -184,20 +215,21 @@ class _AuctionManagementModalState extends State<AuctionManagementModal> {
                                 children: [
                                   Text(
                                     widget.artwork.title,
-                                    style:
-                                        theme.textTheme.titleMedium?.copyWith(
-                                      fontFamily: 'SpaceGrotesk',
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.white,
-                                    ),
+                                    style: theme.textTheme.titleMedium
+                                        ?.copyWith(
+                                          fontFamily: 'SpaceGrotesk',
+                                          fontWeight: FontWeight.w700,
+                                          color: Colors.white,
+                                        ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                   Text(
                                     widget.artwork.artistName,
                                     style: theme.textTheme.bodyMedium?.copyWith(
-                                      color:
-                                          Colors.white.withValues(alpha: 0.7),
+                                      color: Colors.white.withValues(
+                                        alpha: 0.7,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -246,8 +278,9 @@ class _AuctionManagementModalState extends State<AuctionManagementModal> {
                               labelText: 'auction.starting_price'.tr(),
                               prefixText: '\$',
                               border: const OutlineInputBorder(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(12)),
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(12),
+                                ),
                               ),
                               filled: true,
                               fillColor: Colors.white.withValues(alpha: 0.1),
@@ -282,8 +315,9 @@ class _AuctionManagementModalState extends State<AuctionManagementModal> {
                               labelText: 'auction.reserve_price'.tr(),
                               prefixText: '\$',
                               border: const OutlineInputBorder(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(12)),
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(12),
+                                ),
                               ),
                               filled: true,
                               fillColor: Colors.white.withValues(alpha: 0.1),
@@ -315,13 +349,15 @@ class _AuctionManagementModalState extends State<AuctionManagementModal> {
                               decoration: InputDecoration(
                                 labelText: 'auction.end_date_time'.tr(),
                                 border: const OutlineInputBorder(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(12)),
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(12),
+                                  ),
                                 ),
                                 filled: true,
                                 fillColor: Colors.white.withValues(alpha: 0.1),
-                                labelStyle:
-                                    const TextStyle(color: Colors.white),
+                                labelStyle: const TextStyle(
+                                  color: Colors.white,
+                                ),
                                 suffixIcon: const Icon(
                                   Icons.calendar_today,
                                   color: Colors.white,
@@ -372,31 +408,37 @@ class _AuctionManagementModalState extends State<AuctionManagementModal> {
                           height: 48,
                           child: ElevatedButton(
                             onPressed: _isLoading ? null : _saveAuctionSettings,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.transparent,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(24),
-                              ),
-                            ).copyWith(
-                              backgroundColor:
-                                  WidgetStateProperty.resolveWith<Color>(
-                                (states) {
-                                  if (states.contains(WidgetState.disabled)) {
-                                    return Colors.grey.withValues(alpha: 0.3);
-                                  }
-                                  return Colors.transparent;
-                                },
-                              ),
-                              foregroundColor:
-                                  WidgetStateProperty.all(Colors.white),
-                            ),
+                            style:
+                                ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.transparent,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(24),
+                                  ),
+                                ).copyWith(
+                                  backgroundColor:
+                                      WidgetStateProperty.resolveWith<Color>((
+                                        states,
+                                      ) {
+                                        if (states.contains(
+                                          WidgetState.disabled,
+                                        )) {
+                                          return Colors.grey.withValues(
+                                            alpha: 0.3,
+                                          );
+                                        }
+                                        return Colors.transparent;
+                                      }),
+                                  foregroundColor: WidgetStateProperty.all(
+                                    Colors.white,
+                                  ),
+                                ),
                             child: Ink(
                               decoration: BoxDecoration(
                                 gradient: const LinearGradient(
                                   colors: [
                                     Color(0xFF7C4DFF),
                                     Color(0xFF22D3EE),
-                                    Color(0xFF34D399)
+                                    Color(0xFF34D399),
                                   ],
                                 ),
                                 borderRadius: BorderRadius.circular(24),
@@ -405,15 +447,16 @@ class _AuctionManagementModalState extends State<AuctionManagementModal> {
                                 alignment: Alignment.center,
                                 child: _isLoading
                                     ? const CircularProgressIndicator(
-                                        color: Colors.white)
+                                        color: Colors.white,
+                                      )
                                     : Text(
                                         'auction.save_settings'.tr(),
                                         style: theme.textTheme.titleMedium
                                             ?.copyWith(
-                                          fontFamily: 'SpaceGrotesk',
-                                          fontWeight: FontWeight.w700,
-                                          color: Colors.white,
-                                        ),
+                                              fontFamily: 'SpaceGrotesk',
+                                              fontWeight: FontWeight.w700,
+                                              color: Colors.white,
+                                            ),
                                       ),
                               ),
                             ),

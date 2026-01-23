@@ -4,8 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../widgets/widgets.dart';
 
-class GiftRulesScreen extends StatelessWidget {
-  const GiftRulesScreen({super.key});
+class BoostRulesScreen extends StatelessWidget {
+  const BoostRulesScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

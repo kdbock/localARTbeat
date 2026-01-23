@@ -10,7 +10,7 @@ import 'package:artbeat_core/artbeat_core.dart';
 /// Enum for different notification types
 enum NotificationType {
   message('message', '💬'),
-  gift('gift', '🎁'),
+  boost('boost', '⚡'),
   commission('commission', '🎨'),
   event('event', '📅');
 
@@ -397,7 +397,7 @@ class NotificationService {
   (String, String) _getNotificationChannel(NotificationType type) {
     return switch (type) {
       NotificationType.message => ('chat_messages', 'Messages'),
-      NotificationType.gift => ('gifts_received', 'Gifts'),
+      NotificationType.boost => ('artist_boosts', 'Artist Boosts'),
       NotificationType.commission => ('commissions', 'Commissions'),
       NotificationType.event => ('event_reminders', 'Events'),
     };
@@ -411,10 +411,10 @@ class NotificationService {
         'Notifications for new chat messages',
         'notification_message',
       ),
-      NotificationType.gift => (
-        'Gift Received',
-        'Notifications when you receive gifts',
-        'notification_gift',
+      NotificationType.boost => (
+        'Artist Boost Received',
+        'Notifications when you receive boosts',
+        'notification_boost',
       ),
       NotificationType.commission => (
         'Commission Request',
@@ -770,29 +770,29 @@ class NotificationService {
     }
   }
 
-  /// Send a gift notification
-  Future<void> sendGiftNotification({
+  /// Send an artist boost notification
+  Future<void> sendBoostNotification({
     required String recipientUserId,
     required String senderName,
-    required String giftName,
-    required String giftImageUrl,
+    required String boostName,
+    required String boostImageUrl,
   }) async {
     try {
       await sendNotificationToUser(
         userId: recipientUserId,
-        title: '🎁 Gift from $senderName',
-        body: '$senderName sent you: $giftName',
+        title: '⚡ Boost from $senderName',
+        body: '$senderName sent you a $boostName boost!',
         data: {
-          'type': NotificationType.gift.value,
+          'type': NotificationType.boost.value,
           'senderName': senderName,
-          'giftName': giftName,
-          'giftImageUrl': giftImageUrl,
-          'route': '/gifts/received',
+          'boostName': boostName,
+          'boostImageUrl': boostImageUrl,
+          'route': '/boosts/received',
         },
       );
-      AppLogger.info('🎁 Gift notification sent to $recipientUserId');
+      AppLogger.info('⚡ Boost notification sent to $recipientUserId');
     } catch (e) {
-      AppLogger.error('❌ Error sending gift notification: $e');
+      AppLogger.error('❌ Error sending boost notification: $e');
       rethrow;
     }
   }

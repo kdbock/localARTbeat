@@ -46,11 +46,9 @@ class UpcomingEventsRowWidget extends StatelessWidget {
           child: StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
                 .collection('events')
-                .where('isPublic', isEqualTo: true)
                 .where('startDate',
                     isGreaterThanOrEqualTo: Timestamp.fromDate(now))
-                .orderBy('startDate')
-                .limit(10)
+                .limit(40) // Fetch more to allow for local filtering
                 .snapshots(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -74,9 +72,12 @@ class UpcomingEventsRowWidget extends StatelessWidget {
               final events = snapshot.data!.docs
                   .map((doc) => ArtbeatEvent.fromFirestore(doc))
                   .where((event) {
-                // Filter to only show events with locations containing the zipCode
-                return event.location.contains(zipCode);
+                // Filter to only show public events with locations containing the zipCode
+                return event.isPublic && event.location.contains(zipCode);
               }).toList();
+
+              // Sort locally by date
+              events.sort((a, b) => a.startDate.compareTo(b.startDate));
 
               if (events.isEmpty) {
                 return Padding(

@@ -3,11 +3,11 @@ import 'package:artbeat_core/artbeat_core.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-class GiftCardWidget extends StatelessWidget {
-  final GiftModel gift;
-  final VoidCallback? onSendGift;
+class ArtistBoostCardWidget extends StatelessWidget {
+  final ArtistBoostModel boost;
+  final VoidCallback? onSendBoost;
 
-  const GiftCardWidget({super.key, required this.gift, this.onSendGift});
+  const ArtistBoostCardWidget({super.key, required this.boost, this.onSendBoost});
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +18,7 @@ class GiftCardWidget extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              gift.giftType,
+              boost.boostType,
               style: GoogleFonts.spaceGrotesk(
                 fontWeight: FontWeight.w900,
                 fontSize: 18,
@@ -27,7 +27,7 @@ class GiftCardWidget extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'amount'.tr(args: [gift.amount.toStringAsFixed(2)]),
+              'community_boosts.xp_reward'.tr(args: [boost.xpAmount.toString()]),
               style: GoogleFonts.spaceGrotesk(
                 color: const Color(0xFF70FFFFFF),
                 fontSize: 14,
@@ -35,8 +35,11 @@ class GiftCardWidget extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            if (onSendGift != null)
-              HudButton(onPressed: onSendGift, text: 'send_gift'.tr()),
+            if (onSendBoost != null)
+              HudButton(
+                onPressed: onSendBoost,
+                text: 'community_boosts.deploy_boost'.tr(),
+              ),
           ],
         ),
       ),

@@ -39,11 +39,11 @@ class InAppPurchaseService {
       'artbeat_business_yearly',
       'artbeat_enterprise_yearly',
     ],
-    'gifts': [
-      'artbeat_gift_small', // Small Gift (50 Credits)
-      'artbeat_gift_medium', // Medium Gift (100 Credits)
-      'artbeat_gift_large', // Large Gift (250 Credits)
-      'artbeat_gift_premium', // Premium Gift (500 Credits)
+    'boosts': [
+      'artbeat_boost_small', // Small Boost (50 Credits)
+      'artbeat_boost_medium', // Medium Boost (100 Credits)
+      'artbeat_boost_large', // Large Boost (250 Credits)
+      'artbeat_boost_premium', // Premium Boost (500 Credits)
     ],
     'ads': [
       'ad_small_1w', // Small ad package - 1 week
@@ -339,7 +339,7 @@ class InAppPurchaseService {
 
         // In debug mode, treat restored consumables as successful for testing
         // This handles the case where IAP dialogs don't work on simulators
-        if (_isDebugMode() && _isGiftProduct(purchaseDetails.productID)) {
+        if (_isDebugMode() && _isBoostProduct(purchaseDetails.productID)) {
           if (kDebugMode) {
             print(
               '🐛 DEBUG MODE: Treating restored consumable as successful purchase',
@@ -436,7 +436,7 @@ class InAppPurchaseService {
       case PurchaseCategory.subscription:
         await _processSubscriptionPurchase(purchase, details);
         break;
-      case PurchaseCategory.gifts:
+      case PurchaseCategory.boosts:
         await _processGiftPurchase(purchase, details);
         break;
       case PurchaseCategory.ads:
@@ -709,9 +709,9 @@ class InAppPurchaseService {
     return getProductsByCategory(PurchaseCategory.subscription);
   }
 
-  /// Get gift products
-  List<ProductDetails> getGiftProducts() {
-    return getProductsByCategory(PurchaseCategory.gifts);
+  /// Get boost products
+  List<ProductDetails> getBoostProducts() {
+    return getProductsByCategory(PurchaseCategory.boosts);
   }
 
   /// Check if a specific product is loaded
@@ -731,7 +731,7 @@ class InAppPurchaseService {
   PurchaseType _getPurchaseType(String productId) {
     if (_productIds['subscriptions']!.contains(productId)) {
       return PurchaseType.subscription;
-    } else if (_productIds['gifts']!.contains(productId) ||
+    } else if (_productIds['boosts']!.contains(productId) ||
         _productIds['ads']!.contains(productId)) {
       return PurchaseType.consumable;
     }
@@ -741,8 +741,8 @@ class InAppPurchaseService {
   PurchaseCategory _getPurchaseCategory(String productId) {
     if (_productIds['subscriptions']!.contains(productId)) {
       return PurchaseCategory.subscription;
-    } else if (_productIds['gifts']!.contains(productId)) {
-      return PurchaseCategory.gifts;
+    } else if (_productIds['boosts']!.contains(productId)) {
+      return PurchaseCategory.boosts;
     } else if (_productIds['ads']!.contains(productId)) {
       return PurchaseCategory.ads;
     }
@@ -883,9 +883,9 @@ class InAppPurchaseService {
     return debug;
   }
 
-  /// Check if product ID is a gift product
-  bool _isGiftProduct(String productId) {
-    return _productIds['gifts']?.contains(productId) ?? false;
+  /// Check if product ID is a boost product
+  bool _isBoostProduct(String productId) {
+    return _productIds['boosts']?.contains(productId) ?? false;
   }
 
   /// Dispose resources

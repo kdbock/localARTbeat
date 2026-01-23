@@ -3,14 +3,9 @@
 <plist version="1.0">
 <dict>
     <key>method</key>
-    <string>app-store</string>
-    <key>provisioningProfiles</key>
-    <dict>
-        <key>com.wordnerd.artbeat</key>
-        <string>Artbeat Distribution</string>
-    </dict>
+    <string>development</string>
     <key>signingStyle</key>
-    <string>manual</string>
+    <string>automatic</string>
     <key>teamID</key>
     <string>H49R32NPY6</string>
 </dict>

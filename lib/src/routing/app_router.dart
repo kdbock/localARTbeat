@@ -1,4 +1,3 @@
-
 import 'package:artbeat_admin/artbeat_admin.dart' as admin;
 import 'package:artbeat_ads/artbeat_ads.dart' as ads;
 import 'package:artbeat_art_walk/artbeat_art_walk.dart' as art_walk;
@@ -17,6 +16,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:provider/provider.dart';
 
 import '../../screens/in_app_purchase_demo_screen.dart';
 import '../../screens/notifications_screen.dart';
@@ -31,6 +31,10 @@ import 'route_utils.dart';
 /// Main application router that handles all route generation
 class AppRouter {
   final _authGuard = AuthGuard();
+
+  // Shared view model instance for artist onboarding
+  // This ensures state persists across all onboarding screens
+  static core.ArtistOnboardingViewModel? _onboardingViewModel;
 
   /// Main route generation method
   Route<dynamic>? onGenerateRoute(RouteSettings settings) {
@@ -200,6 +204,11 @@ class AppRouter {
         return RouteUtils.createMainLayoutRoute(
           child: const sponsorships.LocalBusinessScreen(),
         );
+
+      case '/auction/hub':
+        return RouteUtils.createMainLayoutRoute(
+          child: const artist.AuctionHubScreen(),
+        );
     }
 
     // Try specialized routes
@@ -240,6 +249,52 @@ class AppRouter {
       !routeName.startsWith('/public/') &&
       !routeName.startsWith('/art-walk/') &&
       !routeName.startsWith('/community/');
+
+  /// Get or create shared onboarding view model instance
+  core.ArtistOnboardingViewModel _getOnboardingViewModel() {
+    if (_onboardingViewModel == null) {
+      _onboardingViewModel = core.ArtistOnboardingViewModel();
+      _onboardingViewModel!.initialize();
+    }
+    return _onboardingViewModel!;
+  }
+
+  /// Build onboarding screen with shared view model
+  Widget _buildOnboardingScreen(String routeName) {
+    final viewModel = _getOnboardingViewModel();
+
+    Widget screen;
+    switch (routeName) {
+      case core.AppRoutes.artistOnboardingWelcome:
+        screen = const core.WelcomeScreen();
+        break;
+      case core.AppRoutes.artistOnboardingIntroduction:
+        screen = const core.ArtistIntroductionScreen();
+        break;
+      case core.AppRoutes.artistOnboardingStory:
+        screen = const core.ArtistStoryScreen();
+        break;
+      case core.AppRoutes.artistOnboardingArtwork:
+        screen = const core.ArtworkUploadScreen();
+        break;
+      case core.AppRoutes.artistOnboardingFeatured:
+        screen = const core.FeaturedArtworkScreen();
+        break;
+      case core.AppRoutes.artistOnboardingBenefits:
+        screen = const core.BenefitsScreen();
+        break;
+      case core.AppRoutes.artistOnboardingSelection:
+        screen = const core.TierSelectionScreen();
+        break;
+      default:
+        screen = const core.WelcomeScreen();
+    }
+
+    return ChangeNotifierProvider<core.ArtistOnboardingViewModel>.value(
+      value: viewModel,
+      child: screen,
+    );
+  }
 
   /// Handles specialized routes that aren't in core handler
   Route<dynamic>? _handleSpecializedRoutes(RouteSettings settings) {
@@ -359,6 +414,27 @@ class AppRouter {
           unauthenticatedBuilder: () => const core.MainLayout(
             currentIndex: -1,
             child: core.AuthRequiredScreen(),
+          ),
+        );
+
+      // New Artist Onboarding Flow - wrapped with Provider
+      // IMPORTANT: All routes share the same ViewModel instance to persist state
+      case core.AppRoutes.artistOnboardingWelcome:
+      case core.AppRoutes.artistOnboardingIntroduction:
+      case core.AppRoutes.artistOnboardingStory:
+      case core.AppRoutes.artistOnboardingArtwork:
+      case core.AppRoutes.artistOnboardingFeatured:
+      case core.AppRoutes.artistOnboardingBenefits:
+      case core.AppRoutes.artistOnboardingSelection:
+        return RouteUtils.createSimpleRoute(
+          child: _buildOnboardingScreen(settings.name!),
+        );
+
+      case core.AppRoutes.artistOnboardingComplete:
+        return RouteUtils.createSimpleRoute(
+          child: ChangeNotifierProvider(
+            create: (_) => core.ArtistOnboardingViewModel()..initialize(),
+            child: const core.OnboardingCompletionScreen(),
           ),
         );
 
@@ -595,10 +671,10 @@ class AppRouter {
           child: const community.StudiosScreen(),
         );
 
-      case core.AppRoutes.communityGifts:
+      case core.AppRoutes.communityBoosts:
         return RouteUtils.createMainLayoutRoute(
-          appBar: RouteUtils.createAppBar('Gift Artists'),
-          child: const community.ViewReceivedGiftsScreen(),
+          appBar: RouteUtils.createAppBar('Boost Artists'),
+          child: const community.ViewReceivedBoostsScreen(),
         );
 
       case core.AppRoutes.communityPortfolios:
@@ -612,9 +688,9 @@ class AppRouter {
         );
 
       case core.AppRoutes.communitySponsorships:
-        // Sponsorship functionality removed - redirect to gifts
+        // Sponsorship functionality removed - redirect to boosts
         return RouteUtils.createMainLayoutRoute(
-          child: const community.ViewReceivedGiftsScreen(),
+          child: const community.ViewReceivedBoostsScreen(),
         );
 
       case core.AppRoutes.communitySettings:
@@ -1699,9 +1775,7 @@ class AppRouter {
         }
         // Provide required arguments for CaptureEditScreen
         return RouteUtils.createMainLayoutRoute(
-          child: capture.CaptureEditScreen(
-            capture: captureModel,
-          ),
+          child: capture.CaptureEditScreen(capture: captureModel),
         );
 
       case core.AppRoutes.captureNearby:
@@ -1827,9 +1901,12 @@ class AppRouter {
           child: const core.SubscriptionsScreen(),
         );
 
-      case core.AppRoutes.gifts:
+      case core.AppRoutes.boosts:
         return RouteUtils.createMainLayoutRoute(
-          child: const core.GiftsScreen(),
+          child: const core.ArtistBoostWidget(
+            recipientId: 'system',
+            recipientName: 'ARTbeat Store',
+          ),
         );
 
       case core.AppRoutes.ads:

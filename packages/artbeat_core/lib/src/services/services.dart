@@ -25,7 +25,7 @@ export 'enhanced_storage_service.dart';
 // In-app purchase services
 export 'in_app_purchase_service.dart';
 export 'in_app_subscription_service.dart';
-export 'in_app_gift_service.dart';
+export 'artist_boost_service.dart';
 export 'in_app_ad_service.dart';
 export 'in_app_purchase_manager.dart';
 

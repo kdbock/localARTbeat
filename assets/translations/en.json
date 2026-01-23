@@ -814,6 +814,8 @@
   "art_walk_art_walk_edit_error_error_picking_image": "Error picking image: $e",
   "art_walk_art_walk_edit_error_error_updating_art": "Error updating art walk: $e",
   "art_walk_art_walk_edit_success_art_walk_deleted": "Art walk deleted successfully",
+  "art_walk_edit": "Edit",
+  "art_walk_delete": "Delete",
   "art_walk_art_walk_edit_success_artwork_added_to": "Artwork added to art walk successfully",
   "art_walk_art_walk_edit_text_add_artwork": "Add Artwork",
   "art_walk_art_walk_edit_text_add_artwork_20": "Add Artwork",
@@ -2050,7 +2052,11 @@
     "winning": "Winning",
     "won": "Won",
     "you_are_winning": "You are winning!",
-    "your_bid": "Your bid"
+    "your_bid": "Your bid",
+    "manage_auction": "Manage Auction",
+    "enable_auction": "Enable Auction",
+    "enable_description": "Allow bidders to place bids on this artwork",
+    "save_settings": "Save Settings"
   },
   "auction_manage_cancel": "Cancel",
   "auction_manage_end_time": "Auction end",

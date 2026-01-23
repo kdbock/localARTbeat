@@ -4,8 +4,8 @@ version: 0.0.2
 publish_to: "none"
 
 environment:
-  sdk: ">=3.10.0 <4.0.0"
-  flutter: ">=3.38.0"
+  sdk: ">=3.10.7 <4.0.0"
+  flutter: ">=3.38.7"
 
 dependencies:
   flutter:
@@ -27,12 +27,12 @@ dependencies:
   artbeat_core:
     path: ../artbeat_core
   cached_network_image: ^3.2.3
-  cloud_firestore: ^6.0.0
+  cloud_firestore: ^6.1.2
   easy_localization: ^3.0.7
-  firebase_app_check: ^0.4.1+3
-  firebase_auth: ^6.1.3
-  firebase_core: ^4.3.0
-  firebase_storage: ^13.0.5
+  firebase_app_check: ^0.4.1+4
+  firebase_auth: ^6.1.4
+  firebase_core: ^4.4.0
+  firebase_storage: ^13.0.6
   geolocator: ^14.0.1
   image_picker: ^1.0.4
   intl: ^0.20.2
@@ -46,7 +46,7 @@ dependencies:
   confetti: ^0.8.0
 
   # Added for design system typography
-  google_fonts: ^7.0.2
+  google_fonts: ^7.1.0
 
 flutter:
   uses-material-design: true

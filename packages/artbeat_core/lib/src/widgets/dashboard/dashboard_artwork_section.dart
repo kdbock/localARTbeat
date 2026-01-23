@@ -326,7 +326,7 @@ class DashboardArtworkSection extends StatelessWidget {
                             _buildEngagementButton(
                               Icons.card_giftcard,
                               0,
-                              () => _handleGiftArtist(context, artworkItem),
+                              () => _handleBoostArtist(context, artworkItem),
                             ),
 
                             // Commission Artist
@@ -456,14 +456,14 @@ class DashboardArtworkSection extends StatelessWidget {
     }
   }
 
-  void _handleGiftArtist(BuildContext context, ArtworkModel artwork) {
+  void _handleBoostArtist(BuildContext context, ArtworkModel artwork) {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (context) => GiftSelectionWidget(
+      builder: (context) => ArtistBoostWidget(
         recipientId: artwork.artistId,
         recipientName: artwork.artistName,
       ),

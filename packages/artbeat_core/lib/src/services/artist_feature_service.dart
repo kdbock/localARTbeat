@@ -2,27 +2,27 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/artist_feature_model.dart';
 import '../utils/logger.dart';
 
-/// Service for managing artist features granted by gifts
+/// Service for managing artist features granted by boosts
 class ArtistFeatureService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final CollectionReference _featuresCollection = FirebaseFirestore.instance
       .collection('artist_features');
 
-  /// Create features for a gift purchase
-  Future<List<ArtistFeature>> createFeaturesForGift({
-    required String giftId,
+  /// Create features for a boost purchase
+  Future<List<ArtistFeature>> createFeaturesForBoost({
+    required String boostId,
     required String artistId,
     required String purchaserId,
   }) async {
-    final config = GiftTierConfig.fromGiftId(giftId);
+    final config = BoostTierConfig.fromBoostId(boostId);
     if (config == null) {
-      throw Exception('Unknown gift ID: $giftId');
+      throw Exception('Unknown boost ID: $boostId');
     }
 
     final features = <ArtistFeature>[];
     final now = DateTime.now();
 
-    // Create a feature for each type in the gift config
+    // Create a feature for each type in the boost config
     for (final entry in config.features.entries) {
       final featureType = entry.key;
       final duration = entry.value;
@@ -30,14 +30,14 @@ class ArtistFeatureService {
       final feature = ArtistFeature(
         id: '', // Will be set by Firestore
         artistId: artistId,
-        giftId: giftId,
+        boostId: boostId,
         purchaserId: purchaserId,
         type: featureType,
         startDate: now,
         endDate: now.add(duration),
         isActive: true,
         metadata: {
-          'giftPrice': config.price,
+          'boostPrice': config.price,
           'creditsGranted': config.credits,
           'durationDays': duration.inDays,
         },
@@ -50,7 +50,7 @@ class ArtistFeatureService {
       features.add(savedFeature);
 
       AppLogger.info(
-        '🎁 Created feature: ${featureType.name} for artist $artistId, expires ${savedFeature.endDate}',
+        '🚀 Created feature: ${featureType.name} for artist $artistId, expires ${savedFeature.endDate}',
       );
     }
 
@@ -192,8 +192,8 @@ class ArtistFeatureService {
         .toList();
   }
 
-  /// Get gift purchase history for a user
-  Future<List<Map<String, dynamic>>> getGiftPurchaseHistory(
+  /// Get boost purchase history for a user
+  Future<List<Map<String, dynamic>>> getBoostPurchaseHistory(
     String userId,
   ) async {
     final query = _featuresCollection
@@ -208,7 +208,7 @@ class ArtistFeatureService {
       return {
         'featureId': feature.id,
         'artistId': feature.artistId,
-        'giftId': feature.giftId,
+        'boostId': feature.boostId,
         'type': feature.type.name,
         'startDate': feature.startDate,
         'endDate': feature.endDate,

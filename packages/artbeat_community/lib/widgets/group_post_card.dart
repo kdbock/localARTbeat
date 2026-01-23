@@ -15,7 +15,7 @@ class GroupPostCard extends StatelessWidget {
   final VoidCallback onAppreciate;
   final VoidCallback onComment;
   final VoidCallback onFeature;
-  final VoidCallback onGift;
+  final VoidCallback onBoost;
   final VoidCallback onShare;
   final bool isCompact;
 
@@ -26,7 +26,7 @@ class GroupPostCard extends StatelessWidget {
     required this.onAppreciate,
     required this.onComment,
     required this.onFeature,
-    required this.onGift,
+    required this.onBoost,
     required this.onShare,
     this.isCompact = false,
   });
@@ -146,13 +146,13 @@ class GroupPostCard extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        // Gift button
+        // Boost button
         Expanded(
           child: HudButton(
             isPrimary: true,
-            onPressed: onGift,
-            text: 'gift'.tr(),
-            icon: Icons.card_giftcard,
+            onPressed: onBoost,
+            text: 'boost'.tr(),
+            icon: Icons.rocket_launch,
           ),
         ),
       ],

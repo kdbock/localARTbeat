@@ -1,14 +1,14 @@
 import 'package:artbeat_core/artbeat_core.dart' as core;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_community/artbeat_community.dart' as community;
+import 'package:artbeat_artwork/artbeat_artwork.dart' as artwork;
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../models/activity_model.dart';
-import '../widgets/artist_header.dart';
 import '../widgets/local_artists_row_widget.dart';
 import '../widgets/local_galleries_widget.dart';
 import '../widgets/upcoming_events_row_widget.dart';
-import '../widgets/artist_subscription_cta_widget.dart';
 import '../services/earnings_service.dart';
 import '../services/visibility_service.dart';
 import '../models/earnings_model.dart';
@@ -27,6 +27,7 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
   // Services
   final EarningsService _earningsService = EarningsService();
   final VisibilityService _analyticsService = VisibilityService();
+  final core.ArtistFeatureService _featureService = core.ArtistFeatureService();
 
   bool _isLoading = true;
   String? _error;
@@ -34,6 +35,7 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
   Map<String, dynamic> _analytics = {};
   List<ActivityModel> _recentActivities = [];
   List<Map<String, dynamic>> _discoveryHighlights = [];
+  List<core.ArtistFeature> _activeBoosts = [];
 
   @override
   void initState() {
@@ -49,6 +51,7 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
 
   Future<void> _loadArtistData() async {
     try {
+      debugPrint('🚀 DEBUG: Starting to load artist data...');
       setState(() {
         _isLoading = true;
         _error = null;
@@ -60,24 +63,32 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
 
       // Load recent activities from various sources
       final activities = await _loadRecentActivities();
-      
+
       // Load discovery boost highlights
       final userId = _analyticsService.getCurrentUserId();
       List<Map<String, dynamic>> highlights = [];
+      List<core.ArtistFeature> activeBoosts = [];
+
       if (userId != null) {
-        highlights = await _analyticsService.getDiscoveryBoostHighlights(userId);
+        highlights = await _analyticsService.getDiscoveryBoostHighlights(
+          userId,
+        );
+        activeBoosts = await _featureService.getActiveFeaturesForArtist(userId);
       }
 
       if (mounted) {
+        debugPrint('✅ DEBUG: All data loaded successfully');
         setState(() {
           _earnings = earnings;
           _analytics = analytics;
           _recentActivities = activities;
           _discoveryHighlights = highlights;
+          _activeBoosts = activeBoosts;
           _isLoading = false;
         });
       }
     } catch (e) {
+      debugPrint('❌ DEBUG: Error in _loadArtistData: $e');
       if (mounted) {
         setState(() {
           _error = e.toString();
@@ -97,6 +108,15 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
       final profileViews = await _getProfileViews(userId);
       final artBattleStats = await _getArtBattleStats(userId);
 
+      // Get Artist XP from user document
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .get();
+      final artistXP = userDoc.exists
+          ? (userDoc.data()?['artistXP'] as int? ?? 0)
+          : 0;
+
       return {
         'artworkCount': artworkCount,
         'profileViews': profileViews,
@@ -104,10 +124,20 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
         'artBattleVotes': artBattleStats['totalVotes'] ?? 0,
         'artBattleAppearances': artBattleStats['totalAppearances'] ?? 0,
         'artBattleWins': artBattleStats['totalWins'] ?? 0,
+        'artistXP': artistXP,
       };
     } catch (e) {
       return {};
     }
+  }
+
+  String _calculatePowerLevel(int xp) {
+    if (xp >= 5000) return 'Mythic Legend';
+    if (xp >= 2500) return 'Titan';
+    if (xp >= 1000) return 'Elite';
+    if (xp >= 500) return 'Pro';
+    if (xp >= 100) return 'Rising Star';
+    return 'Rookie';
   }
 
   Future<int> _getArtworkCount(String userId) async {
@@ -158,11 +188,7 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
         'totalWins': totalWins,
       };
     } catch (e) {
-      return {
-        'totalVotes': 0,
-        'totalAppearances': 0,
-        'totalWins': 0,
-      };
+      return {'totalVotes': 0, 'totalAppearances': 0, 'totalWins': 0};
     }
   }
 
@@ -181,6 +207,10 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
       final commissionActivities = await _loadCommissionActivities(userId);
       activities.addAll(commissionActivities);
 
+      // Load recent auction activities
+      final auctionActivities = await _loadAuctionActivities(userId);
+      activities.addAll(auctionActivities);
+
       // Load recent gift activities
       final giftActivities = await _loadGiftActivities(userId);
       activities.addAll(giftActivities);
@@ -197,12 +227,16 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
     final activities = <ActivityModel>[];
 
     try {
+      debugPrint('🔍 DEBUG: Loading sales activities for user: $userId');
       final snapshot = await FirebaseFirestore.instance
           .collection('artwork_sales')
-          .where('artistId', isEqualTo: userId)
+          .where('artistID', isEqualTo: userId)
           .orderBy('soldAt', descending: true)
           .limit(3)
           .get();
+      debugPrint(
+        '✅ DEBUG: Sales activities loaded successfully: ${snapshot.docs.length} docs',
+      );
 
       for (final doc in snapshot.docs) {
         final data = doc.data();
@@ -210,16 +244,18 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
         final soldAt =
             (data['soldAt'] as Timestamp?)?.toDate() ?? DateTime.now();
 
-        activities.add(ActivityModel(
-          type: ActivityType.sale,
-          title: 'Artwork Sold',
-          description: '"$artworkTitle" was sold',
-          timeAgo: _formatTimeAgo(soldAt),
-          timestamp: soldAt,
-        ));
+        activities.add(
+          ActivityModel(
+            type: ActivityType.sale,
+            title: 'Artwork Sold',
+            description: '"$artworkTitle" was sold',
+            timeAgo: _formatTimeAgo(soldAt),
+            timestamp: soldAt,
+          ),
+        );
       }
     } catch (e) {
-      // Handle error silently
+      debugPrint('❌ DEBUG: Error loading sales activities: $e');
     }
 
     return activities;
@@ -229,28 +265,88 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
     final activities = <ActivityModel>[];
 
     try {
+      debugPrint('🔍 DEBUG: Loading commission activities for user: $userId');
       final snapshot = await FirebaseFirestore.instance
           .collection('commission_requests')
           .where('artistId', isEqualTo: userId)
           .orderBy('createdAt', descending: true)
           .limit(3)
           .get();
+      debugPrint(
+        '✅ DEBUG: Commission activities loaded successfully: ${snapshot.docs.length} docs',
+      );
 
       for (final doc in snapshot.docs) {
         final data = doc.data();
         final createdAt =
             (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now();
 
-        activities.add(ActivityModel(
-          type: ActivityType.commission,
-          title: 'Commission Request',
-          description: 'New commission inquiry received',
-          timeAgo: _formatTimeAgo(createdAt),
-          timestamp: createdAt,
-        ));
+        activities.add(
+          ActivityModel(
+            type: ActivityType.commission,
+            title: 'Commission Request',
+            description: 'New commission inquiry received',
+            timeAgo: _formatTimeAgo(createdAt),
+            timestamp: createdAt,
+          ),
+        );
       }
     } catch (e) {
-      // Handle error silently
+      debugPrint('❌ DEBUG: Error loading commission activities: $e');
+    }
+
+    return activities;
+  }
+
+  Future<List<ActivityModel>> _loadAuctionActivities(String userId) async {
+    final activities = <ActivityModel>[];
+
+    try {
+      debugPrint('🔍 DEBUG: Loading auction activities for user: $userId');
+      // Get user's artworks that have auctions
+      final artworkSnapshot = await FirebaseFirestore.instance
+          .collection('artwork')
+          .where('userId', isEqualTo: userId)
+          .where('auctionEnabled', isEqualTo: true)
+          .orderBy('auctionEnd', descending: true)
+          .limit(10)
+          .get();
+
+      debugPrint(
+        '✅ DEBUG: Found ${artworkSnapshot.docs.length} artworks with auctions',
+      );
+
+      for (final artworkDoc in artworkSnapshot.docs) {
+        final artworkId = artworkDoc.id;
+
+        // Get recent bids for this artwork
+        final bidsSnapshot = await FirebaseFirestore.instance
+            .collection('artwork')
+            .doc(artworkId)
+            .collection('bids')
+            .orderBy('timestamp', descending: true)
+            .limit(3)
+            .get();
+
+        for (final bidDoc in bidsSnapshot.docs) {
+          final bidData = bidDoc.data();
+          final timestamp =
+              (bidData['timestamp'] as Timestamp?)?.toDate() ?? DateTime.now();
+          final bidAmount = bidData['amount'] as num? ?? 0;
+
+          activities.add(
+            ActivityModel(
+              type: ActivityType.auction,
+              title: 'New Bid',
+              description: 'Bid of \$${bidAmount.toStringAsFixed(2)} placed',
+              timeAgo: _formatTimeAgo(timestamp),
+              timestamp: timestamp,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('❌ DEBUG: Error loading auction activities: $e');
     }
 
     return activities;
@@ -260,29 +356,42 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
     final activities = <ActivityModel>[];
 
     try {
+      debugPrint('🔍 DEBUG: Loading gift activities for user: $userId');
       final snapshot = await FirebaseFirestore.instance
-          .collection('gift_purchases')
-          .where('recipientArtistId', isEqualTo: userId)
-          .orderBy('purchasedAt', descending: true)
-          .limit(2)
+          .collection('boosts')
+          .where('recipientId', isEqualTo: userId)
+          .orderBy('purchaseDate', descending: true)
+          .limit(3)
           .get();
+      debugPrint(
+        '✅ DEBUG: Gift activities loaded successfully: ${snapshot.docs.length} docs',
+      );
 
       for (final doc in snapshot.docs) {
         final data = doc.data();
-        final purchasedAt =
-            (data['purchasedAt'] as Timestamp?)?.toDate() ?? DateTime.now();
+        final purchaseDate =
+            (data['purchaseDate'] as Timestamp?)?.toDate() ?? DateTime.now();
         final amount = (data['amount'] as num?)?.toDouble() ?? 0.0;
+        final productId = data['productId'] as String? ?? '';
 
-        activities.add(ActivityModel(
-          type: ActivityType.gift,
-          title: 'Support Received',
-          description: 'Received \$${amount.toStringAsFixed(2)} in Promotion Support',
-          timeAgo: _formatTimeAgo(purchasedAt),
-          timestamp: purchasedAt,
-        ));
+        String boostName = 'Artist Boost';
+        if (productId.contains('small')) boostName = 'Quick Spark';
+        if (productId.contains('medium')) boostName = 'Neon Surge';
+        if (productId.contains('large')) boostName = 'Titan Overdrive';
+        if (productId.contains('premium')) boostName = 'Mythic Expansion';
+
+        activities.add(
+          ActivityModel(
+            type: ActivityType.gift,
+            title: 'Power-Up Activated!',
+            description: '$boostName received (\$${amount.toStringAsFixed(2)})',
+            timeAgo: _formatTimeAgo(purchaseDate),
+            timestamp: purchaseDate,
+          ),
+        );
       }
     } catch (e) {
-      // Handle error silently
+      debugPrint('❌ DEBUG: Error loading gift activities: $e');
     }
 
     return activities;
@@ -303,53 +412,31 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
     }
   }
 
-  Widget _buildStatCard(
-      String title, String value, IconData icon, Color color) {
-    final updatedColor = color.withValues(alpha: color.a);
-    return Card(
-      elevation: 2,
-      shadowColor: updatedColor.withValues(alpha: 0.3),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 32,
-              color: updatedColor,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              value,
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: updatedColor,
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              title,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).textTheme.bodySmall?.color,
-                  ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildArtistMarketingSection(BuildContext context) {
+  Widget _buildCompactStatsSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          tr('art_walk_artist_marketing'),
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              tr('art_walk_overview'),
+              style: GoogleFonts.poppins(
+                fontSize: 24,
                 fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
+            ),
+            TextButton.icon(
+              onPressed: () =>
+                  Navigator.pushNamed(context, '/artist/analytics'),
+              icon: const Icon(Icons.arrow_forward, size: 18),
+              label: const Text('Details'),
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xFF00F5FF),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 16),
         Container(
@@ -359,87 +446,96 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                Colors.blue.shade50,
-                Colors.purple.shade50,
+                Colors.white.withValues(alpha: 0.1),
+                Colors.white.withValues(alpha: 0.05),
               ],
             ),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.blue.shade200),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: const Color(0xFF00F5FF).withValues(alpha: 0.2),
+            ),
           ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.shade100,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      Icons.campaign,
-                      color: Colors.blue.shade700,
-                      size: 24,
+                  Expanded(
+                    child: _buildCompactStat(
+                      '${_analytics['artistXP'] ?? 0}',
+                      'Artist XP',
+                      Icons.bolt,
+                      const Color(0xFFFFD700),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  Container(
+                    width: 1,
+                    height: 40,
+                    color: Colors.white.withValues(alpha: 0.1),
+                  ),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          tr('art_walk_promote_your_art'),
-                          style:
-                              Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.blue.shade800,
-                                  ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          tr('art_walk_create_ads_featuring_your_artwork_to_reach_more_art_lovers'),
-                          style:
-                              Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Colors.blue.shade700,
-                                  ),
-                        ),
-                      ],
+                    child: _buildCompactStat(
+                      _calculatePowerLevel(
+                        (_analytics['artistXP'] as num?)?.toInt() ?? 0,
+                      ),
+                      'Level',
+                      Icons.workspace_premium,
+                      const Color(0xFF00F5FF),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () => Navigator.pushNamed(context, '/ads/create'),
-                  icon: const Icon(Icons.add_circle_outline),
-                  label: Text(tr('ads_create_local_ad_text_create_ad')),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue.shade600,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
+              Divider(color: Colors.white.withValues(alpha: 0.1)),
+              const SizedBox(height: 16),
               Row(
                 children: [
-                  Icon(Icons.star, color: Colors.amber.shade600, size: 16),
-                  const SizedBox(width: 4),
                   Expanded(
-                    child: Text(
-                      'Premium feature: Create engaging ads with your artwork',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.amber.shade700,
-                            fontWeight: FontWeight.w500,
-                          ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                    child: _buildCompactStat(
+                      _analytics['artworkCount']?.toString() ?? '0',
+                      'Artworks',
+                      Icons.palette,
+                      const Color(0xFFFF00F5),
+                    ),
+                  ),
+                  Container(
+                    width: 1,
+                    height: 40,
+                    color: Colors.white.withValues(alpha: 0.1),
+                  ),
+                  Expanded(
+                    child: _buildCompactStat(
+                      _analytics['profileViews']?.toString() ?? '0',
+                      'Views',
+                      Icons.visibility,
+                      const Color(0xFF00F5FF),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Divider(color: Colors.white.withValues(alpha: 0.1)),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildCompactStat(
+                      '\$${_earnings?.totalEarnings.toStringAsFixed(2) ?? '0.00'}',
+                      'Earnings',
+                      Icons.payments,
+                      const Color(0xFF34D399),
+                    ),
+                  ),
+                  Container(
+                    width: 1,
+                    height: 40,
+                    color: Colors.white.withValues(alpha: 0.1),
+                  ),
+                  Expanded(
+                    child: _buildCompactStat(
+                      _analytics['artBattleWins']?.toString() ?? '0',
+                      'Battle Wins',
+                      Icons.emoji_events,
+                      Colors.amber,
                     ),
                   ),
                 ],
@@ -447,34 +543,177 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
             ],
           ),
         ),
-        const SizedBox(height: 16),
-        ArtistSubscriptionCTAWidget(
-          onSubscribePressed: () =>
-              Navigator.pushNamed(context, '/subscription/artist'),
+      ],
+    );
+  }
+
+  Widget _buildCompactStat(
+    String value,
+    String label,
+    IconData icon,
+    Color color,
+  ) {
+    return Column(
+      children: [
+        Icon(icon, color: color, size: 24),
+        const SizedBox(height: 8),
+        Text(
+          value,
+          style: GoogleFonts.poppins(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+          textAlign: TextAlign.center,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: GoogleFonts.poppins(fontSize: 11, color: Colors.white70),
+          textAlign: TextAlign.center,
         ),
       ],
     );
   }
 
+  Widget _buildActiveBoostsSection() {
+    if (_activeBoosts.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Active Power-Ups',
+          style: GoogleFonts.poppins(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          height: 120,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: _activeBoosts.length,
+            itemBuilder: (context, index) {
+              final boost = _activeBoosts[index];
+              return _buildBoostCard(boost);
+            },
+          ),
+        ),
+        const SizedBox(height: 24),
+      ],
+    );
+  }
+
+  Widget _buildBoostCard(core.ArtistFeature boost) {
+    IconData icon;
+    String name;
+    Color color;
+
+    switch (boost.type) {
+      case core.FeatureType.artistFeatured:
+        icon = Icons.bolt;
+        name = 'Profile Glow';
+        color = const Color(0xFF00F5FF);
+        break;
+      case core.FeatureType.artworkFeatured:
+        icon = Icons.auto_awesome;
+        name = 'Shiny Art';
+        color = const Color(0xFFFF00F5);
+        break;
+      case core.FeatureType.adRotation:
+        icon = Icons.rocket_launch;
+        name = 'Titan Reach';
+        color = const Color(0xFFFFD700);
+        break;
+    }
+
+    return Container(
+      width: 140,
+      margin: const EdgeInsets.only(right: 12),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [color.withValues(alpha: 0.2), color.withValues(alpha: 0.05)],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withValues(alpha: 0.3), width: 1.5),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 28, color: color),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            name,
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(
+            '${boost.daysRemaining}d left',
+            style: GoogleFonts.poppins(fontSize: 11, color: Colors.white70),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return core.MainLayout(
-      currentIndex: 1, // Gallery Hub tab in bottom navigation
-      scaffoldKey: _scaffoldKey,
-      appBar: const ArtistHeader(
-        title: 'My Gallery Hub',
-        showBackButton: false,
-        showSearch: false,
-        showDeveloper: true,
+    return Scaffold(
+      key: _scaffoldKey,
+      backgroundColor: const Color(0xFF0A0E27),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF0A0E27),
+        elevation: 0,
+        title: Text(
+          'My Gallery Hub',
+          style: GoogleFonts.poppins(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(
+              Icons.notifications_outlined,
+              color: Color(0xFF00F5FF),
+            ),
+            onPressed: () => Navigator.pushNamed(context, '/notifications'),
+          ),
+          IconButton(
+            icon: const Icon(Icons.settings_outlined, color: Colors.white70),
+            onPressed: () => Navigator.pushNamed(context, '/settings'),
+          ),
+        ],
       ),
       drawer: const core.ArtbeatDrawer(),
-      child: _buildHubContent(),
+      body: _buildHubContent(),
     );
   }
 
   Widget _buildHubContent() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00F5FF)),
+        ),
+      );
     }
 
     if (_error != null) {
@@ -482,28 +721,36 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Colors.red.shade300,
-            ),
+            const Icon(Icons.error_outline, size: 64, color: Color(0xFFFF00F5)),
             const SizedBox(height: 16),
             Text(
               tr('art_walk_error_loading_hub'),
-              style: Theme.of(context).textTheme.titleMedium,
+              style: GoogleFonts.poppins(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
             ),
             const SizedBox(height: 8),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Text(
                 _error!,
-                style: Theme.of(context).textTheme.bodyMedium,
+                style: GoogleFonts.poppins(fontSize: 14, color: Colors.white70),
                 textAlign: TextAlign.center,
               ),
             ),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _loadArtistData,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF00F5FF),
+                foregroundColor: const Color(0xFF0A0E27),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 16,
+                ),
+              ),
               child: Text(tr('admin_admin_settings_text_retry')),
             ),
           ],
@@ -511,16 +758,12 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
       );
     }
 
-    final surfaceColor = Theme.of(context).colorScheme.surface;
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            surfaceColor,
-            surfaceColor.withValues(alpha: 0.8),
-          ],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFF0A0E27), Color(0xFF1A1E37)],
         ),
       ),
       child: SafeArea(
@@ -538,90 +781,8 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
                     const SizedBox(height: 24),
                   ],
 
-                  // Stats Overview Section
-                  Text(
-                    tr('art_walk_overview'),
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  const SizedBox(height: 16),
-                  GridView.count(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    crossAxisCount:
-                        MediaQuery.of(context).size.width > 600 ? 4 : 2,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                    children: [
-                      _buildStatCard(
-                        'Total Support',
-                        '\$${_earnings?.totalEarnings.toStringAsFixed(2) ?? '0.00'}',
-                        Icons.attach_money,
-                        Colors.green,
-                      ),
-                      _buildStatCard(
-                        'Promotion Credits',
-                        '${_earnings?.availableBalance.toInt() ?? 0} (≈${((_earnings?.availableBalance ?? 0) * 100).toInt()} views)',
-                        Icons.auto_awesome,
-                        Colors.teal,
-                      ),
-                      _buildStatCard(
-                        'Total Artworks',
-                        _analytics['artworkCount']?.toString() ?? '0',
-                        Icons.palette,
-                        Colors.blue,
-                      ),
-                      _buildStatCard(
-                        'Profile Views',
-                        _analytics['profileViews']?.toString() ?? '0',
-                        Icons.visibility,
-                        Colors.indigo,
-                      ),
-                      _buildStatCard(
-                        'Promotion Support',
-                        '\$${_earnings?.promotionSupportEarnings.toStringAsFixed(2) ?? '0.00'}',
-                        Icons.card_giftcard,
-                        Colors.purple,
-                      ),
-                      _buildStatCard(
-                        'Commission Work',
-                        '\$${_earnings?.commissionEarnings.toStringAsFixed(2) ?? '0.00'}',
-                        Icons.work,
-                        Colors.amber,
-                      ),
-                      _buildStatCard(
-                        'Sponsorships',
-                        '\$${_earnings?.sponsorshipEarnings.toStringAsFixed(2) ?? '0.00'}',
-                        Icons.handshake,
-                        Colors.orange,
-                      ),
-                      _buildStatCard(
-                        'Processing',
-                        '\$${_earnings?.pendingBalance.toStringAsFixed(2) ?? '0.00'}',
-                        Icons.pending,
-                        Colors.red,
-                      ),
-                      _buildStatCard(
-                        'Art Battle Votes',
-                        _analytics['artBattleVotes']?.toString() ?? '0',
-                        Icons.thumb_up,
-                        Colors.pink,
-                      ),
-                      _buildStatCard(
-                        'Battle Appearances',
-                        _analytics['artBattleAppearances']?.toString() ?? '0',
-                        Icons.visibility,
-                        Colors.cyan,
-                      ),
-                      _buildStatCard(
-                        'Battle Wins',
-                        _analytics['artBattleWins']?.toString() ?? '0',
-                        Icons.emoji_events,
-                        Colors.amber,
-                      ),
-                    ],
-                  ),
+                  // Compact Stats Overview Section
+                  _buildCompactStatsSection(),
                   const SizedBox(height: 24),
 
                   // Quick Actions Section - Moved to top
@@ -631,9 +792,11 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
                   // Local Artists Section
                   Text(
                     tr('art_walk_local_artists'),
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                    style: GoogleFonts.poppins(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   LocalArtistsRowWidget(
@@ -647,9 +810,11 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
                   // Local Galleries Section
                   Text(
                     tr('art_walk_local_galleries___museums'),
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                    style: GoogleFonts.poppins(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   LocalGalleriesWidget(
@@ -663,9 +828,11 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
                   // Upcoming Events Section
                   Text(
                     tr('art_walk_upcoming_events'),
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                    style: GoogleFonts.poppins(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   UpcomingEventsRowWidget(
@@ -676,17 +843,18 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
                   ),
                   const SizedBox(height: 24),
 
-                  // Artist Marketing Section
-                  _buildArtistMarketingSection(context),
-                  const SizedBox(height: 24),
+                  // Active Boosts Section
+                  _buildActiveBoostsSection(),
 
                   // Recent Activity Section
                   if (_recentActivities.isNotEmpty) ...[
                     Text(
                       tr('art_walk_recent_activity'),
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                      style: GoogleFonts.poppins(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
                     const SizedBox(height: 16),
                     ListView.separated(
@@ -697,21 +865,48 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
                       itemBuilder: (context, index) {
                         final activity = _recentActivities[index];
                         final activityColor = activity.type.color;
-                        return ListTile(
-                          leading: CircleAvatar(
-                            backgroundColor: activityColor.withValues(
-                              alpha: 0.2,
-                            ),
-                            child: Icon(
-                              activity.type.icon,
-                              color: activityColor,
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.05),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: const Color(
+                                0xFF00F5FF,
+                              ).withValues(alpha: 0.1),
                             ),
                           ),
-                          title: Text(activity.title),
-                          subtitle: Text(activity.description),
-                          trailing: Text(
-                            activity.timeAgo,
-                            style: Theme.of(context).textTheme.bodySmall,
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: activityColor.withValues(
+                                alpha: 0.2,
+                              ),
+                              child: Icon(
+                                activity.type.icon,
+                                color: activityColor,
+                              ),
+                            ),
+                            title: Text(
+                              activity.title,
+                              style: GoogleFonts.poppins(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            subtitle: Text(
+                              activity.description,
+                              style: GoogleFonts.poppins(
+                                color: Colors.white70,
+                                fontSize: 12,
+                              ),
+                            ),
+                            trailing: Text(
+                              activity.timeAgo,
+                              style: GoogleFonts.poppins(
+                                color: const Color(0xFF00F5FF),
+                                fontSize: 11,
+                              ),
+                            ),
                           ),
                         );
                       },
@@ -722,8 +917,20 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
                         onPressed: () {
                           Navigator.pushNamed(context, '/artist/activity');
                         },
-                        child: Text(tr(
-                            'artist_artist_hub_text_view_all_activity')),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFF00F5FF),
+                          side: const BorderSide(color: Color(0xFF00F5FF)),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 32,
+                            vertical: 16,
+                          ),
+                        ),
+                        child: Text(
+                          tr('artist_artist_hub_text_view_all_activity'),
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -742,9 +949,11 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
       children: [
         Text(
           tr('art_walk_quick_actions'),
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+          style: GoogleFonts.poppins(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
         const SizedBox(height: 16),
         Row(
@@ -752,15 +961,21 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
             Expanded(
               child: _buildThemedActionButton(
                 context,
-                title: 'Add Post',
-                subtitle: 'Share updates with your community',
-                icon: Icons.post_add,
+                title: 'My Artworks',
+                subtitle: 'View & manage your art',
+                icon: Icons.collections_outlined,
                 gradient: const LinearGradient(
-                  colors: [Colors.purple, Colors.pink],
+                  colors: [Color(0xFF06B6D4), Color(0xFF22D3EE)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-                onTap: () => _showCreatePostOptions(context),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(
+                    builder: (context) =>
+                        const artwork.ArtistArtworkManagementScreen(),
+                  ),
+                ),
               ),
             ),
             const SizedBox(width: 12),
@@ -771,7 +986,7 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
                 subtitle: 'Add new artwork to your portfolio',
                 icon: Icons.add_photo_alternate,
                 gradient: const LinearGradient(
-                  colors: [Colors.blue, Colors.cyan],
+                  colors: [Color(0xFF00F5FF), Color(0xFF06B6D4)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -786,15 +1001,15 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
             Expanded(
               child: _buildThemedActionButton(
                 context,
-                title: 'Create Event',
-                subtitle: 'Host exhibitions and gatherings',
-                icon: Icons.event,
+                title: 'Add Post',
+                subtitle: 'Share updates with your community',
+                icon: Icons.post_add,
                 gradient: const LinearGradient(
-                  colors: [Colors.orange, Colors.red],
+                  colors: [Color(0xFFFF00F5), Color(0xFF8B5CF6)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-                onTap: () => Navigator.pushNamed(context, '/events/create'),
+                onTap: () => _showCreatePostOptions(context),
               ),
             ),
             const SizedBox(width: 12),
@@ -805,7 +1020,7 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
                 subtitle: 'Track your gallery reach',
                 icon: Icons.visibility,
                 gradient: const LinearGradient(
-                  colors: [Colors.green, Colors.teal],
+                  colors: [Color(0xFF00F5FF), Color(0xFF10B981)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -820,11 +1035,26 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
             Expanded(
               child: _buildThemedActionButton(
                 context,
+                title: 'Create Event',
+                subtitle: 'Host exhibitions and gatherings',
+                icon: Icons.event,
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFFF00F5), Color(0xFFFF6B6B)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                onTap: () => Navigator.pushNamed(context, '/events/create'),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildThemedActionButton(
+                context,
                 title: 'Commission Wizard',
                 subtitle: 'Set up commission settings',
                 icon: Icons.auto_awesome,
                 gradient: const LinearGradient(
-                  colors: [Colors.deepPurple, Colors.purple],
+                  colors: [Color(0xFF8B5CF6), Color(0xFFFF00F5)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -839,11 +1069,45 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
                 subtitle: 'Manage your commissions',
                 icon: Icons.work_outline,
                 gradient: const LinearGradient(
-                  colors: [Colors.indigo, Colors.blue],
+                  colors: [Color(0xFF00F5FF), Color(0xFF3B82F6)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 onTap: () => Navigator.pushNamed(context, '/commission/hub'),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _buildThemedActionButton(
+                context,
+                title: 'Auction Wizard',
+                subtitle: 'Set up auction settings',
+                icon: Icons.gavel,
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFFF6B35), Color(0xFFF7B801)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                onTap: () => _navigateToAuctionWizard(context),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildThemedActionButton(
+                context,
+                title: 'Auction Hub',
+                subtitle: 'Manage your auctions',
+                icon: Icons.store,
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF9333EA), Color(0xFFC026D3)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                onTap: () => Navigator.pushNamed(context, '/auction/hub'),
               ),
             ),
           ],
@@ -884,11 +1148,7 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
                 padding: const EdgeInsets.all(20),
                 child: Row(
                   children: [
-                    const Icon(
-                      Icons.post_add,
-                      color: Colors.purple,
-                      size: 28,
-                    ),
+                    const Icon(Icons.post_add, color: Colors.purple, size: 28),
                     const SizedBox(width: 16),
                     Expanded(
                       child: Column(
@@ -1012,19 +1272,12 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                     ),
                   ],
                 ),
               ),
-              Icon(
-                Icons.arrow_forward_ios,
-                size: 16,
-                color: Colors.grey[400],
-              ),
+              Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey[400]),
             ],
           ),
         ),
@@ -1067,9 +1320,9 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
             Text(
               'Your Studio Launch Wins',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.amber.shade800,
-                  ),
+                fontWeight: FontWeight.bold,
+                color: Colors.amber.shade800,
+              ),
             ),
           ],
         ),
@@ -1082,7 +1335,7 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
             itemBuilder: (context, index) {
               final highlight = _discoveryHighlights[index];
               final color = _getHighlightColor(highlight['color'] as String);
-              
+
               return Container(
                 width: 240,
                 margin: const EdgeInsets.only(right: 12),
@@ -1097,8 +1350,11 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
                   children: [
                     Row(
                       children: [
-                        Icon(_getHighlightIcon(highlight['icon'] as String), 
-                             color: color, size: 18),
+                        Icon(
+                          _getHighlightIcon(highlight['icon'] as String),
+                          color: color,
+                          size: 18,
+                        ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
@@ -1134,21 +1390,31 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
 
   Color _getHighlightColor(String colorName) {
     switch (colorName) {
-      case 'blue': return Colors.blue.shade700;
-      case 'green': return Colors.green.shade700;
-      case 'orange': return Colors.orange.shade700;
-      case 'purple': return Colors.purple.shade700;
-      default: return Colors.blue.shade700;
+      case 'blue':
+        return Colors.blue.shade700;
+      case 'green':
+        return Colors.green.shade700;
+      case 'orange':
+        return Colors.orange.shade700;
+      case 'purple':
+        return Colors.purple.shade700;
+      default:
+        return Colors.blue.shade700;
     }
   }
 
   IconData _getHighlightIcon(String iconName) {
     switch (iconName) {
-      case 'visibility': return Icons.visibility;
-      case 'map': return Icons.map;
-      case 'bookmark': return Icons.bookmark;
-      case 'auto_awesome': return Icons.auto_awesome;
-      default: return Icons.info;
+      case 'visibility':
+        return Icons.visibility;
+      case 'map':
+        return Icons.map;
+      case 'bookmark':
+        return Icons.bookmark;
+      case 'auto_awesome':
+        return Icons.auto_awesome;
+      default:
+        return Icons.info;
     }
   }
 
@@ -1189,11 +1455,7 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
                     color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(
-                    icon,
-                    color: Colors.white,
-                    size: 24,
-                  ),
+                  child: Icon(icon, color: Colors.white, size: 24),
                 ),
                 const Spacer(),
                 Text(
@@ -1230,6 +1492,17 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
       MaterialPageRoute<void>(
         builder: (context) => const community.CommissionSetupWizardScreen(
           mode: community.SetupMode.firstTime,
+        ),
+      ),
+    );
+  }
+
+  void _navigateToAuctionWizard(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute<void>(
+        builder: (context) => const artwork.AuctionSetupWizardScreen(
+          mode: artwork.AuctionSetupMode.firstTime,
         ),
       ),
     );

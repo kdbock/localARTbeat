@@ -257,6 +257,7 @@ class ArtbeatEvent {
       'eventBannerFit': eventBannerFit,
       'imageFit': imageFit,
       'dateTime': Timestamp.fromDate(dateTime),
+      'startDate': Timestamp.fromDate(dateTime),
       'location': location,
       'ticketTypes': ticketTypes.map((t) => t.toMap()).toList(),
       'refundPolicy': refundPolicy.toMap(),
@@ -449,4 +450,6 @@ class ArtbeatEvent {
 
   @override
   int get hashCode => id.hashCode;
+
+  DateTime get startDate => dateTime;
 }

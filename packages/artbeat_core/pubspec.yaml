@@ -5,8 +5,8 @@ publish_to: "none"
 homepage: https://artbeat.app
 
 environment:
-  sdk: ">=3.10.0 <4.0.0"
-  flutter: ">=3.38.0"
+  sdk: ">=3.10.7 <4.0.0"
+  flutter: ">=3.38.7"
 
 dependencies:
   flutter:
@@ -16,12 +16,12 @@ dependencies:
   flutter_dotenv: ^6.0.0
 
   # Firebase - versions aligned with iOS SDK 10.25.0
-  firebase_core: ^4.3.0
-  firebase_auth: ^6.1.3
-  cloud_firestore: ^6.0.0
-  firebase_storage: ^13.0.5
-  firebase_analytics: ^12.1.0
-  firebase_app_check: 0.4.1+3
+  firebase_core: ^4.4.0
+  firebase_auth: ^6.1.4
+  cloud_firestore: ^6.1.2
+  firebase_storage: ^13.0.6
+  firebase_analytics: ^12.1.1
+  firebase_app_check: 0.4.1+4
 
   # Image handling and optimization
   image: ^4.1.3
@@ -35,7 +35,7 @@ dependencies:
   geocoding: ^4.0.0
 
   # Authentication
-  google_fonts: ^7.0.2
+  google_fonts: ^7.1.0
   google_sign_in: ^7.2.0
 
   # Payments and data

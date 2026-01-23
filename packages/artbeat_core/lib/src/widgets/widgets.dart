@@ -4,4 +4,4 @@
 // In-app purchase widgets
 export 'subscription_purchase_widget.dart';
 export 'ad_purchase_widget.dart';
-export 'gift_selection_widget.dart';
+export 'artist_boost_widget.dart';

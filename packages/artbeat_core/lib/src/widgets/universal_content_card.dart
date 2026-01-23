@@ -19,9 +19,9 @@ class UniversalContentCard extends StatelessWidget {
   final VoidCallback? onAuthorTap;
   final VoidCallback? onDiscuss;
   final VoidCallback? onAmplify;
-  final VoidCallback? onGift;
+  final VoidCallback? onBoost;
   final bool showConnect;
-  final bool showGift;
+  final bool showBoost;
   final bool showCommentPrompt;
   final bool isCompact;
   final Widget? customContent;
@@ -44,9 +44,9 @@ class UniversalContentCard extends StatelessWidget {
     this.onAuthorTap,
     this.onDiscuss,
     this.onAmplify,
-    this.onGift,
+    this.onBoost,
     this.showConnect = false,
-    this.showGift = false,
+    this.showBoost = false,
     this.showCommentPrompt = false,
     this.isCompact = false,
     this.customContent,
@@ -86,7 +86,7 @@ class UniversalContentCard extends StatelessWidget {
               customHandlers: {
                 if (onDiscuss != null) EngagementType.comment: onDiscuss,
                 if (onAmplify != null) EngagementType.share: onAmplify,
-                if (onGift != null) EngagementType.gift: onGift,
+                if (onBoost != null) EngagementType.boost: onBoost,
               },
             ),
             // Optional quick comment prompt under engagement bar

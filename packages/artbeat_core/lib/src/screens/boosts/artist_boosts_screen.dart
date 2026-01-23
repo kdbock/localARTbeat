@@ -6,17 +6,16 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../services/in_app_gift_service.dart';
 
-class GiftsScreen extends StatefulWidget {
+class ArtistBoostsScreen extends StatefulWidget {
   final bool showAppBar;
-  const GiftsScreen({Key? key, this.showAppBar = true}) : super(key: key);
+  const ArtistBoostsScreen({Key? key, this.showAppBar = true}) : super(key: key);
 
   @override
-  State<GiftsScreen> createState() => _GiftsScreenState();
+  State<ArtistBoostsScreen> createState() => _ArtistBoostsScreenState();
 }
 
-class _GiftsScreenState extends State<GiftsScreen> {
+class _ArtistBoostsScreenState extends State<ArtistBoostsScreen> {
   final UserService _userService = UserService();
 
   List<UserModel> _artists = [];
@@ -108,22 +107,22 @@ class _GiftsScreenState extends State<GiftsScreen> {
         .toList();
   }
 
-  Future<void> _purchaseGift(
+  Future<void> _purchaseBoost(
     String productId,
-    String giftName,
+    String boostName,
     double price,
   ) async {
     if (_selectedArtist == null) {
       if (kDebugMode) {
-        print('🎁 No artist selected');
+        print('⚡ No artist selected');
       }
       return;
     }
 
     if (kDebugMode) {
-      print('🎁 Starting gift purchase flow');
+      print('⚡ Starting boost purchase flow');
       print(
-        '   - Product: $productId ($giftName - \$${price.toStringAsFixed(2)})',
+        '   - Product: $productId ($boostName - \$${price.toStringAsFixed(2)})',
       );
       print(
         '   - Recipient: ${_selectedArtist!.fullName} (${_selectedArtist!.id})',
@@ -131,16 +130,16 @@ class _GiftsScreenState extends State<GiftsScreen> {
     }
 
     try {
-      final giftService = InAppGiftService();
+      final boostService = ArtistBoostService();
 
-      final success = await giftService.purchaseGift(
-        giftProductId: productId,
+      final success = await boostService.purchaseBoost(
+        boostProductId: productId,
         recipientId: _selectedArtist!.id,
         message: '',
       );
 
       if (kDebugMode) {
-        print('🎁 Purchase initiation result: $success');
+        print('⚡ Purchase initiation result: $success');
       }
 
       if (!mounted) return;
@@ -149,7 +148,7 @@ class _GiftsScreenState extends State<GiftsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
-              'Failed to start gift purchase. Please check:\n'
+              'Failed to start boost purchase. Please check:\n'
               '• Internet connection\n'
               '• In-app purchases are enabled\n'
               '• You\'re signed in with a valid account',
@@ -161,7 +160,7 @@ class _GiftsScreenState extends State<GiftsScreen> {
       }
     } catch (e) {
       if (kDebugMode) {
-        print('🎁 Exception during purchase: $e');
+        print('⚡ Exception during purchase: $e');
       }
       if (!mounted) return;
 
@@ -210,7 +209,7 @@ class _GiftsScreenState extends State<GiftsScreen> {
           backgroundColor: Colors.transparent,
           elevation: 0,
           title: Text(
-            'Visibility Gifts',
+            'Artist Boosts',
             style: GoogleFonts.spaceGrotesk(
               fontSize: 18,
               fontWeight: FontWeight.w700,
@@ -278,7 +277,7 @@ class _GiftsScreenState extends State<GiftsScreen> {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          'Gifts unlock featured artist slots, artwork highlights, event placement, and ad credits creators can reinvest.',
+                          'Artist Boosts unlock featured artist slots, artwork highlights, event placement, and ad credits creators can reinvest.',
                           style: GoogleFonts.spaceGrotesk(
                             fontSize: 15,
                             fontWeight: FontWeight.w500,
@@ -564,7 +563,7 @@ class _GiftsScreenState extends State<GiftsScreen> {
                   ),
                 ),
                 Text(
-                  'Pick a gift tier below to push them into featured lanes.',
+                  'Pick a boost tier below to push them into featured lanes.',
                   style: GoogleFonts.spaceGrotesk(
                     color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 12,
@@ -591,8 +590,8 @@ class _GiftsScreenState extends State<GiftsScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionHeader(
-          'Send a visibility gift',
-          'Each tier funds artist placements, artwork features, and ad budgets.',
+          'Send an Artist Boost',
+          'Each tier provides massive XP boosts, artwork features, and visibility buffs.',
         ),
         const SizedBox(height: 20),
         ..._buildGiftTierCards(),
@@ -601,68 +600,68 @@ class _GiftsScreenState extends State<GiftsScreen> {
   }
 
   List<Widget> _buildGiftTierCards() {
-    final giftTiers = [
+    final boostTiers = [
       {
-        'id': 'artbeat_gift_small',
-        'name': 'Supporter',
+        'id': 'artbeat_boost_quick_spark',
+        'name': 'Quick Spark',
         'price': 4.99,
-        'credits': 50,
-        'icon': Icons.favorite_border,
+        'xp': 500,
+        'icon': Icons.bolt,
         'accentColor': const Color(0xFF7C4DFF),
         'benefits': [
-          '30 days of artist discovery placement',
-          'Boosted search placement for the artist',
+          '30 days of discovery placement',
+          'Boosted search visibility',
           'One featured artwork slot',
         ],
         'isPopular': false,
       },
       {
-        'id': 'artbeat_gift_medium',
-        'name': 'Fan',
+        'id': 'artbeat_boost_neon_surge',
+        'name': 'Neon Surge',
         'price': 9.99,
-        'credits': 100,
-        'icon': Icons.star_border,
+        'xp': 1200,
+        'icon': Icons.electric_bolt,
         'accentColor': const Color(0xFF22D3EE),
         'benefits': [
-          '90 days of artist discovery placement',
+          '90 days of discovery placement',
           'Artwork + upcoming event spotlight',
           'Ad credits for story placements',
         ],
         'isPopular': true,
       },
       {
-        'id': 'artbeat_gift_large',
-        'name': 'Patron',
+        'id': 'artbeat_boost_titan_overdrive',
+        'name': 'Titan Overdrive',
         'price': 24.99,
-        'credits': 250,
-        'icon': Icons.diamond,
+        'xp': 3500,
+        'icon': Icons.rocket_launch,
         'accentColor': const Color(0xFF34D399),
         'benefits': [
-          '180 days of featured artist slots',
-          'Five artwork highlights rotating weekly',
-          'Promo credits for creator-led ads',
+          '180 days of featured slots',
+          'Five rotating artwork highlights',
+          'Promo credits for creator ads',
           'Priority event promotion',
         ],
         'isPopular': false,
       },
       {
-        'id': 'artbeat_gift_premium',
-        'name': 'Benefactor',
+        'id': 'artbeat_boost_mythic_expansion',
+        'name': 'Mythic Expansion',
         'price': 49.99,
-        'credits': 500,
-        'icon': Icons.workspace_premium,
+        'xp': 8000,
+        'icon': Icons.auto_awesome,
         'accentColor': const Color(0xFFFFA074),
         'benefits': [
-          'One year of continuous discovery placement',
-          'Artwork + event takeover slots',
+          'One year of discovery placement',
+          'Full profile + event takeover',
           'Dedicated promo strategist session',
-          'Legendary supporter halo on artist profile',
+          'Mythic Legend badge on profile',
         ],
         'isPopular': false,
       },
     ];
 
-    return giftTiers.map((tier) {
+    return boostTiers.map((tier) {
       final accentColor = tier['accentColor'] as Color;
       final isPopular = tier['isPopular'] as bool;
       final benefits = tier['benefits'] as List<String>;
@@ -711,7 +710,7 @@ class _GiftsScreenState extends State<GiftsScreen> {
                           ),
                         ),
                         Text(
-                          '${tier['credits']} visibility credits',
+                          '+${tier['xp']} Artist XP',
                           style: GoogleFonts.spaceGrotesk(
                             color: Colors.white.withValues(alpha: 0.75),
                             fontSize: 13,
@@ -770,7 +769,7 @@ class _GiftsScreenState extends State<GiftsScreen> {
                 child: ElevatedButton(
                   onPressed: _selectedArtist == null
                       ? null
-                      : () => _purchaseGift(
+                      : () => _purchaseBoost(
                           tier['id'] as String,
                           tier['name'] as String,
                           tier['price'] as double,
@@ -790,7 +789,7 @@ class _GiftsScreenState extends State<GiftsScreen> {
                   child: Text(
                     _selectedArtist == null
                         ? 'Select an artist first'
-                        : 'Send ${tier['name']} gift',
+                        : 'Deploy ${tier['name']} Boost',
                     style: GoogleFonts.spaceGrotesk(
                       fontWeight: FontWeight.w700,
                     ),
@@ -927,7 +926,7 @@ class _GiftsScreenState extends State<GiftsScreen> {
   }
 
   void _handlePurchaseCompleted(CompletedPurchase purchase) {
-    if (purchase.category == PurchaseCategory.gifts && mounted) {
+    if (purchase.category == PurchaseCategory.boosts && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(

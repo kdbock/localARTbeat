@@ -360,14 +360,14 @@ class _PostDetailModalState extends State<PostDetailModal> {
     AppLogger.info('Feature post: ${post.id}');
   }
 
-  void _handleGift(BaseGroupPost post) {
+  void _handleBoost(BaseGroupPost post) {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (context) => GiftSelectionWidget(
+      builder: (context) => ArtistBoostWidget(
         recipientId: post.userId,
         recipientName: post.userName,
       ),
@@ -620,7 +620,7 @@ class _PostDetailModalState extends State<PostDetailModal> {
                           });
                         },
                         onFeature: () => _handleFeature(widget.post),
-                        onGift: () => _handleGift(widget.post),
+                        onBoost: () => _handleBoost(widget.post),
                         onShare: () => _handleShare(widget.post),
                         isCompact: true,
                       ),

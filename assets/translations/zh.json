@@ -826,6 +826,8 @@
   "art_walk_art_walk_edit_error_error_picking_image": "选择图片时出错：$e",
   "art_walk_art_walk_edit_error_error_updating_art": "更新艺术漫步时出错：$e",
   "art_walk_art_walk_edit_success_art_walk_deleted": "艺术漫步删除成功",
+  "art_walk_edit": "编辑",
+  "art_walk_delete": "删除",
   "art_walk_art_walk_edit_success_artwork_added_to": "作品已成功添加到艺术漫步",
   "art_walk_art_walk_edit_text_add_artwork": "添加作品",
   "art_walk_art_walk_edit_text_add_artwork_20": "添加作品",
