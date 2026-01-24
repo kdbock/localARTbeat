@@ -166,6 +166,7 @@ export 'src/widgets/profile_tab_interface.dart';
 export 'src/widgets/featured_content_row_widget.dart';
 export 'src/widgets/network_error_widget.dart';
 export 'src/widgets/main_layout.dart';
+export 'src/widgets/navigation_overlay.dart' show NavigationOverlay;
 export 'src/widgets/enhanced_universal_header.dart';
 export 'src/widgets/enhanced_profile_menu.dart';
 export 'src/widgets/enhanced_bottom_nav.dart';

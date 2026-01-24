@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../services/crash_prevention_service.dart';
+import 'navigation_overlay.dart';
 import 'enhanced_bottom_nav.dart';
 
 class MainLayout extends StatefulWidget {
@@ -29,6 +31,16 @@ class MainLayout extends StatefulWidget {
 
 class _MainLayoutState extends State<MainLayout> {
   void _handleNavigation(int index) {
+    // Prevent redundant navigation if we're already on that tab
+    if (index == widget.currentIndex) return;
+
+    // Throttle navigation to prevent rapid multiple taps
+    if (!CrashPreventionService.shouldAllowNavigation()) return;
+
+    // Show navigation overlay
+    final navOverlay = NavigationOverlay.of(context);
+    navOverlay?.startNavigation();
+
     if (widget.onNavigationChanged != null) {
       widget.onNavigationChanged!(index);
     } else {

@@ -107,27 +107,32 @@ class DashboardViewModel extends ChangeNotifier {
       await _loadCurrentUser();
       AppLogger.info('👤 Current user loaded: ${_currentUser?.id}');
 
-      // Start location loading
-      final locationLoad = _loadLocation(notify: false);
-
-      // Then load all other data in parallel
+      // Start critical data loading
       await Future.wait<void>([
-        locationLoad,
-        _loadEvents(notify: false),
-        _loadArtwork(notify: false),
-        _loadArtists(notify: false),
-        _loadAchievements(notify: false),
-        _loadLocalCaptures(notify: false),
-        _loadPosts(notify: false),
+        _loadLocation(notify: false),
         _loadUserProgress(notify: false),
-        _loadTodaysChallenge(notify: false),
-        // Activities depend on location for "nearby" features
-        (() async {
-          await locationLoad;
-          await _loadActivities(notify: false);
-        })(),
       ]);
-      debugPrint('🔍 DashboardViewModel: ✅ Initialization complete');
+
+      // Mark as initialized early so UI can show basic info
+      _isInitializing = false;
+      _safeNotifyListeners();
+      debugPrint('🔍 DashboardViewModel: Initialized with critical data');
+
+      // Then load all other data in background
+      unawaited(
+        Future.wait<void>([
+          _loadEvents(notify: true),
+          _loadArtwork(notify: true),
+          _loadArtists(notify: true),
+          _loadAchievements(notify: true),
+          _loadLocalCaptures(notify: true),
+          _loadPosts(notify: true),
+          _loadTodaysChallenge(notify: true),
+          _loadActivities(notify: true),
+        ]),
+      );
+
+      debugPrint('🔍 DashboardViewModel: ✅ Background data loading started');
     } catch (e, stack) {
       debugPrint('🔍 DashboardViewModel: ❌ Initialization error: $e');
       AppLogger.error('❌ Error initializing dashboard: $e');

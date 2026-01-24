@@ -183,9 +183,7 @@ class AuthService {
     try {
       // Scopes are now requested during authorization, not initialization in 7.x
       await _googleSignIn.initialize();
-      AppLogger.info(
-        '✅ Google Sign-In initialized',
-      );
+      AppLogger.info('✅ Google Sign-In initialized');
     } catch (e) {
       AppLogger.error('⚠️ Error initializing Google Sign-In: $e');
     }
@@ -202,7 +200,7 @@ class AuthService {
       try {
         // Ensure initialized
         await _initializeGoogleSignIn();
-        
+
         // Check if user is already signed in
         final event = await _googleSignIn.attemptLightweightAuthentication();
         if (event is gsi.GoogleSignInAuthenticationEventSignIn) {
@@ -217,22 +215,26 @@ class AuthService {
       // Trigger the authentication flow with error handling
       // Returns a GoogleSignInAccount directly in 7.x authenticate()
       final googleUser = await _googleSignIn.authenticate();
-      
+
       AppLogger.info('✅ Google Sign-In successful for: ${googleUser.email}');
-      
+
       // Obtain the auth details (contains idToken)
       final googleAuth = await googleUser.authentication;
-      
+
       // Obtain the authorization details (contains accessToken)
       // In 7.x, authentication and authorization are separate steps
-      var clientAuth = await googleUser.authorizationClient.authorizationForScopes(['email', 'profile']);
-      
+      var clientAuth = await googleUser.authorizationClient
+          .authorizationForScopes(['email', 'profile']);
+
       // If not already authorized, request scopes
       if (clientAuth == null) {
         AppLogger.info('🔄 Requesting authorization scopes for accessToken');
-        clientAuth = await googleUser.authorizationClient.authorizeScopes(['email', 'profile']);
+        clientAuth = await googleUser.authorizationClient.authorizeScopes([
+          'email',
+          'profile',
+        ]);
       }
-      
+
       final accessToken = clientAuth.accessToken;
       final idToken = googleAuth.idToken;
 
@@ -321,7 +323,7 @@ class AuthService {
         AppLogger.debug('🔄 Requesting Apple ID credential...');
         final webAuthOptions = kIsWeb
             ? WebAuthenticationOptions(
-                clientId: 'com.wordnerd.artbeat', // Your Services ID
+                clientId: 'com.wordnerd.artbeat',
                 redirectUri: Uri.parse(
                   'https://wordnerd-artbeat.firebaseapp.com/__/auth/handler',
                 ),
@@ -421,7 +423,11 @@ class AuthService {
       // Create an OAuth credential from the credential returned by Apple
       final oauthCredential = OAuthProvider(
         "apple.com",
-      ).credential(idToken: appleCredential.identityToken!, rawNonce: rawNonce);
+      ).credential(
+        idToken: appleCredential.identityToken!,
+        accessToken: appleCredential.authorizationCode,
+        rawNonce: rawNonce,
+      );
 
       AppLogger.debug('✅ OAuth credential created successfully');
 

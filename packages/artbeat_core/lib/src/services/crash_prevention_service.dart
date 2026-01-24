@@ -442,6 +442,27 @@ class CrashPreventionService {
     return true;
   }
 
+  /// Throttle navigation to prevent rapid multiple taps
+  static DateTime? _lastNavTime;
+  static const _navThrottleDuration = Duration(milliseconds: 800);
+
+  /// Check if navigation should be allowed based on throttling
+  static bool shouldAllowNavigation() {
+    final now = DateTime.now();
+    if (_lastNavTime == null ||
+        now.difference(_lastNavTime!) > _navThrottleDuration) {
+      _lastNavTime = now;
+      return true;
+    }
+
+    logCrashPrevention(
+      operation: 'navigation_throttling',
+      errorType: 'rapid_tap_detected',
+      additionalInfo: 'Navigation blocked to prevent overload',
+    );
+    return false;
+  }
+
   /// Get user-friendly error message based on error type
   static String getUserFriendlyErrorMessage(dynamic error) {
     if (error == null) return 'An unknown error occurred';

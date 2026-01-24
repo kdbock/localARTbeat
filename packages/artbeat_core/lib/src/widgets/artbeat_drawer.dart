@@ -13,9 +13,11 @@ import 'package:artbeat_messaging/artbeat_messaging.dart';
 
 import '../theme/artbeat_colors.dart';
 import '../services/user_service.dart';
+import '../services/crash_prevention_service.dart';
 import '../models/user_model.dart' as core;
 import 'artbeat_drawer_items.dart';
 import 'user_avatar.dart';
+import 'navigation_overlay.dart';
 import '../utils/logger.dart';
 
 // Define main navigation routes that should use pushReplacement
@@ -104,6 +106,12 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer>
     bool isMainRoute,
   ) {
     if (!snackBarContext.mounted) return;
+
+    // Throttle navigation to prevent rapid multiple taps
+    if (!CrashPreventionService.shouldAllowNavigation()) return;
+
+    // Show navigation overlay
+    NavigationOverlay.of(snackBarContext)?.startNavigation();
 
     final implementedRoutes = {
       '/dashboard',

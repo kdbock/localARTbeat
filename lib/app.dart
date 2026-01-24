@@ -235,16 +235,21 @@ class MyApp extends StatelessWidget {
                       ),
             ),
           ],
-          child: MaterialApp(
-            navigatorKey: navigatorKey,
-            title: 'ARTbeat',
-            theme: core.ArtbeatTheme.lightTheme,
-            initialRoute: '/splash',
-            onGenerateRoute: _appRouter.onGenerateRoute,
-            debugShowCheckedModeBanner: false,
-            localizationsDelegates: context.localizationDelegates,
-            supportedLocales: context.supportedLocales,
-            locale: context.locale,
+          child: NavigationOverlay(
+            child: Builder(
+              builder: (context) => MaterialApp(
+                navigatorKey: navigatorKey,
+                title: 'ARTbeat',
+                theme: core.ArtbeatTheme.lightTheme,
+                initialRoute: '/splash',
+                onGenerateRoute: _appRouter.onGenerateRoute,
+                debugShowCheckedModeBanner: false,
+                localizationsDelegates: context.localizationDelegates,
+                supportedLocales: context.supportedLocales,
+                locale: context.locale,
+                navigatorObservers: [NavigationOverlay.createObserver(context)],
+              ),
+            ),
           ),
         ),
       );

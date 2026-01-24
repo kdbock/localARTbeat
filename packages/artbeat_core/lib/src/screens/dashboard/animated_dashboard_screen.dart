@@ -9,8 +9,10 @@ import 'package:flag/flag.dart';
 import 'package:provider/provider.dart';
 import 'package:artbeat_core/src/theme/artbeat_colors.dart';
 import 'package:artbeat_core/src/services/leaderboard_service.dart';
+import 'package:artbeat_core/src/services/crash_prevention_service.dart';
 import 'package:artbeat_core/src/utils/logger.dart';
 import 'package:artbeat_core/src/widgets/artbeat_drawer.dart';
+import 'package:artbeat_core/src/widgets/navigation_overlay.dart';
 import 'package:artbeat_capture/artbeat_capture.dart';
 import 'package:artbeat_art_walk/artbeat_art_walk.dart' as artWalkLib;
 import '../../viewmodels/dashboard_view_model.dart';
@@ -62,6 +64,8 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
   }
 
   void _showProfileMenu() {
+    if (!CrashPreventionService.shouldAllowNavigation()) return;
+    NavigationOverlay.of(context)?.startNavigation();
     Navigator.of(context).pushNamed('/profile/menu');
   }
 
@@ -139,6 +143,10 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                         onProfile: _showProfileMenu,
 
                         onSettings: () {
+                          if (!CrashPreventionService.shouldAllowNavigation()) {
+                            return;
+                          }
+                          NavigationOverlay.of(context)?.startNavigation();
                           Navigator.pushNamed(context, '/settings');
                         },
 
@@ -211,12 +219,17 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                               accent: ArtbeatColors.accentYellow,
                             ),
 
-                            onTap: () => Navigator.of(context).push(
-                              MaterialPageRoute<Widget>(
-                                builder: (context) =>
-                                    const EnhancedCaptureDashboardScreen(),
-                              ),
-                            ),
+                            onTap: () {
+                              if (!CrashPreventionService
+                                  .shouldAllowNavigation()) return;
+                              NavigationOverlay.of(context)?.startNavigation();
+                              Navigator.of(context).push(
+                                MaterialPageRoute<Widget>(
+                                  builder: (context) =>
+                                      const EnhancedCaptureDashboardScreen(),
+                                ),
+                              );
+                            },
                           ),
                         ),
 
@@ -251,11 +264,15 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                               accent: ArtbeatColors.accentOrange,
                             ),
 
-                            onTap: () => Navigator.pushNamed(
-                              context,
-
-                              '/art-walk/dashboard',
-                            ),
+                            onTap: () {
+                              if (!CrashPreventionService
+                                  .shouldAllowNavigation()) return;
+                              NavigationOverlay.of(context)?.startNavigation();
+                              Navigator.pushNamed(
+                                context,
+                                '/art-walk/dashboard',
+                              );
+                            },
                           ),
                         ),
 
@@ -290,8 +307,12 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                               accent: ArtbeatColors.secondaryTeal,
                             ),
 
-                            onTap: () =>
-                                Navigator.pushNamed(context, '/old-dashboard'),
+                            onTap: () {
+                              if (!CrashPreventionService
+                                  .shouldAllowNavigation()) return;
+                              NavigationOverlay.of(context)?.startNavigation();
+                              Navigator.pushNamed(context, '/old-dashboard');
+                            },
                           ),
                         ),
 
@@ -326,8 +347,12 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                               accent: ArtbeatColors.primaryGreen,
                             ),
 
-                            onTap: () =>
-                                Navigator.pushNamed(context, '/community/hub'),
+                            onTap: () {
+                              if (!CrashPreventionService
+                                  .shouldAllowNavigation()) return;
+                              NavigationOverlay.of(context)?.startNavigation();
+                              Navigator.pushNamed(context, '/community/hub');
+                            },
                           ),
                         ),
 
@@ -340,13 +365,21 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                           index: 4,
 
                           child: _BottomChips(
-                            onArtist: () => Navigator.pushNamed(
-                              context,
-                              '/artist/onboarding/welcome',
-                            ),
-
-                            onBusiness: () =>
-                                Navigator.pushNamed(context, '/local-business'),
+                            onArtist: () {
+                              if (!CrashPreventionService
+                                  .shouldAllowNavigation()) return;
+                              NavigationOverlay.of(context)?.startNavigation();
+                              Navigator.pushNamed(
+                                context,
+                                '/artist/onboarding/welcome',
+                              );
+                            },
+                            onBusiness: () {
+                              if (!CrashPreventionService
+                                  .shouldAllowNavigation()) return;
+                              NavigationOverlay.of(context)?.startNavigation();
+                              Navigator.pushNamed(context, '/local-business');
+                            },
                           ),
                         ),
 
