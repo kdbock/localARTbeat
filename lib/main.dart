@@ -134,20 +134,49 @@ Future<void> _initializeCoreServices() async {
     _guardedInit(ConfigService.instance.initialize, 'ConfigService'),
     _guardedInit(MapsConfig.initialize, 'MapsConfig'),
     _guardedInit(EnvLoader().init, 'EnvLoader'),
-    _guardedInit(() async {
-      if (Firebase.apps.isEmpty) {
-        await Firebase.initializeApp(
-          options: DefaultFirebaseOptions.currentPlatform,
-        );
-      }
-      // Initialize App Check IMMEDIATELY after Firebase Core
-      // This prevents permission denied errors during initial data fetching
-      // forceDebug: true is used because production App Check requires business registration
-      await SecureFirebaseConfig.configureAppCheck(
-        teamId: 'H49R32NPY6',
-        forceDebug: true,
-      );
-    }, 'Firebase & App Check'),
+    _guardedInit(
+      () async {
+        debugPrint('🛡️ ========================================');
+        debugPrint('🛡️ STARTING FIREBASE & APP CHECK INIT');
+        debugPrint('🛡️ ========================================');
+        if (Firebase.apps.isEmpty) {
+          debugPrint('🛡️ Initializing Firebase Core...');
+          try {
+            await Firebase.initializeApp(
+              options: DefaultFirebaseOptions.currentPlatform,
+            ).timeout(const Duration(seconds: 8));
+            debugPrint('🛡️ ✅ Firebase Core initialized successfully');
+          } catch (e) {
+            if (e.toString().contains('duplicate-app')) {
+              debugPrint('🛡️ Firebase Core already initialized (duplicate-app)');
+            } else {
+              debugPrint('⚠️ Firebase Core initialization error: $e');
+              rethrow;
+            }
+          }
+        } else {
+          debugPrint('🛡️ Firebase Core already initialized');
+        }
+        
+        // ALWAYS Initialize App Check, even if Firebase was already initialized
+        // This prevents permission denied errors during initial data fetching
+        // In debug mode: uses debug provider (requires debug token in Firebase Console)
+        // In release mode: uses AppAttest with DeviceCheck fallback
+        debugPrint('🛡️ About to call configureAppCheck...');
+        try {
+          await SecureFirebaseConfig.configureAppCheck(
+            teamId: 'H49R32NPY6',
+            forceDebug: false, // Set to true only for debugging production App Check issues
+          ).timeout(const Duration(seconds: 8));
+          debugPrint('🛡️ ✅ configureAppCheck completed successfully');
+        } catch (e) {
+          debugPrint('⚠️ configureAppCheck error: $e');
+          // Don't rethrow - allow app to continue without App Check
+        }
+      },
+      'Firebase & App Check',
+      timeout: const Duration(seconds: 20),
+    ),
   ]);
 }
 
