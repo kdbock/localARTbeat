@@ -258,6 +258,12 @@ class _ProfileViewScreenState extends State<ProfileViewScreen>
     color: Colors.white,
   );
 
+  TextStyle get _heroSectionTitleStyle => GoogleFonts.spaceGrotesk(
+    fontSize: 16,
+    fontWeight: FontWeight.w700,
+    color: Colors.white,
+  );
+
   TextStyle get _heroMetaStyle => GoogleFonts.spaceGrotesk(
     fontSize: 13,
     fontWeight: FontWeight.w600,
@@ -361,6 +367,8 @@ class _ProfileViewScreenState extends State<ProfileViewScreen>
         _buildHeroCard(),
         const SizedBox(height: 20),
         _buildActionRow(),
+        const SizedBox(height: 20),
+        _buildBoostBadgesSection(),
         const SizedBox(height: 20),
         _buildTabSection(),
       ],
@@ -519,6 +527,113 @@ class _ProfileViewScreenState extends State<ProfileViewScreen>
         children: buttons,
       ),
     );
+  }
+
+  Widget _buildBoostBadgesSection() {
+    return GlassCard(
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'profile_supporter_badges_title'.tr(),
+            style: _heroSectionTitleStyle,
+          ),
+          const SizedBox(height: 10),
+          StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('users')
+                .doc(widget.userId)
+                .collection('boost_badges')
+                .orderBy('awardedAt', descending: true)
+                .limit(12)
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                return Text(
+                  'profile_supporter_badges_empty'.tr(),
+                  style: _heroMetaStyle,
+                );
+              }
+
+              final badges = snapshot.data!.docs
+                  .map((doc) => doc.data() as Map<String, dynamic>)
+                  .toList();
+
+              return Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: badges.map((badge) {
+                  final tier = (badge['tier'] as String?) ?? 'boost';
+                  final label = _boostTierLabel(tier);
+                  final color = _boostTierColor(tier);
+                  return Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(color: color.withValues(alpha: 0.4)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.bolt_rounded, size: 14, color: color),
+                        const SizedBox(width: 6),
+                        Text(
+                          label,
+                          style: GoogleFonts.spaceGrotesk(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: color,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _boostTierLabel(String tier) {
+    switch (tier) {
+      case 'supporter':
+      case 'boost':
+        return 'profile_supporter_badges_spark'.tr();
+      case 'fan':
+        return 'profile_supporter_badges_surge'.tr();
+      case 'patron':
+      case 'premium':
+        return 'profile_supporter_badges_overdrive'.tr();
+      default:
+        return 'profile_supporter_badges_supporter'.tr();
+    }
+  }
+
+  Color _boostTierColor(String tier) {
+    switch (tier) {
+      case 'supporter':
+      case 'boost':
+        return const Color(0xFFFB7185);
+      case 'fan':
+        return const Color(0xFFF97316);
+      case 'patron':
+      case 'premium':
+        return const Color(0xFF22D3EE);
+      default:
+        return ArtbeatColors.primaryGreen;
+    }
   }
 
   Widget _buildTabSection() {

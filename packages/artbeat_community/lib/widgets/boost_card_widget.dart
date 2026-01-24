@@ -27,7 +27,7 @@ class ArtistBoostCardWidget extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'community_boosts.xp_reward'.tr(args: [boost.xpAmount.toString()]),
+              'Momentum +${boost.momentumAmount}',
               style: GoogleFonts.spaceGrotesk(
                 color: const Color(0xFF70FFFFFF),
                 fontSize: 14,

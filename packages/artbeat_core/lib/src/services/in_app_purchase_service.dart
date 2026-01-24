@@ -24,6 +24,10 @@ class InAppPurchaseService {
   bool _isAvailable = false;
   List<ProductDetails> _products = [];
 
+  // Development bypass for testing without StoreKit (set to true for testing)
+  static const bool _developmentBypass =
+      true; // Set to true to bypass store checks
+
   // Store pending purchase metadata (cleared after purchase completes)
   final Map<String, Map<String, dynamic>> _pendingPurchaseMetadata = {};
 
@@ -40,10 +44,9 @@ class InAppPurchaseService {
       'artbeat_enterprise_yearly',
     ],
     'boosts': [
-      'artbeat_boost_small', // Small Boost (50 Credits)
-      'artbeat_boost_medium', // Medium Boost (100 Credits)
-      'artbeat_boost_large', // Large Boost (250 Credits)
-      'artbeat_boost_premium', // Premium Boost (500 Credits)
+      'artbeat_boost_spark', // Spark Boost
+      'artbeat_boost_surge', // Surge Boost
+      'artbeat_boost_overdrive', // Overdrive Boost
     ],
     'ads': [
       'ad_small_1w', // Small ad package - 1 week
@@ -437,7 +440,7 @@ class InAppPurchaseService {
         await _processSubscriptionPurchase(purchase, details);
         break;
       case PurchaseCategory.boosts:
-        await _processGiftPurchase(purchase, details);
+        await _processBoostPurchase(purchase, details);
         break;
       case PurchaseCategory.ads:
         await _processAdPurchase(purchase, details);
@@ -500,17 +503,17 @@ class InAppPurchaseService {
     }
   }
 
-  /// Process gift purchase
-  Future<void> _processGiftPurchase(
+  /// Process boost purchase
+  Future<void> _processBoostPurchase(
     CompletedPurchase purchase,
     PurchaseDetails details,
   ) async {
     try {
-      // Gift processing will be handled by the gift service
+      // Boost processing is handled by the boost service
       // This is just to record the purchase
-      AppLogger.info('✅ Gift purchase processed: ${purchase.productId}');
+      AppLogger.info('✅ Boost purchase processed: ${purchase.productId}');
     } catch (e) {
-      AppLogger.error('Error processing gift purchase: $e');
+      AppLogger.error('Error processing boost purchase: $e');
     }
   }
 
@@ -558,6 +561,55 @@ class InAppPurchaseService {
   }) async {
     try {
       AppLogger.info('🛍️ Starting purchase flow for product: $productId');
+
+      // Development bypass for testing without real store
+      if (_developmentBypass) {
+        AppLogger.warning(
+          '⚠️ DEVELOPMENT MODE: Simulating successful purchase',
+        );
+
+        final user = _auth.currentUser;
+        if (user == null) {
+          throw Exception('User must be authenticated');
+        }
+
+        // Store metadata if provided
+        if (metadata != null && metadata.isNotEmpty) {
+          _pendingPurchaseMetadata[productId] = metadata;
+          AppLogger.info(
+            '📝 Stored purchase metadata for $productId (dev mode)',
+          );
+        }
+
+        // Simulate a successful purchase after a short delay
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+
+        // Trigger the purchase completion callback manually in dev mode
+        if (onPurchaseCompleted != null) {
+          final transactionId = 'dev_${DateTime.now().millisecondsSinceEpoch}';
+          final mockPurchase = CompletedPurchase(
+            purchaseId: transactionId,
+            productId: productId,
+            userId: user.uid,
+            purchaseDate: DateTime.now(),
+            status: 'completed',
+            type: _isBoostProduct(productId)
+                ? PurchaseType.consumable
+                : PurchaseType.subscription,
+            category: _isBoostProduct(productId)
+                ? PurchaseCategory.boosts
+                : PurchaseCategory.premium,
+            amount: 4.99, // Default amount for dev mode
+            currency: 'USD',
+            transactionId: transactionId,
+            metadata: metadata ?? {},
+          );
+          onPurchaseCompleted!(mockPurchase);
+        }
+
+        AppLogger.info('✅ Development mode purchase completed');
+        return true;
+      }
 
       // Validate in-app purchase is available
       if (!_isAvailable) {
@@ -871,7 +923,7 @@ class InAppPurchaseService {
   }
 
   /// Check if service is available
-  bool get isAvailable => _isAvailable;
+  bool get isAvailable => _developmentBypass || _isAvailable;
 
   /// Get all available products
   List<ProductDetails> get products => _products;

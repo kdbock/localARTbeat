@@ -24,7 +24,6 @@ class BenefitsScreen extends StatefulWidget {
 class _BenefitsScreenState extends State<BenefitsScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  int _currentIndex = 0;
 
   final List<TierInfo> _tiers = [
     TierInfo(
@@ -118,7 +117,6 @@ class _BenefitsScreenState extends State<BenefitsScreen>
     _tabController = TabController(length: _tiers.length, vsync: this);
     _tabController.addListener(() {
       if (_tabController.indexIsChanging) {
-        setState(() => _currentIndex = _tabController.index);
 
         // Track tier viewed
         final viewModel = context.read<ArtistOnboardingViewModel>();
@@ -333,7 +331,7 @@ class _BenefitsScreenState extends State<BenefitsScreen>
   }
 
   void _showComparisonModal() {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,

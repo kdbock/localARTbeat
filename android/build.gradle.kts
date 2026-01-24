@@ -11,9 +11,6 @@ rootProject.layout.buildDirectory.value(newBuildDir)
 subprojects {
     val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
     project.layout.buildDirectory.value(newSubprojectBuildDir)
-}
-subprojects {
-    project.evaluationDependsOn(":app")
     
     configurations.all {
         resolutionStrategy {
@@ -23,6 +20,16 @@ subprojects {
                 if (requested.group == "androidx.camera") {
                     useVersion("1.5.0-alpha02")
                 }
+            }
+        }
+    }
+}
+
+subprojects {
+    afterEvaluate {
+        if (project.hasProperty("android")) {
+            extensions.findByType<com.android.build.gradle.LibraryExtension>()?.apply {
+                compileSdk = 36
             }
         }
     }

@@ -178,6 +178,7 @@ export 'src/widgets/artist_cta_widget.dart'
 export 'src/widgets/usage_limits_widget.dart' show UsageLimitsWidget;
 
 export 'src/widgets/user_avatar.dart';
+export 'src/widgets/boost_pulse_ring.dart';
 export 'src/widgets/optimized_image.dart';
 export 'src/widgets/feedback_form.dart';
 export 'src/widgets/developer_feedback_admin_screen.dart';
@@ -191,6 +192,7 @@ export 'src/widgets/filter/index.dart';
 export 'src/utils/color_extensions.dart';
 export 'src/utils/connectivity_utils.dart';
 export 'src/utils/date_utils.dart';
+export 'src/utils/geo_weighting_utils.dart';
 export 'src/utils/validators.dart';
 export 'src/utils/user_sync_helper.dart';
 export 'src/utils/location_utils.dart' show LocationUtils;

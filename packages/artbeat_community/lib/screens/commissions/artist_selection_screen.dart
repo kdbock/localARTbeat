@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
 import '../../theme/community_colors.dart';
 
@@ -252,17 +253,22 @@ class _ArtistCard extends StatelessWidget {
           child: Row(
             children: [
               // Profile Image
-              CircleAvatar(
-                radius: 30,
-                backgroundImage: core.ImageUrlValidator.safeNetworkImage(
-                  artist.profileImageUrl,
+              core.BoostPulseRing(
+                enabled: artist.hasActiveBoost,
+                ringPadding: 4,
+                ringWidth: 2,
+                child: CircleAvatar(
+                  radius: 30,
+                  backgroundImage: core.ImageUrlValidator.safeNetworkImage(
+                    artist.profileImageUrl,
+                  ),
+                  child:
+                      !core.ImageUrlValidator.isValidImageUrl(
+                        artist.profileImageUrl,
+                      )
+                      ? const Icon(Icons.person, size: 30)
+                      : null,
                 ),
-                child:
-                    !core.ImageUrlValidator.isValidImageUrl(
-                      artist.profileImageUrl,
-                    )
-                    ? const Icon(Icons.person, size: 30)
-                    : null,
               ),
 
               const SizedBox(width: 16),
@@ -286,6 +292,40 @@ class _ArtistCard extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
+                        if (artist.hasActiveBoost)
+                          Container(
+                            margin: const EdgeInsets.only(left: 8),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.teal,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Tooltip(
+                              message: 'boost_badge_tooltip'.tr(),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.bolt_rounded,
+                                    size: 12,
+                                    color: Colors.white,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    'boost_badge_label'.tr(),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                         if (artist.isVerified)
                           Container(
                             margin: const EdgeInsets.only(left: 8),
@@ -297,9 +337,9 @@ class _ArtistCard extends StatelessWidget {
                               color: Colors.blue,
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Text(
-                              'Verified',
-                              style: TextStyle(
+                            child: Text(
+                              'artist_artist_browse_badge_verified'.tr(),
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,
@@ -317,9 +357,9 @@ class _ArtistCard extends StatelessWidget {
                               color: Colors.orange,
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Text(
-                              'Featured',
-                              style: TextStyle(
+                            child: Text(
+                              'artist_artist_browse_badge_featured'.tr(),
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,

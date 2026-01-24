@@ -7,7 +7,7 @@ class EarningsModel {
   final double totalEarnings;
   final double availableBalance;
   final double pendingBalance;
-  final double promotionSupportEarnings;
+  final double boostEarnings;
   final double sponsorshipEarnings;
   final double commissionEarnings;
   final double subscriptionEarnings;
@@ -22,7 +22,7 @@ class EarningsModel {
     required this.totalEarnings,
     required this.availableBalance,
     required this.pendingBalance,
-    required this.promotionSupportEarnings,
+    required this.boostEarnings,
     required this.sponsorshipEarnings,
     required this.commissionEarnings,
     required this.subscriptionEarnings,
@@ -41,7 +41,12 @@ class EarningsModel {
       totalEarnings: (data['totalEarnings'] as num?)?.toDouble() ?? 0.0,
       availableBalance: (data['availableBalance'] as num?)?.toDouble() ?? 0.0,
       pendingBalance: (data['pendingBalance'] as num?)?.toDouble() ?? 0.0,
-      promotionSupportEarnings: (data['promotionSupportEarnings'] as num? ?? data['giftEarnings'] as num?)?.toDouble() ?? 0.0,
+      boostEarnings:
+          (data['boostEarnings'] as num? ??
+                  data['promotionSupportEarnings'] as num? ??
+                  data['giftEarnings'] as num?)
+              ?.toDouble() ??
+          0.0,
       sponsorshipEarnings:
           (data['sponsorshipEarnings'] as num?)?.toDouble() ?? 0.0,
       commissionEarnings:
@@ -55,9 +60,11 @@ class EarningsModel {
       monthlyBreakdown: Map<String, double>.from(
         data['monthlyBreakdown'] as Map<String, dynamic>? ?? {},
       ),
-      recentTransactions: (data['recentTransactions'] as List<dynamic>?)
+      recentTransactions:
+          (data['recentTransactions'] as List<dynamic>?)
               ?.map(
-                  (t) => EarningsTransaction.fromMap(t as Map<String, dynamic>))
+                (t) => EarningsTransaction.fromMap(t as Map<String, dynamic>),
+              )
               .toList() ??
           [],
     );
@@ -69,7 +76,7 @@ class EarningsModel {
       'totalEarnings': totalEarnings,
       'availableBalance': availableBalance,
       'pendingBalance': pendingBalance,
-      'promotionSupportEarnings': promotionSupportEarnings,
+      'boostEarnings': boostEarnings,
       'sponsorshipEarnings': sponsorshipEarnings,
       'commissionEarnings': commissionEarnings,
       'subscriptionEarnings': subscriptionEarnings,
@@ -97,7 +104,7 @@ class EarningsModel {
     if (totalEarnings == 0) return {};
 
     return {
-      'Promotion Support': (promotionSupportEarnings / totalEarnings) * 100,
+      'Boost Engagement': (boostEarnings / totalEarnings) * 100,
       'Sponsorships': (sponsorshipEarnings / totalEarnings) * 100,
       'Commissions': (commissionEarnings / totalEarnings) * 100,
       'Subscriptions': (subscriptionEarnings / totalEarnings) * 100,
@@ -111,7 +118,7 @@ class EarningsTransaction {
   final String id;
   final String artistId;
   final String
-      type; // gift, sponsorship, commission, subscription, artwork_sale
+  type; // gift, sponsorship, commission, subscription, artwork_sale
   final double amount;
   final String fromUserId;
   final String fromUserName;
@@ -145,7 +152,8 @@ class EarningsTransaction {
       status: data['status'] as String? ?? 'pending',
       description: data['description'] as String? ?? '',
       metadata: Map<String, dynamic>.from(
-          data['metadata'] as Map<String, dynamic>? ?? {}),
+        data['metadata'] as Map<String, dynamic>? ?? {},
+      ),
     );
   }
 
@@ -162,7 +170,8 @@ class EarningsTransaction {
       status: data['status'] as String? ?? 'pending',
       description: data['description'] as String? ?? '',
       metadata: Map<String, dynamic>.from(
-          data['metadata'] as Map<String, dynamic>? ?? {}),
+        data['metadata'] as Map<String, dynamic>? ?? {},
+      ),
     );
   }
 

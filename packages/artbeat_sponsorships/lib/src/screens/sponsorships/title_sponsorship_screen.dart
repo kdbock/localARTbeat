@@ -870,9 +870,9 @@ class _HeroMetricData {
     this.suffix = '',
     required this.detail,
   }) : assert(
-          (value != null) ^ (display != null),
-          'Provide either a numeric value or a display string',
-        );
+         (value != null) ^ (display != null),
+         'Provide either a numeric value or a display string',
+       );
 
   final String label;
   final double? value;
@@ -940,7 +940,7 @@ const List<_BenefitTileData> _benefitTiles = [
     icon: Icons.mic_rounded,
     title: 'Editorial mentions',
     detail:
-        'Founder videos, newsletters, and brief audio cues reference you as the presenting supporter.',
+        'Founder videos, newsletters, and brief audio cues reference you as the presenting sponsor.',
     metric: 'Monthly updates',
   ),
   _BenefitTileData(

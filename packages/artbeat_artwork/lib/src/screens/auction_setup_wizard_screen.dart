@@ -43,7 +43,7 @@ class _AuctionSetupWizardScreenState extends State<AuctionSetupWizardScreen> {
   bool _isLoading = false;
 
   // Auction settings
-  bool _enableAuctionsByDefault = false;
+  final bool _enableAuctionsByDefault = false;
   double _defaultStartingPrice = 50.0;
   int _defaultDurationDays = 7;
   bool _useReservePriceByDefault = false;

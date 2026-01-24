@@ -176,7 +176,7 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
         'yearlyPrice': '\$49.99',
         'features': [
           '10 artwork uploads + basic insights',
-          'Access to visibility gifts dashboard',
+          'Access to visibility boosts dashboard',
           'Standard support response',
         ],
       },

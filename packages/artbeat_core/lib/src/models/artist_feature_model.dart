@@ -138,65 +138,52 @@ class ArtistFeature {
 class BoostTierConfig {
   final String boostId;
   final double price;
-  final int credits;
+  final int momentum;
   final Map<FeatureType, Duration> features;
 
   const BoostTierConfig({
     required this.boostId,
     required this.price,
-    required this.credits,
+    required this.momentum,
     required this.features,
   });
 
   static const supporter = BoostTierConfig(
-    boostId: 'artbeat_gift_small',
+    boostId: 'artbeat_boost_spark',
     price: 4.99,
-    credits: 50,
-    features: {FeatureType.artistFeatured: Duration(days: 30)},
+    momentum: 50,
+    features: {FeatureType.artistFeatured: Duration(days: 7)},
   );
 
   static const fan = BoostTierConfig(
-    boostId: 'artbeat_gift_medium',
+    boostId: 'artbeat_boost_surge',
     price: 9.99,
-    credits: 100,
+    momentum: 120,
     features: {
-      FeatureType.artistFeatured: Duration(days: 90),
-      FeatureType.artworkFeatured: Duration(days: 90), // 1 artwork
+      FeatureType.artistFeatured: Duration(days: 14),
+      FeatureType.artworkFeatured: Duration(days: 14), // 1 artwork
     },
   );
 
   static const patron = BoostTierConfig(
-    boostId: 'artbeat_gift_large',
+    boostId: 'artbeat_boost_overdrive',
     price: 24.99,
-    credits: 250,
+    momentum: 350,
     features: {
-      FeatureType.artistFeatured: Duration(days: 180),
-      FeatureType.artworkFeatured: Duration(days: 180), // 5 artworks
-      FeatureType.adRotation: Duration(days: 180),
-    },
-  );
-
-  static const benefactor = BoostTierConfig(
-    boostId: 'artbeat_gift_premium',
-    price: 49.99,
-    credits: 500,
-    features: {
-      FeatureType.artistFeatured: Duration(days: 365),
-      FeatureType.artworkFeatured: Duration(days: 365), // 5 artworks
-      FeatureType.adRotation: Duration(days: 365),
+      FeatureType.artistFeatured: Duration(days: 21),
+      FeatureType.artworkFeatured: Duration(days: 21), // 3 artworks
+      FeatureType.adRotation: Duration(days: 14),
     },
   );
 
   static BoostTierConfig? fromBoostId(String boostId) {
     switch (boostId) {
-      case 'artbeat_gift_small':
+      case 'artbeat_boost_spark':
         return supporter;
-      case 'artbeat_gift_medium':
+      case 'artbeat_boost_surge':
         return fan;
-      case 'artbeat_gift_large':
+      case 'artbeat_boost_overdrive':
         return patron;
-      case 'artbeat_gift_premium':
-        return benefactor;
       default:
         return null;
     }

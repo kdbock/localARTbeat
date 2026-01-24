@@ -4,6 +4,7 @@ import 'package:artbeat_sponsorships/artbeat_sponsorships.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:artbeat_core/artbeat_core.dart'
     hide GlassCard, HudTopBar, WorldBackground, GradientCTAButton;
 import 'package:artbeat_capture/artbeat_capture.dart' hide GlassCard, HudTopBar;
@@ -129,6 +130,10 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
         child: SizedBox(height: ArtWalkDesignSystem.paddingL),
       ),
       SliverToBoxAdapter(child: _buildInstantDiscoveryRadar()),
+      const SliverToBoxAdapter(
+        child: SizedBox(height: ArtWalkDesignSystem.paddingL),
+      ),
+      SliverToBoxAdapter(child: _buildKioskLaneSection()),
       const SliverToBoxAdapter(
         child: SizedBox(height: ArtWalkDesignSystem.paddingL),
       ),
@@ -941,6 +946,131 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildKioskLaneSection() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: ArtWalkDesignSystem.paddingL),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.bolt_rounded,
+                color: ArtWalkDesignSystem.accentOrange,
+                size: 18,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'dashboard_kiosk_lane_title'.tr(),
+                style: ArtWalkDesignSystem.cardTitleStyle,
+              ),
+            ],
+          ),
+          const SizedBox(height: ArtWalkDesignSystem.paddingS),
+          SizedBox(
+            height: 96,
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('artistProfiles')
+                  .where(
+                    'kioskLaneUntil',
+                    isGreaterThan: Timestamp.fromDate(DateTime.now()),
+                  )
+                  .orderBy('kioskLaneUntil', descending: true)
+                  .limit(10)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return Center(
+                    child: Text(
+                      'dashboard_kiosk_lane_empty'.tr(),
+                      style: ArtWalkDesignSystem.cardSubtitleStyle,
+                    ),
+                  );
+                }
+
+                final artists = snapshot.data!.docs
+                    .map((doc) => ArtistProfileModel.fromFirestore(doc))
+                    .toList();
+
+                return ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: artists.length,
+                  separatorBuilder: (_, __) =>
+                      const SizedBox(width: ArtWalkDesignSystem.paddingS),
+                  itemBuilder: (context, index) =>
+                      _buildKioskLaneChip(context, artists[index]),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildKioskLaneChip(BuildContext context, ArtistProfileModel artist) {
+    return GestureDetector(
+      onTap: () => Navigator.pushNamed(
+        context,
+        '/artist/public-profile',
+        arguments: {'artistId': artist.userId},
+      ),
+      child: Container(
+        width: 160,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: ArtWalkDesignSystem.glassDecoration(
+          borderRadius: ArtWalkDesignSystem.radiusM,
+        ),
+        child: Row(
+          children: [
+            BoostPulseRing(
+              enabled: artist.hasActiveBoost || artist.hasKioskLane,
+              ringPadding: 3,
+              ringWidth: 2,
+              child: CircleAvatar(
+                radius: 18,
+                backgroundImage: ImageUrlValidator.safeNetworkImage(
+                  artist.profileImageUrl,
+                ),
+                backgroundColor: Colors.white.withValues(alpha: 0.15),
+                child: !ImageUrlValidator.isValidImageUrl(
+                  artist.profileImageUrl,
+                )
+                    ? Text(
+                        artist.displayName.isNotEmpty
+                            ? artist.displayName[0].toUpperCase()
+                            : '?',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      )
+                    : null,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                artist.displayName,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: ArtWalkDesignSystem.cardSubtitleStyle.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

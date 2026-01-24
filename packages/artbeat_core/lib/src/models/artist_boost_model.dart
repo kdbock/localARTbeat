@@ -14,6 +14,7 @@ class ArtistBoostModel {
   final String boostType; // Small Boost, Medium Boost, Large Boost, Premium Boost, or Custom
   final double amount;
   final int xpAmount;
+  final int momentumAmount;
   final Timestamp createdAt;
   final BoostType type;
   final String? message;
@@ -31,6 +32,7 @@ class ArtistBoostModel {
     required this.boostType,
     required this.amount,
     this.xpAmount = 0,
+    int? momentumAmount,
     required this.createdAt,
     this.type = BoostType.preset,
     this.message,
@@ -40,7 +42,7 @@ class ArtistBoostModel {
     this.isRecurring = false,
     this.paymentIntentId,
     this.status = 'completed',
-  });
+  }) : momentumAmount = momentumAmount ?? xpAmount;
 
   factory ArtistBoostModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
@@ -51,6 +53,12 @@ class ArtistBoostModel {
       boostType: data['boostType'] as String? ?? data['giftType'] as String? ?? '',
       amount: (data['amount'] as num? ?? 0).toDouble(),
       xpAmount: data['xpAmount'] as int? ?? data['xp'] as int? ?? 0,
+      momentumAmount:
+          data['momentumAmount'] as int? ??
+          data['momentum'] as int? ??
+          data['xpAmount'] as int? ??
+          data['xp'] as int? ??
+          0,
       createdAt: data['createdAt'] as Timestamp? ?? Timestamp.now(),
       type: _parseBoostType(data['type'] as String?),
       message: data['message'] as String?,
@@ -70,6 +78,7 @@ class ArtistBoostModel {
       'boostType': boostType,
       'amount': amount,
       'xpAmount': xpAmount,
+      'momentumAmount': momentumAmount,
       'createdAt': createdAt,
       'type': type.name,
       if (message != null) 'message': message,
@@ -109,6 +118,7 @@ class ArtistBoostModel {
     String? boostType,
     double? amount,
     int? xpAmount,
+    int? momentumAmount,
     Timestamp? createdAt,
     BoostType? type,
     String? message,
@@ -126,6 +136,7 @@ class ArtistBoostModel {
       boostType: boostType ?? this.boostType,
       amount: amount ?? this.amount,
       xpAmount: xpAmount ?? this.xpAmount,
+      momentumAmount: momentumAmount ?? this.momentumAmount,
       createdAt: createdAt ?? this.createdAt,
       type: type ?? this.type,
       message: message ?? this.message,

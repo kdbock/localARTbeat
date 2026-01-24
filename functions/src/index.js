@@ -3,6 +3,7 @@ const {
   onCall,
   HttpsError,
 } = require("firebase-functions/v2/https");
+const {onDocumentCreated} = require("firebase-functions/v2/firestore");
 const {onSchedule} = require("firebase-functions/v2/scheduler");
 const {setGlobalOptions} = require("firebase-functions/v2");
 const admin = require("firebase-admin");
@@ -12,17 +13,362 @@ const https = require("https");
 const crypto = require("crypto");
 
 // Set global options for all functions
-setGlobalOptions({maxInstances: 10});
+setGlobalOptions({
+  maxInstances: 3,
+  cpu: 0.25,
+  memory: "256MiB",
+});
 
 // Define secret for Stripe
 const stripeSecretKey = defineSecret("STRIPE_SECRET_KEY");
 
 admin.initializeApp();
 
+const MOMENTUM_DECAY_RATE_WEEKLY = 0.1;
+const WEEKLY_MOMENTUM_THRESHOLD = 300;
+const WEEKLY_MOMENTUM_CAP = 600;
+const DIMINISHING_MULTIPLIER = 0.5;
+const KIOSK_ROTATION_INTERVAL_MINUTES = 60;
+
+function getMomentumForProduct(productId, fallback) {
+  if (!productId) return fallback || 0;
+  if (productId.includes("spark") || productId.includes("gift_small")) return 50;
+  if (productId.includes("surge") || productId.includes("gift_medium"))
+    return 120;
+  if (productId.includes("overdrive") || productId.includes("gift_large"))
+    return 350;
+  if (productId.includes("gift_premium")) return 500;
+  return fallback || 0;
+}
+
+function getBoostTitleForProduct(productId) {
+  if (!productId) return "Artist Boost";
+  if (productId.includes("spark")) return "Spark Boost";
+  if (productId.includes("surge")) return "Surge Boost";
+  if (productId.includes("overdrive")) return "Overdrive Boost";
+  if (productId.includes("gift_small")) return "Quick Spark";
+  if (productId.includes("gift_medium")) return "Neon Surge";
+  if (productId.includes("gift_large")) return "Titan Overdrive";
+  if (productId.includes("gift_premium")) return "Mythic Expansion";
+  return "Artist Boost";
+}
+
+function getBoostFeaturesForProduct(productId, amount, momentum) {
+  const now = admin.firestore.Timestamp.now();
+  const features = [];
+  if (!productId) return features;
+
+  const addFeature = (type, days) => {
+    const endDate = admin.firestore.Timestamp.fromMillis(
+      now.toMillis() + days * 24 * 60 * 60 * 1000
+    );
+    features.push({
+      type,
+      startDate: now,
+      endDate,
+      isActive: true,
+      metadata: {
+        boostPrice: amount || 0,
+        momentumGranted: momentum || 0,
+        durationDays: days,
+      },
+    });
+  };
+
+  if (productId.includes("spark") || productId.includes("gift_small")) {
+    addFeature("artist_featured", 7);
+  } else if (productId.includes("surge") || productId.includes("gift_medium")) {
+    addFeature("artist_featured", 14);
+    addFeature("artwork_featured", 14);
+  } else if (
+    productId.includes("overdrive") ||
+    productId.includes("gift_large")
+  ) {
+    addFeature("artist_featured", 21);
+    addFeature("artwork_featured", 21);
+    addFeature("ad_rotation", 14);
+  } else if (productId.includes("gift_premium")) {
+    addFeature("artist_featured", 365);
+    addFeature("artwork_featured", 365);
+    addFeature("ad_rotation", 365);
+  }
+
+  return features;
+}
+
+async function performKioskLaneRotation(reason = "schedule") {
+  const now = new Date();
+  const nowTimestamp = admin.firestore.Timestamp.fromDate(now);
+
+  const laneSnapshot = await admin
+    .firestore()
+    .collection("kiosk_lane")
+    .where("endAt", ">", nowTimestamp)
+    .get();
+
+  if (laneSnapshot.empty) {
+    await admin.firestore().collection("kiosk_lane_state").doc("current").set(
+      {
+        activeArtistId: null,
+        index: 0,
+        totalActive: 0,
+        artistIds: [],
+        rotationAt: admin.firestore.FieldValue.serverTimestamp(),
+        reason,
+      },
+      {merge: true}
+    );
+    return {activeArtistId: null, totalActive: 0, index: 0};
+  }
+
+  const laneItems = laneSnapshot.docs.map((doc) => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      artistId: data.artistId || doc.id,
+      endAt: data.endAt,
+      momentum: Number(data.momentum || 0),
+      boostTier: data.boostTier || "boost",
+    };
+  });
+
+  laneItems.sort((a, b) => {
+    const endA = a.endAt?.toMillis?.() || 0;
+    const endB = b.endAt?.toMillis?.() || 0;
+    if (endB !== endA) return endB - endA;
+    return (b.momentum || 0) - (a.momentum || 0);
+  });
+
+  const artistIds = laneItems.map((item) => item.artistId);
+
+  const stateRef = admin.firestore().collection("kiosk_lane_state").doc("current");
+  const stateSnap = await stateRef.get();
+  let index = 0;
+
+  if (stateSnap.exists) {
+    const state = stateSnap.data() || {};
+    const prevIds = Array.isArray(state.artistIds) ? state.artistIds : [];
+    const sameOrder =
+      prevIds.length === artistIds.length &&
+      prevIds.every((id, idx) => id === artistIds[idx]);
+    if (sameOrder && Number.isInteger(state.index)) {
+      index = (state.index + 1) % artistIds.length;
+    }
+  }
+
+  const active = laneItems[index];
+
+  await stateRef.set(
+    {
+      activeArtistId: active.artistId,
+      index,
+      totalActive: artistIds.length,
+      artistIds,
+      rotationAt: admin.firestore.FieldValue.serverTimestamp(),
+      reason,
+    },
+    {merge: true}
+  );
+
+  await admin.firestore().collection("kiosk_lane_metrics").add({
+    activeArtistId: active.artistId,
+    boostTier: active.boostTier,
+    index,
+    totalActive: artistIds.length,
+    artistIds,
+    rotationAt: admin.firestore.FieldValue.serverTimestamp(),
+    reason,
+  });
+
+  return {
+    activeArtistId: active.artistId,
+    totalActive: artistIds.length,
+    index,
+  };
+}
+
+function getBoostTierConfig(productId) {
+  if (!productId) return null;
+  if (productId.includes("spark") || productId.includes("gift_small")) {
+    return {tier: "spark", mapGlowDays: 0, kioskDays: 0, earlyAccessDays: 7};
+  }
+  if (productId.includes("surge") || productId.includes("gift_medium")) {
+    return {tier: "surge", mapGlowDays: 14, kioskDays: 0, earlyAccessDays: 14};
+  }
+  if (productId.includes("overdrive") || productId.includes("gift_large")) {
+    return {tier: "overdrive", mapGlowDays: 14, kioskDays: 21, earlyAccessDays: 21};
+  }
+  if (productId.includes("gift_premium")) {
+    return {tier: "premium", mapGlowDays: 365, kioskDays: 365, earlyAccessDays: 30};
+  }
+  return null;
+}
+
+async function updateArtistProfileBoostFields(recipientId, fields) {
+  const profilesQuery = await admin
+    .firestore()
+    .collection("artistProfiles")
+    .where("userId", "==", recipientId)
+    .limit(1)
+    .get();
+
+  if (!profilesQuery.empty) {
+    await profilesQuery.docs[0].ref.set(fields, {merge: true});
+    return;
+  }
+
+  const directRef = admin.firestore().collection("artistProfiles").doc(recipientId);
+  const directSnap = await directRef.get();
+  if (directSnap.exists) {
+    await directRef.set(fields, {merge: true});
+  }
+}
+async function applyMomentumTransaction(
+  recipientId,
+  momentum,
+  eventTime = new Date()
+) {
+  const momentumRef = admin.firestore().collection("artist_momentum").doc(
+    recipientId
+  );
+  const userRef = admin.firestore().collection("users").doc(recipientId);
+
+  const result = await admin.firestore().runTransaction(async (transaction) => {
+    const snapshot = await transaction.get(momentumRef);
+
+    let currentMomentum = 0;
+    let weeklyMomentum = 0;
+    let lastUpdated = eventTime;
+    let weekStart = eventTime;
+    let boostStreakMonths = 0;
+    let boostStreakMonthKey = null;
+    let streakIncremented = false;
+
+    if (snapshot.exists) {
+      const momentumData = snapshot.data() || {};
+      currentMomentum = Number(momentumData.momentum || 0);
+      weeklyMomentum = Number(momentumData.weeklyMomentum || 0);
+      lastUpdated = momentumData.momentumLastUpdated
+        ? momentumData.momentumLastUpdated.toDate()
+        : eventTime;
+      weekStart = momentumData.weeklyWindowStart
+        ? momentumData.weeklyWindowStart.toDate()
+        : eventTime;
+      boostStreakMonths = Number(momentumData.boostStreakMonths || 0);
+      boostStreakMonthKey = momentumData.boostStreakMonthKey || null;
+    }
+
+    const elapsedWeeks =
+      (eventTime.getTime() - lastUpdated.getTime()) /
+      (7 * 24 * 60 * 60 * 1000);
+    if (elapsedWeeks > 0) {
+      currentMomentum =
+        currentMomentum *
+        Math.pow(1 - MOMENTUM_DECAY_RATE_WEEKLY, elapsedWeeks);
+    }
+
+    if (
+      (eventTime.getTime() - weekStart.getTime()) / (24 * 60 * 60 * 1000) >= 7
+    ) {
+      weeklyMomentum = 0;
+      weekStart = eventTime;
+    }
+
+    let effectiveAdd = momentum;
+
+    if (weeklyMomentum >= WEEKLY_MOMENTUM_THRESHOLD) {
+      effectiveAdd = momentum * DIMINISHING_MULTIPLIER;
+    } else if (weeklyMomentum + momentum > WEEKLY_MOMENTUM_THRESHOLD) {
+      const fullRateAmount = WEEKLY_MOMENTUM_THRESHOLD - weeklyMomentum;
+      const diminishedAmount = momentum - fullRateAmount;
+      effectiveAdd = fullRateAmount + diminishedAmount * DIMINISHING_MULTIPLIER;
+    }
+
+    const remainingCap = WEEKLY_MOMENTUM_CAP - weeklyMomentum;
+    if (remainingCap <= 0) {
+      effectiveAdd = 0;
+    } else if (effectiveAdd > remainingCap) {
+      effectiveAdd = remainingCap;
+    }
+
+    const newWeeklyMomentum = weeklyMomentum + effectiveAdd;
+    const newMomentum = currentMomentum + effectiveAdd;
+
+    const currentMonthKey = `${eventTime.getUTCFullYear()}-${String(
+      eventTime.getUTCMonth() + 1
+    ).padStart(2, "0")}`;
+    if (boostStreakMonthKey) {
+      const [lastYear, lastMonth] = boostStreakMonthKey.split("-").map(Number);
+      const lastIndex = lastYear * 12 + (lastMonth - 1);
+      const currentIndex =
+        eventTime.getUTCFullYear() * 12 + eventTime.getUTCMonth();
+      const diff = currentIndex - lastIndex;
+      if (diff === 0) {
+        boostStreakMonths = Math.max(boostStreakMonths, 1);
+      } else if (diff === 1) {
+        boostStreakMonths = Math.max(boostStreakMonths, 1) + 1;
+        streakIncremented = true;
+      } else {
+        boostStreakMonths = 1;
+      }
+    } else {
+      boostStreakMonths = 1;
+    }
+    boostStreakMonthKey = currentMonthKey;
+
+    transaction.set(
+      momentumRef,
+      {
+        momentum: newMomentum,
+        weeklyMomentum: newWeeklyMomentum,
+        weeklyWindowStart: admin.firestore.Timestamp.fromDate(weekStart),
+        momentumLastUpdated: admin.firestore.Timestamp.fromDate(eventTime),
+        lastBoostAt: admin.firestore.Timestamp.fromDate(eventTime),
+        boostStreakMonths,
+        boostStreakMonthKey,
+        boostStreakUpdatedAt: admin.firestore.Timestamp.fromDate(eventTime),
+        lifetimeMomentum: admin.firestore.FieldValue.increment(effectiveAdd),
+      },
+      {merge: true}
+    );
+
+    transaction.set(
+      userRef,
+      {
+        artistMomentum: newMomentum,
+        artistMomentumUpdatedAt: admin.firestore.Timestamp.fromDate(eventTime),
+        artistMomentumWeekly: newWeeklyMomentum,
+        artistMomentumWeekStart: admin.firestore.Timestamp.fromDate(weekStart),
+        artistBoostStreakMonths: boostStreakMonths,
+        artistBoostStreakUpdatedAt: admin.firestore.Timestamp.fromDate(eventTime),
+        artistXP: admin.firestore.FieldValue.increment(momentum),
+        totalXPReceived: admin.firestore.FieldValue.increment(momentum),
+      },
+      {merge: true}
+    );
+
+    return {
+      momentum: newMomentum,
+      weeklyMomentum: newWeeklyMomentum,
+      boostStreakMonths,
+      boostStreakMonthKey,
+      streakIncremented,
+    };
+  });
+
+  return result;
+}
+
 /**
  * Fix leaderboard data - one-time maintenance function
  */
-exports.fixLeaderboardData = onRequest((request, response) => {
+exports.fixLeaderboardData = onRequest(
+  {
+    cpu: 0.25,
+    memory: "256MiB",
+    maxInstances: 2,
+  },
+  (request, response) => {
   cors(request, response, async () => {
     try {
       console.log("🔧 Starting leaderboard data fix...");
@@ -207,7 +553,13 @@ exports.fixLeaderboardData = onRequest((request, response) => {
 /**
  * Fix specific user's data by name
  */
-exports.fixUserData = onRequest((request, response) => {
+exports.fixUserData = onRequest(
+  {
+    cpu: 0.25,
+    memory: "256MiB",
+    maxInstances: 2,
+  },
+  (request, response) => {
   cors(request, response, async () => {
     try {
       const userName = request.body?.name || request.query?.name || "Izzy Piel";
@@ -315,9 +667,469 @@ exports.fixUserData = onRequest((request, response) => {
 });
 
 /**
+ * Apply boost momentum + features server-side when a boost is completed.
+ * Clients should only write boost events.
+ */
+exports.applyBoostMomentum = onDocumentCreated(
+  {
+    document: "boosts/{boostId}",
+    cpu: 0.25,
+    memory: "256MiB",
+    maxInstances: 5,
+  },
+  async (event) => {
+    const data = event.data?.data();
+    if (!data) return;
+    if (data.status && data.status !== "completed") return;
+
+    const recipientId = data.recipientId;
+    const senderId = data.senderId;
+    const productId = data.productId;
+    const amount = Number(data.amount || 0);
+    const message = data.message || null;
+
+    if (!recipientId || !senderId) return;
+
+    const momentum =
+      Number(data.momentum || data.momentumAmount || 0) ||
+      getMomentumForProduct(productId, 0);
+
+    const now = new Date();
+    const momentumResult = await applyMomentumTransaction(
+      recipientId,
+      momentum,
+      now
+    );
+
+    const boostTitle = getBoostTitleForProduct(productId);
+    const features = getBoostFeaturesForProduct(productId, amount, momentum);
+    const featureWrites = features.map((feature) =>
+      admin.firestore().collection("artist_features").add({
+        artistId: recipientId,
+        boostId: productId || "boost",
+        purchaserId: senderId,
+        type: feature.type,
+        startDate: feature.startDate,
+        endDate: feature.endDate,
+        isActive: true,
+        metadata: feature.metadata,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      })
+    );
+
+    await Promise.all(featureWrites);
+
+    const momentumSnapshot = await admin
+      .firestore()
+      .collection("artist_momentum")
+      .doc(recipientId)
+      .get();
+    const momentumData = momentumSnapshot.exists ? momentumSnapshot.data() : {};
+
+    const tierConfig = getBoostTierConfig(productId);
+    const mapGlowUntil = tierConfig?.mapGlowDays
+      ? admin.firestore.Timestamp.fromMillis(
+          now.getTime() + tierConfig.mapGlowDays * 24 * 60 * 60 * 1000
+        )
+      : null;
+    const kioskLaneUntil = tierConfig?.kioskDays
+      ? admin.firestore.Timestamp.fromMillis(
+          now.getTime() + tierConfig.kioskDays * 24 * 60 * 60 * 1000
+        )
+      : null;
+
+    await updateArtistProfileBoostFields(recipientId, {
+      boostScore: Number(momentumData?.momentum || 0),
+      lastBoostAt: admin.firestore.Timestamp.fromDate(now),
+      weeklyBoostMomentum: Number(momentumData?.weeklyMomentum || 0),
+      boostMomentumUpdatedAt: admin.firestore.Timestamp.fromDate(now),
+      boostStreakMonths: momentumResult?.boostStreakMonths || 0,
+      boostStreakUpdatedAt: admin.firestore.Timestamp.fromDate(now),
+      mapGlowUntil,
+      kioskLaneUntil,
+      boostTier: tierConfig?.tier || "boost",
+    });
+
+    if (kioskLaneUntil) {
+      await admin
+        .firestore()
+        .collection("kiosk_lane")
+        .doc(recipientId)
+        .set(
+          {
+            artistId: recipientId,
+            boostTier: tierConfig?.tier || "boost",
+            startAt: admin.firestore.Timestamp.fromDate(now),
+            endAt: kioskLaneUntil,
+            momentum,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          },
+          {merge: true}
+        );
+    }
+
+    const supporterTier = tierConfig?.tier || "boost";
+    await admin.firestore().collection("users").doc(senderId).set(
+      {
+        collectorXP: admin.firestore.FieldValue.increment(momentum),
+        collectorXPUpdatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      },
+      {merge: true}
+    );
+
+    await admin
+      .firestore()
+      .collection("artist_boosters")
+      .doc(recipientId)
+      .collection("boosters")
+      .doc(senderId)
+      .set(
+        {
+          boosterId: senderId,
+          artistId: recipientId,
+          tier: supporterTier,
+          lastBoostAt: admin.firestore.Timestamp.fromDate(now),
+          boostCount: admin.firestore.FieldValue.increment(1),
+          earlyAccessTier: supporterTier,
+          earlyAccessGrantedAt: admin.firestore.Timestamp.fromDate(now),
+          earlyAccessUntil: tierConfig?.earlyAccessDays
+            ? admin.firestore.Timestamp.fromMillis(
+                now.getTime() + tierConfig.earlyAccessDays * 24 * 60 * 60 * 1000
+              )
+            : null,
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        },
+        {merge: true}
+      );
+
+    await admin
+      .firestore()
+      .collection("users")
+      .doc(senderId)
+      .collection("boost_badges")
+      .doc(`${recipientId}_${supporterTier}`)
+      .set(
+        {
+          artistId: recipientId,
+          tier: supporterTier,
+          awardedAt: admin.firestore.Timestamp.fromDate(now),
+          momentum,
+        },
+        {merge: true}
+      );
+
+    const senderDoc = await admin.firestore().collection("users").doc(senderId).get();
+    const senderName = senderDoc.exists
+      ? senderDoc.data().displayName || senderDoc.data().username || "A Fan"
+      : "A Fan";
+
+    await admin.firestore().collection("notifications").add({
+      userId: recipientId,
+      type: "boost_received",
+      title: "Momentum Boost Activated",
+      body: `${senderName} fueled ${boostTitle} for you!`,
+      data: {
+        senderId,
+        senderName,
+        boostType: boostTitle,
+        amount,
+        momentum,
+        message,
+      },
+      read: false,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    if (momentumResult?.streakIncremented) {
+      await admin.firestore().collection("notifications").add({
+        userId: recipientId,
+        type: "boost_streak",
+        title: "Boost Streak Active",
+        body: `You're on a ${momentumResult.boostStreakMonths}-month boost streak!`,
+        data: {
+          boostStreakMonths: momentumResult.boostStreakMonths,
+        },
+        read: false,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+    }
+
+    await event.data.ref.update({
+      momentumAppliedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+  }
+);
+
+/**
+ * Scheduled decay enforcement for artist momentum + profile sync.
+ */
+exports.decayArtistMomentum = onSchedule(
+  {
+    schedule: "every 24 hours",
+    cpu: 0.25,
+    memory: "256MiB",
+    maxInstances: 2,
+  },
+  async () => {
+  const momentumSnapshot = await admin.firestore().collection("artist_momentum").get();
+  if (momentumSnapshot.empty) return;
+
+  const now = new Date();
+  let batch = admin.firestore().batch();
+  let batchCount = 0;
+
+  const commitBatch = async () => {
+    if (batchCount === 0) return;
+    await batch.commit();
+    batch = admin.firestore().batch();
+    batchCount = 0;
+  };
+
+  for (const doc of momentumSnapshot.docs) {
+    const data = doc.data() || {};
+    let currentMomentum = Number(data.momentum || 0);
+    let weeklyMomentum = Number(data.weeklyMomentum || 0);
+    const lastUpdated = data.momentumLastUpdated
+      ? data.momentumLastUpdated.toDate()
+      : now;
+    let weekStart = data.weeklyWindowStart
+      ? data.weeklyWindowStart.toDate()
+      : now;
+
+    const elapsedWeeks =
+      (now.getTime() - lastUpdated.getTime()) / (7 * 24 * 60 * 60 * 1000);
+    if (elapsedWeeks > 0) {
+      currentMomentum =
+        currentMomentum *
+        Math.pow(1 - MOMENTUM_DECAY_RATE_WEEKLY, elapsedWeeks);
+    }
+
+    if ((now.getTime() - weekStart.getTime()) / (24 * 60 * 60 * 1000) >= 7) {
+      weeklyMomentum = 0;
+      weekStart = now;
+    }
+
+    batch.set(
+      doc.ref,
+      {
+        momentum: currentMomentum,
+        weeklyMomentum,
+        weeklyWindowStart: admin.firestore.Timestamp.fromDate(weekStart),
+        momentumLastUpdated: admin.firestore.Timestamp.fromDate(now),
+      },
+      {merge: true}
+    );
+    batchCount += 1;
+
+    const userRef = admin.firestore().collection("users").doc(doc.id);
+    batch.set(
+      userRef,
+      {
+        artistMomentum: currentMomentum,
+        artistMomentumUpdatedAt: admin.firestore.Timestamp.fromDate(now),
+        artistMomentumWeekly: weeklyMomentum,
+        artistMomentumWeekStart: admin.firestore.Timestamp.fromDate(weekStart),
+      },
+      {merge: true}
+    );
+    batchCount += 1;
+
+    if (batchCount >= 400) {
+      await commitBatch();
+    }
+
+    await updateArtistProfileBoostFields(doc.id, {
+      boostScore: currentMomentum,
+      boostMomentumUpdatedAt: admin.firestore.Timestamp.fromDate(now),
+      weeklyBoostMomentum: weeklyMomentum,
+    });
+  }
+
+  await commitBatch();
+});
+
+exports.rotateKioskLane = onSchedule(
+  {
+    schedule: `every ${KIOSK_ROTATION_INTERVAL_MINUTES} minutes`,
+    cpu: 0.25,
+    memory: "256MiB",
+    maxInstances: 2,
+  },
+  async () => {
+    await performKioskLaneRotation("schedule");
+  }
+);
+
+exports.rotateKioskLaneNow = onRequest(
+  {
+    cpu: 0.25,
+    memory: "256MiB",
+    maxInstances: 2,
+  },
+  async (request, response) => {
+  try {
+    const result = await performKioskLaneRotation("manual");
+    return response.status(200).send(result);
+  } catch (error) {
+    console.error("Error rotating kiosk lane:", error);
+    return response.status(500).send({error: error.message});
+  }
+});
+
+/**
+ * Migrate legacy gifts into boosts and artist XP.
+ * Optional query params:
+ * - limit (default 200)
+ * - dryRun=true
+ */
+exports.migrateGiftsToBoosts = onRequest(
+  {
+    cpu: 0.25,
+    memory: "256MiB",
+    maxInstances: 5,
+  },
+  async (request, response) => {
+  try {
+    const limit = Math.min(Number(request.query.limit || 200), 1000);
+    const dryRun = String(request.query.dryRun || "false") === "true";
+
+    const giftsSnapshot = await admin
+      .firestore()
+      .collection("gifts")
+      .orderBy("createdAt", "asc")
+      .limit(limit)
+      .get();
+
+    if (giftsSnapshot.empty) {
+      return response.status(200).send({processed: 0});
+    }
+
+    let processed = 0;
+    for (const doc of giftsSnapshot.docs) {
+      const data = doc.data();
+      if (data.migratedToBoost) continue;
+
+      const recipientId = data.recipientId;
+      const senderId = data.senderId;
+      if (!recipientId || !senderId) continue;
+
+      const productId =
+        data.productId ||
+        (data.giftType === "Small Gift" ? "artbeat_boost_spark" : null) ||
+        (data.giftType === "Medium Gift" ? "artbeat_boost_surge" : null) ||
+        (data.giftType === "Large Gift" ? "artbeat_boost_overdrive" : null) ||
+        "artbeat_boost_spark";
+
+      const momentum = getMomentumForProduct(productId, Number(data.momentum || 0));
+      const purchaseDate = data.createdAt?.toDate?.() || new Date();
+
+      if (!dryRun) {
+        await admin.firestore().collection("boosts").add({
+          senderId,
+          recipientId,
+          productId,
+          amount: Number(data.amount || 0),
+          currency: data.currency || "USD",
+          message: data.message || "",
+          purchaseDate: admin.firestore.Timestamp.fromDate(purchaseDate),
+          status: "completed",
+          momentum,
+          migratedFromGiftId: doc.id,
+          migratedAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+
+        await doc.ref.set(
+          {
+            migratedToBoost: true,
+            migratedAt: admin.firestore.FieldValue.serverTimestamp(),
+          },
+          {merge: true}
+        );
+      }
+
+      processed += 1;
+    }
+
+    return response.status(200).send({processed, dryRun});
+  } catch (error) {
+    console.error("Error migrating gifts to boosts:", error);
+    return response.status(500).send({error: error.message});
+  }
+});
+
+/**
+ * Admin backfill for historical boosts to compute momentum without notifications.
+ * Optional query params:
+ * - limit: number of boosts to process (default 200)
+ */
+exports.backfillBoostMomentum = onRequest(
+  {
+    cpu: 0.25,
+    memory: "256MiB",
+    maxInstances: 2,
+  },
+  async (request, response) => {
+  try {
+    const limit = Math.min(
+      Number(request.query.limit || 200),
+      1000
+    );
+
+    let query = admin
+      .firestore()
+      .collection("boosts")
+      .orderBy("purchaseDate", "asc")
+      .limit(limit);
+
+    const snapshot = await query.get();
+    if (snapshot.empty) {
+      return response.status(200).send({processed: 0});
+    }
+
+    let processed = 0;
+    for (const doc of snapshot.docs) {
+      const data = doc.data();
+      if (data.momentumAppliedAt || data.momentumBackfilledAt) continue;
+      if (data.status && data.status !== "completed") continue;
+
+      const recipientId = data.recipientId;
+      if (!recipientId) continue;
+
+      const productId = data.productId;
+      const momentum =
+        Number(data.momentum || data.momentumAmount || 0) ||
+        getMomentumForProduct(productId, 0);
+
+      const eventTime = data.purchaseDate
+        ? data.purchaseDate.toDate()
+        : new Date();
+
+      await applyMomentumTransaction(recipientId, momentum, eventTime);
+
+      await doc.ref.update({
+        momentumBackfilledAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+
+      processed += 1;
+    }
+
+    return response.status(200).send({processed});
+  } catch (error) {
+    console.error("Error backfilling boost momentum:", error);
+    return response.status(500).send({error: error.message});
+  }
+});
+
+/**
  * Test leaderboard queries directly
  */
-exports.testLeaderboardQuery = onRequest((request, response) => {
+exports.testLeaderboardQuery = onRequest(
+  {
+    cpu: 0.25,
+    memory: "256MiB",
+    maxInstances: 2,
+  },
+  (request, response) => {
   cors(request, response, async () => {
     try {
       console.log("🧪 Testing leaderboard queries...");
@@ -369,7 +1181,13 @@ exports.testLeaderboardQuery = onRequest((request, response) => {
 /**
  * Debug user data for leaderboard issues
  */
-exports.debugUsers = onRequest((request, response) => {
+exports.debugUsers = onRequest(
+  {
+    cpu: 0.25,
+    memory: "256MiB",
+    maxInstances: 2,
+  },
+  (request, response) => {
   cors(request, response, async () => {
     try {
       console.log("🔍 Debugging user data...");
@@ -641,7 +1459,12 @@ exports.createSetupIntent = onRequest(
  * (no stored payment methods)
  */
 exports.createPaymentIntent = onRequest(
-  {secrets: [stripeSecretKey]},
+  {
+    secrets: [stripeSecretKey],
+    cpu: 0.25,
+    memory: "256MiB",
+    maxInstances: 5,
+  },
   (request, response) => {
     cors(request, response, async () => {
       try {
@@ -1040,7 +1863,12 @@ exports.changeSubscriptionTier = onRequest(
  * Process gift payment after payment intent is confirmed
  */
 exports.processGiftPayment = onRequest(
-  {secrets: [stripeSecretKey]},
+  {
+    secrets: [stripeSecretKey],
+    cpu: 0.25,
+    memory: "256MiB",
+    maxInstances: 5,
+  },
   (request, response) => {
     cors(request, response, async () => {
       try {
@@ -1198,7 +2026,12 @@ exports.processGiftPayment = onRequest(
  * Process subscription payment after payment intent is confirmed
  */
 exports.processSubscriptionPayment = onRequest(
-  {secrets: [stripeSecretKey]},
+  {
+    secrets: [stripeSecretKey],
+    cpu: 0.25,
+    memory: "256MiB",
+    maxInstances: 5,
+  },
   (request, response) => {
     cors(request, response, async () => {
       try {
@@ -1291,7 +2124,12 @@ exports.processSubscriptionPayment = onRequest(
  * Process ad payment after payment intent is confirmed
  */
 exports.processAdPayment = onRequest(
-  {secrets: [stripeSecretKey]},
+  {
+    secrets: [stripeSecretKey],
+    cpu: 0.25,
+    memory: "256MiB",
+    maxInstances: 5,
+  },
   (request, response) => {
     cors(request, response, async () => {
       try {
@@ -1383,7 +2221,12 @@ exports.processAdPayment = onRequest(
  * Process sponsorship payment after payment intent is confirmed
  */
 exports.processSponsorshipPayment = onRequest(
-  {secrets: [stripeSecretKey]},
+  {
+    secrets: [stripeSecretKey],
+    cpu: 0.25,
+    memory: "256MiB",
+    maxInstances: 5,
+  },
   (request, response) => {
     cors(request, response, async () => {
       try {
@@ -1514,7 +2357,12 @@ exports.processSponsorshipPayment = onRequest(
  * Process commission payment after payment intent is confirmed
  */
 exports.processCommissionPayment = onRequest(
-  {secrets: [stripeSecretKey]},
+  {
+    secrets: [stripeSecretKey],
+    cpu: 0.25,
+    memory: "256MiB",
+    maxInstances: 5,
+  },
   (request, response) => {
     cors(request, response, async () => {
       try {
@@ -1688,7 +2536,12 @@ exports.requestRefund = onRequest(
  * Handles both production and sandbox environments
  */
 exports.validateAppleReceipt = onRequest(
-  {secrets: [stripeSecretKey]},
+  {
+    secrets: [stripeSecretKey],
+    cpu: 0.25,
+    memory: "256MiB",
+    maxInstances: 5,
+  },
   (request, response) => {
     cors(request, response, async () => {
       try {
@@ -1878,7 +2731,13 @@ function getAppleErrorMessage(statusCode) {
 /**
  * Place a bid on an auction artwork
  */
-exports.placeBid = onRequest((request, response) => {
+exports.placeBid = onRequest(
+  {
+    cpu: 0.25,
+    memory: "256MiB",
+    maxInstances: 5,
+  },
+  (request, response) => {
   cors(request, response, async () => {
     try {
       // Only allow POST requests
@@ -2005,7 +2864,14 @@ exports.placeBid = onRequest((request, response) => {
  * Close auctions that have ended
  * Runs every minute to check for ended auctions
  */
-exports.closeAuction = onSchedule("every 1 minutes", async (event) => {
+exports.closeAuction = onSchedule(
+  {
+    schedule: "every 1 minutes",
+    cpu: 0.25,
+    memory: "256MiB",
+    maxInstances: 2,
+  },
+  async (event) => {
   try {
     console.log("🔨 Checking for auctions to close...");
 
@@ -2134,7 +3000,13 @@ exports.closeAuction = onSchedule("every 1 minutes", async (event) => {
   }
 });
 
-exports.submitArtBattleVote = onCall(async (request) => {
+exports.submitArtBattleVote = onCall(
+  {
+    cpu: 0.25,
+    memory: "256MiB",
+    maxInstances: 5,
+  },
+  async (request) => {
   const {data, auth} = request;
 
   console.log("submitArtBattleVote called", {

@@ -478,6 +478,33 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
                                 ],
                               ),
                             ),
+                          if (artist.hasActiveBoost) ...[
+                            if (artist.isFeatured) const SizedBox(width: 8),
+                            Tooltip(
+                              message: 'boost_badge_tooltip'.tr(),
+                              child: GradientBadge(
+                                gradient: const LinearGradient(
+                                  colors: [Color(0xFFF97316), Color(0xFF22D3EE)],
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.bolt_rounded,
+                                        size: 16, color: Colors.white),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'boost_badge_label'.tr(),
+                                      style: GoogleFonts.spaceGrotesk(
+                                        color: Colors.white,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
                           if (artist.isVerified) ...[
                             const SizedBox(width: 8),
                             GradientBadge(
@@ -510,25 +537,32 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
                       left: 14,
                       child: Row(
                         children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.9),
-                                width: 3,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.4),
-                                  blurRadius: 12,
-                                  offset: const Offset(0, 6),
+                          core.BoostPulseRing(
+                            enabled: artist.hasActiveBoost,
+                            ringPadding: 4,
+                            ringWidth: 2,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Colors.white.withValues(alpha: 0.9),
+                                  width: 3,
                                 ),
-                              ],
-                            ),
-                            child: core.UserAvatar(
-                              imageUrl: artist.profileImageUrl,
-                              displayName: artist.displayName,
-                              radius: 36,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(
+                                      alpha: 0.4,
+                                    ),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 6),
+                                  ),
+                                ],
+                              ),
+                              child: core.UserAvatar(
+                                imageUrl: artist.profileImageUrl,
+                                displayName: artist.displayName,
+                                radius: 36,
+                              ),
                             ),
                           ),
                           const SizedBox(width: 12),

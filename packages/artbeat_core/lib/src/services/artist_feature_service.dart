@@ -38,7 +38,7 @@ class ArtistFeatureService {
         isActive: true,
         metadata: {
           'boostPrice': config.price,
-          'creditsGranted': config.credits,
+          'momentumGranted': config.momentum,
           'durationDays': duration.inDays,
         },
       );

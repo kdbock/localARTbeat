@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'developer_feedback_admin_screen.dart';
 import 'feedback_form.dart';
+import 'admin_boost_maintenance_screen.dart';
 
 /// Developer menu with admin upload screens only
 class DeveloperMenu extends StatelessWidget {
@@ -78,6 +79,7 @@ class DeveloperMenu extends StatelessWidget {
       'Admin Upload User': const AdminUploadUserScreen(),
       'Admin Upload Artworks': const AdminUploadArtworksScreen(),
       'Admin Upload Captures': const AdminUploadCapturesScreen(),
+      'Admin Boost Maintenance': const AdminBoostMaintenanceScreen(),
     };
     return ExpansionTile(
       title: const Text('Admin Screens'),

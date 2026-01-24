@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -191,9 +193,11 @@ class _ArtistBoostsScreenState extends State<ArtistBoostsScreen> {
               children: [
                 _buildHeroSection(),
                 const SizedBox(height: 24),
+                _buildKioskLaneSection(),
+                const SizedBox(height: 24),
                 _buildArtistSelectionSection(),
                 const SizedBox(height: 24),
-                _buildGiftTiersSection(),
+                _buildBoostTiersSection(),
               ],
             ),
           ),
@@ -209,7 +213,7 @@ class _ArtistBoostsScreenState extends State<ArtistBoostsScreen> {
           backgroundColor: Colors.transparent,
           elevation: 0,
           title: Text(
-            'Artist Boosts',
+            'boosts_title'.tr(),
             style: GoogleFonts.spaceGrotesk(
               fontSize: 18,
               fontWeight: FontWeight.w700,
@@ -268,7 +272,7 @@ class _ArtistBoostsScreenState extends State<ArtistBoostsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Signal boost artists you love',
+                          'boosts_hero_title'.tr(),
                           style: GoogleFonts.spaceGrotesk(
                             fontSize: 24,
                             fontWeight: FontWeight.w800,
@@ -277,7 +281,7 @@ class _ArtistBoostsScreenState extends State<ArtistBoostsScreen> {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          'Artist Boosts unlock featured artist slots, artwork highlights, event placement, and ad credits creators can reinvest.',
+                          'boosts_hero_subtitle'.tr(),
                           style: GoogleFonts.spaceGrotesk(
                             fontSize: 15,
                             fontWeight: FontWeight.w500,
@@ -290,14 +294,14 @@ class _ArtistBoostsScreenState extends State<ArtistBoostsScreen> {
                 ],
               ),
               const SizedBox(height: 22),
-              const Wrap(
+              Wrap(
                 spacing: 12,
                 runSpacing: 12,
                 children: [
-                  _HeroBadge(label: 'Artist spotlights'),
-                  _HeroBadge(label: 'Artwork features'),
-                  _HeroBadge(label: 'Event promos'),
-                  _HeroBadge(label: 'Ad credits for creators'),
+                  _HeroBadge(label: 'boosts_badge_momentum'.tr()),
+                  _HeroBadge(label: 'boosts_badge_local'.tr()),
+                  _HeroBadge(label: 'boosts_badge_map_glow'.tr()),
+                  _HeroBadge(label: 'boosts_badge_kiosk'.tr()),
                 ],
               ),
             ],
@@ -312,8 +316,8 @@ class _ArtistBoostsScreenState extends State<ArtistBoostsScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionHeader(
-          'Select an artist',
-          'Search the community and decide who receives the visibility boost.',
+          'boosts_section_select_title'.tr(),
+          'boosts_section_select_subtitle'.tr(),
         ),
         const SizedBox(height: 16),
         _buildGlassPanel(
@@ -328,6 +332,173 @@ class _ArtistBoostsScreenState extends State<ArtistBoostsScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildKioskLaneSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader(
+          'boosts_section_kiosk_title'.tr(),
+          'boosts_section_kiosk_subtitle'.tr(),
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          height: 180,
+          child: StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('artistProfiles')
+                .where(
+                  'kioskLaneUntil',
+                  isGreaterThan: Timestamp.fromDate(DateTime.now()),
+                )
+                .orderBy('kioskLaneUntil', descending: true)
+                .limit(10)
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return _buildPanelPlaceholder(
+                  child: const Center(child: CircularProgressIndicator()),
+                );
+              }
+
+              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                return _buildPanelPlaceholder(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.auto_awesome,
+                        size: 42,
+                        color: Colors.white.withValues(alpha: 0.4),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'boosts_kiosk_empty'.tr(),
+                        style: GoogleFonts.spaceGrotesk(
+                          color: Colors.white70,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              final artists = snapshot.data!.docs
+                  .map((doc) => ArtistProfileModel.fromFirestore(doc))
+                  .toList();
+
+              return ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: artists.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 12),
+                itemBuilder: (context, index) {
+                  final artist = artists[index];
+                  return _buildKioskLaneCard(artist);
+                },
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildKioskLaneCard(ArtistProfileModel artist) {
+    return SizedBox(
+      width: 220,
+      child: _buildGlassPanel(
+        padding: const EdgeInsets.all(18),
+        child: Row(
+          children: [
+            Stack(
+              children: [
+                BoostPulseRing(
+                  enabled: artist.hasActiveBoost || artist.hasKioskLane,
+                  ringPadding: 4,
+                  ringWidth: 2,
+                  child: CircleAvatar(
+                    radius: 26,
+                    backgroundImage: ImageUrlValidator.safeNetworkImage(
+                      artist.profileImageUrl,
+                    ),
+                    backgroundColor: Colors.white.withValues(alpha: 0.1),
+                    child: !ImageUrlValidator.isValidImageUrl(
+                      artist.profileImageUrl,
+                    )
+                        ? Text(
+                            artist.displayName.isNotEmpty
+                                ? artist.displayName[0].toUpperCase()
+                                : '?',
+                            style: GoogleFonts.spaceGrotesk(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          )
+                        : null,
+                  ),
+                ),
+                if (artist.hasKioskLane)
+                  Positioned(
+                    right: -2,
+                    bottom: -2,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          colors: [Color(0xFF22D3EE), Color(0xFFF97316)],
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.bolt_rounded,
+                        size: 14,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    artist.displayName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.spaceGrotesk(
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    artist.location ?? 'boosts_kiosk_local_artist'.tr(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.spaceGrotesk(
+                      color: Colors.white.withValues(alpha: 0.6),
+                      fontSize: 12,
+                    ),
+                  ),
+                  const Spacer(),
+                  Text(
+                    'boosts_kiosk_spotlight_active'.tr(),
+                    style: GoogleFonts.spaceGrotesk(
+                      color: Colors.white.withValues(alpha: 0.7),
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -346,7 +517,7 @@ class _ArtistBoostsScreenState extends State<ArtistBoostsScreen> {
         },
         style: GoogleFonts.spaceGrotesk(color: Colors.white),
         decoration: InputDecoration(
-          hintText: 'Search artists by name or handle',
+          hintText: 'boosts_search_hint'.tr(),
           hintStyle: GoogleFonts.spaceGrotesk(
             color: Colors.white.withValues(alpha: 0.55),
           ),
@@ -369,7 +540,7 @@ class _ArtistBoostsScreenState extends State<ArtistBoostsScreen> {
             const CircularProgressIndicator(),
             const SizedBox(height: 16),
             Text(
-              'Loading artists...',
+              'boosts_loading_artists'.tr(),
               style: GoogleFonts.spaceGrotesk(
                 color: Colors.white70,
                 fontSize: 13,
@@ -392,8 +563,8 @@ class _ArtistBoostsScreenState extends State<ArtistBoostsScreen> {
             const SizedBox(height: 12),
             Text(
               _searchQuery.isEmpty
-                  ? 'No artists available yet'
-                  : 'No artists match that search',
+                  ? 'boosts_empty_artists'.tr()
+                  : 'boosts_empty_search'.tr(),
               style: GoogleFonts.spaceGrotesk(
                 color: Colors.white70,
                 fontSize: 14,
@@ -556,14 +727,15 @@ class _ArtistBoostsScreenState extends State<ArtistBoostsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Supporting ${_selectedArtist!.fullName}',
+                  'boosts_supporting_artist'
+                      .tr(namedArgs: {'name': _selectedArtist!.fullName}),
                   style: GoogleFonts.spaceGrotesk(
                     color: Colors.white,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
                 Text(
-                  'Pick a boost tier below to push them into featured lanes.',
+                  'boosts_supporting_subtitle'.tr(),
                   style: GoogleFonts.spaceGrotesk(
                     color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 12,
@@ -585,77 +757,61 @@ class _ArtistBoostsScreenState extends State<ArtistBoostsScreen> {
     );
   }
 
-  Widget _buildGiftTiersSection() {
+  Widget _buildBoostTiersSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionHeader(
-          'Send an Artist Boost',
-          'Each tier provides massive XP boosts, artwork features, and visibility buffs.',
+          'boosts_section_send_title'.tr(),
+          'boosts_section_send_subtitle'.tr(),
         ),
         const SizedBox(height: 20),
-        ..._buildGiftTierCards(),
+        ..._buildBoostTierCards(),
       ],
     );
   }
 
-  List<Widget> _buildGiftTierCards() {
+  List<Widget> _buildBoostTierCards() {
     final boostTiers = [
       {
-        'id': 'artbeat_boost_quick_spark',
-        'name': 'Quick Spark',
+        'id': 'artbeat_boost_spark',
+        'name': 'Spark',
         'price': 4.99,
-        'xp': 500,
+        'momentum': 50,
         'icon': Icons.bolt,
-        'accentColor': const Color(0xFF7C4DFF),
+        'accentColor': const Color(0xFFFB7185),
         'benefits': [
-          '30 days of discovery placement',
-          'Boosted search visibility',
-          'One featured artwork slot',
+          'boosts_tier_spark_benefit_1'.tr(),
+          'boosts_tier_spark_benefit_2'.tr(),
+          'boosts_tier_spark_benefit_3'.tr(),
         ],
         'isPopular': false,
       },
       {
-        'id': 'artbeat_boost_neon_surge',
-        'name': 'Neon Surge',
+        'id': 'artbeat_boost_surge',
+        'name': 'Surge',
         'price': 9.99,
-        'xp': 1200,
+        'momentum': 120,
         'icon': Icons.electric_bolt,
-        'accentColor': const Color(0xFF22D3EE),
+        'accentColor': const Color(0xFFF97316),
         'benefits': [
-          '90 days of discovery placement',
-          'Artwork + upcoming event spotlight',
-          'Ad credits for story placements',
+          'boosts_tier_surge_benefit_1'.tr(),
+          'boosts_tier_surge_benefit_2'.tr(),
+          'boosts_tier_surge_benefit_3'.tr(),
         ],
         'isPopular': true,
       },
       {
-        'id': 'artbeat_boost_titan_overdrive',
-        'name': 'Titan Overdrive',
+        'id': 'artbeat_boost_overdrive',
+        'name': 'Overdrive',
         'price': 24.99,
-        'xp': 3500,
-        'icon': Icons.rocket_launch,
-        'accentColor': const Color(0xFF34D399),
-        'benefits': [
-          '180 days of featured slots',
-          'Five rotating artwork highlights',
-          'Promo credits for creator ads',
-          'Priority event promotion',
-        ],
-        'isPopular': false,
-      },
-      {
-        'id': 'artbeat_boost_mythic_expansion',
-        'name': 'Mythic Expansion',
-        'price': 49.99,
-        'xp': 8000,
+        'momentum': 350,
         'icon': Icons.auto_awesome,
-        'accentColor': const Color(0xFFFFA074),
+        'accentColor': const Color(0xFF22D3EE),
         'benefits': [
-          'One year of discovery placement',
-          'Full profile + event takeover',
-          'Dedicated promo strategist session',
-          'Mythic Legend badge on profile',
+          'boosts_tier_overdrive_benefit_1'.tr(),
+          'boosts_tier_overdrive_benefit_2'.tr(),
+          'boosts_tier_overdrive_benefit_3'.tr(),
         ],
         'isPopular': false,
       },
@@ -710,7 +866,7 @@ class _ArtistBoostsScreenState extends State<ArtistBoostsScreen> {
                           ),
                         ),
                         Text(
-                          '+${tier['xp']} Artist XP',
+                          '+${tier['momentum']} Momentum',
                           style: GoogleFonts.spaceGrotesk(
                             color: Colors.white.withValues(alpha: 0.75),
                             fontSize: 13,
@@ -731,7 +887,7 @@ class _ArtistBoostsScreenState extends State<ArtistBoostsScreen> {
                         ),
                       ),
                       Text(
-                        'one-time',
+                        'boosts_one_time'.tr(),
                         style: GoogleFonts.spaceGrotesk(
                           color: Colors.white.withValues(alpha: 0.7),
                           fontSize: 12,
@@ -788,8 +944,10 @@ class _ArtistBoostsScreenState extends State<ArtistBoostsScreen> {
                   ),
                   child: Text(
                     _selectedArtist == null
-                        ? 'Select an artist first'
-                        : 'Deploy ${tier['name']} Boost',
+                        ? 'boosts_select_artist_first'.tr()
+                        : 'boosts_deploy_boost'.tr(
+                            namedArgs: {'name': tier['name'] as String},
+                          ),
                     style: GoogleFonts.spaceGrotesk(
                       fontWeight: FontWeight.w700,
                     ),
@@ -928,12 +1086,10 @@ class _ArtistBoostsScreenState extends State<ArtistBoostsScreen> {
   void _handlePurchaseCompleted(CompletedPurchase purchase) {
     if (purchase.category == PurchaseCategory.boosts && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Gift sent successfully! Thank you for supporting artists.',
-          ),
+        SnackBar(
+          content: Text('boosts_success_message'.tr()),
           backgroundColor: Colors.green,
-          duration: Duration(seconds: 3),
+          duration: const Duration(seconds: 3),
         ),
       );
     }
@@ -943,7 +1099,9 @@ class _ArtistBoostsScreenState extends State<ArtistBoostsScreen> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Purchase failed: $error'),
+          content: Text(
+            'boosts_purchase_failed'.tr(namedArgs: {'error': error}),
+          ),
           backgroundColor: Colors.red,
           duration: const Duration(seconds: 5),
         ),
@@ -954,10 +1112,10 @@ class _ArtistBoostsScreenState extends State<ArtistBoostsScreen> {
   void _handlePurchaseCancelled() {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Purchase cancelled'),
+        SnackBar(
+          content: Text('boosts_purchase_cancelled'.tr()),
           backgroundColor: Colors.orange,
-          duration: Duration(seconds: 3),
+          duration: const Duration(seconds: 3),
         ),
       );
     }

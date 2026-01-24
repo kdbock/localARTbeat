@@ -2,10 +2,10 @@
 
 ## Overview
 
-Create **18 IAP products** in your App Store Connect account:
+Create **17 IAP products** in your App Store Connect account:
 
 - **6 consumable ad products** (banner and square ads)
-- **4 consumable gift products** (gifts with credits)
+- **3 consumable boost products** (artist momentum)
 - **8 auto-renewable subscription products** (artist subscriptions)
 
 ---
@@ -30,20 +30,18 @@ Create **18 IAP products** in your App Store Connect account:
 
 ---
 
-## GIFT Products (Consumable - In-App Credits)
+## BOOST Products (Consumable - Visibility Momentum)
 
 **⚠️ APPLE COMPLIANCE NOTE:**
-Gifts are **consumable IAP products that provide in-app credits** to recipients.
-Recipients **cannot withdraw or cash out** gift credits.
-Credits can only be used within the ArtBeat platform for subscriptions, ads, and premium features.
-Recipients **cannot receive payment/revenue** from gifts (see Artist Subscriptions for legitimate artist monetization).
+Boosts are **consumable IAP products** that provide **in-app visibility momentum**.
+Boosts **do not convert to cash**, are **non-withdrawable**, and **do not pay artists**.
+Boost impact is **in-app placement/visibility** only.
 
-| SKU                    | Display         | Price      | Credits | Usage                                         |
-| ---------------------- | --------------- | ---------- | ------- | --------------------------------------------- |
-| `artbeat_gift_small`   | Supporter Gift  | **$4.99**  | 50      | Purchase subscriptions, ads, premium features |
-| `artbeat_gift_medium`  | Fan Gift        | **$9.99**  | 100     | Purchase subscriptions, ads, premium features |
-| `artbeat_gift_large`   | Patron Gift     | **$24.99** | 250     | Purchase subscriptions, ads, premium features |
-| `artbeat_gift_premium` | Benefactor Gift | **$49.99** | 500     | Purchase subscriptions, ads, premium features |
+| SKU                        | Display           | Price      | Momentum | Impact                                         |
+| -------------------------- | ----------------- | ---------- | -------- | ---------------------------------------------- |
+| `artbeat_boost_spark`      | Spark Boost       | **$4.99**  | 50       | Local discovery weighting + supporter badge    |
+| `artbeat_boost_surge`      | Surge Boost       | **$9.99**  | 120      | Map pin glow + follow suggestion weighting     |
+| `artbeat_boost_overdrive`  | Overdrive Boost   | **$24.99** | 350      | Kiosk Lane rotation slot (scheduled placement) |
 
 ---
 
@@ -86,7 +84,7 @@ Artists earn when ads appear on their content (artist profiles, artworks, galler
 
 - Artists pay $4.99–$79.99/month for subscriptions (tools, storage, analytics)
 - App sells ads (consumable IAP)
-- App sells gifts (consumable IAP)
+- App sells boosts (consumable IAP)
 - App takes 8–15% cut of commissions, 5–10% cut of tips, 30–50% of ad revenue
 
 **ARTIST Revenue** (Direct Income via Stripe):
@@ -94,11 +92,11 @@ Artists earn when ads appear on their content (artist profiles, artworks, galler
 - Commissions from art sales
 - Tips/donations from supporters
 - Ad revenue share
-- **NOT from gifts** (gifts are in-app appreciation tokens only)
+- **NOT from boosts** (boosts are in-app visibility only)
 
 **Example Flow:**
 
-- Supporter buys $9.99 gift → Recipient gets 100 in-app credits → **ArtBeat gets $9.99**
+- Supporter buys $9.99 boost → Artist gains momentum + visibility → **ArtBeat gets $9.99**
 - Artist pays $4.99 for Artist Starter subscription → **ArtBeat gets $4.99**
 - Artist sells a $50 commission → **Artist gets $42.50–$46 (after ArtBeat fee)**
 - Supporter tips artist $5 → **Artist gets $4.50–$4.75**
@@ -129,7 +127,7 @@ Artists earn when ads appear on their content (artist profiles, artworks, galler
 | Revenue Stream           | Who Pays      | Platform    | Product Type        | Setup Location                  | Goes To             |
 | ------------------------ | ------------- | ----------- | ------------------- | ------------------------------- | ------------------- |
 | **Ads**                  | Users/Artists | iOS/Android | Consumable IAP      | App Store Connect / Google Play | **ArtBeat**         |
-| **Gifts**                | Gift Senders  | iOS/Android | Consumable IAP      | App Store Connect / Google Play | **ArtBeat**         |
+| **Boosts**               | Supporters    | iOS/Android | Consumable IAP      | App Store Connect / Google Play | **ArtBeat**         |
 | **Artist Subscriptions** | Artists       | iOS/Android | Auto-Renewable IAP  | App Store Connect / Google Play | **ArtBeat**         |
 | **Commissions & Sales**  | Buyers        | Stripe      | Direct Seller/Buyer | Stripe Dashboard                | **Artist** (90%+)   |
 | **Tips & Donations**     | Supporters    | Stripe      | Direct Support      | Stripe Dashboard                | **Artist** (90–95%) |
@@ -154,17 +152,17 @@ Artists earn when ads appear on their content (artist profiles, artworks, galler
    - Fill in metadata (description, screenshot, etc.)
    - Save and submit for review
 
-#### For Gift Products (Consumable)
+#### For Boost Products (Consumable)
 
 1. Go to **My Apps** → Select your app
 2. Navigate to **In-App Purchases**
-3. For each gift SKU:
+3. For each boost SKU:
    - Click **Create In-App Purchase**
    - Select **Consumable** (not Renewable Subscription)
-   - Enter the **SKU** exactly as listed (e.g., `artbeat_gift_small`)
+   - Enter the **SKU** exactly as listed (e.g., `artbeat_boost_spark`)
    - Set **Reference Name** to match the SKU
    - Set **Price Tier** to match the pricing
-   - Fill in metadata with gift tier description and credit amount
+   - Fill in metadata with boost tier description and momentum impact
    - Save and submit for review
 
 #### For Subscription Products (Auto-Renewable)
@@ -196,15 +194,15 @@ Artists earn when ads appear on their content (artist profiles, artworks, galler
    - Activate the product
    - Save
 
-#### For Gift Products (Managed Products)
+#### For Boost Products (Managed Products)
 
 1. Go to your app → **Monetize** → **In-app products**
-2. For each gift SKU:
+2. For each boost SKU:
    - Click **Create product**
    - Select **Managed product** (not subscription)
-   - Enter the **Product ID** exactly as the SKU (e.g., `artbeat_gift_small`)
+   - Enter the **Product ID** exactly as the SKU (e.g., `artbeat_boost_spark`)
    - Set **Default price** to match the pricing
-   - Add description including credit amount
+   - Add description including momentum amount and visibility impact
    - Activate the product
    - Save
 
@@ -235,13 +233,12 @@ ad_big_1m
 ad_big_3m
 ```
 
-### All Gift SKUs (4 products)
+### All Boost SKUs (3 products)
 
 ```
-artbeat_gift_small
-artbeat_gift_medium
-artbeat_gift_large
-artbeat_gift_premium
+artbeat_boost_spark
+artbeat_boost_surge
+artbeat_boost_overdrive
 ```
 
 ### All Subscription SKUs (8 products)
@@ -257,7 +254,7 @@ artbeat_business_yearly
 artbeat_enterprise_yearly
 ```
 
-### All SKUs Combined (18 total products)
+### All SKUs Combined (17 total products)
 
 ```
 ad_small_1w
@@ -266,10 +263,9 @@ ad_small_3m
 ad_big_1w
 ad_big_1m
 ad_big_3m
-artbeat_gift_small
-artbeat_gift_medium
-artbeat_gift_large
-artbeat_gift_premium
+artbeat_boost_spark
+artbeat_boost_surge
+artbeat_boost_overdrive
 artbeat_starter_monthly
 artbeat_creator_monthly
 artbeat_business_monthly
@@ -294,14 +290,13 @@ ad_big_1m,Consumable,3.99,Big Square - 1 Month
 ad_big_3m,Consumable,9.99,Big Square - 3 Months
 ```
 
-#### Gift Products (Consumable)
+#### Boost Products (Consumable)
 
 ```
-SKU,Product Type,Price (USD),Display Name,Credits
-artbeat_gift_small,Consumable,4.99,Supporter Gift,50
-artbeat_gift_medium,Consumable,9.99,Fan Gift,100
-artbeat_gift_large,Consumable,24.99,Patron Gift,250
-artbeat_gift_premium,Consumable,49.99,Benefactor Gift,500
+SKU,Product Type,Price (USD),Display Name,Momentum
+artbeat_boost_spark,Consumable,4.99,Spark Boost,50
+artbeat_boost_surge,Consumable,9.99,Surge Boost,120
+artbeat_boost_overdrive,Consumable,24.99,Overdrive Boost,350
 ```
 
 #### Subscription Products (Auto-Renewable)
@@ -330,16 +325,14 @@ artbeat_enterprise_yearly,Auto-Renewable Subscription,769.99,Artist Enterprise -
 - All ad products are **consumable** (one-time purchase per ad)
 - Simple enough for local advertisers to understand in seconds
 
-### Gift Products (4 Consumables) - IN-APP CREDITS ONLY
+### Boost Products (3 Consumables) - VISIBILITY ONLY
 
 **Apple Compliance Details:**
 
-- **Gifts are consumable items** that provide in-app credits to recipients
-- **NO revenue sharing/payouts to recipients** — gifts do NOT result in cash or platform payouts
-- Recipients can **only use credits within the app** (subscriptions, ads, premium features)
-- Credits **cannot be withdrawn, refunded (except to sender), or exchanged for money**
-- Senders cannot receive money from gifts — they're purely for in-app appreciation
-- Per App Store Review Guidelines: "Apps may enable gifting of items...gifts may only be refunded to the original purchaser and may not be exchanged"
+- **Boosts are consumable items** that provide in-app visibility momentum
+- **NO revenue sharing/payouts** — boosts do NOT result in cash or platform payouts
+- Momentum **cannot be withdrawn, refunded (except to sender), or exchanged for money**
+- Supporters cannot receive money from boosts — they are for in-app visibility only
 
 ### Subscription Products (8 Auto-Renewable) - APP PLATFORM REVENUE
 
@@ -359,7 +352,7 @@ artbeat_enterprise_yearly,Auto-Renewable Subscription,769.99,Artist Enterprise -
 1. **Commission/Sales via Stripe** (variable) — Seller/buyer transactions → Artist gets 85–92%
 2. **Tips/Donations via Stripe** (variable) — Direct fan support → Artist gets 90–95%
 3. **Ad Revenue via Stripe** (variable) — Earn when ads display on their content → Artist gets 50–70%
-4. **NOT from gifts** — Gifts provide in-app credits only (Apple compliant, no payouts)
+4. **NOT from boosts** — Boosts provide in-app visibility only (Apple compliant, no payouts)
 
 ---
 
@@ -369,8 +362,8 @@ artbeat_enterprise_yearly,Auto-Renewable Subscription,769.99,Artist Enterprise -
 
 1. In Xcode: **Product** → **Scheme** → **Edit Scheme**
 2. Select **Run** → **Options** → **StoreKit Configuration**
-3. Create a test configuration file with all 14 SKUs
-4. Add both consumable products (ads) and subscription products (artist subscriptions)
+3. Create a test configuration file with all 17 SKUs
+4. Add both consumable products (ads + boosts) and subscription products (artist subscriptions)
 5. For subscriptions, set test durations (e.g., 5 minutes = 1 month) for faster testing
 6. Products will be available for testing without real charges
 
@@ -434,7 +427,7 @@ artbeat_enterprise_yearly,Auto-Renewable Subscription,769.99,Artist Enterprise -
 - Commissions from artwork sales → Keep 85–92%
 - Tips/donations from supporters → Keep 90–95%
 - Ad revenue when ads display on galleries → Keep 50–70%
-- **NOT from gifts** (gifts are in-app credits, no payouts)
+- **NOT from boosts** (boosts are in-app visibility only, no payouts)
 
 **Why this model works:**
 

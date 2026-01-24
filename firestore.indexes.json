@@ -845,9 +845,26 @@
       "collectionGroup": "giftSubscriptions",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "supporterId", "order": "ASCENDING" },
+        { "fieldPath": "boosterId", "order": "ASCENDING" },
         { "fieldPath": "status", "order": "ASCENDING" },
         { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "boosters",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "artistId", "order": "ASCENDING" },
+        { "fieldPath": "lastBoostAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "boosters",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "boosterId", "order": "ASCENDING" },
+        { "fieldPath": "tier", "order": "ASCENDING" },
+        { "fieldPath": "lastBoostAt", "order": "DESCENDING" }
       ]
     },
     {
@@ -1402,6 +1419,77 @@
       "fields": [
         { "fieldPath": "moderationStatus", "order": "ASCENDING" },
         { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "boosts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "recipientId", "order": "ASCENDING" },
+        { "fieldPath": "purchaseDate", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "commission_requests",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "artistId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "artwork",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "auctionEnabled", "order": "ASCENDING" },
+        { "fieldPath": "isPublic", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "artist_features",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "artistId", "order": "ASCENDING" },
+        { "fieldPath": "isActive", "order": "ASCENDING" },
+        { "fieldPath": "endDate", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "sponsorships",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "placementKeys", "arrayConfig": "CONTAINS" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "endDate", "order": "ASCENDING" },
+        { "fieldPath": "startDate", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "artwork",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "isForSale", "order": "ASCENDING" },
+        { "fieldPath": "isPublic", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "giftSubscriptions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "supporterId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "artwork",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "auctionEnabled", "order": "ASCENDING" },
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "auctionEnd", "order": "DESCENDING" }
       ]
     }
   ],

@@ -124,6 +124,11 @@ class ArtistProfile {
   final int followersCount;
   final DateTime createdAt;
   final bool isFollowedByCurrentUser;
+  final double boostScore;
+  final DateTime? lastBoostAt;
+  final int boostStreakMonths;
+  final DateTime? boostStreakUpdatedAt;
+  final String? location;
 
   const ArtistProfile({
     required this.userId,
@@ -136,6 +141,11 @@ class ArtistProfile {
     this.followersCount = 0,
     required this.createdAt,
     this.isFollowedByCurrentUser = false,
+    this.boostScore = 0.0,
+    this.lastBoostAt,
+    this.boostStreakMonths = 0,
+    this.boostStreakUpdatedAt,
+    this.location,
   });
 
   /// Create from Firestore document
@@ -187,7 +197,23 @@ class ArtistProfile {
       isVerified: data['isVerified'] as bool? ?? false,
       followersCount: data['followersCount'] as int? ?? 0,
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      boostScore: (data['boostScore'] as num?)?.toDouble() ??
+          (data['artistMomentum'] as num?)?.toDouble() ??
+          (data['momentum'] as num?)?.toDouble() ??
+          0.0,
+      lastBoostAt:
+          (data['lastBoostAt'] as Timestamp?)?.toDate() ??
+          (data['boostedAt'] as Timestamp?)?.toDate(),
+      boostStreakMonths: (data['boostStreakMonths'] as num?)?.toInt() ?? 0,
+      boostStreakUpdatedAt:
+          (data['boostStreakUpdatedAt'] as Timestamp?)?.toDate(),
+      location: data['location'] as String? ?? data['zipCode'] as String?,
     );
+  }
+
+  bool get hasActiveBoost {
+    if (boostScore <= 0 || lastBoostAt == null) return false;
+    return DateTime.now().difference(lastBoostAt!).inDays <= 7;
   }
 
   /// Convert to Firestore format
@@ -217,6 +243,11 @@ class ArtistProfile {
     int? followersCount,
     DateTime? createdAt,
     bool? isFollowedByCurrentUser,
+    double? boostScore,
+    DateTime? lastBoostAt,
+    int? boostStreakMonths,
+    DateTime? boostStreakUpdatedAt,
+    String? location,
   }) {
     return ArtistProfile(
       userId: userId ?? this.userId,
@@ -230,6 +261,12 @@ class ArtistProfile {
       createdAt: createdAt ?? this.createdAt,
       isFollowedByCurrentUser:
           isFollowedByCurrentUser ?? this.isFollowedByCurrentUser,
+      boostScore: boostScore ?? this.boostScore,
+      lastBoostAt: lastBoostAt ?? this.lastBoostAt,
+      boostStreakMonths: boostStreakMonths ?? this.boostStreakMonths,
+      boostStreakUpdatedAt:
+          boostStreakUpdatedAt ?? this.boostStreakUpdatedAt,
+      location: location ?? this.location,
     );
   }
 }

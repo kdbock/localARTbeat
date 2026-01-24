@@ -319,8 +319,8 @@ artbeat/
 - **Theme Customization**: Dark/light themes and personalization
 - **Accessibility**: WCAG 2.1 AA compliance
 
-**Lines of Code**: 4,000+
-**Languages**: English, Spanish, French, German, Portuguese, Chinese
+**Lines of Code**: 5,000+
+**Languages**: English, Spanish, French, German, Portuguese, Chinese, Arabic
 **Quality Grade**: ⭐⭐⭐⭐⭐ Outstanding
 
 ### **🛡️ artbeat_admin** - Administrative Tools

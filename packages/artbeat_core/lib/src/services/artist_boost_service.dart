@@ -1,9 +1,23 @@
+import 'dart:math';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/in_app_purchase_models.dart';
 import '../utils/logger.dart';
 import 'in_app_purchase_service.dart';
 import 'artist_feature_service.dart';
+
+class _MomentumUpdate {
+  final double newMomentum;
+  final double newWeeklyMomentum;
+  final double effectiveAdd;
+
+  const _MomentumUpdate({
+    required this.newMomentum,
+    required this.newWeeklyMomentum,
+    required this.effectiveAdd,
+  });
+}
 
 /// Service for handling artist boost-specific in-app purchases
 class ArtistBoostService {
@@ -15,41 +29,38 @@ class ArtistBoostService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Artist Boost configurations (Option 2: Game Pack Vibe)
+  // Artist Boost configurations (Spark / Surge / Overdrive)
   static const Map<String, Map<String, dynamic>> _boostProducts = {
-    'artbeat_gift_small': {
+    'artbeat_boost_spark': {
       'amount': 4.99,
-      'title': 'The Quick Spark',
-      'description':
-          '⚡ Instant Buff: 30 Days "Glow" effect on profile + Featured artist status!',
-      'credits': 50,
-      'powerLevel': 'Basic Buff',
+      'title': 'Spark Boost',
+      'description': '⚡ Local discovery weighting + supporter badge.',
+      'momentum': 50,
+      'powerLevel': 'Spark',
     },
-    'artbeat_gift_medium': {
+    'artbeat_boost_surge': {
       'amount': 9.99,
-      'title': 'The Neon Surge',
-      'description':
-          '🌈 Chroma Pack: 90 Days Featured Artist + 1 "Shiny" Artwork slot!',
-      'credits': 100,
-      'powerLevel': 'Rare Expansion',
+      'title': 'Surge Boost',
+      'description': '🌈 Map pin glow + follow suggestion weighting.',
+      'momentum': 120,
+      'powerLevel': 'Surge',
     },
-    'artbeat_gift_large': {
+    'artbeat_boost_overdrive': {
       'amount': 24.99,
-      'title': 'The Titan Overdrive',
-      'description':
-          '🛡️ Elite Gear: 180 Days Max Visibility + 5 Slots + Global Ad Rotation!',
-      'credits': 250,
-      'powerLevel': 'Epic Gear',
-    },
-    'artbeat_gift_premium': {
-      'amount': 49.99,
-      'title': 'The Mythic Expansion',
-      'description':
-          '💎 Ultimate DLC: 1 Year "Legendary" status + Zero Commission on next 3 sales!',
-      'credits': 500,
-      'powerLevel': 'Mythic Legacy',
+      'title': 'Overdrive Boost',
+      'description': '💎 Kiosk Lane rotation slot (scheduled placement).',
+      'momentum': 350,
+      'powerLevel': 'Overdrive',
     },
   };
+
+  static const double _momentumDecayRateWeekly = 0.10;
+  static const int _weeklyMomentumThreshold = 300;
+  static const int _weeklyMomentumCap = 600;
+  static const double _diminishingMultiplier = 0.5;
+
+  static const String _effectsAppliedField = 'effectsApplied';
+  static const String _effectsApplyingField = 'effectsApplying';
 
   /// Purchase a boost for another user
   Future<bool> purchaseBoost({
@@ -155,6 +166,7 @@ class ArtistBoostService {
         message: message,
         purchaseDate: DateTime.now(),
         status: 'pending',
+        momentum: boostData['momentum'] as int,
       );
 
       await _firestore.collection('boosts').add(boost.toFirestore());
@@ -173,6 +185,7 @@ class ArtistBoostService {
     required String transactionId,
     required String message,
   }) async {
+    final boostRef = _firestore.collection('boosts').doc(transactionId);
     try {
       final boostData = _boostProducts[productId]!;
 
@@ -188,53 +201,228 @@ class ArtistBoostService {
         purchaseDate: DateTime.now(),
         status: 'completed',
         transactionId: transactionId,
+        momentum: boostData['momentum'] as int,
       );
 
-      // Save boost to Firestore
-      await _firestore
-          .collection('boosts')
-          .doc(transactionId)
-          .set(boost.toFirestore());
+      bool shouldApplyEffects = false;
 
-      // Add XP to recipient's account
-      final xpAmount = boostData['credits'] as int;
-      await _addXPToRecipient(recipientId, xpAmount);
+      // Save boost to Firestore and guard against double-apply.
+      await _firestore.runTransaction((transaction) async {
+        final existing = await transaction.get(boostRef);
+        if (existing.exists) {
+          final data = existing.data() ?? {};
+          final alreadyApplied = data[_effectsAppliedField] == true;
+          final inProgress = data[_effectsApplyingField] == true;
+          if (alreadyApplied || inProgress) {
+            shouldApplyEffects = false;
+            return;
+          }
+        }
+        transaction.set(
+          boostRef,
+          {
+            ...boost.toFirestore(),
+            _effectsApplyingField: true,
+            _effectsAppliedField: false,
+          },
+          SetOptions(merge: true),
+        );
+        shouldApplyEffects = true;
+      });
 
-      // Create artist features based on boost tier
-      await _createArtistFeatures(senderId, recipientId, productId);
-
-      // Send notification to recipient
-      await _sendBoostNotification(senderId, recipientId, boostData, message);
+      if (!shouldApplyEffects) {
+        AppLogger.warning(
+          '⚠️ Boost effects already applied or in progress: $transactionId',
+        );
+        return;
+      }
 
       // Update pending boost to completed
       await _updatePendingBoosts(senderId, recipientId, productId, 'completed');
 
+      // Apply boost effects (momentum, features, notifications).
+      final momentumUpdate = await _applyMomentumToRecipient(
+        recipientId,
+        boostData['momentum'] as int,
+      );
+      if (momentumUpdate != null) {
+        await _updateArtistProfileBoostFields(
+          recipientId,
+          momentumUpdate,
+        );
+      }
+
+      await _createArtistFeatures(senderId, recipientId, productId);
+      await _sendBoostNotification(senderId, recipientId, boostData, message);
+
+      await boostRef.update({
+        _effectsAppliedField: true,
+        _effectsApplyingField: false,
+        'effectsAppliedAt': FieldValue.serverTimestamp(),
+      });
+
       AppLogger.info('✅ Boost purchase completed: $productId');
     } catch (e) {
       AppLogger.error('Error completing boost purchase: $e');
+      try {
+        await boostRef.update({
+          _effectsApplyingField: false,
+          _effectsAppliedField: false,
+        });
+      } catch (_) {
+        // Swallow secondary failures to avoid masking the original error.
+      }
     }
   }
 
-  /// Add XP to recipient's account
-  Future<void> _addXPToRecipient(String recipientId, int xp) async {
+  /// Apply momentum to recipient with decay, caps, and diminishing returns
+  Future<_MomentumUpdate?> _applyMomentumToRecipient(
+    String recipientId,
+    int momentumAmount,
+  ) async {
+    final now = DateTime.now();
+    final momentumRef =
+        _firestore.collection('artist_momentum').doc(recipientId);
+    final userRef = _firestore.collection('users').doc(recipientId);
+
     try {
-      await _firestore.collection('users').doc(recipientId).update({
-        'artistXP': FieldValue.increment(xp),
-        'totalXPReceived': FieldValue.increment(xp),
-        'updatedAt': FieldValue.serverTimestamp(),
+      double newMomentum = 0;
+      double newWeeklyMomentum = 0;
+      double effectiveAdd = 0;
+
+      await _firestore.runTransaction((transaction) async {
+        final snapshot = await transaction.get(momentumRef);
+        double currentMomentum = 0;
+        double weeklyMomentum = 0;
+        DateTime lastUpdated = now;
+        DateTime weekStart = now;
+
+        if (snapshot.exists) {
+          final data = snapshot.data() as Map<String, dynamic>;
+          currentMomentum = (data['momentum'] as num?)?.toDouble() ?? 0;
+          weeklyMomentum = (data['weeklyMomentum'] as num?)?.toDouble() ?? 0;
+          lastUpdated =
+              (data['momentumLastUpdated'] as Timestamp?)?.toDate() ?? now;
+          weekStart =
+              (data['weeklyWindowStart'] as Timestamp?)?.toDate() ?? now;
+        }
+
+        // Apply decay based on elapsed weeks
+        final elapsedHours = now.difference(lastUpdated).inHours;
+        final weeksElapsed = elapsedHours / (24 * 7);
+        if (weeksElapsed > 0) {
+          currentMomentum =
+              currentMomentum * pow(1 - _momentumDecayRateWeekly, weeksElapsed);
+        }
+
+        // Reset weekly window if needed
+        if (now.difference(weekStart).inDays >= 7) {
+          weeklyMomentum = 0;
+          weekStart = now;
+        }
+
+        effectiveAdd = _calculateEffectiveMomentum(
+          momentumAmount.toDouble(),
+          weeklyMomentum,
+        );
+
+        final remainingCap = _weeklyMomentumCap - weeklyMomentum;
+        if (remainingCap <= 0) {
+          effectiveAdd = 0;
+        } else if (effectiveAdd > remainingCap) {
+          effectiveAdd = remainingCap.toDouble();
+        }
+
+        newWeeklyMomentum = weeklyMomentum + effectiveAdd;
+        newMomentum = currentMomentum + effectiveAdd;
+
+        transaction.set(
+          momentumRef,
+          {
+            'momentum': newMomentum,
+            'weeklyMomentum': newWeeklyMomentum,
+            'weeklyWindowStart': Timestamp.fromDate(weekStart),
+            'momentumLastUpdated': Timestamp.fromDate(now),
+            'lastBoostAt': Timestamp.fromDate(now),
+            'lifetimeMomentum': FieldValue.increment(effectiveAdd),
+          },
+          SetOptions(merge: true),
+        );
+
+        transaction.set(
+          userRef,
+          {
+            'artistMomentum': newMomentum,
+            'artistMomentumUpdatedAt': Timestamp.fromDate(now),
+            'artistMomentumWeekly': newWeeklyMomentum,
+            'artistMomentumWeekStart': Timestamp.fromDate(weekStart),
+            'artistXP': FieldValue.increment(momentumAmount),
+            'totalXPReceived': FieldValue.increment(momentumAmount),
+          },
+          SetOptions(merge: true),
+        );
+
       });
 
-      AppLogger.info('✅ Added $xp XP to artist: $recipientId');
+      AppLogger.info(
+        '✅ Applied $momentumAmount momentum to artist: $recipientId',
+      );
+      return _MomentumUpdate(
+        newMomentum: newMomentum,
+        newWeeklyMomentum: newWeeklyMomentum,
+        effectiveAdd: effectiveAdd,
+      );
     } catch (e) {
-      AppLogger.error('Error adding XP to recipient: $e');
+      AppLogger.error('Error applying momentum to recipient: $e');
+      return null;
     }
+  }
+
+  Future<void> _updateArtistProfileBoostFields(
+    String recipientId,
+    _MomentumUpdate update,
+  ) async {
+    try {
+      final snapshot = await _firestore
+          .collection('artistProfiles')
+          .where('userId', isEqualTo: recipientId)
+          .limit(1)
+          .get();
+
+      if (snapshot.docs.isEmpty) return;
+
+      await snapshot.docs.first.reference.set(
+        {
+          'boostScore': update.newMomentum,
+          'lastBoostAt': FieldValue.serverTimestamp(),
+          'weeklyBoostMomentum': update.newWeeklyMomentum,
+          'boostMomentumUpdatedAt': FieldValue.serverTimestamp(),
+        },
+        SetOptions(merge: true),
+      );
+    } catch (e) {
+      AppLogger.error('Error updating artist profile boost fields: $e');
+    }
+  }
+
+  double _calculateEffectiveMomentum(double amount, double weeklyMomentum) {
+    if (amount <= 0) return 0;
+    if (weeklyMomentum >= _weeklyMomentumThreshold) {
+      return amount * _diminishingMultiplier;
+    }
+    if (weeklyMomentum + amount <= _weeklyMomentumThreshold) {
+      return amount;
+    }
+    final fullRateAmount = _weeklyMomentumThreshold - weeklyMomentum;
+    final diminishedAmount = amount - fullRateAmount;
+    return fullRateAmount + (diminishedAmount * _diminishingMultiplier);
   }
 
   /// Send boost notification to recipient
   Future<void> _sendBoostNotification(
     String senderId,
     String recipientId,
-    Map<String, dynamic> giftData,
+    Map<String, dynamic> boostData,
     String message,
   ) async {
     try {
@@ -248,14 +436,14 @@ class ArtistBoostService {
       await _firestore.collection('notifications').add({
         'userId': recipientId,
         'type': 'boost_received',
-        'title': 'Artist Power-Up!',
-        'body': '$senderName activated ${giftData['title']} for you!',
+        'title': 'Momentum Boost Activated',
+        'body': '$senderName fueled ${boostData['title']} for you!',
         'data': {
           'senderId': senderId,
           'senderName': senderName,
-          'boostType': giftData['title'],
-          'amount': giftData['amount'],
-          'xp': giftData['credits'],
+          'boostType': boostData['title'],
+          'amount': boostData['amount'],
+          'momentum': boostData['momentum'],
           'message': message,
         },
         'read': false,
@@ -364,6 +552,24 @@ class ArtistBoostService {
     }
   }
 
+  /// Get user's momentum balance
+  Future<double> getArtistMomentumBalance(String userId) async {
+    try {
+      final doc = await _firestore
+          .collection('artist_momentum')
+          .doc(userId)
+          .get();
+      if (doc.exists) {
+        final data = doc.data()!;
+        return (data['momentum'] as num?)?.toDouble() ?? 0.0;
+      }
+      return 0.0;
+    } catch (e) {
+      AppLogger.error('Error getting artist momentum balance: $e');
+      return 0.0;
+    }
+  }
+
   /// Use Artist XP
   Future<bool> useArtistXP(String userId, int amount) async {
     try {
@@ -395,6 +601,7 @@ class ArtistBoostService {
       final sentBoosts = await getSentBoosts(userId);
       final receivedBoosts = await getReceivedBoosts(userId);
       final currentBalance = await getArtistXPBalance(userId);
+      final currentMomentum = await getArtistMomentumBalance(userId);
 
       final totalSent = sentBoosts.fold<double>(
         0,
@@ -411,6 +618,7 @@ class ArtistBoostService {
         'totalSentAmount': totalSent,
         'totalReceivedAmount': totalReceived,
         'currentXPBalance': currentBalance,
+        'currentMomentum': currentMomentum,
         'recentSent': sentBoosts.take(5).toList(),
         'recentReceived': receivedBoosts.take(5).toList(),
       };
@@ -422,6 +630,7 @@ class ArtistBoostService {
         'totalSentAmount': 0.0,
         'totalReceivedAmount': 0.0,
         'currentXPBalance': 0,
+        'currentMomentum': 0.0,
         'recentSent': <Map<String, dynamic>>[],
         'recentReceived': <Map<String, dynamic>>[],
       };
@@ -486,7 +695,7 @@ class ArtistBoostService {
         return false;
       }
 
-      const boostProductId = 'artbeat_gift_small';
+      const boostProductId = 'artbeat_boost_spark';
       const defaultMessage = 'A boost from an ArtBeat user';
 
       final success = await purchaseBoost(

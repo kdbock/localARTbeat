@@ -29,6 +29,12 @@ class ArtistProfileModel {
   final int viewsCount;
   final int artworksCount;
   final int followersCount;
+  final double boostScore;
+  final DateTime? lastBoostAt;
+  final int boostStreakMonths;
+  final DateTime? boostStreakUpdatedAt;
+  final DateTime? mapGlowUntil;
+  final DateTime? kioskLaneUntil;
 
   ArtistProfileModel({
     required this.id,
@@ -55,6 +61,12 @@ class ArtistProfileModel {
     this.viewsCount = 0,
     this.artworksCount = 0,
     this.followersCount = 0,
+    this.boostScore = 0.0,
+    this.lastBoostAt,
+    this.boostStreakMonths = 0,
+    this.boostStreakUpdatedAt,
+    this.mapGlowUntil,
+    this.kioskLaneUntil,
   });
 
   /// Create from Firestore document
@@ -98,6 +110,18 @@ class ArtistProfileModel {
       artworksCount: data['artworksCount'] as int? ?? 0,
       followersCount:
           data['followersCount'] as int? ?? data['followerCount'] as int? ?? 0,
+      boostScore: (data['boostScore'] as num?)?.toDouble() ??
+          (data['artistMomentum'] as num?)?.toDouble() ??
+          (data['momentum'] as num?)?.toDouble() ??
+          0.0,
+      lastBoostAt:
+          (data['lastBoostAt'] as Timestamp?)?.toDate() ??
+          (data['boostedAt'] as Timestamp?)?.toDate(),
+      boostStreakMonths: (data['boostStreakMonths'] as num?)?.toInt() ?? 0,
+      boostStreakUpdatedAt:
+          (data['boostStreakUpdatedAt'] as Timestamp?)?.toDate(),
+      mapGlowUntil: (data['mapGlowUntil'] as Timestamp?)?.toDate(),
+      kioskLaneUntil: (data['kioskLaneUntil'] as Timestamp?)?.toDate(),
     );
   }
 
@@ -125,6 +149,15 @@ class ArtistProfileModel {
       'viewsCount': viewsCount,
       'artworksCount': artworksCount,
       'followersCount': followersCount,
+      'boostScore': boostScore,
+      if (lastBoostAt != null) 'lastBoostAt': Timestamp.fromDate(lastBoostAt!),
+      if (boostStreakMonths > 0) 'boostStreakMonths': boostStreakMonths,
+      if (boostStreakUpdatedAt != null)
+        'boostStreakUpdatedAt': Timestamp.fromDate(boostStreakUpdatedAt!),
+      if (mapGlowUntil != null)
+        'mapGlowUntil': Timestamp.fromDate(mapGlowUntil!),
+      if (kioskLaneUntil != null)
+        'kioskLaneUntil': Timestamp.fromDate(kioskLaneUntil!),
       // isFollowing is not stored in Firestore as it's user-specific
     };
   }
@@ -179,6 +212,21 @@ class ArtistProfileModel {
   bool get isGallerySubscription =>
       subscriptionTier == SubscriptionTier.business;
 
+  bool get hasActiveBoost {
+    if (boostScore <= 0 || lastBoostAt == null) return false;
+    return DateTime.now().difference(lastBoostAt!).inDays <= 7;
+  }
+
+  bool get hasMapGlow {
+    if (mapGlowUntil == null) return false;
+    return mapGlowUntil!.isAfter(DateTime.now());
+  }
+
+  bool get hasKioskLane {
+    if (kioskLaneUntil == null) return false;
+    return kioskLaneUntil!.isAfter(DateTime.now());
+  }
+
   /// Get maximum number of artworks allowed for this subscription
   int get maxArtworkCount {
     switch (subscriptionTier) {
@@ -231,6 +279,12 @@ class ArtistProfileModel {
     int? viewsCount,
     int? artworksCount,
     int? followersCount,
+    double? boostScore,
+    DateTime? lastBoostAt,
+    int? boostStreakMonths,
+    DateTime? boostStreakUpdatedAt,
+    DateTime? mapGlowUntil,
+    DateTime? kioskLaneUntil,
   }) {
     return ArtistProfileModel(
       id: id ?? this.id,
@@ -257,6 +311,13 @@ class ArtistProfileModel {
       viewsCount: viewsCount ?? this.viewsCount,
       artworksCount: artworksCount ?? this.artworksCount,
       followersCount: followersCount ?? this.followersCount,
+      boostScore: boostScore ?? this.boostScore,
+      lastBoostAt: lastBoostAt ?? this.lastBoostAt,
+      boostStreakMonths: boostStreakMonths ?? this.boostStreakMonths,
+      boostStreakUpdatedAt:
+          boostStreakUpdatedAt ?? this.boostStreakUpdatedAt,
+      mapGlowUntil: mapGlowUntil ?? this.mapGlowUntil,
+      kioskLaneUntil: kioskLaneUntil ?? this.kioskLaneUntil,
     );
   }
 }

@@ -11,8 +11,7 @@ class ArtistEarningsHub extends StatefulWidget {
   const ArtistEarningsHub({super.key});
 
   @override
-  State<ArtistEarningsHub> createState() =>
-      _ArtistEarningsHubState();
+  State<ArtistEarningsHub> createState() => _ArtistEarningsHubState();
 }
 
 class _ArtistEarningsHubState extends State<ArtistEarningsHub>
@@ -57,10 +56,12 @@ class _ArtistEarningsHubState extends State<ArtistEarningsHub>
       core.AppLogger.info('✅ Artist earnings loaded');
 
       core.AppLogger.info('💰 Fetching earnings transactions...');
-      final transactions =
-          await _earningsService.getEarningsTransactions(limit: 10);
+      final transactions = await _earningsService.getEarningsTransactions(
+        limit: 10,
+      );
       core.AppLogger.info(
-          '✅ Transactions loaded: ${transactions.length} items');
+        '✅ Transactions loaded: ${transactions.length} items',
+      );
 
       core.AppLogger.info('💳 Fetching payout history...');
       final payouts = await _earningsService.getPayoutHistory(limit: 5);
@@ -176,9 +177,9 @@ class _ArtistEarningsHubState extends State<ArtistEarningsHub>
                   Text(
                     '🔍 Firestore Index Required',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: Colors.orange[700],
-                          fontWeight: FontWeight.bold,
-                        ),
+                      color: Colors.orange[700],
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 8),
                 ],
@@ -191,9 +192,9 @@ class _ArtistEarningsHubState extends State<ArtistEarningsHub>
                   child: SelectableText(
                     _errorMessage!,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.grey[800],
-                          fontFamily: 'monospace',
-                        ),
+                      color: Colors.grey[800],
+                      fontFamily: 'monospace',
+                    ),
                     textAlign: TextAlign.left,
                   ),
                 ),
@@ -236,16 +237,19 @@ class _ArtistEarningsHubState extends State<ArtistEarningsHub>
         children: [
           Row(
             children: [
-              const Icon(Icons.account_balance_wallet,
-                  color: Colors.white, size: 28),
+              const Icon(
+                Icons.account_balance_wallet,
+                color: Colors.white,
+                size: 28,
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   'Career Earnings',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -254,9 +258,9 @@ class _ArtistEarningsHubState extends State<ArtistEarningsHub>
           Text(
             '\$${_earnings!.totalEarnings.toStringAsFixed(2)}',
             style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 16),
           Row(
@@ -286,7 +290,11 @@ class _ArtistEarningsHubState extends State<ArtistEarningsHub>
   }
 
   Widget _buildEarningsCard(
-      String title, String amount, Color bgColor, Color textColor) {
+    String title,
+    String amount,
+    Color bgColor,
+    Color textColor,
+  ) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -340,23 +348,23 @@ class _ArtistEarningsHubState extends State<ArtistEarningsHub>
     final breakdown = [
       {
         'label': 'Boost Earnings',
-        'amount': _earnings!.promotionSupportEarnings,
-        'color': Colors.pink
+        'amount': _earnings!.boostEarnings,
+        'color': Colors.pink,
       },
       {
         'label': 'Sponsorships',
         'amount': _earnings!.sponsorshipEarnings,
-        'color': Colors.purple
+        'color': Colors.purple,
       },
       {
         'label': 'Commission Work',
         'amount': _earnings!.commissionEarnings,
-        'color': Colors.blue
+        'color': Colors.blue,
       },
       {
         'label': 'Subscriptions',
         'amount': _earnings!.subscriptionEarnings,
-        'color': Colors.orange
+        'color': Colors.orange,
       },
     ];
 
@@ -368,39 +376,41 @@ class _ArtistEarningsHubState extends State<ArtistEarningsHub>
           children: [
             Text(
               tr('art_walk_earnings_breakdown'),
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            ...breakdown.map((item) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 12,
-                        height: 12,
-                        decoration: BoxDecoration(
-                          color: item['color'] as Color,
-                          shape: BoxShape.circle,
-                        ),
+            ...breakdown.map(
+              (item) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 12,
+                      height: 12,
+                      decoration: BoxDecoration(
+                        color: item['color'] as Color,
+                        shape: BoxShape.circle,
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          item['label'] as String,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        item['label'] as String,
+                        style: Theme.of(context).textTheme.bodyMedium,
                       ),
-                      Text(
-                        '\$${(item['amount'] as double).toStringAsFixed(2)}',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                    ),
+                    Text(
+                      '\$${(item['amount'] as double).toStringAsFixed(2)}',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
                       ),
-                    ],
-                  ),
-                )),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -416,16 +426,17 @@ class _ArtistEarningsHubState extends State<ArtistEarningsHub>
           children: [
             Text(
               tr('art_walk_quick_actions'),
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             Row(
               children: [
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: _earnings?.availableBalance != null &&
+                    onPressed:
+                        _earnings?.availableBalance != null &&
                             _earnings!.availableBalance > 0
                         ? () => _navigateToPayoutRequest()
                         : null,
@@ -468,8 +479,8 @@ class _ArtistEarningsHubState extends State<ArtistEarningsHub>
                   child: Text(
                     tr('art_walk_recent_activity'),
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 TextButton(
@@ -622,9 +633,9 @@ class _ArtistEarningsHubState extends State<ArtistEarningsHub>
           children: [
             Text(
               '\$${payout.amount.toStringAsFixed(2)}',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             Text(
               payout.status.toUpperCase(),

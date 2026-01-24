@@ -2,18 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/artist_boost_service.dart';
+import '../services/in_app_purchase_setup.dart';
 import '../utils/logger.dart';
-import '../theme/artbeat_colors.dart';
 import '../theme/glass_card.dart';
 
 class ArtistBoostWidget extends StatefulWidget {
   final String recipientId;
   final String recipientName;
+  final VoidCallback? onBoostCompleted;
 
   const ArtistBoostWidget({
     super.key,
     required this.recipientId,
     required this.recipientName,
+    this.onBoostCompleted,
   });
 
   @override
@@ -22,9 +24,11 @@ class ArtistBoostWidget extends StatefulWidget {
 
 class _ArtistBoostWidgetState extends State<ArtistBoostWidget> {
   final ArtistBoostService _boostService = ArtistBoostService();
+  final InAppPurchaseSetup _purchaseSetup = InAppPurchaseSetup();
   bool _isLoading = false;
   bool _isInitializing = true;
   String? _initError;
+  final bool _showCelebration = false;
 
   @override
   void initState() {
@@ -38,163 +42,490 @@ class _ArtistBoostWidgetState extends State<ArtistBoostWidget> {
       _initError = null;
     });
 
-    await Future.delayed(const Duration(milliseconds: 300));
+    try {
+      AppLogger.info('🛒 Checking in-app purchase availability...');
 
-    if (!_boostService.isAvailable) {
-      setState(() {
-        _initError = 'Store unavailable. Check your connection.';
-        _isInitializing = false;
-      });
-      return;
+      // Attempt to initialize the purchase service if not already available
+      if (!_boostService.isAvailable) {
+        AppLogger.info(
+          '🔄 Purchase service not available, attempting initialization...',
+        );
+        final initialized = await _purchaseSetup.initialize();
+
+        if (!initialized) {
+          AppLogger.error('❌ Failed to initialize in-app purchases');
+          AppLogger.warning('⚠️ This may be due to:');
+          AppLogger.warning(
+            '  - Running on simulator without StoreKit configuration',
+          );
+          AppLogger.warning('  - No internet connection to App Store');
+          AppLogger.warning('  - In-app purchase capability not enabled');
+          if (mounted) {
+            setState(() {
+              _initError =
+                  'Store unavailable.\n\n'
+                  'Common causes:\n'
+                  '• Running on simulator without StoreKit\n'
+                  '• No App Store connection\n'
+                  '• Testing setup incomplete\n\n'
+                  'For StoreKit testing:\n'
+                  '1. In Xcode, go to Product > Scheme > Edit Scheme\n'
+                  '2. Under Run > Options\n'
+                  '3. Set StoreKit Configuration to ArtBeat.storekit';
+              _isInitializing = false;
+            });
+          }
+          return;
+        }
+
+        AppLogger.info('✅ In-app purchases initialized successfully');
+      }
+
+      // Double-check availability after initialization attempt
+      if (!_boostService.isAvailable) {
+        AppLogger.warning(
+          '⚠️ Purchase service still not available after initialization',
+        );
+        if (mounted) {
+          setState(() {
+            _initError = 'Store unavailable. Check your connection.';
+            _isInitializing = false;
+          });
+        }
+        return;
+      }
+
+      AppLogger.info('✅ Purchase service is available');
+      if (mounted) {
+        setState(() {
+          _isInitializing = false;
+        });
+      }
+    } catch (e) {
+      AppLogger.error('❌ Error checking purchase availability: $e');
+      if (mounted) {
+        setState(() {
+          _initError = 'Store unavailable. Check your connection.';
+          _isInitializing = false;
+        });
+      }
     }
-
-    setState(() {
-      _isInitializing = false;
-    });
   }
 
-  final List<Map<String, dynamic>> _boosts = [
+  final List<Map<String, dynamic>> _boostOptions = [
     {
-      'id': 'artbeat_gift_small',
-      'name': 'The Quick Spark',
+      'id': 'artbeat_boost_spark',
+      'name': 'Spark Boost',
       'icon': '⚡',
       'price': 4.99,
-      'xp': '+50 XP',
-      'powerLevel': 'BASIC BUFF',
-      'description': '30 Days "Glow" effect + Featured artist status!',
-      'gradient': const LinearGradient(colors: [Color(0xFF8C52FF), Color(0xFF00BFA5)]),
+      'momentum': '+50 Momentum',
+      'momentumValue': 50,
+      'powerLevel': 'SPARK',
+      'description': 'Local discovery lift + supporter badge.',
+      'gradient': const LinearGradient(
+        colors: [Color(0xFFFB7185), Color(0xFF22D3EE)],
+      ),
     },
     {
-      'id': 'artbeat_gift_medium',
-      'name': 'The Neon Surge',
+      'id': 'artbeat_boost_surge',
+      'name': 'Surge Boost',
       'icon': '🌈',
       'price': 9.99,
-      'xp': '+100 XP',
-      'powerLevel': 'RARE EXPANSION',
-      'description': '90 Days Featured Artist + 1 "Shiny" Artwork slot!',
-      'gradient': const LinearGradient(colors: [Color(0xFFFF6B35), Color(0xFFFFD700)]),
+      'momentum': '+120 Momentum',
+      'momentumValue': 120,
+      'powerLevel': 'SURGE',
+      'description': 'Map pin glow + follow recommendations.',
+      'gradient': const LinearGradient(
+        colors: [Color(0xFFF97316), Color(0xFFFACC15)],
+      ),
     },
     {
-      'id': 'artbeat_gift_large',
-      'name': 'The Titan Overdrive',
-      'icon': '🛡️',
-      'price': 24.99,
-      'xp': '+250 XP',
-      'powerLevel': 'EPIC GEAR',
-      'description': 'Max Visibility + 5 Slots + Global Ad Rotation!',
-      'gradient': const LinearGradient(colors: [Color(0xFF00BFA5), Color(0xFF007BFF)]),
-    },
-    {
-      'id': 'artbeat_gift_premium',
-      'name': 'The Mythic Expansion',
+      'id': 'artbeat_boost_overdrive',
+      'name': 'Overdrive Boost',
       'icon': '💎',
-      'price': 49.99,
-      'xp': '+500 XP',
-      'powerLevel': 'MYTHIC LEGACY',
-      'description': '1 Year "Legendary" status + Zero Commission Sales!',
-      'gradient': const LinearGradient(colors: [Color(0xFFE91E63), Color(0xFF8C52FF)]),
+      'price': 24.99,
+      'momentum': '+350 Momentum',
+      'momentumValue': 350,
+      'powerLevel': 'OVERDRIVE',
+      'description': 'Scheduled Kiosk Lane placement.',
+      'gradient': const LinearGradient(
+        colors: [Color(0xFF34D399), Color(0xFF0EA5E9)],
+      ),
     },
   ];
 
   Future<void> _activateBoost(String boostId, double price) async {
-    AppLogger.info('🚀 Activating boost: $boostId (\$${price.toStringAsFixed(2)})');
+    AppLogger.info('===============================================');
+    AppLogger.info('🚨 BOOST ACTIVATION STARTED: $boostId');
+    AppLogger.info('===============================================');
+    AppLogger.info(
+      '🚀 Activating boost: $boostId (\$${price.toStringAsFixed(2)})',
+    );
     setState(() => _isLoading = true);
 
     try {
       final user = FirebaseAuth.instance.currentUser;
+      AppLogger.info('🚨 User check: ${user?.uid ?? "NO USER"}');
       if (user == null) {
         _showError('Sign in to power-up this artist!');
         setState(() => _isLoading = false);
         return;
       }
 
+      AppLogger.info('🚨 Recipient check: ${widget.recipientId}');
       if (user.uid == widget.recipientId) {
         _showError('You cannot boost yourself! 🛡️');
         setState(() => _isLoading = false);
         return;
       }
 
+      AppLogger.info('🚨 About to call purchaseBoost...');
+      AppLogger.info('🛒 Attempting purchase for boost: $boostId');
+
       final success = await _boostService.purchaseBoost(
         recipientId: widget.recipientId,
         boostProductId: boostId,
-        message: 'POWERED UP BY ${user.displayName ?? "A FAN"}!',
+        message: 'FUELED BY ${user.displayName ?? "A FAN"}!',
       );
+
+      AppLogger.info('🚨 Purchase result: $success');
+      AppLogger.info('🛒 Purchase result: $success');
 
       if (!mounted) return;
 
       if (success) {
-        _showSuccess('BOOST ACTIVATED! 🚀');
-        // Placeholder for the splash effect animation hook
-        _triggerSplashEffect();
-        Future.delayed(const Duration(seconds: 2), () {
-          if (mounted) Navigator.pop(context);
-        });
+        setState(() => _isLoading = false);
+        // Show celebratory success screen
+        await _showSuccessScreen(boostId, price);
+        if (mounted) {
+          // Call the callback to refresh parent screen
+          widget.onBoostCompleted?.call();
+          Navigator.pop(context);
+        }
       } else {
-        _showError('Activation failed. Check store settings.');
+        _showError('Activation failed. Store connection issue.');
         setState(() => _isLoading = false);
       }
     } catch (e) {
+      AppLogger.error('🚨 EXCEPTION CAUGHT: $e');
       AppLogger.error('Error activating boost: $e');
-      _showError('An error occurred during activation.');
-      setState(() => _isLoading = false);
+      if (mounted) {
+        _showError('Error: ${e.toString().replaceAll('Exception: ', '')}');
+        setState(() => _isLoading = false);
+      }
     }
   }
 
-  void _triggerSplashEffect() {
-    // This will be connected to the visual celebration service later
-    AppLogger.info('✨ TRIGGER: Global profile splash effect for ${widget.recipientId}');
+  Future<void> _showSuccessScreen(String boostId, double price) async {
+    final boostData = _boostOptions.firstWhere((b) => b['id'] == boostId);
+    final momentum = boostData['momentumValue'] as int;
+    final powerLevel = boostData['powerLevel'] as String;
+
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          padding: const EdgeInsets.all(32),
+          decoration: BoxDecoration(
+            gradient: boostData['gradient'] as LinearGradient,
+            borderRadius: BorderRadius.circular(32),
+            boxShadow: [
+              BoxShadow(
+                color: (boostData['gradient'] as LinearGradient).colors.first
+                    .withValues(alpha: 0.3),
+                blurRadius: 30,
+                spreadRadius: 10,
+              ),
+            ],
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Celebration icon
+                const Icon(
+                  Icons.celebration_rounded,
+                  size: 80,
+                  color: Colors.white,
+                ),
+                const SizedBox(height: 24),
+
+                // Success title
+                Text(
+                  'BOOST ACTIVATED!',
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 32,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                    letterSpacing: 1.2,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+
+                // Power level
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    powerLevel,
+                    style: GoogleFonts.spaceGrotesk(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                      letterSpacing: 2,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 32),
+
+                // Impact details
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.3),
+                      width: 2,
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      // Momentum added
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.bolt_rounded,
+                            color: Colors.white,
+                            size: 32,
+                          ),
+                          const SizedBox(width: 12),
+                          Flexible(
+                            child: Text(
+                              '+$momentum Momentum',
+                              style: GoogleFonts.spaceGrotesk(
+                                fontSize: 28,
+                                fontWeight: FontWeight.w900,
+                                color: Colors.white,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Impact description
+                      Text(
+                        '${widget.recipientName}\'s discovery momentum is now amplified!',
+                        style: GoogleFonts.spaceGrotesk(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white.withValues(alpha: 0.95),
+                          height: 1.4,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 12),
+
+                      Text(
+                        '• Profile visibility increased in discovery feeds\n• Higher placement in search and recommendations\n• Your boost is reflected in their profile',
+                        style: GoogleFonts.spaceGrotesk(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white.withValues(alpha: 0.85),
+                          height: 1.6,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 32),
+
+                // Supporter badge
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.stars_rounded,
+                        color: Color(0xFFFFC857),
+                        size: 24,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '$powerLevel Boost Active',
+                        style: GoogleFonts.spaceGrotesk(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Close button
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () => Navigator.pop(context),
+                    borderRadius: BorderRadius.circular(24),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 32,
+                        vertical: 16,
+                      ),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.white.withValues(alpha: 0.3),
+                            Colors.white.withValues(alpha: 0.2),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.4),
+                          width: 2,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'View Their Profile',
+                            style: GoogleFonts.spaceGrotesk(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          const Icon(
+                            Icons.arrow_forward_rounded,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   void _showError(String message) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message, style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold)),
+        content: Text(
+          message,
+          style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Colors.redAccent,
-      ),
-    );
-  }
-
-  void _showSuccess(String message) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message, style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold)),
-        backgroundColor: ArtbeatColors.primaryGreen,
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF03050F).withValues(alpha: 0.95),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildHeader(),
-          const SizedBox(height: 24),
-          if (_isInitializing)
-            const Center(child: CircularProgressIndicator(color: Colors.cyanAccent))
-          else if (_initError != null)
-            _buildErrorState()
-          else
-            _buildBoostList(),
-          if (_isLoading)
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.only(top: 20),
-                child: CircularProgressIndicator(color: Colors.pinkAccent),
+    return Stack(
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF03050F).withValues(alpha: 0.95),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeader(),
+              const SizedBox(height: 24),
+              if (_isInitializing)
+                const Center(
+                  child: CircularProgressIndicator(color: Colors.cyanAccent),
+                )
+              else if (_initError != null)
+                _buildErrorState()
+              else
+                _buildBoostList(),
+              if (_isLoading)
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 20),
+                    child: CircularProgressIndicator(color: Colors.pinkAccent),
+                  ),
+                ),
+              const SizedBox(height: 20),
+            ],
+          ),
+        ),
+        if (_showCelebration)
+          Positioned.fill(
+            child: IgnorePointer(
+              child: AnimatedOpacity(
+                opacity: _showCelebration ? 1 : 0,
+                duration: const Duration(milliseconds: 300),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(32),
+                    ),
+                    gradient: RadialGradient(
+                      radius: 0.8,
+                      colors: [
+                        Colors.pinkAccent.withValues(alpha: 0.35),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                  child: Center(
+                    child: TweenAnimationBuilder<double>(
+                      tween: Tween(begin: 0.8, end: 1.15),
+                      duration: const Duration(milliseconds: 800),
+                      builder: (context, value, child) {
+                        return Transform.scale(scale: value, child: child);
+                      },
+                      child: Icon(
+                        Icons.auto_awesome,
+                        size: 90,
+                        color: Colors.white.withValues(alpha: 0.9),
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ),
-          const SizedBox(height: 20),
-        ],
-      ),
+          ),
+      ],
     );
   }
 
@@ -207,7 +538,7 @@ class _ArtistBoostWidgetState extends State<ArtistBoostWidget> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'POWER-UP ARTIST',
+                'FUEL THE ARTIST',
                 style: GoogleFonts.spaceGrotesk(
                   fontSize: 14,
                   fontWeight: FontWeight.w900,
@@ -236,25 +567,32 @@ class _ArtistBoostWidgetState extends State<ArtistBoostWidget> {
 
   Widget _buildBoostList() {
     return Column(
-      children: _boosts.map((boost) => _buildBoostCard(boost)).toList(),
+      children: _boostOptions.map((boost) => _buildBoostCard(boost)).toList(),
     );
   }
 
   Widget _buildBoostCard(Map<String, dynamic> boost) {
-    final bool isTitan = boost['id'] == 'artbeat_gift_large';
-    final bool isMythic = boost['id'] == 'artbeat_gift_premium';
+    final bool isOverdrive = boost['id'] == 'artbeat_boost_overdrive';
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: GlassCard(
         padding: const EdgeInsets.all(16),
         blur: 20,
-        showAccentGlow: isTitan || isMythic,
-        accentColor: isMythic ? Colors.pinkAccent : Colors.cyanAccent,
-        onTap: _isLoading ? null : () => _activateBoost(boost['id'] as String, boost['price'] as double),
+        showAccentGlow: isOverdrive,
+        accentColor: isOverdrive ? Colors.cyanAccent : Colors.white24,
+        onTap: _isLoading
+            ? null
+            : () {
+                AppLogger.info('🎯 Boost card tapped: ${boost['id']}');
+                _activateBoost(boost['id'] as String, boost['price'] as double);
+              },
         child: Row(
           children: [
-            _buildIconBox(boost['icon'] as String, boost['gradient'] as LinearGradient),
+            _buildIconBox(
+              boost['icon'] as String,
+              boost['gradient'] as LinearGradient,
+            ),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
@@ -262,17 +600,23 @@ class _ArtistBoostWidgetState extends State<ArtistBoostWidget> {
                 children: [
                   Row(
                     children: [
-                      Text(
-                        boost['name'] as String,
-                        style: GoogleFonts.spaceGrotesk(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
+                      Flexible(
+                        child: Text(
+                          boost['name'] as String,
+                          style: GoogleFonts.spaceGrotesk(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       const SizedBox(width: 8),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.white.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(4),
@@ -312,7 +656,7 @@ class _ArtistBoostWidgetState extends State<ArtistBoostWidget> {
                   ),
                 ),
                 Text(
-                  boost['xp'] as String,
+                  boost['momentum'] as String,
                   style: GoogleFonts.spaceGrotesk(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
@@ -342,12 +686,7 @@ class _ArtistBoostWidgetState extends State<ArtistBoostWidget> {
           ),
         ],
       ),
-      child: Center(
-        child: Text(
-          icon,
-          style: const TextStyle(fontSize: 28),
-        ),
-      ),
+      child: Center(child: Text(icon, style: const TextStyle(fontSize: 28))),
     );
   }
 
@@ -363,7 +702,10 @@ class _ArtistBoostWidgetState extends State<ArtistBoostWidget> {
           ),
           TextButton(
             onPressed: _checkAvailability,
-            child: const Text('RETRY', style: TextStyle(color: Colors.cyanAccent)),
+            child: const Text(
+              'RETRY',
+              style: TextStyle(color: Colors.cyanAccent),
+            ),
           ),
         ],
       ),

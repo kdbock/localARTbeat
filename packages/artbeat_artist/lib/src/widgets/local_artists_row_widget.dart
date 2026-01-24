@@ -1,18 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:artbeat_core/src/utils/coordinate_validator.dart'
+    show SimpleLatLng;
 import 'package:easy_localization/easy_localization.dart';
 
 /// Widget that displays a horizontal list of local artists
 class LocalArtistsRowWidget extends StatelessWidget {
   final String zipCode;
   final VoidCallback? onSeeAllPressed;
+  static const int _maxArtists = 50;
 
   const LocalArtistsRowWidget({
     super.key,
     required this.zipCode,
     this.onSeeAllPressed,
   });
+
+  Future<SimpleLatLng?> _resolveViewerLocation() async {
+    final zipCoords = await LocationUtils.getCoordinatesFromZipCode(zipCode);
+    if (zipCoords != null) {
+      return zipCoords;
+    }
+    return GeoWeightingUtils.resolveViewerLocation(null);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,8 +54,8 @@ class LocalArtistsRowWidget extends StatelessWidget {
           child: StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
                 .collection('artistProfiles')
-                .where('location', isEqualTo: zipCode)
-                .limit(10)
+                .where('isPortfolioPublic', isEqualTo: true)
+                .limit(_maxArtists)
                 .snapshots(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -112,105 +123,226 @@ class LocalArtistsRowWidget extends StatelessWidget {
                 );
               }
 
-              final artists = snapshot.data!.docs.map((doc) {
-                return ArtistProfileModel.fromFirestore(doc);
-              }).toList();
+              final artists = snapshot.data!.docs
+                  .map((doc) => ArtistProfileModel.fromFirestore(doc))
+                  .toList();
 
-              return ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: artists.length,
-                itemBuilder: (context, index) {
-                  final artist = artists[index];
-                  return Padding(
-                    padding: EdgeInsets.only(
-                      left: index == 0 ? 16.0 : 8.0,
-                      right: index == artists.length - 1 ? 16.0 : 8.0,
+              return FutureBuilder<SimpleLatLng?>(
+                future: _resolveViewerLocation(),
+                builder: (context, locationSnapshot) {
+                  if (locationSnapshot.connectionState ==
+                      ConnectionState.waiting) {
+                    return const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(20.0),
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                  }
+
+                  return FutureBuilder<List<ArtistProfileModel>>(
+                    future: GeoWeightingUtils.sortByDistance<
+                        ArtistProfileModel>(
+                      items: artists,
+                      idOf: (artist) => artist.userId,
+                      locationOf: (artist) => artist.location,
+                      viewerLocation: locationSnapshot.data,
+                      tieBreaker: (a, b) {
+                        final scoreCompare =
+                            b.boostScore.compareTo(a.boostScore);
+                        if (scoreCompare != 0) return scoreCompare;
+                        final aBoost =
+                            a.lastBoostAt ??
+                            DateTime.fromMillisecondsSinceEpoch(0);
+                        final bBoost =
+                            b.lastBoostAt ??
+                            DateTime.fromMillisecondsSinceEpoch(0);
+                        final boostTimeCompare = bBoost.compareTo(aBoost);
+                        if (boostTimeCompare != 0) return boostTimeCompare;
+                        return a.displayName.compareTo(b.displayName);
+                      },
                     ),
-                    child: SizedBox(
-                      width: 120,
-                      child: Column(
-                        children: [
-                          Stack(
-                            alignment: Alignment.topRight,
-                            children: [
-                              Container(
-                                width: 120,
-                                height: 120,
-                                decoration: BoxDecoration(
-                                  border: artist.isVerified
-                                      ? Border.all(
-                                          color: Colors.blue,
-                                          width: 2,
-                                        )
-                                      : artist.isFeatured
-                                          ? Border.all(
-                                              color: Colors.amber,
-                                              width: 2,
-                                            )
-                                          : null,
-                                  borderRadius: BorderRadius.circular(12),
-                                  image: (artist.profileImageUrl != null &&
-                                          artist.profileImageUrl!.isNotEmpty &&
-                                          (artist.profileImageUrl!
-                                                  .startsWith('http://') ||
-                                              artist.profileImageUrl!
-                                                  .startsWith('https://')) &&
-                                          artist.profileImageUrl !=
-                                              'placeholder_headshot_url')
-                                      ? DecorationImage(
-                                          image: ImageUrlValidator
-                                              .safeNetworkImage(
-                                                  artist.profileImageUrl)!,
-                                          fit: BoxFit.cover,
-                                        )
-                                      : null,
-                                ),
-                                child: !ImageUrlValidator.isValidImageUrl(
-                                        artist.profileImageUrl)
-                                    ? const Icon(
-                                        Icons.person,
-                                        size: 60,
-                                        color: Colors.grey,
-                                      )
-                                    : null,
-                              ),
-                              if (artist.isVerified || artist.isFeatured)
-                                Positioned(
-                                  top: 4,
-                                  right: 4,
-                                  child: Container(
-                                    padding: const EdgeInsets.all(4),
-                                    decoration: BoxDecoration(
-                                      color: artist.isVerified
-                                          ? Colors.blue
-                                          : Colors.amber,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Icon(
-                                      artist.isVerified
-                                          ? Icons.verified
-                                          : Icons.star,
-                                      color: Colors.white,
-                                      size: 16,
+                    builder: (context, sortedSnapshot) {
+                      final sortedArtists =
+                          sortedSnapshot.data ?? artists;
+
+                      return ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: sortedArtists.length,
+                        itemBuilder: (context, index) {
+                          final artist = sortedArtists[index];
+                          return Padding(
+                            padding: EdgeInsets.only(
+                              left: index == 0 ? 16.0 : 8.0,
+                              right: index == sortedArtists.length - 1
+                                  ? 16.0
+                                  : 8.0,
+                            ),
+                            child: SizedBox(
+                              width: 120,
+                              child: Column(
+                                children: [
+                                  Stack(
+                                    alignment: Alignment.topRight,
+                                    children: [
+                                      if (artist.hasActiveBoost)
+                                        Positioned(
+                                          top: 6,
+                                          left: 6,
+                                          child: Tooltip(
+                                            message:
+                                                'boost_badge_tooltip'.tr(),
+                                            child: Container(
+                                              padding: const EdgeInsets.all(4),
+                                              decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                gradient:
+                                                    const LinearGradient(
+                                                  colors: [
+                                                    Color(0xFFF97316),
+                                                    Color(0xFF22D3EE),
+                                                  ],
+                                                ),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color:
+                                                        const Color(0xFF22D3EE)
+                                                            .withValues(
+                                                      alpha: 0.4,
+                                                    ),
+                                                    blurRadius: 8,
+                                                    offset: const Offset(0, 4),
+                                                  ),
+                                                ],
+                                              ),
+                                              child: const Icon(
+                                                Icons.bolt_rounded,
+                                                size: 14,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      BoostPulseRing(
+                                        enabled: artist.hasActiveBoost,
+                                        ringPadding: 4,
+                                        ringWidth: 2,
+                                        child: Container(
+                                          width: 120,
+                                          height: 120,
+                                          decoration: BoxDecoration(
+                                            border: artist.isVerified
+                                                ? Border.all(
+                                                    color: Colors.blue,
+                                                    width: 2,
+                                                  )
+                                                : artist.isFeatured
+                                                    ? Border.all(
+                                                        color: Colors.amber,
+                                                        width: 2,
+                                                      )
+                                                    : null,
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                            boxShadow: artist.hasMapGlow
+                                                ? [
+                                                    BoxShadow(
+                                                      color:
+                                                          const Color(0xFF22D3EE)
+                                                              .withValues(
+                                                        alpha: 0.45,
+                                                      ),
+                                                      blurRadius: 18,
+                                                      spreadRadius: 2,
+                                                    ),
+                                                    BoxShadow(
+                                                      color:
+                                                          const Color(0xFFF97316)
+                                                              .withValues(
+                                                        alpha: 0.35,
+                                                      ),
+                                                      blurRadius: 12,
+                                                      spreadRadius: 1,
+                                                    ),
+                                                  ]
+                                                : null,
+                                            image: (artist.profileImageUrl !=
+                                                        null &&
+                                                    artist.profileImageUrl!
+                                                        .isNotEmpty &&
+                                                    (artist.profileImageUrl!
+                                                            .startsWith(
+                                                          'http://',
+                                                        ) ||
+                                                        artist.profileImageUrl!
+                                                            .startsWith(
+                                                          'https://',
+                                                        )) &&
+                                                    artist.profileImageUrl !=
+                                                        'placeholder_headshot_url')
+                                                ? DecorationImage(
+                                                    image: ImageUrlValidator
+                                                        .safeNetworkImage(
+                                                      artist.profileImageUrl,
+                                                    )!,
+                                                    fit: BoxFit.cover,
+                                                  )
+                                                : null,
+                                          ),
+                                          child: !ImageUrlValidator
+                                                  .isValidImageUrl(
+                                            artist.profileImageUrl,
+                                          )
+                                              ? const Icon(
+                                                  Icons.person,
+                                                  size: 60,
+                                                  color: Colors.grey,
+                                                )
+                                              : null,
+                                        ),
+                                      ),
+                                      if (artist.isVerified ||
+                                          artist.isFeatured)
+                                        Positioned(
+                                          top: 4,
+                                          right: 4,
+                                          child: Container(
+                                            padding: const EdgeInsets.all(4),
+                                            decoration: BoxDecoration(
+                                              color: artist.isVerified
+                                                  ? Colors.blue
+                                                  : Colors.amber,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: Icon(
+                                              artist.isVerified
+                                                  ? Icons.verified
+                                                  : Icons.star,
+                                              color: Colors.white,
+                                              size: 16,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    artist.displayName,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
                                     ),
                                   ),
-                                ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            artist.displayName,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
+                          );
+                        },
+                      );
+                    },
                   );
                 },
               );

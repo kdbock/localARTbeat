@@ -254,6 +254,7 @@ class ArtistBoostPurchase {
   final DateTime purchaseDate;
   final String status;
   final String? transactionId;
+  final int? momentum;
 
   ArtistBoostPurchase({
     required this.id,
@@ -266,6 +267,7 @@ class ArtistBoostPurchase {
     required this.purchaseDate,
     required this.status,
     this.transactionId,
+    this.momentum,
   });
 
   factory ArtistBoostPurchase.fromFirestore(DocumentSnapshot doc) {
@@ -281,6 +283,7 @@ class ArtistBoostPurchase {
       purchaseDate: (data['purchaseDate'] as Timestamp).toDate(),
       status: data['status'] as String,
       transactionId: data['transactionId'] as String?,
+      momentum: data['momentum'] as int?,
     );
   }
 
@@ -295,6 +298,7 @@ class ArtistBoostPurchase {
       'purchaseDate': Timestamp.fromDate(purchaseDate),
       'status': status,
       if (transactionId != null) 'transactionId': transactionId,
+      if (momentum != null) 'momentum': momentum,
     };
   }
 }

@@ -672,7 +672,7 @@
       "collectionGroup": "giftSubscriptions",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "supporterId", "order": "ASCENDING" },
+        { "fieldPath": "boosterId", "order": "ASCENDING" },
         { "fieldPath": "status", "order": "ASCENDING" },
         { "fieldPath": "createdAt", "order": "DESCENDING" }
       ]

@@ -44,8 +44,10 @@ class _OnboardingCompletionScreenState
 
   Future<void> _shareProfile() async {
     // TODO: Get actual profile URL
-    await Share.share(
-      'Check out my artist profile on ArtBeat! artbeat.com/artist/username',
+    await SharePlus.instance.share(
+      ShareParams(
+        text: 'Check out my artist profile on ArtBeat! artbeat.com/artist/username',
+      ),
     );
   }
 

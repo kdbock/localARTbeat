@@ -512,6 +512,41 @@ class _PortfolioCard extends StatelessWidget {
           const SizedBox(height: 12),
           Row(
             children: [
+              if (_PortfolioDataUtils.hasActiveBoost(portfolio)) ...[
+                Tooltip(
+                  message: 'boost_badge_tooltip'.tr(),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: _PortfolioPalette.accentTeal.withValues(alpha: 0.18),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.bolt_rounded,
+                          size: 14,
+                          color: _PortfolioPalette.accentTeal,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'boost_badge_label'.tr(),
+                          style: GoogleFonts.spaceGrotesk(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: _PortfolioPalette.accentTeal,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+              ],
               _PortfolioDataUtils.isVerified(portfolio)
                   ? const Icon(
                       Icons.verified,
@@ -1189,12 +1224,36 @@ class _PortfolioDataUtils {
     return (data['acceptingCommissions'] as bool?) ?? false;
   }
 
+  static double boostScore(Map<String, dynamic> data) {
+    final value = data['boostScore'] ?? data['artistMomentum'] ?? data['momentum'];
+    if (value is num) return value.toDouble();
+    return 0.0;
+  }
+
+  static DateTime? lastBoostAt(Map<String, dynamic> data) {
+    final raw = data['lastBoostAt'] ?? data['boostedAt'];
+    if (raw is Timestamp) return raw.toDate();
+    return null;
+  }
+
+  static bool hasActiveBoost(Map<String, dynamic> data) {
+    final score = boostScore(data);
+    final lastBoost = lastBoostAt(data);
+    if (score <= 0 || lastBoost == null) return false;
+    return DateTime.now().difference(lastBoost).inDays <= 7;
+  }
+
   static num rankScore(Map<String, dynamic> data) {
     final followers = followerCount(data);
     final artworks = artworkCount(data);
     final featuredBoost = isFeatured(data) ? 5000 : 0;
     final commissionBoost = acceptingCommissions(data) ? 2000 : 0;
-    return (followers * 2) + (artworks * 12) + featuredBoost + commissionBoost;
+    final boostWeight = boostScore(data) * 10;
+    return (followers * 2) +
+        (artworks * 12) +
+        featuredBoost +
+        commissionBoost +
+        boostWeight;
   }
 }
 

@@ -162,7 +162,7 @@ class _ArtistCTAWidgetState extends State<ArtistCTAWidget> {
                       children: [
                         _buildFeature(
                           icon: Icons.card_giftcard_outlined,
-                          text: 'Receive gifts',
+                          text: 'Receive boosts',
                         ),
                         _buildFeature(
                           icon: Icons.attach_money_outlined,
@@ -212,7 +212,7 @@ class _ArtistCTAWidgetState extends State<ArtistCTAWidget> {
                     // Subtitle
                     Center(
                       child: Text(
-                        'Join artists earning through gifts, sponsorships & commissions',
+                        'Join artists earning through boosts, sponsorships & commissions',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: ArtbeatColors.textSecondary,
                         ),

@@ -111,6 +111,10 @@ class _ArtistStoryScreenState extends State<ArtistStoryScreen> {
         imageQuality: 85,
       );
 
+      if (!mounted) {
+        return;
+      }
+
       if (image != null) {
         setState(() {
           _localPhotoPath = image.path;

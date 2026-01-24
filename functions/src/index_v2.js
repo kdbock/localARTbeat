@@ -5,7 +5,11 @@ const {defineSecret} = require("firebase-functions/params");
 const cors = require("cors")({origin: true});
 
 // Set global options for all functions
-setGlobalOptions({maxInstances: 10});
+setGlobalOptions({
+  maxInstances: 3,
+  cpu: 0.25,
+  memory: "256MiB",
+});
 
 // Define secret for Stripe
 const stripeSecretKey = defineSecret("STRIPE_SECRET_KEY");
@@ -16,7 +20,12 @@ admin.initializeApp();
  * Create a new customer in Stripe
  */
 exports.createCustomer = onRequest(
-  {secrets: [stripeSecretKey]},
+  {
+    secrets: [stripeSecretKey],
+    cpu: 0.25,
+    memory: "256MiB",
+    maxInstances: 3,
+  },
   (request, response) => {
     cors(request, response, async () => {
       try {
@@ -61,7 +70,12 @@ exports.createCustomer = onRequest(
  * Create a setup intent for adding payment methods
  */
 exports.createSetupIntent = onRequest(
-  {secrets: [stripeSecretKey]},
+  {
+    secrets: [stripeSecretKey],
+    cpu: 0.25,
+    memory: "256MiB",
+    maxInstances: 3,
+  },
   (request, response) => {
     cors(request, response, async () => {
       try {
@@ -100,7 +114,12 @@ exports.createSetupIntent = onRequest(
  * Get payment methods for a customer
  */
 exports.getPaymentMethods = onRequest(
-  {secrets: [stripeSecretKey]},
+  {
+    secrets: [stripeSecretKey],
+    cpu: 0.25,
+    memory: "256MiB",
+    maxInstances: 3,
+  },
   (request, response) => {
     cors(request, response, async () => {
       try {
@@ -139,7 +158,12 @@ exports.getPaymentMethods = onRequest(
  * Update customer information
  */
 exports.updateCustomer = onRequest(
-  {secrets: [stripeSecretKey]},
+  {
+    secrets: [stripeSecretKey],
+    cpu: 0.25,
+    memory: "256MiB",
+    maxInstances: 3,
+  },
   (request, response) => {
     cors(request, response, async () => {
       try {
@@ -179,7 +203,12 @@ exports.updateCustomer = onRequest(
  * Detach a payment method from a customer
  */
 exports.detachPaymentMethod = onRequest(
-  {secrets: [stripeSecretKey]},
+  {
+    secrets: [stripeSecretKey],
+    cpu: 0.25,
+    memory: "256MiB",
+    maxInstances: 3,
+  },
   (request, response) => {
     cors(request, response, async () => {
       try {
@@ -217,7 +246,12 @@ exports.detachPaymentMethod = onRequest(
  * Create a subscription
  */
 exports.createSubscription = onRequest(
-  {secrets: [stripeSecretKey]},
+  {
+    secrets: [stripeSecretKey],
+    cpu: 0.25,
+    memory: "256MiB",
+    maxInstances: 3,
+  },
   (request, response) => {
     cors(request, response, async () => {
       try {
@@ -262,7 +296,12 @@ exports.createSubscription = onRequest(
  * Cancel a subscription
  */
 exports.cancelSubscription = onRequest(
-  {secrets: [stripeSecretKey]},
+  {
+    secrets: [stripeSecretKey],
+    cpu: 0.25,
+    memory: "256MiB",
+    maxInstances: 3,
+  },
   (request, response) => {
     cors(request, response, async () => {
       try {
@@ -305,7 +344,12 @@ exports.cancelSubscription = onRequest(
  * Change subscription tier
  */
 exports.changeSubscriptionTier = onRequest(
-  {secrets: [stripeSecretKey]},
+  {
+    secrets: [stripeSecretKey],
+    cpu: 0.25,
+    memory: "256MiB",
+    maxInstances: 3,
+  },
   (request, response) => {
     cors(request, response, async () => {
       try {
@@ -358,7 +402,12 @@ exports.changeSubscriptionTier = onRequest(
  * Request a refund
  */
 exports.requestRefund = onRequest(
-  {secrets: [stripeSecretKey]},
+  {
+    secrets: [stripeSecretKey],
+    cpu: 0.25,
+    memory: "256MiB",
+    maxInstances: 3,
+  },
   (request, response) => {
     cors(request, response, async () => {
       try {

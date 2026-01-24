@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:artbeat_core/artbeat_core.dart' hide GradientBadge;
 
 import '../models/art_models.dart';
 import 'widgets.dart';
@@ -82,6 +83,7 @@ class _MiniArtistCardState extends State<MiniArtistCard> {
 
   @override
   Widget build(BuildContext context) {
+    final bool hasBoost = widget.artist.hasActiveBoost;
     return GestureDetector(
       onTap: widget.onTap,
       child: GlassCard(
@@ -91,6 +93,36 @@ class _MiniArtistCardState extends State<MiniArtistCard> {
           height: 140,
           child: Stack(
             children: [
+              if (hasBoost)
+                Positioned(
+                  top: 10,
+                  right: 10,
+                  child: Tooltip(
+                    message: 'boost_badge_tooltip'.tr(),
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFFF97316), Color(0xFF22D3EE)],
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF22D3EE)
+                                .withValues(alpha: 0.35),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.bolt_rounded,
+                        size: 14,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
               // Background image if available
               if (widget.artist.portfolioImages.isNotEmpty)
                 Positioned.fill(
@@ -142,41 +174,49 @@ class _MiniArtistCardState extends State<MiniArtistCard> {
                     Row(
                       children: [
                         // Avatar
-                        Container(
-                          width: 32,
-                          height: 32,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 1.5),
-                          ),
-                          child: ClipOval(
-                            child: widget.artist.avatarUrl.isNotEmpty
-                                ? Image.network(
-                                    widget.artist.avatarUrl,
-                                    fit: BoxFit.cover,
-                                    errorBuilder:
-                                        (context, error, stackTrace) =>
-                                            Container(
-                                              color: const Color(
-                                                0xFF7C4DFF,
-                                              ).withAlpha(77),
-                                              child: const Icon(
-                                                Icons.person,
-                                                color: Colors.white,
-                                                size: 16,
+                        BoostPulseRing(
+                          enabled: hasBoost,
+                          ringPadding: 2,
+                          ringWidth: 1.5,
+                          child: Container(
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.white,
+                                width: 1.5,
+                              ),
+                            ),
+                            child: ClipOval(
+                              child: widget.artist.avatarUrl.isNotEmpty
+                                  ? Image.network(
+                                      widget.artist.avatarUrl,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) =>
+                                              Container(
+                                                color: const Color(
+                                                  0xFF7C4DFF,
+                                                ).withAlpha(77),
+                                                child: const Icon(
+                                                  Icons.person,
+                                                  color: Colors.white,
+                                                  size: 16,
+                                                ),
                                               ),
-                                            ),
-                                  )
-                                : Container(
-                                    color: const Color(
-                                      0xFF7C4DFF,
-                                    ).withAlpha(77),
-                                    child: const Icon(
-                                      Icons.person,
-                                      color: Colors.white,
-                                      size: 16,
+                                    )
+                                  : Container(
+                                      color: const Color(
+                                        0xFF7C4DFF,
+                                      ).withAlpha(77),
+                                      child: const Icon(
+                                        Icons.person,
+                                        color: Colors.white,
+                                        size: 16,
+                                      ),
                                     ),
-                                  ),
+                            ),
                           ),
                         ),
                         const Spacer(),

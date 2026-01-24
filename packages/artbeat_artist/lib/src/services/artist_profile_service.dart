@@ -8,6 +8,7 @@ class ArtistProfileService {
   ArtistProfileService._internal();
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final core.UserService _userService = core.UserService();
   CollectionReference get _artistProfilesCollection =>
       _firestore.collection('artistProfiles');
   CollectionReference get _usersCollection => _firestore.collection('users');
@@ -332,6 +333,12 @@ class ArtistProfileService {
     DocumentSnapshot? lastDocument,
   }) async {
     try {
+      core.UserModel? currentUser;
+      try {
+        currentUser = await _userService.getCurrentUserModel();
+      } catch (_) {
+        currentUser = null;
+      }
       // Query users where userType = 'artist'
       Query usersQuery = _usersCollection
           .where('userType', isEqualTo: 'artist')
@@ -390,7 +397,27 @@ class ArtistProfileService {
         }
       }
 
-      return artists;
+      final viewerLocation =
+          await core.GeoWeightingUtils.resolveViewerLocation(currentUser);
+
+      final sorted =
+          await core.GeoWeightingUtils.sortByDistance<core.ArtistProfileModel>(
+        items: artists,
+        idOf: (artist) => artist.userId,
+        locationOf: (artist) => artist.location,
+        viewerLocation: viewerLocation,
+        tieBreaker: (a, b) {
+          final boostCompare = b.boostScore.compareTo(a.boostScore);
+          if (boostCompare != 0) return boostCompare;
+          final aBoost = a.lastBoostAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+          final bBoost = b.lastBoostAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+          final boostTimeCompare = bBoost.compareTo(aBoost);
+          if (boostTimeCompare != 0) return boostTimeCompare;
+          return a.displayName.compareTo(b.displayName);
+        },
+      );
+
+      return sorted;
     } catch (e) {
       throw Exception('Error getting all artists: $e');
     }

@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:artbeat_core/artbeat_core.dart' as core;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_community/artbeat_community.dart' as community;
@@ -28,6 +30,8 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
   final EarningsService _earningsService = EarningsService();
   final VisibilityService _analyticsService = VisibilityService();
   final core.ArtistFeatureService _featureService = core.ArtistFeatureService();
+  static const double _momentumDecayRateWeekly = 0.10;
+  static const int _weeklyMomentumCap = 600;
 
   bool _isLoading = true;
   String? _error;
@@ -117,6 +121,22 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
           ? (userDoc.data()?['artistXP'] as int? ?? 0)
           : 0;
 
+      final momentumDoc = await FirebaseFirestore.instance
+          .collection('artist_momentum')
+          .doc(userId)
+          .get();
+      final momentumData = momentumDoc.data() ?? {};
+      final rawMomentum =
+          (momentumData['momentum'] as num?)?.toDouble() ?? 0.0;
+      final weeklyMomentum =
+          (momentumData['weeklyMomentum'] as num?)?.toDouble() ?? 0.0;
+      final momentumLastUpdated =
+          (momentumData['momentumLastUpdated'] as Timestamp?)?.toDate();
+      final weeklyWindowStart =
+          (momentumData['weeklyWindowStart'] as Timestamp?)?.toDate();
+      final decayedMomentum =
+          _calculateDecayedMomentum(rawMomentum, momentumLastUpdated);
+
       return {
         'artworkCount': artworkCount,
         'profileViews': profileViews,
@@ -125,10 +145,25 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
         'artBattleAppearances': artBattleStats['totalAppearances'] ?? 0,
         'artBattleWins': artBattleStats['totalWins'] ?? 0,
         'artistXP': artistXP,
+        'momentum': decayedMomentum,
+        'weeklyMomentum': weeklyMomentum,
+        'weeklyWindowStart': weeklyWindowStart,
+        'momentumLastUpdated': momentumLastUpdated,
       };
     } catch (e) {
       return {};
     }
+  }
+
+  double _calculateDecayedMomentum(
+    double momentum,
+    DateTime? lastUpdated,
+  ) {
+    if (momentum <= 0 || lastUpdated == null) return momentum;
+    final elapsedHours = DateTime.now().difference(lastUpdated).inHours;
+    if (elapsedHours <= 0) return momentum;
+    final weeksElapsed = elapsedHours / (24 * 7);
+    return momentum * math.pow(1 - _momentumDecayRateWeekly, weeksElapsed);
   }
 
   String _calculatePowerLevel(int xp) {
@@ -356,7 +391,7 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
     final activities = <ActivityModel>[];
 
     try {
-      debugPrint('🔍 DEBUG: Loading gift activities for user: $userId');
+      debugPrint('🔍 DEBUG: Loading boost activities for user: $userId');
       final snapshot = await FirebaseFirestore.instance
           .collection('boosts')
           .where('recipientId', isEqualTo: userId)
@@ -364,7 +399,7 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
           .limit(3)
           .get();
       debugPrint(
-        '✅ DEBUG: Gift activities loaded successfully: ${snapshot.docs.length} docs',
+        '✅ DEBUG: Boost activities loaded successfully: ${snapshot.docs.length} docs',
       );
 
       for (final doc in snapshot.docs) {
@@ -375,15 +410,14 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
         final productId = data['productId'] as String? ?? '';
 
         String boostName = 'Artist Boost';
-        if (productId.contains('small')) boostName = 'Quick Spark';
-        if (productId.contains('medium')) boostName = 'Neon Surge';
-        if (productId.contains('large')) boostName = 'Titan Overdrive';
-        if (productId.contains('premium')) boostName = 'Mythic Expansion';
+        if (productId.contains('spark')) boostName = 'Spark Boost';
+        if (productId.contains('surge')) boostName = 'Surge Boost';
+        if (productId.contains('overdrive')) boostName = 'Overdrive Boost';
 
         activities.add(
           ActivityModel(
             type: ActivityType.gift,
-            title: 'Power-Up Activated!',
+            title: 'Boost Activated!',
             description: '$boostName received (\$${amount.toStringAsFixed(2)})',
             timeAgo: _formatTimeAgo(purchaseDate),
             timestamp: purchaseDate,
@@ -391,7 +425,7 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
         );
       }
     } catch (e) {
-      debugPrint('❌ DEBUG: Error loading gift activities: $e');
+      debugPrint('❌ DEBUG: Error loading boost activities: $e');
     }
 
     return activities;
@@ -484,6 +518,10 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
                   ),
                 ],
               ),
+              const SizedBox(height: 16),
+              _buildMomentumMeter(),
+              const SizedBox(height: 12),
+              _buildMomentumInsights(),
               const SizedBox(height: 16),
               Divider(color: Colors.white.withValues(alpha: 0.1)),
               const SizedBox(height: 16),
@@ -578,6 +616,79 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
     );
   }
 
+  Widget _buildMomentumMeter() {
+    final momentum = (_analytics['momentum'] as num?)?.toDouble() ?? 0.0;
+    final weeklyMomentum =
+        (_analytics['weeklyMomentum'] as num?)?.toDouble() ?? 0.0;
+    final weekStart = _analytics['weeklyWindowStart'] as DateTime?;
+    final daysSinceStart =
+        weekStart != null ? DateTime.now().difference(weekStart).inDays : null;
+    final effectiveWeekly =
+        (daysSinceStart != null && daysSinceStart >= 7) ? 0.0 : weeklyMomentum;
+    final progress = (effectiveWeekly / _weeklyMomentumCap)
+        .clamp(0.0, 1.0)
+        .toDouble();
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        color: Colors.white.withValues(alpha: 0.06),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.local_fire_department,
+                  color: Color(0xFFFF8C42), size: 20),
+              const SizedBox(width: 8),
+              Text(
+                'Momentum Meter',
+                style: GoogleFonts.spaceGrotesk(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                momentum.toStringAsFixed(0),
+                style: GoogleFonts.spaceGrotesk(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 16,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(999),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 8,
+              backgroundColor: Colors.white.withValues(alpha: 0.1),
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                Color(0xFF22D3EE),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Weekly: ${effectiveWeekly.toStringAsFixed(0)} / $_weeklyMomentumCap',
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white.withValues(alpha: 0.7),
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildActiveBoostsSection() {
     if (_activeBoosts.isEmpty) return const SizedBox.shrink();
 
@@ -606,6 +717,89 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
         ),
         const SizedBox(height: 24),
       ],
+    );
+  }
+
+  Widget _buildMomentumInsights() {
+    final weeklyMomentum =
+        (_analytics['weeklyMomentum'] as num?)?.toDouble() ?? 0.0;
+    final nextTier = _nextBoostTier(weeklyMomentum);
+    final remaining = nextTier.remaining;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Impact Preview',
+          style: GoogleFonts.poppins(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+            fontSize: 12,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.06),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                nextTier.preview,
+                style: GoogleFonts.poppins(
+                  color: Colors.white.withValues(alpha: 0.85),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                remaining > 0
+                    ? 'Next unlock: ${nextTier.label} in ${remaining.toStringAsFixed(0)} momentum'
+                    : 'Next unlock: ${nextTier.label} ready',
+                style: GoogleFonts.poppins(
+                  color: Colors.white70,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  _BoostTierInsight _nextBoostTier(double weeklyMomentum) {
+    if (weeklyMomentum < 50) {
+      return _BoostTierInsight(
+        label: 'Spark Boost',
+        remaining: 50 - weeklyMomentum,
+        preview: 'Local discovery weighting + supporter badge momentum.',
+      );
+    }
+    if (weeklyMomentum < 120) {
+      return _BoostTierInsight(
+        label: 'Surge Boost',
+        remaining: 120 - weeklyMomentum,
+        preview: 'Map glow + enhanced follow suggestions.',
+      );
+    }
+    if (weeklyMomentum < 350) {
+      return _BoostTierInsight(
+        label: 'Overdrive Boost',
+        remaining: 350 - weeklyMomentum,
+        preview: 'Kiosk lane rotation slot + peak discovery window.',
+      );
+    }
+    return _BoostTierInsight(
+      label: 'Momentum Maxed',
+      remaining: 0,
+      preview: 'You are at peak momentum this week.',
     );
   }
 
@@ -1507,4 +1701,16 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
       ),
     );
   }
+}
+
+class _BoostTierInsight {
+  final String label;
+  final double remaining;
+  final String preview;
+
+  _BoostTierInsight({
+    required this.label,
+    required this.remaining,
+    required this.preview,
+  });
 }

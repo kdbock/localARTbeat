@@ -19,6 +19,7 @@ class _ArtistListWidgetState extends State<ArtistListWidget>
     with AutomaticKeepAliveClientMixin {
   final List<ArtistProfileModel> _artists = [];
   final Map<String, int> _followerCounts = {};
+  final UserService _userService = UserService();
   bool _isLoading = true;
   bool _hasError = false;
   String? _errorMessage;
@@ -78,9 +79,36 @@ class _ArtistListWidgetState extends State<ArtistListWidget>
 
       AppLogger.info('Loaded ${loadedArtists.length} artists');
 
+      UserModel? currentUser;
+      try {
+        currentUser = await _userService.getCurrentUserModel();
+      } catch (_) {
+        currentUser = null;
+      }
+
+      final viewerLocation =
+          await GeoWeightingUtils.resolveViewerLocation(currentUser);
+
+      final sortedArtists =
+          await GeoWeightingUtils.sortByDistance<ArtistProfileModel>(
+        items: loadedArtists,
+        idOf: (artist) => artist.userId,
+        locationOf: (artist) => artist.location,
+        viewerLocation: viewerLocation,
+        tieBreaker: (a, b) {
+          final scoreCompare = b.boostScore.compareTo(a.boostScore);
+          if (scoreCompare != 0) return scoreCompare;
+          final aBoost = a.lastBoostAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+          final bBoost = b.lastBoostAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+          final boostTimeCompare = bBoost.compareTo(aBoost);
+          if (boostTimeCompare != 0) return boostTimeCompare;
+          return a.displayName.compareTo(b.displayName);
+        },
+      );
+
       if (mounted) {
         setState(() {
-          _artists.addAll(loadedArtists);
+          _artists.addAll(sortedArtists);
           _isLoading = false;
         });
       }
@@ -222,15 +250,22 @@ class _ArtistListWidgetState extends State<ArtistListWidget>
           child: Row(
             children: [
               // Artist Avatar
-              CircleAvatar(
-                radius: 30,
-                backgroundImage: ImageUrlValidator.safeNetworkImage(
-                  artist.profileImageUrl,
+              BoostPulseRing(
+                enabled: artist.hasActiveBoost,
+                ringPadding: 4,
+                ringWidth: 2,
+                child: CircleAvatar(
+                  radius: 30,
+                  backgroundImage: ImageUrlValidator.safeNetworkImage(
+                    artist.profileImageUrl,
+                  ),
+                  child:
+                      !ImageUrlValidator.isValidImageUrl(
+                        artist.profileImageUrl,
+                      )
+                      ? const Icon(Icons.person, size: 30)
+                      : null,
                 ),
-                child:
-                    !ImageUrlValidator.isValidImageUrl(artist.profileImageUrl)
-                    ? const Icon(Icons.person, size: 30)
-                    : null,
               ),
               const SizedBox(width: 16),
 
@@ -258,6 +293,43 @@ class _ArtistListWidgetState extends State<ArtistListWidget>
                             Icons.verified,
                             size: 18,
                             color: ArtbeatColors.primaryPurple,
+                          ),
+                        ],
+                        if (artist.hasActiveBoost) ...[
+                          const SizedBox(width: 4),
+                          Tooltip(
+                            message: 'boost_badge_tooltip'.tr(),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: ArtbeatColors.primaryGreen.withValues(
+                                  alpha: 0.18,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.bolt_rounded,
+                                    size: 12,
+                                    color: ArtbeatColors.primaryGreen,
+                                  ),
+                                  const SizedBox(width: 4),
+                                Text(
+                                  'boost_badge_label'.tr(),
+                                    style: GoogleFonts.spaceGrotesk(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w700,
+                                      color: ArtbeatColors.primaryGreen,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         ],
                         if (artist.isFeatured) ...[

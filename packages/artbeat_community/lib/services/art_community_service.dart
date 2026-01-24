@@ -10,6 +10,7 @@ import 'package:artbeat_core/artbeat_core.dart';
 /// Simplified and focused on core art-sharing functionality
 class ArtCommunityService extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final UserService _userService = UserService();
 
   // Stream controllers for real-time updates
   final StreamController<List<ArtPost>> _feedController =
@@ -35,7 +36,7 @@ class ArtCommunityService extends ChangeNotifier {
       AppLogger.info('🎨 Query returned ${snapshot.docs.length} documents');
 
       final artists = <ArtistProfile>[];
-      final currentUser = FirebaseAuth.instance.currentUser;
+      final authUser = FirebaseAuth.instance.currentUser;
 
       for (final doc in snapshot.docs) {
         final userData = doc.data();
@@ -116,11 +117,11 @@ class ArtCommunityService extends ChangeNotifier {
           bool isFollowing = false;
           int updatedFollowersCount = artist.followersCount;
 
-          if (currentUser != null && currentUser.uid != artist.userId) {
+          if (authUser != null && authUser.uid != artist.userId) {
             try {
               final followDoc = await _firestore
                   .collection('follows')
-                  .doc('${currentUser.uid}_${artist.userId}')
+                  .doc('${authUser.uid}_${artist.userId}')
                   .get();
               isFollowing = followDoc.exists;
             } catch (e) {
@@ -165,8 +166,34 @@ class ArtCommunityService extends ChangeNotifier {
       }
 
       AppLogger.info('🎨 Successfully loaded ${artists.length} artists');
-      _artistsCache = artists;
-      return artists;
+      UserModel? viewerModel;
+      try {
+        viewerModel = await _userService.getCurrentUserModel();
+      } catch (_) {
+        viewerModel = null;
+      }
+
+      final viewerLocation =
+          await GeoWeightingUtils.resolveViewerLocation(viewerModel);
+
+      final sorted = await GeoWeightingUtils.sortByDistance<ArtistProfile>(
+        items: artists,
+        idOf: (artist) => artist.userId,
+        locationOf: (artist) => artist.location,
+        viewerLocation: viewerLocation,
+        tieBreaker: (a, b) {
+          final boostCompare = b.boostScore.compareTo(a.boostScore);
+          if (boostCompare != 0) return boostCompare;
+          final aBoost = a.lastBoostAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+          final bBoost = b.lastBoostAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+          final boostTimeCompare = bBoost.compareTo(aBoost);
+          if (boostTimeCompare != 0) return boostTimeCompare;
+          return a.displayName.compareTo(b.displayName);
+        },
+      );
+
+      _artistsCache = sorted;
+      return sorted;
     } catch (e) {
       AppLogger.error('🎨 Error fetching artists: $e');
       return [];
@@ -200,10 +227,35 @@ class ArtCommunityService extends ChangeNotifier {
         .collection('users')
         .where('userType', isEqualTo: 'artist')
         .snapshots()
-        .listen((snapshot) {
-          _artistsCache = snapshot.docs
+        .listen((snapshot) async {
+          final artists = snapshot.docs
               .map((doc) => ArtistProfile.fromFirestore(doc))
               .toList();
+          UserModel? currentUser;
+          try {
+            currentUser = await _userService.getCurrentUserModel();
+          } catch (_) {
+            currentUser = null;
+          }
+          final viewerLocation =
+              await GeoWeightingUtils.resolveViewerLocation(currentUser);
+          _artistsCache = await GeoWeightingUtils.sortByDistance<ArtistProfile>(
+            items: artists,
+            idOf: (artist) => artist.userId,
+            locationOf: (artist) => artist.location,
+            viewerLocation: viewerLocation,
+            tieBreaker: (a, b) {
+              final boostCompare = b.boostScore.compareTo(a.boostScore);
+              if (boostCompare != 0) return boostCompare;
+              final aBoost =
+                  a.lastBoostAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+              final bBoost =
+                  b.lastBoostAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+              final boostTimeCompare = bBoost.compareTo(aBoost);
+              if (boostTimeCompare != 0) return boostTimeCompare;
+              return a.displayName.compareTo(b.displayName);
+            },
+          );
           _artistsController.add(_artistsCache);
         });
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart'
     hide
@@ -44,11 +45,93 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
   String? _artistProfileId; // Store the artist profile document ID
   bool _isFollowing = false;
   ArtistCommissionSettings? _commissionSettings;
+  List<UserModel> _boosters = [];
+  bool _isLoadingBoosters = false;
+  DateTime? _earlyAccessUntil;
+  String? _earlyAccessTier;
 
   @override
   void initState() {
     super.initState();
     _loadArtistProfile();
+  }
+
+  Future<void> _loadBoosters(String artistUserId) async {
+    setState(() {
+      _isLoadingBoosters = true;
+    });
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('artist_boosters')
+          .doc(artistUserId)
+          .collection('boosters')
+          .orderBy('lastBoostAt', descending: true)
+          .limit(8)
+          .get();
+
+      if (snapshot.docs.isEmpty) {
+        if (mounted) {
+          setState(() {
+            _boosters = [];
+            _isLoadingBoosters = false;
+          });
+        }
+        return;
+      }
+
+      final boosterIds = snapshot.docs
+          .map((doc) => doc.id)
+          .where((id) => id.isNotEmpty)
+          .toList();
+
+      final usersSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where(FieldPath.documentId, whereIn: boosterIds)
+          .get();
+
+      final boosters = usersSnapshot.docs
+          .map((doc) => UserModel.fromFirestore(doc))
+          .toList();
+
+      if (mounted) {
+        setState(() {
+          _boosters = boosters;
+          _isLoadingBoosters = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _boosters = [];
+          _isLoadingBoosters = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _loadBoosterStatus(String artistUserId) async {
+    if (_currentUserId == null) return;
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('artist_boosters')
+          .doc(artistUserId)
+          .collection('boosters')
+          .doc(_currentUserId)
+          .get();
+
+      final data = doc.data();
+      if (!doc.exists || data == null) return;
+
+      if (mounted) {
+        setState(() {
+          _earlyAccessTier = data['earlyAccessTier'] as String?;
+          _earlyAccessUntil = (data['earlyAccessUntil'] as Timestamp?)
+              ?.toDate();
+        });
+      }
+    } catch (_) {
+      // Ignore booster status errors
+    }
   }
 
   Future<void> _loadArtistProfile() async {
@@ -131,6 +214,9 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
         // debugPrint(
         //     '✅ ArtistPublicProfileScreen: Successfully loaded profile UI');
       }
+
+      _loadBoosters(artistProfile.userId);
+      _loadBoosterStatus(artistProfile.userId);
     } catch (e) {
       // debugPrint('❌ ArtistPublicProfileScreen: Error loading profile: $e');
       if (mounted) {
@@ -263,6 +349,12 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
                     followerCount: artist.followersCount,
                   ),
                 ),
+              ),
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(14, 14, 14, 0),
+              sliver: SliverToBoxAdapter(
+                child: GlassCard(child: _buildBoosterTrailSection()),
               ),
             ),
             SliverPadding(
@@ -495,6 +587,100 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
     );
   }
 
+  Widget _buildBoosterTrailSection() {
+    final streakMonths = _artistProfile?.boostStreakMonths ?? 0;
+    final hasStreak = streakMonths >= 2;
+    final hasEarlyAccess =
+        _earlyAccessUntil != null && _earlyAccessUntil!.isAfter(DateTime.now());
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SectionHeader(
+          title: 'artist_artist_public_profile_section_boosters'.tr(),
+          accentColor: const Color(0xFFF97316),
+        ),
+        if (hasStreak || hasEarlyAccess) ...[
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              if (hasStreak)
+                _buildStatusPill(
+                  icon: Icons.bolt_rounded,
+                  label: 'artist_boost_streak_label'.tr(
+                    namedArgs: {'count': streakMonths.toString()},
+                  ),
+                ),
+              if (hasEarlyAccess)
+                _buildStatusPill(
+                  icon: Icons.lock_open_rounded,
+                  label: _earlyAccessTier != null
+                      ? 'artist_early_access_label'.tr(
+                          namedArgs: {'tier': _earlyAccessTier!},
+                        )
+                      : 'artist_early_access_label_generic'.tr(),
+                ),
+            ],
+          ),
+        ],
+        const SizedBox(height: 12),
+        if (_isLoadingBoosters)
+          const Center(child: CircularProgressIndicator())
+        else if (_boosters.isEmpty)
+          Text(
+            'artist_artist_public_profile_text_no_boosters'.tr(),
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white.withValues(alpha: 0.7),
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
+          )
+        else
+          SizedBox(
+            height: 56,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: _boosters.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              itemBuilder: (context, index) {
+                final booster = _boosters[index];
+                return Tooltip(
+                  message: booster.fullName.isNotEmpty
+                      ? booster.fullName
+                      : booster.username,
+                  child: CircleAvatar(
+                    radius: 24,
+                    backgroundImage: ImageUrlValidator.safeNetworkImage(
+                      booster.profileImageUrl,
+                    ),
+                    backgroundColor: Colors.white.withValues(alpha: 0.1),
+                    child:
+                        !ImageUrlValidator.isValidImageUrl(
+                          booster.profileImageUrl,
+                        )
+                        ? Text(
+                            booster.fullName.isNotEmpty
+                                ? booster.fullName[0].toUpperCase()
+                                : (booster.username.isNotEmpty
+                                      ? booster.username[0].toUpperCase()
+                                      : '?'),
+                            style: GoogleFonts.spaceGrotesk(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          )
+                        : null,
+                  ),
+                );
+              },
+            ),
+          ),
+      ],
+    );
+  }
+
   Widget _buildHeroCard(ArtistProfileModel artist, bool isPremium) {
     return GlassCard(
       padding: EdgeInsets.zero,
@@ -657,6 +843,32 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
                 const SizedBox(height: 12),
                 _buildSecondaryActions(),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatusPill({required IconData icon, required String label}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(999),
+        color: Colors.white.withValues(alpha: 0.08),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: Colors.white, size: 14),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+              fontSize: 11,
             ),
           ),
         ],
@@ -1092,7 +1304,7 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
 
     // Debug: Add logging to understand what's happening
     AppLogger.info(
-      '🎁 Gift action triggered for artist: ${_artistProfile!.userId}',
+      '⚡ Boost action triggered for artist: ${_artistProfile!.userId}',
     );
     AppLogger.info('🎁 Artist name: ${_artistProfile!.displayName}');
 
@@ -1109,7 +1321,7 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
       return;
     }
 
-    // Check if user is trying to gift themselves
+    // Check if user is trying to boost themselves
     if (_currentUserId == _artistProfile!.userId) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -1131,6 +1343,10 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
       builder: (context) => ArtistBoostWidget(
         recipientId: _artistProfile!.userId,
         recipientName: _artistProfile!.displayName,
+        onBoostCompleted: () {
+          // Refresh artist profile to show updated momentum and supporter status
+          _loadArtistProfile();
+        },
       ),
     );
   }

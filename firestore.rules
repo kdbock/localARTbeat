@@ -254,6 +254,30 @@ service cloud.firestore {
       allow delete: if isAdmin(request.auth.uid);
     }
 
+    // Artist Boosters - tracks users who have boosted an artist
+    match /artist_boosters/{artistId} {
+      allow read: if true; // Public read for displaying booster lists
+      allow list: if isAuthenticated();
+      allow create: if isAdmin(request.auth.uid); // Only Cloud Functions should create
+      allow update: if isAdmin(request.auth.uid); // Only Cloud Functions should update
+      allow delete: if isAdmin(request.auth.uid);
+
+      // Boosters subcollection
+      match /boosters/{boosterId} {
+        allow read: if true; // Public read for displaying individual boosters
+        allow list: if isAuthenticated();
+        allow create: if isAuthenticated() && (
+          request.auth.uid == boosterId || // User boosting
+          isAdmin(request.auth.uid)
+        );
+        allow update: if isAuthenticated() && (
+          request.auth.uid == boosterId || // User updating their own boost record
+          isAdmin(request.auth.uid)
+        );
+        allow delete: if isAdmin(request.auth.uid);
+      }
+    }
+
     // Artist Earnings - tracks earnings for artists
     match /artist_earnings/{artistId} {
       allow read: if isAuthenticated() && (
@@ -1029,21 +1053,21 @@ service cloud.firestore {
     // Gift Subscriptions collection
     match /giftSubscriptions/{subscriptionId} {
       allow read: if isAuthenticated() && (
-        request.auth.uid == resource.data.supporterId ||
+        request.auth.uid == resource.data.boosterId ||
         request.auth.uid == resource.data.artistId ||
         isAdmin(request.auth.uid)
       );
       allow create: if isAuthenticated() && (
-        request.auth.uid == request.resource.data.supporterId ||
+        request.auth.uid == request.resource.data.boosterId ||
         isAdmin(request.auth.uid)
       );
       allow update: if isAuthenticated() && (
-        request.auth.uid == resource.data.supporterId ||
+        request.auth.uid == resource.data.boosterId ||
         request.auth.uid == resource.data.artistId ||
         isAdmin(request.auth.uid)
       );
       allow delete: if isAuthenticated() && (
-        request.auth.uid == resource.data.supporterId ||
+        request.auth.uid == resource.data.boosterId ||
         isAdmin(request.auth.uid)
       );
     }

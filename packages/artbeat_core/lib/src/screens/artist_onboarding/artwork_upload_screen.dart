@@ -40,6 +40,7 @@ class _ArtworkUploadScreenState extends State<ArtworkUploadScreen> {
       );
 
       if (images.isNotEmpty) {
+        if (!mounted) return;
         final viewModel = context.read<ArtistOnboardingViewModel>();
 
         for (final image in images) {
@@ -76,6 +77,7 @@ class _ArtworkUploadScreenState extends State<ArtworkUploadScreen> {
       );
 
       if (image != null) {
+        if (!mounted) return;
         final viewModel = context.read<ArtistOnboardingViewModel>();
         final artworkId = viewModel.addArtwork(localImagePath: image.path);
 
@@ -107,6 +109,7 @@ class _ArtworkUploadScreenState extends State<ArtworkUploadScreen> {
       );
 
       if (image != null) {
+        if (!mounted) return;
         final viewModel = context.read<ArtistOnboardingViewModel>();
         final artworkId = viewModel.addArtwork(localImagePath: image.path);
 

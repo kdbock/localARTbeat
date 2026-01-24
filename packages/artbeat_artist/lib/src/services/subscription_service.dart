@@ -11,6 +11,7 @@ import '../utils/input_validator.dart';
 class SubscriptionService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final UserService _userService = UserService();
 
   String? getCurrentUserId() => _auth.currentUser?.uid;
 
@@ -509,21 +510,42 @@ class SubscriptionService {
         }).toList();
       }
 
-      // Sort by subscription tier, featured status, and name
-      artists.sort((a, b) {
-        // First sort by subscription tier (premium > standard > basic)
-        final tierCompare =
-            b.subscriptionTier.index.compareTo(a.subscriptionTier.index);
-        if (tierCompare != 0) return tierCompare;
+      UserModel? currentUser;
+      try {
+        currentUser = await _userService.getCurrentUserModel();
+      } catch (_) {
+        currentUser = null;
+      }
 
-        // Then by featured status
-        if (a.isFeatured != b.isFeatured) {
-          return a.isFeatured ? -1 : 1;
-        }
+      final viewerLocation =
+          await GeoWeightingUtils.resolveViewerLocation(currentUser);
 
-        // Finally by name
-        return a.displayName.compareTo(b.displayName);
-      });
+      artists = await GeoWeightingUtils.sortByDistance<ArtistProfileModel>(
+        items: artists,
+        idOf: (artist) => artist.userId,
+        locationOf: (artist) => artist.location,
+        viewerLocation: viewerLocation,
+        tieBreaker: (a, b) {
+          final tierCompare =
+              b.subscriptionTier.index.compareTo(a.subscriptionTier.index);
+          if (tierCompare != 0) return tierCompare;
+
+          if (a.isFeatured != b.isFeatured) {
+            return a.isFeatured ? -1 : 1;
+          }
+
+          final boostCompare = b.boostScore.compareTo(a.boostScore);
+          if (boostCompare != 0) return boostCompare;
+          final aBoost =
+              a.lastBoostAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+          final bBoost =
+              b.lastBoostAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+          final boostTimeCompare = bBoost.compareTo(aBoost);
+          if (boostTimeCompare != 0) return boostTimeCompare;
+
+          return a.displayName.compareTo(b.displayName);
+        },
+      );
 
       return artists;
     } catch (e) {

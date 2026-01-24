@@ -141,7 +141,7 @@ class _SubscriptionPurchaseScreenState
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'Bundle fan subscriptions with automatic featuring, boosted drops, and credits that turn gifts into promos.',
+                      'Bundle fan subscriptions with automatic featuring, boosted drops, and credits that turn boosts into promos.',
                       style: GoogleFonts.spaceGrotesk(
                         fontSize: 15,
                         fontWeight: FontWeight.w500,

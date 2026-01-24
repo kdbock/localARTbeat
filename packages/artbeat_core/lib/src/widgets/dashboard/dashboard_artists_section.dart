@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'dashboard_section_button.dart';
 
@@ -44,6 +45,8 @@ class _DashboardArtistsSectionState extends State<DashboardArtistsSection> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildSectionHeader(context),
+            const SizedBox(height: 16),
+            _buildKioskLaneSection(context),
             const SizedBox(height: 16),
             _buildArtistsContent(context),
           ],
@@ -126,6 +129,179 @@ class _DashboardArtistsSectionState extends State<DashboardArtistsSection> {
             child: _buildArtistCard(context, artist),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildKioskLaneSection(BuildContext context) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('artistProfiles')
+          .where(
+            'kioskLaneUntil',
+            isGreaterThan: Timestamp.fromDate(DateTime.now()),
+          )
+          .orderBy('kioskLaneUntil', descending: true)
+          .limit(8)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return _buildKioskLanePlaceholder(
+            child: const Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return _buildKioskLanePlaceholder(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.auto_awesome,
+                  color: Colors.white70,
+                  size: 28,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'dashboard_kiosk_lane_empty'.tr(),
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.7),
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        final artists = snapshot.data!.docs
+            .map((doc) => ArtistProfileModel.fromFirestore(doc))
+            .toList();
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.bolt_rounded, color: Colors.white, size: 18),
+                const SizedBox(width: 8),
+                Text(
+                  'dashboard_kiosk_lane_title'.tr(),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            SizedBox(
+              height: 96,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: artists.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 10),
+                itemBuilder: (context, index) =>
+                    _buildKioskLaneCard(context, artists[index]),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildKioskLanePlaceholder({required Widget child}) {
+    return Container(
+      height: 110,
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.12),
+        ),
+      ),
+      child: Center(child: child),
+    );
+  }
+
+  Widget _buildKioskLaneCard(
+    BuildContext context,
+    ArtistProfileModel artist,
+  ) {
+    return GestureDetector(
+      onTap: () => Navigator.pushNamed(
+        context,
+        '/artist/public-profile',
+        arguments: {'artistId': artist.userId},
+      ),
+      child: Container(
+        width: 180,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+        ),
+        child: Row(
+          children: [
+            BoostPulseRing(
+              enabled: artist.hasActiveBoost || artist.hasKioskLane,
+              ringPadding: 3,
+              ringWidth: 2,
+              child: CircleAvatar(
+                radius: 20,
+                backgroundImage: ImageUrlValidator.safeNetworkImage(
+                  artist.profileImageUrl,
+                ),
+                backgroundColor: Colors.white.withValues(alpha: 0.15),
+                child: !ImageUrlValidator.isValidImageUrl(
+                  artist.profileImageUrl,
+                )
+                    ? Text(
+                        artist.displayName.isNotEmpty
+                            ? artist.displayName[0].toUpperCase()
+                            : '?',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      )
+                    : null,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    artist.displayName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    artist.location ?? 'Local artist',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.65),
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -256,49 +432,54 @@ class _DashboardArtistsSectionState extends State<DashboardArtistsSection> {
                       '/artist/public-profile',
                       arguments: {'artistId': artist.userId},
                     ),
-                    child: Container(
-                      width: 65,
-                      height: 65,
-                      margin: const EdgeInsets.only(
-                        top: 8,
-                      ), // Move down slightly
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: LinearGradient(
-                          colors: [
-                            ArtbeatColors.primaryPurple,
-                            ArtbeatColors.primaryGreen,
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
+                    child: BoostPulseRing(
+                      enabled: artist.hasActiveBoost,
+                      ringPadding: 4,
+                      ringWidth: 2,
+                      child: Container(
+                        width: 65,
+                        height: 65,
+                        margin: const EdgeInsets.only(
+                          top: 8,
+                        ), // Move down slightly
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            colors: [
+                              ArtbeatColors.primaryPurple,
+                              ArtbeatColors.primaryGreen,
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
                         ),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(2),
-                        child: ClipOval(
-                          child:
-                              (artist.profileImageUrl != null &&
-                                  artist.profileImageUrl?.isNotEmpty == true)
-                              ? CachedNetworkImage(
-                                  imageUrl: artist.profileImageUrl ?? '',
-                                  fit: BoxFit.cover,
-                                  placeholder: (context, url) => const Center(
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  ),
-                                  errorWidget: (context, url, error) =>
-                                      const Icon(
-                                        Icons.person,
-                                        color: ArtbeatColors.textSecondary,
-                                        size: 30,
+                        child: Padding(
+                          padding: const EdgeInsets.all(2),
+                          child: ClipOval(
+                            child:
+                                (artist.profileImageUrl != null &&
+                                    artist.profileImageUrl?.isNotEmpty == true)
+                                ? CachedNetworkImage(
+                                    imageUrl: artist.profileImageUrl ?? '',
+                                    fit: BoxFit.cover,
+                                    placeholder: (context, url) => const Center(
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
                                       ),
-                                )
-                              : const Icon(
-                                  Icons.person,
-                                  color: ArtbeatColors.textSecondary,
-                                  size: 30,
-                                ),
+                                    ),
+                                    errorWidget: (context, url, error) =>
+                                        const Icon(
+                                          Icons.person,
+                                          color: ArtbeatColors.textSecondary,
+                                          size: 30,
+                                        ),
+                                  )
+                                : const Icon(
+                                    Icons.person,
+                                    color: ArtbeatColors.textSecondary,
+                                    size: 30,
+                                  ),
+                          ),
                         ),
                       ),
                     ),

@@ -664,20 +664,43 @@ class _ArtistCardState extends State<ArtistCard> {
                     Row(
                       children: [
                         // Avatar
-                        Container(
-                          width: 50,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 2),
-                          ),
-                          child: ClipOval(
-                            child: widget.artist.avatarUrl.isNotEmpty
-                                ? SecureNetworkImage(
-                                    imageUrl: widget.artist.avatarUrl,
-                                    fit: BoxFit.cover,
-                                    enableThumbnailFallback: true,
-                                    placeholder: Container(
+                        BoostPulseRing(
+                          enabled: widget.artist.hasActiveBoost,
+                          ringPadding: 3,
+                          ringWidth: 2,
+                          child: Container(
+                            width: 50,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.white, width: 2),
+                            ),
+                            child: ClipOval(
+                              child: widget.artist.avatarUrl.isNotEmpty
+                                  ? SecureNetworkImage(
+                                      imageUrl: widget.artist.avatarUrl,
+                                      fit: BoxFit.cover,
+                                      enableThumbnailFallback: true,
+                                      placeholder: Container(
+                                        color: ArtbeatColors.primaryPurple
+                                            .withValues(alpha: 0.3),
+                                        child: const Icon(
+                                          Icons.person,
+                                          color: Colors.white,
+                                          size: 24,
+                                        ),
+                                      ),
+                                      errorWidget: Container(
+                                        color: ArtbeatColors.primaryPurple
+                                            .withValues(alpha: 0.3),
+                                        child: const Icon(
+                                          Icons.person,
+                                          color: Colors.white,
+                                          size: 24,
+                                        ),
+                                      ),
+                                    )
+                                  : Container(
                                       color: ArtbeatColors.primaryPurple
                                           .withValues(alpha: 0.3),
                                       child: const Icon(
@@ -686,27 +709,41 @@ class _ArtistCardState extends State<ArtistCard> {
                                         size: 24,
                                       ),
                                     ),
-                                    errorWidget: Container(
-                                      color: ArtbeatColors.primaryPurple
-                                          .withValues(alpha: 0.3),
-                                      child: const Icon(
-                                        Icons.person,
-                                        color: Colors.white,
-                                        size: 24,
-                                      ),
-                                    ),
-                                  )
-                                : Container(
-                                    color: ArtbeatColors.primaryPurple
-                                        .withValues(alpha: 0.3),
-                                    child: const Icon(
-                                      Icons.person,
-                                      color: Colors.white,
-                                      size: 24,
-                                    ),
-                                  ),
+                            ),
                           ),
                         ),
+                        if (widget.artist.hasActiveBoost) ...[
+                          const SizedBox(width: 10),
+                          Tooltip(
+                            message: 'boost_badge_tooltip'.tr(),
+                            child: Container(
+                              width: 24,
+                              height: 24,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: const LinearGradient(
+                                  colors: [
+                                    Color(0xFFF97316),
+                                    Color(0xFF22D3EE),
+                                  ],
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: const Color(0xFF22D3EE)
+                                        .withValues(alpha: 0.35),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: const Icon(
+                                Icons.bolt_rounded,
+                                size: 14,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
                         const Spacer(),
                         // Follow button
                         if (widget.onFollow != null)

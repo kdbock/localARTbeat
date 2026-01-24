@@ -1,0 +1,259 @@
+{
+  "configVersion": 1,
+  "products": [
+    {
+      "productIdentifier": "ad_small_1w",
+      "type": "consumable",
+      "price": "0.99",
+      "displayName": "Small Banner - 1 Week",
+      "referenceName": "ad_small_1w",
+      "localizations": [
+        {
+          "locale": "en_US",
+          "displayName": "Small Banner - 1 Week",
+          "description": "7-day small banner ads"
+        }
+      ]
+    },
+    {
+      "productIdentifier": "ad_small_1m",
+      "type": "consumable",
+      "price": "1.99",
+      "displayName": "Small Banner - 1 Month",
+      "referenceName": "ad_small_1m",
+      "localizations": [
+        {
+          "locale": "en_US",
+          "displayName": "Small Banner - 1 Month",
+          "description": "30-day small banner ads"
+        }
+      ]
+    },
+    {
+      "productIdentifier": "ad_small_3m",
+      "type": "consumable",
+      "price": "4.99",
+      "displayName": "Small Banner - 3 Months",
+      "referenceName": "ad_small_3m",
+      "localizations": [
+        {
+          "locale": "en_US",
+          "displayName": "Small Banner - 3 Months",
+          "description": "90-day small banner ads"
+        }
+      ]
+    },
+    {
+      "productIdentifier": "ad_big_1w",
+      "type": "consumable",
+      "price": "1.99",
+      "displayName": "Big Square - 1 Week",
+      "referenceName": "ad_big_1w",
+      "localizations": [
+        {
+          "locale": "en_US",
+          "displayName": "Big Square - 1 Week",
+          "description": "7-day premium square ads"
+        }
+      ]
+    },
+    {
+      "productIdentifier": "ad_big_1m",
+      "type": "consumable",
+      "price": "3.99",
+      "displayName": "Big Square - 1 Month",
+      "referenceName": "ad_big_1m",
+      "localizations": [
+        {
+          "locale": "en_US",
+          "displayName": "Big Square - 1 Month",
+          "description": "30-day premium square ads"
+        }
+      ]
+    },
+    {
+      "productIdentifier": "ad_big_3m",
+      "type": "consumable",
+      "price": "9.99",
+      "displayName": "Big Square - 3 Months",
+      "referenceName": "ad_big_3m",
+      "localizations": [
+        {
+          "locale": "en_US",
+          "displayName": "Big Square - 3 Months",
+          "description": "90-day premium square ads"
+        }
+      ]
+    },
+    {
+      "productIdentifier": "artbeat_boost_spark",
+      "type": "consumable",
+      "price": "4.99",
+      "displayName": "Spark Boost",
+      "referenceName": "artbeat_boost_spark",
+      "localizations": [
+        {
+          "locale": "en_US",
+          "displayName": "Spark Boost",
+          "description": "Local discovery weighting + supporter badge"
+        }
+      ]
+    },
+    {
+      "productIdentifier": "artbeat_boost_surge",
+      "type": "consumable",
+      "price": "9.99",
+      "displayName": "Surge Boost",
+      "referenceName": "artbeat_boost_surge",
+      "localizations": [
+        {
+          "locale": "en_US",
+          "displayName": "Surge Boost",
+          "description": "Map pin glow + follow suggestion weighting"
+        }
+      ]
+    },
+    {
+      "productIdentifier": "artbeat_boost_overdrive",
+      "type": "consumable",
+      "price": "24.99",
+      "displayName": "Overdrive Boost",
+      "referenceName": "artbeat_boost_overdrive",
+      "localizations": [
+        {
+          "locale": "en_US",
+          "displayName": "Overdrive Boost",
+          "description": "Kiosk Lane rotation slot (scheduled placement)"
+        }
+      ]
+    }
+  ],
+  "subscriptionGroups": [
+    {
+      "id": "artist_subscriptions",
+      "name": "Artist Subscriptions",
+      "subscriptions": [
+        {
+          "productIdentifier": "artbeat_starter_monthly",
+          "type": "autoRenewable",
+          "price": "4.99",
+          "displayName": "Artist Starter - Monthly",
+          "referenceName": "artbeat_starter_monthly",
+          "duration": "P1M",
+          "localizations": [
+            {
+              "locale": "en_US",
+              "displayName": "Artist Starter - Monthly",
+              "description": "25 artworks, 5GB storage, basic analytics"
+            }
+          ]
+        },
+        {
+          "productIdentifier": "artbeat_creator_monthly",
+          "type": "autoRenewable",
+          "price": "12.99",
+          "displayName": "Artist Creator - Monthly",
+          "referenceName": "artbeat_creator_monthly",
+          "duration": "P1M",
+          "localizations": [
+            {
+              "locale": "en_US",
+              "displayName": "Artist Creator - Monthly",
+              "description": "100 artworks, 25GB storage, advanced features"
+            }
+          ]
+        },
+        {
+          "productIdentifier": "artbeat_business_monthly",
+          "type": "autoRenewable",
+          "price": "29.99",
+          "displayName": "Artist Business - Monthly",
+          "referenceName": "artbeat_business_monthly",
+          "duration": "P1M",
+          "localizations": [
+            {
+              "locale": "en_US",
+              "displayName": "Artist Business - Monthly",
+              "description": "Unlimited artworks, team features, API access"
+            }
+          ]
+        },
+        {
+          "productIdentifier": "artbeat_enterprise_monthly",
+          "type": "autoRenewable",
+          "price": "79.99",
+          "displayName": "Artist Enterprise - Monthly",
+          "referenceName": "artbeat_enterprise_monthly",
+          "duration": "P1M",
+          "localizations": [
+            {
+              "locale": "en_US",
+              "displayName": "Artist Enterprise - Monthly",
+              "description": "Enterprise features, white-label, dedicated support"
+            }
+          ]
+        },
+        {
+          "productIdentifier": "artbeat_starter_yearly",
+          "type": "autoRenewable",
+          "price": "47.99",
+          "displayName": "Artist Starter - Yearly",
+          "referenceName": "artbeat_starter_yearly",
+          "duration": "P1Y",
+          "localizations": [
+            {
+              "locale": "en_US",
+              "displayName": "Artist Starter - Yearly",
+              "description": "25 artworks, 5GB storage, basic analytics"
+            }
+          ]
+        },
+        {
+          "productIdentifier": "artbeat_creator_yearly",
+          "type": "autoRenewable",
+          "price": "124.99",
+          "displayName": "Artist Creator - Yearly",
+          "referenceName": "artbeat_creator_yearly",
+          "duration": "P1Y",
+          "localizations": [
+            {
+              "locale": "en_US",
+              "displayName": "Artist Creator - Yearly",
+              "description": "100 artworks, 25GB storage, advanced features"
+            }
+          ]
+        },
+        {
+          "productIdentifier": "artbeat_business_yearly",
+          "type": "autoRenewable",
+          "price": "289.99",
+          "displayName": "Artist Business - Yearly",
+          "referenceName": "artbeat_business_yearly",
+          "duration": "P1Y",
+          "localizations": [
+            {
+              "locale": "en_US",
+              "displayName": "Artist Business - Yearly",
+              "description": "Unlimited artworks, team features, API access"
+            }
+          ]
+        },
+        {
+          "productIdentifier": "artbeat_enterprise_yearly",
+          "type": "autoRenewable",
+          "price": "769.99",
+          "displayName": "Artist Enterprise - Yearly",
+          "referenceName": "artbeat_enterprise_yearly",
+          "duration": "P1Y",
+          "localizations": [
+            {
+              "locale": "en_US",
+              "displayName": "Artist Enterprise - Yearly",
+              "description": "Enterprise features, white-label, dedicated support"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

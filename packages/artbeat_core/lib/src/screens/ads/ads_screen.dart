@@ -111,7 +111,7 @@ class _AdsScreenState extends State<AdsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Turn gifts into promo fuel',
+                          'Turn boosts into promo fuel',
                           style: GoogleFonts.spaceGrotesk(
                             fontSize: 24,
                             fontWeight: FontWeight.w800,
@@ -120,7 +120,7 @@ class _AdsScreenState extends State<AdsScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Visibility gifts unlock ad credits so artists can feature themselves, their artwork, and events without leaving Artbeat.',
+                          'Visibility boosts unlock ad credits so artists can feature themselves, their artwork, and events without leaving Artbeat.',
                           style: GoogleFonts.spaceGrotesk(
                             fontSize: 15,
                             fontWeight: FontWeight.w500,
