@@ -161,17 +161,47 @@ class AuthTestHelpers {
       mockFirestore: firestore,
       child: ForgotPasswordScreen(
         authService: AuthService(auth: auth, firestore: firestore),
+        enableBackgroundAnimation: false,
       ),
     );
   }
 
   /// Create EmailVerificationScreen for testing
-  static Widget createTestEmailVerificationScreen() =>
-      const TestAuthScreenWrapper(child: TestEmailVerificationScreen());
+  static Widget createTestEmailVerificationScreen({
+    MockFirebaseAuth? mockAuth,
+    FakeFirebaseFirestore? mockFirestore,
+  }) {
+    final auth = mockAuth ?? createMockAuth();
+    final firestore = mockFirestore ?? createMockFirestore();
+
+    return TestAuthScreenWrapper(
+      mockAuth: auth,
+      mockFirestore: firestore,
+      child: EmailVerificationScreen(
+        authService: AuthService(auth: auth, firestore: firestore),
+        enableBackgroundAnimation: false,
+      ),
+    );
+  }
 
   /// Create ProfileCreateScreen for testing
-  static Widget createTestProfileCreateScreen() =>
-      const TestAuthScreenWrapper(child: TestProfileCreateScreen());
+  static Widget createTestProfileCreateScreen({
+    MockFirebaseAuth? mockAuth,
+    FakeFirebaseFirestore? mockFirestore,
+  }) {
+    final auth = mockAuth ?? createMockAuth();
+    final firestore = mockFirestore ?? createMockFirestore();
+
+    return TestAuthScreenWrapper(
+      mockAuth: auth,
+      mockFirestore: firestore,
+      child: ProfileCreateScreen(
+        authService: AuthService(auth: auth, firestore: firestore),
+        enableBackgroundAnimation: false,
+        autoNavigate: false,
+      ),
+    );
+  }
 
   /// Create a simplified SplashScreen for testing (without Firebase dependencies)
   static Widget createTestSplashScreen() =>

@@ -17,7 +17,10 @@ void main() {
   group('🎯 ArtBeat Authentication & Onboarding Tests', () {
     group('1. AUTHENTICATION & ONBOARDING - Core UI Tests', () {
       testWidgets('✅ Splash screen displays on app launch', (tester) async {
-        await tester.pumpWidget(const MaterialApp(home: SplashScreen()));
+        final mockSponsorService = FirebaseTestSetup.createMockSponsorService();
+        await tester.pumpWidget(MaterialApp(
+          home: SplashScreen(sponsorService: mockSponsorService),
+        ));
 
         // Wait for timers to complete
         await tester.pumpAndSettle();
@@ -52,7 +55,7 @@ void main() {
           findsAtLeastNWidgets(2),
         ); // Email and password fields
         expect(
-          find.byType(ElevatedButton),
+          find.byType(InkWell),
           findsAtLeastNWidgets(1),
         ); // Login button
       });
@@ -75,7 +78,7 @@ void main() {
         // Check for form elements - RegisterScreen should have multiple text fields
         expect(find.byType(Form), findsOneWidget);
         expect(find.byType(TextFormField), findsAtLeastNWidgets(4));
-        expect(find.byType(ElevatedButton), findsAtLeastNWidgets(1));
+        expect(find.byType(InkWell), findsAtLeastNWidgets(1));
       });
 
       testWidgets('Forgot Password screen displays correctly', (tester) async {
@@ -91,7 +94,7 @@ void main() {
         expect(find.byType(Form), findsOneWidget);
         expect(find.byType(TextFormField), findsOneWidget); // Email field
         expect(
-          find.byType(ElevatedButton),
+          find.byType(InkWell),
           findsAtLeastNWidgets(1),
         ); // Reset button
       });
@@ -249,7 +252,7 @@ void main() {
           );
 
           // Find and tap the main action button
-          final buttons = find.byType(ElevatedButton);
+          final buttons = find.byType(InkWell);
           if (buttons.evaluate().isNotEmpty) {
             await tester.tap(buttons.first);
             await tester.pump();
@@ -270,7 +273,7 @@ void main() {
             ),
           );
 
-          final buttons = find.byType(ElevatedButton);
+          final buttons = find.byType(InkWell);
           if (buttons.evaluate().isNotEmpty) {
             // Ensure the button is visible before tapping
             await tester.ensureVisible(buttons.first);
@@ -291,7 +294,7 @@ void main() {
             ),
           );
 
-          final buttons = find.byType(ElevatedButton);
+          final buttons = find.byType(InkWell);
           if (buttons.evaluate().isNotEmpty) {
             await tester.tap(buttons.first);
             await tester.pump();
@@ -395,10 +398,10 @@ void main() {
           await tester.pumpAndSettle();
 
           // Ensure the button is present
-          expect(find.byType(ElevatedButton), findsAtLeastNWidgets(1));
+          expect(find.byType(InkWell), findsAtLeastNWidgets(1));
 
           // Try to submit empty form to trigger validation
-          final submitButton = find.byType(ElevatedButton).first;
+          final submitButton = find.byType(InkWell).first;
           await tester.tap(submitButton);
           await tester.pump();
 
@@ -410,7 +413,10 @@ void main() {
 
       group('Screen Layout Tests', () {
         testWidgets('Splash screen has proper layout', (tester) async {
-          await tester.pumpWidget(const MaterialApp(home: SplashScreen()));
+          final mockSponsorService = FirebaseTestSetup.createMockSponsorService();
+          await tester.pumpWidget(MaterialApp(
+            home: SplashScreen(sponsorService: mockSponsorService),
+          ));
 
           // Wait for any timers to complete
           await tester.pumpAndSettle();
@@ -455,12 +461,13 @@ void main() {
       group('Integration Readiness Tests', () {
         testWidgets('Screens handle navigation properly', (tester) async {
           final mockAuthService = FirebaseTestSetup.createMockAuthService();
+          final mockSponsorService = FirebaseTestSetup.createMockSponsorService();
 
           await tester.pumpWidget(
             MaterialApp(
               initialRoute: '/',
               routes: {
-                '/': (context) => const SplashScreen(),
+                '/': (context) => SplashScreen(sponsorService: mockSponsorService),
                 '/login': (context) => LoginScreen(
                   authService: mockAuthService,
                   enableBackgroundAnimation: false,

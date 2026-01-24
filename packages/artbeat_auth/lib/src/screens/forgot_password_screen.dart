@@ -12,7 +12,12 @@ import 'package:artbeat_core/artbeat_core.dart' show ArtbeatInput;
 /// Forgot password screen with email reset functionality (Quest theme)
 class ForgotPasswordScreen extends StatefulWidget {
   final AuthService? authService; // Optional for testing
-  const ForgotPasswordScreen({super.key, this.authService});
+  final bool enableBackgroundAnimation;
+  const ForgotPasswordScreen({
+    super.key,
+    this.authService,
+    this.enableBackgroundAnimation = true,
+  });
 
   @override
   State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
@@ -39,11 +44,40 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
     _loop = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 9),
-    )..repeat();
+    );
+    if (widget.enableBackgroundAnimation) {
+      _loop.repeat();
+    }
     _intro = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 650),
-    )..forward();
+    );
+    if (widget.enableBackgroundAnimation) {
+      _intro.forward();
+    } else {
+      _intro.value = 1;
+    }
+  }
+
+  @override
+  void didUpdateWidget(ForgotPasswordScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.enableBackgroundAnimation !=
+        widget.enableBackgroundAnimation) {
+      if (widget.enableBackgroundAnimation) {
+        if (!_loop.isAnimating) {
+          _loop.repeat();
+        }
+        if (!_intro.isAnimating && _intro.value != 1) {
+          _intro.forward();
+        }
+      } else {
+        _loop.stop();
+        _loop.reset();
+        _intro.stop();
+        _intro.value = 1;
+      }
+    }
   }
 
   @override

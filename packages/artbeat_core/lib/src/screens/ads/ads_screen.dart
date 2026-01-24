@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AdsScreen extends StatefulWidget {
-  const AdsScreen({super.key});
+  final bool isPreview;
+  const AdsScreen({super.key, this.isPreview = false});
 
   @override
   State<AdsScreen> createState() => _AdsScreenState();
@@ -47,6 +48,9 @@ class _AdsScreenState extends State<AdsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.isPreview) {
+      return _buildPreview();
+    }
     return Stack(
       children: [
         _buildWorldBackground(),
@@ -63,6 +67,58 @@ class _AdsScreenState extends State<AdsScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildPreview() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        gradient: const LinearGradient(
+          colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
+        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: const BoxDecoration(
+              color: Color(0xFF22D3EE),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.ads_click_rounded, color: Colors.white, size: 24),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Watch & Earn',
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                  ),
+                ),
+                Text(
+                  'Get 50 Art Tokens for watching a short video.',
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white70,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Icon(Icons.chevron_right_rounded, color: Colors.white54),
+        ],
+      ),
     );
   }
 

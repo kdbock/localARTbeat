@@ -1,11 +1,15 @@
 import 'dart:ui';
 
-import 'package:artbeat_core/artbeat_core.dart';
+import 'package:artbeat_core/artbeat_core.dart' hide ArtworkModel;
+import 'package:artbeat_artwork/artbeat_artwork.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'art_market_screen.dart';
+import 'ads/ads_screen.dart';
+import 'boosts/artist_boosts_screen.dart';
+import 'subscriptions/subscriptions_screen.dart';
 
 class ArtbeatStoreScreen extends StatefulWidget {
   const ArtbeatStoreScreen({super.key});
@@ -14,19 +18,12 @@ class ArtbeatStoreScreen extends StatefulWidget {
   State<ArtbeatStoreScreen> createState() => _ArtbeatStoreScreenState();
 }
 
-class _ArtbeatStoreScreenState extends State<ArtbeatStoreScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 5, vsync: this);
-  }
+class _ArtbeatStoreScreenState extends State<ArtbeatStoreScreen> {
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void dispose() {
-    _tabController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -38,13 +35,52 @@ class _ArtbeatStoreScreenState extends State<ArtbeatStoreScreen>
         children: [
           _buildWorldBackground(),
           SafeArea(
-            child: Column(
-              children: [
-                _buildHeader(),
-                const SizedBox(height: 12),
-                _buildKioskLanePreview(),
-                const SizedBox(height: 12),
-                Expanded(child: _buildKioskShell()),
+            child: CustomScrollView(
+              controller: _scrollController,
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                _buildSliverAppBar(),
+                SliverToBoxAdapter(
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 16),
+                      _buildImpulseBuyRow(),
+                      const SizedBox(height: 24),
+                      _buildSectionHeader(
+                        'store_tab_auctions'.tr(),
+                        Icons.gavel_rounded,
+                        const Color(0xFFF97316),
+                        onTap: () => _showAllMarket(true),
+                      ),
+                      _buildAuctionsPreview(),
+                      const SizedBox(height: 24),
+                      _buildSectionHeader(
+                        'store_tab_buy_now'.tr(),
+                        Icons.shopping_bag_rounded,
+                        const Color(0xFF34D399),
+                        onTap: () => _showAllMarket(false),
+                      ),
+                      _buildArtMarketPreview(),
+                      const SizedBox(height: 24),
+                      _buildSectionHeader(
+                        'store_tab_subs'.tr(),
+                        Icons.workspace_premium_rounded,
+                        const Color(0xFFA855F7),
+                        onTap: () => _showAllSubscriptions(),
+                      ),
+                      _buildSubscriptionsPreview(),
+                      const SizedBox(height: 24),
+                      _buildSectionHeader(
+                        'store_tab_ads'.tr(),
+                        Icons.ads_click_rounded,
+                        const Color(0xFF22D3EE),
+                        onTap: () => _showAds(),
+                      ),
+                      _buildAdsPreview(),
+                      const SizedBox(height: 40),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -53,108 +89,116 @@ class _ArtbeatStoreScreenState extends State<ArtbeatStoreScreen>
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildSliverAppBar() {
+    return SliverAppBar(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      pinned: true,
+      expandedHeight: 140,
+      flexibleSpace: FlexibleSpaceBar(
+        titlePadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        title: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'store_title'.tr(),
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+              ),
+            ),
+            Text(
+              'Shop Local',
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: Colors.white70,
+              ),
+            ),
+          ],
+        ),
+        background: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const SizedBox(height: 10),
+            _buildKioskLanePreview(),
+          ],
+        ),
+      ),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.search_rounded, color: Colors.white70),
+          onPressed: () => Navigator.pushNamed(context, AppRoutes.artworkSearch),
+        ),
+        const SizedBox(width: 8),
+      ],
+    );
+  }
+
+  Widget _buildSectionHeader(
+    String title,
+    IconData icon,
+    Color color, {
+    VoidCallback? onTap,
+  }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      child: Row(
         children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
-                  color: Colors.white.withValues(alpha: 0.08),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.store_mall_directory_outlined,
-                        color: Color(0xFFFB7185), size: 16),
-                    const SizedBox(width: 6),
-                    Text(
-                      'store_kiosk_label'.tr(),
-                      style: GoogleFonts.spaceGrotesk(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 1.6,
-                        color: Colors.white70,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const Spacer(),
-              Text(
-                'store_swipe_to_browse'.tr(),
-                style: GoogleFonts.spaceGrotesk(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white60,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
+          Icon(icon, color: color, size: 20),
+          const SizedBox(width: 10),
           Text(
-            'store_title'.tr(),
+            title,
             style: GoogleFonts.spaceGrotesk(
-              fontSize: 32,
-              fontWeight: FontWeight.w800,
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
               color: Colors.white,
             ),
           ),
-          Text(
-            'store_subtitle'.tr(),
-            style: GoogleFonts.spaceGrotesk(
-              fontSize: 16,
-              color: Colors.white70,
-              fontWeight: FontWeight.w500,
+          const Spacer(),
+          if (onTap != null)
+            _buildGlassButton(
+              'View All',
+              onTap,
+              color: color,
+              small: true,
             ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            'store_kiosk_tagline'.tr(),
-            style: GoogleFonts.spaceGrotesk(
-              fontSize: 13,
-              color: Colors.white54,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
         ],
       ),
     );
   }
 
-  Widget _buildKioskShell() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(28),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(28),
-              border:
-                  Border.all(color: Colors.white.withValues(alpha: 0.12)),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Colors.white.withValues(alpha: 0.08),
-                  Colors.white.withValues(alpha: 0.03),
-                ],
-              ),
+  Widget _buildGlassButton(
+    String label,
+    VoidCallback onTap, {
+    Color color = Colors.white,
+    bool small = false,
+  }) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(small ? 12 : 16),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+        child: GestureDetector(
+          onTap: onTap,
+          child: Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: small ? 12 : 20,
+              vertical: small ? 6 : 10,
             ),
-            child: Column(
-              children: [
-                const SizedBox(height: 12),
-                _buildAccessibleTabBar(),
-                const SizedBox(height: 12),
-                Expanded(child: _buildTabContent()),
-              ],
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(small ? 12 : 16),
+              border: Border.all(color: color.withValues(alpha: 0.3)),
+              color: color.withValues(alpha: 0.1),
+            ),
+            child: Text(
+              label,
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: small ? 12 : 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
             ),
           ),
         ),
@@ -162,9 +206,323 @@ class _ArtbeatStoreScreenState extends State<ArtbeatStoreScreen>
     );
   }
 
+  Widget _buildImpulseBuyRow() {
+    return SizedBox(
+      height: 110,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        children: [
+          _buildImpulseItem(
+            'Give Boost',
+            'dashboard_boost_now_btn'.tr(),
+            Icons.rocket_launch_rounded,
+            const Color(0xFFF97316),
+            () => _showBoosts(),
+          ),
+          _buildImpulseItem(
+            'Local Ad',
+            'Get Tokens',
+            Icons.ads_click_rounded,
+            const Color(0xFF22D3EE),
+            () => _showAds(),
+          ),
+          _buildImpulseItem(
+            'Artist Access',
+            'Share Your Art',
+            Icons.workspace_premium_rounded,
+            const Color(0xFFA855F7),
+            () => _showArtistOnboarding(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildImpulseItem(
+    String title,
+    String subtitle,
+    IconData icon,
+    Color color,
+    VoidCallback onTap,
+  ) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 140,
+        margin: const EdgeInsets.symmetric(horizontal: 8),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              color.withValues(alpha: 0.2),
+              color.withValues(alpha: 0.05),
+            ],
+          ),
+          border: Border.all(color: color.withValues(alpha: 0.3)),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: color, size: 24),
+            const SizedBox(height: 6),
+            Text(
+              title,
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            Text(
+              subtitle,
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+                color: Colors.white70,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAuctionsPreview() {
+    return SizedBox(
+      height: 200,
+      child: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('artwork')
+            .where('isPublic', isEqualTo: true)
+            .where('isAuction', isEqualTo: true)
+            .limit(5)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            // Fallback to auctionEnabled if isAuction is not yet used in DB
+            return StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('artwork')
+                  .where('isPublic', isEqualTo: true)
+                  .where('auctionEnabled', isEqualTo: true)
+                  .limit(5)
+                  .snapshots(),
+              builder: (context, snap2) {
+                if (!snap2.hasData || snap2.data!.docs.isEmpty) {
+                  return _buildEmptySection('No active auctions');
+                }
+                final artworks = snap2.data!.docs
+                    .map((doc) => ArtworkModel.fromFirestore(doc))
+                    .toList();
+                return _buildMarketList(artworks);
+              },
+            );
+          }
+          final artworks = snapshot.data!.docs
+              .map((doc) => ArtworkModel.fromFirestore(doc))
+              .toList();
+          return _buildMarketList(artworks);
+        },
+      ),
+    );
+  }
+
+  Widget _buildMarketList(List<ArtworkModel> artworks) {
+    return ListView.separated(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      scrollDirection: Axis.horizontal,
+      itemCount: artworks.length,
+      separatorBuilder: (_, __) => const SizedBox(width: 16),
+      itemBuilder: (context, index) => _buildMarketCard(artworks[index]),
+    );
+  }
+
+  Widget _buildArtMarketPreview() {
+    return SizedBox(
+      height: 200,
+      child: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('artwork')
+            .where('isPublic', isEqualTo: true)
+            .where('isForSale', isEqualTo: true)
+            .limit(5)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return _buildEmptySection('No items for sale');
+          }
+          final artworks = snapshot.data!.docs
+              .map((doc) => ArtworkModel.fromFirestore(doc))
+              .toList();
+          return ListView.separated(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            scrollDirection: Axis.horizontal,
+            itemCount: artworks.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 16),
+            itemBuilder: (context, index) => _buildMarketCard(artworks[index]),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildMarketCard(ArtworkModel artwork) {
+    return GestureDetector(
+      onTap: () => Navigator.pushNamed(
+        context,
+        AppRoutes.artworkDetail,
+        arguments: artwork.id,
+      ),
+      child: Container(
+        width: 160,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          color: Colors.white.withValues(alpha: 0.05),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 3,
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(20),
+                ),
+                child: SecureNetworkImage(
+                  imageUrl: artwork.imageUrl,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                ),
+              ),
+            ),
+            Flexible(
+              flex: 1,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        artwork.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.spaceGrotesk(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Flexible(
+                      child: Text(
+                        artwork.auctionEnabled
+                            ? '\$${(artwork.currentHighestBid ?? artwork.startingPrice ?? 0).toStringAsFixed(0)}'
+                            : '\$${(artwork.price ?? 0).toStringAsFixed(0)}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.spaceGrotesk(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 14,
+                          color: artwork.auctionEnabled
+                              ? const Color(0xFF22D3EE)
+                              : const Color(0xFF34D399),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSubscriptionsPreview() {
+    return const SizedBox(
+      height: 180,
+      child: SubscriptionsScreen(showAppBar: false, isPreview: true),
+    );
+  }
+
+  Widget _buildAdsPreview() {
+    return const Padding(
+      padding: EdgeInsets.symmetric(horizontal: 24),
+      child: AdsScreen(isPreview: true),
+    );
+  }
+
+  Widget _buildEmptySection(String text) {
+    return Center(
+      child: Text(
+        text,
+        style: GoogleFonts.spaceGrotesk(
+          fontSize: 14,
+          color: Colors.white38,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
+  }
+
+  void _showAllMarket(bool isAuction) {
+    Navigator.push(
+      context,
+      MaterialPageRoute<void>(
+        builder: (context) => Scaffold(
+          appBar: AppBar(
+            title: Text(isAuction ? 'Auctions' : 'Buy Now'),
+            backgroundColor: const Color(0xFF03050F),
+          ),
+          body: ArtMarketScreen(isAuction: isAuction),
+        ),
+      ),
+    );
+  }
+
+  void _showAllSubscriptions() {
+    Navigator.push(
+      context,
+      MaterialPageRoute<void>(
+        builder: (context) => const SubscriptionsScreen(showAppBar: true),
+      ),
+    );
+  }
+
+  void _showAds() {
+    Navigator.push(
+      context,
+      MaterialPageRoute<void>(builder: (context) => const AdsScreen()),
+    );
+  }
+
+  void _showBoosts() {
+    Navigator.push(
+      context,
+      MaterialPageRoute<void>(
+        builder: (context) => const ArtistBoostsScreen(showAppBar: true),
+      ),
+    );
+  }
+
   Widget _buildKioskLanePreview() {
     return SizedBox(
-      height: 96,
+      height: 60,
       child: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('artistProfiles')
@@ -177,62 +535,24 @@ class _ArtbeatStoreScreenState extends State<ArtbeatStoreScreen>
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const SizedBox();
           }
 
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return Center(
-              child: Text(
-                'dashboard_kiosk_lane_empty'.tr(),
-                style: GoogleFonts.spaceGrotesk(
-                  fontSize: 12,
-                  color: Colors.white60,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            );
+            return const SizedBox();
           }
 
           final artists = snapshot.data!.docs
               .map((doc) => ArtistProfileModel.fromFirestore(doc))
               .toList();
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.bolt_rounded,
-                      color: Color(0xFFF97316),
-                      size: 18,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'dashboard_kiosk_lane_title'.tr(),
-                      style: GoogleFonts.spaceGrotesk(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 8),
-              Expanded(
-                child: ListView.separated(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  scrollDirection: Axis.horizontal,
-                  itemCount: artists.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 10),
-                  itemBuilder: (context, index) =>
-                      _buildKioskLaneChip(context, artists[index]),
-                ),
-              ),
-            ],
+          return ListView.separated(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            scrollDirection: Axis.horizontal,
+            itemCount: artists.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 8),
+            itemBuilder: (context, index) =>
+                _buildKioskLaneChip(context, artists[index]),
           );
         },
       ),
@@ -247,104 +567,34 @@ class _ArtbeatStoreScreenState extends State<ArtbeatStoreScreen>
         arguments: {'artistId': artist.userId},
       ),
       child: Container(
-        width: 150,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+          color: Colors.white.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
         ),
         child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            BoostPulseRing(
-              enabled: artist.hasActiveBoost || artist.hasKioskLane,
-              ringPadding: 3,
-              ringWidth: 2,
-              child: CircleAvatar(
-                radius: 18,
-                backgroundImage: ImageUrlValidator.safeNetworkImage(
-                  artist.profileImageUrl,
-                ),
-                backgroundColor: Colors.white.withValues(alpha: 0.15),
-                child: !ImageUrlValidator.isValidImageUrl(
-                  artist.profileImageUrl,
-                )
-                    ? Text(
-                        artist.displayName.isNotEmpty
-                            ? artist.displayName[0].toUpperCase()
-                            : '?',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      )
-                    : null,
+            CircleAvatar(
+              radius: 12,
+              backgroundImage: ImageUrlValidator.safeNetworkImage(
+                artist.profileImageUrl,
               ),
+              backgroundColor: Colors.white.withValues(alpha: 0.15),
             ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                artist.displayName,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.spaceGrotesk(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
+            const SizedBox(width: 8),
+            Text(
+              artist.displayName,
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
               ),
             ),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildAccessibleTabBar() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 12),
-      padding: const EdgeInsets.all(6),
-      decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
-      ),
-      child: TabBar(
-        controller: _tabController,
-        isScrollable: true,
-        indicator: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
-          gradient: const LinearGradient(
-            colors: [Color(0xFFF97316), Color(0xFF22D3EE)],
-          ),
-        ),
-        labelColor: Colors.white,
-        unselectedLabelColor: Colors.white60,
-        labelStyle: GoogleFonts.spaceGrotesk(
-          fontWeight: FontWeight.bold,
-          fontSize: 14,
-        ),
-        tabs: [
-          Tab(text: 'store_tab_boost'.tr(), icon: const Icon(Icons.rocket_launch, size: 20)),
-          Tab(text: 'store_tab_buy_now'.tr(), icon: const Icon(Icons.shopping_bag, size: 20)),
-          Tab(text: 'store_tab_auctions'.tr(), icon: const Icon(Icons.gavel, size: 20)),
-          Tab(text: 'store_tab_subs'.tr(), icon: const Icon(Icons.workspace_premium, size: 20)),
-          Tab(text: 'store_tab_ads'.tr(), icon: const Icon(Icons.ads_click, size: 20)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTabContent() {
-    return TabBarView(
-      controller: _tabController,
-      children: const [
-        ArtistBoostsScreen(showAppBar: false),
-        ArtMarketScreen(isAuction: false),
-        ArtMarketScreen(isAuction: true),
-        SubscriptionsScreen(showAppBar: false),
-        AdsScreen(),
-      ],
     );
   }
 

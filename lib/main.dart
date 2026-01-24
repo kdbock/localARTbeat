@@ -148,7 +148,9 @@ Future<void> _initializeCoreServices() async {
             debugPrint('🛡️ ✅ Firebase Core initialized successfully');
           } catch (e) {
             if (e.toString().contains('duplicate-app')) {
-              debugPrint('🛡️ Firebase Core already initialized (duplicate-app)');
+              debugPrint(
+                '🛡️ Firebase Core already initialized (duplicate-app)',
+              );
             } else {
               debugPrint('⚠️ Firebase Core initialization error: $e');
               rethrow;
@@ -157,7 +159,7 @@ Future<void> _initializeCoreServices() async {
         } else {
           debugPrint('🛡️ Firebase Core already initialized');
         }
-        
+
         // ALWAYS Initialize App Check, even if Firebase was already initialized
         // This prevents permission denied errors during initial data fetching
         // In debug mode: uses debug provider (requires debug token in Firebase Console)
@@ -166,7 +168,8 @@ Future<void> _initializeCoreServices() async {
         try {
           await SecureFirebaseConfig.configureAppCheck(
             teamId: 'H49R32NPY6',
-            forceDebug: false, // Set to true only for debugging production App Check issues
+            forceDebug:
+                false, // Set to true only for debugging production App Check issues
           ).timeout(const Duration(seconds: 8));
           debugPrint('🛡️ ✅ configureAppCheck completed successfully');
         } catch (e) {

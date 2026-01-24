@@ -11,9 +11,16 @@ import '../services/auth_service.dart';
 /// Bridge screen that redirects to the full profile creation screen
 /// Styled to match Local ARTbeat auth/quest theme
 class ProfileCreateScreen extends StatefulWidget {
-  const ProfileCreateScreen({super.key, this.authService});
+  const ProfileCreateScreen({
+    super.key,
+    this.authService,
+    this.enableBackgroundAnimation = true,
+    this.autoNavigate = true,
+  });
 
   final AuthService? authService;
+  final bool enableBackgroundAnimation;
+  final bool autoNavigate;
 
   @override
   State<ProfileCreateScreen> createState() => _ProfileCreateScreenState();
@@ -32,7 +39,26 @@ class _ProfileCreateScreenState extends State<ProfileCreateScreen>
     _loop = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 9),
-    )..repeat();
+    );
+    if (widget.enableBackgroundAnimation) {
+      _loop.repeat();
+    }
+  }
+
+  @override
+  void didUpdateWidget(ProfileCreateScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.enableBackgroundAnimation !=
+        widget.enableBackgroundAnimation) {
+      if (widget.enableBackgroundAnimation) {
+        if (!_loop.isAnimating) {
+          _loop.repeat();
+        }
+      } else {
+        _loop.stop();
+        _loop.reset();
+      }
+    }
   }
 
   @override
@@ -55,7 +81,9 @@ class _ProfileCreateScreenState extends State<ProfileCreateScreen>
     final user = _authService.currentUser;
 
     if (user == null) {
-      _redirectToLoginOnce();
+      if (widget.autoNavigate) {
+        _redirectToLoginOnce();
+      }
       return Scaffold(
         backgroundColor: const Color(0xFF07060F),
         body: Stack(
@@ -116,13 +144,16 @@ class _ProfileCreateScreenState extends State<ProfileCreateScreen>
                             ),
                           ),
                           const SizedBox(height: 16),
-                          const SizedBox(
+                          SizedBox(
                             height: 22,
                             width: 22,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.4,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Color(0xFF22D3EE),
+                            child: TickerMode(
+                              enabled: widget.enableBackgroundAnimation,
+                              child: const CircularProgressIndicator(
+                                strokeWidth: 2.4,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Color(0xFF22D3EE),
+                                ),
                               ),
                             ),
                           ),

@@ -9,7 +9,8 @@ import '../../services/in_app_purchase_setup.dart';
 
 class SubscriptionsScreen extends StatefulWidget {
   final bool showAppBar;
-  const SubscriptionsScreen({Key? key, this.showAppBar = true})
+  final bool isPreview;
+  const SubscriptionsScreen({Key? key, this.showAppBar = true, this.isPreview = false})
     : super(key: key);
 
   @override
@@ -38,6 +39,9 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.isPreview) {
+      return _buildPreview();
+    }
     final body = Stack(
       children: [
         _buildWorldBackground(),
@@ -81,6 +85,87 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
     }
 
     return body;
+  }
+
+  Widget _buildPreview() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Row(
+        children: [
+          _buildPreviewCard(
+            'Fan Club',
+            'Support your favorite artists directly.',
+            const Color(0xFFA855F7),
+          ),
+          const SizedBox(width: 16),
+          _buildPreviewCard(
+            'Collector Tier',
+            'Exclusive access to new drops.',
+            const Color(0xFFEC4899),
+          ),
+          const SizedBox(width: 16),
+          _buildPreviewCard(
+            'Patron Tier',
+            'Ultimate support for the community.',
+            const Color(0xFF3B82F6),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPreviewCard(String title, String subtitle, Color color) {
+    return Container(
+      width: 200,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            color.withValues(alpha: 0.2),
+            color.withValues(alpha: 0.05),
+          ],
+        ),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.2),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.workspace_premium_rounded, color: color, size: 20),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            title,
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            subtitle,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: Colors.white70,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildHeroSection() {

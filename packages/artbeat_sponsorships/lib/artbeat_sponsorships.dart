@@ -17,8 +17,8 @@ export 'src/screens/sponsorships/title_sponsorship_screen.dart';
 export 'src/utils/sponsorship_placements.dart';
 export 'src/widgets/sponsor_banner.dart';
 // (Optional future exports)
-// export 'src/services/sponsor_service.dart';
-// export 'src/models/sponsorship.dart';
+export 'src/services/sponsor_service.dart';
+export 'src/models/sponsorship.dart';
 // Widgets – Sponsorship UI primitives
 export 'src/widgets/sponsorship_card.dart';
 export 'src/widgets/sponsorship_cta_tile.dart';

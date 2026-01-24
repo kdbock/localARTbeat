@@ -50,3 +50,4 @@ flutter: \^[[34m[🌎 Easy Localization] [WARNING] Localization key [quest_art_c
 flutter: \^[[34m[🌎 Easy Localization] [WARNING] Localization key [quest_style_collector_title] not found\^[[0m
 flutter: \^[[34m[🌎 Easy Localization] [WARNING] Localization key [quest_style_collector_desc] not found\^[[0m
 flutter: \^[[34m[🌎 Easy Localization] [WARNING] Localization key [quest_style_collector_reward] not found\^[[0m
+flutter: [🌎 Easy Localization] [WARNING] Localization key [dashboard_boost_now_btn] not found

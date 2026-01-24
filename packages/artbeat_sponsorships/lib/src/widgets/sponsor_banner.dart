@@ -21,6 +21,7 @@ class SponsorBanner extends StatefulWidget {
     this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
     this.showPlaceholder = false,
     this.onPlaceholderTap,
+    this.sponsorService,
   });
 
   final String placementKey;
@@ -28,13 +29,14 @@ class SponsorBanner extends StatefulWidget {
   final EdgeInsets padding;
   final bool showPlaceholder;
   final VoidCallback? onPlaceholderTap;
+  final SponsorService? sponsorService;
 
   @override
   State<SponsorBanner> createState() => _SponsorBannerState();
 }
 
 class _SponsorBannerState extends State<SponsorBanner> {
-  final SponsorService _service = SponsorService();
+  late final SponsorService _service;
 
   Sponsorship? _sponsor;
   bool _isLoading = false;
@@ -45,6 +47,7 @@ class _SponsorBannerState extends State<SponsorBanner> {
   @override
   void initState() {
     super.initState();
+    _service = widget.sponsorService ?? SponsorService();
     _loadSponsor();
   }
 

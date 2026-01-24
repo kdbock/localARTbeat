@@ -1,6 +1,7 @@
 // Copyright (c) 2025 ArtBeat. All rights reserved.
 
 import 'package:artbeat_auth/artbeat_auth.dart';
+import 'package:artbeat_sponsorships/artbeat_sponsorships.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -32,6 +33,16 @@ class FirebaseTestSetup {
       );
     }
     return AuthService(auth: _mockAuth, firestore: _fakeFirestore);
+  }
+
+  /// Create a mock SponsorService for testing
+  static SponsorService createMockSponsorService() {
+    if (!_isInitialized) {
+      throw StateError(
+        'Firebase not initialized for testing. Call initializeFirebaseForTesting() first.',
+      );
+    }
+    return SponsorService(firestore: _fakeFirestore);
   }
 
   /// Get mock FirebaseAuth instance for testing

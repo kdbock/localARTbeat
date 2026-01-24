@@ -19,7 +19,16 @@ import '../utils/performance_monitor.dart';
 /// - Logo "breathes" with a neon aura
 /// - Optional tiny "LOADING" HUD text
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
+  const SplashScreen({
+    super.key,
+    this.sponsorService,
+    this.enableBackgroundAnimation = true,
+    this.autoNavigate = true,
+  });
+
+  final SponsorService? sponsorService;
+  final bool enableBackgroundAnimation;
+  final bool autoNavigate;
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -68,11 +77,29 @@ class _SplashScreenState extends State<SplashScreen>
       ),
     ]).animate(_heartbeatController);
 
-    // Skip looping animations in test mode.
-    if (!Platform.environment.containsKey('FLUTTER_TEST')) {
+    if (widget.enableBackgroundAnimation) {
       _heartbeatController.repeat();
       _loopController.repeat();
+    }
+
+    if (widget.autoNavigate &&
+        !Platform.environment.containsKey('FLUTTER_TEST')) {
       _checkAuthAndNavigate();
+    }
+  }
+
+  @override
+  void didUpdateWidget(SplashScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.enableBackgroundAnimation !=
+        widget.enableBackgroundAnimation) {
+      if (widget.enableBackgroundAnimation) {
+        _heartbeatController.repeat();
+        _loopController.repeat();
+      } else {
+        _heartbeatController.stop();
+        _loopController.stop();
+      }
     }
   }
 
@@ -347,9 +374,10 @@ class _SplashScreenState extends State<SplashScreen>
             left: 0,
             right: 0,
             bottom: 40 + MediaQuery.of(context).padding.bottom,
-            child: const SponsorBanner(
+            child: SponsorBanner(
               placementKey: SponsorshipPlacements.splash,
               showPlaceholder: true,
+              sponsorService: widget.sponsorService,
             ),
           ),
         ],

@@ -43,7 +43,11 @@ void main() {
             supportedLocales: const [Locale('en')],
             path: 'assets/translations',
             fallbackLocale: const Locale('en'),
-            child: const MaterialApp(home: SplashScreen()),
+            child: MaterialApp(
+              home: SplashScreen(
+                sponsorService: FirebaseTestSetup.createMockSponsorService(),
+              ),
+            ),
           ),
         );
 
@@ -90,7 +94,7 @@ void main() {
           findsAtLeastNWidgets(2),
         ); // Email and password fields
         expect(
-          find.byType(ElevatedButton),
+          find.byType(InkWell),
           findsAtLeastNWidgets(1),
         ); // Login button
       });
@@ -124,7 +128,7 @@ void main() {
         // Check for form elements - RegisterScreen should have multiple text fields
         expect(find.byType(Form), findsOneWidget);
         expect(find.byType(TextFormField), findsAtLeastNWidgets(4));
-        expect(find.byType(ElevatedButton), findsAtLeastNWidgets(1));
+        expect(find.byType(InkWell), findsAtLeastNWidgets(1));
       });
 
       testWidgets('Forgot Password screen displays correctly with Firebase', (
@@ -156,7 +160,7 @@ void main() {
         expect(find.byType(Form), findsOneWidget);
         expect(find.byType(TextFormField), findsOneWidget); // Email field
         expect(
-          find.byType(ElevatedButton),
+          find.byType(InkWell),
           findsAtLeastNWidgets(1),
         ); // Reset button
       });
@@ -289,7 +293,7 @@ void main() {
           await tester.pump();
 
           // Find and tap the main action button
-          final buttons = find.byType(ElevatedButton);
+          final buttons = find.byType(InkWell);
           if (buttons.evaluate().isNotEmpty) {
             await tester.tap(buttons.first);
             await tester.pump();
@@ -319,7 +323,7 @@ void main() {
 
           await tester.pump();
 
-          final buttons = find.byType(ElevatedButton);
+          final buttons = find.byType(InkWell);
           if (buttons.evaluate().isNotEmpty) {
             await tester.tap(buttons.first);
             await tester.pump();
@@ -347,7 +351,7 @@ void main() {
 
           await tester.pump();
 
-          final buttons = find.byType(ElevatedButton);
+          final buttons = find.byType(InkWell);
           if (buttons.evaluate().isNotEmpty) {
             await tester.tap(buttons.first);
             await tester.pump();

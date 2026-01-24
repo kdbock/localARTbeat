@@ -65,7 +65,7 @@ class SecureFirebaseConfig {
           debugPrint('🛡️ IMPORTANT: Check Xcode console for debug token!');
           debugPrint('🛡️ Look for: "Firebase App Check debug token:"');
           debugPrint('🛡️ ============================================');
-          
+
           final token = await FirebaseAppCheck.instance.getToken(true);
           debugPrint('🛡️ ============================================');
           debugPrint('🛡️ APP CHECK DEBUG TOKEN:');
@@ -110,34 +110,39 @@ class SecureFirebaseConfig {
           appleProvider: AppleProvider.appAttestWithDeviceCheckFallback,
         );
         await FirebaseAppCheck.instance.setTokenAutoRefreshEnabled(true);
-        
+
         // Add token change listener to monitor production tokens
-        FirebaseAppCheck.instance.onTokenChange.listen((token) {
-          debugPrint('🛡️ ============================================');
-          debugPrint('🛡️ PRODUCTION APP CHECK TOKEN RECEIVED');
-          debugPrint('🛡️ Token length: ${token?.length ?? 0}');
-          if (token != null && token.isNotEmpty) {
-            debugPrint('🛡️ ✅ AppAttest/DeviceCheck is working!');
-            // Decode JWT to see provider
-            try {
-              final parts = token.split('.');
-              if (parts.length >= 2) {
-                final payload = parts[1];
-                debugPrint('🛡️ Token type: Production (AppAttest or DeviceCheck)');
-              }
-            } catch (_) {}
-          }
-          debugPrint('🛡️ ============================================');
-        }, onError: (error) {
-          debugPrint('⚠️ ============================================');
-          debugPrint('⚠️ PRODUCTION APP CHECK TOKEN ERROR: $error');
-          debugPrint('⚠️ ============================================');
-        });
-        
+        FirebaseAppCheck.instance.onTokenChange.listen(
+          (token) {
+            debugPrint('🛡️ ============================================');
+            debugPrint('🛡️ PRODUCTION APP CHECK TOKEN RECEIVED');
+            debugPrint('🛡️ Token length: ${token?.length ?? 0}');
+            if (token != null && token.isNotEmpty) {
+              debugPrint('🛡️ ✅ AppAttest/DeviceCheck is working!');
+              // Decode JWT to see provider
+              try {
+                final parts = token.split('.');
+                if (parts.length >= 2) {
+                  final payload = parts[1];
+                  debugPrint(
+                    '🛡️ Token type: Production (AppAttest or DeviceCheck)',
+                  );
+                }
+              } catch (_) {}
+            }
+            debugPrint('🛡️ ============================================');
+          },
+          onError: (error) {
+            debugPrint('⚠️ ============================================');
+            debugPrint('⚠️ PRODUCTION APP CHECK TOKEN ERROR: $error');
+            debugPrint('⚠️ ============================================');
+          },
+        );
+
         debugPrint('🛡️ ✅ AppCheck activated with PRODUCTION providers');
         debugPrint('🛡️ iOS: AppAttest with DeviceCheck fallback');
         debugPrint('🛡️ Android: Play Integrity');
-        
+
         // Test token fetch
         try {
           debugPrint('🛡️ Testing production token fetch...');

@@ -12,9 +12,14 @@ import '../services/auth_service.dart';
 
 /// Email verification screen (Quest theme) for Local ARTbeat
 class EmailVerificationScreen extends StatefulWidget {
-  const EmailVerificationScreen({super.key, this.authService});
+  const EmailVerificationScreen({
+    super.key,
+    this.authService,
+    this.enableBackgroundAnimation = true,
+  });
 
   final AuthService? authService;
+  final bool enableBackgroundAnimation;
 
   @override
   State<EmailVerificationScreen> createState() =>
@@ -43,13 +48,48 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
     _loop = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 9),
-    )..repeat();
+    );
+    if (widget.enableBackgroundAnimation) {
+      _loop.repeat();
+    }
+
     _intro = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 650),
-    )..forward();
+    );
+    if (widget.enableBackgroundAnimation) {
+      _intro.forward();
+    } else {
+      _intro.value = 1;
+    }
 
-    _startEmailVerificationCheck();
+    if (widget.enableBackgroundAnimation) {
+      _startEmailVerificationCheck();
+    }
+  }
+
+  @override
+  void didUpdateWidget(EmailVerificationScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.enableBackgroundAnimation !=
+        widget.enableBackgroundAnimation) {
+      if (widget.enableBackgroundAnimation) {
+        if (!_loop.isAnimating) {
+          _loop.repeat();
+        }
+        if (!_intro.isAnimating && _intro.value != 1) {
+          _intro.forward();
+        }
+        _startEmailVerificationCheck();
+      } else {
+        _loop.stop();
+        _loop.reset();
+        _intro.stop();
+        _intro.value = 1;
+        _timer?.cancel();
+        _timer = null;
+      }
+    }
   }
 
   @override

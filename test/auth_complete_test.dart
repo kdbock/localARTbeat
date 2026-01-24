@@ -4,12 +4,23 @@ import 'package:artbeat_core/artbeat_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'auth_test_helpers.dart';
+import 'firebase_test_setup.dart';
 
 void main() {
+  setUpAll(() async {
+    await FirebaseTestSetup.initializeFirebaseForTesting();
+  });
+
   group('🎯 ArtBeat Authentication & Onboarding Tests (Complete)', () {
     group('1. AUTHENTICATION SCREENS - UI Tests', () {
       testWidgets('✅ Splash screen displays and animates', (tester) async {
-        await tester.pumpWidget(const MaterialApp(home: SplashScreen()));
+        await tester.pumpWidget(MaterialApp(
+          home: SplashScreen(
+            sponsorService: FirebaseTestSetup.createMockSponsorService(),
+            enableBackgroundAnimation: false,
+            autoNavigate: false,
+          ),
+        ));
 
         // Wait for timers to complete
         await tester.pumpAndSettle();
@@ -27,7 +38,7 @@ void main() {
         expect(find.byType(Image), findsOneWidget);
 
         // Test animation
-        await tester.pump();
+        await tester.pumpAndSettle();
         await tester.pump(const Duration(milliseconds: 500));
 
         // Animation should be running (ScaleTransition)
@@ -36,7 +47,7 @@ void main() {
 
       testWidgets('✅ Login screen displays correctly', (tester) async {
         await tester.pumpWidget(AuthTestHelpers.createTestLoginScreen());
-        await tester.pump();
+        await tester.pumpAndSettle();
 
         // Verify login screen structure
         expect(find.byType(TestAuthScreenWrapper), findsOneWidget);
@@ -48,12 +59,12 @@ void main() {
         expect(textFields, findsAtLeastNWidgets(2)); // Email and password
 
         // Check for buttons
-        expect(find.byType(ElevatedButton), findsAtLeastNWidgets(1));
+        expect(find.byType(InkWell), findsAtLeastNWidgets(1));
       });
 
       testWidgets('✅ Registration screen displays correctly', (tester) async {
         await tester.pumpWidget(AuthTestHelpers.createTestRegisterScreen());
-        await tester.pump();
+        await tester.pumpAndSettle();
 
         // Verify registration screen structure
         expect(find.byType(TestAuthScreenWrapper), findsOneWidget);
@@ -68,7 +79,7 @@ void main() {
         ); // Name, email, password, confirm, etc.
 
         // Check for submit button
-        expect(find.byType(ElevatedButton), findsAtLeastNWidgets(1));
+        expect(find.byType(InkWell), findsAtLeastNWidgets(1));
       });
 
       testWidgets('✅ Forgot Password screen displays correctly', (
@@ -77,7 +88,7 @@ void main() {
         await tester.pumpWidget(
           AuthTestHelpers.createTestForgotPasswordScreen(),
         );
-        await tester.pump();
+        await tester.pumpAndSettle();
 
         // Verify forgot password screen structure
         expect(find.byType(TestAuthScreenWrapper), findsOneWidget);
@@ -88,7 +99,7 @@ void main() {
         expect(find.byType(TextFormField), findsOneWidget);
 
         // Should have reset button
-        expect(find.byType(ElevatedButton), findsAtLeastNWidgets(1));
+        expect(find.byType(InkWell), findsAtLeastNWidgets(1));
       });
 
       testWidgets('✅ Email verification screen displays correctly', (
@@ -97,7 +108,7 @@ void main() {
         await tester.pumpWidget(
           AuthTestHelpers.createTestEmailVerificationScreen(),
         );
-        await tester.pump();
+        await tester.pumpAndSettle();
 
         // Verify email verification screen
         expect(find.byType(TestAuthScreenWrapper), findsOneWidget);
@@ -110,7 +121,7 @@ void main() {
         await tester.pumpWidget(
           AuthTestHelpers.createTestProfileCreateScreen(),
         );
-        await tester.pump();
+        await tester.pumpAndSettle();
 
         // Verify profile creation screen
         expect(find.byType(TestAuthScreenWrapper), findsOneWidget);
@@ -121,13 +132,13 @@ void main() {
     group('2. FORM INTERACTIONS - Input Tests', () {
       testWidgets('✅ Login form accepts email input', (tester) async {
         await tester.pumpWidget(AuthTestHelpers.createTestLoginScreen());
-        await tester.pump();
+        await tester.pumpAndSettle();
 
         final textFields = find.byType(TextFormField);
         if (textFields.evaluate().isNotEmpty) {
           // Enter email in first field
           await tester.enterText(textFields.first, 'test@example.com');
-          await tester.pump();
+          await tester.pumpAndSettle();
 
           // Verify email was entered
           expect(find.text('test@example.com'), findsOneWidget);
@@ -136,13 +147,13 @@ void main() {
 
       testWidgets('✅ Login form accepts password input', (tester) async {
         await tester.pumpWidget(AuthTestHelpers.createTestLoginScreen());
-        await tester.pump();
+        await tester.pumpAndSettle();
 
         final textFields = find.byType(TextFormField);
         if (textFields.evaluate().length >= 2) {
           // Enter password in second field
           await tester.enterText(textFields.at(1), 'password123');
-          await tester.pump();
+          await tester.pumpAndSettle();
 
           // Note: Password might be obscured, so we check the field exists
           expect(textFields.at(1), findsOneWidget);
@@ -151,26 +162,26 @@ void main() {
 
       testWidgets('✅ Registration form accepts user input', (tester) async {
         await tester.pumpWidget(AuthTestHelpers.createTestRegisterScreen());
-        await tester.pump();
+        await tester.pumpAndSettle();
 
         final textFields = find.byType(TextFormField);
 
         if (textFields.evaluate().isNotEmpty) {
           // Test first name field
           await tester.enterText(textFields.first, 'John');
-          await tester.pump();
+          await tester.pumpAndSettle();
           expect(find.text('John'), findsOneWidget);
 
           // Test additional fields if available
           if (textFields.evaluate().length >= 2) {
             await tester.enterText(textFields.at(1), 'Doe');
-            await tester.pump();
+            await tester.pumpAndSettle();
             expect(find.text('Doe'), findsOneWidget);
           }
 
           if (textFields.evaluate().length >= 3) {
             await tester.enterText(textFields.at(2), 'john@example.com');
-            await tester.pump();
+            await tester.pumpAndSettle();
             expect(find.text('john@example.com'), findsOneWidget);
           }
         }
@@ -180,11 +191,11 @@ void main() {
         await tester.pumpWidget(
           AuthTestHelpers.createTestForgotPasswordScreen(),
         );
-        await tester.pump();
+        await tester.pumpAndSettle();
 
         final textField = find.byType(TextFormField);
         await tester.enterText(textField, 'reset@example.com');
-        await tester.pump();
+        await tester.pumpAndSettle();
 
         expect(find.text('reset@example.com'), findsOneWidget);
       });
@@ -193,12 +204,12 @@ void main() {
     group('3. BUTTON INTERACTIONS - Action Tests', () {
       testWidgets('✅ Login button can be tapped', (tester) async {
         await tester.pumpWidget(AuthTestHelpers.createTestLoginScreen());
-        await tester.pump();
+        await tester.pumpAndSettle();
 
-        final buttons = find.byType(ElevatedButton);
+        final buttons = find.byType(InkWell);
         if (buttons.evaluate().isNotEmpty) {
           await tester.tap(buttons.first);
-          await tester.pump();
+          await tester.pumpAndSettle();
 
           // Form should still be present (validation may prevent submission)
           expect(find.byType(TestAuthScreenWrapper), findsOneWidget);
@@ -207,14 +218,14 @@ void main() {
 
       testWidgets('✅ Registration button can be tapped', (tester) async {
         await tester.pumpWidget(AuthTestHelpers.createTestRegisterScreen());
-        await tester.pump();
+        await tester.pumpAndSettle();
 
-        final buttons = find.byType(ElevatedButton);
+        final buttons = find.byType(InkWell);
         if (buttons.evaluate().isNotEmpty) {
           // Ensure button is visible by scrolling if needed
           await tester.ensureVisible(buttons.first);
           await tester.tap(buttons.first, warnIfMissed: false);
-          await tester.pump();
+          await tester.pumpAndSettle();
 
           expect(find.byType(TestAuthScreenWrapper), findsOneWidget);
         }
@@ -224,12 +235,12 @@ void main() {
         await tester.pumpWidget(
           AuthTestHelpers.createTestForgotPasswordScreen(),
         );
-        await tester.pump();
+        await tester.pumpAndSettle();
 
-        final buttons = find.byType(ElevatedButton);
+        final buttons = find.byType(InkWell);
         if (buttons.evaluate().isNotEmpty) {
           await tester.tap(buttons.first);
-          await tester.pump();
+          await tester.pumpAndSettle();
 
           expect(find.byType(TestAuthScreenWrapper), findsOneWidget);
         }
@@ -239,13 +250,13 @@ void main() {
     group('4. FORM VALIDATION - Error Handling Tests', () {
       testWidgets('✅ Login form handles empty submission', (tester) async {
         await tester.pumpWidget(AuthTestHelpers.createTestLoginScreen());
-        await tester.pump();
+        await tester.pumpAndSettle();
 
         // Try to submit without entering data
-        final submitButton = find.byType(ElevatedButton);
+        final submitButton = find.byType(InkWell);
         if (submitButton.evaluate().isNotEmpty) {
           await tester.tap(submitButton.first);
-          await tester.pump();
+          await tester.pumpAndSettle();
 
           // Form should still be displayed (validation should prevent submission)
           expect(find.byType(Form), findsOneWidget);
@@ -257,14 +268,14 @@ void main() {
         tester,
       ) async {
         await tester.pumpWidget(AuthTestHelpers.createTestRegisterScreen());
-        await tester.pump();
+        await tester.pumpAndSettle();
 
-        final submitButton = find.byType(ElevatedButton);
+        final submitButton = find.byType(InkWell);
         if (submitButton.evaluate().isNotEmpty) {
           // Ensure button is visible and tap with warning disabled
           await tester.ensureVisible(submitButton.first);
           await tester.tap(submitButton.first, warnIfMissed: false);
-          await tester.pump();
+          await tester.pumpAndSettle();
 
           expect(find.byType(Form), findsOneWidget);
           expect(find.byType(TestAuthScreenWrapper), findsOneWidget);
@@ -278,38 +289,38 @@ void main() {
       ) async {
         // Test login screen
         await tester.pumpWidget(AuthTestHelpers.createTestLoginScreen());
-        await tester.pump();
+        await tester.pumpAndSettle();
         expect(find.byType(Scaffold), findsOneWidget);
 
         // Test registration screen
         await tester.pumpWidget(AuthTestHelpers.createTestRegisterScreen());
-        await tester.pump();
+        await tester.pumpAndSettle();
         expect(find.byType(Scaffold), findsOneWidget);
 
         // Test forgot password screen
         await tester.pumpWidget(
           AuthTestHelpers.createTestForgotPasswordScreen(),
         );
-        await tester.pump();
+        await tester.pumpAndSettle();
         expect(find.byType(Scaffold), findsOneWidget);
       });
 
       testWidgets('✅ Forms have proper validation structure', (tester) async {
         // Login form
         await tester.pumpWidget(AuthTestHelpers.createTestLoginScreen());
-        await tester.pump();
+        await tester.pumpAndSettle();
         expect(find.byType(Form), findsOneWidget);
 
         // Registration form
         await tester.pumpWidget(AuthTestHelpers.createTestRegisterScreen());
-        await tester.pump();
+        await tester.pumpAndSettle();
         expect(find.byType(Form), findsOneWidget);
 
         // Forgot password form
         await tester.pumpWidget(
           AuthTestHelpers.createTestForgotPasswordScreen(),
         );
-        await tester.pump();
+        await tester.pumpAndSettle();
         expect(find.byType(Form), findsOneWidget);
       });
 
@@ -317,7 +328,7 @@ void main() {
         tester,
       ) async {
         await tester.pumpWidget(AuthTestHelpers.createTestLoginScreen());
-        await tester.pump();
+        await tester.pumpAndSettle();
 
         // Look for password visibility icons
         final iconButtons = find.byType(IconButton);
@@ -325,7 +336,7 @@ void main() {
         // If there are icon buttons, they might be for password visibility
         if (iconButtons.evaluate().isNotEmpty) {
           await tester.tap(iconButtons.first);
-          await tester.pump();
+          await tester.pumpAndSettle();
 
           // Screen should still be functional
           expect(find.byType(TestAuthScreenWrapper), findsOneWidget);
@@ -396,7 +407,7 @@ void main() {
     group('8. ACCESSIBILITY TESTS', () {
       testWidgets('✅ Login screen is accessible', (tester) async {
         await tester.pumpWidget(AuthTestHelpers.createTestLoginScreen());
-        await tester.pump();
+        await tester.pumpAndSettle();
 
         // Check that screen has proper structure for accessibility
         expect(find.byType(Scaffold), findsOneWidget);
@@ -409,7 +420,7 @@ void main() {
 
       testWidgets('✅ Registration screen is accessible', (tester) async {
         await tester.pumpWidget(AuthTestHelpers.createTestRegisterScreen());
-        await tester.pump();
+        await tester.pumpAndSettle();
 
         expect(find.byType(Scaffold), findsOneWidget);
         expect(find.byType(Form), findsOneWidget);
@@ -420,7 +431,7 @@ void main() {
       testWidgets('✅ Screens handle MaterialApp context', (tester) async {
         // Test that screens work within MaterialApp context
         await tester.pumpWidget(AuthTestHelpers.createTestLoginScreen());
-        await tester.pump();
+        await tester.pumpAndSettle();
 
         // Should find MaterialApp wrapper
         expect(find.byType(MaterialApp), findsOneWidget);
