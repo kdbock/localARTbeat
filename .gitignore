@@ -16,6 +16,8 @@ migrate_working_dir/
 **/client_secret_*.json
 **/google-services.json
 **/GoogleService-Info.plist
+service-account-key.json
+**/service-account-key.json
 .env
 .env.*
 !.env.example
