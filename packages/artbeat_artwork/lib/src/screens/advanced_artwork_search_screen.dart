@@ -129,9 +129,9 @@ class _AdvancedArtworkSearchScreenState
         _isLoading = false;
       });
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('advanced_search_error'.tr())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('advanced_search_error'.tr())));
     }
   }
 

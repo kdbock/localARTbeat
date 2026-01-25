@@ -1,22 +1,43 @@
 // Copyright (c) 2025 ArtBeat. All rights reserved.
 
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'auth_test_helpers.dart';
 import 'firebase_test_setup.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   setUpAll(() async {
+    await EasyLocalization.ensureInitialized();
     await FirebaseTestSetup.initializeFirebaseForTesting();
   });
+
+  Widget wrapWithLocalization(Widget child) => EasyLocalization(
+    supportedLocales: const [Locale('en')],
+    path: 'assets/translations',
+    fallbackLocale: const Locale('en'),
+    startLocale: const Locale('en'),
+    useOnlyLangCode: true,
+    assetLoader: const TestFileAssetLoader(),
+    child: Builder(
+      builder: (BuildContext context) => MaterialApp(
+        locale: context.locale,
+        supportedLocales: context.supportedLocales,
+        localizationsDelegates: context.localizationDelegates,
+        home: child,
+      ),
+    ),
+  );
 
   group('🎯 ArtBeat Authentication & Onboarding Tests (Complete)', () {
     group('1. AUTHENTICATION SCREENS - UI Tests', () {
       testWidgets('✅ Splash screen displays and animates', (tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: SplashScreen(
+          wrapWithLocalization(
+            SplashScreen(
               sponsorService: FirebaseTestSetup.createMockSponsorService(),
               enableBackgroundAnimation: false,
               autoNavigate: false,

@@ -3,27 +3,54 @@
 import 'package:artbeat_auth/artbeat_auth.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_profile/artbeat_profile.dart' hide UserService;
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'auth_test_helpers.dart';
 import 'firebase_test_setup.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   setUpAll(() async {
+    await EasyLocalization.ensureInitialized();
     // Initialize Firebase for all tests
     await FirebaseTestSetup.initializeFirebaseForTesting();
   });
+
+  Widget wrapWithLocalization(Widget child) => EasyLocalization(
+    supportedLocales: const [Locale('en')],
+    path: 'assets/translations',
+    fallbackLocale: const Locale('en'),
+    startLocale: const Locale('en'),
+    useOnlyLangCode: true,
+    assetLoader: const TestFileAssetLoader(),
+    child: Builder(
+      builder: (BuildContext context) => MaterialApp(
+        locale: context.locale,
+        supportedLocales: context.supportedLocales,
+        localizationsDelegates: context.localizationDelegates,
+        home: child,
+      ),
+    ),
+  );
 
   group('🎯 ArtBeat Authentication & Onboarding Tests', () {
     group('1. AUTHENTICATION & ONBOARDING - Core UI Tests', () {
       testWidgets('✅ Splash screen displays on app launch', (tester) async {
         final mockSponsorService = FirebaseTestSetup.createMockSponsorService();
         await tester.pumpWidget(
-          MaterialApp(home: SplashScreen(sponsorService: mockSponsorService)),
+          wrapWithLocalization(
+            SplashScreen(
+              sponsorService: mockSponsorService,
+              enableBackgroundAnimation: false,
+              autoNavigate: false,
+            ),
+          ),
         );
 
-        // Wait for timers to complete
-        await tester.pumpAndSettle();
+        await tester.pump();
 
         // Verify splash screen elements are present
         expect(find.byType(SplashScreen), findsOneWidget);
@@ -37,8 +64,8 @@ void main() {
         final mockAuthService = FirebaseTestSetup.createMockAuthService();
 
         await tester.pumpWidget(
-          MaterialApp(
-            home: LoginScreen(
+          wrapWithLocalization(
+            LoginScreen(
               authService: mockAuthService,
               enableBackgroundAnimation: false,
             ),
@@ -61,8 +88,8 @@ void main() {
         final mockAuthService = FirebaseTestSetup.createMockAuthService();
 
         await tester.pumpWidget(
-          MaterialApp(
-            home: RegisterScreen(
+          wrapWithLocalization(
+            RegisterScreen(
               authService: mockAuthService,
               enableBackgroundAnimation: false,
             ),
@@ -81,7 +108,9 @@ void main() {
       testWidgets('Forgot Password screen displays correctly', (tester) async {
         final mockAuthService = FirebaseTestSetup.createMockAuthService();
         await tester.pumpWidget(
-          MaterialApp(home: ForgotPasswordScreen(authService: mockAuthService)),
+          wrapWithLocalization(
+            ForgotPasswordScreen(authService: mockAuthService),
+          ),
         );
 
         // Verify forgot password screen loads
@@ -98,8 +127,8 @@ void main() {
       ) async {
         final mockAuthService = FirebaseTestSetup.createMockAuthService();
         await tester.pumpWidget(
-          MaterialApp(
-            home: EmailVerificationScreen(authService: mockAuthService),
+          wrapWithLocalization(
+            EmailVerificationScreen(authService: mockAuthService),
           ),
         );
 
@@ -109,7 +138,9 @@ void main() {
 
       testWidgets('Profile creation screen displays correctly', (tester) async {
         await tester.pumpWidget(
-          const MaterialApp(home: CreateProfileScreen(userId: 'test-user-id')),
+          wrapWithLocalization(
+            const CreateProfileScreen(userId: 'test-user-id'),
+          ),
         );
 
         // Allow the widget to build
@@ -123,8 +154,8 @@ void main() {
           final mockAuthService = FirebaseTestSetup.createMockAuthService();
 
           await tester.pumpWidget(
-            MaterialApp(
-              home: LoginScreen(
+            wrapWithLocalization(
+              LoginScreen(
                 authService: mockAuthService,
                 enableBackgroundAnimation: false,
               ),
@@ -151,8 +182,8 @@ void main() {
         testWidgets('Registration form accepts text input', (tester) async {
           final mockAuthService = FirebaseTestSetup.createMockAuthService();
           await tester.pumpWidget(
-            MaterialApp(
-              home: RegisterScreen(
+            wrapWithLocalization(
+              RegisterScreen(
                 authService: mockAuthService,
                 enableBackgroundAnimation: false,
               ),
@@ -181,20 +212,33 @@ void main() {
         testWidgets('Login screen has navigation elements', (tester) async {
           final mockAuthService = FirebaseTestSetup.createMockAuthService();
           await tester.pumpWidget(
-            MaterialApp(
-              initialRoute: '/login',
-              routes: {
-                '/login': (context) => LoginScreen(
-                  authService: mockAuthService,
-                  enableBackgroundAnimation: false,
+            EasyLocalization(
+              supportedLocales: const [Locale('en')],
+              path: 'assets/translations',
+              fallbackLocale: const Locale('en'),
+              startLocale: const Locale('en'),
+              useOnlyLangCode: true,
+              assetLoader: const TestFileAssetLoader(),
+              child: Builder(
+                builder: (BuildContext context) => MaterialApp(
+                  locale: context.locale,
+                  supportedLocales: context.supportedLocales,
+                  localizationsDelegates: context.localizationDelegates,
+                  initialRoute: '/login',
+                  routes: {
+                    '/login': (context) => LoginScreen(
+                      authService: mockAuthService,
+                      enableBackgroundAnimation: false,
+                    ),
+                    '/register': (context) => RegisterScreen(
+                      authService: mockAuthService,
+                      enableBackgroundAnimation: false,
+                    ),
+                    '/forgot-password': (context) =>
+                        ForgotPasswordScreen(authService: mockAuthService),
+                  },
                 ),
-                '/register': (context) => RegisterScreen(
-                  authService: mockAuthService,
-                  enableBackgroundAnimation: false,
-                ),
-                '/forgot-password': (context) =>
-                    ForgotPasswordScreen(authService: mockAuthService),
-              },
+              ),
             ),
           );
 
@@ -213,18 +257,31 @@ void main() {
         ) async {
           final mockAuthService = FirebaseTestSetup.createMockAuthService();
           await tester.pumpWidget(
-            MaterialApp(
-              initialRoute: '/register',
-              routes: {
-                '/login': (context) => LoginScreen(
-                  authService: mockAuthService,
-                  enableBackgroundAnimation: false,
+            EasyLocalization(
+              supportedLocales: const [Locale('en')],
+              path: 'assets/translations',
+              fallbackLocale: const Locale('en'),
+              startLocale: const Locale('en'),
+              useOnlyLangCode: true,
+              assetLoader: const TestFileAssetLoader(),
+              child: Builder(
+                builder: (BuildContext context) => MaterialApp(
+                  locale: context.locale,
+                  supportedLocales: context.supportedLocales,
+                  localizationsDelegates: context.localizationDelegates,
+                  initialRoute: '/register',
+                  routes: {
+                    '/login': (context) => LoginScreen(
+                      authService: mockAuthService,
+                      enableBackgroundAnimation: false,
+                    ),
+                    '/register': (context) => RegisterScreen(
+                      authService: mockAuthService,
+                      enableBackgroundAnimation: false,
+                    ),
+                  },
                 ),
-                '/register': (context) => RegisterScreen(
-                  authService: mockAuthService,
-                  enableBackgroundAnimation: false,
-                ),
-              },
+              ),
             ),
           );
 
@@ -237,8 +294,8 @@ void main() {
           final mockAuthService = FirebaseTestSetup.createMockAuthService();
 
           await tester.pumpWidget(
-            MaterialApp(
-              home: LoginScreen(
+            wrapWithLocalization(
+              LoginScreen(
                 authService: mockAuthService,
                 enableBackgroundAnimation: false,
               ),
@@ -259,8 +316,8 @@ void main() {
         testWidgets('Registration button can be tapped', (tester) async {
           final mockAuthService = FirebaseTestSetup.createMockAuthService();
           await tester.pumpWidget(
-            MaterialApp(
-              home: RegisterScreen(
+            wrapWithLocalization(
+              RegisterScreen(
                 authService: mockAuthService,
                 enableBackgroundAnimation: false,
               ),
@@ -283,8 +340,8 @@ void main() {
         testWidgets('Password reset button can be tapped', (tester) async {
           final mockAuthService = FirebaseTestSetup.createMockAuthService();
           await tester.pumpWidget(
-            MaterialApp(
-              home: ForgotPasswordScreen(authService: mockAuthService),
+            wrapWithLocalization(
+              ForgotPasswordScreen(authService: mockAuthService),
             ),
           );
 
@@ -302,8 +359,8 @@ void main() {
         testWidgets('Password fields have visibility toggle', (tester) async {
           final mockAuthService = FirebaseTestSetup.createMockAuthService();
           await tester.pumpWidget(
-            MaterialApp(
-              home: LoginScreen(
+            wrapWithLocalization(
+              LoginScreen(
                 authService: mockAuthService,
                 enableBackgroundAnimation: false,
               ),
@@ -326,8 +383,8 @@ void main() {
         testWidgets('Forms have proper validation structure', (tester) async {
           final mockAuthService = FirebaseTestSetup.createMockAuthService();
           await tester.pumpWidget(
-            MaterialApp(
-              home: RegisterScreen(
+            wrapWithLocalization(
+              RegisterScreen(
                 authService: mockAuthService,
                 enableBackgroundAnimation: false,
               ),
@@ -347,8 +404,8 @@ void main() {
         testWidgets('Login screen has proper semantics', (tester) async {
           final mockAuthService = FirebaseTestSetup.createMockAuthService();
           await tester.pumpWidget(
-            MaterialApp(
-              home: LoginScreen(
+            wrapWithLocalization(
+              LoginScreen(
                 authService: mockAuthService,
                 enableBackgroundAnimation: false,
               ),
@@ -363,8 +420,8 @@ void main() {
         testWidgets('Registration screen has proper semantics', (tester) async {
           final mockAuthService = FirebaseTestSetup.createMockAuthService();
           await tester.pumpWidget(
-            MaterialApp(
-              home: RegisterScreen(
+            wrapWithLocalization(
+              RegisterScreen(
                 authService: mockAuthService,
                 enableBackgroundAnimation: false,
               ),
@@ -380,8 +437,8 @@ void main() {
           final mockAuthService = FirebaseTestSetup.createMockAuthService();
 
           await tester.pumpWidget(
-            MaterialApp(
-              home: LoginScreen(
+            wrapWithLocalization(
+              LoginScreen(
                 authService: mockAuthService,
                 enableBackgroundAnimation: false,
               ),
@@ -410,11 +467,16 @@ void main() {
           final mockSponsorService =
               FirebaseTestSetup.createMockSponsorService();
           await tester.pumpWidget(
-            MaterialApp(home: SplashScreen(sponsorService: mockSponsorService)),
+            wrapWithLocalization(
+              SplashScreen(
+                sponsorService: mockSponsorService,
+                enableBackgroundAnimation: false,
+                autoNavigate: false,
+              ),
+            ),
           );
 
-          // Wait for any timers to complete
-          await tester.pumpAndSettle();
+          await tester.pump();
 
           // Check for proper layout structure
           expect(find.byType(Scaffold), findsOneWidget);
@@ -426,8 +488,8 @@ void main() {
 
           // Test login screen layout
           await tester.pumpWidget(
-            MaterialApp(
-              home: LoginScreen(
+            wrapWithLocalization(
+              LoginScreen(
                 authService: mockAuthService,
                 enableBackgroundAnimation: false,
               ),
@@ -440,8 +502,8 @@ void main() {
 
           // Test registration screen layout separately
           await tester.pumpWidget(
-            MaterialApp(
-              home: RegisterScreen(
+            wrapWithLocalization(
+              RegisterScreen(
                 authService: mockAuthService,
                 enableBackgroundAnimation: false,
               ),
@@ -460,30 +522,45 @@ void main() {
               FirebaseTestSetup.createMockSponsorService();
 
           await tester.pumpWidget(
-            MaterialApp(
-              initialRoute: '/',
-              routes: {
-                '/': (context) =>
-                    SplashScreen(sponsorService: mockSponsorService),
-                '/login': (context) => LoginScreen(
-                  authService: mockAuthService,
-                  enableBackgroundAnimation: false,
+            EasyLocalization(
+              supportedLocales: const [Locale('en')],
+              path: 'assets/translations',
+              fallbackLocale: const Locale('en'),
+              startLocale: const Locale('en'),
+              useOnlyLangCode: true,
+              assetLoader: const TestFileAssetLoader(),
+              child: Builder(
+                builder: (BuildContext context) => MaterialApp(
+                  locale: context.locale,
+                  supportedLocales: context.supportedLocales,
+                  localizationsDelegates: context.localizationDelegates,
+                  initialRoute: '/',
+                  routes: {
+                    '/': (context) => SplashScreen(
+                      sponsorService: mockSponsorService,
+                      enableBackgroundAnimation: false,
+                      autoNavigate: false,
+                    ),
+                    '/login': (context) => LoginScreen(
+                      authService: mockAuthService,
+                      enableBackgroundAnimation: false,
+                    ),
+                    '/register': (context) => RegisterScreen(
+                      authService: mockAuthService,
+                      enableBackgroundAnimation: false,
+                    ),
+                    '/dashboard': (context) =>
+                        const Scaffold(body: Center(child: Text('Dashboard'))),
+                  },
                 ),
-                '/register': (context) => RegisterScreen(
-                  authService: mockAuthService,
-                  enableBackgroundAnimation: false,
-                ),
-                '/dashboard': (context) =>
-                    const Scaffold(body: Center(child: Text('Dashboard'))),
-              },
+              ),
             ),
           );
 
           // Start with splash screen
           expect(find.byType(SplashScreen), findsOneWidget);
 
-          // Wait for navigation to complete
-          await tester.pumpAndSettle();
+          await tester.pump();
         });
       });
     });

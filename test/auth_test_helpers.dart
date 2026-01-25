@@ -80,7 +80,7 @@ class _TestAuthScreenWrapperState extends State<TestAuthScreenWrapper> {
       fallbackLocale: const Locale('en'),
       startLocale: const Locale('en'),
       useOnlyLangCode: true,
-      assetLoader: const _FileAssetLoader(),
+      assetLoader: const TestFileAssetLoader(),
       child: Builder(
         builder: (BuildContext context) => MaterialApp(
           locale: context.locale,
@@ -370,8 +370,8 @@ class _TestSplashScreenState extends State<TestSplashScreen>
   );
 }
 
-class _FileAssetLoader extends AssetLoader {
-  const _FileAssetLoader();
+class TestFileAssetLoader extends AssetLoader {
+  const TestFileAssetLoader();
 
   @override
   Future<Map<String, dynamic>> load(String path, Locale locale) async {

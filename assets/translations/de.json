@@ -7166,5 +7166,10 @@
   "boost_fuel_artist": "KÜNSTLER UNTERSTÜTZEN",
   "boost_fueled_by": "UNTERSTÜTZT VON {name}!",
   "common_supporter": "Unterstützer",
-  "drawer_local_brand": "LOKALES ARTBEAT"
+  "drawer_local_brand": "LOKALES ARTBEAT",
+  "progress_card_title": "Dein Fortschritt",
+  "progress_card_streak": "Serie",
+  "progress_card_discoveries": "Entdeckungen",
+  "progress_card_weekly_goal": "Wöchentliches Ziel",
+  "progress_card_complete": "Abgeschlossen"
 }

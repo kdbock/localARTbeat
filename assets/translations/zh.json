@@ -6171,5 +6171,10 @@
   "store_view_all": "查看全部",
   "store_artist_cta_title": "分享你的艺术",
   "store_artist_cta_subtitle": "加入我们的艺术家社区",
-  "store_empty_auctions": "暂无活跃拍卖"
+  "store_empty_auctions": "暂无活跃拍卖",
+  "progress_card_title": "你的进度",
+  "progress_card_streak": "连续",
+  "progress_card_discoveries": "发现",
+  "progress_card_weekly_goal": "每周目标",
+  "progress_card_complete": "完成"
 }

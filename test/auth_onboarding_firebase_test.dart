@@ -14,6 +14,23 @@ import 'firebase_test_setup.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  Widget wrapWithLocalization(Widget child) => EasyLocalization(
+    supportedLocales: const [Locale('en')],
+    path: 'assets/translations',
+    fallbackLocale: const Locale('en'),
+    startLocale: const Locale('en'),
+    useOnlyLangCode: true,
+    assetLoader: const TestFileAssetLoader(),
+    child: Builder(
+      builder: (BuildContext context) => MaterialApp(
+        locale: context.locale,
+        supportedLocales: context.supportedLocales,
+        localizationsDelegates: context.localizationDelegates,
+        home: child,
+      ),
+    ),
+  );
+
   group('🎯 ArtBeat Authentication & Onboarding Tests (Firebase Enabled)', () {
     setUpAll(() async {
       // Initialize shared preferences mock for all tests
@@ -39,14 +56,11 @@ void main() {
     group('1. AUTHENTICATION & ONBOARDING - Core UI Tests', () {
       testWidgets('✅ Splash screen displays on app launch', (tester) async {
         await tester.pumpWidget(
-          EasyLocalization(
-            supportedLocales: const [Locale('en')],
-            path: 'assets/translations',
-            fallbackLocale: const Locale('en'),
-            child: MaterialApp(
-              home: SplashScreen(
-                sponsorService: FirebaseTestSetup.createMockSponsorService(),
-              ),
+          wrapWithLocalization(
+            SplashScreen(
+              sponsorService: FirebaseTestSetup.createMockSponsorService(),
+              enableBackgroundAnimation: false,
+              autoNavigate: false,
             ),
           ),
         );
@@ -65,17 +79,12 @@ void main() {
         tester,
       ) async {
         await tester.pumpWidget(
-          EasyLocalization(
-            supportedLocales: const [Locale('en')],
-            path: 'assets/translations',
-            fallbackLocale: const Locale('en'),
-            child: MaterialApp(
-              home: LoginScreen(
-                enableBackgroundAnimation: false,
-                authService: AuthService(
-                  auth: FirebaseTestSetup.mockAuth,
-                  firestore: FirebaseTestSetup.fakeFirestore,
-                ),
+          wrapWithLocalization(
+            LoginScreen(
+              enableBackgroundAnimation: false,
+              authService: AuthService(
+                auth: FirebaseTestSetup.mockAuth,
+                firestore: FirebaseTestSetup.fakeFirestore,
               ),
             ),
           ),
@@ -100,17 +109,12 @@ void main() {
         tester,
       ) async {
         await tester.pumpWidget(
-          EasyLocalization(
-            supportedLocales: const [Locale('en')],
-            path: 'assets/translations',
-            fallbackLocale: const Locale('en'),
-            child: MaterialApp(
-              home: RegisterScreen(
-                enableBackgroundAnimation: false,
-                authService: AuthService(
-                  auth: FirebaseTestSetup.mockAuth,
-                  firestore: FirebaseTestSetup.fakeFirestore,
-                ),
+          wrapWithLocalization(
+            RegisterScreen(
+              enableBackgroundAnimation: false,
+              authService: AuthService(
+                auth: FirebaseTestSetup.mockAuth,
+                firestore: FirebaseTestSetup.fakeFirestore,
               ),
             ),
           ),
@@ -132,16 +136,11 @@ void main() {
         tester,
       ) async {
         await tester.pumpWidget(
-          EasyLocalization(
-            supportedLocales: const [Locale('en')],
-            path: 'assets/translations',
-            fallbackLocale: const Locale('en'),
-            child: MaterialApp(
-              home: ForgotPasswordScreen(
-                authService: AuthService(
-                  auth: FirebaseTestSetup.mockAuth,
-                  firestore: FirebaseTestSetup.fakeFirestore,
-                ),
+          wrapWithLocalization(
+            ForgotPasswordScreen(
+              authService: AuthService(
+                auth: FirebaseTestSetup.mockAuth,
+                firestore: FirebaseTestSetup.fakeFirestore,
               ),
             ),
           ),
@@ -163,12 +162,7 @@ void main() {
         tester,
       ) async {
         await tester.pumpWidget(
-          EasyLocalization(
-            supportedLocales: const [Locale('en')],
-            path: 'assets/translations',
-            fallbackLocale: const Locale('en'),
-            child: const MaterialApp(home: TestEmailVerificationScreen()),
-          ),
+          wrapWithLocalization(const TestEmailVerificationScreen()),
         );
 
         // Allow the widget to build
@@ -199,17 +193,12 @@ void main() {
       group('Form Interaction Tests with Firebase', () {
         testWidgets('Login form accepts text input', (tester) async {
           await tester.pumpWidget(
-            EasyLocalization(
-              supportedLocales: const [Locale('en')],
-              path: 'assets/translations',
-              fallbackLocale: const Locale('en'),
-              child: MaterialApp(
-                home: LoginScreen(
-                  enableBackgroundAnimation: false,
-                  authService: AuthService(
-                    auth: FirebaseTestSetup.mockAuth,
-                    firestore: FirebaseTestSetup.fakeFirestore,
-                  ),
+            wrapWithLocalization(
+              LoginScreen(
+                enableBackgroundAnimation: false,
+                authService: AuthService(
+                  auth: FirebaseTestSetup.mockAuth,
+                  firestore: FirebaseTestSetup.fakeFirestore,
                 ),
               ),
             ),
@@ -236,17 +225,12 @@ void main() {
 
         testWidgets('Registration form accepts text input', (tester) async {
           await tester.pumpWidget(
-            EasyLocalization(
-              supportedLocales: const [Locale('en')],
-              path: 'assets/translations',
-              fallbackLocale: const Locale('en'),
-              child: MaterialApp(
-                home: RegisterScreen(
-                  enableBackgroundAnimation: false,
-                  authService: AuthService(
-                    auth: FirebaseTestSetup.mockAuth,
-                    firestore: FirebaseTestSetup.fakeFirestore,
-                  ),
+            wrapWithLocalization(
+              RegisterScreen(
+                enableBackgroundAnimation: false,
+                authService: AuthService(
+                  auth: FirebaseTestSetup.mockAuth,
+                  firestore: FirebaseTestSetup.fakeFirestore,
                 ),
               ),
             ),
@@ -268,17 +252,12 @@ void main() {
       group('Button Interaction Tests with Firebase', () {
         testWidgets('Login button can be tapped', (tester) async {
           await tester.pumpWidget(
-            EasyLocalization(
-              supportedLocales: const [Locale('en')],
-              path: 'assets/translations',
-              fallbackLocale: const Locale('en'),
-              child: MaterialApp(
-                home: LoginScreen(
-                  enableBackgroundAnimation: false,
-                  authService: AuthService(
-                    auth: FirebaseTestSetup.mockAuth,
-                    firestore: FirebaseTestSetup.fakeFirestore,
-                  ),
+            wrapWithLocalization(
+              LoginScreen(
+                enableBackgroundAnimation: false,
+                authService: AuthService(
+                  auth: FirebaseTestSetup.mockAuth,
+                  firestore: FirebaseTestSetup.fakeFirestore,
                 ),
               ),
             ),
@@ -299,17 +278,12 @@ void main() {
 
         testWidgets('Registration button can be tapped', (tester) async {
           await tester.pumpWidget(
-            EasyLocalization(
-              supportedLocales: const [Locale('en')],
-              path: 'assets/translations',
-              fallbackLocale: const Locale('en'),
-              child: MaterialApp(
-                home: RegisterScreen(
-                  enableBackgroundAnimation: false,
-                  authService: AuthService(
-                    auth: FirebaseTestSetup.mockAuth,
-                    firestore: FirebaseTestSetup.fakeFirestore,
-                  ),
+            wrapWithLocalization(
+              RegisterScreen(
+                enableBackgroundAnimation: false,
+                authService: AuthService(
+                  auth: FirebaseTestSetup.mockAuth,
+                  firestore: FirebaseTestSetup.fakeFirestore,
                 ),
               ),
             ),
@@ -328,16 +302,11 @@ void main() {
 
         testWidgets('Password reset button can be tapped', (tester) async {
           await tester.pumpWidget(
-            EasyLocalization(
-              supportedLocales: const [Locale('en')],
-              path: 'assets/translations',
-              fallbackLocale: const Locale('en'),
-              child: MaterialApp(
-                home: ForgotPasswordScreen(
-                  authService: AuthService(
-                    auth: FirebaseTestSetup.mockAuth,
-                    firestore: FirebaseTestSetup.fakeFirestore,
-                  ),
+            wrapWithLocalization(
+              ForgotPasswordScreen(
+                authService: AuthService(
+                  auth: FirebaseTestSetup.mockAuth,
+                  firestore: FirebaseTestSetup.fakeFirestore,
                 ),
               ),
             ),

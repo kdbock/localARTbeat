@@ -6174,5 +6174,10 @@
   "store_view_all": "Voir tout",
   "store_artist_cta_title": "Partagez votre art",
   "store_artist_cta_subtitle": "Rejoignez notre communauté d'artistes",
-  "store_empty_auctions": "Aucune enchère active"
+  "store_empty_auctions": "Aucune enchère active",
+  "progress_card_title": "Votre progression",
+  "progress_card_streak": "Série",
+  "progress_card_discoveries": "Découvertes",
+  "progress_card_weekly_goal": "Objectif hebdomadaire",
+  "progress_card_complete": "Terminé"
 }

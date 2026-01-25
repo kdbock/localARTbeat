@@ -6189,5 +6189,10 @@
   "boost_fuel_artist": "FUEL THE ARTIST",
   "boost_fueled_by": "FUELED BY {name}!",
   "common_supporter": "Supporter",
-  "drawer_local_brand": "LOCAL ARTBEAT"
+  "drawer_local_brand": "LOCAL ARTBEAT",
+  "progress_card_title": "Your Progress",
+  "progress_card_streak": "Streak",
+  "progress_card_discoveries": "Discoveries",
+  "progress_card_weekly_goal": "Weekly goal",
+  "progress_card_complete": "Complete"
 }

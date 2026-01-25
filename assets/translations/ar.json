@@ -6153,5 +6153,10 @@
   "boost_fuel_artist": "دعم الفنان",
   "boost_fueled_by": "مدعوم من {name}!",
   "common_supporter": "داعم",
-  "drawer_local_brand": "آرت بيت المحلي"
+  "drawer_local_brand": "آرت بيت المحلي",
+  "progress_card_title": "تقدمك",
+  "progress_card_streak": "سلسلة",
+  "progress_card_discoveries": "الاكتشافات",
+  "progress_card_weekly_goal": "الهدف الأسبوعي",
+  "progress_card_complete": "إكمال"
 }
