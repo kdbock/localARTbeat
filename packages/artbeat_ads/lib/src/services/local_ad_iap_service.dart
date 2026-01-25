@@ -17,10 +17,14 @@ class LocalAdIapService {
   late final List<String> _productIds;
 
   Future<void> initIap() async {
+    final isAvailable = await _inAppPurchase.isAvailable();
+    if (!isAvailable) {
+      throw Exception('In-app purchases are not available on this device');
+    }
     try {
       await _inAppPurchase.restorePurchases();
-    } catch (e) {
-      throw Exception('Failed to initialize IAP: $e');
+    } catch (_) {
+      // Restore failures should not block a new purchase attempt.
     }
   }
 

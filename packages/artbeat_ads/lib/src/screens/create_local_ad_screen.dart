@@ -125,6 +125,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
     setState(() => _isLoading = true);
 
     try {
+      await _iapService.initIap();
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) throw Exception('User not authenticated');
 
@@ -176,7 +177,10 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('ads_create_local_ad_error_failed_to_post'.tr()),
+            content: Text(
+              'ads_create_local_ad_error_failed_to_post'
+                  .tr(namedArgs: {'error': e.toString()}),
+            ),
           ),
         );
       }
@@ -219,8 +223,6 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
                     _buildHeroSection(context),
                     const SizedBox(height: 24),
                     _buildGlassPanel(child: _buildAdDetailsSection(context)),
-                    const SizedBox(height: 24),
-                    _buildGlassPanel(child: _buildAdPlacementSection(context)),
                     const SizedBox(height: 24),
                     _buildGlassPanel(
                       child: fromStore
@@ -605,7 +607,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
                     borderRadius: BorderRadius.circular(12),
                     color: Colors.white.withValues(alpha: 0.04),
                   ),
-                  child: Row(
+                  child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
@@ -613,9 +615,12 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
                         size: 24,
                         color: Colors.white.withValues(alpha: 0.7),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(height: 6),
                       Text(
                         'Add banner image',
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.spaceGrotesk(
                           color: Colors.white.withValues(alpha: 0.6),
                           fontSize: 11,
@@ -908,9 +913,8 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
                 ),
               )
             : Text(
-                'ads_create_local_ad_text_post_ad_for_price'.tr().replaceAll(
-                  '{price}',
-                  '\$${price.toStringAsFixed(2)}',
+                'ads_create_local_ad_text_post_ad_for_price'.tr(
+                  namedArgs: {'price': '\$${price.toStringAsFixed(2)}'},
                 ),
                 style: GoogleFonts.spaceGrotesk(
                   color: Colors.black,
@@ -1148,6 +1152,31 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
 
   Widget _buildAdPreview() {
     final isSpotlight = _selectedSize == LocalAdSize.small;
+    final previewAspectRatio = isSpotlight ? 320 / 50 : 300 / 250;
+    final imagePreview = AspectRatio(
+      aspectRatio: previewAspectRatio,
+      child: _selectedImages.isNotEmpty
+          ? Image.file(
+              _selectedImages[0],
+              fit: BoxFit.cover,
+              width: double.infinity,
+            )
+          : Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: Colors.white.withValues(alpha: 0.08),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.15),
+                ),
+              ),
+              alignment: Alignment.center,
+              child: Icon(
+                Icons.image_outlined,
+                size: isSpotlight ? 16 : 28,
+                color: Colors.white.withValues(alpha: 0.5),
+              ),
+            ),
+    );
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -1166,42 +1195,41 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(999),
-                color: Colors.white.withValues(alpha: 0.12),
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.2),
+          // Image preview with discreet sponsored label
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Stack(
+              children: [
+                imagePreview,
+                Positioned(
+                  top: 6,
+                  right: 6,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(999),
+                      color: Colors.black.withValues(alpha: 0.55),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.2),
+                      ),
+                    ),
+                    child: Text(
+                      'Sponsored',
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.white.withValues(alpha: 0.85),
+                        fontSize: 9,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-              child: Text(
-                'Sponsored',
-                style: GoogleFonts.spaceGrotesk(
-                  color: Colors.white.withValues(alpha: 0.9),
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.4,
-                ),
-              ),
+              ],
             ),
           ),
-          const SizedBox(height: 10),
-          // Image preview
-          if (_selectedImages.isNotEmpty)
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: AspectRatio(
-                aspectRatio: isSpotlight ? 320 / 50 : 300 / 250,
-                child: Image.file(
-                  _selectedImages[0],
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                ),
-              ),
-            ),
           if (_selectedImages.isNotEmpty &&
               ((_showTitle && _titleController.text.isNotEmpty) ||
                   (_showDescription &&
