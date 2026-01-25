@@ -42,6 +42,14 @@ class LocationUtils {
     return Geolocator.getCurrentPosition(locationSettings: locationSettings);
   }
 
+  static Future<Position?> getLastKnownPositionSafe() async {
+    try {
+      return await Geolocator.getLastKnownPosition();
+    } catch (_) {
+      return null;
+    }
+  }
+
   static Future<String> getZipCodeFromGeoPoint(
     double latitude,
     double longitude,

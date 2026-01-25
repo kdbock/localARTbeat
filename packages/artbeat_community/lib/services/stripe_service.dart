@@ -1,5 +1,3 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:artbeat_core/artbeat_core.dart';
@@ -12,11 +10,7 @@ class StripeService {
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final PaymentService _paymentService = PaymentService();
-  final http.Client _httpClient = http.Client();
-
-  static const String _baseUrl =
-      'https://us-central1-wordnerd-artbeat.cloudfunctions.net';
+  final UnifiedPaymentService _paymentService = UnifiedPaymentService();
 
   /// Initialize Stripe
   void initialize() {
@@ -47,7 +41,7 @@ class StripeService {
         );
       }
 
-      // Process payment using PaymentService
+      // Process payment using UnifiedPaymentService
       final result = await _paymentService.processCommissionDepositPayment(
         commissionId: commissionId,
         amount: amount,
@@ -55,10 +49,17 @@ class StripeService {
         message: message,
       );
 
+      if (!result.success) {
+        throw Exception(result.error ?? 'Failed to process deposit payment');
+      }
+
       // Update commission status locally
       await _updateCommissionStatus(commissionId, 'in_progress');
 
-      return result;
+      return {
+        'success': true,
+        'paymentIntentId': result.paymentIntentId,
+      };
     } catch (e) {
       AppLogger.error('Error processing commission deposit: $e');
       rethrow;
@@ -89,7 +90,7 @@ class StripeService {
         );
       }
 
-      // Process payment using PaymentService
+      // Process payment using UnifiedPaymentService
       final result = await _paymentService.processCommissionMilestonePayment(
         commissionId: commissionId,
         milestoneId: milestoneId,
@@ -98,7 +99,14 @@ class StripeService {
         message: message,
       );
 
-      return result;
+      if (!result.success) {
+        throw Exception(result.error ?? 'Failed to process milestone payment');
+      }
+
+      return {
+        'success': true,
+        'paymentIntentId': result.paymentIntentId,
+      };
     } catch (e) {
       AppLogger.error('Error processing commission milestone: $e');
       rethrow;
@@ -128,7 +136,7 @@ class StripeService {
         );
       }
 
-      // Process payment using PaymentService
+      // Process payment using UnifiedPaymentService
       final result = await _paymentService.processCommissionFinalPayment(
         commissionId: commissionId,
         amount: amount,
@@ -136,10 +144,17 @@ class StripeService {
         message: message,
       );
 
+      if (!result.success) {
+        throw Exception(result.error ?? 'Failed to process final payment');
+      }
+
       // Update commission status locally
       await _updateCommissionStatus(commissionId, 'completed');
 
-      return result;
+      return {
+        'success': true,
+        'paymentIntentId': result.paymentIntentId,
+      };
     } catch (e) {
       AppLogger.error('Error processing commission final payment: $e');
       rethrow;
@@ -166,26 +181,13 @@ class StripeService {
         throw Exception('User must be authenticated');
       }
 
-      final customerId = await _paymentService.getOrCreateCustomerId();
-
-      final response = await _httpClient.post(
-        Uri.parse('$_baseUrl/createCommissionPaymentIntent'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'customerId': customerId,
-          'commissionId': commissionId,
-          'amount': amount,
-          'type': type,
-          'milestoneId': milestoneId,
-          'userId': user.uid,
-        }),
+      final result = await _paymentService.createCommissionPaymentIntent(
+        commissionId: commissionId,
+        amount: amount,
+        type: type,
+        milestoneId: milestoneId,
       );
 
-      if (response.statusCode != 200) {
-        throw Exception('Failed to create payment intent');
-      }
-
-      final result = jsonDecode(response.body) as Map<String, dynamic>;
       return result['clientSecret'] as String;
     } catch (e) {
       AppLogger.error('Error creating commission payment intent: $e');
@@ -199,10 +201,9 @@ class StripeService {
     String paymentMethodId,
   ) async {
     try {
-      // Payment confirmation is handled by the PaymentService
-      // This method is kept for future use if direct Stripe confirmation is needed
+      // Payment confirmation is handled by the UnifiedPaymentService/Stripe SDK
       AppLogger.info(
-        'Commission payment confirmation handled by PaymentService',
+        'Commission payment confirmation handled by UnifiedPaymentService',
       );
     } catch (e) {
       AppLogger.error('Error confirming commission payment: $e');
@@ -230,7 +231,7 @@ class StripeService {
 
   /// Dispose resources
   void dispose() {
-    _httpClient.close();
+    // No-op
   }
 
   /// Process commission payment (generic method)
@@ -248,41 +249,31 @@ class StripeService {
         throw Exception('User must be authenticated');
       }
 
-      // Get or create payment method
-      final paymentMethod =
-          paymentMethodId ?? await _paymentService.getDefaultPaymentMethodId();
-
-      if (paymentMethod == null) {
-        throw Exception(
-          'No payment method available. Please set up a payment method in your profile first.',
-        );
-      }
-
       // Route to appropriate payment method based on type
       switch (paymentType) {
         case 'deposit':
-          return await _paymentService.processCommissionDepositPayment(
+          return await processCommissionDeposit(
             commissionId: commissionId,
             amount: amount,
-            paymentMethodId: paymentMethod,
+            paymentMethodId: paymentMethodId,
             message: message,
           );
         case 'milestone':
           if (milestoneId == null) {
             throw Exception('Milestone ID required for milestone payment');
           }
-          return await _paymentService.processCommissionMilestonePayment(
+          return await processCommissionMilestone(
             commissionId: commissionId,
             milestoneId: milestoneId,
             amount: amount,
-            paymentMethodId: paymentMethod,
+            paymentMethodId: paymentMethodId,
             message: message,
           );
         case 'final':
-          return await _paymentService.processCommissionFinalPayment(
+          return await processCommissionFinal(
             commissionId: commissionId,
             amount: amount,
-            paymentMethodId: paymentMethod,
+            paymentMethodId: paymentMethodId,
             message: message,
           );
         default:
@@ -307,23 +298,13 @@ class StripeService {
         throw Exception('User must be authenticated');
       }
 
-      final response = await _httpClient.post(
-        Uri.parse('$_baseUrl/refundPayment'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'paymentIntentId': paymentIntentId,
-          'amount': amount,
-          'reason': reason ?? 'requested_by_customer',
-          'metadata': metadata ?? {},
-          'userId': user.uid,
-        }),
+      final result = await _paymentService.requestRefund(
+        paymentId: paymentIntentId,
+        userId: user.uid,
+        reason: reason ?? 'requested_by_customer',
+        amount: amount,
+        metadata: metadata,
       );
-
-      if (response.statusCode != 200) {
-        throw Exception('Failed to process refund: ${response.body}');
-      }
-
-      final result = jsonDecode(response.body) as Map<String, dynamic>;
 
       // Log refund in commission history
       if (metadata != null && metadata.containsKey('commissionId')) {

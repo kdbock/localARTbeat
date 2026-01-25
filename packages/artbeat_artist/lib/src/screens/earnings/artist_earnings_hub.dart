@@ -366,6 +366,11 @@ class _ArtistEarningsHubState extends State<ArtistEarningsHub>
         'amount': _earnings!.subscriptionEarnings,
         'color': Colors.orange,
       },
+      {
+        'label': 'Artwork Sales',
+        'amount': _earnings!.artworkSalesEarnings,
+        'color': Colors.teal,
+      },
     ];
 
     return Card(
@@ -527,6 +532,7 @@ class _ArtistEarningsHubState extends State<ArtistEarningsHub>
 
     switch (transaction.type) {
       case 'gift':
+      case 'boost':
       case 'promotion_credit':
         icon = Icons.auto_awesome;
         color = Colors.pink;
@@ -542,6 +548,10 @@ class _ArtistEarningsHubState extends State<ArtistEarningsHub>
       case 'subscription':
         icon = Icons.subscriptions;
         color = Colors.orange;
+        break;
+      case 'artwork_sale':
+        icon = Icons.image;
+        color = Colors.teal;
         break;
       default:
         icon = Icons.attach_money;

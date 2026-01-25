@@ -14,6 +14,8 @@ class ArtistProfileModel {
   final String? coverImageUrl;
   final String? website;
   final String? location;
+  final double? locationLat;
+  final double? locationLng;
   final UserType userType;
   final SubscriptionTier subscriptionTier;
   final bool isVerified;
@@ -46,6 +48,8 @@ class ArtistProfileModel {
     this.coverImageUrl,
     this.website,
     this.location,
+    this.locationLat,
+    this.locationLng,
     required this.userType,
     this.subscriptionTier = SubscriptionTier.starter,
     this.isVerified = false,
@@ -94,6 +98,8 @@ class ArtistProfileModel {
       coverImageUrl: data['coverImageUrl'] as String?,
       website: data['website'] as String?,
       location: data['location'] as String? ?? data['zipCode'] as String?,
+      locationLat: (data['locationLat'] as num?)?.toDouble(),
+      locationLng: (data['locationLng'] as num?)?.toDouble(),
       userType: _parseUserType(data['userType']),
       subscriptionTier: _parseSubscriptionTier(data['subscriptionTier']),
       isVerified: data['isVerified'] as bool? ?? false,
@@ -136,6 +142,8 @@ class ArtistProfileModel {
       'coverImageUrl': coverImageUrl,
       'website': website,
       'location': location,
+      if (locationLat != null) 'locationLat': locationLat,
+      if (locationLng != null) 'locationLng': locationLng,
       'userType': userType.name,
       'subscriptionTier': subscriptionTier.name,
       'isVerified': isVerified,

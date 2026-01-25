@@ -183,8 +183,20 @@ class UnifiedPaymentService {
         'https://us-central1-wordnerd-artbeat.cloudfunctions.net/processSponsorshipPayment',
     'processCommissionPayment':
         'https://us-central1-wordnerd-artbeat.cloudfunctions.net/processCommissionPayment',
+    'createCommissionPaymentIntent':
+        'https://us-central1-wordnerd-artbeat.cloudfunctions.net/createCommissionPaymentIntent',
+    'processCommissionDepositPayment':
+        'https://us-central1-wordnerd-artbeat.cloudfunctions.net/processCommissionDepositPayment',
+    'processCommissionMilestonePayment':
+        'https://us-central1-wordnerd-artbeat.cloudfunctions.net/processCommissionMilestonePayment',
+    'processCommissionFinalPayment':
+        'https://us-central1-wordnerd-artbeat.cloudfunctions.net/processCommissionFinalPayment',
     'processArtworkSalePayment':
         'https://us-central1-wordnerd-artbeat.cloudfunctions.net/processArtworkSalePayment',
+    'processEventTicketPayment':
+        'https://us-central1-wordnerd-artbeat.cloudfunctions.net/processEventTicketPayment',
+    'completeCommission':
+        'https://us-central1-wordnerd-artbeat.cloudfunctions.net/completeCommission',
     'getPaymentMethods':
         'https://us-central1-wordnerd-artbeat.cloudfunctions.net/getPaymentMethods',
     'updateCustomer':
@@ -295,6 +307,37 @@ class UnifiedPaymentService {
     );
   }
 
+  /// Create a payment intent for Stripe
+  Future<Map<String, dynamic>> createPaymentIntent({
+    required double amount,
+    String? currency = 'usd',
+    String? description,
+    Map<String, dynamic>? metadata,
+    String? artworkId,
+  }) async {
+    try {
+      final response = await _makeAuthenticatedRequest(
+        functionKey: 'createPaymentIntent',
+        body: {
+          'amount': amount,
+          'currency': currency,
+          'description': description,
+          'metadata': metadata,
+          if (artworkId != null) 'artworkId': artworkId,
+        },
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to create payment intent');
+      }
+
+      return json.decode(response.body) as Map<String, dynamic>;
+    } catch (e) {
+      AppLogger.error('Error creating payment intent: $e');
+      rethrow;
+    }
+  }
+
   // ========================================================================
   // PAYMENT STRATEGY ROUTING (IAP vs Stripe)
   // ========================================================================
@@ -360,7 +403,8 @@ class UnifiedPaymentService {
   Future<SubscriptionResult> processSubscriptionPayment({
     required SubscriptionTier tier,
     required PaymentMethod method,
-    String? paymentMethodId,
+    String? paymentIntentId,
+    String? billingCycle, String? paymentMethodId,
   }) async {
     try {
       final userId = _auth.currentUser?.uid;
@@ -378,9 +422,10 @@ class UnifiedPaymentService {
         final response = await _makeAuthenticatedRequest(
           functionKey: 'processSubscriptionPayment',
           body: {
-            'tierId': tier.apiName,
-            'amount': tier.monthlyPrice,
-            if (paymentMethodId != null) 'paymentMethodId': paymentMethodId,
+            'tier': tier.apiName,
+            'priceAmount': tier.monthlyPrice,
+            'billingCycle': billingCycle ?? 'monthly',
+            if (paymentIntentId != null) 'paymentIntentId': paymentIntentId,
           },
         );
 
@@ -407,13 +452,129 @@ class UnifiedPaymentService {
     }
   }
 
+  /// Create a subscription with Stripe
+  Future<Map<String, dynamic>> createSubscription({
+    required String customerId,
+    required SubscriptionTier tier,
+    String? paymentMethodId,
+    String? couponCode,
+  }) async {
+    try {
+      final userId = _auth.currentUser?.uid;
+      if (userId == null) throw Exception('User not authenticated');
+
+      final priceId = _getPriceIdForTier(tier);
+      final response = await _makeAuthenticatedRequest(
+        functionKey: 'createSubscription',
+        body: {
+          'customerId': customerId,
+          'priceId': priceId,
+          'userId': userId,
+          if (paymentMethodId != null) 'paymentMethodId': paymentMethodId,
+          if (couponCode != null) 'couponCode': couponCode,
+        },
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to create subscription');
+      }
+
+      final data = json.decode(response.body) as Map<String, dynamic>;
+
+      // Store subscription in Firestore with coupon information
+      await _firestore.collection('subscriptions').add({
+        'userId': userId,
+        'customerId': customerId,
+        'subscriptionId': data['subscriptionId'],
+        'tier': tier.apiName,
+        'status': data['status'],
+        'isActive': true,
+        'autoRenew': true,
+        'couponCode': couponCode,
+        'couponId': data['couponId'],
+        'originalPrice': tier.monthlyPrice,
+        'discountedPrice': data['discountedPrice'] ?? tier.monthlyPrice,
+        'revenue': data['revenue'] ?? tier.monthlyPrice,
+        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      return data;
+    } catch (e) {
+      AppLogger.error('Error creating subscription: $e');
+      rethrow;
+    }
+  }
+
+  /// Create a free subscription (mock for free access)
+  Future<Map<String, dynamic>> createFreeSubscription({
+    required String customerId,
+    required SubscriptionTier tier,
+    required String couponId,
+    required String couponCode,
+  }) async {
+    try {
+      final userId = _auth.currentUser?.uid;
+      if (userId == null) throw Exception('User not authenticated');
+
+      final subscriptionData = {
+        'subscriptionId':
+            'free_${userId}_${DateTime.now().millisecondsSinceEpoch}',
+        'status': 'active',
+        'couponId': couponId,
+        'discountedPrice': 0.0,
+        'revenue': 0.0,
+      };
+
+      await _firestore.collection('subscriptions').add({
+        'userId': userId,
+        'customerId': customerId,
+        'subscriptionId': subscriptionData['subscriptionId'],
+        'tier': tier.apiName,
+        'status': subscriptionData['status'],
+        'isActive': true,
+        'autoRenew': false,
+        'couponCode': couponCode,
+        'couponId': couponId,
+        'originalPrice': tier.monthlyPrice,
+        'discountedPrice': 0.0,
+        'revenue': 0.0,
+        'isFree': true,
+        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      return subscriptionData;
+    } catch (e) {
+      AppLogger.error('Error creating free subscription: $e');
+      rethrow;
+    }
+  }
+
+  String _getPriceIdForTier(SubscriptionTier tier) {
+    switch (tier) {
+      case SubscriptionTier.starter:
+        return 'price_starter_monthly_2025';
+      case SubscriptionTier.creator:
+        return 'price_creator_monthly_2025';
+      case SubscriptionTier.business:
+        return 'price_business_monthly_2025';
+      case SubscriptionTier.enterprise:
+        return 'price_enterprise_monthly_2025';
+      case SubscriptionTier.free:
+        return '';
+    }
+  }
+
   /// Process boost payment (IAP + Stripe support)
   Future<PaymentResult> processBoostPayment({
     required String recipientId,
     required double amount,
     required PaymentMethod method,
-    String? paymentMethodId,
+    String? paymentIntentId,
+    String? boostType,
     String? boostMessage,
+    String? productId,
   }) async {
     try {
       final userId = _auth.currentUser?.uid;
@@ -428,10 +589,12 @@ class UnifiedPaymentService {
         final response = await _makeAuthenticatedRequest(
           functionKey: 'processBoostPayment',
           body: {
+            'paymentIntentId': paymentIntentId,
             'recipientId': recipientId,
             'amount': amount,
-            if (paymentMethodId != null) 'paymentMethodId': paymentMethodId,
+            if (boostType != null) 'boostType': boostType,
             if (boostMessage != null) 'boostMessage': boostMessage,
+            if (productId != null) 'productId': productId,
           },
         );
 
@@ -460,10 +623,12 @@ class UnifiedPaymentService {
 
   /// Process advertising payment (Stripe only)
   Future<PaymentResult> processAdPayment({
-    required String adId,
+    required String adType,
     required double amount,
-    required int durationDays,
-    String? paymentMethodId,
+    required int duration,
+    required String paymentIntentId,
+    Map<String, dynamic>? targetAudience,
+    Map<String, dynamic>? adContent,
   }) async {
     try {
       final userId = _auth.currentUser?.uid;
@@ -472,10 +637,12 @@ class UnifiedPaymentService {
       final response = await _makeAuthenticatedRequest(
         functionKey: 'processAdPayment',
         body: {
-          'adId': adId,
+          'paymentIntentId': paymentIntentId,
+          'adType': adType,
           'amount': amount,
-          'durationDays': durationDays,
-          if (paymentMethodId != null) 'paymentMethodId': paymentMethodId,
+          'duration': duration,
+          if (targetAudience != null) 'targetAudience': targetAudience,
+          if (adContent != null) 'adContent': adContent,
         },
       );
 
@@ -503,10 +670,12 @@ class UnifiedPaymentService {
 
   /// Process commission payment (Stripe only - artist earnings)
   Future<PaymentResult> processCommissionPayment({
-    required String artworkId,
-    required double amount,
     required String artistId,
-    String? paymentMethodId,
+    required double amount,
+    required String commissionType,
+    required String paymentIntentId,
+    String? description,
+    DateTime? deadline,
   }) async {
     try {
       final userId = _auth.currentUser?.uid;
@@ -515,10 +684,12 @@ class UnifiedPaymentService {
       final response = await _makeAuthenticatedRequest(
         functionKey: 'processCommissionPayment',
         body: {
-          'artworkId': artworkId,
-          'amount': amount,
+          'paymentIntentId': paymentIntentId,
           'artistId': artistId,
-          if (paymentMethodId != null) 'paymentMethodId': paymentMethodId,
+          'amount': amount,
+          'commissionType': commissionType,
+          if (description != null) 'description': description,
+          if (deadline != null) 'deadline': deadline.toIso8601String(),
         },
       );
 
@@ -543,12 +714,220 @@ class UnifiedPaymentService {
     }
   }
 
+  /// Create a payment intent for a commission (Direct Commissions)
+  Future<Map<String, dynamic>> createCommissionPaymentIntent({
+    required String commissionId,
+    required double amount,
+    required String type, // 'deposit', 'milestone', 'final'
+    String? milestoneId,
+    String? customerId,
+  }) async {
+    try {
+      final actualCustomerId = customerId ?? await getOrCreateCustomerId();
+      final response = await _makeAuthenticatedRequest(
+        functionKey: 'createCommissionPaymentIntent',
+        body: {
+          'amount': amount,
+          'commissionId': commissionId,
+          'type': type,
+          'milestoneId': milestoneId,
+          'customerId': actualCustomerId,
+        },
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to create commission payment intent');
+      }
+
+      return json.decode(response.body) as Map<String, dynamic>;
+    } catch (e) {
+      AppLogger.error('Error creating commission payment intent: $e');
+      rethrow;
+    }
+  }
+
+  /// Process a commission deposit payment (Direct Commissions)
+  Future<PaymentResult> processCommissionDepositPayment({
+    required String commissionId,
+    required double amount,
+    required String paymentMethodId,
+    String? message,
+    String? customerId,
+  }) async {
+    try {
+      final actualCustomerId = customerId ?? await getOrCreateCustomerId();
+      final response = await _makeAuthenticatedRequest(
+        functionKey: 'processCommissionDepositPayment',
+        body: {
+          'amount': amount,
+          'commissionId': commissionId,
+          'paymentMethodId': paymentMethodId,
+          'customerId': actualCustomerId,
+          'message': message,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body) as Map<String, dynamic>;
+        _logPaymentEvent('commission_deposit', amount, 'success');
+        return PaymentResult(
+          success: true,
+          paymentIntentId: (data['paymentIntentId'] as String?) ?? '',
+        );
+      } else {
+        _logPaymentEvent('commission_deposit', amount, 'failed');
+        return PaymentResult(
+          success: false,
+          error: 'Failed to process commission deposit payment',
+        );
+      }
+    } catch (e) {
+      AppLogger.error('Error processing commission deposit: $e');
+      return PaymentResult(success: false, error: e.toString());
+    }
+  }
+
+  /// Process a commission milestone payment (Direct Commissions)
+  Future<PaymentResult> processCommissionMilestonePayment({
+    required String commissionId,
+    required String milestoneId,
+    required double amount,
+    required String paymentMethodId,
+    String? message,
+    String? customerId,
+  }) async {
+    try {
+      final actualCustomerId = customerId ?? await getOrCreateCustomerId();
+      final response = await _makeAuthenticatedRequest(
+        functionKey: 'processCommissionMilestonePayment',
+        body: {
+          'amount': amount,
+          'commissionId': commissionId,
+          'milestoneId': milestoneId,
+          'paymentMethodId': paymentMethodId,
+          'customerId': actualCustomerId,
+          'message': message,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body) as Map<String, dynamic>;
+        _logPaymentEvent('commission_milestone', amount, 'success');
+        return PaymentResult(
+          success: true,
+          paymentIntentId: (data['paymentIntentId'] as String?) ?? '',
+        );
+      } else {
+        _logPaymentEvent('commission_milestone', amount, 'failed');
+        return PaymentResult(
+          success: false,
+          error: 'Failed to process commission milestone payment',
+        );
+      }
+    } catch (e) {
+      AppLogger.error('Error processing commission milestone: $e');
+      return PaymentResult(success: false, error: e.toString());
+    }
+  }
+
+  /// Process a commission final payment (Direct Commissions)
+  Future<PaymentResult> processCommissionFinalPayment({
+    required String commissionId,
+    required double amount,
+    required String paymentMethodId,
+    String? message,
+    String? customerId,
+  }) async {
+    try {
+      final actualCustomerId = customerId ?? await getOrCreateCustomerId();
+      final response = await _makeAuthenticatedRequest(
+        functionKey: 'processCommissionFinalPayment',
+        body: {
+          'amount': amount,
+          'commissionId': commissionId,
+          'paymentMethodId': paymentMethodId,
+          'customerId': actualCustomerId,
+          'message': message,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body) as Map<String, dynamic>;
+        _logPaymentEvent('commission_final', amount, 'success');
+        return PaymentResult(
+          success: true,
+          paymentIntentId: (data['paymentIntentId'] as String?) ?? '',
+        );
+      } else {
+        _logPaymentEvent('commission_final', amount, 'failed');
+        return PaymentResult(
+          success: false,
+          error: 'Failed to process commission final payment',
+        );
+      }
+    } catch (e) {
+      AppLogger.error('Error processing commission final payment: $e');
+      return PaymentResult(success: false, error: e.toString());
+    }
+  }
+
+  /// Complete a commission and release held funds to the artist
+  Future<PaymentResult> completeCommission({
+    required String commissionId,
+  }) async {
+    try {
+      final response = await _makeAuthenticatedRequest(
+        functionKey: 'completeCommission',
+        body: {
+          'commissionId': commissionId,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        AppLogger.info('✅ Commission completed: $commissionId');
+        return PaymentResult(
+          success: true,
+          paymentIntentId: commissionId,
+        );
+      } else {
+        final data = json.decode(response.body) as Map<String, dynamic>;
+        AppLogger.warning('⚠️ Failed to complete commission: ${data['error']}');
+        return PaymentResult(
+          success: false,
+          error: (data['error'] as String?) ?? 'Failed to complete commission',
+        );
+      }
+    } catch (e) {
+      AppLogger.error('Error completing commission: $e');
+      return PaymentResult(success: false, error: e.toString());
+    }
+  }
+
+  /// Get commission payment history
+  Future<List<Map<String, dynamic>>> getCommissionPayments(
+    String commissionId,
+  ) async {
+    try {
+      final querySnapshot = await _firestore
+          .collection('commission_payments')
+          .where('commissionId', isEqualTo: commissionId)
+          .orderBy('createdAt', descending: true)
+          .get();
+
+      return querySnapshot.docs.map((doc) => doc.data()).toList();
+    } catch (e) {
+      AppLogger.error('Error getting commission payments: $e');
+      return [];
+    }
+  }
+
   /// Process artwork sale payment (Stripe only)
   Future<PaymentResult> processArtworkSalePayment({
     required String artworkId,
     required double amount,
     required String artistId,
-    String? paymentMethodId,
+    required String paymentIntentId,
+    bool isAuction = false,
   }) async {
     try {
       final userId = _auth.currentUser?.uid;
@@ -557,10 +936,11 @@ class UnifiedPaymentService {
       final response = await _makeAuthenticatedRequest(
         functionKey: 'processArtworkSalePayment',
         body: {
+          'paymentIntentId': paymentIntentId,
           'artworkId': artworkId,
           'amount': amount,
           'artistId': artistId,
-          if (paymentMethodId != null) 'paymentMethodId': paymentMethodId,
+          'isAuction': isAuction,
         },
       );
 
@@ -582,6 +962,57 @@ class UnifiedPaymentService {
     } catch (e) {
       AppLogger.error('Error processing artwork sale: $e');
       _logPaymentEvent('artwork_sale', 0, 'error');
+      return PaymentResult(success: false, error: e.toString());
+    }
+  }
+
+  /// Process event ticket payment (Stripe only)
+  Future<PaymentResult> processEventTicketPayment({
+    required String eventId,
+    required String ticketTypeId,
+    required int quantity,
+    required double amount,
+    required String artistId,
+    required String paymentIntentId,
+    String? userEmail,
+    String? userName,
+  }) async {
+    try {
+      final userId = _auth.currentUser?.uid;
+      if (userId == null) throw Exception('User not authenticated');
+
+      final response = await _makeAuthenticatedRequest(
+        functionKey: 'processEventTicketPayment',
+        body: {
+          'paymentIntentId': paymentIntentId,
+          'eventId': eventId,
+          'ticketTypeId': ticketTypeId,
+          'quantity': quantity,
+          'amount': amount,
+          'artistId': artistId,
+          'userEmail': userEmail,
+          'userName': userName,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body) as Map<String, dynamic>;
+        _logPaymentEvent('ticket_sale', amount, 'success');
+        return PaymentResult(
+          success: true,
+          paymentIntentId: (data['paymentIntentId'] as String?) ?? paymentIntentId,
+        );
+      } else {
+        _logPaymentEvent('ticket_sale', amount, 'failed');
+        final data = json.decode(response.body) as Map<String, dynamic>;
+        return PaymentResult(
+          success: false,
+          error: (data['error'] as String?) ?? 'Failed to process ticket payment',
+        );
+      }
+    } catch (e) {
+      AppLogger.error('Error processing ticket sale: $e');
+      _logPaymentEvent('ticket_sale', 0, 'error');
       return PaymentResult(success: false, error: e.toString());
     }
   }
@@ -752,9 +1183,12 @@ class UnifiedPaymentService {
 
   /// Process sponsorship payment
   Future<PaymentResult> processSponsorshipPayment({
-    required String sponsorshipId,
+    required String artistId,
     required double amount,
-    String? paymentMethodId,
+    required String sponsorshipType,
+    required String paymentIntentId,
+    int? duration,
+    List<String>? benefits,
   }) async {
     try {
       final userId = _auth.currentUser?.uid;
@@ -763,9 +1197,12 @@ class UnifiedPaymentService {
       final response = await _makeAuthenticatedRequest(
         functionKey: 'processSponsorshipPayment',
         body: {
-          'sponsorshipId': sponsorshipId,
+          'paymentIntentId': paymentIntentId,
+          'artistId': artistId,
           'amount': amount,
-          if (paymentMethodId != null) 'paymentMethodId': paymentMethodId,
+          'sponsorshipType': sponsorshipType,
+          if (duration != null) 'duration': duration,
+          if (benefits != null) 'benefits': benefits,
         },
       );
 
@@ -826,6 +1263,87 @@ class UnifiedPaymentService {
     } catch (e) {
       AppLogger.error('Error creating customer: $e');
       rethrow;
+    }
+  }
+
+  /// Get or create a customer ID
+  Future<String> getOrCreateCustomerId() async {
+    final userId = _auth.currentUser?.uid;
+    if (userId == null) {
+      throw Exception('User not authenticated');
+    }
+
+    AppLogger.info('Getting or creating customer ID for user: $userId');
+
+    // Check if customer ID already exists in Firestore
+    final userDoc = await _firestore.collection('users').doc(userId).get();
+    final data = userDoc.data();
+
+    if (userDoc.exists &&
+        data != null &&
+        data.containsKey('stripeCustomerId')) {
+      final customerId = data['stripeCustomerId'] as String?;
+      if (customerId != null) {
+        AppLogger.info('Found existing customer ID: $customerId');
+        return customerId;
+      }
+    }
+
+    // If not, create a new customer in Stripe
+    final email = _auth.currentUser?.email ?? '';
+    final name = _auth.currentUser?.displayName ?? '';
+    AppLogger.info('Creating new customer with email: $email, name: $name');
+    return createCustomer(email: email, name: name);
+  }
+
+  /// Get the user's default payment method ID
+  Future<String?> getDefaultPaymentMethodId() async {
+    try {
+      final userId = _auth.currentUser?.uid;
+      if (userId == null) {
+        AppLogger.auth('User not authenticated');
+        return null;
+      }
+
+      // First check if we have a stored default payment method ID in users collection
+      final userDoc = await _firestore.collection('users').doc(userId).get();
+      if (userDoc.exists) {
+        final userData = userDoc.data();
+        final defaultPaymentMethodId =
+            userData?['defaultPaymentMethodId'] as String?;
+
+        if (defaultPaymentMethodId != null) {
+          AppLogger.info(
+            'Found stored default payment method: $defaultPaymentMethodId',
+          );
+          return defaultPaymentMethodId;
+        }
+
+        // If no default is set, check customer document or Stripe
+        final stripeCustomerId = userData?['stripeCustomerId'] as String?;
+        if (stripeCustomerId != null) {
+          final paymentMethods = await getPaymentMethods(stripeCustomerId);
+          if (paymentMethods.isNotEmpty) {
+            final firstPaymentMethodId = paymentMethods.first.id;
+
+            // Set this as the default for future use
+            await _firestore.collection('users').doc(userId).update({
+              'defaultPaymentMethodId': firstPaymentMethodId,
+            });
+
+            AppLogger.info(
+              'Set first payment method as default: $firstPaymentMethodId',
+            );
+            return firstPaymentMethodId;
+          }
+        }
+      }
+
+      AppLogger.info('No payment methods found for user');
+      return null;
+    } catch (e) {
+      AppLogger.error('Error getting default payment method: $e');
+      return null;
     }
   }
 
@@ -986,21 +1504,34 @@ class UnifiedPaymentService {
     }
   }
 
-  /// Present the payment sheet to the user
-  Future<void> presentPaymentSheet() async {
+  /// Safely present the payment sheet to the user
+  Future<void> safelyPresentPaymentSheet({
+    required String operationName,
+  }) async {
     try {
+      AppLogger.info('🔄 Presenting Stripe payment sheet for: $operationName');
       await Stripe.instance.presentPaymentSheet();
+      AppLogger.info('✅ Payment confirmed with Stripe for: $operationName');
     } catch (e) {
       if (e is StripeException) {
+        if (e.error.code == FailureCode.Canceled) {
+          AppLogger.info('ℹ️ Payment cancelled by user for: $operationName');
+          throw Exception('Payment was cancelled by user');
+        }
         AppLogger.warning(
-          'Stripe payment sheet error: ${e.error.localizedMessage}',
+          'Stripe payment sheet error during $operationName: ${e.error.localizedMessage}',
         );
         rethrow;
       } else {
-        AppLogger.error('Error presenting payment sheet: $e');
+        AppLogger.error('Error presenting payment sheet during $operationName: $e');
         rethrow;
       }
     }
+  }
+
+  /// Present the payment sheet to the user
+  Future<void> presentPaymentSheet() async {
+    return safelyPresentPaymentSheet(operationName: 'general_payment');
   }
 
   // ========================================================================
@@ -1065,22 +1596,27 @@ class UnifiedPaymentService {
   /// Request a refund
   Future<Map<String, dynamic>> requestRefund({
     required String paymentId,
-    required String subscriptionId,
+    String? subscriptionId,
     required String reason,
     String? additionalDetails,
+    double? amount,
+    String? userId,
+    Map<String, dynamic>? metadata,
   }) async {
     try {
-      final userId = _auth.currentUser?.uid;
-      if (userId == null) throw Exception('User not authenticated');
+      final actualUserId = userId ?? _auth.currentUser?.uid;
+      if (actualUserId == null) throw Exception('User not authenticated');
 
       final response = await _makeAuthenticatedRequest(
         functionKey: 'requestRefund',
         body: {
           'paymentId': paymentId,
-          'subscriptionId': subscriptionId,
-          'userId': userId,
+          if (subscriptionId != null) 'subscriptionId': subscriptionId,
+          'userId': actualUserId,
           'reason': reason,
           if (additionalDetails != null) 'additionalDetails': additionalDetails,
+          if (amount != null) 'amount': amount,
+          if (metadata != null) 'metadata': metadata,
         },
       );
 

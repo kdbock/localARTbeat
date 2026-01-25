@@ -203,86 +203,107 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   );
 
   Widget _buildNotificationsStream(User user) =>
-      StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
         stream: FirebaseFirestore.instance
             .collection('users')
             .doc(user.uid)
-            .collection('notifications')
-            .orderBy('createdAt', descending: true)
+            .collection('notification_summary')
+            .doc('summary')
             .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (snapshot.hasError) {
-            return _buildErrorState(snapshot.error?.toString() ?? 'Error');
-          }
-
-          final docs = snapshot.data?.docs ?? [];
-          if (docs.isEmpty) {
-            return _buildEmptyNotificationsState();
-          }
-
-          final unreadCount = docs
-              .where((doc) => doc.data()['read'] != true)
-              .length;
-
-          final filteredDocs = docs
-              .where((doc) => _activeFilter.appliesTo(doc.data()))
-              .toList();
-
-          final summaryCard = _buildSummaryCard(
-            total: docs.length,
-            unread: unreadCount,
-            lastUpdated: _extractLatestDate(docs),
-          );
-
-          if (filteredDocs.isEmpty) {
-            return ListView(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
-              physics: const BouncingScrollPhysics(),
-              children: [
-                summaryCard,
-                const SizedBox(height: 12),
-                _buildFilterEmptyState(),
-              ],
-            );
-          }
-
-          return ListView.builder(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
-            physics: const BouncingScrollPhysics(),
-            itemCount: filteredDocs.length + 1,
-            itemBuilder: (context, index) {
-              if (index == 0) {
-                return Column(
-                  children: [summaryCard, const SizedBox(height: 12)],
-                );
-              }
-
-              final doc = filteredDocs[index - 1];
-              final data = doc.data();
-              final title = _parseTitle(data);
-              final message = _parseMessage(data);
-              final type = (data['type'] as String?) ?? '';
-              final timestamp = data['createdAt'] as Timestamp?;
-              final createdAt = timestamp?.toDate();
-              final isRead = data['read'] == true;
-
-              return _buildNotificationCard(
-                notificationId: doc.id,
-                data: data,
-                title: title,
-                message: message,
-                type: type,
-                isRead: isRead,
-                createdAt: createdAt,
-              );
-            },
-          );
-        },
+        builder: (context, summarySnapshot) =>
+            StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+              stream: FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(user.uid)
+                  .collection('notifications')
+                  .orderBy('createdAt', descending: true)
+                  .snapshots(),
+              builder: (context, snapshot) =>
+                  _buildNotificationsList(snapshot, summarySnapshot),
+            ),
       );
+
+  Widget _buildNotificationsList(
+    AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot,
+    AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>> summarySnapshot,
+  ) {
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (snapshot.hasError) {
+      return _buildErrorState(snapshot.error?.toString() ?? 'Error');
+    }
+
+    final docs = snapshot.data?.docs ?? [];
+    if (docs.isEmpty) {
+      return _buildEmptyNotificationsState();
+    }
+
+    final summaryData = summarySnapshot.data?.data();
+    final cachedTotal = summaryData?['totalCount'] as int?;
+    final cachedUnread = summaryData?['unreadCount'] as int?;
+    final cachedUpdated =
+        (summaryData?['lastUpdated'] as Timestamp?)?.toDate();
+
+    final unreadCount = cachedUnread ??
+        docs.where((doc) => doc.data()['read'] != true).length;
+    final totalCount = cachedTotal ?? docs.length;
+    final lastUpdated = cachedUpdated ?? _extractLatestDate(docs);
+
+    final filteredDocs =
+        docs.where((doc) => _activeFilter.appliesTo(doc.data())).toList();
+
+    final summaryCard = _buildSummaryCard(
+      total: totalCount,
+      unread: unreadCount,
+      lastUpdated: lastUpdated,
+    );
+
+    if (filteredDocs.isEmpty) {
+      return ListView(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+        physics: const BouncingScrollPhysics(),
+        children: [
+          summaryCard,
+          const SizedBox(height: 12),
+          _buildFilterEmptyState(),
+        ],
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+      physics: const BouncingScrollPhysics(),
+      itemCount: filteredDocs.length + 1,
+      itemBuilder: (context, index) {
+        if (index == 0) {
+          return Column(
+            children: [summaryCard, const SizedBox(height: 12)],
+          );
+        }
+
+        final doc = filteredDocs[index - 1];
+        final data = doc.data();
+        final title = _parseTitle(data);
+        final message = _parseMessage(data);
+        final type = (data['type'] as String?) ?? '';
+        final timestamp = data['createdAt'] as Timestamp?;
+        final createdAt = timestamp?.toDate();
+        final isRead = data['read'] == true;
+
+        return _buildNotificationCard(
+          notificationId: doc.id,
+          data: data,
+          title: title,
+          message: message,
+          type: type,
+          isRead: isRead,
+          createdAt: createdAt,
+        );
+      },
+    );
+  }
 
   Widget _buildSummaryCard({
     required int total,

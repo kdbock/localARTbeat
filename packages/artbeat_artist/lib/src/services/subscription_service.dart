@@ -1,8 +1,12 @@
+import 'dart:developer' as developer;
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/subscription_model.dart';
 import '../models/top_follower_model.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:artbeat_core/src/utils/coordinate_validator.dart'
+    show SimpleLatLng;
 import 'error_monitoring_service.dart';
 import '../utils/artist_logger.dart';
 import '../utils/input_validator.dart';
@@ -12,6 +16,9 @@ class SubscriptionService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final UserService _userService = UserService();
+  SimpleLatLng? _cachedViewerLocation;
+  DateTime? _viewerLocationUpdatedAt;
+  static const Duration _viewerLocationTtl = Duration(minutes: 5);
 
   String? getCurrentUserId() => _auth.currentUser?.uid;
 
@@ -120,6 +127,7 @@ class SubscriptionService {
       final validBio = bioResult.getOrThrow();
       final validLocation = locationResult.getOrThrow();
 
+      final locationCoords = await _resolveLocationCoords(validLocation);
       DocumentReference docRef;
 
       // Check if profile already exists
@@ -137,9 +145,11 @@ class SubscriptionService {
 
         await docRef.update({
           'displayName': validDisplayName,
+          'displayNameLower': validDisplayName.trim().toLowerCase(),
           'bio': validBio,
           'userType': userType.value,
           'location': validLocation,
+          if (locationCoords != null) ...locationCoords,
           'mediums': mediums,
           'styles': styles,
           'socialLinks': socialLinks,
@@ -154,9 +164,11 @@ class SubscriptionService {
         await docRef.set({
           'userId': validUserId,
           'displayName': validDisplayName,
+          'displayNameLower': validDisplayName.trim().toLowerCase(),
           'bio': validBio,
           'userType': userType.value,
           'location': validLocation,
+          if (locationCoords != null) ...locationCoords,
           'mediums': mediums,
           'styles': styles,
           'socialLinks': socialLinks,
@@ -221,6 +233,7 @@ class SubscriptionService {
       final Map<String, dynamic> data = {
         'userId': userId,
         'displayName': displayName,
+        'displayNameLower': displayName.trim().toLowerCase(),
         'bio': bio,
         'userType': userType.value,
         'mediums': mediums,
@@ -230,7 +243,13 @@ class SubscriptionService {
         'updatedAt': FieldValue.serverTimestamp(),
       };
 
-      if (location != null) data['location'] = location;
+      if (location != null) {
+        data['location'] = location;
+        final locationCoords = await _resolveLocationCoords(location);
+        if (locationCoords != null) {
+          data.addAll(locationCoords);
+        }
+      }
       if (profileImageUrl != null) data['profileImageUrl'] = profileImageUrl;
       if (coverImageUrl != null) data['coverImageUrl'] = coverImageUrl;
 
@@ -485,6 +504,38 @@ class SubscriptionService {
     String? style,
   }) async {
     try {
+      final page = await getAllArtistsPage(
+        searchQuery: searchQuery,
+        medium: medium,
+        style: style,
+      );
+      return page.artists;
+    } catch (e) {
+      ArtistLogger.error('Error getting all artists: $e');
+      return [];
+    }
+  }
+
+  /// Get paginated artists with optional filters
+  Future<ArtistPage> getAllArtistsPage({
+    String? searchQuery,
+    String? medium,
+    String? style,
+    DocumentSnapshot? startAfter,
+    int limit = 50,
+  }) async {
+    final task = developer.TimelineTask();
+    task.start(
+      'Artists.getAllArtistsPage',
+      arguments: {
+        'limit': limit,
+        'hasSearch': (searchQuery?.trim().isNotEmpty ?? false),
+        'hasMedium': (medium != null && medium != 'All'),
+        'hasStyle': (style != null && style != 'All'),
+        'hasStartAfter': startAfter != null,
+      },
+    );
+    try {
       Query query = _firestore.collection('artistProfiles');
 
       // Filter by medium if specified
@@ -492,27 +543,32 @@ class SubscriptionService {
         query = query.where('mediums', arrayContains: medium);
       }
 
-      // Get all artists
-      final snapshot = await query.get();
+      // Search by display name (requires displayNameLower field + index)
+      final searchLower = searchQuery?.trim().toLowerCase();
+      if (searchLower != null && searchLower.isNotEmpty) {
+        query = query
+            .orderBy('displayNameLower')
+            .startAt([searchLower])
+            .endAt(['$searchLower\uf8ff']);
+      } else {
+        query = query.orderBy('displayNameLower');
+      }
+
+      if (style != null && style != 'All') {
+        query = query.where('styles', arrayContains: style);
+      }
+
+      if (startAfter != null) {
+        query = query.startAfterDocument(startAfter);
+      }
+
+      final queryTask = developer.TimelineTask();
+      queryTask.start('Artists.getAllArtistsPage.query');
+      final snapshot = await query.limit(limit).get();
+      queryTask.finish();
       List<ArtistProfileModel> artists = snapshot.docs
           .map((doc) => ArtistProfileModel.fromFirestore(doc))
           .toList();
-
-      // Apply style filter in memory (since Firestore doesn't support multiple array-contains queries)
-      if (style != null && style != 'All') {
-        artists = artists
-            .where((artist) => artist.styles.contains(style))
-            .toList();
-      }
-
-      // Apply search filter in memory
-      if (searchQuery != null && searchQuery.isNotEmpty) {
-        final searchLower = searchQuery.toLowerCase();
-        artists = artists.where((artist) {
-          return artist.displayName.toLowerCase().contains(searchLower) ||
-              (artist.bio?.toLowerCase().contains(searchLower) ?? false);
-        }).toList();
-      }
 
       UserModel? currentUser;
       try {
@@ -521,14 +577,23 @@ class SubscriptionService {
         currentUser = null;
       }
 
-      final viewerLocation = await GeoWeightingUtils.resolveViewerLocation(
-        currentUser,
-      );
+      final viewerLocation = await _resolveViewerLocationCached(currentUser);
 
+      final sortTask = developer.TimelineTask();
+      sortTask.start(
+        'Artists.getAllArtistsPage.sortByDistance',
+        arguments: {'count': artists.length},
+      );
       artists = await GeoWeightingUtils.sortByDistance<ArtistProfileModel>(
         items: artists,
         idOf: (artist) => artist.userId,
         locationOf: (artist) => artist.location,
+        coordsOf: (artist) {
+          final lat = artist.locationLat;
+          final lng = artist.locationLng;
+          if (lat == null || lng == null) return null;
+          return SimpleLatLng(lat, lng);
+        },
         viewerLocation: viewerLocation,
         tieBreaker: (a, b) {
           final tierCompare = b.subscriptionTier.index.compareTo(
@@ -552,11 +617,16 @@ class SubscriptionService {
           return a.displayName.compareTo(b.displayName);
         },
       );
+      sortTask.finish();
 
-      return artists;
+      final lastDoc = snapshot.docs.isNotEmpty ? snapshot.docs.last : null;
+      final hasMore = snapshot.docs.length == limit;
+      return ArtistPage(artists: artists, lastDoc: lastDoc, hasMore: hasMore);
     } catch (e) {
       ArtistLogger.error('Error getting all artists: $e');
-      return [];
+      return const ArtistPage(artists: [], lastDoc: null, hasMore: false);
+    } finally {
+      task.finish();
     }
   }
 
@@ -727,4 +797,54 @@ class SubscriptionService {
       };
     }
   }
+
+  Future<Map<String, double>?> _resolveLocationCoords(String location) async {
+    final trimmed = location.trim();
+    if (trimmed.isEmpty) return null;
+
+    final zip = _extractZip(trimmed);
+    SimpleLatLng? coords;
+    if (zip != null) {
+      coords = await LocationUtils.getCoordinatesFromZipCode(zip);
+    } else {
+      coords = await LocationUtils.getLocationFromAddress(trimmed);
+    }
+
+    if (coords == null) return null;
+    if (!LocationUtils.isValidLatLng(coords)) return null;
+
+    return {'locationLat': coords.latitude, 'locationLng': coords.longitude};
+  }
+
+  String? _extractZip(String input) {
+    final match = RegExp(r'(\\d{5})(?:-\\d{4})?').firstMatch(input);
+    return match?.group(1);
+  }
+
+  Future<SimpleLatLng?> _resolveViewerLocationCached(UserModel? user) async {
+    final now = DateTime.now();
+    final lastUpdated = _viewerLocationUpdatedAt;
+    if (_cachedViewerLocation != null &&
+        lastUpdated != null &&
+        now.difference(lastUpdated) < _viewerLocationTtl) {
+      return _cachedViewerLocation;
+    }
+
+    final resolved = await GeoWeightingUtils.resolveViewerLocation(user);
+    _cachedViewerLocation = resolved;
+    _viewerLocationUpdatedAt = DateTime.now();
+    return resolved;
+  }
+}
+
+class ArtistPage {
+  final List<ArtistProfileModel> artists;
+  final DocumentSnapshot? lastDoc;
+  final bool hasMore;
+
+  const ArtistPage({
+    required this.artists,
+    required this.lastDoc,
+    required this.hasMore,
+  });
 }

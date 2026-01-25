@@ -35,6 +35,11 @@ class OptimizedImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    ImageManagementService().logDecodeDimensions(
+      label: 'OptimizedImage',
+      width: width,
+      height: height,
+    );
     Widget imageWidget = ImageManagementService().getOptimizedImage(
       imageUrl: imageUrl,
       width: width,

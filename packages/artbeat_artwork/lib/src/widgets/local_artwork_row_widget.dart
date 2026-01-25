@@ -107,115 +107,112 @@ class LocalArtworkRowWidget extends StatelessWidget {
                   .map((doc) => ArtworkModel.fromFirestore(doc))
                   .toList();
 
-              return ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: artworks.length,
-                padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                itemBuilder: (context, index) {
-                  final artwork = artworks[index];
-                  return GestureDetector(
-                    onTap: () => Navigator.pushNamed(
-                      context,
-                      '/artist/artwork-detail',
-                      arguments: {'artworkId': artwork.id},
-                    ),
-                    child: Container(
-                      width: 170, // Increased width for better display
-                      margin: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Card(
-                        clipBehavior: Clip.antiAlias,
-                        elevation: 2,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.0),
+              final artistIds = artworks
+                  .map((artwork) => artwork.artistProfileId)
+                  .where((id) => id.isNotEmpty)
+                  .toSet()
+                  .toList();
+
+              return FutureBuilder<Map<String, String>>(
+                future: _fetchArtistNames(artistIds),
+                builder: (context, artistSnapshot) {
+                  final artistNames = artistSnapshot.data ?? const {};
+
+                  return ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: artworks.length,
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                    itemBuilder: (context, index) {
+                      final artwork = artworks[index];
+                      final artistName =
+                          artistNames[artwork.artistProfileId] ??
+                          'Unknown Artist';
+
+                      return GestureDetector(
+                        onTap: () => Navigator.pushNamed(
+                          context,
+                          '/artist/artwork-detail',
+                          arguments: {'artworkId': artwork.id},
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Artwork image with sold badge if applicable
-                            Stack(
+                        child: Container(
+                          width: 170, // Increased width for better display
+                          margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Card(
+                            clipBehavior: Clip.antiAlias,
+                            elevation: 2,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                ClipRRect(
-                                  borderRadius: const BorderRadius.vertical(
-                                    top: Radius.circular(12.0),
-                                  ),
-                                  child: SecureNetworkImage(
-                                    imageUrl: artwork.imageUrl,
-                                    width: 170,
-                                    height: 150,
-                                    fit: BoxFit.cover,
-                                    enableThumbnailFallback:
-                                        true, // Enable fallback for artwork
-                                    errorWidget: Container(
-                                      width: 170,
-                                      height: 150,
-                                      color: Colors.grey.shade300,
-                                      child: const Icon(
-                                        Icons.image_not_supported,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                if (artwork.isForSale == false)
-                                  Positioned(
-                                    top: 8,
-                                    right: 8,
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 4,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: Colors.red,
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: const Text(
-                                        'SOLD',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 12,
+                                // Artwork image with sold badge if applicable
+                                Stack(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius:
+                                          const BorderRadius.vertical(
+                                            top: Radius.circular(12.0),
+                                          ),
+                                      child: SecureNetworkImage(
+                                        imageUrl: artwork.imageUrl,
+                                        width: 170,
+                                        height: 150,
+                                        fit: BoxFit.cover,
+                                        enableThumbnailFallback:
+                                            true, // Enable fallback for artwork
+                                        errorWidget: Container(
+                                          width: 170,
+                                          height: 150,
+                                          color: Colors.grey.shade300,
+                                          child: const Icon(
+                                            Icons.image_not_supported,
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                              ],
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    artwork.title,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  FutureBuilder<DocumentSnapshot>(
-                                    future: FirebaseFirestore.instance
-                                        .collection('artistProfiles')
-                                        .doc(artwork.artistProfileId)
-                                        .get(),
-                                    builder: (context, snapshot) {
-                                      String artistName = 'Unknown Artist';
-                                      if (snapshot.hasData &&
-                                          snapshot.data != null) {
-                                        final artistData =
-                                            snapshot.data!.data()
-                                                as Map<String, dynamic>?;
-                                        if (artistData != null &&
-                                            artistData.containsKey(
-                                              'displayName',
-                                            )) {
-                                          artistName =
-                                              artistData['displayName']
-                                                  as String;
-                                        }
-                                      }
-                                      return Text(
+                                    if (artwork.isForSale == false)
+                                      Positioned(
+                                        top: 8,
+                                        right: 8,
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 4,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: Colors.red,
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                          ),
+                                          child: const Text(
+                                            'SOLD',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        artwork.title,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
                                         artistName,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
@@ -223,26 +220,26 @@ class LocalArtworkRowWidget extends StatelessWidget {
                                           fontSize: 12,
                                           color: Colors.grey.shade700,
                                         ),
-                                      );
-                                    },
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        artwork.price != null
+                                            ? '\$${artwork.price!.toStringAsFixed(2)}'
+                                            : 'Not for sale',
+                                        style: TextStyle(
+                                          color: Theme.of(context).primaryColor,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    artwork.price != null
-                                        ? '\$${artwork.price!.toStringAsFixed(2)}'
-                                        : 'Not for sale',
-                                    style: TextStyle(
-                                      color: Theme.of(context).primaryColor,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
-                          ],
+                          ),
                         ),
-                      ),
-                    ),
+                      );
+                    },
                   );
                 },
               );
@@ -251,5 +248,19 @@ class LocalArtworkRowWidget extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Future<Map<String, String>> _fetchArtistNames(List<String> artistIds) async {
+    if (artistIds.isEmpty) return {};
+
+    final snapshot = await FirebaseFirestore.instance
+        .collection('artistProfiles')
+        .where(FieldPath.documentId, whereIn: artistIds)
+        .get();
+
+    return {
+      for (final doc in snapshot.docs)
+        doc.id: (doc.data()['displayName'] as String?) ?? 'Unknown Artist',
+    };
   }
 }

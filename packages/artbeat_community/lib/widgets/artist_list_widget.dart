@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:artbeat_core/src/utils/coordinate_validator.dart'
+    show SimpleLatLng;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
 
@@ -95,6 +97,12 @@ class _ArtistListWidgetState extends State<ArtistListWidget>
             items: loadedArtists,
             idOf: (artist) => artist.userId,
             locationOf: (artist) => artist.location,
+            coordsOf: (artist) {
+              final lat = artist.locationLat;
+              final lng = artist.locationLng;
+              if (lat == null || lng == null) return null;
+              return SimpleLatLng(lat, lng);
+            },
             viewerLocation: viewerLocation,
             tieBreaker: (a, b) {
               final scoreCompare = b.boostScore.compareTo(a.boostScore);

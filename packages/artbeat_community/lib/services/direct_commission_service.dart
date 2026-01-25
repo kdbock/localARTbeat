@@ -6,6 +6,7 @@ import 'package:artbeat_core/artbeat_core.dart';
 class DirectCommissionService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final UnifiedPaymentService _paymentService = UnifiedPaymentService();
 
   /// Get commissions for a specific user (as client or artist)
   Future<List<DirectCommissionModel>> getCommissionsByUser(
@@ -226,13 +227,23 @@ class DirectCommissionService {
   /// Complete commission
   Future<void> completeCommission(String commissionId) async {
     try {
-      await _firestore
-          .collection('direct_commissions')
-          .doc(commissionId)
-          .update({
-            'status': CommissionStatus.completed.name,
-            'completedAt': Timestamp.now(),
-          });
+      // 1. Update the direct_commissions document status
+      await _firestore.collection('direct_commissions').doc(commissionId).update({
+        'status': CommissionStatus.completed.name,
+        'completedAt': Timestamp.now(),
+      });
+
+      // 2. Call the Cloud Function to release funds in the earnings system
+      // This transitions funds from pending to available balance
+      final result = await _paymentService.completeCommission(
+        commissionId: commissionId,
+      );
+
+      if (!result.success) {
+        AppLogger.warning(
+          '⚠️ Financial fulfillment failed for commission $commissionId: ${result.error}',
+        );
+      }
 
       await addMessage(
         commissionId,

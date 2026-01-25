@@ -5,18 +5,30 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../models/art_models.dart';
 import '../models/post_model.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:artbeat_core/src/utils/coordinate_validator.dart'
+    show SimpleLatLng;
 
 /// Unified service for art community operations
 /// Simplified and focused on core art-sharing functionality
 class ArtCommunityService extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final UserService _userService = UserService();
+  static const Duration _viewerLocationTtl = Duration(minutes: 10);
+  static const Duration _artistSortInterval = Duration(seconds: 8);
+  static const double _artistSortDistanceThresholdKm = 2.0;
 
   // Stream controllers for real-time updates
   final StreamController<List<ArtPost>> _feedController =
       StreamController.broadcast();
   final StreamController<List<ArtistProfile>> _artistsController =
       StreamController.broadcast();
+  Timer? _artistSortDebounce;
+  SimpleLatLng? _cachedViewerLocation;
+  DateTime? _viewerLocationUpdatedAt;
+  DateTime? _lastArtistSortAt;
+  SimpleLatLng? _lastSortedViewerLocation;
+  bool _artistSortInFlight = false;
+  bool _pendingArtistSort = false;
 
   Stream<List<ArtPost>> get feedStream => _feedController.stream;
   Stream<List<ArtistProfile>> get artistsStream => _artistsController.stream;
@@ -206,6 +218,8 @@ class ArtCommunityService extends ChangeNotifier {
   // Cache for performance
   List<ArtPost> _feedCache = [];
   List<ArtistProfile> _artistsCache = [];
+  List<ArtistProfile> _artistsRawCache = [];
+  int _artistsSortHash = 0;
 
   ArtCommunityService() {
     _initializeStreams();
@@ -234,34 +248,140 @@ class ArtCommunityService extends ChangeNotifier {
           final artists = snapshot.docs
               .map((doc) => ArtistProfile.fromFirestore(doc))
               .toList();
-          UserModel? currentUser;
-          try {
-            currentUser = await _userService.getCurrentUserModel();
-          } catch (_) {
-            currentUser = null;
-          }
-          final viewerLocation = await GeoWeightingUtils.resolveViewerLocation(
-            currentUser,
+          _artistsRawCache = artists;
+
+          _artistSortDebounce?.cancel();
+          _artistSortDebounce = Timer(
+            const Duration(milliseconds: 350),
+            _scheduleArtistSort,
           );
-          _artistsCache = await GeoWeightingUtils.sortByDistance<ArtistProfile>(
-            items: artists,
-            idOf: (artist) => artist.userId,
-            locationOf: (artist) => artist.location,
-            viewerLocation: viewerLocation,
-            tieBreaker: (a, b) {
-              final boostCompare = b.boostScore.compareTo(a.boostScore);
-              if (boostCompare != 0) return boostCompare;
-              final aBoost =
-                  a.lastBoostAt ?? DateTime.fromMillisecondsSinceEpoch(0);
-              final bBoost =
-                  b.lastBoostAt ?? DateTime.fromMillisecondsSinceEpoch(0);
-              final boostTimeCompare = bBoost.compareTo(aBoost);
-              if (boostTimeCompare != 0) return boostTimeCompare;
-              return a.displayName.compareTo(b.displayName);
-            },
-          );
-          _artistsController.add(_artistsCache);
         });
+  }
+
+  void _scheduleArtistSort() {
+    if (_artistSortInFlight) {
+      _pendingArtistSort = true;
+      return;
+    }
+    _performArtistSort();
+  }
+
+  Future<void> _performArtistSort() async {
+    _artistSortInFlight = true;
+    try {
+      final viewerLocation = await _getViewerLocation();
+      if (!_shouldResortArtists(viewerLocation)) {
+        _artistsCache = _mergeArtistUpdates(_artistsCache, _artistsRawCache);
+        _artistsController.add(_artistsCache);
+        return;
+      }
+
+      _lastArtistSortAt = DateTime.now();
+      _lastSortedViewerLocation = viewerLocation;
+      final sorted = await GeoWeightingUtils.sortByDistance<ArtistProfile>(
+        items: _artistsRawCache,
+        idOf: (artist) => artist.userId,
+        locationOf: (artist) => artist.location,
+        viewerLocation: viewerLocation,
+        tieBreaker: (a, b) {
+          final boostCompare = b.boostScore.compareTo(a.boostScore);
+          if (boostCompare != 0) return boostCompare;
+          final aBoost = a.lastBoostAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+          final bBoost = b.lastBoostAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+          final boostTimeCompare = bBoost.compareTo(aBoost);
+          if (boostTimeCompare != 0) return boostTimeCompare;
+          return a.displayName.compareTo(b.displayName);
+        },
+      );
+      _artistsCache = sorted;
+      if (_shouldEmitArtistUpdate(_artistsCache)) {
+        _artistsController.add(_artistsCache);
+      }
+    } finally {
+      _artistSortInFlight = false;
+      if (_pendingArtistSort) {
+        _pendingArtistSort = false;
+        _scheduleArtistSort();
+      }
+    }
+  }
+
+  bool _shouldResortArtists(SimpleLatLng? viewerLocation) {
+    final lastSort = _lastArtistSortAt;
+    if (lastSort == null) return true;
+    final elapsed = DateTime.now().difference(lastSort);
+    if (elapsed >= _artistSortInterval) return true;
+
+    if (viewerLocation == null || _lastSortedViewerLocation == null) {
+      return false;
+    }
+
+    final distance = LocationUtils.calculateDistance(
+      viewerLocation.latitude,
+      viewerLocation.longitude,
+      _lastSortedViewerLocation!.latitude,
+      _lastSortedViewerLocation!.longitude,
+    );
+    return distance >= _artistSortDistanceThresholdKm;
+  }
+
+  List<ArtistProfile> _mergeArtistUpdates(
+    List<ArtistProfile> ordered,
+    List<ArtistProfile> latest,
+  ) {
+    final byId = {
+      for (final artist in latest) artist.userId: artist,
+    };
+    final merged = <ArtistProfile>[];
+    for (final artist in ordered) {
+      final updated = byId.remove(artist.userId);
+      if (updated != null) {
+        merged.add(updated);
+      }
+    }
+    if (byId.isNotEmpty) {
+      merged.addAll(byId.values);
+    }
+    return merged;
+  }
+
+  bool _shouldEmitArtistUpdate(List<ArtistProfile> sorted) {
+    final hash = _computeArtistHash(sorted);
+    if (hash == _artistsSortHash) return false;
+    _artistsSortHash = hash;
+    return true;
+  }
+
+  int _computeArtistHash(List<ArtistProfile> artists) {
+    var hash = 17;
+    for (final artist in artists) {
+      hash = hash * 31 + artist.userId.hashCode;
+      hash = hash * 31 + (artist.lastBoostAt?.millisecondsSinceEpoch ?? 0);
+    }
+    return hash;
+  }
+
+  Future<SimpleLatLng?> _getViewerLocation() async {
+    final now = DateTime.now();
+    if (_cachedViewerLocation != null &&
+        _viewerLocationUpdatedAt != null &&
+        now.difference(_viewerLocationUpdatedAt!) < _viewerLocationTtl) {
+      return _cachedViewerLocation;
+    }
+
+    UserModel? currentUser;
+    try {
+      currentUser = await _userService.getCurrentUserModel();
+    } catch (_) {
+      currentUser = null;
+    }
+
+    final viewerLocation = await GeoWeightingUtils.resolveViewerLocation(
+      currentUser,
+    );
+    _cachedViewerLocation = viewerLocation;
+    _viewerLocationUpdatedAt = now;
+    return viewerLocation;
   }
 
   /// Get paginated feed posts
@@ -281,14 +401,14 @@ class ArtCommunityService extends ChangeNotifier {
 
       final snapshot = await query.get();
 
-      // Load posts and add like status for current user
-      final posts = <PostModel>[];
-      for (final doc in snapshot.docs) {
+      // Load posts and add like status for current user (batched)
+      final postIds = snapshot.docs.map((doc) => doc.id).toList();
+      final likedPostIds = await _getLikedPostIds(postIds);
+      final posts = snapshot.docs.map((doc) {
         final post = PostModel.fromFirestore(doc);
-        final isLiked = await hasUserLikedPost(post.id);
-        final postWithLikeStatus = post.copyWith(isLikedByCurrentUser: isLiked);
-        posts.add(postWithLikeStatus);
-      }
+        final isLiked = likedPostIds.contains(post.id);
+        return post.copyWith(isLikedByCurrentUser: isLiked);
+      }).toList();
 
       // Debug: Log the retrieved posts
       if (kDebugMode) {
@@ -655,6 +775,31 @@ class ArtCommunityService extends ChangeNotifier {
     } catch (e) {
       AppLogger.error('Error checking if user liked post $postId: $e');
       return false;
+    }
+  }
+
+  Future<Set<String>> _getLikedPostIds(List<String> postIds) async {
+    if (postIds.isEmpty) return {};
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId == null) return {};
+
+    try {
+      final snapshot = await _firestore
+          .collectionGroup('likes')
+          .where(FieldPath.documentId, isEqualTo: userId)
+          .get();
+
+      final likedPostIds = <String>{};
+      for (final doc in snapshot.docs) {
+        final postId = doc.reference.parent.parent?.id;
+        if (postId != null && postIds.contains(postId)) {
+          likedPostIds.add(postId);
+        }
+      }
+      return likedPostIds;
+    } catch (e) {
+      AppLogger.error('Error loading liked posts for user: $e');
+      return {};
     }
   }
 

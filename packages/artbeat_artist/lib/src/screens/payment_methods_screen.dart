@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
 
 /// Screen for managing payment methods
@@ -14,7 +13,7 @@ class PaymentMethodsScreen extends StatefulWidget {
 }
 
 class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
-  final core.PaymentService _paymentService = core.PaymentService();
+  final core.UnifiedPaymentService _paymentService = core.UnifiedPaymentService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -39,59 +38,29 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
     });
 
     try {
-      // Get current user's Stripe customer ID
       final userId = _auth.currentUser?.uid;
-      core.AppLogger.info('🔷 PaymentMethodsScreen: Current user ID: $userId');
       if (userId == null) {
         throw Exception('User not authenticated');
       }
 
-      // Get customer data from Firestore
-      final customerDoc = await _firestore
-          .collection('customers')
-          .doc(userId)
-          .get();
-      core.AppLogger.info(
-        '🔷 PaymentMethodsScreen: Customer doc exists: ${customerDoc.exists}',
-      );
+      // Get customer ID (using the more robust UnifiedPaymentService helper)
+      final stripeCustomerId = await _paymentService.getOrCreateCustomerId();
+      
+      // Get default payment method from Firestore
+      final userDoc = await _firestore.collection('users').doc(userId).get();
+      _defaultPaymentMethodId = userDoc.data()?['defaultPaymentMethodId'] as String?;
 
-      if (!customerDoc.exists) {
+      if (stripeCustomerId.isEmpty) {
         setState(() {
           _isLoading = false;
           _paymentMethods = [];
         });
-        core.AppLogger.info(
-          '🔷 PaymentMethodsScreen: No customer document found',
-        );
-        return;
-      }
-
-      final customerData = customerDoc.data();
-      final stripeCustomerId = customerData?['stripeCustomerId'] as String?;
-      _defaultPaymentMethodId =
-          customerData?['defaultPaymentMethodId'] as String?;
-
-      core.AppLogger.info(
-        '🔷 PaymentMethodsScreen: Stripe Customer ID: $stripeCustomerId',
-      );
-
-      if (stripeCustomerId == null) {
-        setState(() {
-          _isLoading = false;
-          _paymentMethods = [];
-        });
-        core.AppLogger.info(
-          '🔷 PaymentMethodsScreen: No Stripe customer ID found',
-        );
         return;
       }
 
       // Load payment methods
       final methods = await _paymentService.getPaymentMethods(stripeCustomerId);
-      core.AppLogger.info(
-        '🔷 PaymentMethodsScreen: Loaded ${methods.length} payment methods',
-      );
-
+      
       setState(() {
         _isLoading = false;
         _paymentMethods = methods;
@@ -117,35 +86,8 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
         throw Exception('User not authenticated');
       }
 
-      // Get or create a customer
-      final customerDoc = await _firestore
-          .collection('customers')
-          .doc(userId)
-          .get();
-
-      String? stripeCustomerId;
-      if (customerDoc.exists) {
-        stripeCustomerId = customerDoc.data()?['stripeCustomerId'] as String?;
-      }
-
-      if (stripeCustomerId == null) {
-        // Create new customer
-        final userDoc = await _firestore.collection('users').doc(userId).get();
-        final email = userDoc.data()?['email'] as String? ?? '';
-        final name = userDoc.data()?['fullName'] as String? ?? '';
-
-        stripeCustomerId = await _paymentService.createCustomer(
-          email: email,
-          name: name,
-        );
-
-        // Save customer ID
-        await _firestore.collection('customers').doc(userId).set({
-          'stripeCustomerId': stripeCustomerId,
-          'userId': userId,
-          'createdAt': FieldValue.serverTimestamp(),
-        });
-      }
+      // Get or create a customer using the robust helper
+      final stripeCustomerId = await _paymentService.getOrCreateCustomerId();
 
       // Setup payment sheet
       await _paymentService.setupPaymentSheet(
@@ -156,8 +98,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
       );
 
       // Present payment sheet with crash prevention
-      await core.CrashPreventionService.safeExecute(
-        operation: () => Stripe.instance.presentPaymentSheet(),
+      await _paymentService.safelyPresentPaymentSheet(
         operationName: 'presentPaymentSheet_setup',
       );
 
@@ -190,30 +131,16 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
         throw Exception('User not authenticated');
       }
 
-      // Get customer ID
-      final customerDoc = await _firestore
-          .collection('customers')
-          .doc(userId)
-          .get();
+      final stripeCustomerId = await _paymentService.getOrCreateCustomerId();
 
-      if (!customerDoc.exists) {
-        throw Exception('Customer not found');
-      }
-
-      final stripeCustomerId =
-          customerDoc.data()?['stripeCustomerId'] as String?;
-      if (stripeCustomerId == null) {
-        throw Exception('Stripe customer not found');
-      }
-
-      // Set default payment method
+      // Set default payment method in Stripe
       await _paymentService.setDefaultPaymentMethod(
         customerId: stripeCustomerId,
         paymentMethodId: paymentMethodId,
       );
 
-      // Update local reference
-      await _firestore.collection('customers').doc(userId).update({
+      // Update user document
+      await _firestore.collection('users').doc(userId).update({
         'defaultPaymentMethodId': paymentMethodId,
       });
 
@@ -250,7 +177,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
       if (_defaultPaymentMethodId == paymentMethodId) {
         final userId = _auth.currentUser?.uid;
         if (userId != null) {
-          await _firestore.collection('customers').doc(userId).update({
+          await _firestore.collection('users').doc(userId).update({
             'defaultPaymentMethodId': FieldValue.delete(),
           });
           _defaultPaymentMethodId = null;

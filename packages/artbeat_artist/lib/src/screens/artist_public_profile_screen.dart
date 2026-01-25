@@ -143,7 +143,6 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
     try {
       // Get current user ID
       _currentUserId = _subscriptionService.getCurrentUserId();
-      // Current user ID retrieved
 
       // Get artist profile by user ID
       final artistProfile = await _subscriptionService.getArtistProfileByUserId(
@@ -173,46 +172,39 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
         artistId: artistProfile.userId,
       );
 
-      // Get artist's artwork using the artist profile document ID
-      // debugPrint(
-      //     '🔍 ArtistPublicProfileScreen: About to query artwork with artistProfileId: ${artistProfile.id}');
-      final artwork = await _artworkService.getArtworkByArtistProfileId(
-        artistProfile.id,
-      );
+      final artworkFuture =
+          _artworkService.getArtworkByArtistProfileId(artistProfile.id);
+      final followingFuture = _currentUserId != null
+          ? _subscriptionService.isFollowingArtist(
+              artistProfileId: artistProfile.id,
+            )
+          : Future.value(false);
+      final commissionFuture = _commissionService
+          .getArtistCommissionSettings(widget.userId)
+          .catchError((_) => null);
 
-      // debugPrint(
-      //     '🖼️ ArtistPublicProfileScreen: Found ${artwork.length} artworks');
+      final results = await Future.wait([
+        artworkFuture,
+        followingFuture,
+        commissionFuture,
+      ]);
 
-      // Check if current user is following this artist
-      bool isFollowing = false;
-      if (_currentUserId != null) {
-        isFollowing = await _subscriptionService.isFollowingArtist(
-          artistProfileId: artistProfile.id,
-        );
-        // debugPrint(
-        //     '👥 ArtistPublicProfileScreen: Following status: $isFollowing');
-      }
-
-      // Load commission settings for this artist
-      ArtistCommissionSettings? commissionSettings;
-      try {
-        commissionSettings = await _commissionService
-            .getArtistCommissionSettings(widget.userId);
-      } catch (e) {
-        // Artist may not have commission settings - that's OK
-      }
+      final artworks = results[0] as List<artwork.ArtworkModel>;
+      final isFollowing = results[1] as bool;
+      final ArtistCommissionSettings? commissionSettings =
+          results[2] as ArtistCommissionSettings?;
 
       if (mounted) {
         setState(() {
           _artistProfile = artistProfile;
           _artistProfileId = artistProfile.id; // Store the document ID
-          _artwork = artwork;
+          _artwork = artworks;
           _isFollowing = isFollowing;
-          _commissionSettings = commissionSettings;
+          if (commissionSettings != null) {
+            _commissionSettings = commissionSettings;
+          }
           _isLoading = false;
         });
-        // debugPrint(
-        //     '✅ ArtistPublicProfileScreen: Successfully loaded profile UI');
       }
 
       _loadBoosters(artistProfile.userId);

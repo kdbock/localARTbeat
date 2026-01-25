@@ -529,28 +529,65 @@ class _TicketPurchaseSheetState extends State<TicketPurchaseSheet> {
     setState(() => _isProcessing = true);
 
     try {
-      String? paymentIntentId;
+      String? purchaseId;
 
-      if (!widget.ticketType.isFree) {
-        final amount = widget.ticketType.price * _quantity;
+      if (widget.ticketType.isFree) {
+        purchaseId = await _eventService.purchaseTickets(
+          eventId: widget.event.id,
+          ticketTypeId: widget.ticketType.id,
+          quantity: _quantity,
+          userEmail: _emailController.text.trim(),
+          userName: _nameController.text.trim(),
+        );
+      } else {
+        // Handle paid tickets via UnifiedPaymentService
+        final subtotal = widget.ticketType.price * _quantity;
+        final tax = subtotal * 0.08;
+        final total = subtotal + tax;
 
-        await PaymentService.refundPayment(
-          paymentId: 'mock_payment_id',
-          amount: amount,
-          reason: 'Ticket purchase',
+        final unifiedPaymentService = UnifiedPaymentService();
+
+        // 1. Create Payment Intent
+        final intentData = await unifiedPaymentService.createPaymentIntent(
+          amount: total,
+          description: 'Tickets for ${widget.event.title} x$_quantity',
+          metadata: {
+            'eventId': widget.event.id,
+            'ticketTypeId': widget.ticketType.id,
+            'quantity': _quantity.toString(),
+            'type': 'event_tickets',
+          },
         );
 
-        paymentIntentId = 'mock_payment_intent_id';
-      }
+        final clientSecret = intentData['clientSecret'] as String;
+        final paymentIntentId = intentData['paymentIntentId'] as String;
 
-      final purchaseId = await _eventService.purchaseTickets(
-        eventId: widget.event.id,
-        ticketTypeId: widget.ticketType.id,
-        quantity: _quantity,
-        userEmail: _emailController.text.trim(),
-        userName: _nameController.text.trim(),
-        paymentIntentId: paymentIntentId,
-      );
+        // 2. Initialize Payment Sheet
+        await unifiedPaymentService.initPaymentSheetForPayment(
+          paymentIntentClientSecret: clientSecret,
+        );
+
+        // 3. Present Payment Sheet
+        await unifiedPaymentService.presentPaymentSheet();
+
+        // 4. Process Payment on Backend (Verification and record creation)
+        final result = await unifiedPaymentService.processEventTicketPayment(
+          eventId: widget.event.id,
+          ticketTypeId: widget.ticketType.id,
+          quantity: _quantity,
+          amount: total,
+          artistId: widget.event.artistId,
+          paymentIntentId: paymentIntentId,
+          userEmail: _emailController.text.trim(),
+          userName: _nameController.text.trim(),
+        );
+
+        if (!result.success) {
+          throw Exception(result.error ?? 'Failed to process ticket payment');
+        }
+
+        purchaseId = result.paymentIntentId;
+      }
 
       await _notificationService.sendTicketPurchaseConfirmation(
         eventTitle: widget.event.title,
@@ -559,7 +596,7 @@ class _TicketPurchaseSheetState extends State<TicketPurchaseSheet> {
       );
 
       if (mounted) {
-        _showSuccessDialog(purchaseId);
+        _showSuccessDialog(purchaseId ?? 'confirmed');
       }
     } on Exception catch (e) {
       if (mounted) {

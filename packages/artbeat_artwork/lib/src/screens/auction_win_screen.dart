@@ -1,11 +1,11 @@
-import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_artwork/artbeat_artwork.dart';
-import 'package:artbeat_core/shared_widgets.dart';
 import 'package:artbeat_core/artbeat_core.dart'
     as core
-    show StripePaymentService;
+    show UnifiedPaymentService;
+import 'package:artbeat_core/shared_widgets.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 
 /// Screen shown when user wins an auction
 class AuctionWinScreen extends StatefulWidget {
@@ -25,7 +25,7 @@ class AuctionWinScreen extends StatefulWidget {
 }
 
 class _AuctionWinScreenState extends State<AuctionWinScreen> {
-  final core.StripePaymentService _paymentService = core.StripePaymentService();
+  final core.UnifiedPaymentService _paymentService = core.UnifiedPaymentService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   bool _isLoading = false;
@@ -64,23 +64,40 @@ class _AuctionWinScreenState extends State<AuctionWinScreen> {
     });
 
     try {
-      // Create payment intent for auction
-      final paymentIntent = await _paymentService.createAuctionPaymentIntent(
-        artworkId: widget.artworkId,
-        artistId: widget.artwork.userId,
+      // 1. Create payment intent for auction
+      final intentResult = await _paymentService.createPaymentIntent(
         amount: widget.finalPrice,
         currency: 'usd',
-      );
-
-      // Confirm payment
-      final paymentId = await _paymentService.confirmAuctionPayment(
-        paymentIntentId: paymentIntent['id'] as String,
         artworkId: widget.artworkId,
-        artistId: widget.artwork.userId,
-        amount: widget.finalPrice,
+        description: 'Auction Win: ${widget.artwork.title}',
+        metadata: {
+          'artworkId': widget.artworkId,
+          'artistId': widget.artwork.userId,
+          'type': 'auction',
+        },
       );
 
-      if (paymentId.isNotEmpty) {
+      final clientSecret = intentResult['clientSecret'] as String;
+      final paymentIntentId = intentResult['paymentIntentId'] as String;
+
+      // 2. Initialize Stripe Payment Sheet
+      await _paymentService.initPaymentSheetForPayment(
+        paymentIntentClientSecret: clientSecret,
+      );
+
+      // 3. Present the Payment Sheet
+      await _paymentService.presentPaymentSheet();
+
+      // 4. Process auction win via Cloud Function
+      final processResult = await _paymentService.processArtworkSalePayment(
+        artworkId: widget.artworkId,
+        amount: widget.finalPrice,
+        artistId: widget.artwork.userId,
+        paymentIntentId: paymentIntentId,
+        isAuction: true,
+      );
+
+      if (processResult.success) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -92,10 +109,14 @@ class _AuctionWinScreenState extends State<AuctionWinScreen> {
         }
       } else {
         setState(() {
-          _errorMessage = 'auction.payment_failed'.tr();
+          _errorMessage = processResult.error ?? 'auction.payment_failed'.tr();
         });
       }
     } catch (e) {
+      if (e.toString().contains('cancelled')) {
+        setState(() => _isLoading = false);
+        return;
+      }
       setState(() {
         _errorMessage = 'auction.payment_error'.tr();
       });

@@ -1,9 +1,11 @@
+import 'dart:developer' as developer;
 import 'dart:math' as math;
 
 import 'package:artbeat_core/artbeat_core.dart' as core;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_community/artbeat_community.dart' as community;
 import 'package:artbeat_artwork/artbeat_artwork.dart' as artwork;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -61,23 +63,38 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
         _error = null;
       });
 
-      // Load real data from services
-      final earnings = await _earningsService.getArtistEarnings();
-      final analytics = await _loadVisibilityData();
-
-      // Load recent activities from various sources
-      final activities = await _loadRecentActivities();
-
-      // Load discovery boost highlights
       final userId = _analyticsService.getCurrentUserId();
+      final futures = <Future<Object?>>[
+        _withTimeline<Object?>(
+          'GalleryHub.loadArtistData.earnings',
+          () => _earningsService.getArtistEarnings(),
+        ),
+        _withTimeline<Object?>(
+          'GalleryHub.loadArtistData.visibility',
+          _loadVisibilityData,
+        ),
+        _withTimeline<Object?>(
+          'GalleryHub.loadArtistData.activities',
+          _loadRecentActivities,
+        ),
+      ];
+
+      final results = await Future.wait(futures);
+      final earnings = results[0] as EarningsModel?;
+      final analytics = results[1] as Map<String, dynamic>;
+      final activities = results[2] as List<ActivityModel>;
+
       List<Map<String, dynamic>> highlights = [];
       List<core.ArtistFeature> activeBoosts = [];
-
       if (userId != null) {
-        highlights = await _analyticsService.getDiscoveryBoostHighlights(
-          userId,
+        highlights =
+            await _withTimeline('GalleryHub.loadArtistData.highlights', () {
+          return _analyticsService.getDiscoveryBoostHighlights(userId);
+        });
+        activeBoosts = await _withTimeline(
+          'GalleryHub.loadArtistData.features',
+          () => _featureService.getActiveFeaturesForArtist(userId),
         );
-        activeBoosts = await _featureService.getActiveFeaturesForArtist(userId);
       }
 
       if (mounted) {
@@ -99,6 +116,19 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
           _isLoading = false;
         });
       }
+    }
+  }
+
+  Future<T> _withTimeline<T>(
+    String name,
+    Future<T> Function() action,
+  ) async {
+    final task = developer.TimelineTask();
+    task.start(name);
+    try {
+      return await action();
+    } finally {
+      task.finish();
     }
   }
 
@@ -445,6 +475,14 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
   }
 
   Widget _buildCompactStatsSection() {
+    developer.Timeline.instantSync(
+      'GalleryHub.renderCompactStats',
+      arguments: {
+        'artworkCount': _analytics['artworkCount'] ?? 0,
+        'profileViews': _analytics['profileViews'] ?? 0,
+        'momentum': _analytics['momentum'] ?? 0,
+      },
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -694,6 +732,11 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
 
   Widget _buildActiveBoostsSection() {
     if (_activeBoosts.isEmpty) return const SizedBox.shrink();
+
+    developer.Timeline.instantSync(
+      'GalleryHub.renderActiveBoosts',
+      arguments: {'count': _activeBoosts.length},
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -955,6 +998,8 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
       );
     }
 
+    _maybeLogGalleryHubImageStats();
+
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -1053,61 +1098,76 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
                         color: Colors.white,
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    ListView.separated(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: _recentActivities.length,
-                      separatorBuilder: (context, index) => const Divider(),
-                      itemBuilder: (context, index) {
-                        final activity = _recentActivities[index];
-                        final activityColor = activity.type.color;
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 8),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.05),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: const Color(
-                                0xFF00F5FF,
-                              ).withValues(alpha: 0.1),
-                            ),
-                          ),
-                          child: ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor: activityColor.withValues(
-                                alpha: 0.2,
-                              ),
-                              child: Icon(
-                                activity.type.icon,
-                                color: activityColor,
-                              ),
-                            ),
-                            title: Text(
-                              activity.title,
-                              style: GoogleFonts.poppins(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
+                  const SizedBox(height: 16),
+                  Builder(
+                    builder: (context) {
+                      developer.Timeline.instantSync(
+                        'GalleryHub.renderRecentActivityList',
+                        arguments: {'count': _recentActivities.length},
+                      );
+                      return ListView.separated(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: _recentActivities.length,
+                        separatorBuilder: (context, index) => const Divider(),
+                        itemBuilder: (context, index) {
+                          final activity = _recentActivities[index];
+                          final activityColor = activity.type.color;
+                          developer.Timeline.instantSync(
+                            'GalleryHub.activityCard',
+                            arguments: {
+                              'type': activity.type.name,
+                              'timestamp': activity.timestamp.toIso8601String(),
+                            },
+                          );
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.05),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: const Color(
+                                  0xFF00F5FF,
+                                ).withValues(alpha: 0.1),
                               ),
                             ),
-                            subtitle: Text(
-                              activity.description,
-                              style: GoogleFonts.poppins(
-                                color: Colors.white70,
-                                fontSize: 12,
+                            child: ListTile(
+                              leading: CircleAvatar(
+                                backgroundColor: activityColor.withValues(
+                                  alpha: 0.2,
+                                ),
+                                child: Icon(
+                                  activity.type.icon,
+                                  color: activityColor,
+                                ),
+                              ),
+                              title: Text(
+                                activity.title,
+                                style: GoogleFonts.poppins(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              subtitle: Text(
+                                activity.description,
+                                style: GoogleFonts.poppins(
+                                  color: Colors.white70,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              trailing: Text(
+                                activity.timeAgo,
+                                style: GoogleFonts.poppins(
+                                  color: const Color(0xFF00F5FF),
+                                  fontSize: 11,
+                                ),
                               ),
                             ),
-                            trailing: Text(
-                              activity.timeAgo,
-                              style: GoogleFonts.poppins(
-                                color: const Color(0xFF00F5FF),
-                                fontSize: 11,
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
+                          );
+                        },
+                      );
+                    },
+                  ),
                     const SizedBox(height: 16),
                     Center(
                       child: OutlinedButton(
@@ -1507,6 +1567,10 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
   }
 
   Widget _buildDiscoveryBoostSection() {
+    developer.Timeline.instantSync(
+      'GalleryHub.renderDiscoveryBoosts',
+      arguments: {'count': _discoveryHighlights.length},
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1702,6 +1766,22 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
           mode: artwork.AuctionSetupMode.firstTime,
         ),
       ),
+    );
+  }
+ 
+  void _maybeLogGalleryHubImageStats() {
+    if (kReleaseMode) return;
+    final imageService = core.ImageManagementService();
+    imageService.logCacheStats(label: 'GalleryHub.cards');
+    imageService.logDecodeDimensions(
+      label: 'GalleryHub.boostCard',
+      width: 240,
+      height: 120,
+    );
+    imageService.logDecodeDimensions(
+      label: 'GalleryHub.activityIcon',
+      width: 48,
+      height: 48,
     );
   }
 }

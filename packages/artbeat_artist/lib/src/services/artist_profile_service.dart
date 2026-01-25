@@ -1,4 +1,8 @@
+import 'dart:async';
+
 import 'package:artbeat_core/artbeat_core.dart' as core;
+import 'package:artbeat_core/src/utils/coordinate_validator.dart'
+    show SimpleLatLng;
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ArtistProfileService {
@@ -28,15 +32,18 @@ class ArtistProfileService {
   }) async {
     try {
       final now = DateTime.now();
+      final locationCoords = await _resolveLocationCoords(location);
       final data = {
         'userId': userId,
         'displayName': displayName,
+        'displayNameLower': displayName.trim().toLowerCase(),
         'username': username,
         'bio': bio,
         'website': website,
         'mediums': mediums ?? [],
         'styles': styles ?? [],
         'location': location,
+        if (locationCoords != null) ...locationCoords,
         'userType': userType.name,
         'subscriptionTier': subscriptionTier.name,
         'isVerified': false,
@@ -93,6 +100,7 @@ class ArtistProfileService {
       final doc = querySnapshot.docs.first;
       final data = doc.data() as Map<String, dynamic>;
       data['id'] = doc.id;
+      _queueLocationBackfill(doc.reference, data);
 
       return core.ArtistProfileModel(
         id: doc.id,
@@ -143,6 +151,7 @@ class ArtistProfileService {
 
       final data = doc.data() as Map<String, dynamic>;
       data['id'] = doc.id;
+      _queueLocationBackfill(doc.reference, data);
 
       return core.ArtistProfileModel(
         id: doc.id,
@@ -201,11 +210,20 @@ class ArtistProfileService {
       final updates = <String, dynamic>{'updatedAt': DateTime.now()};
 
       if (displayName != null) updates['displayName'] = displayName;
+      if (displayName != null) {
+        updates['displayNameLower'] = displayName.trim().toLowerCase();
+      }
       if (bio != null) updates['bio'] = bio;
       if (website != null) updates['website'] = website;
       if (mediums != null) updates['mediums'] = mediums;
       if (styles != null) updates['styles'] = styles;
-      if (location != null) updates['location'] = location;
+      if (location != null) {
+        updates['location'] = location;
+        final locationCoords = await _resolveLocationCoords(location);
+        if (locationCoords != null) {
+          updates.addAll(locationCoords);
+        }
+      }
       if (profileImageUrl != null) updates['profileImageUrl'] = profileImageUrl;
       if (coverImageUrl != null) updates['coverImageUrl'] = coverImageUrl;
       if (socialLinks != null) updates['socialLinks'] = socialLinks;
@@ -545,6 +563,54 @@ class ArtistProfileService {
       return artists.take(limit).toList();
     } catch (e) {
       throw Exception('Error searching artists: $e');
+    }
+  }
+
+  Future<Map<String, double>?> _resolveLocationCoords(String? location) async {
+    final trimmed = location?.trim() ?? '';
+    if (trimmed.isEmpty) return null;
+
+    final zip = _extractZip(trimmed);
+    SimpleLatLng? coords;
+    if (zip != null) {
+      coords = await core.LocationUtils.getCoordinatesFromZipCode(zip);
+    } else {
+      coords = await core.LocationUtils.getLocationFromAddress(trimmed);
+    }
+
+    if (coords == null) return null;
+    if (!core.LocationUtils.isValidLatLng(coords)) return null;
+
+    return {'locationLat': coords.latitude, 'locationLng': coords.longitude};
+  }
+
+  String? _extractZip(String input) {
+    final match = RegExp(r'(\\d{5})(?:-\\d{4})?').firstMatch(input);
+    return match?.group(1);
+  }
+
+  void _queueLocationBackfill(
+    DocumentReference ref,
+    Map<String, dynamic> data,
+  ) {
+    final hasCoords =
+        data['locationLat'] != null && data['locationLng'] != null;
+    final location = (data['location'] as String?)?.trim() ?? '';
+    if (hasCoords || location.isEmpty) return;
+
+    unawaited(_updateLocationCoords(ref, location));
+  }
+
+  Future<void> _updateLocationCoords(
+    DocumentReference ref,
+    String location,
+  ) async {
+    try {
+      final coords = await _resolveLocationCoords(location);
+      if (coords == null) return;
+      await ref.update(coords);
+    } catch (_) {
+      // Best-effort backfill; ignore failures.
     }
   }
 }

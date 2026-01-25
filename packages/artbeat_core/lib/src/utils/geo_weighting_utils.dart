@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_core/src/utils/coordinate_validator.dart';
 
@@ -29,26 +31,27 @@ class GeoWeightingUtils {
     final viewerLocation = await resolveViewerLocation(viewer);
     if (viewerLocation == null) return artists;
 
-    final distances = await _distanceMapForLocations(viewerLocation, {
-      for (final artist in artists) artist.userId: artist.location ?? '',
-    });
-
-    final sorted = List<ArtistProfileModel>.from(artists);
-    sorted.sort((a, b) {
-      final distanceA = distances[a.userId] ?? double.infinity;
-      final distanceB = distances[b.userId] ?? double.infinity;
-      if (distanceA != distanceB) return distanceA.compareTo(distanceB);
-
-      final boostCompare = b.boostScore.compareTo(a.boostScore);
-      if (boostCompare != 0) return boostCompare;
-      final aBoost = a.lastBoostAt ?? DateTime.fromMillisecondsSinceEpoch(0);
-      final bBoost = b.lastBoostAt ?? DateTime.fromMillisecondsSinceEpoch(0);
-      final boostTimeCompare = bBoost.compareTo(aBoost);
-      if (boostTimeCompare != 0) return boostTimeCompare;
-      return a.displayName.compareTo(b.displayName);
-    });
-
-    return sorted;
+    return sortByDistance<ArtistProfileModel>(
+      items: artists,
+      idOf: (artist) => artist.userId,
+      locationOf: (artist) => artist.location,
+      coordsOf: (artist) {
+        final lat = artist.locationLat;
+        final lng = artist.locationLng;
+        if (lat == null || lng == null) return null;
+        return SimpleLatLng(lat, lng);
+      },
+      viewerLocation: viewerLocation,
+      tieBreaker: (a, b) {
+        final boostCompare = b.boostScore.compareTo(a.boostScore);
+        if (boostCompare != 0) return boostCompare;
+        final aBoost = a.lastBoostAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+        final bBoost = b.lastBoostAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+        final boostTimeCompare = bBoost.compareTo(aBoost);
+        if (boostTimeCompare != 0) return boostTimeCompare;
+        return a.displayName.compareTo(b.displayName);
+      },
+    );
   }
 
   static Future<List<T>> sortByDistance<T>({
@@ -57,21 +60,69 @@ class GeoWeightingUtils {
     required String? Function(T) locationOf,
     required SimpleLatLng? viewerLocation,
     required int Function(T, T) tieBreaker,
+    SimpleLatLng? Function(T)? coordsOf,
   }) async {
     if (viewerLocation == null) return items;
 
-    final distances = await _distanceMapForLocations(viewerLocation, {
-      for (final item in items) idOf(item): locationOf(item) ?? '',
-    });
+    final task = developer.TimelineTask();
+    task.start(
+      'GeoWeighting.sortByDistance',
+      arguments: {'count': items.length},
+    );
+    try {
+      final distances = <String, double>{};
+      final missingLocations = <String, String>{};
 
-    final sorted = List<T>.from(items);
-    sorted.sort((a, b) {
-      final distanceA = distances[idOf(a)] ?? double.infinity;
-      final distanceB = distances[idOf(b)] ?? double.infinity;
-      if (distanceA != distanceB) return distanceA.compareTo(distanceB);
-      return tieBreaker(a, b);
-    });
-    return sorted;
+      developer.Timeline.timeSync(
+        'GeoWeighting.sortByDistance.distanceMap',
+        () {
+          for (final item in items) {
+            final coords = coordsOf?.call(item);
+            if (coords != null && LocationUtils.isValidLatLng(coords)) {
+              distances[idOf(item)] = LocationUtils.calculateDistance(
+                viewerLocation.latitude,
+                viewerLocation.longitude,
+                coords.latitude,
+                coords.longitude,
+              );
+            } else {
+              missingLocations[idOf(item)] = locationOf(item) ?? '';
+            }
+          }
+        },
+      );
+
+      if (missingLocations.isNotEmpty) {
+        final resolveTask = developer.TimelineTask();
+        resolveTask.start(
+          'GeoWeighting.sortByDistance.resolveMissing',
+          arguments: {'count': missingLocations.length},
+        );
+        final resolved = await _distanceMapForLocations(
+          viewerLocation,
+          missingLocations,
+        );
+        resolveTask.finish();
+        distances.addAll(resolved);
+      }
+
+      final sorted = List<T>.from(items);
+      developer.Timeline.timeSync(
+        'GeoWeighting.sortByDistance.sort',
+        () {
+          sorted.sort((a, b) {
+            final distanceA = distances[idOf(a)] ?? double.infinity;
+            final distanceB = distances[idOf(b)] ?? double.infinity;
+            if (distanceA != distanceB) return distanceA.compareTo(distanceB);
+            return tieBreaker(a, b);
+          });
+        },
+      );
+
+      return sorted;
+    } finally {
+      task.finish();
+    }
   }
 
   static Future<SimpleLatLng?> _getCurrentDeviceCoordinates() async {

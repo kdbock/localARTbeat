@@ -64,7 +64,10 @@ class InAppPurchaseManager {
   /// Handle completed purchase
   void _handlePurchaseCompleted(CompletedPurchase purchase) {
     try {
+      AppLogger.info('🎉 InAppPurchaseManager._handlePurchaseCompleted called');
       AppLogger.info('🎉 Purchase completed: ${purchase.productId}');
+      AppLogger.info('🎉 Purchase category: ${purchase.category}');
+      AppLogger.info('🎉 Purchase metadata: ${purchase.metadata}');
 
       // Process purchase based on category
       switch (purchase.category) {
@@ -72,6 +75,7 @@ class InAppPurchaseManager {
           _handleSubscriptionPurchase(purchase);
           break;
         case PurchaseCategory.boosts:
+          AppLogger.info('🚀 Processing boost purchase...');
           _handleBoostPurchase(purchase);
           break;
         case PurchaseCategory.ads:
@@ -83,9 +87,11 @@ class InAppPurchaseManager {
       }
 
       // Emit purchase event
+      AppLogger.info('📡 Emitting purchase event to stream...');
       _purchaseEventController?.add(
         PurchaseEvent(type: PurchaseEventType.completed, purchase: purchase),
       );
+      AppLogger.info('✅ Purchase event emitted');
     } catch (e) {
       AppLogger.error('Error handling completed purchase: $e');
     }

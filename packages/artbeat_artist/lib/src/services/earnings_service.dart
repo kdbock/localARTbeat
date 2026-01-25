@@ -459,8 +459,9 @@ class EarningsService {
       final earnings = await getArtistEarnings();
       if (earnings == null) return {};
 
-      final currentMonth = DateTime.now().month.toString();
-      final previousMonth = (DateTime.now().month - 1).toString();
+      final now = DateTime.now();
+      final currentMonth = now.month.toString();
+      final previousMonth = (now.month == 1 ? 12 : now.month - 1).toString();
 
       final currentMonthEarnings =
           earnings.monthlyBreakdown[currentMonth] ?? 0.0;

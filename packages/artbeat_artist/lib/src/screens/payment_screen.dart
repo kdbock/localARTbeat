@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart'
-    show PaymentService, SubscriptionTier, EnhancedUniversalHeader, MainLayout;
+    show UnifiedPaymentService, SubscriptionTier, EnhancedUniversalHeader, MainLayout;
+import 'package:artbeat_core/src/services/unified_payment_service.dart'
+    show PaymentMethod;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'payment_methods_screen.dart';
@@ -17,7 +19,8 @@ class PaymentScreen extends StatefulWidget {
 }
 
 class _PaymentScreenState extends State<PaymentScreen> {
-  final PaymentService _paymentService = PaymentService();
+  // Use UnifiedPaymentService instead of legacy PaymentService
+  final UnifiedPaymentService _paymentService = UnifiedPaymentService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   bool _isLoading = false;
@@ -210,17 +213,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
         return;
       }
 
-      // Get the amount based on the subscription tier
-      final amount = widget.tier.monthlyPrice;
-      final description = 'Subscription to ${widget.tier.displayName}';
-
-      final success = await _paymentService.processPayment(
+      final result = await _paymentService.processSubscriptionPayment(
+        tier: widget.tier,
+        method: PaymentMethod.stripe,
         paymentMethodId: defaultPaymentMethodId,
-        amount: amount,
-        description: description,
       );
 
-      if (success) {
+      if (result.success) {
         if (mounted) {
           // Show success dialog
           await showDialog<void>(

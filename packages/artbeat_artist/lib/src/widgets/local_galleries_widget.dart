@@ -7,6 +7,9 @@ import 'package:easy_localization/easy_localization.dart';
 class LocalGalleriesWidget extends StatelessWidget {
   final String zipCode;
   final VoidCallback? onSeeAllPressed;
+  static const Color _grey600 = Color(0xFF757575);
+  static const Color _grey700 = Color(0xFF616161);
+  static const Color _grey800 = Color(0xFF424242);
 
   const LocalGalleriesWidget({
     super.key,
@@ -93,10 +96,10 @@ class LocalGalleriesWidget extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.museum_outlined,
                       size: 48,
-                      color: Colors.grey.shade600,
+                      color: _grey600,
                     ),
                     const SizedBox(height: 12),
                     Text(
@@ -250,19 +253,19 @@ class LocalGalleriesWidget extends StatelessWidget {
                                 const SizedBox(height: 4),
                                 Row(
                                   children: [
-                                    Icon(
+                                    const Icon(
                                       Icons.location_on,
                                       size: 12,
-                                      color: Colors.grey.shade600,
+                                      color: _grey600,
                                     ),
                                     const SizedBox(width: 2),
                                     Expanded(
                                       child: Text(
                                         gallery['address'] as String? ??
                                             'Address',
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                           fontSize: 12,
-                                          color: Colors.grey.shade700,
+                                          color: _grey700,
                                         ),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
@@ -274,9 +277,9 @@ class LocalGalleriesWidget extends StatelessWidget {
                                 Text(
                                   gallery['description'] as String? ??
                                       'Gallery description',
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 12,
-                                    color: Colors.grey.shade800,
+                                    color: _grey800,
                                   ),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,

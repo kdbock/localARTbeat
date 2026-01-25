@@ -39,16 +39,14 @@ class CommunityService extends ChangeNotifier {
 
       final querySnapshot = await query.get();
 
-      // Load posts and add like status for current user
-      final posts = <PostModel>[];
-      for (final doc in querySnapshot.docs) {
+      // Load posts and add like status for current user (batched)
+      final postIds = querySnapshot.docs.map((doc) => doc.id).toList();
+      final likedPostIds = await _getLikedPostIds(postIds);
+      return querySnapshot.docs.map((doc) {
         final post = PostModel.fromFirestore(doc);
-        final isLiked = await hasUserLikedPost(post.id);
-        final postWithLikeStatus = post.copyWith(isLikedByCurrentUser: isLiked);
-        posts.add(postWithLikeStatus);
-      }
-
-      return posts;
+        final isLiked = likedPostIds.contains(post.id);
+        return post.copyWith(isLikedByCurrentUser: isLiked);
+      }).toList();
     } catch (e) {
       AppLogger.error('Error getting posts: $e');
       return [];
@@ -407,6 +405,31 @@ class CommunityService extends ChangeNotifier {
     } catch (e) {
       AppLogger.error('Error checking if user liked post $postId: $e');
       return false;
+    }
+  }
+
+  Future<Set<String>> _getLikedPostIds(List<String> postIds) async {
+    if (postIds.isEmpty) return {};
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId == null) return {};
+
+    try {
+      final snapshot = await _firestore
+          .collectionGroup('likes')
+          .where('userId', isEqualTo: userId)
+          .get();
+
+      final likedPostIds = <String>{};
+      for (final doc in snapshot.docs) {
+        final postId = doc.reference.parent.parent?.id;
+        if (postId != null && postIds.contains(postId)) {
+          likedPostIds.add(postId);
+        }
+      }
+      return likedPostIds;
+    } catch (e) {
+      AppLogger.error('Error loading liked posts for user: $e');
+      return {};
     }
   }
 

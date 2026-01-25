@@ -1,0 +1,389 @@
+flutter:       boxShadow: [BoxShadow(Color(alpha: 0.3500, red: 0.0000, green:
+flutter:         0.0000, blue: 0.0000, colorSpace: ColorSpace.sRGB), Offset(0.0,
+flutter:         14.0), 26.0, 0.0, BlurStyle.normal), BoxShadow(Color(alpha:
+flutter:         0.1000, red: 0.1333, green: 0.8275, blue: 0.9333, colorSpace:
+flutter:         ColorSpace.sRGB), Offset(0.0, 0.0), 28.0, 1.0, BlurStyle.normal)]
+flutter:       )
+flutter:   , constraints: BoxConstraints(0.0<=w<=Infinity, h=76.0))
+flutter: Rebuilding Positioned(left: 0.0, top: 0.0, right: 0.0, bottom: 0.0)
+flutter: Rebuilding Container(bg: BoxDecoration(gradient: LinearGradient(begin: Alignment.centerLeft, end: Alignment.centerRight, colors: [Color(alpha: 0.0000, red: 0.0000, green: 0.0000, blue: 0.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 0.1000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 0.0800, red: 0.1333, green: 0.8275, blue: 0.9333, colorSpace: ColorSpace.sRGB), Color(alpha: 0.0000, red: 0.0000, green: 0.0000, blue: 0.0000, colorSpace: ColorSpace.sRGB)], stops: [0.0, 0.45, 0.58, 1.0], tileMode: TileMode.clamp)))
+flutter: Rebuilding Expanded(flex: 1)
+flutter: Rebuilding GestureDetector(startBehavior: start, dependencies: [MediaQuery, ScrollConfiguration])
+flutter: Rebuilding RawGestureDetector(state: RawGestureDetectorState#16ab9(gestures: [tap], behavior: opaque))
+flutter: Rebuilding AnimatedBuilder(listenable: AnimationController#dca40(⏭ 1.000; paused)➩Cubic(0.42, 0.00, 0.58, 1.00)➩Tween<double>(0.0 → 1.0)➩1.0, state: _AnimatedState#cca01)
+flutter: Rebuilding AnimatedContainer(duration: 220ms, padding: EdgeInsets.all(8.0), bg:
+flutter:     BoxDecoration(color: Color(alpha: 0.1000, red: 0.1333, green: 0.8275, blue: 0.9333, colorSpace: ColorSpace.sRGB), border: Border.all(BorderSide(color: Color(alpha: 0.2200, red: 0.1333, green: 0.8275, blue: 0.9333, colorSpace: ColorSpace.sRGB))), borderRadius: BorderRadius.circular(16.0),
+flutter:       boxShadow: [BoxShadow(Color(alpha: 0.1600, red: 0.1333, green:
+flutter:         0.8275, blue: 0.9333, colorSpace: ColorSpace.sRGB), Offset(0.0,
+flutter:         0.0), 18.0, 1.0, BlurStyle.normal)]
+flutter:       )
+flutter:   , clipBehavior: Clip.none, state:
+flutter:     _AnimatedContainerState#36b18(ticker inactive, padding: EdgeInsetsGeometryTween(EdgeInsets.all(8.0) → EdgeInsets.all(8.0)), bg:
+flutter:         DecorationTween(BoxDecoration(color: Color(alpha: 0.1000, red: 0.1333, green: 0.8275, blue: 0.9333, colorSpace: ColorSpace.sRGB), border: Border.all(BorderSide(color: Color(alpha: 0.2200, red: 0.1333, green: 0.8275, blue: 0.9333, colorSpace: ColorSpace.sRGB))), borderRadius: BorderRadius.circular(16.0),
+flutter:           boxShadow: [BoxShadow(Color(alpha: 0.1600, red: 0.1333, green:
+flutter:             0.8275, blue: 0.9333, colorSpace: ColorSpace.sRGB), Offset(0.0,
+flutter:             0.0), 18.0, 1.0, BlurStyle.normal)]
+flutter:           ) → BoxDecoration(color: Color(alpha: 0.1000, red: 0.1333, green: 0.8275, blue: 0.9333, colorSpace: ColorSpace.sRGB), border: Border.all(BorderSide(color: Color(alpha: 0.2200, red: 0.1333, green: 0.8275, blue: 0.9333, colorSpace: ColorSpace.sRGB))), borderRadius: BorderRadius.circular(16.0),
+flutter:           boxShadow: [BoxShadow(Color(alpha: 0.1600, red: 0.1333, green:
+flutter:             0.8275, blue: 0.9333, colorSpace: ColorSpace.sRGB), Offset(0.0,
+flutter:             0.0), 18.0, 1.0, BlurStyle.normal)]
+flutter:           ))
+flutter:       )
+flutter:   )
+flutter: Rebuilding Container(padding: EdgeInsets.all(8.0), bg:
+flutter:     BoxDecoration(color: Color(alpha: 0.1000, red: 0.1333, green: 0.8275, blue: 0.9333, colorSpace: ColorSpace.sRGB), border: Border.all(BorderSide(color: Color(alpha: 0.2200, red: 0.1333, green: 0.8275, blue: 0.9333, colorSpace: ColorSpace.sRGB))), borderRadius: BorderRadius.circular(16.0),
+flutter:       boxShadow: [BoxShadow(Color(alpha: 0.1600, red: 0.1333, green:
+flutter:         0.8275, blue: 0.9333, colorSpace: ColorSpace.sRGB), Offset(0.0,
+flutter:         0.0), 18.0, 1.0, BlurStyle.normal)]
+flutter:       )
+flutter:   )
+flutter: Rebuilding Icon(IconData(U+0F7F5), size: 24.0, color: Color(alpha: 1.0000, red: 0.1333, green: 0.8275, blue: 0.9333, colorSpace: ColorSpace.sRGB), dependencies: [Directionality, IconTheme])
+flutter: Rebuilding Text("Home", inherit: true, color: Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), family: SpaceGrotesk_700, familyFallback: [SpaceGrotesk], size: 10.5, weight: 800, letterSpacing: 0.6, overflow: ellipsis, maxLines: 1, dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery])
+flutter: Rebuilding Expanded(flex: 1)
+flutter: Rebuilding GestureDetector(startBehavior: start, dependencies: [MediaQuery, ScrollConfiguration])
+flutter: Rebuilding RawGestureDetector(state: RawGestureDetectorState#50fc0(gestures: [tap], behavior: opaque))
+flutter: Rebuilding AnimatedBuilder(listenable: AnimationController#c98fc(⏮ 0.000; paused)➩Cubic(0.42, 0.00, 0.58, 1.00)➩Tween<double>(0.0 → 1.0)➩0.0, state: _AnimatedState#8741e)
+flutter: Rebuilding AnimatedContainer(duration: 220ms, padding: EdgeInsets.all(8.0), bg:
+flutter:     BoxDecoration(color: Color(alpha: 0.0400, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), border: Border.all(BorderSide(color: Color(alpha: 0.1000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB))), borderRadius: BorderRadius.circular(16.0),
+flutter:       boxShadow: []
+flutter:       )
+flutter:   , clipBehavior: Clip.none, state:
+flutter:     _AnimatedContainerState#c9318(ticker inactive, padding: EdgeInsetsGeometryTween(EdgeInsets.all(8.0) → EdgeInsets.all(8.0)), bg:
+flutter:         DecorationTween(BoxDecoration(color: Color(alpha: 0.0400, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), border: Border.all(BorderSide(color: Color(alpha: 0.1000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB))), borderRadius: BorderRadius.circular(16.0),
+flutter:           boxShadow: []
+flutter:           ) → BoxDecoration(color: Color(alpha: 0.0400, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), border: Border.all(BorderSide(color: Color(alpha: 0.1000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB))), borderRadius: BorderRadius.circular(16.0),
+flutter:           boxShadow: []
+flutter:           ))
+flutter:       )
+flutter:   )
+flutter: Rebuilding Container(padding: EdgeInsets.all(8.0), bg:
+flutter:     BoxDecoration(color: Color(alpha: 0.0400, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), border: Border.all(BorderSide(color: Color(alpha: 0.1000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB))), borderRadius: BorderRadius.circular(16.0),
+flutter:       boxShadow: []
+flutter:       )
+flutter:   )
+flutter: Rebuilding Icon(IconData(U+0F1AE), size: 22.0, color: Color(alpha: 0.5500, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), dependencies: [Directionality, IconTheme])
+flutter: Rebuilding Text("Art Walk", inherit: true, color: Color(alpha: 0.5500, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), family: SpaceGrotesk_700, familyFallback: [SpaceGrotesk], size: 10.5, weight: 700, letterSpacing: 0.6, overflow: ellipsis, maxLines: 1, dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery])
+flutter: Rebuilding Expanded(flex: 1)
+flutter: Rebuilding GestureDetector(startBehavior: start, dependencies: [MediaQuery, ScrollConfiguration])
+flutter: Rebuilding RawGestureDetector(state: RawGestureDetectorState#d78cb(gestures: [tap], behavior: opaque))
+flutter: Rebuilding AnimatedBuilder(listenable: AnimationController#01d9b(⏮ 0.000; paused)➩Cubic(0.42, 0.00, 0.58, 1.00)➩Tween<double>(0.0 → 1.0)➩0.0, state: _AnimatedState#167ba)
+flutter: Rebuilding Container(bg:
+flutter:     BoxDecoration(border: Border.all(BorderSide(color: Color(alpha: 0.1400, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB))), borderRadius: BorderRadius.circular(18.0),
+flutter:       boxShadow: [BoxShadow(Color(alpha: 0.2200, red: 0.1333, green:
+flutter:         0.8275, blue: 0.9333, colorSpace: ColorSpace.sRGB), Offset(0.0,
+flutter:         10.0), 18.0, 1.0, BlurStyle.normal)]
+flutter:       , gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(alpha: 0.9500, red: 0.5490, green: 0.3216, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 0.8500, red: 0.1333, green: 0.8275, blue: 0.9333, colorSpace: ColorSpace.sRGB), Color(alpha: 0.7000, red: 0.0000, green: 0.7490, blue: 0.3882, colorSpace: ColorSpace.sRGB)], tileMode: TileMode.clamp))
+flutter:   , constraints: BoxConstraints(w=52.0, h=44.0))
+flutter: Rebuilding Positioned(left: 0.0, top: 0.0, right: 0.0, bottom: 0.0)
+flutter: Rebuilding Container(bg: BoxDecoration(gradient: LinearGradient(begin: Alignment.centerLeft, end: Alignment.centerRight, colors: [Color(alpha: 0.0000, red: 0.0000, green: 0.0000, blue: 0.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 0.2400, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 0.0000, red: 0.0000, green: 0.0000, blue: 0.0000, colorSpace: ColorSpace.sRGB)], stops: [0.0, 0.5, 1.0], tileMode: TileMode.clamp)))
+flutter: Rebuilding Icon(IconData(U+0EF1E), size: 24.0, color: Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), dependencies: [Directionality, IconTheme])
+flutter: Rebuilding Text("CAPTURE", inherit: true, color: Color(alpha: 0.9000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), family: SpaceGrotesk_700, familyFallback: [SpaceGrotesk], size: 10.5, weight: 900, letterSpacing: 1.0, dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery])
+flutter: Rebuilding Expanded(flex: 1)
+flutter: Rebuilding GestureDetector(startBehavior: start, dependencies: [MediaQuery, ScrollConfiguration])
+flutter: Rebuilding RawGestureDetector(state: RawGestureDetectorState#45136(gestures: [tap], behavior: opaque))
+flutter: Rebuilding AnimatedBuilder(listenable: AnimationController#62f40(⏮ 0.000; paused)➩Cubic(0.42, 0.00, 0.58, 1.00)➩Tween<double>(0.0 → 1.0)➩0.0, state: _AnimatedState#091d3)
+flutter: Rebuilding AnimatedContainer(duration: 220ms, padding: EdgeInsets.all(8.0), bg:
+flutter:     BoxDecoration(color: Color(alpha: 0.0400, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), border: Border.all(BorderSide(color: Color(alpha: 0.1000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB))), borderRadius: BorderRadius.circular(16.0),
+flutter:       boxShadow: []
+flutter:       )
+flutter:   , clipBehavior: Clip.none, state:
+flutter:     _AnimatedContainerState#c14fc(ticker inactive, padding: EdgeInsetsGeometryTween(EdgeInsets.all(8.0) → EdgeInsets.all(8.0)), bg:
+flutter:         DecorationTween(BoxDecoration(color: Color(alpha: 0.0400, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), border: Border.all(BorderSide(color: Color(alpha: 0.1000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB))), borderRadius: BorderRadius.circular(16.0),
+flutter:           boxShadow: []
+flutter:           ) → BoxDecoration(color: Color(alpha: 0.0400, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), border: Border.all(BorderSide(color: Color(alpha: 0.1000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB))), borderRadius: BorderRadius.circular(16.0),
+flutter:           boxShadow: []
+flutter:           ))
+flutter:       )
+flutter:   )
+flutter: Rebuilding Container(padding: EdgeInsets.all(8.0), bg:
+flutter:     BoxDecoration(color: Color(alpha: 0.0400, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), border: Border.all(BorderSide(color: Color(alpha: 0.1000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB))), borderRadius: BorderRadius.circular(16.0),
+flutter:       boxShadow: []
+flutter:       )
+flutter:   )
+flutter: Rebuilding Icon(IconData(U+F005D), size: 22.0, color: Color(alpha: 0.5500, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), dependencies: [Directionality, IconTheme])
+flutter: Rebuilding Text("Community", inherit: true, color: Color(alpha: 0.5500, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), family: SpaceGrotesk_700, familyFallback: [SpaceGrotesk], size: 10.5, weight: 700, letterSpacing: 0.6, overflow: ellipsis, maxLines: 1, dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery])
+flutter: Rebuilding Expanded(flex: 1)
+flutter: Rebuilding GestureDetector(startBehavior: start, dependencies: [MediaQuery, ScrollConfiguration])
+flutter: Rebuilding RawGestureDetector(state: RawGestureDetectorState#2b9c6(gestures: [tap], behavior: opaque))
+flutter: Rebuilding AnimatedBuilder(listenable: AnimationController#88b0c(⏮ 0.000; paused)➩Cubic(0.42, 0.00, 0.58, 1.00)➩Tween<double>(0.0 → 1.0)➩0.0, state: _AnimatedState#173fa)
+flutter: Rebuilding AnimatedContainer(duration: 220ms, padding: EdgeInsets.all(8.0), bg:
+flutter:     BoxDecoration(color: Color(alpha: 0.0400, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), border: Border.all(BorderSide(color: Color(alpha: 0.1000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB))), borderRadius: BorderRadius.circular(16.0),
+flutter:       boxShadow: []
+flutter:       )
+flutter:   , clipBehavior: Clip.none, state:
+flutter:     _AnimatedContainerState#11ef0(ticker inactive, padding: EdgeInsetsGeometryTween(EdgeInsets.all(8.0) → EdgeInsets.all(8.0)), bg:
+flutter:         DecorationTween(BoxDecoration(color: Color(alpha: 0.0400, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), border: Border.all(BorderSide(color: Color(alpha: 0.1000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB))), borderRadius: BorderRadius.circular(16.0),
+flutter:           boxShadow: []
+flutter:           ) → BoxDecoration(color: Color(alpha: 0.0400, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), border: Border.all(BorderSide(color: Color(alpha: 0.1000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB))), borderRadius: BorderRadius.circular(16.0),
+flutter:           boxShadow: []
+flutter:           ))
+flutter:       )
+flutter:   )
+flutter: Rebuilding Container(padding: EdgeInsets.all(8.0), bg:
+flutter:     BoxDecoration(color: Color(alpha: 0.0400, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), border: Border.all(BorderSide(color: Color(alpha: 0.1000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB))), borderRadius: BorderRadius.circular(16.0),
+flutter:       boxShadow: []
+flutter:       )
+flutter:   )
+flutter: Rebuilding Icon(IconData(U+0F02F), size: 22.0, color: Color(alpha: 0.5500, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), dependencies: [Directionality, IconTheme])
+flutter: Rebuilding Text("Events", inherit: true, color: Color(alpha: 0.5500, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), family: SpaceGrotesk_700, familyFallback: [SpaceGrotesk], size: 10.5, weight: 700, letterSpacing: 0.6, overflow: ellipsis, maxLines: 1, dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery])
+flutter: Rebuilding AnimatedBuilder(listenable: AnimationController#c2503(▶ 0.134), dirty, state: _AnimatedState#823f2)
+flutter: Rebuilding AnimatedBuilder(listenable: AnimationController#c2503(▶ 0.134), dirty, state: _AnimatedState#a370b)
+flutter: Rebuilding Container(padding: EdgeInsets(14.0, 12.0, 14.0, 12.0), bg: BoxDecoration(color: Color(alpha: 0.0600, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), border: Border.all(BorderSide(color: Color(alpha: 0.1000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB))), borderRadius: BorderRadius.circular(18.0)), constraints: BoxConstraints(w=Infinity, 0.0<=h<=Infinity))
+flutter: Rebuilding Container(bg:
+flutter:     BoxDecoration(borderRadius: BorderRadius.circular(14.0),
+flutter:       boxShadow: [BoxShadow(Color(alpha: 0.1529, red: 0.1333, green:
+flutter:         0.8275, blue: 0.9333, colorSpace: ColorSpace.sRGB), Offset(0.0,
+flutter:         0.0), 18.0, 1.0, BlurStyle.normal)]
+flutter:       , gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(alpha: 0.7500, red: 0.0000, green: 0.7490, blue: 0.6471, colorSpace: ColorSpace.sRGB), Color(alpha: 0.6500, red: 1.0000, green: 0.4196, blue: 0.2078, colorSpace: ColorSpace.sRGB), Color(alpha: 0.5500, red: 1.0000, green: 0.8431, blue: 0.0000, colorSpace: ColorSpace.sRGB)], tileMode: TileMode.clamp))
+flutter:   , constraints: BoxConstraints(w=36.0, h=36.0))
+flutter: Rebuilding Expanded(flex: 1)
+flutter: Rebuilding Text("QUEST HUB", inherit: true, color: Color(alpha: 0.6200, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), family: SpaceGrotesk_700, familyFallback: [SpaceGrotesk], size: 11.0, weight: 900, letterSpacing: 1.3, dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery])
+flutter: Rebuilding AnimatedBuilder(listenable: AnimationController#c2503(▶ 0.134), dirty, state: _AnimatedState#12921)
+flutter: Rebuilding Container(padding: EdgeInsets(16.0, 16.0, 16.0, 14.0), bg:
+flutter:     BoxDecoration(color: Color(alpha: 0.0600, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), border: Border.all(BorderSide(color: Color(alpha: 0.1200, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB))), borderRadius: BorderRadius.circular(28.0),
+flutter:       boxShadow: [BoxShadow(Color(alpha: 0.3500, red: 0.0000, green:
+flutter:         0.0000, blue: 0.0000, colorSpace: ColorSpace.sRGB), Offset(0.0,
+flutter:         18.0), 28.0, 0.0, BlurStyle.normal), BoxShadow(Color(alpha:
+flutter:         0.1000, red: 0.0000, green: 0.7490, blue: 0.6471, colorSpace:
+flutter:         ColorSpace.sRGB), Offset(0.0, 0.0), 34.0, 1.0, BlurStyle.normal)]
+flutter:       )
+flutter:   , constraints: BoxConstraints(w=404.0, 0.0<=h<=Infinity))
+flutter: Rebuilding _TagChip
+flutter: Rebuilding Container(padding: EdgeInsets(10.0, 6.0, 10.0, 6.0), bg:
+flutter:     BoxDecoration(borderRadius: BorderRadius.circular(999.0),
+flutter:       boxShadow: [BoxShadow(Color(alpha: 0.2200, red: 1.0000, green:
+flutter:         0.8431, blue: 0.0000, colorSpace: ColorSpace.sRGB), Offset(0.0,
+flutter:         10.0), 16.0, 0.0, BlurStyle.normal)]
+flutter:       , gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(alpha: 1.0000, red: 1.0000, green: 0.8431, blue: 0.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 0.3500, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB)], tileMode: TileMode.clamp))
+flutter:   )
+flutter: Rebuilding Text("DROP A PIN", inherit: true, color: Color(alpha: 0.8500, red: 0.0000, green: 0.0000, blue: 0.0000, colorSpace: ColorSpace.sRGB), family: SpaceGrotesk_700, familyFallback: [SpaceGrotesk], size: 11.0, weight: 900, letterSpacing: 1.0, dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery])
+flutter: Rebuilding Container(bg:
+flutter:     BoxDecoration(borderRadius: BorderRadius.circular(18.0),
+flutter:       boxShadow: [BoxShadow(Color(alpha: 0.3000, red: 0.5490, green:
+flutter:         0.3216, blue: 1.0000, colorSpace: ColorSpace.sRGB), Offset(0.0,
+flutter:         12.0), 18.0, 0.0, BlurStyle.normal)]
+flutter:       , gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(alpha: 0.9500, red: 0.5490, green: 0.3216, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 0.8000, red: 0.0000, green: 0.7490, blue: 0.6471, colorSpace: ColorSpace.sRGB)], tileMode: TileMode.clamp))
+flutter:   , constraints: BoxConstraints(w=50.0, h=50.0))
+flutter: Rebuilding Icon(IconData(U+0F60B), size: 26.0, color: Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), dependencies: [Directionality, IconTheme])
+flutter: Rebuilding Expanded(flex: 1)
+flutter: Rebuilding Text("CAPTURE", inherit: true, color: Color(alpha: 0.9500, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), family: SpaceGrotesk_700, familyFallback: [SpaceGrotesk], size: 20.0, weight: 900, letterSpacing: 0.3, dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery])
+flutter: Rebuilding Text("Scan art → upload it to the map", inherit: true, color: Color(alpha: 0.7000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), family: SpaceGrotesk_600, familyFallback: [SpaceGrotesk], size: 13.5, weight: 600, height: 1.1x, dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery])
+flutter: Rebuilding Container(bg: BoxDecoration(color: Color(alpha: 0.0800, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), border: Border.all(BorderSide(color: Color(alpha: 0.1400, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB))), borderRadius: BorderRadius.circular(16.0)), constraints: BoxConstraints(w=40.0, h=40.0))
+flutter: Rebuilding Icon(IconData(U+0F57A), size: 20.0, color: Color(alpha: 0.9200, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), dependencies: [Directionality, IconTheme])
+flutter: Rebuilding Positioned(left: 0.0, top: 0.0, right: 0.0, bottom: 0.0)
+flutter: Rebuilding Container(bg: BoxDecoration(gradient: LinearGradient(begin: Alignment.centerLeft, end: Alignment.centerRight, colors: [Color(alpha: 0.0000, red: 0.0000, green: 0.0000, blue: 0.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 0.1600, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 0.1000, red: 0.0000, green: 0.7490, blue: 0.6471, colorSpace: ColorSpace.sRGB), Color(alpha: 0.0000, red: 0.0000, green: 0.0000, blue: 0.0000, colorSpace: ColorSpace.sRGB)], stops: [0.0, 0.46, 0.58, 1.0], tileMode: TileMode.clamp)))
+flutter: Rebuilding Positioned(left: 0.0, top: 0.0, right: 0.0, bottom: 0.0)
+flutter: Rebuilding Positioned(left: 0.0, top: 0.0, right: 0.0, bottom: 0.0)
+flutter: Rebuilding Material(type: canvas, color: Color(alpha: 0.0000, red: 0.0000, green: 0.0000, blue: 0.0000, colorSpace: ColorSpace.sRGB), dependencies: [InheritedCupertinoTheme, _InheritedTheme, _LocalizationsScope-[GlobalKey#54413]], state: _MaterialState#f9d18)
+flutter: Rebuilding AnimatedPhysicalModel(duration: 200ms, shape: rectangle, borderRadius: null, elevation: 0.0, color: Color(alpha: 0.0000, red: 0.0000, green: 0.0000, blue: 0.0000, colorSpace: ColorSpace.sRGB), animateColor: false, shadowColor: Color(alpha: 1.0000, red: 0.0000, green: 0.0000, blue: 0.0000, colorSpace: ColorSpace.sRGB), animateShadowColor: true, state: _AnimatedPhysicalModelState#65f53(ticker inactive))
+flutter: Rebuilding NotificationListener<LayoutChangedNotification>
+flutter: Rebuilding AnimatedDefaultTextStyle(duration: 200ms, debugLabel: (englishLike bodyMedium 2021).merge(unknown), inherit: false, color: Color(alpha: 1.0000, red: 0.4000, green: 0.4000, blue: 0.4000, colorSpace: ColorSpace.sRGB), family: Roboto, size: 14.0, weight: 400, letterSpacing: 0.3, baseline: alphabetic, height: 1.4x, leadingDistribution: even, softWrap: wrapping at box width, overflow: clip, state: _AnimatedDefaultTextStyleState#40e74(ticker inactive))
+flutter: Rebuilding DefaultTextStyle(debugLabel: (englishLike bodyMedium 2021).merge(unknown), inherit: false, color: Color(alpha: 1.0000, red: 0.4000, green: 0.4000, blue: 0.4000, colorSpace: ColorSpace.sRGB), family: Roboto, size: 14.0, weight: 400, letterSpacing: 0.3, baseline: alphabetic, height: 1.4x, leadingDistribution: even, softWrap: wrapping at box width, overflow: clip)
+flutter: Rebuilding InkWell
+flutter: Rebuilding _InkResponseStateWidget(gestures: [tap, tap down, tap up, tap cancel], mouseCursor: null, clipped to BoxShape.rectangle, dependencies: [InheritedCupertinoTheme, MediaQuery, _InheritedTheme, _LocalizationsScope-[GlobalKey#54413]], state: _InkResponseState#82770)
+flutter: Rebuilding _ParentInkResponseProvider
+flutter: Rebuilding Actions(dispatcher: null, actions: {ActivateIntent: CallbackAction<ActivateIntent>#70e68, ButtonActivateIntent: CallbackAction<ButtonActivateIntent>#936d0}, state: _ActionsState#1e97a)
+flutter: Rebuilding _ActionsScope
+flutter: Rebuilding Focus(dependencies: [_FocusInheritedScope], state: _FocusState#48a45)
+flutter: Rebuilding _FocusInheritedScope
+flutter: Rebuilding Builder(dependencies: [DefaultSelectionStyle])
+flutter: Rebuilding DefaultSelectionStyle
+flutter: Rebuilding GestureDetector(startBehavior: start, dependencies: [MediaQuery, ScrollConfiguration])
+flutter: Rebuilding RawGestureDetector(state: RawGestureDetectorState#53a77(gestures: [tap], excludeFromSemantics: true, behavior: opaque))
+flutter: Rebuilding AnimatedBuilder(listenable: AnimationController#c2503(▶ 0.134), dirty, state: _AnimatedState#8df86)
+flutter: Rebuilding Container(padding: EdgeInsets(16.0, 16.0, 16.0, 14.0), bg:
+flutter:     BoxDecoration(color: Color(alpha: 0.0600, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), border: Border.all(BorderSide(color: Color(alpha: 0.1200, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB))), borderRadius: BorderRadius.circular(28.0),
+flutter:       boxShadow: [BoxShadow(Color(alpha: 0.3500, red: 0.0000, green:
+flutter:         0.0000, blue: 0.0000, colorSpace: ColorSpace.sRGB), Offset(0.0,
+flutter:         18.0), 28.0, 0.0, BlurStyle.normal), BoxShadow(Color(alpha:
+flutter:         0.1358, red: 0.0000, green: 0.7490, blue: 0.3882, colorSpace:
+flutter:         ColorSpace.sRGB), Offset(0.0, 0.0), 34.0, 1.0, BlurStyle.normal)]
+flutter:       )
+flutter:   , constraints: BoxConstraints(w=404.0, 0.0<=h<=Infinity))
+flutter: Rebuilding _TagChip
+flutter: Rebuilding Container(padding: EdgeInsets(10.0, 6.0, 10.0, 6.0), bg:
+flutter:     BoxDecoration(borderRadius: BorderRadius.circular(999.0),
+flutter:       boxShadow: [BoxShadow(Color(alpha: 0.2200, red: 1.0000, green:
+flutter:         0.4196, blue: 0.2078, colorSpace: ColorSpace.sRGB), Offset(0.0,
+flutter:         10.0), 16.0, 0.0, BlurStyle.normal)]
+flutter:       , gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(alpha: 1.0000, red: 1.0000, green: 0.4196, blue: 0.2078, colorSpace: ColorSpace.sRGB), Color(alpha: 0.3500, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB)], tileMode: TileMode.clamp))
+flutter:   )
+flutter: Rebuilding Text("+XP HUNT", inherit: true, color: Color(alpha: 0.8500, red: 0.0000, green: 0.0000, blue: 0.0000, colorSpace: ColorSpace.sRGB), family: SpaceGrotesk_700, familyFallback: [SpaceGrotesk], size: 11.0, weight: 900, letterSpacing: 1.0, dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery])
+Another exception was thrown: Unsupported operation: Infinity or NaN toInt
+flutter: Rebuilding Container(bg:
+flutter:     BoxDecoration(borderRadius: BorderRadius.circular(18.0),
+flutter:       boxShadow: [BoxShadow(Color(alpha: 0.3000, red: 0.0000, green:
+flutter:         0.4824, blue: 1.0000, colorSpace: ColorSpace.sRGB), Offset(0.0,
+flutter:         12.0), 18.0, 0.0, BlurStyle.normal)]
+flutter:       , gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(alpha: 0.9500, red: 0.0000, green: 0.4824, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 0.8000, red: 0.0000, green: 0.7490, blue: 0.3882, colorSpace: ColorSpace.sRGB)], tileMode: TileMode.clamp))
+flutter:   , constraints: BoxConstraints(w=50.0, h=50.0))
+flutter: Rebuilding Icon(IconData(U+F00D6), size: 26.0, color: Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), dependencies: [Directionality, IconTheme])
+flutter: Rebuilding Expanded(flex: 1)
+flutter: Rebuilding Text("DISCOVER", inherit: true, color: Color(alpha: 0.9500, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), family: SpaceGrotesk_700, familyFallback: [SpaceGrotesk], size: 20.0, weight: 900, letterSpacing: 0.3, dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery])
+flutter: Rebuilding Text("Find captured art → earn XP", inherit: true, color: Color(alpha: 0.7000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), family: SpaceGrotesk_600, familyFallback: [SpaceGrotesk], size: 13.5, weight: 600, height: 1.1x, dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery])
+flutter: Rebuilding Container(bg: BoxDecoration(color: Color(alpha: 0.0800, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), border: Border.all(BorderSide(color: Color(alpha: 0.1400, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB))), borderRadius: BorderRadius.circular(16.0)), constraints: BoxConstraints(w=40.0, h=40.0))
+flutter: Rebuilding Icon(IconData(U+0F57A), size: 20.0, color: Color(alpha: 0.9200, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), dependencies: [Directionality, IconTheme])
+flutter: Rebuilding Positioned(left: 0.0, top: 0.0, right: 0.0, bottom: 0.0)
+flutter: Rebuilding Container(bg: BoxDecoration(gradient: LinearGradient(begin: Alignment.centerLeft, end: Alignment.centerRight, colors: [Color(alpha: 0.0000, red: 0.0000, green: 0.0000, blue: 0.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 0.1795, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 0.1130, red: 0.0000, green: 0.7490, blue: 0.3882, colorSpace: ColorSpace.sRGB), Color(alpha: 0.0000, red: 0.0000, green: 0.0000, blue: 0.0000, colorSpace: ColorSpace.sRGB)], stops: [0.0, 0.46, 0.58, 1.0], tileMode: TileMode.clamp)))
+flutter: Rebuilding Positioned(left: 0.0, top: 0.0, right: 0.0, bottom: 0.0)
+flutter: Rebuilding Positioned(left: 0.0, top: 0.0, right: 0.0, bottom: 0.0)
+flutter: Rebuilding Material(type: canvas, color: Color(alpha: 0.0000, red: 0.0000, green: 0.0000, blue: 0.0000, colorSpace: ColorSpace.sRGB), dependencies: [InheritedCupertinoTheme, _InheritedTheme, _LocalizationsScope-[GlobalKey#54413]], state: _MaterialState#2cddf)
+flutter: Rebuilding AnimatedPhysicalModel(duration: 200ms, shape: rectangle, borderRadius: null, elevation: 0.0, color: Color(alpha: 0.0000, red: 0.0000, green: 0.0000, blue: 0.0000, colorSpace: ColorSpace.sRGB), animateColor: false, shadowColor: Color(alpha: 1.0000, red: 0.0000, green: 0.0000, blue: 0.0000, colorSpace: ColorSpace.sRGB), animateShadowColor: true, state: _AnimatedPhysicalModelState#ddb9a(ticker inactive))
+flutter: Rebuilding NotificationListener<LayoutChangedNotification>
+flutter: Rebuilding AnimatedDefaultTextStyle(duration: 200ms, debugLabel: (englishLike bodyMedium 2021).merge(unknown), inherit: false, color: Color(alpha: 1.0000, red: 0.4000, green: 0.4000, blue: 0.4000, colorSpace: ColorSpace.sRGB), family: Roboto, size: 14.0, weight: 400, letterSpacing: 0.3, baseline: alphabetic, height: 1.4x, leadingDistribution: even, softWrap: wrapping at box width, overflow: clip, state: _AnimatedDefaultTextStyleState#203bb(ticker inactive))
+flutter: Rebuilding DefaultTextStyle(debugLabel: (englishLike bodyMedium 2021).merge(unknown), inherit: false, color: Color(alpha: 1.0000, red: 0.4000, green: 0.4000, blue: 0.4000, colorSpace: ColorSpace.sRGB), family: Roboto, size: 14.0, weight: 400, letterSpacing: 0.3, baseline: alphabetic, height: 1.4x, leadingDistribution: even, softWrap: wrapping at box width, overflow: clip)
+flutter: Rebuilding InkWell
+flutter: Rebuilding _InkResponseStateWidget(gestures: [tap, tap down, tap up, tap cancel], mouseCursor: null, clipped to BoxShape.rectangle, dependencies: [InheritedCupertinoTheme, MediaQuery, _InheritedTheme, _LocalizationsScope-[GlobalKey#54413]], state: _InkResponseState#371e5)
+flutter: Rebuilding _ParentInkResponseProvider
+flutter: Rebuilding Actions(dispatcher: null, actions: {ActivateIntent: CallbackAction<ActivateIntent>#0d9b7, ButtonActivateIntent: CallbackAction<ButtonActivateIntent>#94f9f}, state: _ActionsState#65241)
+flutter: Rebuilding _ActionsScope
+flutter: Rebuilding Focus(dependencies: [_FocusInheritedScope], state: _FocusState#6a00d)
+flutter: Rebuilding _FocusInheritedScope
+flutter: Rebuilding Builder(dependencies: [DefaultSelectionStyle])
+flutter: Rebuilding DefaultSelectionStyle
+flutter: Rebuilding GestureDetector(startBehavior: start, dependencies: [MediaQuery, ScrollConfiguration])
+flutter: Rebuilding RawGestureDetector(state: RawGestureDetectorState#e7bec(gestures: [tap], excludeFromSemantics: true, behavior: opaque))
+flutter: Rebuilding AnimatedBuilder(listenable: AnimationController#c2503(▶ 0.134), dirty, state: _AnimatedState#550b9)
+flutter: Rebuilding Container(padding: EdgeInsets(16.0, 16.0, 16.0, 14.0), bg:
+flutter:     BoxDecoration(color: Color(alpha: 0.0600, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), border: Border.all(BorderSide(color: Color(alpha: 0.1200, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB))), borderRadius: BorderRadius.circular(28.0),
+flutter:       boxShadow: [BoxShadow(Color(alpha: 0.3500, red: 0.0000, green:
+flutter:         0.0000, blue: 0.0000, colorSpace: ColorSpace.sRGB), Offset(0.0,
+flutter:         18.0), 28.0, 0.0, BlurStyle.normal), BoxShadow(Color(alpha:
+flutter:         0.2765, red: 1.0000, green: 0.8431, blue: 0.0000, colorSpace:
+flutter:         ColorSpace.sRGB), Offset(0.0, 0.0), 34.0, 1.0, BlurStyle.normal)]
+flutter:       )
+flutter:   , constraints: BoxConstraints(w=404.0, 0.0<=h<=Infinity))
+flutter: Rebuilding _TagChip
+flutter: Rebuilding Container(padding: EdgeInsets(10.0, 6.0, 10.0, 6.0), bg:
+flutter:     BoxDecoration(borderRadius: BorderRadius.circular(999.0),
+flutter:       boxShadow: [BoxShadow(Color(alpha: 0.2200, red: 0.0000, green:
+flutter:         0.7490, blue: 0.6471, colorSpace: ColorSpace.sRGB), Offset(0.0,
+flutter:         10.0), 16.0, 0.0, BlurStyle.normal)]
+flutter:       , gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(alpha: 1.0000, red: 0.0000, green: 0.7490, blue: 0.6471, colorSpace: ColorSpace.sRGB), Color(alpha: 0.3500, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB)], tileMode: TileMode.clamp))
+flutter:   )
+flutter: Rebuilding Text("ART LOVER", inherit: true, color: Color(alpha: 0.8500, red: 0.0000, green: 0.0000, blue: 0.0000, colorSpace: ColorSpace.sRGB), family: SpaceGrotesk_700, familyFallback: [SpaceGrotesk], size: 11.0, weight: 900, letterSpacing: 1.0, dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery])
+flutter: Rebuilding Container(bg:
+flutter:     BoxDecoration(borderRadius: BorderRadius.circular(18.0),
+flutter:       boxShadow: [BoxShadow(Color(alpha: 0.3000, red: 0.0000, green:
+flutter:         0.7490, blue: 0.3882, colorSpace: ColorSpace.sRGB), Offset(0.0,
+flutter:         12.0), 18.0, 0.0, BlurStyle.normal)]
+flutter:       , gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(alpha: 0.9500, red: 0.0000, green: 0.7490, blue: 0.3882, colorSpace: ColorSpace.sRGB), Color(alpha: 0.8000, red: 1.0000, green: 0.8431, blue: 0.0000, colorSpace: ColorSpace.sRGB)], tileMode: TileMode.clamp))
+flutter:   , constraints: BoxConstraints(w=50.0, h=50.0))
+flutter: Rebuilding Icon(IconData(U+F0377), size: 26.0, color: Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), dependencies: [Directionality, IconTheme])
+flutter: Rebuilding Expanded(flex: 1)
+flutter: Rebuilding Text("EXPLORE", inherit: true, color: Color(alpha: 0.9500, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), family: SpaceGrotesk_700, familyFallback: [SpaceGrotesk], size: 20.0, weight: 900, letterSpacing: 0.3, dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery])
+flutter: Rebuilding Text("Find local artist, local art, upcoming events", inherit: true, color: Color(alpha: 0.7000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), family: SpaceGrotesk_600, familyFallback: [SpaceGrotesk], size: 13.5, weight: 600, height: 1.1x, dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery])
+flutter: Rebuilding Container(bg: BoxDecoration(color: Color(alpha: 0.0800, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), border: Border.all(BorderSide(color: Color(alpha: 0.1400, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB))), borderRadius: BorderRadius.circular(16.0)), constraints: BoxConstraints(w=40.0, h=40.0))
+flutter: Rebuilding Icon(IconData(U+0F57A), size: 20.0, color: Color(alpha: 0.9200, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), dependencies: [Directionality, IconTheme])
+flutter: Rebuilding Positioned(left: 0.0, top: 0.0, right: 0.0, bottom: 0.0)
+flutter: Rebuilding Container(bg: BoxDecoration(gradient: LinearGradient(begin: Alignment.centerLeft, end: Alignment.centerRight, colors: [Color(alpha: 0.0000, red: 0.0000, green: 0.0000, blue: 0.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 0.2563, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 0.1642, red: 1.0000, green: 0.8431, blue: 0.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 0.0000, red: 0.0000, green: 0.0000, blue: 0.0000, colorSpace: ColorSpace.sRGB)], stops: [0.0, 0.46, 0.58, 1.0], tileMode: TileMode.clamp)))
+flutter: Rebuilding Positioned(left: 0.0, top: 0.0, right: 0.0, bottom: 0.0)
+flutter: Rebuilding Positioned(left: 0.0, top: 0.0, right: 0.0, bottom: 0.0)
+flutter: Rebuilding Material(type: canvas, color: Color(alpha: 0.0000, red: 0.0000, green: 0.0000, blue: 0.0000, colorSpace: ColorSpace.sRGB), dependencies: [InheritedCupertinoTheme, _InheritedTheme, _LocalizationsScope-[GlobalKey#54413]], state: _MaterialState#f6778)
+flutter: Rebuilding AnimatedPhysicalModel(duration: 200ms, shape: rectangle, borderRadius: null, elevation: 0.0, color: Color(alpha: 0.0000, red: 0.0000, green: 0.0000, blue: 0.0000, colorSpace: ColorSpace.sRGB), animateColor: false, shadowColor: Color(alpha: 1.0000, red: 0.0000, green: 0.0000, blue: 0.0000, colorSpace: ColorSpace.sRGB), animateShadowColor: true, state: _AnimatedPhysicalModelState#a8c93(ticker inactive))
+flutter: Rebuilding NotificationListener<LayoutChangedNotification>
+flutter: Rebuilding AnimatedDefaultTextStyle(duration: 200ms, debugLabel: (englishLike bodyMedium 2021).merge(unknown), inherit: false, color: Color(alpha: 1.0000, red: 0.4000, green: 0.4000, blue: 0.4000, colorSpace: ColorSpace.sRGB), family: Roboto, size: 14.0, weight: 400, letterSpacing: 0.3, baseline: alphabetic, height: 1.4x, leadingDistribution: even, softWrap: wrapping at box width, overflow: clip, state: _AnimatedDefaultTextStyleState#5b86d(ticker inactive))
+flutter: Rebuilding DefaultTextStyle(debugLabel: (englishLike bodyMedium 2021).merge(unknown), inherit: false, color: Color(alpha: 1.0000, red: 0.4000, green: 0.4000, blue: 0.4000, colorSpace: ColorSpace.sRGB), family: Roboto, size: 14.0, weight: 400, letterSpacing: 0.3, baseline: alphabetic, height: 1.4x, leadingDistribution: even, softWrap: wrapping at box width, overflow: clip)
+flutter: Rebuilding InkWell
+flutter: Rebuilding _InkResponseStateWidget(gestures: [tap, tap down, tap up, tap cancel], mouseCursor: null, clipped to BoxShape.rectangle, dependencies: [InheritedCupertinoTheme, MediaQuery, _InheritedTheme, _LocalizationsScope-[GlobalKey#54413]], state: _InkResponseState#21b0e)
+flutter: Rebuilding _ParentInkResponseProvider
+flutter: Rebuilding Actions(dispatcher: null, actions: {ActivateIntent: CallbackAction<ActivateIntent>#1e6cc, ButtonActivateIntent: CallbackAction<ButtonActivateIntent>#3dce0}, state: _ActionsState#f364d)
+flutter: Rebuilding _ActionsScope
+flutter: Rebuilding Focus(dependencies: [_FocusInheritedScope], state: _FocusState#97fde)
+flutter: Rebuilding _FocusInheritedScope
+flutter: Rebuilding Builder(dependencies: [DefaultSelectionStyle])
+flutter: Rebuilding DefaultSelectionStyle
+flutter: Rebuilding GestureDetector(startBehavior: start, dependencies: [MediaQuery, ScrollConfiguration])
+flutter: Rebuilding RawGestureDetector(state: RawGestureDetectorState#17a79(gestures: [tap], excludeFromSemantics: true, behavior: opaque))
+flutter: Rebuilding AnimatedBuilder(listenable: AnimationController#c2503(▶ 0.134), dirty, state: _AnimatedState#436f8)
+flutter: Rebuilding Container(padding: EdgeInsets(16.0, 16.0, 16.0, 14.0), bg:
+flutter:     BoxDecoration(color: Color(alpha: 0.0600, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), border: Border.all(BorderSide(color: Color(alpha: 0.1200, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB))), borderRadius: BorderRadius.circular(28.0),
+flutter:       boxShadow: [BoxShadow(Color(alpha: 0.3500, red: 0.0000, green:
+flutter:         0.0000, blue: 0.0000, colorSpace: ColorSpace.sRGB), Offset(0.0,
+flutter:         18.0), 28.0, 0.0, BlurStyle.normal), BoxShadow(Color(alpha:
+flutter:         0.1000, red: 0.5490, green: 0.3216, blue: 1.0000, colorSpace:
+flutter:         ColorSpace.sRGB), Offset(0.0, 0.0), 34.0, 1.0, BlurStyle.normal)]
+flutter:       )
+flutter:   , constraints: BoxConstraints(w=404.0, 0.0<=h<=Infinity))
+flutter: Rebuilding _TagChip
+flutter: Rebuilding Container(padding: EdgeInsets(10.0, 6.0, 10.0, 6.0), bg:
+flutter:     BoxDecoration(borderRadius: BorderRadius.circular(999.0),
+flutter:       boxShadow: [BoxShadow(Color(alpha: 0.2200, red: 0.0000, green:
+flutter:         0.7490, blue: 0.3882, colorSpace: ColorSpace.sRGB), Offset(0.0,
+flutter:         10.0), 16.0, 0.0, BlurStyle.normal)]
+flutter:       , gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(alpha: 1.0000, red: 0.0000, green: 0.7490, blue: 0.3882, colorSpace: ColorSpace.sRGB), Color(alpha: 0.3500, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB)], tileMode: TileMode.clamp))
+flutter:   )
+flutter: Rebuilding Text("SOCIAL", inherit: true, color: Color(alpha: 0.8500, red: 0.0000, green: 0.0000, blue: 0.0000, colorSpace: ColorSpace.sRGB), family: SpaceGrotesk_700, familyFallback: [SpaceGrotesk], size: 11.0, weight: 900, letterSpacing: 1.0, dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery])
+flutter: Rebuilding Container(bg:
+flutter:     BoxDecoration(borderRadius: BorderRadius.circular(18.0),
+flutter:       boxShadow: [BoxShadow(Color(alpha: 0.3000, red: 1.0000, green:
+flutter:         0.4196, blue: 0.2078, colorSpace: ColorSpace.sRGB), Offset(0.0,
+flutter:         12.0), 18.0, 0.0, BlurStyle.normal)]
+flutter:       , gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(alpha: 0.9500, red: 1.0000, green: 0.4196, blue: 0.2078, colorSpace: ColorSpace.sRGB), Color(alpha: 0.8000, red: 0.5490, green: 0.3216, blue: 1.0000, colorSpace: ColorSpace.sRGB)], tileMode: TileMode.clamp))
+flutter:   , constraints: BoxConstraints(w=50.0, h=50.0))
+flutter: Rebuilding Icon(IconData(U+F005C), size: 26.0, color: Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), dependencies: [Directionality, IconTheme])
+flutter: Rebuilding Expanded(flex: 1)
+flutter: Rebuilding Text("CONNECT", inherit: true, color: Color(alpha: 0.9500, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), family: SpaceGrotesk_700, familyFallback: [SpaceGrotesk], size: 20.0, weight: 900, letterSpacing: 0.3, dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery])
+flutter: Rebuilding Text("Artists, feed, commissions & events", inherit: true, color: Color(alpha: 0.7000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), family: SpaceGrotesk_600, familyFallback: [SpaceGrotesk], size: 13.5, weight: 600, height: 1.1x, dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery])
+flutter: Rebuilding Container(bg: BoxDecoration(color: Color(alpha: 0.0800, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), border: Border.all(BorderSide(color: Color(alpha: 0.1400, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB))), borderRadius: BorderRadius.circular(16.0)), constraints: BoxConstraints(w=40.0, h=40.0))
+flutter: Rebuilding Icon(IconData(U+0F57A), size: 20.0, color: Color(alpha: 0.9200, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), dependencies: [Directionality, IconTheme])
+flutter: Rebuilding Positioned(left: 0.0, top: 0.0, right: 0.0, bottom: 0.0)
+flutter: Rebuilding Container(bg: BoxDecoration(gradient: LinearGradient(begin: Alignment.centerLeft, end: Alignment.centerRight, colors: [Color(alpha: 0.0000, red: 0.0000, green: 0.0000, blue: 0.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 0.1600, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 0.1000, red: 0.5490, green: 0.3216, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 0.0000, red: 0.0000, green: 0.0000, blue: 0.0000, colorSpace: ColorSpace.sRGB)], stops: [0.0, 0.46, 0.58, 1.0], tileMode: TileMode.clamp)))
+flutter: Rebuilding Positioned(left: 0.0, top: 0.0, right: 0.0, bottom: 0.0)
+flutter: Rebuilding Positioned(left: 0.0, top: 0.0, right: 0.0, bottom: 0.0)
+flutter: Rebuilding Material(type: canvas, color: Color(alpha: 0.0000, red: 0.0000, green: 0.0000, blue: 0.0000, colorSpace: ColorSpace.sRGB), dependencies: [InheritedCupertinoTheme, _InheritedTheme, _LocalizationsScope-[GlobalKey#54413]], state: _MaterialState#d9845)
+flutter: Rebuilding AnimatedPhysicalModel(duration: 200ms, shape: rectangle, borderRadius: null, elevation: 0.0, color: Color(alpha: 0.0000, red: 0.0000, green: 0.0000, blue: 0.0000, colorSpace: ColorSpace.sRGB), animateColor: false, shadowColor: Color(alpha: 1.0000, red: 0.0000, green: 0.0000, blue: 0.0000, colorSpace: ColorSpace.sRGB), animateShadowColor: true, state: _AnimatedPhysicalModelState#20391(ticker inactive))
+flutter: Rebuilding NotificationListener<LayoutChangedNotification>
+flutter: Rebuilding AnimatedDefaultTextStyle(duration: 200ms, debugLabel: (englishLike bodyMedium 2021).merge(unknown), inherit: false, color: Color(alpha: 1.0000, red: 0.4000, green: 0.4000, blue: 0.4000, colorSpace: ColorSpace.sRGB), family: Roboto, size: 14.0, weight: 400, letterSpacing: 0.3, baseline: alphabetic, height: 1.4x, leadingDistribution: even, softWrap: wrapping at box width, overflow: clip, state: _AnimatedDefaultTextStyleState#a1cce(ticker inactive))
+flutter: Rebuilding DefaultTextStyle(debugLabel: (englishLike bodyMedium 2021).merge(unknown), inherit: false, color: Color(alpha: 1.0000, red: 0.4000, green: 0.4000, blue: 0.4000, colorSpace: ColorSpace.sRGB), family: Roboto, size: 14.0, weight: 400, letterSpacing: 0.3, baseline: alphabetic, height: 1.4x, leadingDistribution: even, softWrap: wrapping at box width, overflow: clip)
+flutter: Rebuilding InkWell
+flutter: Rebuilding _InkResponseStateWidget(gestures: [tap, tap down, tap up, tap cancel], mouseCursor: null, clipped to BoxShape.rectangle, dependencies: [InheritedCupertinoTheme, MediaQuery, _InheritedTheme, _LocalizationsScope-[GlobalKey#54413]], state: _InkResponseState#74dea)
+flutter: Rebuilding _ParentInkResponseProvider
+flutter: Rebuilding Actions(dispatcher: null, actions: {ActivateIntent: CallbackAction<ActivateIntent>#0a53b, ButtonActivateIntent: CallbackAction<ButtonActivateIntent>#58f84}, state: _ActionsState#e56f9)
+flutter: Rebuilding _ActionsScope
+flutter: Rebuilding Focus(dependencies: [_FocusInheritedScope], state: _FocusState#3bef6)
+flutter: Rebuilding _FocusInheritedScope
+flutter: Rebuilding Builder(dependencies: [DefaultSelectionStyle])
+flutter: Rebuilding DefaultSelectionStyle
+flutter: Rebuilding GestureDetector(startBehavior: start, dependencies: [MediaQuery, ScrollConfiguration])
+flutter: Rebuilding RawGestureDetector(state: RawGestureDetectorState#2bc9d(gestures: [tap], excludeFromSemantics: true, behavior: opaque))
+flutter: Rebuilding AnimatedBuilder(listenable: AnimationController#95521(▶ 0.000), dirty, dependencies: [InheritedCupertinoTheme, _InheritedTheme, _LocalizationsScope-[GlobalKey#54413]], state: _AnimatedState#c3a0d)
+flutter: Rebuilding AnimatedBuilder(listenable: AnimationController#e2cfa(▶ 0.204), dirty, state: _AnimatedState#b3f5c)
+flutter: Rebuilding SafeArea(avoid left padding, avoid right padding, avoid bottom padding, dependencies: [MediaQuery])
+flutter: Rebuilding MediaQuery(MediaQueryData(size: Size(440.0, 956.0), devicePixelRatio: 3.0, textScaler: SystemTextScaler (no scaling), platformBrightness: Brightness.light, padding: EdgeInsets.zero, viewPadding: EdgeInsets.zero, viewInsets: EdgeInsets.zero, systemGestureInsets: EdgeInsets.zero, alwaysUse24HourFormat: false, accessibleNavigation: false, highContrast: false, onOffSwitchLabels: false, disableAnimations: false, invertColors: false, boldText: false, navigationMode: traditional, gestureSettings: DeviceGestureSettings(touchSlop: null), displayFeatures: [], supportsShowingSystemContextMenu: true))
+flutter: Rebuilding Container(bg:
+flutter:     BoxDecoration(color: Color(alpha: 0.6200, red: 0.0392, green: 0.0431, blue: 0.0784, colorSpace: ColorSpace.sRGB), border: Border.all(BorderSide(color: Color(alpha: 0.1000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB))), borderRadius: BorderRadius.circular(24.0),
+flutter:       boxShadow: [BoxShadow(Color(alpha: 0.3500, red: 0.0000, green:
+flutter:         0.0000, blue: 0.0000, colorSpace: ColorSpace.sRGB), Offset(0.0,
+flutter:         14.0), 26.0, 0.0, BlurStyle.normal), BoxShadow(Color(alpha:
+flutter:         0.1000, red: 0.1333, green: 0.8275, blue: 0.9333, colorSpace:
+flutter:         ColorSpace.sRGB), Offset(0.0, 0.0), 28.0, 1.0, BlurStyle.normal)]
+flutter:       )
+flutter:   , constraints: BoxConstraints(0.0<=w<=Infinity, h=76.0))
+flutter: Rebuilding Positioned(left: 0.0, top: 0.0, right: 0.0, bottom: 0.0)
+flutter: Rebuilding Container(bg: BoxDecoration(gradient: LinearGradient(begin: Alignment.centerLeft, end: Alignment.centerRight, colors: [Color(alpha: 0.0000, red: 0.0000, green: 0.0000, blue: 0.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 0.1000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 0.0800, red: 0.1333, green: 0.8275, blue: 0.9333, colorSpace: ColorSpace.sRGB), Color(alpha: 0.0000, red: 0.0000, green: 0.0000, blue: 0.0000, colorSpace: ColorSpace.sRGB)], stops: [0.0, 0.45, 0.58, 1.0], tileMode: TileMode.clamp)))
+flutter: Rebuilding Expanded(flex: 1)
+flutter: Rebuilding GestureDetector(startBehavior: start, dependencies: [MediaQuery, ScrollConfiguration])
+flutter: Rebuilding RawGestureDetector(state: RawGestureDetectorState#16ab9(gestures: [tap], behavior: opaque))
+flutter: Rebuilding AnimatedBuilder(listenable: AnimationController#dca40(⏭ 1.000; paused)➩Cubic(0.42, 0.00, 0.58, 1.00)➩Tween<double>(0.0 → 1.0)➩1.0, state: _AnimatedState#cca01)
+flutter: Rebuilding AnimatedContainer(duration: 220ms, padding: EdgeInsets.all(8.0), bg:
+flutter:     BoxDecoration(color: Color(alpha: 0.1000, red: 0.1333, green: 0.8275, blue: 0.9333, colorSpace: ColorSpace.sRGB), border: Border.all(BorderSide(color: Color(alpha: 0.2200, red: 0.1333, green: 0.8275, blue: 0.9333, colorSpace: ColorSpace.sRGB))), borderRadius: BorderRadius.circular(16.0),
+flutter:       boxShadow: [BoxShadow(Color(alpha: 0.1600, red: 0.1333, green:
+flutter:         0.8275, blue: 0.9333, colorSpace: ColorSpace.sRGB), Offset(0.0,
+flutter:         0.0), 18.0, 1.0, BlurStyle.normal)]
+flutter:       )
+flutter:   , clipBehavior: Clip.none, state:
+flutter:     _AnimatedContainerState#36b18(ticker inactive, padding: EdgeInsetsGeometryTween(EdgeInsets.all(8.0) → EdgeInsets.all(8.0)), bg:
+flutter:         DecorationTween(BoxDecoration(color: Color(alpha: 0.1000, red: 0.1333, green: 0.8275, blue: 0.9333, colorSpace: ColorSpace.sRGB), border: Border.all(BorderSide(color: Color(alpha: 0.2200, red: 0.1333, green: 0.8275, blue: 0.9333, colorSpace: ColorSpace.sRGB))), borderRadius: BorderRadius.circular(16.0),
+flutter:           boxShadow: [BoxShadow(Color(alpha: 0.1600, red: 0.1333, green:
+flutter:             0.8275, blue: 0.9333, colorSpace: ColorSpace.sRGB), Offset(0.0,
+flutter:             0.0), 18.0, 1.0, BlurStyle.normal)]
+flutter:           ) → BoxDecoration(color: Color(alpha: 0.1000, red: 0.1333, green: 0.8275, blue: 0.9333, colorSpace: ColorSpace.sRGB), border: Border.all(BorderSide(color: Color(alpha: 0.2200, red: 0.1333, green: 0.8275, blue: 0.9333, colorSpace: ColorSpace.sRGB))), borderRadius: BorderRadius.circular(16.0),
+flutter:           boxShadow: [BoxShadow(Color(alpha: 0.1600, red: 0.1333, green:
+flutter:             0.8275, blue: 0.9333, colorSpace: ColorSpace.sRGB), Offset(0.0,
+flutter:             0.0), 18.0, 1.0, BlurStyle.normal)]
+flutter:           ))
+flutter:       )
+flutter:   )
+flutter: Rebuilding Container(padding: EdgeInsets.all(8.0), bg:
+flutter:     BoxDecoration(color: Color(alpha: 0.1000, red: 0.1333, green: 0.8275, blue: 0.9333, colorSpace: ColorSpace.sRGB), border: Border.all(BorderSide(color: Color(alpha: 0.2200, red: 0.1333, green: 0.8275, blue: 0.9333, colorSpace: ColorSpace.sRGB))), borderRadius: BorderRadius.circular(16.0),

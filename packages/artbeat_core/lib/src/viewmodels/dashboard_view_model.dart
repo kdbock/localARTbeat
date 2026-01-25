@@ -60,6 +60,12 @@ class DashboardViewModel extends ChangeNotifier {
   List<community.PostModel> _posts = [];
   List<artWalkLib.SocialActivity> _activities = [];
   artWalkLib.ChallengeModel? _todaysChallenge;
+  final Map<String, Set<Marker>> _markerCache = {};
+  LatLng? _lastMarkerLocation;
+  LatLng? _pendingMarkerLocation;
+  Timer? _markerRefreshTimer;
+  DateTime? _lastMarkerLoadedAt;
+  static const Duration _markerThrottleDuration = Duration(milliseconds: 700);
 
   // User progress stats
   int _totalDiscoveries = 0;
@@ -548,6 +554,14 @@ class DashboardViewModel extends ChangeNotifier {
       _isLoadingLocation = true;
       if (notify) _safeNotifyListeners();
 
+      final lastKnown = await LocationUtils.getLastKnownPositionSafe();
+      if (lastKnown != null) {
+        _currentLocation = lastKnown;
+        _mapLocation = LatLng(lastKnown.latitude, lastKnown.longitude);
+        _safeNotifyListeners();
+        unawaited(_loadNearbyArtMarkers());
+      }
+
       // Use shorter timeout for better UX - if location takes too long, fallback faster
       final position =
           await LocationUtils.getCurrentPosition(
@@ -583,7 +597,7 @@ class DashboardViewModel extends ChangeNotifier {
 
       // Still try to load markers for default location
       try {
-        await _loadNearbyArtMarkers();
+      await _loadNearbyArtMarkers();
       } catch (markerError) {
         debugPrint(
           '❌ Error loading markers for default location: $markerError',
@@ -595,10 +609,31 @@ class DashboardViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> _loadNearbyArtMarkers() async {
+  Future<void> _loadNearbyArtMarkers({bool force = false}) async {
     if (_mapLocation == null) return;
 
+    final location = _mapLocation!;
+    final now = DateTime.now();
+    if (!force &&
+        _lastMarkerLoadedAt != null &&
+        now.difference(_lastMarkerLoadedAt!) < _markerThrottleDuration &&
+        _lastMarkerLocation != null &&
+        _isLocationClose(location, _lastMarkerLocation!)) {
+      _pendingMarkerLocation = location;
+      _scheduleMarkerRefresh();
+      return;
+    }
+
     try {
+      final cacheKey =
+          '${location.latitude.toStringAsFixed(2)}_${location.longitude.toStringAsFixed(2)}';
+      if (_markerCache.containsKey(cacheKey)) {
+        _markers = _markerCache[cacheKey]!;
+        _isMapPreviewReady = true;
+        _safeNotifyListeners();
+        return;
+      }
+
       final newMarkers = <Marker>{};
 
       // Add current location marker if we have it
@@ -614,34 +649,105 @@ class DashboardViewModel extends ChangeNotifier {
       );
 
       // Get nearby art pieces from ArtWalk service
-      final nearbyArt = await _artWalkService.getPublicArtNearLocation(
-        latitude: _mapLocation!.latitude,
-        longitude: _mapLocation!.longitude,
+      final List<artWalkLib.PublicArtModel> nearbyArt =
+          await _artWalkService.getPublicArtNearLocation(
+        latitude: location.latitude,
+        longitude: location.longitude,
         radiusKm: 10, // 10km radius
       );
+      final List<artWalkLib.PublicArtModel> limitedNearbyArt =
+          nearbyArt.take(300).toList();
 
-      // Add markers for each art piece
-      for (final art in nearbyArt) {
-        newMarkers.add(
-          Marker(
-            markerId: MarkerId('art_${art.id}'),
-            position: LatLng(art.location.latitude, art.location.longitude),
-            icon: BitmapDescriptor.defaultMarkerWithHue(
-              BitmapDescriptor.hueViolet,
-            ),
-            infoWindow: InfoWindow(title: art.title, snippet: art.artistName),
-          ),
+      // Cluster markers to reduce load when many nearby items exist
+      final Map<String, List<artWalkLib.PublicArtModel>> clusters = {};
+      const double clusterSize = 0.01; // ~1km grid
+
+      for (final art in limitedNearbyArt) {
+        final lat = art.location.latitude;
+        final lng = art.location.longitude;
+        final key =
+            '${(lat / clusterSize).floor()}_${(lng / clusterSize).floor()}';
+        clusters.putIfAbsent(key, () => []).add(art);
+      }
+
+      for (final entry in clusters.entries) {
+        final List<artWalkLib.PublicArtModel> items = entry.value;
+        final artWalkLib.PublicArtModel first = items.first;
+        final position = LatLng(
+          first.location.latitude,
+          first.location.longitude,
         );
+
+        if (items.length == 1) {
+          newMarkers.add(
+            Marker(
+              markerId: MarkerId('art_${first.id}'),
+              position: position,
+              icon: BitmapDescriptor.defaultMarkerWithHue(
+                BitmapDescriptor.hueViolet,
+              ),
+              infoWindow: InfoWindow(
+                title: first.title,
+                snippet: first.artistName,
+              ),
+            ),
+          );
+        } else {
+          newMarkers.add(
+            Marker(
+              markerId: MarkerId('cluster_${entry.key}'),
+              position: position,
+              icon: BitmapDescriptor.defaultMarkerWithHue(
+                BitmapDescriptor.hueRose,
+              ),
+              infoWindow: InfoWindow(
+                title: '${items.length} nearby artworks',
+                snippet: 'Zoom in to see individual pieces',
+              ),
+            ),
+          );
+        }
       }
 
       _markers = newMarkers;
+      _markerCache[cacheKey] = newMarkers;
       _isMapPreviewReady = true;
+      _lastMarkerLocation = location;
+      _lastMarkerLoadedAt = DateTime.now();
       _safeNotifyListeners();
     } catch (e) {
       AppLogger.error('Error loading nearby art markers: $e');
       _isMapPreviewReady = false;
       _safeNotifyListeners();
     }
+  }
+
+  bool _isLocationClose(LatLng a, LatLng b, {double thresholdMeters = 250}) {
+    final distance = Geolocator.distanceBetween(
+      a.latitude,
+      a.longitude,
+      b.latitude,
+      b.longitude,
+    );
+    return distance < thresholdMeters;
+  }
+
+  void _scheduleMarkerRefresh() {
+    if (_markerRefreshTimer?.isActive ?? false) return;
+    _markerRefreshTimer = Timer(_markerThrottleDuration, () {
+      _markerRefreshTimer = null;
+      if (_pendingMarkerLocation != null) {
+        _mapLocation = _pendingMarkerLocation;
+        _pendingMarkerLocation = null;
+      }
+      unawaited(_loadNearbyArtMarkers(force: true));
+    });
+  }
+
+  @override
+  void dispose() {
+    _markerRefreshTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadTodaysChallenge({bool notify = true}) async {

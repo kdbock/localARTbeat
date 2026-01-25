@@ -11,7 +11,7 @@ import '../models/feature_limits.dart';
 import 'subscription_plan_validator.dart';
 import 'subscription_validation_service.dart';
 import 'coupon_service.dart';
-import 'payment_service.dart';
+import 'unified_payment_service.dart';
 import 'artist_feature_service.dart';
 import '../utils/logger.dart';
 
@@ -254,14 +254,15 @@ class SubscriptionService extends ChangeNotifier {
             .get();
 
         DocumentReference artistRef;
+        final displayName = _auth.currentUser?.displayName ?? '';
 
         if (artistQuery.docs.isEmpty) {
           // Create a minimal artist profile for the user so subscription changes succeed.
-          final displayName = _auth.currentUser?.displayName ?? '';
           artistRef = _firestore.collection('artistProfiles').doc();
           transaction.set(artistRef, {
             'userId': userId,
             'displayName': displayName,
+            'displayNameLower': displayName.trim().toLowerCase(),
             'userType': UserType.artist.name,
             'subscriptionTier': newTier.apiName,
             'isVerified': false,
@@ -281,6 +282,7 @@ class SubscriptionService extends ChangeNotifier {
 
           // Update subscription tier in artist profile
           transaction.update(artistRef, {
+            'displayNameLower': displayName.trim().toLowerCase(),
             'subscriptionTier': newTier.apiName,
             'updatedAt': FieldValue.serverTimestamp(),
           });
@@ -350,13 +352,14 @@ class SubscriptionService extends ChangeNotifier {
             .get();
 
         DocumentReference artistRef;
+        final displayName = _auth.currentUser?.displayName ?? '';
 
         if (artistQuery.docs.isEmpty) {
-          final displayName = _auth.currentUser?.displayName ?? '';
           artistRef = _firestore.collection('artistProfiles').doc();
           transaction.set(artistRef, {
             'userId': userId,
             'displayName': displayName,
+            'displayNameLower': displayName.trim().toLowerCase(),
             'userType': UserType.artist.name,
             'subscriptionTier': newTier.apiName,
             'isVerified': false,
@@ -376,6 +379,7 @@ class SubscriptionService extends ChangeNotifier {
 
           // Update subscription tier in artist profile
           transaction.update(artistRef, {
+            'displayNameLower': displayName.trim().toLowerCase(),
             'subscriptionTier': newTier.apiName,
             'updatedAt': FieldValue.serverTimestamp(),
           });
@@ -456,16 +460,10 @@ class SubscriptionService extends ChangeNotifier {
       }
 
       final couponService = CouponService();
-      final paymentService = PaymentService();
+      final paymentService = UnifiedPaymentService();
 
       // Get or create customer
-      final customerId = await _getOrCreateCustomerId();
-      if (customerId == null) {
-        return {
-          'success': false,
-          'message': 'Failed to create payment customer',
-        };
-      }
+      final customerId = await paymentService.getOrCreateCustomerId();
 
       Map<String, dynamic>? couponResult;
 
@@ -613,33 +611,6 @@ class SubscriptionService extends ChangeNotifier {
     }
   }
 
-  /// Helper method to get or create customer ID
-  Future<String?> _getOrCreateCustomerId() async {
-    try {
-      final user = _auth.currentUser;
-      if (user == null) return null;
-
-      // Check if user already has a customer ID
-      final userDoc = await _firestore.collection('users').doc(user.uid).get();
-      if (userDoc.exists) {
-        final data = userDoc.data();
-        final customerId = data?['stripeCustomerId'] as String?;
-        if (customerId != null) return customerId;
-      }
-
-      // Create new customer
-      final paymentService = PaymentService();
-      final customerId = await paymentService.createCustomer(
-        email: user.email ?? '',
-        name: user.displayName ?? 'ARTbeat User',
-      );
-
-      return customerId;
-    } catch (e) {
-      AppLogger.error('Error getting/creating customer ID: $e');
-      return null;
-    }
-  }
 
   /// Helper method to update user's subscription tier
   Future<void> updateUserSubscriptionTier(SubscriptionTier tier) async {
@@ -677,6 +648,8 @@ class SubscriptionService extends ChangeNotifier {
         await docRef.set({
           'userId': user.uid,
           'displayName': user.displayName ?? 'Artist',
+          'displayNameLower':
+              (user.displayName ?? 'Artist').trim().toLowerCase(),
           'bio': 'Artist profile created via subscription purchase',
           'userType': 'artist',
           'location': '',
@@ -728,7 +701,7 @@ class SubscriptionService extends ChangeNotifier {
       }
 
       // Process payment for the upgrade
-      final paymentService = PaymentService();
+      final paymentService = UnifiedPaymentService();
 
       // Get or create Stripe customer ID
       final customerId = await paymentService.getOrCreateCustomerId();

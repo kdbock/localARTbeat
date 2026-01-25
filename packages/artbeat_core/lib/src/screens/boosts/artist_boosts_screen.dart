@@ -35,13 +35,31 @@ class _ArtistBoostsScreenState extends State<ArtistBoostsScreen> {
   Future<void> _initializePurchases() async {
     final setup = InAppPurchaseSetup();
     await setup.initialize();
+    
+    if (kDebugMode) {
+      print('📱 ArtistBoostsScreen: Setting up purchase event listener...');
+    }
+    
     _purchaseSubscription = setup.purchaseManager.purchaseEventStream.listen(
       (event) {
+        if (kDebugMode) {
+          print('📱 ArtistBoostsScreen: Received purchase event: ${event.type}');
+        }
+        
         if (event.type == PurchaseEventType.completed) {
+          if (kDebugMode) {
+            print('📱 ArtistBoostsScreen: Handling completed purchase');
+          }
           _handlePurchaseCompleted(event.purchase!);
         } else if (event.type == PurchaseEventType.error) {
+          if (kDebugMode) {
+            print('📱 ArtistBoostsScreen: Handling purchase error');
+          }
           _handlePurchaseError(event.error!);
         } else if (event.type == PurchaseEventType.cancelled) {
+          if (kDebugMode) {
+            print('📱 ArtistBoostsScreen: Handling purchase cancellation');
+          }
           _handlePurchaseCancelled();
         }
       },
@@ -51,6 +69,10 @@ class _ArtistBoostsScreenState extends State<ArtistBoostsScreen> {
         }
       },
     );
+    
+    if (kDebugMode) {
+      print('📱 ArtistBoostsScreen: Purchase event listener set up successfully');
+    }
   }
 
   Future<void> _loadArtists() async {
@@ -909,7 +931,18 @@ class _ArtistBoostsScreenState extends State<ArtistBoostsScreen> {
   }
 
   void _handlePurchaseCompleted(CompletedPurchase purchase) {
+    if (kDebugMode) {
+      print('📱 _handlePurchaseCompleted called');
+      print('   - Category: ${purchase.category}');
+      print('   - Product: ${purchase.productId}');
+      print('   - Mounted: $mounted');
+    }
+    
     if (purchase.category == PurchaseCategory.boosts && mounted) {
+      if (kDebugMode) {
+        print('📱 Showing success snackbar...');
+      }
+      
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('boosts_success_message'.tr()),

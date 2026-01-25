@@ -26,7 +26,7 @@ class InAppPurchaseService {
 
   // Development bypass for testing without StoreKit (set to true for testing)
   static const bool _developmentBypass =
-      true; // Set to true to bypass store checks
+      false; // Set to true to bypass store checks
 
   // Store pending purchase metadata (cleared after purchase completes)
   final Map<String, Map<String, dynamic>> _pendingPurchaseMetadata = {};
@@ -585,6 +585,9 @@ class InAppPurchaseService {
         await Future<void>.delayed(const Duration(milliseconds: 500));
 
         // Trigger the purchase completion callback manually in dev mode
+        AppLogger.info('🔧 DEV MODE: About to trigger onPurchaseCompleted callback');
+        AppLogger.info('🔧 DEV MODE: Callback is ${onPurchaseCompleted != null ? "SET" : "NULL"}');
+        
         if (onPurchaseCompleted != null) {
           final transactionId = 'dev_${DateTime.now().millisecondsSinceEpoch}';
           final mockPurchase = CompletedPurchase(
@@ -604,7 +607,12 @@ class InAppPurchaseService {
             transactionId: transactionId,
             metadata: metadata ?? {},
           );
+          
+          AppLogger.info('🔧 DEV MODE: Calling onPurchaseCompleted with metadata: $metadata');
           onPurchaseCompleted!(mockPurchase);
+          AppLogger.info('🔧 DEV MODE: onPurchaseCompleted callback executed');
+        } else {
+          AppLogger.error('❌ DEV MODE: onPurchaseCompleted callback is NULL!');
         }
 
         AppLogger.info('✅ Development mode purchase completed');

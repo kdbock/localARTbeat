@@ -212,8 +212,9 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
             transaction.metadata['paymentIntentId'] as String?;
 
         if (paymentIntentId != null) {
-          // Process actual Stripe refund using PaymentService
-          await PaymentService.refundPayment(
+          // Process actual Stripe refund using UnifiedPaymentService
+          final unifiedPaymentService = UnifiedPaymentService();
+          await unifiedPaymentService.requestRefund(
             paymentId: paymentIntentId,
             amount: transaction.amount,
             reason: 'Admin processed refund',
@@ -318,9 +319,24 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
         }
 
         int successCount = 0;
+        final unifiedPaymentService = UnifiedPaymentService();
+        
         for (final transaction in selectedTransactions) {
           try {
-            // Process individual refund
+            // Get payment intent ID from transaction metadata
+            final paymentIntentId =
+                transaction.metadata['paymentIntentId'] as String?;
+
+            if (paymentIntentId != null) {
+              // Process actual Stripe refund using UnifiedPaymentService
+              await unifiedPaymentService.requestRefund(
+                paymentId: paymentIntentId,
+                amount: transaction.amount,
+                reason: 'Bulk admin refund',
+              );
+            }
+
+            // Record refund in database
             await _firestore.collection('refunds').add({
               'originalTransactionId': transaction.id,
               'amount': transaction.amount,

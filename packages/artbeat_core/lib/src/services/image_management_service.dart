@@ -1,3 +1,6 @@
+import 'dart:developer' as developer;
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -21,11 +24,14 @@ class ImageManagementService {
   static const int thumbnailSize = 300;
   static const int profileImageSize = 200;
   static const Duration cacheDuration = Duration(days: 7);
+  static const int largeImageDimensionThreshold = 2048;
+  static const int largeImagePixelThreshold = 3000000;
 
   // Active loading tracking
   int _activeLoads = 0;
   final Queue<VoidCallback> _loadQueue = Queue<VoidCallback>();
   final Set<String> _loadingUrls = <String>{};
+  final Set<String> _loggedLargeImages = <String>{};
 
   // Custom cache manager with optimized settings
   CacheManager? _cacheManager;
@@ -118,6 +124,8 @@ class ImageManagementService {
         memCacheHeight = thumbnailSize; // fallback
       }
     }
+
+    _logLargeDecode(imageUrl, memCacheWidth, memCacheHeight, width, height);
 
     // Guard against invalid URLs that crash CachedNetworkImage
     final uri = Uri.tryParse(imageUrl);
@@ -334,6 +342,101 @@ class ImageManagementService {
         'queuedLoads': _loadQueue.length,
       };
     }
+  }
+
+  /// Log in-memory cache stats (debug/profile only)
+  void logCacheStats({String label = 'image_cache'}) {
+    if (kReleaseMode) return;
+    final cache = PaintingBinding.instance.imageCache;
+    final stats = {
+      'label': label,
+      'entries': cache.currentSize,
+      'bytes': cache.currentSizeBytes,
+      'maxEntries': cache.maximumSize,
+      'maxBytes': cache.maximumSizeBytes,
+      'activeLoads': _activeLoads,
+      'queuedLoads': _loadQueue.length,
+    };
+    developer.Timeline.instantSync('Image.CacheStats', arguments: stats);
+    AppLogger.info(
+      '🖼️ Cache stats [$label] entries=${cache.currentSize}/${cache.maximumSize} '
+      'bytes=${cache.currentSizeBytes}/${cache.maximumSizeBytes} '
+      'active=${_activeLoads} queued=${_loadQueue.length}',
+    );
+  }
+
+  void _logLargeDecode(
+    String imageUrl,
+    int? memCacheWidth,
+    int? memCacheHeight,
+    double? width,
+    double? height,
+  ) {
+    if (kReleaseMode) return;
+    if (_loggedLargeImages.contains(imageUrl)) return;
+
+    final decodeWidth = memCacheWidth ?? _safeRoundedDimension(width);
+    final decodeHeight = memCacheHeight ?? _safeRoundedDimension(height);
+    if (decodeWidth == null || decodeHeight == null) return;
+
+    final pixels = decodeWidth * decodeHeight;
+    if (decodeWidth < largeImageDimensionThreshold &&
+        decodeHeight < largeImageDimensionThreshold &&
+        pixels < largeImagePixelThreshold) {
+      return;
+    }
+
+    _loggedLargeImages.add(imageUrl);
+    developer.Timeline.instantSync(
+      'Image.LargeDecode',
+      arguments: {
+        'width': decodeWidth,
+        'height': decodeHeight,
+        'pixels': pixels,
+      },
+    );
+    AppLogger.warning(
+      '⚠️ Large decode requested: ${decodeWidth}x${decodeHeight} '
+      '(${(pixels / 1000000).toStringAsFixed(1)}MP)',
+    );
+  }
+
+  /// Log decode size request for UI instrumentation
+  void logDecodeDimensions({
+    required String label,
+    double? width,
+    double? height,
+    int? cacheWidth,
+    int? cacheHeight,
+  }) {
+    if (kReleaseMode) return;
+    final decodeWidth = cacheWidth ?? _safeRoundedDimension(width);
+    final decodeHeight = cacheHeight ?? _safeRoundedDimension(height);
+    if (decodeWidth == null || decodeHeight == null) return;
+    if (decodeWidth <= 0 || decodeHeight <= 0) return;
+
+    final pixels = decodeWidth * decodeHeight;
+    developer.Timeline.instantSync(
+      'Image.DecodeSize',
+      arguments: {
+        'label': label,
+        'width': decodeWidth,
+        'height': decodeHeight,
+        'pixels': pixels,
+      },
+    );
+    AppLogger.debug(
+      '🖼️ Decode request "$label": ${decodeWidth}x${decodeHeight} '
+      '(${(pixels / 1000000).toStringAsFixed(1)}MP)',
+    );
+  }
+
+  int? _safeRoundedDimension(double? value) {
+    if (value == null) return null;
+    if (!value.isFinite) return null;
+    final rounded = value.round();
+    if (rounded <= 0) return null;
+    return rounded;
   }
 
   /// Dispose of resources

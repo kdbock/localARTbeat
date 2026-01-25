@@ -11,7 +11,7 @@ import 'package:artbeat_core/artbeat_core.dart'
         HudTopBar,
         MainLayout,
         SecureNetworkImage,
-        StripePaymentService,
+        UnifiedPaymentService,
         WorldBackground;
 import '../models/artwork_model.dart';
 import '../services/artwork_service.dart';
@@ -28,7 +28,7 @@ class ArtworkPurchaseScreen extends StatefulWidget {
 
 class _ArtworkPurchaseScreenState extends State<ArtworkPurchaseScreen> {
   final ArtworkService _artworkService = ArtworkService();
-  final StripePaymentService _paymentService = StripePaymentService();
+  final UnifiedPaymentService _paymentService = UnifiedPaymentService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   ArtworkModel? _artwork;
@@ -99,22 +99,39 @@ class _ArtworkPurchaseScreenState extends State<ArtworkPurchaseScreen> {
         _isProcessing = true;
       });
 
-      // Create payment intent
-      // ignore: unused_local_variable
-      final paymentIntent = await _paymentService.createPaymentIntent(
-        artworkId: widget.artworkId,
-        artistId: _artwork!.userId,
-        amount: _artwork!.price ?? 0,
+      final double totalAmount = (_artwork!.price ?? 0) * 1.15; // Including 15% platform fee
+
+      // 1. Create payment intent
+      final intentData = await _paymentService.createPaymentIntent(
+        amount: totalAmount,
         currency: 'USD',
+        description: 'Purchase of artwork: ${_artwork!.title}',
+        metadata: {
+          'artworkId': widget.artworkId,
+          'artistId': _artwork!.userId,
+        }, artworkId: '',
       );
 
-      // In production, use Stripe Flutter SDK to process payment with paymentIntent
-      // For now, we'll complete the purchase directly
-      final transactionId = await _paymentService.purchaseArtwork(
+      final String? clientSecret = intentData['clientSecret'] as String?;
+      final String? paymentIntentId = intentData['paymentIntentId'] as String?;
+
+      if (clientSecret == null || paymentIntentId == null) {
+        throw Exception('Failed to initialize payment intent');
+      }
+
+      // 2. Initialize and present payment sheet
+      await _paymentService.initPaymentSheetForPayment(
+        paymentIntentClientSecret: clientSecret,
+      );
+
+      await _paymentService.presentPaymentSheet();
+
+      // 3. Complete purchase on backend
+      final result = await _paymentService.processArtworkSalePayment(
         artworkId: widget.artworkId,
         artistId: _artwork!.userId,
-        amount: _artwork!.price ?? 0,
-        paymentMethod: 'card',
+        amount: totalAmount,
+        paymentIntentId: paymentIntentId,
       );
 
       if (mounted) {
@@ -122,19 +139,21 @@ class _ArtworkPurchaseScreenState extends State<ArtworkPurchaseScreen> {
           _isProcessing = false;
         });
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'artwork_purchase_success'.tr(namedArgs: {'id': transactionId}),
+        if (result.success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('artwork_purchase_success'.tr(namedArgs: {'id': paymentIntentId})),
+              backgroundColor: Colors.green,
             ),
-            backgroundColor: Colors.green,
-          ),
-        );
+          );
 
-        // Navigate back after brief delay
-        await Future<void>.delayed(const Duration(seconds: 2));
-        if (mounted) {
-          Navigator.pop(context, true);
+          // Navigate back after brief delay
+          await Future<void>.delayed(const Duration(seconds: 2));
+          if (mounted) {
+            Navigator.pop(context, true);
+          }
+        } else {
+          throw Exception(result.error ?? 'Payment verification failed');
         }
       }
     } catch (e) {

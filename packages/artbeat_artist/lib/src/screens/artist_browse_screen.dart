@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:artbeat_artist/artbeat_artist.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -23,12 +26,18 @@ class ArtistBrowseScreen extends StatefulWidget {
 
 class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
   final SubscriptionService _subscriptionService = SubscriptionService();
+  final ScrollController _scrollController = ScrollController();
 
-  bool _isLoading = true;
-  List<core.ArtistProfileModel> _artists = [];
+  bool _isLoading = false;
+  bool _isLoadingMore = false;
+  bool _hasMore = true;
+  final ValueNotifier<List<core.ArtistProfileModel>> _artistsNotifier =
+      ValueNotifier([]);
+  DocumentSnapshot? _lastArtistDoc;
   late _FilterOption _selectedMedium;
   late _FilterOption _selectedStyle;
   final TextEditingController _searchController = TextEditingController();
+  Timer? _searchDebounce;
 
   static const List<_FilterOption> _mediumOptions = [
     _FilterOption(value: 'All', labelKey: 'artist_artist_browse_filter_all'),
@@ -91,37 +100,64 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
     super.initState();
     _selectedMedium = _mediumOptions.first;
     _selectedStyle = _styleOptions.first;
-    _loadArtists();
+    _scrollController.addListener(_onScroll);
+    _loadArtists(reset: true);
   }
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
+    _scrollController.dispose();
     _searchController.dispose();
+    _artistsNotifier.dispose();
     super.dispose();
   }
 
-  Future<void> _loadArtists() async {
+  Future<void> _loadArtists({required bool reset}) async {
+    if (reset) {
+      if (_isLoading) return;
+    } else {
+      if (_isLoading || _isLoadingMore || !_hasMore) return;
+    }
+
     setState(() {
-      _isLoading = true;
+      if (reset) {
+        _isLoading = true;
+      } else {
+        _isLoadingMore = true;
+      }
     });
 
     try {
-      // Get all artists with current filters
-      final artists = await _subscriptionService.getAllArtists(
+      if (reset) {
+        _artistsNotifier.value = [];
+        _lastArtistDoc = null;
+        _hasMore = true;
+      }
+
+      final page = await _subscriptionService.getAllArtistsPage(
         searchQuery: _searchController.text,
         medium: _selectedMedium.value != 'All' ? _selectedMedium.value : null,
         style: _selectedStyle.value != 'All' ? _selectedStyle.value : null,
+        startAfter: _lastArtistDoc,
+        limit: 50,
       );
 
       // Filter for featured artists if mode is 'featured'
       final filteredArtists = widget.mode == 'featured'
-          ? artists.where((artist) => artist.isFeatured).toList()
-          : artists;
+          ? page.artists.where((artist) => artist.isFeatured).toList()
+          : page.artists;
 
       if (mounted) {
+        final currentArtists = List<core.ArtistProfileModel>.from(
+          _artistsNotifier.value,
+        );
+        _artistsNotifier.value = [...currentArtists, ...filteredArtists];
         setState(() {
-          _artists = filteredArtists;
+          _lastArtistDoc = page.lastDoc;
+          _hasMore = page.hasMore;
           _isLoading = false;
+          _isLoadingMore = false;
         });
       }
     } catch (e) {
@@ -135,12 +171,22 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
         );
         setState(() {
           _isLoading = false;
+          _isLoadingMore = false;
         });
       }
     }
   }
 
-  void _applyFilters() => _loadArtists();
+  void _applyFilters() => _loadArtists(reset: true);
+
+  void _resetFilters() {
+    setState(() {
+      _selectedMedium = _mediumOptions.first;
+      _selectedStyle = _styleOptions.first;
+      _searchController.clear();
+    });
+    _loadArtists(reset: true);
+  }
 
   void _openProfile(core.ArtistProfileModel artist) {
     Navigator.pushNamed(
@@ -151,9 +197,19 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
   }
 
   void _onSearchChanged(String value) {
-    setState(() {});
-    if (value.isEmpty || value.length > 2) {
-      _loadArtists();
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 300), () {
+      if (!mounted) return;
+      setState(() {});
+      if (value.isEmpty || value.length > 2) {
+        _loadArtists(reset: true);
+      }
+    });
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.extentAfter < 300) {
+      _loadArtists(reset: false);
     }
   }
 
@@ -288,7 +344,7 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
                       onPressed: () {
                         _searchController.clear();
                         setState(() {});
-                        _loadArtists();
+                        _loadArtists(reset: true);
                       },
                     )
                   : null,
@@ -337,337 +393,28 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
       );
     }
 
-    if (_artists.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(18, 0, 18, 18),
-        child: GlassCard(
-          padding: const EdgeInsets.all(18),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                tr('artist_artist_browse_text_no_artists_found'),
-                style: GoogleFonts.spaceGrotesk(
-                  color: Colors.white.withValues(alpha: 0.92),
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                tr('artist_artist_browse_text_empty_state'),
-                style: GoogleFonts.spaceGrotesk(
-                  color: Colors.white.withValues(alpha: 0.7),
-                  fontSize: 13.5,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 16),
-              HudButton(
-                label: tr('artist_artist_browse_cta_reset_filters'),
-                icon: Icons.refresh_rounded,
-                onPressed: () {
-                  setState(() {
-                    _selectedMedium = _mediumOptions.first;
-                    _selectedStyle = _styleOptions.first;
-                    _searchController.clear();
-                  });
-                  _loadArtists();
-                },
-              ),
-            ],
-          ),
-        ),
-      );
-    }
+    return ValueListenableBuilder<List<core.ArtistProfileModel>>(
+      valueListenable: _artistsNotifier,
+      builder: (context, artists, _) {
+        if (_isLoading && artists.isEmpty) {
+          return const Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF22D3EE)),
+            ),
+          );
+        }
 
-    return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(18, 0, 18, 18),
-      physics: const BouncingScrollPhysics(),
-      itemCount: _artists.length,
-      itemBuilder: (context, index) {
-        final artist = _artists[index];
-        return _buildArtistCard(artist);
+        if (artists.isEmpty) {
+          return ArtistBrowseEmptyState(onReset: _resetFilters);
+        }
+
+        return _ArtistBrowseListView(
+          artists: artists,
+          controller: _scrollController,
+          isLoadingMore: _isLoadingMore,
+          onArtistTap: _openProfile,
+        );
       },
-    );
-  }
-
-  Widget _buildArtistCard(core.ArtistProfileModel artist) {
-    final bool isPremium =
-        artist.subscriptionTier != core.SubscriptionTier.free;
-    final bool isGallery = artist.userType.name == core.UserType.gallery.name;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: GlassCard(
-        padding: const EdgeInsets.all(14),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(18),
-          onTap: () => _openProfile(artist),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(18),
-                child: Stack(
-                  children: [
-                    AspectRatio(
-                      aspectRatio: 16 / 9,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF0A1330), Color(0xFF071C18)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          image:
-                              core.ImageUrlValidator.isValidImageUrl(
-                                artist.coverImageUrl,
-                              )
-                              ? DecorationImage(
-                                  image:
-                                      core.ImageUrlValidator.safeNetworkImage(
-                                        artist.coverImageUrl,
-                                      )!,
-                                  fit: BoxFit.cover,
-                                )
-                              : null,
-                        ),
-                      ),
-                    ),
-                    Positioned.fill(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Colors.black.withValues(alpha: 0.05),
-                              Colors.black.withValues(alpha: 0.45),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      top: 12,
-                      left: 12,
-                      child: Row(
-                        children: [
-                          if (artist.isFeatured)
-                            GradientBadge(
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    Icons.auto_awesome_rounded,
-                                    size: 16,
-                                    color: Colors.white,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    tr('artist_artist_browse_badge_featured'),
-                                    style: GoogleFonts.spaceGrotesk(
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w800,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          if (artist.hasActiveBoost) ...[
-                            if (artist.isFeatured) const SizedBox(width: 8),
-                            Tooltip(
-                              message: 'boost_badge_tooltip'.tr(),
-                              child: GradientBadge(
-                                gradient: const LinearGradient(
-                                  colors: [
-                                    Color(0xFFF97316),
-                                    Color(0xFF22D3EE),
-                                  ],
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(
-                                      Icons.bolt_rounded,
-                                      size: 16,
-                                      color: Colors.white,
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      'boost_badge_label'.tr(),
-                                      style: GoogleFonts.spaceGrotesk(
-                                        color: Colors.white,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w800,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                          if (artist.isVerified) ...[
-                            const SizedBox(width: 8),
-                            GradientBadge(
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFF22D3EE), Color(0xFF34D399)],
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    Icons.verified_rounded,
-                                    size: 16,
-                                    color: Colors.white,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    tr('artist_artist_browse_badge_verified'),
-                                    style: GoogleFonts.spaceGrotesk(
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w800,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 12,
-                      left: 14,
-                      child: Row(
-                        children: [
-                          core.BoostPulseRing(
-                            enabled: artist.hasActiveBoost,
-                            ringPadding: 4,
-                            ringWidth: 2,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: Colors.white.withValues(alpha: 0.9),
-                                  width: 3,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.4),
-                                    blurRadius: 12,
-                                    offset: const Offset(0, 6),
-                                  ),
-                                ],
-                              ),
-                              child: core.UserAvatar(
-                                imageUrl: artist.profileImageUrl,
-                                displayName: artist.displayName,
-                                radius: 36,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                artist.displayName,
-                                style: GoogleFonts.spaceGrotesk(
-                                  color: Colors.white.withValues(alpha: 0.95),
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.w900,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Row(
-                                children: [
-                                  if (isGallery)
-                                    _GlassTag(
-                                      icon: Icons.store_mall_directory_rounded,
-                                      label: tr(
-                                        'artist_artist_browse_text_gallery',
-                                      ),
-                                    ),
-                                  if (isPremium) ...[
-                                    if (isGallery) const SizedBox(width: 8),
-                                    _GlassTag(
-                                      icon: Icons.star_rounded,
-                                      label:
-                                          artist.subscriptionTier ==
-                                              core.SubscriptionTier.business
-                                          ? tr(
-                                              'artist_artist_browse_badge_business',
-                                            )
-                                          : tr(
-                                              'artist_artist_browse_badge_premium',
-                                            ),
-                                    ),
-                                  ],
-                                ],
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 14),
-              Text(
-                artist.bio?.isNotEmpty == true
-                    ? artist.bio!
-                    : tr('artist_artist_browse_text_no_bio'),
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.spaceGrotesk(
-                  color: Colors.white.withValues(alpha: 0.78),
-                  fontSize: 13.5,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  if (artist.mediums.isEmpty)
-                    _GlassTag(
-                      icon: Icons.brush_rounded,
-                      label: tr('artist_artist_browse_text_medium_unknown'),
-                    )
-                  else ...[
-                    ...artist.mediums
-                        .take(3)
-                        .map(
-                          (medium) => _GlassTag(
-                            icon: Icons.brush_rounded,
-                            label: medium,
-                          ),
-                        ),
-                    if (artist.mediums.length > 3)
-                      _GlassTag(
-                        icon: Icons.add_rounded,
-                        label: '+${artist.mediums.length - 3}',
-                      ),
-                  ],
-                ],
-              ),
-              const SizedBox(height: 16),
-              HudButton(
-                label: tr('artist_artist_browse_cta_view_profile'),
-                icon: Icons.chevron_right_rounded,
-                onPressed: () => _openProfile(artist),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 
@@ -942,6 +689,388 @@ class _GlassTag extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class ArtistBrowseEmptyState extends StatelessWidget {
+  final VoidCallback onReset;
+
+  const ArtistBrowseEmptyState({Key? key, required this.onReset})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(18, 0, 18, 18),
+      child: GlassCard(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              tr('artist_artist_browse_text_no_artists_found'),
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white.withValues(alpha: 0.92),
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              tr('artist_artist_browse_text_empty_state'),
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white.withValues(alpha: 0.7),
+                fontSize: 13.5,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 16),
+            HudButton(
+              label: tr('artist_artist_browse_cta_reset_filters'),
+              icon: Icons.refresh_rounded,
+              onPressed: onReset,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ArtistBrowseListView extends StatelessWidget {
+  final List<core.ArtistProfileModel> artists;
+  final ScrollController controller;
+  final bool isLoadingMore;
+  final ValueChanged<core.ArtistProfileModel> onArtistTap;
+
+  const _ArtistBrowseListView({
+    Key? key,
+    required this.artists,
+    required this.controller,
+    required this.isLoadingMore,
+    required this.onArtistTap,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      controller: controller,
+      padding: const EdgeInsets.fromLTRB(18, 0, 18, 18),
+      physics: const BouncingScrollPhysics(),
+      itemCount: artists.length + (isLoadingMore ? 1 : 0),
+      itemBuilder: (context, index) {
+        if (index >= artists.length) {
+          return const _ArtistBrowseLoadingMoreIndicator();
+        }
+        final artist = artists[index];
+        return RepaintBoundary(
+          child: _ArtistBrowseCard(
+            artist: artist,
+            onTap: () => onArtistTap(artist),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _ArtistBrowseCard extends StatelessWidget {
+  final core.ArtistProfileModel artist;
+  final VoidCallback onTap;
+
+  const _ArtistBrowseCard({
+    Key? key,
+    required this.artist,
+    required this.onTap,
+  }) : super(key: key);
+
+  bool get _isPremium =>
+      artist.subscriptionTier != core.SubscriptionTier.free;
+  bool get _isGallery => artist.userType.name == core.UserType.gallery.name;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: GlassCard(
+        padding: const EdgeInsets.all(14),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(18),
+          onTap: onTap,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(18),
+                child: Stack(
+                  children: [
+                    AspectRatio(
+                      aspectRatio: 16 / 9,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF0A1330), Color(0xFF071C18)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          image:
+                              core.ImageUrlValidator.isValidImageUrl(
+                                artist.coverImageUrl,
+                              )
+                              ? DecorationImage(
+                                  image:
+                                      core.ImageUrlValidator.safeNetworkImage(
+                                        artist.coverImageUrl,
+                                      )!,
+                                  fit: BoxFit.cover,
+                                )
+                              : null,
+                        ),
+                      ),
+                    ),
+                    Positioned.fill(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.black.withValues(alpha: 0.05),
+                              Colors.black.withValues(alpha: 0.45),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 12,
+                      left: 12,
+                      child: Row(
+                        children: [
+                          if (artist.isFeatured)
+                            GradientBadge(
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.auto_awesome_rounded,
+                                    size: 16,
+                                    color: Colors.white,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    tr('artist_artist_browse_badge_featured'),
+                                    style: GoogleFonts.spaceGrotesk(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          if (artist.hasActiveBoost) ...[
+                            if (artist.isFeatured) const SizedBox(width: 8),
+                            Tooltip(
+                              message: 'boost_badge_tooltip'.tr(),
+                              child: GradientBadge(
+                                gradient: const LinearGradient(
+                                  colors: [
+                                    Color(0xFFF97316),
+                                    Color(0xFF22D3EE),
+                                  ],
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.bolt_rounded,
+                                      size: 16,
+                                      color: Colors.white,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'boost_badge_label'.tr(),
+                                      style: GoogleFonts.spaceGrotesk(
+                                        color: Colors.white,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                          if (artist.isVerified) ...[
+                            const SizedBox(width: 8),
+                            GradientBadge(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF22D3EE), Color(0xFF34D399)],
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.verified_rounded,
+                                    size: 16,
+                                    color: Colors.white,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    tr('artist_artist_browse_badge_verified'),
+                                    style: GoogleFonts.spaceGrotesk(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 12,
+                      left: 14,
+                      child: Row(
+                        children: [
+                          core.BoostPulseRing(
+                            enabled: artist.hasActiveBoost,
+                            ringPadding: 4,
+                            ringWidth: 2,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Colors.white.withValues(alpha: 0.9),
+                                  width: 3,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.4),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 6),
+                                  ),
+                                ],
+                              ),
+                              child: core.UserAvatar(
+                                imageUrl: artist.profileImageUrl,
+                                displayName: artist.displayName,
+                                radius: 36,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                artist.displayName,
+                                style: GoogleFonts.spaceGrotesk(
+                                  color: Colors.white.withValues(alpha: 0.95),
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  if (_isGallery)
+                                    _GlassTag(
+                                      icon: Icons.storefront_rounded,
+                                      label: tr('artist_artist_browse_text_gallery'),
+                                    ),
+                                  if (_isPremium) ...[
+                                    if (_isGallery) const SizedBox(width: 8),
+                                    _GlassTag(
+                                      icon: Icons.star_rounded,
+                                      label: artist.subscriptionTier ==
+                                              core.SubscriptionTier.business
+                                          ? tr('artist_artist_browse_badge_business')
+                                          : tr('artist_artist_browse_badge_premium'),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 14),
+              Text(
+                artist.bio?.isNotEmpty == true
+                    ? artist.bio!
+                    : tr('artist_artist_browse_text_no_bio'),
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.spaceGrotesk(
+                  color: Colors.white.withValues(alpha: 0.78),
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  if (artist.mediums.isEmpty)
+                    _GlassTag(
+                      icon: Icons.brush_rounded,
+                      label: tr('artist_artist_browse_text_medium_unknown'),
+                    )
+                  else ...[
+                    ...artist.mediums
+                        .take(3)
+                        .map(
+                          (medium) => _GlassTag(
+                            icon: Icons.brush_rounded,
+                            label: medium,
+                          ),
+                        ),
+                    if (artist.mediums.length > 3)
+                      _GlassTag(
+                        icon: Icons.add_rounded,
+                        label: '+${artist.mediums.length - 3}',
+                      ),
+                  ],
+                ],
+              ),
+              const SizedBox(height: 16),
+              HudButton(
+                label: tr('artist_artist_browse_cta_view_profile'),
+                icon: Icons.chevron_right_rounded,
+                onPressed: onTap,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ArtistBrowseLoadingMoreIndicator extends StatelessWidget {
+  const _ArtistBrowseLoadingMoreIndicator({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 16),
+      child: Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF22D3EE)),
+        ),
       ),
     );
   }

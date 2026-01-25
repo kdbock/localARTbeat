@@ -530,35 +530,54 @@ class _WrittenContentDetailScreenState
     });
 
     try {
+      final double totalAmount = (_artwork!.price ?? 0.0);
+
       // 1. Create payment intent on the backend
-      final result = await _paymentService.processArtworkSalePayment(
-        artworkId: widget.artworkId,
-        amount: _artwork!.price ?? 0.0,
-        artistId: _artwork!.artistProfileId,
+      final intentData = await _paymentService.createPaymentIntent(
+        amount: totalAmount,
+        currency: 'USD',
+        description: 'Purchase of written content: ${_artwork!.title}',
+        metadata: {
+          'artworkId': widget.artworkId,
+          'artistId': _artwork!.artistProfileId,
+          'contentType': 'written',
+        },
       );
 
-      if (!result.success || result.clientSecret == null) {
-        throw Exception(result.error ?? 'Failed to initialize payment');
+      final String? clientSecret = intentData['clientSecret'] as String?;
+      final String? paymentIntentId = intentData['paymentIntentId'] as String?;
+
+      if (clientSecret == null || paymentIntentId == null) {
+        throw Exception('Failed to initialize payment intent');
       }
 
       // 2. Initialize the payment sheet
       await _paymentService.initPaymentSheetForPayment(
-        paymentIntentClientSecret: result.clientSecret!,
-        // customerId would be fetched from user profile if needed
+        paymentIntentClientSecret: clientSecret,
       );
 
       // 3. Present the payment sheet
       await _paymentService.presentPaymentSheet();
 
-      // 4. Verification - the backend should handle the webhook,
-      // but we can refresh local state
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Payment successful!')));
+      // 4. Complete purchase on backend
+      final result = await _paymentService.processArtworkSalePayment(
+        artworkId: widget.artworkId,
+        artistId: _artwork!.artistProfileId,
+        amount: totalAmount,
+        paymentIntentId: paymentIntentId,
+      );
 
-      // Reload content to check for updated access
-      await _loadContent();
+      if (result.success) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Payment successful!')));
+
+        // Reload content to check for updated access
+        await _loadContent();
+      } else {
+        throw Exception(result.error ?? 'Payment verification failed');
+      }
     } catch (e) {
       late final String errorMessage;
       if (e is StripeException) {

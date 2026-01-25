@@ -424,9 +424,7 @@ class _ArtbeatStoreScreenState extends State<ArtbeatStoreScreen> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      artwork.auctionEnabled
-                          ? '\$${(artwork.currentHighestBid ?? artwork.startingPrice ?? 0).toStringAsFixed(0)}'
-                          : '\$${(artwork.price ?? 0).toStringAsFixed(0)}',
+                      _formatArtworkPrice(artwork),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.spaceGrotesk(
@@ -652,6 +650,22 @@ class _ArtbeatStoreScreenState extends State<ArtbeatStoreScreen> {
         ),
       ),
     );
+  }
+
+  String _formatArtworkPrice(ArtworkModel artwork) {
+    final basePrice = artwork.auctionEnabled
+        ? (artwork.currentHighestBid ?? artwork.startingPrice)
+        : artwork.price;
+    return _formatCurrency(basePrice);
+  }
+
+  String _formatCurrency(double? amount) {
+    return '\$${_safeAmount(amount).toStringAsFixed(0)}';
+  }
+
+  double _safeAmount(double? value) {
+    final candidate = value ?? 0.0;
+    return candidate.isFinite ? candidate : 0.0;
   }
 
   Widget _buildWorldBackground() {

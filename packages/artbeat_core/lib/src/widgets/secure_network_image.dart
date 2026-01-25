@@ -400,6 +400,12 @@ class _SecureNetworkImageState extends State<SecureNetworkImage> {
       return _buildErrorWidget(context, 'Invalid URL', null);
     }
 
+    ImageManagementService().logDecodeDimensions(
+      label: 'SecureNetworkImage',
+      width: widget.width,
+      height: widget.height,
+    );
+
     Widget imageWidget = CachedNetworkImage(
       imageUrl: urlToCheck,
       width: widget.width,

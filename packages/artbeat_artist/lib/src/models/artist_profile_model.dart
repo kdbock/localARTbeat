@@ -12,6 +12,8 @@ class ArtistProfileModel {
   final String bio;
   final UserType userType;
   final String? location;
+  final double? locationLat;
+  final double? locationLng;
   final List<String> mediums;
   final List<String> styles;
   final String? profileImageUrl;
@@ -31,6 +33,8 @@ class ArtistProfileModel {
     required this.bio,
     required this.userType,
     this.location,
+    this.locationLat,
+    this.locationLng,
     required this.mediums,
     required this.styles,
     this.profileImageUrl,
@@ -52,6 +56,8 @@ class ArtistProfileModel {
       bio: (map['bio'] ?? '').toString(),
       userType: _userTypeFromString((map['userType'] ?? 'artist').toString()),
       location: map['location'] != null ? map['location'].toString() : null,
+      locationLat: (map['locationLat'] as num?)?.toDouble(),
+      locationLng: (map['locationLng'] as num?)?.toDouble(),
       mediums: map['mediums'] is List
           ? (map['mediums'] as List).map((e) => e.toString()).toList()
           : <String>[],
@@ -94,6 +100,8 @@ class ArtistProfileModel {
       'bio': bio,
       'userType': _userTypeToString(userType),
       'location': location,
+      if (locationLat != null) 'locationLat': locationLat,
+      if (locationLng != null) 'locationLng': locationLng,
       'mediums': mediums,
       'styles': styles,
       'profileImageUrl': profileImageUrl,
