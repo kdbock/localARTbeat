@@ -14,6 +14,8 @@ class RewardsService {
   FirebaseAuth get _auth => _authInstance ??= FirebaseAuth.instance;
 
   final Logger _logger = Logger();
+  static final Map<String, Future<Map<String, dynamic>>> _dailyLoginInFlight =
+      {};
 
   /// XP rewards for different actions
   static const Map<String, int> _xpRewards = {
@@ -410,10 +412,11 @@ class RewardsService {
       int newXP = 0;
       int oldLevel = 0;
       int newLevel = 0;
+      Map<String, dynamic> userData = {};
 
       await _firestore.runTransaction((transaction) async {
         final userDoc = await transaction.get(userRef);
-        final userData = userDoc.data() ?? {};
+        userData = userDoc.data() ?? {};
 
         final currentXP = userData['experiencePoints'] as int? ?? 0;
         newXP = currentXP + xpAmount;
@@ -463,14 +466,16 @@ class RewardsService {
 
         transaction.update(userRef, updates);
 
-        // Check for new achievements if level increased
-        if (newLevel > oldLevel) {
-          _checkLevelAchievements(user.uid, newLevel, newXP);
-        }
-
-        // Check for action-specific achievements
-        _checkActionAchievements(user.uid, action, userData);
+        return userData; // Return userData for achievement checks
       });
+
+      // Check for new achievements if level increased (outside transaction)
+      if (newLevel > oldLevel) {
+        await _checkLevelAchievements(user.uid, newLevel, newXP);
+      }
+
+      // Check for action-specific achievements (outside transaction)
+      await _checkActionAchievements(user.uid, action, userData);
 
       // Post social activity for level up
       if (newLevel > oldLevel) {
@@ -835,15 +840,29 @@ class RewardsService {
   /// Process daily login and award rewards
   /// Call this when user opens the app
   Future<Map<String, dynamic>> processDailyLogin(String userId) async {
+    final inFlight = _dailyLoginInFlight[userId];
+    if (inFlight != null) return inFlight;
+
+    final future = _processDailyLoginInternal(userId);
+    _dailyLoginInFlight[userId] = future;
+    try {
+      return await future;
+    } finally {
+      _dailyLoginInFlight.remove(userId);
+    }
+  }
+
+  Future<Map<String, dynamic>> _processDailyLoginInternal(String userId) async {
     try {
       final userRef = _firestore.collection('users').doc(userId);
       final today = DateTime.now();
       final todayKey =
           '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
 
-      final result = await _firestore.runTransaction((transaction) async {
-        final userDoc = await transaction.get(userRef);
-        final userData = userDoc.data() ?? {};
+      final result = await _firestore.runTransaction(
+        (transaction) async {
+          final userDoc = await transaction.get(userRef);
+          final userData = userDoc.data() ?? {};
 
         final lastLoginDate = userData['lastLoginDate'] as String?;
         final currentLoginStreak =
@@ -906,13 +925,16 @@ class RewardsService {
 
         transaction.update(userRef, updates);
 
-        return {
-          'alreadyLoggedIn': false,
-          'streak': newStreak,
-          'xpAwarded': xpReward,
-          'isNewStreak': newStreak == 1 && lastLoginDate != null,
-        };
-      });
+          return {
+            'alreadyLoggedIn': false,
+            'streak': newStreak,
+            'xpAwarded': xpReward,
+            'isNewStreak': newStreak == 1 && lastLoginDate != null,
+          };
+        },
+        timeout: const Duration(seconds: 10),
+        maxAttempts: 5,
+      );
 
       // Check for login streak badges (outside transaction)
       if (result['alreadyLoggedIn'] != true) {

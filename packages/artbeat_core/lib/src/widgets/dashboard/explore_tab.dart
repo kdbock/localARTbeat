@@ -85,16 +85,18 @@ class ExploreTab extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
-                                  'Explore Art Walk',
-                                  style: TextStyle(
+                                Text(
+                                  'dashboard_explore_art_walk_title'.tr(),
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                                 Text(
-                                  '${markers.length} artworks nearby',
+                                  'dashboard_explore_art_walk_count'.tr(namedArgs: {
+                                    'count': markers.length.toString(),
+                                  }),
                                   style: const TextStyle(
                                     color: Colors.white70,
                                     fontSize: 14,
@@ -110,9 +112,9 @@ class ExploreTab extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-          const Text(
-            'Captured Art',
-            style: TextStyle(
+          Text(
+            'dashboard_explore_captured_art_title'.tr(),
+            style: const TextStyle(
               color: Colors.black87,
               fontWeight: FontWeight.bold,
               fontSize: 16,
@@ -147,7 +149,7 @@ class ExploreTab extends StatelessWidget {
             Icon(Icons.map_outlined, size: 48, color: Colors.grey[400]),
             const SizedBox(height: 8),
             Text(
-              'Explore Map',
+              'dashboard_explore_map_web_title'.tr(),
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -156,7 +158,7 @@ class ExploreTab extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              'Map preview available on mobile',
+              'dashboard_explore_map_web_subtitle'.tr(),
               style: TextStyle(fontSize: 12, color: Colors.grey[500]),
             ),
           ],

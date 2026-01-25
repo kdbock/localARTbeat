@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -193,8 +192,6 @@ class _ArtistBoostsScreenState extends State<ArtistBoostsScreen> {
               children: [
                 _buildHeroSection(),
                 const SizedBox(height: 24),
-                _buildKioskLaneSection(),
-                const SizedBox(height: 24),
                 _buildArtistSelectionSection(),
                 const SizedBox(height: 24),
                 _buildBoostTiersSection(),
@@ -294,16 +291,6 @@ class _ArtistBoostsScreenState extends State<ArtistBoostsScreen> {
                 ],
               ),
               const SizedBox(height: 22),
-              Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                children: [
-                  _HeroBadge(label: 'boosts_badge_momentum'.tr()),
-                  _HeroBadge(label: 'boosts_badge_local'.tr()),
-                  _HeroBadge(label: 'boosts_badge_map_glow'.tr()),
-                  _HeroBadge(label: 'boosts_badge_kiosk'.tr()),
-                ],
-              ),
             ],
           ),
         ),
@@ -335,172 +322,6 @@ class _ArtistBoostsScreenState extends State<ArtistBoostsScreen> {
     );
   }
 
-  Widget _buildKioskLaneSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionHeader(
-          'boosts_section_kiosk_title'.tr(),
-          'boosts_section_kiosk_subtitle'.tr(),
-        ),
-        const SizedBox(height: 16),
-        SizedBox(
-          height: 180,
-          child: StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection('artistProfiles')
-                .where(
-                  'kioskLaneUntil',
-                  isGreaterThan: Timestamp.fromDate(DateTime.now()),
-                )
-                .orderBy('kioskLaneUntil', descending: true)
-                .limit(10)
-                .snapshots(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return _buildPanelPlaceholder(
-                  child: const Center(child: CircularProgressIndicator()),
-                );
-              }
-
-              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                return _buildPanelPlaceholder(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.auto_awesome,
-                        size: 42,
-                        color: Colors.white.withValues(alpha: 0.4),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'boosts_kiosk_empty'.tr(),
-                        style: GoogleFonts.spaceGrotesk(
-                          color: Colors.white70,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }
-
-              final artists = snapshot.data!.docs
-                  .map((doc) => ArtistProfileModel.fromFirestore(doc))
-                  .toList();
-
-              return ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: artists.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 12),
-                itemBuilder: (context, index) {
-                  final artist = artists[index];
-                  return _buildKioskLaneCard(artist);
-                },
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildKioskLaneCard(ArtistProfileModel artist) {
-    return SizedBox(
-      width: 220,
-      child: _buildGlassPanel(
-        padding: const EdgeInsets.all(18),
-        child: Row(
-          children: [
-            Stack(
-              children: [
-                BoostPulseRing(
-                  enabled: artist.hasActiveBoost || artist.hasKioskLane,
-                  ringPadding: 4,
-                  ringWidth: 2,
-                  child: CircleAvatar(
-                    radius: 26,
-                    backgroundImage: ImageUrlValidator.safeNetworkImage(
-                      artist.profileImageUrl,
-                    ),
-                    backgroundColor: Colors.white.withValues(alpha: 0.1),
-                    child: !ImageUrlValidator.isValidImageUrl(
-                      artist.profileImageUrl,
-                    )
-                        ? Text(
-                            artist.displayName.isNotEmpty
-                                ? artist.displayName[0].toUpperCase()
-                                : '?',
-                            style: GoogleFonts.spaceGrotesk(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          )
-                        : null,
-                  ),
-                ),
-                if (artist.hasKioskLane)
-                  Positioned(
-                    right: -2,
-                    bottom: -2,
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: LinearGradient(
-                          colors: [Color(0xFF22D3EE), Color(0xFFF97316)],
-                        ),
-                      ),
-                      child: const Icon(
-                        Icons.bolt_rounded,
-                        size: 14,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    artist.displayName,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.spaceGrotesk(
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    artist.location ?? 'boosts_kiosk_local_artist'.tr(),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.spaceGrotesk(
-                      color: Colors.white.withValues(alpha: 0.6),
-                      fontSize: 12,
-                    ),
-                  ),
-                  const Spacer(),
-                  Text(
-                    'boosts_kiosk_spotlight_active'.tr(),
-                    style: GoogleFonts.spaceGrotesk(
-                      color: Colors.white.withValues(alpha: 0.7),
-                      fontSize: 11,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget _buildSearchField() {
     return Container(
@@ -778,7 +599,7 @@ class _ArtistBoostsScreenState extends State<ArtistBoostsScreen> {
         'name': 'Spark',
         'price': 4.99,
         'momentum': 50,
-        'icon': Icons.bolt,
+        'image': 'assets/images/spark_boost.png',
         'accentColor': const Color(0xFFFB7185),
         'benefits': [
           'boosts_tier_spark_benefit_1'.tr(),
@@ -792,7 +613,7 @@ class _ArtistBoostsScreenState extends State<ArtistBoostsScreen> {
         'name': 'Surge',
         'price': 9.99,
         'momentum': 120,
-        'icon': Icons.electric_bolt,
+        'image': 'assets/images/surge_boost.png',
         'accentColor': const Color(0xFFF97316),
         'benefits': [
           'boosts_tier_surge_benefit_1'.tr(),
@@ -806,7 +627,7 @@ class _ArtistBoostsScreenState extends State<ArtistBoostsScreen> {
         'name': 'Overdrive',
         'price': 24.99,
         'momentum': 350,
-        'icon': Icons.auto_awesome,
+        'image': 'assets/images/overdrive_boost.png',
         'accentColor': const Color(0xFF22D3EE),
         'benefits': [
           'boosts_tier_overdrive_benefit_1'.tr(),
@@ -841,15 +662,19 @@ class _ArtistBoostsScreenState extends State<ArtistBoostsScreen> {
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(14),
+                    padding: EdgeInsets.zero,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(20),
                       color: Colors.white.withValues(alpha: 0.15),
                     ),
-                    child: Icon(
-                      tier['icon'] as IconData,
-                      color: accentColor,
-                      size: 26,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: Image.asset(
+                        tier['image'] as String,
+                        width: 56,
+                        height: 56,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 14),

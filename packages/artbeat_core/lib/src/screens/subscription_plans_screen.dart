@@ -71,7 +71,7 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
   Widget _buildHeroSection() {
     final badges = [
       'Promo ads that convert to visibility boosts',
-      'Fan subscriptions with instant boosts',
+      'Artist subscriptions with instant boosts',
       'Unified billing across devices',
     ];
 
@@ -432,7 +432,7 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
       _FaqRow(
         title: 'How do promos and subscriptions connect?',
         description:
-            'Each plan bundles fan subscriptions, promo ads, and boost credits so every purchase fuels visibility.',
+            'Each plan bundles artist subscriptions, promo ads, and boost credits so every purchase fuels visibility.',
       ),
       _FaqRow(
         title: 'Can I switch plans later?',

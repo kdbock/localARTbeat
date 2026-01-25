@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/index.dart';
 import '../services/local_ad_service.dart';
 import '../services/ad_report_service.dart';
 import 'ad_report_dialog.dart';
+import 'ad_image_rotator.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 class AdGridCardWidget extends StatefulWidget {
@@ -91,33 +91,7 @@ class _AdGridCardWidgetState extends State<AdGridCardWidget> {
           borderRadius: BorderRadius.circular(8),
           child: Stack(
             children: [
-              if (_ad!.imageUrl != null &&
-                  _ad!.imageUrl!.isNotEmpty &&
-                  (_ad!.imageUrl!.startsWith('http://') ||
-                      _ad!.imageUrl!.startsWith('https://')))
-                CachedNetworkImage(
-                  imageUrl: _ad!.imageUrl!,
-                  width: widget.size,
-                  height: widget.size,
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => Container(
-                    width: widget.size,
-                    height: widget.size,
-                    color: Colors.grey[300],
-                  ),
-                  errorWidget: (context, url, error) => Container(
-                    width: widget.size,
-                    height: widget.size,
-                    color: Colors.grey[300],
-                    child: const Icon(Icons.image_not_supported),
-                  ),
-                )
-              else
-                Container(
-                  width: widget.size,
-                  height: widget.size,
-                  color: Colors.grey[300],
-                ),
+              _buildAdImage(),
               Positioned(
                 bottom: 0,
                 left: 0,
@@ -185,6 +159,34 @@ class _AdGridCardWidgetState extends State<AdGridCardWidget> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildAdImage() {
+    if (_ad == null) {
+      return const SizedBox.shrink();
+    }
+    final images = (_ad!.imageUrls ?? [])
+        .where((url) => url.isNotEmpty)
+        .toList();
+    if (images.isEmpty &&
+        _ad!.imageUrl != null &&
+        _ad!.imageUrl!.isNotEmpty) {
+      images.add(_ad!.imageUrl!);
+    }
+    if (images.isEmpty) {
+      return Container(
+        width: widget.size,
+        height: widget.size,
+        color: Colors.grey[300],
+      );
+    }
+    return AdImageRotator(
+      imageUrls: images,
+      width: widget.size,
+      height: widget.size,
+      fit: BoxFit.cover,
+      borderRadius: BorderRadius.circular(8),
     );
   }
 }

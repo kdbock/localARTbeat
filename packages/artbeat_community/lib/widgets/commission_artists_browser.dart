@@ -12,8 +12,13 @@ import '../services/direct_commission_service.dart';
 /// Widget to browse artists accepting commissions
 class CommissionArtistsBrowser extends StatefulWidget {
   final VoidCallback? onCommissionRequest;
+  final bool showHeader;
 
-  const CommissionArtistsBrowser({super.key, this.onCommissionRequest});
+  const CommissionArtistsBrowser({
+    super.key,
+    this.onCommissionRequest,
+    this.showHeader = true,
+  });
 
   @override
   State<CommissionArtistsBrowser> createState() =>
@@ -127,77 +132,77 @@ class _CommissionArtistsBrowserState extends State<CommissionArtistsBrowser> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Header
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.shade100,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      Icons.art_track,
-                      color: Colors.blue.shade700,
-                      size: 24,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'commission_artists_browser_title'.tr(),
-                          style: GoogleFonts.spaceGrotesk(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        Text(
-                          'commission_artists_browser_subtitle'.tr(
-                            args: [_artists.length.toString()],
-                          ),
-                          style: GoogleFonts.spaceGrotesk(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w400,
-                            color: ArtbeatColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              // Type filter
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
+        if (widget.showHeader)
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    _buildFilterChip(
-                      label: 'commission_artists_browser_all_types'.tr(),
-                      selected: _selectedType == null,
-                      onSelected: () => _handleTypeFilter(null),
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade100,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        Icons.art_track,
+                        color: Colors.blue.shade700,
+                        size: 24,
+                      ),
                     ),
-                    ...CommissionType.values.map((type) {
-                      return _buildFilterChip(
-                        label: type.displayName,
-                        selected: _selectedType == type,
-                        onSelected: () => _handleTypeFilter(type),
-                      );
-                    }),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'commission_artists_browser_title'.tr(),
+                            style: GoogleFonts.spaceGrotesk(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          Text(
+                            'commission_artists_browser_subtitle'.tr(
+                              args: [_artists.length.toString()],
+                            ),
+                            style: GoogleFonts.spaceGrotesk(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w400,
+                              color: ArtbeatColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
-              ),
-            ],
+                const SizedBox(height: 12),
+                // Type filter
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      _buildFilterChip(
+                        label: 'commission_artists_browser_all_types'.tr(),
+                        selected: _selectedType == null,
+                        onSelected: () => _handleTypeFilter(null),
+                      ),
+                      ...CommissionType.values.map((type) {
+                        return _buildFilterChip(
+                          label: type.displayName,
+                          selected: _selectedType == type,
+                          onSelected: () => _handleTypeFilter(type),
+                        );
+                      }),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
         // Artists list
         if (_isLoading)
           const Padding(

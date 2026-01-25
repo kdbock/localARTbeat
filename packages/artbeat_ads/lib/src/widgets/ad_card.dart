@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/index.dart';
+import 'ad_image_rotator.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 class AdCard extends StatelessWidget {
@@ -37,31 +37,7 @@ class AdCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (ad.imageUrl != null &&
-              ad.imageUrl!.isNotEmpty &&
-              (ad.imageUrl!.startsWith('http://') ||
-                  ad.imageUrl!.startsWith('https://')))
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(12),
-              ),
-              child: CachedNetworkImage(
-                imageUrl: ad.imageUrl!,
-                height: 180,
-                width: double.infinity,
-                fit: BoxFit.cover,
-                placeholder: (context, url) => Container(
-                  height: 180,
-                  color: Colors.grey[300],
-                  child: const Center(child: CircularProgressIndicator()),
-                ),
-                errorWidget: (context, url, error) => Container(
-                  height: 180,
-                  color: Colors.grey[300],
-                  child: const Icon(Icons.image_not_supported),
-                ),
-              ),
-            ),
+          _buildAdImage(ad),
           Padding(
             padding: const EdgeInsets.all(12),
             child: Column(
@@ -128,6 +104,25 @@ class AdCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildAdImage(LocalAd ad) {
+    final images = (ad.imageUrls ?? [])
+        .where((url) => url.isNotEmpty)
+        .toList();
+    if (images.isEmpty && ad.imageUrl != null && ad.imageUrl!.isNotEmpty) {
+      images.add(ad.imageUrl!);
+    }
+    if (images.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    return AdImageRotator(
+      imageUrls: images,
+      width: double.infinity,
+      height: 180,
+      fit: BoxFit.cover,
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
     );
   }
 }

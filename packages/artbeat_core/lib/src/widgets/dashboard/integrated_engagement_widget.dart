@@ -492,7 +492,7 @@ class _IntegratedEngagementWidgetState extends State<IntegratedEngagementWidget>
       return _buildDailyQuestMessage(
         icon: Icons.explore,
         title: 'daily_quest_label'.tr(),
-        subtitle: 'Start your first discovery to unlock personalized quests.',
+        subtitle: 'daily_quest_unlock_subtitle'.tr(),
         buttonLabel: 'dashboard_start_quest'.tr(),
         onPressed: () => Navigator.pushNamed(context, '/art-walk/dashboard'),
       );
@@ -660,7 +660,7 @@ class _IntegratedEngagementWidgetState extends State<IntegratedEngagementWidget>
                         Text(
                           challenge.rewardDescription.isNotEmpty
                               ? challenge.rewardDescription
-                              : '${challenge.rewardXP} XP',
+                              : '${challenge.rewardXP} ${'achievement_xp_suffix'.tr()}',
                           style: const TextStyle(
                             fontSize: 12,
                             color: Colors.blue,
@@ -947,9 +947,13 @@ class _IntegratedEngagementWidgetState extends State<IntegratedEngagementWidget>
 
   String _formatNumber(int number) {
     if (number >= 1000000) {
-      return '${(number / 1000000).toStringAsFixed(1)}M';
+      return 'engagement_xp_suffix_m'.tr(
+        namedArgs: {'value': (number / 1000000).toStringAsFixed(1)},
+      );
     } else if (number >= 1000) {
-      return '${(number / 1000).toStringAsFixed(1)}K';
+      return 'engagement_xp_suffix_k'.tr(
+        namedArgs: {'value': (number / 1000).toStringAsFixed(1)},
+      );
     }
     return number.toString();
   }

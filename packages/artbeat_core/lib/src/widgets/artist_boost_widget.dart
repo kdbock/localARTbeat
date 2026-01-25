@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -62,16 +63,7 @@ class _ArtistBoostWidgetState extends State<ArtistBoostWidget> {
           AppLogger.warning('  - In-app purchase capability not enabled');
           if (mounted) {
             setState(() {
-              _initError =
-                  'Store unavailable.\n\n'
-                  'Common causes:\n'
-                  '• Running on simulator without StoreKit\n'
-                  '• No App Store connection\n'
-                  '• Testing setup incomplete\n\n'
-                  'For StoreKit testing:\n'
-                  '1. In Xcode, go to Product > Scheme > Edit Scheme\n'
-                  '2. Under Run > Options\n'
-                  '3. Set StoreKit Configuration to ArtBeat.storekit';
+              _initError = 'boost_store_unavailable'.tr();
               _isInitializing = false;
             });
           }
@@ -88,7 +80,7 @@ class _ArtistBoostWidgetState extends State<ArtistBoostWidget> {
         );
         if (mounted) {
           setState(() {
-            _initError = 'Store unavailable. Check your connection.';
+            _initError = 'boost_store_unavailable'.tr();
             _isInitializing = false;
           });
         }
@@ -105,7 +97,7 @@ class _ArtistBoostWidgetState extends State<ArtistBoostWidget> {
       AppLogger.error('❌ Error checking purchase availability: $e');
       if (mounted) {
         setState(() {
-          _initError = 'Store unavailable. Check your connection.';
+          _initError = 'boost_store_unavailable'.tr();
           _isInitializing = false;
         });
       }
@@ -115,39 +107,39 @@ class _ArtistBoostWidgetState extends State<ArtistBoostWidget> {
   final List<Map<String, dynamic>> _boostOptions = [
     {
       'id': 'artbeat_boost_spark',
-      'name': 'Spark Boost',
-      'icon': '⚡',
+      'name': 'boost_tier_spark_name'.tr(),
+      'image': 'assets/images/spark_boost.png',
       'price': 4.99,
       'momentum': '+50 Momentum',
       'momentumValue': 50,
       'powerLevel': 'SPARK',
-      'description': 'Local discovery lift + supporter badge.',
+      'description': 'boost_tier_spark_desc'.tr(),
       'gradient': const LinearGradient(
         colors: [Color(0xFFFB7185), Color(0xFF22D3EE)],
       ),
     },
     {
       'id': 'artbeat_boost_surge',
-      'name': 'Surge Boost',
-      'icon': '🌈',
+      'name': 'boost_tier_surge_name'.tr(),
+      'image': 'assets/images/surge_boost.png',
       'price': 9.99,
       'momentum': '+120 Momentum',
       'momentumValue': 120,
       'powerLevel': 'SURGE',
-      'description': 'Map pin glow + follow recommendations.',
+      'description': 'boost_tier_surge_desc'.tr(),
       'gradient': const LinearGradient(
         colors: [Color(0xFFF97316), Color(0xFFFACC15)],
       ),
     },
     {
       'id': 'artbeat_boost_overdrive',
-      'name': 'Overdrive Boost',
-      'icon': '💎',
+      'name': 'boost_tier_overdrive_name'.tr(),
+      'image': 'assets/images/overdrive_boost.png',
       'price': 24.99,
       'momentum': '+350 Momentum',
       'momentumValue': 350,
       'powerLevel': 'OVERDRIVE',
-      'description': 'Scheduled Kiosk Lane placement.',
+      'description': 'boost_tier_overdrive_desc'.tr(),
       'gradient': const LinearGradient(
         colors: [Color(0xFF34D399), Color(0xFF0EA5E9)],
       ),
@@ -167,14 +159,14 @@ class _ArtistBoostWidgetState extends State<ArtistBoostWidget> {
       final user = FirebaseAuth.instance.currentUser;
       AppLogger.info('🚨 User check: ${user?.uid ?? "NO USER"}');
       if (user == null) {
-        _showError('Sign in to power-up this artist!');
+        _showError('boost_error_signin'.tr());
         setState(() => _isLoading = false);
         return;
       }
 
       AppLogger.info('🚨 Recipient check: ${widget.recipientId}');
       if (user.uid == widget.recipientId) {
-        _showError('You cannot boost yourself! 🛡️');
+        _showError('boost_error_self'.tr());
         setState(() => _isLoading = false);
         return;
       }
@@ -185,7 +177,7 @@ class _ArtistBoostWidgetState extends State<ArtistBoostWidget> {
       final success = await _boostService.purchaseBoost(
         recipientId: widget.recipientId,
         boostProductId: boostId,
-        message: 'FUELED BY ${user.displayName ?? "A FAN"}!',
+        message: 'boost_fueled_by'.tr(args: [user.displayName ?? 'common_supporter'.tr().toUpperCase()]),
       );
 
       AppLogger.info('🚨 Purchase result: $success');
@@ -203,7 +195,7 @@ class _ArtistBoostWidgetState extends State<ArtistBoostWidget> {
           Navigator.pop(context);
         }
       } else {
-        _showError('Activation failed. Store connection issue.');
+        _showError('boost_error_connection'.tr());
         setState(() => _isLoading = false);
       }
     } catch (e) {
@@ -254,7 +246,7 @@ class _ArtistBoostWidgetState extends State<ArtistBoostWidget> {
 
                 // Success title
                 Text(
-                  'BOOST ACTIVATED!',
+                  'boost_activated'.tr(),
                   style: GoogleFonts.spaceGrotesk(
                     fontSize: 32,
                     fontWeight: FontWeight.w900,
@@ -312,7 +304,7 @@ class _ArtistBoostWidgetState extends State<ArtistBoostWidget> {
                           const SizedBox(width: 12),
                           Flexible(
                             child: Text(
-                              '+$momentum Momentum',
+                              'boost_momentum_added'.tr(args: [momentum.toString()]),
                               style: GoogleFonts.spaceGrotesk(
                                 fontSize: 28,
                                 fontWeight: FontWeight.w900,
@@ -327,7 +319,7 @@ class _ArtistBoostWidgetState extends State<ArtistBoostWidget> {
 
                       // Impact description
                       Text(
-                        '${widget.recipientName}\'s discovery momentum is now amplified!',
+                        'boost_impact_title'.tr(args: [widget.recipientName]),
                         style: GoogleFonts.spaceGrotesk(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -339,7 +331,7 @@ class _ArtistBoostWidgetState extends State<ArtistBoostWidget> {
                       const SizedBox(height: 12),
 
                       Text(
-                        '• Profile visibility increased in discovery feeds\n• Higher placement in search and recommendations\n• Your boost is reflected in their profile',
+                        'boost_impact_details'.tr(),
                         style: GoogleFonts.spaceGrotesk(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
@@ -373,7 +365,7 @@ class _ArtistBoostWidgetState extends State<ArtistBoostWidget> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        '$powerLevel Boost Active',
+                        'boost_active_label'.tr(args: [powerLevel]),
                         style: GoogleFonts.spaceGrotesk(
                           fontSize: 14,
                           fontWeight: FontWeight.w800,
@@ -414,7 +406,7 @@ class _ArtistBoostWidgetState extends State<ArtistBoostWidget> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            'View Their Profile',
+                            'boost_view_profile'.tr(),
                             style: GoogleFonts.spaceGrotesk(
                               fontSize: 16,
                               fontWeight: FontWeight.w800,
@@ -538,7 +530,7 @@ class _ArtistBoostWidgetState extends State<ArtistBoostWidget> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'FUEL THE ARTIST',
+                'boost_fuel_artist'.tr(),
                 style: GoogleFonts.spaceGrotesk(
                   fontSize: 14,
                   fontWeight: FontWeight.w900,
@@ -590,7 +582,7 @@ class _ArtistBoostWidgetState extends State<ArtistBoostWidget> {
         child: Row(
           children: [
             _buildIconBox(
-              boost['icon'] as String,
+              boost['image'] as String,
               boost['gradient'] as LinearGradient,
             ),
             const SizedBox(width: 16),
@@ -671,7 +663,7 @@ class _ArtistBoostWidgetState extends State<ArtistBoostWidget> {
     );
   }
 
-  Widget _buildIconBox(String icon, LinearGradient gradient) {
+  Widget _buildIconBox(String imagePath, LinearGradient gradient) {
     return Container(
       width: 56,
       height: 56,
@@ -686,7 +678,15 @@ class _ArtistBoostWidgetState extends State<ArtistBoostWidget> {
           ),
         ],
       ),
-      child: Center(child: Text(icon, style: const TextStyle(fontSize: 28))),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Image.asset(
+          imagePath,
+          width: 56,
+          height: 56,
+          fit: BoxFit.cover,
+        ),
+      ),
     );
   }
 
@@ -702,9 +702,9 @@ class _ArtistBoostWidgetState extends State<ArtistBoostWidget> {
           ),
           TextButton(
             onPressed: _checkAvailability,
-            child: const Text(
-              'RETRY',
-              style: TextStyle(color: Colors.cyanAccent),
+            child: Text(
+              'common_retry'.tr().toUpperCase(),
+              style: const TextStyle(color: Colors.cyanAccent),
             ),
           ),
         ],

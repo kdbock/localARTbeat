@@ -1075,7 +1075,6 @@ class UserService extends ChangeNotifier {
     try {
       final query = await _usersCollection
           .where('userType', isEqualTo: role)
-          .limit(100)
           .get();
 
       final results = query.docs.map((doc) {

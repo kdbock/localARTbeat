@@ -245,7 +245,9 @@ class _LiveActivityFeedState extends State<LiveActivityFeed>
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
-              '${activity.distance!.toStringAsFixed(1)}mi',
+              'live_activity_distance_mi'.tr(
+                namedArgs: {'distance': activity.distance!.toStringAsFixed(1)},
+              ),
               style: const TextStyle(
                 color: Colors.blue,
                 fontSize: 10,

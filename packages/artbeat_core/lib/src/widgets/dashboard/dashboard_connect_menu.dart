@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 
 class DashboardConnectMenu extends StatelessWidget {
@@ -29,31 +30,31 @@ class DashboardConnectMenu extends StatelessWidget {
             ),
 
             // Header
-            const Padding(
-              padding: EdgeInsets.all(20),
+            Padding(
+              padding: const EdgeInsets.all(20),
               child: Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.explore,
                     color: ArtbeatColors.primaryPurple,
                     size: 24,
                   ),
-                  SizedBox(width: 16),
+                  const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Discover & Connect',
-                          style: TextStyle(
+                          'dashboard_connect_title'.tr(),
+                          style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                             color: ArtbeatColors.textPrimary,
                           ),
                         ),
                         Text(
-                          'Find artists, explore art, join the community',
-                          style: TextStyle(
+                          'dashboard_connect_subtitle'.tr(),
+                          style: const TextStyle(
                             fontSize: 14,
                             color: ArtbeatColors.textSecondary,
                           ),
@@ -74,56 +75,56 @@ class DashboardConnectMenu extends StatelessWidget {
                   _buildMenuTile(
                     context: context,
                     icon: Icons.leaderboard,
-                    title: 'Leaderboard',
-                    subtitle: 'See top artists and community rankings',
+                    title: 'dashboard_connect_leaderboard_title'.tr(),
+                    subtitle: 'dashboard_connect_leaderboard_subtitle'.tr(),
                     color: ArtbeatColors.warning,
                     route: '/leaderboard',
                   ),
                   _buildMenuTile(
                     context: context,
                     icon: Icons.person_search,
-                    title: 'Find Artists',
-                    subtitle: 'Discover local and featured artists',
+                    title: 'dashboard_connect_find_artists_title'.tr(),
+                    subtitle: 'dashboard_connect_find_artists_subtitle'.tr(),
                     color: ArtbeatColors.primaryPurple,
                     route: '/artist/browse',
                   ),
                   _buildMenuTile(
                     context: context,
                     icon: Icons.palette,
-                    title: 'Browse Artwork',
-                    subtitle: 'Explore art collections and galleries',
+                    title: 'dashboard_connect_browse_artwork_title'.tr(),
+                    subtitle: 'dashboard_connect_browse_artwork_subtitle'.tr(),
                     color: ArtbeatColors.primaryGreen,
                     route: '/artwork/browse',
                   ),
                   _buildMenuTile(
                     context: context,
                     icon: Icons.directions_walk,
-                    title: 'Begin Art Walk',
-                    subtitle: 'Start a new art discovery journey',
+                    title: 'dashboard_connect_start_art_walk_title'.tr(),
+                    subtitle: 'dashboard_connect_start_art_walk_subtitle'.tr(),
                     color: ArtbeatColors.info,
                     route: '/art-walk/create',
                   ),
                   _buildMenuTile(
                     context: context,
                     icon: Icons.groups,
-                    title: 'Community Hub',
-                    subtitle: 'Connect with the art community',
+                    title: 'dashboard_connect_community_hub_title'.tr(),
+                    subtitle: 'dashboard_connect_community_hub_subtitle'.tr(),
                     color: ArtbeatColors.primaryPurple,
                     route: '/community/hub',
                   ),
                   _buildMenuTile(
                     context: context,
                     icon: Icons.camera_alt,
-                    title: 'Explore Art',
-                    subtitle: 'View captured artwork and discoveries',
+                    title: 'dashboard_connect_explore_art_title'.tr(),
+                    subtitle: 'dashboard_connect_explore_art_subtitle'.tr(),
                     color: ArtbeatColors.primaryGreen,
                     route: '/captures/list',
                   ),
                   _buildMenuTile(
                     context: context,
                     icon: Icons.event,
-                    title: 'Upcoming Events',
-                    subtitle: 'Art events and exhibitions near you',
+                    title: 'dashboard_connect_upcoming_events_title'.tr(),
+                    subtitle: 'dashboard_connect_upcoming_events_subtitle'.tr(),
                     color: ArtbeatColors.error,
                     route: '/events/list',
                   ),

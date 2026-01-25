@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class DashboardAppExplanation extends StatelessWidget {
   const DashboardAppExplanation({Key? key}) : super(key: key);
@@ -49,10 +50,10 @@ class DashboardAppExplanation extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Welcome to ARTbeat',
-                  style: TextStyle(
+                  'dashboard_explanation_title'.tr(),
+                  style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
                     color: ArtbeatColors.textPrimary,
@@ -64,9 +65,9 @@ class DashboardAppExplanation extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          const Text(
-            'Discover the vibrant art scene around you and connect with local artists.',
-            style: TextStyle(
+          Text(
+            'dashboard_explanation_subtitle'.tr(),
+            style: const TextStyle(
               fontSize: 16,
               color: ArtbeatColors.textSecondary,
               height: 1.5,
@@ -78,26 +79,24 @@ class DashboardAppExplanation extends StatelessWidget {
           // Feature highlights
           _buildFeatureRow(
             icon: Icons.location_on,
-            title: 'Find Public Art',
-            description:
-                'Discover murals, sculptures, and installations near you',
+            title: 'dashboard_feature_art_title'.tr(),
+            description: 'dashboard_feature_art_desc'.tr(),
           ),
 
           const SizedBox(height: 16),
 
           _buildFeatureRow(
             icon: Icons.people,
-            title: 'Connect with Artists',
-            description: 'Follow local artists and see their latest work',
+            title: 'dashboard_feature_artists_title'.tr(),
+            description: 'dashboard_feature_artists_desc'.tr(),
           ),
 
           const SizedBox(height: 16),
 
           _buildFeatureRow(
             icon: Icons.camera_alt,
-            title: 'Capture & Share',
-            description:
-                'Document art discoveries and share with the community',
+            title: 'dashboard_feature_capture_title'.tr(),
+            description: 'dashboard_feature_capture_desc'.tr(),
           ),
 
           const SizedBox(height: 24),
@@ -117,9 +116,9 @@ class DashboardAppExplanation extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: const Text(
-                    'Get Started',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  child: Text(
+                    'dashboard_explanation_get_started'.tr(),
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                 ),
               ),
@@ -137,9 +136,9 @@ class DashboardAppExplanation extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: const Text(
-                    'Sign In',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  child: Text(
+                    'dashboard_explanation_sign_in'.tr(),
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                 ),
               ),

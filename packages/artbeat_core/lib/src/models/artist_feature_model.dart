@@ -148,14 +148,14 @@ class BoostTierConfig {
     required this.features,
   });
 
-  static const supporter = BoostTierConfig(
+  static const spark = BoostTierConfig(
     boostId: 'artbeat_boost_spark',
     price: 4.99,
     momentum: 50,
     features: {FeatureType.artistFeatured: Duration(days: 7)},
   );
 
-  static const fan = BoostTierConfig(
+  static const surge = BoostTierConfig(
     boostId: 'artbeat_boost_surge',
     price: 9.99,
     momentum: 120,
@@ -165,7 +165,7 @@ class BoostTierConfig {
     },
   );
 
-  static const patron = BoostTierConfig(
+  static const overdrive = BoostTierConfig(
     boostId: 'artbeat_boost_overdrive',
     price: 24.99,
     momentum: 350,
@@ -179,11 +179,11 @@ class BoostTierConfig {
   static BoostTierConfig? fromBoostId(String boostId) {
     switch (boostId) {
       case 'artbeat_boost_spark':
-        return supporter;
+        return spark;
       case 'artbeat_boost_surge':
-        return fan;
+        return surge;
       case 'artbeat_boost_overdrive':
-        return patron;
+        return overdrive;
       default:
         return null;
     }

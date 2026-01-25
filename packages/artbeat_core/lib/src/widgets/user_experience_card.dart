@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_art_walk/artbeat_art_walk.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'achievement_runner.dart';
 import 'achievement_badge.dart';
 
@@ -179,9 +180,9 @@ class _UserExperienceCardState extends State<UserExperienceCard>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Welcome back,',
-                        style: TextStyle(
+                      Text(
+                        'ux_card_welcome_back'.tr(),
+                        style: const TextStyle(
                           fontSize: 14,
                           color: ArtbeatColors.textSecondary,
                           fontWeight: FontWeight.w500,
@@ -218,14 +219,14 @@ class _UserExperienceCardState extends State<UserExperienceCard>
                 color: ArtbeatColors.warning.withValues(alpha: 0.3),
               ),
             ),
-            child: const Row(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.star, color: ArtbeatColors.warning, size: 16),
-                SizedBox(width: 4),
+                const Icon(Icons.star, color: ArtbeatColors.warning, size: 16),
+                const SizedBox(width: 4),
                 Text(
-                  'NEW',
-                  style: TextStyle(
+                  'ux_card_new_badge'.tr(),
+                  style: const TextStyle(
                     color: ArtbeatColors.warning,
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
@@ -287,7 +288,7 @@ class _UserExperienceCardState extends State<UserExperienceCard>
             ? widget.user.fullName
             : widget.user.username.isNotEmpty
             ? widget.user.username
-            : 'User',
+            : 'drawer_user_default'.tr(),
         radius: 25,
         backgroundColor: ArtbeatColors.primaryPurple.withValues(alpha: 0.1),
         textColor: ArtbeatColors.primaryPurple,
@@ -325,9 +326,9 @@ class _UserExperienceCardState extends State<UserExperienceCard>
               size: 20,
             ),
             const SizedBox(width: 8),
-            const Text(
-              'Achievements',
-              style: TextStyle(
+            Text(
+              'ux_card_achievements'.tr(),
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
                 color: ArtbeatColors.textPrimary,
@@ -346,9 +347,9 @@ class _UserExperienceCardState extends State<UserExperienceCard>
             if (widget.achievements.isNotEmpty)
               GestureDetector(
                 onTap: widget.onAchievementsTap,
-                child: const Text(
-                  'View All',
-                  style: TextStyle(
+                child: Text(
+                  'ux_card_view_all'.tr(),
+                  style: const TextStyle(
                     fontSize: 14,
                     color: ArtbeatColors.primaryPurple,
                     fontWeight: FontWeight.w600,
@@ -396,9 +397,9 @@ class _UserExperienceCardState extends State<UserExperienceCard>
                   size: 20,
                 ),
                 const SizedBox(width: 8),
-                const Text(
-                  'Complete activities to earn achievements',
-                  style: TextStyle(color: Colors.grey, fontSize: 14),
+                Text(
+                  'ux_card_empty_achievements'.tr(),
+                  style: const TextStyle(color: Colors.grey, fontSize: 14),
                 ),
               ],
             ),
@@ -474,7 +475,7 @@ class _UserExperienceCardState extends State<UserExperienceCard>
             ),
             const SizedBox(width: 8),
             Text(
-              'Level ${widget.user.level} Perks',
+              'ux_card_level_perks'.tr(namedArgs: {'level': widget.user.level.toString()}),
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
@@ -514,9 +515,9 @@ class _UserExperienceCardState extends State<UserExperienceCard>
                 ),
               )
         else
-          const Text(
-            'No special perks at this level',
-            style: TextStyle(
+          Text(
+            'ux_card_no_perks'.tr(),
+            style: const TextStyle(
               fontSize: 12,
               color: Colors.grey,
               fontStyle: FontStyle.italic,
@@ -542,7 +543,7 @@ class _UserExperienceCardState extends State<UserExperienceCard>
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Next: ${nextLevelPerks.first}',
+                    '${'achievement_next_level_prefix'.tr()}: ${nextLevelPerks.first}',
                     style: const TextStyle(
                       fontSize: 11,
                       color: ArtbeatColors.primaryPurple,
@@ -572,19 +573,19 @@ class _UserExperienceCardState extends State<UserExperienceCard>
         children: [
           _buildStatItem(
             icon: Icons.directions_walk,
-            label: 'Level',
+            label: 'ux_card_level'.tr(),
             value: widget.user.level.toString(),
             color: ArtbeatColors.primaryPurple,
           ),
           _buildStatItem(
             icon: Icons.star,
-            label: 'XP',
+            label: 'ux_card_xp'.tr(),
             value: widget.user.experiencePoints.toString(),
             color: ArtbeatColors.primaryGreen,
           ),
           _buildStatItem(
             icon: Icons.emoji_events,
-            label: 'Badges',
+            label: 'ux_card_badges'.tr(),
             value: _unlockedCount.toString(),
             color: ArtbeatColors.warning,
           ),
@@ -653,7 +654,7 @@ class _UserExperienceCardState extends State<UserExperienceCard>
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Level ${widget.user.level}',
+                          '${'ux_card_level'.tr()} ${widget.user.level}',
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
@@ -661,7 +662,7 @@ class _UserExperienceCardState extends State<UserExperienceCard>
                           ),
                         ),
                         Text(
-                          '${widget.user.experiencePoints} XP',
+                          '${widget.user.experiencePoints} ${'ux_card_xp'.tr()}',
                           style: const TextStyle(
                             fontSize: 12,
                             color: ArtbeatColors.textSecondary,
@@ -709,7 +710,7 @@ class _UserExperienceCardState extends State<UserExperienceCard>
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      '$_unlockedCount badges',
+                      'ux_card_badges_count'.tr(namedArgs: {'count': _unlockedCount.toString()}),
                       style: const TextStyle(
                         fontSize: 12,
                         color: ArtbeatColors.primaryPurple,

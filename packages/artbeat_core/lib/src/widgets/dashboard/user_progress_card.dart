@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// User Progress Card - Shows streaks, achievements, and progress
 class UserProgressCard extends StatelessWidget {
@@ -57,10 +58,10 @@ class UserProgressCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Expanded(
+                Expanded(
                   child: Text(
-                    'Your Progress',
-                    style: TextStyle(
+                    'progress_card_title'.tr(),
+                    style: const TextStyle(
                       color: Colors.black87,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
@@ -87,7 +88,7 @@ class UserProgressCard extends StatelessWidget {
                     icon: Icons.local_fire_department,
                     iconColor: Colors.orange,
                     value: '$currentStreak',
-                    label: 'Day Streak',
+                    label: 'progress_card_streak'.tr(),
                   ),
                 ),
 
@@ -99,7 +100,7 @@ class UserProgressCard extends StatelessWidget {
                     icon: Icons.explore,
                     iconColor: Colors.blue,
                     value: '$totalDiscoveries',
-                    label: 'Discoveries',
+                    label: 'progress_card_discoveries'.tr(),
                   ),
                 ),
               ],
@@ -115,7 +116,7 @@ class UserProgressCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Weekly Goal',
+                      'progress_card_weekly_goal'.tr(),
                       style: TextStyle(
                         color: Colors.black87.withValues(alpha: 0.9),
                         fontSize: 14,
@@ -159,7 +160,7 @@ class UserProgressCard extends StatelessWidget {
                 const SizedBox(height: 4),
 
                 Text(
-                  '${(progressPercent * 100).round()}% complete',
+                  'progress_card_complete'.tr(namedArgs: {'percent': '${(progressPercent * 100).round()}'}),
                   style: TextStyle(
                     color: Colors.black87.withValues(alpha: 0.7),
                     fontSize: 12,
@@ -223,7 +224,7 @@ class UserProgressCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Achievements',
+          'ux_card_achievements'.tr(),
           style: TextStyle(
             color: Colors.black87.withValues(alpha: 0.9),
             fontSize: 14,
@@ -237,13 +238,13 @@ class UserProgressCard extends StatelessWidget {
               _buildBadge(
                 icon: Icons.local_fire_department,
                 color: Colors.orange,
-                label: '7-Day Streak',
+                label: 'progress_card_streak_7'.tr(),
               ),
             if (totalDiscoveries >= 50)
               _buildBadge(
                 icon: Icons.explore,
                 color: Colors.blue,
-                label: 'Explorer',
+                label: 'progress_card_explorer'.tr(),
               ),
           ],
         ),

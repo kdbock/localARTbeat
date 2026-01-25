@@ -6,7 +6,8 @@ import 'package:google_fonts/google_fonts.dart';
 
 class AdsScreen extends StatefulWidget {
   final bool isPreview;
-  const AdsScreen({super.key, this.isPreview = false});
+  final bool? showAppBar;
+  const AdsScreen({super.key, this.isPreview = false, this.showAppBar = true});
 
   @override
   State<AdsScreen> createState() => _AdsScreenState();
@@ -51,12 +52,17 @@ class _AdsScreenState extends State<AdsScreen> {
     if (widget.isPreview) {
       return _buildPreview();
     }
-    return Stack(
+    final body = Stack(
       children: [
         _buildWorldBackground(),
         Positioned.fill(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(16, 32, 16, 40),
+            padding: EdgeInsets.fromLTRB(
+              16,
+              widget.showAppBar ?? true ? 96 : 32,
+              16,
+              40,
+            ),
             child: Column(
               children: [
                 _buildHeroSection(),
@@ -68,6 +74,27 @@ class _AdsScreenState extends State<AdsScreen> {
         ),
       ],
     );
+
+    if (widget.showAppBar ?? true) {
+      return Scaffold(
+        backgroundColor: Colors.black,
+        extendBodyBehindAppBar: true,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          title: Text(
+            'Local Ads',
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+        body: body,
+      );
+    }
+
+    return body;
   }
 
   Widget _buildPreview() {
@@ -98,7 +125,7 @@ class _AdsScreenState extends State<AdsScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Watch & Earn',
+                  'Local Ads',
                   style: GoogleFonts.spaceGrotesk(
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
@@ -106,7 +133,7 @@ class _AdsScreenState extends State<AdsScreen> {
                   ),
                 ),
                 Text(
-                  'Get 50 Art Tokens for watching a short video.',
+                  'Promote your local business and help fund art in your city.',
                   style: GoogleFonts.spaceGrotesk(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
@@ -167,7 +194,7 @@ class _AdsScreenState extends State<AdsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Turn boosts into promo fuel',
+                          'Support local art with local business ads',
                           style: GoogleFonts.spaceGrotesk(
                             fontSize: 24,
                             fontWeight: FontWeight.w800,
@@ -176,7 +203,7 @@ class _AdsScreenState extends State<AdsScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Visibility boosts unlock ad credits so artists can feature themselves, their artwork, and events without leaving Artbeat.',
+                          'Create a simple local ad that helps fund artists and keeps your business visible in the Artbeat community.',
                           style: GoogleFonts.spaceGrotesk(
                             fontSize: 15,
                             fontWeight: FontWeight.w500,
@@ -186,17 +213,6 @@ class _AdsScreenState extends State<AdsScreen> {
                       ],
                     ),
                   ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              const Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                children: [
-                  _HeroBadge(label: 'Story takeovers'),
-                  _HeroBadge(label: 'Discovery banners'),
-                  _HeroBadge(label: 'Event push alerts'),
-                  _HeroBadge(label: 'Neighborhood feed boosts'),
                 ],
               ),
             ],
@@ -226,8 +242,8 @@ class _AdsScreenState extends State<AdsScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionHeader(
-          'Choose your package',
-          'Pick a placement size and duration that fits your launch.',
+          'Choose your ad package',
+          'Select a placement size and run length that fits your business.',
         ),
         const SizedBox(height: 18),
         _buildAdCategory('Spotlight Ads', [
@@ -304,6 +320,28 @@ class _AdsScreenState extends State<AdsScreen> {
         ? const Color(0xFF22D3EE)
         : const Color(0xFF7C4DFF);
 
+    // Determine the image asset based on size and duration
+    String imageAsset;
+    if (size == LocalAdSize.big) {
+      // Billboard ads
+      if (duration == LocalAdDuration.oneWeek) {
+        imageAsset = 'assets/images/ad_big_1w.png';
+      } else if (duration == LocalAdDuration.oneMonth) {
+        imageAsset = 'assets/images/ad_big_1m.png';
+      } else {
+        imageAsset = 'assets/images/ad_big_3m.png';
+      }
+    } else {
+      // Spotlight ads
+      if (duration == LocalAdDuration.oneWeek) {
+        imageAsset = 'assets/images/ad_small_1w.png';
+      } else if (duration == LocalAdDuration.oneMonth) {
+        imageAsset = 'assets/images/ad_small_1m.png';
+      } else {
+        imageAsset = 'assets/images/ad_small_3m.png';
+      }
+    }
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
       child: _buildGlassPanel(
@@ -321,17 +359,30 @@ class _AdsScreenState extends State<AdsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Display the promotional image
+            ClipRRect(
+              borderRadius: BorderRadius.circular(18),
+              child: Image.asset(
+                imageAsset,
+                height: size == LocalAdSize.big ? 280 : 180,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  // Fallback to icon if image fails to load
+                  return Container(
+                    height: size == LocalAdSize.big ? 280 : 180,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(18),
+                      color: Colors.white.withValues(alpha: 0.12),
+                    ),
+                    child: Icon(Icons.campaign, color: accent, size: 48),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 18),
             Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(18),
-                    color: Colors.white.withValues(alpha: 0.12),
-                  ),
-                  child: Icon(Icons.campaign, color: accent, size: 24),
-                ),
-                const SizedBox(width: 14),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -396,7 +447,7 @@ class _AdsScreenState extends State<AdsScreen> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Optimized for artist discovery, story placements, and event pushes.',
+                    'Designed for local businesses that want to support artists and reach nearby art lovers.',
                     style: GoogleFonts.spaceGrotesk(
                       color: Colors.white.withValues(alpha: 0.8),
                       fontSize: 13,
@@ -408,22 +459,22 @@ class _AdsScreenState extends State<AdsScreen> {
             const SizedBox(height: 18),
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => _handleAdPurchase(size, duration),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: accent,
-                  foregroundColor: Colors.black,
+                child: ElevatedButton(
+                  onPressed: () => _handleAdPurchase(size, duration),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: accent,
+                    foregroundColor: Colors.black,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
-                child: Text(
-                  'Build Promo',
-                  style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
+                  child: Text(
+                    'Create Local Ad',
+                    style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
+                  ),
                 ),
               ),
-            ),
           ],
         ),
       ),

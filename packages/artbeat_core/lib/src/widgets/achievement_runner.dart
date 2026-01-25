@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../theme/artbeat_colors.dart';
 
 /// A themed visual runner/progress bar for achievements with animations
@@ -147,7 +148,7 @@ class _AchievementRunnerState extends State<AchievementRunner>
                         ],
                       ),
                       child: Text(
-                        'Level ${widget.currentLevel}',
+                        '${'achievement_level_prefix'.tr()} ${widget.currentLevel}',
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -172,7 +173,7 @@ class _AchievementRunnerState extends State<AchievementRunner>
               ),
               const SizedBox(width: 8),
               Text(
-                '${widget.experiencePoints} XP',
+                '${widget.experiencePoints} ${'achievement_xp_suffix'.tr()}',
                 style: const TextStyle(
                   color: ArtbeatColors.textSecondary,
                   fontWeight: FontWeight.w500,
@@ -338,7 +339,7 @@ class _AchievementRunnerState extends State<AchievementRunner>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Next: ${_getNextLevelTitle(widget.currentLevel + 1)}',
+                '${'achievement_next_level_prefix'.tr()}: ${_getNextLevelTitle(widget.currentLevel + 1)}',
                 style: TextStyle(
                   color: Colors.grey[600],
                   fontSize: 12,
@@ -346,7 +347,7 @@ class _AchievementRunnerState extends State<AchievementRunner>
                 ),
               ),
               Text(
-                '${_getXPForNextLevel(widget.currentLevel)} XP',
+                '${_getXPForNextLevel(widget.currentLevel)} ${'achievement_xp_suffix'.tr()}',
                 style: TextStyle(
                   color: Colors.grey[600],
                   fontSize: 12,

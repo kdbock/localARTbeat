@@ -26,38 +26,38 @@ class AdPricingMatrix {
       size: LocalAdSize.small,
       duration: LocalAdDuration.oneWeek,
       sku: 'ad_small_1w',
-      price: 0.99,
+      price: 4.99,
     ),
     AdPricingConfig(
       size: LocalAdSize.small,
       duration: LocalAdDuration.oneMonth,
       sku: 'ad_small_1m',
-      price: 1.99,
+      price: 9.99,
     ),
     AdPricingConfig(
       size: LocalAdSize.small,
       duration: LocalAdDuration.threeMonths,
       sku: 'ad_small_3m',
-      price: 4.99,
+      price: 19.99,
     ),
     // BIG ADS (SQUARE FORMAT)
     AdPricingConfig(
       size: LocalAdSize.big,
       duration: LocalAdDuration.oneWeek,
       sku: 'ad_big_1w',
-      price: 1.99,
+      price: 9.99,
     ),
     AdPricingConfig(
       size: LocalAdSize.big,
       duration: LocalAdDuration.oneMonth,
       sku: 'ad_big_1m',
-      price: 3.99,
+      price: 19.99,
     ),
     AdPricingConfig(
       size: LocalAdSize.big,
       duration: LocalAdDuration.threeMonths,
       sku: 'ad_big_3m',
-      price: 9.99,
+      price: 49.99,
     ),
   ];
 

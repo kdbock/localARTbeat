@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../models/user_model.dart';
 import '../services/user_service.dart';
 import '../theme/artbeat_colors.dart';
@@ -124,7 +125,7 @@ class _ArtistCTAWidgetState extends State<ArtistCTAWidget> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Are you an artist?',
+                                'artist_cta_title'.tr(),
                                 style: Theme.of(context).textTheme.titleMedium
                                     ?.copyWith(
                                       color: ArtbeatColors.textPrimary,
@@ -133,7 +134,7 @@ class _ArtistCTAWidgetState extends State<ArtistCTAWidget> {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                'Turn your passion into profit',
+                                'artist_cta_subtitle'.tr(),
                                 style: Theme.of(context).textTheme.bodyMedium
                                     ?.copyWith(
                                       color: ArtbeatColors.textSecondary,
@@ -162,19 +163,19 @@ class _ArtistCTAWidgetState extends State<ArtistCTAWidget> {
                       children: [
                         _buildFeature(
                           icon: Icons.card_giftcard_outlined,
-                          text: 'Receive boosts',
+                          text: 'artist_cta_feature_boosts'.tr(),
                         ),
                         _buildFeature(
                           icon: Icons.attach_money_outlined,
-                          text: 'Get sponsored',
+                          text: 'artist_cta_feature_sponsored'.tr(),
                         ),
                         _buildFeature(
                           icon: Icons.work_outline,
-                          text: 'Commissions',
+                          text: 'artist_cta_feature_commissions'.tr(),
                         ),
                         _buildFeature(
                           icon: Icons.trending_up_outlined,
-                          text: 'Earn income',
+                          text: 'artist_cta_feature_earnings'.tr(),
                         ),
                       ],
                     ),
@@ -197,7 +198,7 @@ class _ArtistCTAWidgetState extends State<ArtistCTAWidget> {
                           ),
                         ),
                         child: Text(
-                          'Get Started - From \$4.99/month',
+                          'artist_cta_button'.tr(namedArgs: {'price': r'$4.99'}),
                           style: Theme.of(context).textTheme.bodyLarge
                               ?.copyWith(
                                 color: Colors.white,
@@ -212,7 +213,7 @@ class _ArtistCTAWidgetState extends State<ArtistCTAWidget> {
                     // Subtitle
                     Center(
                       child: Text(
-                        'Join artists earning through boosts, sponsorships & commissions',
+                        'artist_cta_footer'.tr(),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: ArtbeatColors.textSecondary,
                         ),
@@ -308,7 +309,7 @@ class CompactArtistCTAWidget extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'Are you an artist?',
+                            'artist_cta_title'.tr(),
                             style: Theme.of(context).textTheme.bodyLarge
                                 ?.copyWith(
                                   color: ArtbeatColors.textPrimary,
@@ -316,7 +317,7 @@ class CompactArtistCTAWidget extends StatelessWidget {
                                 ),
                           ),
                           Text(
-                            'Start selling your art today',
+                            'artist_cta_compact_subtitle'.tr(),
                             style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(color: ArtbeatColors.textSecondary),
                           ),
@@ -333,7 +334,7 @@ class CompactArtistCTAWidget extends StatelessWidget {
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Text(
-                        'Start',
+                        'artist_cta_compact_button'.tr(),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.w600,

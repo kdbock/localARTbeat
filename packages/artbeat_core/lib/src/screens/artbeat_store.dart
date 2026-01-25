@@ -2,6 +2,8 @@ import 'dart:ui';
 
 import 'package:artbeat_core/artbeat_core.dart' hide ArtworkModel;
 import 'package:artbeat_artwork/artbeat_artwork.dart';
+import 'package:artbeat_community/artbeat_community.dart'
+    show CommissionArtistsBrowser;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -63,17 +65,25 @@ class _ArtbeatStoreScreenState extends State<ArtbeatStoreScreen> {
                       _buildArtMarketPreview(),
                       const SizedBox(height: 24),
                       _buildSectionHeader(
+                        'Artists Available For Commission',
+                        Icons.palette_rounded,
+                        const Color(0xFFFBBF24),
+                      ),
+                      _buildCommissionArtistsPreview(),
+                      const SizedBox(height: 24),
+                      _buildSectionHeader(
                         'store_tab_subs'.tr(),
                         Icons.workspace_premium_rounded,
                         const Color(0xFFA855F7),
-                        onTap: () => _showAllSubscriptions(),
                       ),
                       _buildSubscriptionsPreview(),
                       const SizedBox(height: 24),
                       _buildSectionHeader(
-                        'store_tab_ads'.tr(),
+                        'Local Ads',
                         Icons.ads_click_rounded,
                         const Color(0xFF22D3EE),
+                        subtitle:
+                            'Keep local eyes on local ads with Local ARTbeat',
                         onTap: () => _showAds(),
                       ),
                       _buildAdsPreview(),
@@ -92,48 +102,14 @@ class _ArtbeatStoreScreenState extends State<ArtbeatStoreScreen> {
   Widget _buildSliverAppBar() {
     return SliverAppBar(
       backgroundColor: Colors.transparent,
+      automaticallyImplyLeading: false,
+      leading: const SizedBox.shrink(),
       elevation: 0,
       pinned: true,
-      expandedHeight: 140,
+      expandedHeight: 60,
       flexibleSpace: FlexibleSpaceBar(
-        titlePadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        title: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'store_title'.tr(),
-              style: GoogleFonts.spaceGrotesk(
-                fontSize: 24,
-                fontWeight: FontWeight.w800,
-                color: Colors.white,
-              ),
-            ),
-            Text(
-              'Shop Local',
-              style: GoogleFonts.spaceGrotesk(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: Colors.white70,
-              ),
-            ),
-          ],
-        ),
-        background: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const SizedBox(height: 10),
-            _buildKioskLanePreview(),
-          ],
-        ),
+        background: Center(child: _buildKioskLanePreview()),
       ),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.search_rounded, color: Colors.white70),
-          onPressed: () => Navigator.pushNamed(context, AppRoutes.artworkSearch),
-        ),
-        const SizedBox(width: 8),
-      ],
     );
   }
 
@@ -141,6 +117,7 @@ class _ArtbeatStoreScreenState extends State<ArtbeatStoreScreen> {
     String title,
     IconData icon,
     Color color, {
+    String? subtitle,
     VoidCallback? onTap,
   }) {
     return Padding(
@@ -149,22 +126,38 @@ class _ArtbeatStoreScreenState extends State<ArtbeatStoreScreen> {
         children: [
           Icon(icon, color: color, size: 20),
           const SizedBox(width: 10),
-          Text(
-            title,
-            style: GoogleFonts.spaceGrotesk(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.spaceGrotesk(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white70,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ],
             ),
           ),
-          const Spacer(),
-          if (onTap != null)
-            _buildGlassButton(
-              'View All',
-              onTap,
-              color: color,
-              small: true,
-            ),
+          if (onTap != null) ...[
+            const SizedBox(width: 12),
+            _buildGlassButton('store_view_all'.tr(), onTap, color: color, small: true),
+          ],
         ],
       ),
     );
@@ -215,24 +208,31 @@ class _ArtbeatStoreScreenState extends State<ArtbeatStoreScreen> {
         children: [
           _buildImpulseItem(
             'Give Boost',
-            'dashboard_boost_now_btn'.tr(),
+            'Upgrades for Artists',
             Icons.rocket_launch_rounded,
             const Color(0xFFF97316),
             () => _showBoosts(),
           ),
           _buildImpulseItem(
-            'Local Ad',
-            'Get Tokens',
+            'Local Ads',
+            'Keep Business Local',
             Icons.ads_click_rounded,
             const Color(0xFF22D3EE),
             () => _showAds(),
           ),
           _buildImpulseItem(
-            'Artist Access',
+            'Subscribe',
             'Share Your Art',
             Icons.workspace_premium_rounded,
             const Color(0xFFA855F7),
             () => _showArtistOnboarding(),
+          ),
+          _buildImpulseItem(
+            'Commission',
+            'Art Your Way',
+            Icons.palette_rounded,
+            const Color(0xFFFBBF24),
+            () => _showCommissions(),
           ),
         ],
       ),
@@ -319,7 +319,7 @@ class _ArtbeatStoreScreenState extends State<ArtbeatStoreScreen> {
                   .snapshots(),
               builder: (context, snap2) {
                 if (!snap2.hasData || snap2.data!.docs.isEmpty) {
-                  return _buildEmptySection('No active auctions');
+                  return _buildEmptySection('store_empty_auctions'.tr());
                 }
                 final artworks = snap2.data!.docs
                     .map((doc) => ArtworkModel.fromFirestore(doc))
@@ -349,7 +349,7 @@ class _ArtbeatStoreScreenState extends State<ArtbeatStoreScreen> {
 
   Widget _buildArtMarketPreview() {
     return SizedBox(
-      height: 200,
+      height: 240,
       child: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('artwork')
@@ -359,18 +359,12 @@ class _ArtbeatStoreScreenState extends State<ArtbeatStoreScreen> {
             .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return _buildEmptySection('No items for sale');
+            return _buildEmptySection('store_empty_sale'.tr());
           }
           final artworks = snapshot.data!.docs
               .map((doc) => ArtworkModel.fromFirestore(doc))
               .toList();
-          return ListView.separated(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            scrollDirection: Axis.horizontal,
-            itemCount: artworks.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 16),
-            itemBuilder: (context, index) => _buildMarketCard(artworks[index]),
-          );
+          return _buildMarketList(artworks);
         },
       ),
     );
@@ -381,7 +375,7 @@ class _ArtbeatStoreScreenState extends State<ArtbeatStoreScreen> {
       onTap: () => Navigator.pushNamed(
         context,
         AppRoutes.artworkDetail,
-        arguments: artwork.id,
+        arguments: {'artworkId': artwork.id},
       ),
       child: Container(
         width: 160,
@@ -406,41 +400,40 @@ class _ArtbeatStoreScreenState extends State<ArtbeatStoreScreen> {
                 ),
               ),
             ),
-            Flexible(
-              flex: 1,
+            SizedBox(
+              height: 64,
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Flexible(
-                      child: Text(
-                        artwork.title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.spaceGrotesk(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                          color: Colors.white,
-                        ),
+                    Text(
+                      artwork.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.spaceGrotesk(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                        color: Colors.white,
                       ),
                     ),
                     const SizedBox(height: 2),
-                    Flexible(
-                      child: Text(
-                        artwork.auctionEnabled
-                            ? '\$${(artwork.currentHighestBid ?? artwork.startingPrice ?? 0).toStringAsFixed(0)}'
-                            : '\$${(artwork.price ?? 0).toStringAsFixed(0)}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.spaceGrotesk(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 14,
-                          color: artwork.auctionEnabled
-                              ? const Color(0xFF22D3EE)
-                              : const Color(0xFF34D399),
-                        ),
+                    Text(
+                      artwork.auctionEnabled
+                          ? '\$${(artwork.currentHighestBid ?? artwork.startingPrice ?? 0).toStringAsFixed(0)}'
+                          : '\$${(artwork.price ?? 0).toStringAsFixed(0)}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.spaceGrotesk(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 14,
+                        color: artwork.auctionEnabled
+                            ? const Color(0xFF22D3EE)
+                            : const Color(0xFF34D399),
                       ),
                     ),
                   ],
@@ -454,9 +447,63 @@ class _ArtbeatStoreScreenState extends State<ArtbeatStoreScreen> {
   }
 
   Widget _buildSubscriptionsPreview() {
-    return const SizedBox(
-      height: 180,
-      child: SubscriptionsScreen(showAppBar: false, isPreview: true),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: GestureDetector(
+        onTap: () => _showAllSubscriptions(),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            gradient: LinearGradient(
+              colors: [
+                const Color(0xFFA855F7).withValues(alpha: 0.2),
+                const Color(0xFFA855F7).withValues(alpha: 0.05),
+              ],
+            ),
+            border: Border.all(color: const Color(0xFFA855F7).withValues(alpha: 0.3)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: const BoxDecoration(
+                  color: Color(0xFFA855F7),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.workspace_premium_rounded, color: Colors.white, size: 24),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'store_artist_cta_title'.tr(),
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                      ),
+                    ),
+                    Text(
+                      'store_artist_cta_subtitle'.tr(),
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white70,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right_rounded, color: Colors.white54),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -464,6 +511,20 @@ class _ArtbeatStoreScreenState extends State<ArtbeatStoreScreen> {
     return const Padding(
       padding: EdgeInsets.symmetric(horizontal: 24),
       child: AdsScreen(isPreview: true),
+    );
+  }
+
+  Widget _buildCommissionArtistsPreview() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          color: Colors.white.withValues(alpha: 0.03),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        ),
+        child: const CommissionArtistsBrowser(showHeader: false),
+      ),
     );
   }
 
@@ -481,43 +542,31 @@ class _ArtbeatStoreScreenState extends State<ArtbeatStoreScreen> {
   }
 
   void _showAllMarket(bool isAuction) {
-    Navigator.push(
+    Navigator.pushNamed(
       context,
-      MaterialPageRoute<void>(
-        builder: (context) => Scaffold(
-          appBar: AppBar(
-            title: Text(isAuction ? 'Auctions' : 'Buy Now'),
-            backgroundColor: const Color(0xFF03050F),
-          ),
-          body: ArtMarketScreen(isAuction: isAuction),
-        ),
-      ),
+      isAuction ? AppRoutes.artworkTrending : AppRoutes.artworkBrowse,
+      arguments: {'isAuction': isAuction},
     );
   }
 
   void _showAllSubscriptions() {
-    Navigator.push(
-      context,
-      MaterialPageRoute<void>(
-        builder: (context) => const SubscriptionsScreen(showAppBar: true),
-      ),
-    );
+    Navigator.pushNamed(context, AppRoutes.subscriptions);
   }
 
   void _showAds() {
-    Navigator.push(
-      context,
-      MaterialPageRoute<void>(builder: (context) => const AdsScreen()),
-    );
+    Navigator.pushNamed(context, AppRoutes.ads);
   }
 
   void _showBoosts() {
-    Navigator.push(
-      context,
-      MaterialPageRoute<void>(
-        builder: (context) => const ArtistBoostsScreen(showAppBar: true),
-      ),
-    );
+    Navigator.pushNamed(context, AppRoutes.boosts);
+  }
+
+  void _showCommissions() {
+    Navigator.pushNamed(context, AppRoutes.commissionHub);
+  }
+
+  void _showArtistOnboarding() {
+    Navigator.pushNamed(context, AppRoutes.artistOnboardingIntroduction);
   }
 
   Widget _buildKioskLanePreview() {

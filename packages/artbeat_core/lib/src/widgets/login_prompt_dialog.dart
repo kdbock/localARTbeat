@@ -177,9 +177,9 @@ class LoginPromptDialog extends StatelessWidget {
                   children: [
                     TextSpan(text: 'auth_prompt_no_account'.tr()),
                     const TextSpan(text: ' '),
-                    const TextSpan(
-                      text: 'Sign Up',
-                      style: TextStyle(
+                    TextSpan(
+                      text: 'auth_prompt_signup'.tr(),
+                      style: const TextStyle(
                         color: ArtbeatColors.primaryGreen,
                         fontWeight: FontWeight.w600,
                       ),

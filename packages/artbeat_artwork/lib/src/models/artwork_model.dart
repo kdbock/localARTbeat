@@ -389,7 +389,7 @@ class ArtworkModel {
       releasedChapters: data['releasedChapters'] as int?,
       readingMetadata: data['readingMetadata'] as Map<String, dynamic>?,
       serializationConfig: data['serializationConfig'] as Map<String, dynamic>?,
-      auctionEnabled: data['auctionEnabled'] as bool? ?? false,
+      auctionEnabled: data['auctionEnabled'] as bool? ?? data['isAuction'] as bool? ?? false,
       auctionEnd: (data['auctionEnd'] as Timestamp?)?.toDate(),
       startingPrice: data['startingPrice'] != null
           ? (data['startingPrice'] as num).toDouble()
@@ -458,6 +458,7 @@ class ArtworkModel {
       if (serializationConfig != null)
         'serializationConfig': serializationConfig,
       'auctionEnabled': auctionEnabled,
+      'isAuction': auctionEnabled,
       if (auctionEnd != null) 'auctionEnd': Timestamp.fromDate(auctionEnd!),
       if (startingPrice != null) 'startingPrice': startingPrice,
       if (reservePrice != null) 'reservePrice': reservePrice,

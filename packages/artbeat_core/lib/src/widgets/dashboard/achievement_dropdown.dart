@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../achievement_badge.dart';
 
 /// Dropdown widget to display user achievements
@@ -45,7 +46,10 @@ class AchievementDropdown extends StatelessWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      '${unlockedCount}/${achievements.length} Achievements',
+                      'dashboard_achievements_count'.tr(namedArgs: {
+                        'unlocked': unlockedCount.toString(),
+                        'total': achievements.length.toString(),
+                      }),
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -89,12 +93,12 @@ class AchievementDropdown extends StatelessWidget {
                       );
                     },
                   )
-                : const Padding(
-                    padding: EdgeInsets.all(16),
+                : Padding(
+                    padding: const EdgeInsets.all(16),
                     child: Center(
                       child: Text(
-                        'No achievements found.',
-                        style: TextStyle(color: Colors.grey, fontSize: 14),
+                        'dashboard_achievements_none'.tr(),
+                        style: const TextStyle(color: Colors.grey, fontSize: 14),
                       ),
                     ),
                   ),

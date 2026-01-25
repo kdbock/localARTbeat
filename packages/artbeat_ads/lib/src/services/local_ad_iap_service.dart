@@ -40,6 +40,11 @@ class LocalAdIapService {
     required LocalAdDuration duration,
   }) async {
     try {
+      final isAvailable = await _inAppPurchase.isAvailable();
+      if (!isAvailable) {
+        throw Exception('In-app purchases are not available on this device');
+      }
+
       final sku = AdPricingMatrix.getSku(size, duration);
       if (sku == null) {
         throw Exception('Invalid ad configuration');
@@ -55,9 +60,17 @@ class LocalAdIapService {
       }
 
       final product = response.productDetails.first;
-      await _inAppPurchase.buyConsumable(
-        purchaseParam: PurchaseParam(productDetails: product),
+      final userId = _auth.currentUser?.uid;
+      final purchaseResult = await _inAppPurchase.buyConsumable(
+        purchaseParam: PurchaseParam(
+          productDetails: product,
+          applicationUserName: userId,
+        ),
       );
+
+      if (!purchaseResult) {
+        throw Exception('Failed to start purchase');
+      }
     } catch (e) {
       throw Exception('Failed to purchase: $e');
     }

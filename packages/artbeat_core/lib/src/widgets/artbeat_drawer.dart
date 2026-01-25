@@ -492,21 +492,21 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer>
                   final user = snapshot.data;
 
                   if (user == null) {
-                    return const _HeaderUserBlock(
-                      displayName: 'Guest User',
-                      subtitle: 'Not signed in',
+                    return _HeaderUserBlock(
+                      displayName: 'drawer_guest_user'.tr(),
+                      subtitle: 'drawer_not_signed_in'.tr(),
                       role: null,
                       profileUrl: null,
                       showRoleToggle: false,
                       roleToggle: null,
                       isAdmin: false,
-                      modeChip: null,
+                      modeChip: _buildModeChip(null),
                     );
                   }
 
                   final userModel = _cachedUserModel;
                   final displayName =
-                      userModel?.fullName ?? user.displayName ?? 'User';
+                      userModel?.fullName ?? user.displayName ?? 'drawer_user_default'.tr();
                   final profileImageUrl = userModel?.profileImageUrl;
 
                   final role = _getUserRole();
@@ -533,9 +533,10 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer>
 
   Widget _buildModeChip(String? role) {
     // "Local ARTbeat" brand chip (always)
+    final brand = 'drawer_local_brand'.tr();
     final label = role == null
-        ? "LOCAL ARTBEAT"
-        : "LOCAL ARTBEAT • ${role.toUpperCase()}";
+        ? brand
+        : "$brand • ${role.toUpperCase()}";
     return _NeonChip(
       label: label,
       accent: const Color(0xFF22D3EE),
@@ -551,32 +552,32 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer>
 
     switch (currentViewRole) {
       case 'admin':
-        displayText = 'ADMIN MODE';
+        displayText = 'drawer_mode_admin'.tr();
         badgeColor = ArtbeatColors.primaryPurple;
         icon = Icons.admin_panel_settings_rounded;
         break;
       case 'user':
-        displayText = 'USER MODE';
+        displayText = 'drawer_mode_user'.tr();
         badgeColor = ArtbeatColors.textSecondary;
         icon = Icons.person_rounded;
         break;
       case 'artist':
-        displayText = 'ARTIST MODE';
+        displayText = 'drawer_mode_artist'.tr();
         badgeColor = ArtbeatColors.primaryGreen;
         icon = Icons.palette_rounded;
         break;
       case 'gallery':
-        displayText = 'GALLERY MODE';
+        displayText = 'drawer_mode_gallery'.tr();
         badgeColor = const Color(0xFF2196F3);
         icon = Icons.business_rounded;
         break;
       case 'moderator':
-        displayText = 'MOD MODE';
+        displayText = 'drawer_mode_moderator'.tr();
         badgeColor = const Color(0xFFFF9800);
         icon = Icons.gavel_rounded;
         break;
       default:
-        displayText = 'ADMIN MODE';
+        displayText = 'drawer_mode_admin'.tr();
         badgeColor = ArtbeatColors.primaryPurple;
         icon = Icons.admin_panel_settings_rounded;
     }
@@ -667,7 +668,7 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer>
               } catch (error) {
                 AppLogger.error('⚠️ Error in drawer navigation: $error');
                 // ignore: use_build_context_synchronously
-                _showError(context, 'Navigation failed: ${error.toString()}');
+                _showError(context, error.toString());
               }
             }
           },

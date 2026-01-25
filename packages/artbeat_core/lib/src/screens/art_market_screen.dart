@@ -262,7 +262,7 @@ class _ArtMarketScreenState extends State<ArtMarketScreen> {
         Navigator.pushNamed(
           context,
           AppRoutes.artworkDetail,
-          arguments: artwork.id,
+          arguments: {'artworkId': artwork.id},
         );
       },
       child: Container(

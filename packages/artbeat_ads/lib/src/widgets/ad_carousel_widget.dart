@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/index.dart';
 import '../services/local_ad_service.dart';
+import 'ad_image_rotator.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 class AdCarouselWidget extends StatefulWidget {
@@ -138,25 +138,21 @@ class _AdCarouselWidgetState extends State<AdCarouselWidget> {
   }
 
   Widget _buildAdSlide(LocalAd ad) {
+    final images = (ad.imageUrls ?? [])
+        .where((url) => url.isNotEmpty)
+        .toList();
+    if (images.isEmpty && ad.imageUrl != null && ad.imageUrl!.isNotEmpty) {
+      images.add(ad.imageUrl!);
+    }
     return Stack(
       children: [
-        if (ad.imageUrl != null &&
-            ad.imageUrl!.isNotEmpty &&
-            (ad.imageUrl!.startsWith('http://') ||
-                ad.imageUrl!.startsWith('https://')))
-          CachedNetworkImage(
-            imageUrl: ad.imageUrl!,
+        if (images.isNotEmpty)
+          AdImageRotator(
+            imageUrls: images,
             width: double.infinity,
             height: widget.height,
             fit: BoxFit.cover,
-            placeholder: (context, url) => Container(
-              color: Colors.grey[300],
-              child: const Center(child: CircularProgressIndicator()),
-            ),
-            errorWidget: (context, url, error) => Container(
-              color: Colors.grey[300],
-              child: const Icon(Icons.image_not_supported),
-            ),
+            autoRotateDuration: const Duration(seconds: 4),
           )
         else
           Container(

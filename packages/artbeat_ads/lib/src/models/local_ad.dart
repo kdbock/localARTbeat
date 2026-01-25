@@ -9,6 +9,7 @@ class LocalAd {
   final String title;
   final String description;
   final String? imageUrl;
+  final List<String>? imageUrls;
   final String? contactInfo;
   final String? websiteUrl;
   final LocalAdZone zone;
@@ -27,6 +28,7 @@ class LocalAd {
     required this.title,
     required this.description,
     this.imageUrl,
+    this.imageUrls,
     this.contactInfo,
     this.websiteUrl,
     required this.zone,
@@ -56,6 +58,10 @@ class LocalAd {
       title: (map['title'] ?? '') as String,
       description: (map['description'] ?? '') as String,
       imageUrl: map['imageUrl'] as String?,
+      imageUrls: (map['imageUrls'] as List?)
+          ?.whereType<String>()
+          .toList() ??
+          (map['artworkUrls'] as List?)?.whereType<String>().toList(),
       contactInfo: map['contactInfo'] as String?,
       websiteUrl: map['websiteUrl'] as String?,
       zone: LocalAdZoneExtension.fromIndex((map['zone'] ?? 0) as int),
@@ -80,11 +86,13 @@ class LocalAd {
   }
 
   Map<String, dynamic> toMap() {
+    final urls = imageUrls?.where((url) => url.isNotEmpty).toList();
     return {
       'userId': userId,
       'title': title,
       'description': description,
-      'imageUrl': imageUrl,
+      'imageUrl': imageUrl ?? (urls != null && urls.isNotEmpty ? urls.first : null),
+      if (urls != null && urls.isNotEmpty) 'imageUrls': urls,
       'contactInfo': contactInfo,
       'websiteUrl': websiteUrl,
       'zone': zone.index,
@@ -105,6 +113,7 @@ class LocalAd {
     String? title,
     String? description,
     String? imageUrl,
+    List<String>? imageUrls,
     String? contactInfo,
     String? websiteUrl,
     LocalAdZone? zone,
@@ -123,6 +132,7 @@ class LocalAd {
       title: title ?? this.title,
       description: description ?? this.description,
       imageUrl: imageUrl ?? this.imageUrl,
+      imageUrls: imageUrls ?? this.imageUrls,
       contactInfo: contactInfo ?? this.contactInfo,
       websiteUrl: websiteUrl ?? this.websiteUrl,
       zone: zone ?? this.zone,

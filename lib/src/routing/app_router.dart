@@ -1903,10 +1903,7 @@ class AppRouter {
 
       case core.AppRoutes.boosts:
         return RouteUtils.createMainLayoutRoute(
-          child: const core.ArtistBoostWidget(
-            recipientId: 'system',
-            recipientName: 'ARTbeat Store',
-          ),
+          child: const core.ArtistBoostsScreen(showAppBar: true),
         );
 
       case core.AppRoutes.ads:

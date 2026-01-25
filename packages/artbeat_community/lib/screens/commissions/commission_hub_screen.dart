@@ -754,16 +754,20 @@ class _CommissionHubScreenState extends State<CommissionHubScreen> {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    Text(
-                      'commission_hub_recent_meta_requested'.tr(
-                        namedArgs: {
-                          'date': _dateFormat.format(commission.requestedAt),
-                        },
-                      ),
-                      style: GoogleFonts.spaceGrotesk(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: _CommissionPalette.textSecondary,
+                    Expanded(
+                      child: Text(
+                        'commission_hub_recent_meta_requested'.tr(
+                          namedArgs: {
+                            'date': _dateFormat.format(commission.requestedAt),
+                          },
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.spaceGrotesk(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: _CommissionPalette.textSecondary,
+                        ),
                       ),
                     ),
                   ],

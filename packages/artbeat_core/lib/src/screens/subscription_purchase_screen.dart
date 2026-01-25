@@ -100,9 +100,9 @@ class _SubscriptionPurchaseScreenState
 
   Widget _buildTierHero() {
     final badges = [
-      'Visibility boosts',
-      'Promo ad credits',
-      'Fan subscription perks',
+      'subscriptions_badge_visibility'.tr(),
+      'subscriptions_badge_promo'.tr(),
+      'subscriptions_badge_tier_perks'.tr(),
     ];
 
     return _buildGlassPanel(
@@ -141,7 +141,7 @@ class _SubscriptionPurchaseScreenState
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'Bundle fan subscriptions with automatic featuring, boosted drops, and credits that turn boosts into promos.',
+                      'subscriptions_purchase_hero_subtitle'.tr(),
                       style: GoogleFonts.spaceGrotesk(
                         fontSize: 15,
                         fontWeight: FontWeight.w500,
@@ -279,7 +279,7 @@ class _SubscriptionPurchaseScreenState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Choose your cadence',
+            'subscriptions_choose_cadence'.tr(),
             style: GoogleFonts.spaceGrotesk(
               color: Colors.white,
               fontSize: 16,
@@ -291,8 +291,8 @@ class _SubscriptionPurchaseScreenState
             children: [
               buildOption(
                 selected: !_isYearlyPlan,
-                title: 'Monthly',
-                subtitle: 'Flexible subscription',
+                title: 'subscriptions_monthly'.tr(),
+                subtitle: 'subscriptions_flexible'.tr(),
                 price: '\$${monthly.toStringAsFixed(2)}',
                 onTap: () {
                   setState(() => _isYearlyPlan = false);
@@ -301,9 +301,12 @@ class _SubscriptionPurchaseScreenState
               const SizedBox(width: 12),
               buildOption(
                 selected: _isYearlyPlan,
-                title: 'Yearly',
-                subtitle:
-                    'Saves ${savings > 0 ? '\$${savings.toStringAsFixed(0)} per year' : 'vs monthly'}',
+                title: 'subscriptions_yearly'.tr(),
+                subtitle: savings > 0
+                    ? 'subscriptions_save_amount'.tr(args: [
+                        '\$${savings.toStringAsFixed(0)}'
+                      ])
+                    : 'subscriptions_save_vs_monthly'.tr(),
                 price: '\$${yearly.toStringAsFixed(2)}',
                 onTap: () {
                   setState(() => _isYearlyPlan = true);
@@ -325,7 +328,7 @@ class _SubscriptionPurchaseScreenState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'What you unlock',
+            'subscriptions_unlock_title'.tr(),
             style: GoogleFonts.spaceGrotesk(
               color: Colors.white,
               fontSize: 18,
@@ -367,7 +370,7 @@ class _SubscriptionPurchaseScreenState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Billing overview',
+            'subscriptions_billing_title'.tr(),
             style: GoogleFonts.spaceGrotesk(
               color: Colors.white,
               fontSize: 16,
@@ -384,7 +387,7 @@ class _SubscriptionPurchaseScreenState
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  'Payments run through the App Store with encrypted checkout and easy cancellation in device settings.',
+                  'subscriptions_billing_subtitle'.tr(),
                   style: GoogleFonts.spaceGrotesk(
                     color: Colors.white.withValues(alpha: 0.8),
                     fontSize: 13,
@@ -686,13 +689,13 @@ class _SubscriptionPurchaseScreenState
   String _getTierName(SubscriptionTier tier) {
     switch (tier) {
       case SubscriptionTier.starter:
-        return 'Starter';
+        return 'subscriptions_tier_starter'.tr();
       case SubscriptionTier.creator:
-        return 'Creator';
+        return 'subscriptions_tier_creator'.tr();
       case SubscriptionTier.business:
-        return 'Business';
+        return 'subscriptions_tier_business'.tr();
       case SubscriptionTier.enterprise:
-        return 'Enterprise';
+        return 'subscriptions_tier_enterprise'.tr();
       case SubscriptionTier.free:
         return 'Free';
     }

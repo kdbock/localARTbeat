@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -73,7 +74,7 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
           backgroundColor: Colors.transparent,
           elevation: 0,
           title: Text(
-            'Fan Subscriptions',
+            'store_tab_subs'.tr(),
             style: GoogleFonts.spaceGrotesk(
               fontSize: 18,
               fontWeight: FontWeight.w700,
@@ -94,21 +95,21 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
       child: Row(
         children: [
           _buildPreviewCard(
-            'Fan Club',
-            'Support your favorite artists directly.',
+            'subscriptions_tier_starter'.tr(),
+            'subscriptions_tier_starter_desc'.tr(),
+            const Color(0xFF34D399),
+          ),
+          const SizedBox(width: 16),
+          _buildPreviewCard(
+            'subscriptions_tier_creator'.tr(),
+            'subscriptions_tier_creator_desc'.tr(),
+            const Color(0xFF22D3EE),
+          ),
+          const SizedBox(width: 16),
+          _buildPreviewCard(
+            'subscriptions_tier_business'.tr(),
+            'subscriptions_tier_business_desc'.tr(),
             const Color(0xFFA855F7),
-          ),
-          const SizedBox(width: 16),
-          _buildPreviewCard(
-            'Collector Tier',
-            'Exclusive access to new drops.',
-            const Color(0xFFEC4899),
-          ),
-          const SizedBox(width: 16),
-          _buildPreviewCard(
-            'Patron Tier',
-            'Ultimate support for the community.',
-            const Color(0xFF3B82F6),
           ),
         ],
       ),
@@ -213,7 +214,7 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Bundle perks with guaranteed visibility',
+                          'subscriptions_hero_title'.tr(),
                           style: GoogleFonts.spaceGrotesk(
                             fontSize: 24,
                             fontWeight: FontWeight.w800,
@@ -222,7 +223,7 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Fan subscriptions pair exclusive drops with automatic featuring for new artwork, events, and ad placements.',
+                          'subscriptions_hero_subtitle'.tr(),
                           style: GoogleFonts.spaceGrotesk(
                             fontSize: 15,
                             fontWeight: FontWeight.w500,
@@ -235,13 +236,13 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
                 ],
               ),
               const SizedBox(height: 20),
-              const Wrap(
+              Wrap(
                 spacing: 12,
                 runSpacing: 12,
                 children: [
-                  _HeroBadge(label: 'Premium drops'),
-                  _HeroBadge(label: 'Priority featuring'),
-                  _HeroBadge(label: 'Ad credits included'),
+                  _HeroBadge(label: 'subscriptions_perk_drops'.tr()),
+                  _HeroBadge(label: 'subscriptions_perk_featuring'.tr()),
+                  _HeroBadge(label: 'subscriptions_perk_ads'.tr()),
                 ],
               ),
             ],
@@ -254,53 +255,53 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
   Widget _buildSubscriptionTiers() {
     final tiers = [
       {
-        'name': 'Starter',
+        'name': 'subscriptions_tier_starter'.tr(),
         'monthlyProductId': 'artbeat_starter_monthly',
         'yearlyProductId': 'artbeat_starter_yearly',
         'monthlyPrice': '\$4.99',
         'yearlyPrice': '\$49.99',
         'features': [
-          '10 artwork uploads + basic insights',
-          'Access to visibility boosts dashboard',
-          'Standard support response',
+          'subscriptions_feature_starter_1'.tr(),
+          'subscriptions_feature_starter_2'.tr(),
+          'subscriptions_feature_starter_3'.tr(),
         ],
       },
       {
-        'name': 'Creator',
+        'name': 'subscriptions_tier_creator'.tr(),
         'monthlyProductId': 'artbeat_creator_monthly',
         'yearlyProductId': 'artbeat_creator_yearly',
         'monthlyPrice': '\$9.99',
         'yearlyPrice': '\$99.99',
         'features': [
-          'Unlimited uploads and deep analytics',
-          'Automatic featuring for new drops',
-          'Priority placement in discovery',
-          'Monthly promo ad credits',
+          'subscriptions_feature_creator_1'.tr(),
+          'subscriptions_feature_creator_2'.tr(),
+          'subscriptions_feature_creator_3'.tr(),
+          'subscriptions_feature_creator_4'.tr(),
         ],
         'isPopular': true,
       },
       {
-        'name': 'Business',
+        'name': 'subscriptions_tier_business'.tr(),
         'monthlyProductId': 'artbeat_business_monthly',
         'yearlyProductId': 'artbeat_business_yearly',
         'monthlyPrice': '\$19.99',
         'yearlyPrice': '\$199.99',
         'features': [
-          'Creator tier + commission hub + API',
-          'Custom storefront branding',
-          'Quarterly event promo boosts',
+          'subscriptions_feature_business_1'.tr(),
+          'subscriptions_feature_business_2'.tr(),
+          'subscriptions_feature_business_3'.tr(),
         ],
       },
       {
-        'name': 'Enterprise',
+        'name': 'subscriptions_tier_enterprise'.tr(),
         'monthlyProductId': 'artbeat_enterprise_monthly',
         'yearlyProductId': 'artbeat_enterprise_yearly',
         'monthlyPrice': '\$49.99',
         'yearlyPrice': '\$499.99',
         'features': [
-          'All Business perks with white-label options',
-          'Dedicated partner manager',
-          '24/7 launch and promo support',
+          'subscriptions_feature_enterprise_1'.tr(),
+          'subscriptions_feature_enterprise_2'.tr(),
+          'subscriptions_feature_enterprise_3'.tr(),
         ],
       },
     ];
@@ -354,7 +355,11 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
                         ),
                       ),
                       Text(
-                        'per month · ${tier['yearlyPrice']} per year',
+                        'subscriptions_billing_pattern'.tr(args: [
+                          'subscriptions_per_month'.tr(),
+                          tier['yearlyPrice'] as String,
+                          'subscriptions_per_year'.tr()
+                        ]),
                         style: GoogleFonts.spaceGrotesk(
                           color: Colors.white.withValues(alpha: 0.7),
                           fontSize: 12,
@@ -374,7 +379,7 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
                       borderRadius: BorderRadius.circular(999),
                     ),
                     child: Text(
-                      'Creator Favorite',
+                      'subscriptions_creator_favorite'.tr(),
                       style: GoogleFonts.spaceGrotesk(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
@@ -425,7 +430,7 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
                       ),
                     ),
                     child: Text(
-                      'Subscribe Monthly',
+                      'subscriptions_subscribe_monthly'.tr(),
                       style: GoogleFonts.spaceGrotesk(
                         fontWeight: FontWeight.w700,
                       ),
@@ -448,7 +453,7 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
                       ),
                     ),
                     child: Text(
-                      'Subscribe Yearly',
+                      'subscriptions_subscribe_yearly'.tr(),
                       style: GoogleFonts.spaceGrotesk(
                         fontWeight: FontWeight.w700,
                       ),
@@ -559,8 +564,8 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
     if (!_isInitialized) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('In-app purchases not available. Please try again.'),
+          SnackBar(
+            content: Text('subscriptions_error_unavailable'.tr()),
             backgroundColor: Colors.orange,
           ),
         );
@@ -581,8 +586,8 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
           SnackBar(
             content: Text(
               success
-                  ? 'Subscription initiated!'
-                  : 'Failed to complete subscription',
+                  ? 'subscriptions_success_initiated'.tr()
+                  : 'subscriptions_error_failed'.tr(),
             ),
             backgroundColor: success ? Colors.green : Colors.red,
           ),

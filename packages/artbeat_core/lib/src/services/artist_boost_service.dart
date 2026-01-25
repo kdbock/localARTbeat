@@ -429,8 +429,8 @@ class ArtistBoostService {
       // Get sender information
       final senderDoc = await _firestore.collection('users').doc(senderId).get();
       final senderName = senderDoc.exists
-          ? (senderDoc.data()!['displayName'] as String? ?? 'A Fan')
-          : 'A Fan';
+          ? (senderDoc.data()!['displayName'] as String? ?? 'A Supporter')
+          : 'A Supporter';
 
       // Create notification
       await _firestore.collection('notifications').add({
@@ -696,7 +696,7 @@ class ArtistBoostService {
       }
 
       const boostProductId = 'artbeat_boost_spark';
-      const defaultMessage = 'A boost from an ArtBeat user';
+      const defaultMessage = 'A boost from an ArtBeat supporter';
 
       final success = await purchaseBoost(
         recipientId: recipientId,
