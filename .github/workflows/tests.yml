@@ -1,5 +1,8 @@
 name: Flutter Tests
 
+env:
+  FLUTTER_VERSION: "3.38.7"
+
 on:
   push:
     branches: [main, develop]
@@ -32,7 +35,7 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.35.3"
+          flutter-version: "${{ env.FLUTTER_VERSION }}"
           channel: "stable"
           cache: true
           cache-key: "flutter-:os:-:channel:-:version:-:arch:-:hash:"
@@ -76,7 +79,7 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.35.3"
+          flutter-version: "${{ env.FLUTTER_VERSION }}"
           channel: "stable"
           cache: true
           cache-key: "flutter-:os:-:channel:-:version:-:arch:-:hash:"
