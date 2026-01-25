@@ -14,7 +14,8 @@ class BoostRulesScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
         appBar: HudTopBar(
           title: 'gift_rules.title'.tr(),
-          glassBackground: true, subtitle: '',
+          glassBackground: true,
+          subtitle: '',
         ),
         body: SafeArea(
           child: SingleChildScrollView(
@@ -297,7 +298,9 @@ class _GiftRulesSectionCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: section.accent.withValues(alpha: 0.18),
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.12),
+                  ),
                 ),
                 child: Icon(section.icon, color: Colors.white, size: 24),
               ),
@@ -365,10 +368,7 @@ class _GiftRulesBullet extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             gradient: LinearGradient(
-              colors: [
-                accent,
-                _GiftRulesPalette.accentTeal,
-              ],
+              colors: [accent, _GiftRulesPalette.accentTeal],
             ),
             border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
           ),

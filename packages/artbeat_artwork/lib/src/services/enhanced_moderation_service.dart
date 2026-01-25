@@ -44,8 +44,9 @@ class EnhancedModerationService {
         'estimatedReviewTime': _calculateEstimatedReviewTime(priority),
       };
 
-      final docRef =
-          await _firestore.collection('moderation_queue').add(moderationData);
+      final docRef = await _firestore
+          .collection('moderation_queue')
+          .add(moderationData);
 
       // Update artwork moderation status
       await _firestore.collection('artwork').doc(artworkId).update({
@@ -101,7 +102,8 @@ class EnhancedModerationService {
 
       // Update moderation history
       final updatedHistory = List<Map<String, dynamic>>.from(
-          moderationData['moderationHistory'] as List? ?? []);
+        moderationData['moderationHistory'] as List? ?? [],
+      );
       updatedHistory.add(actionRecord);
 
       // Determine new status
@@ -136,7 +138,8 @@ class EnhancedModerationService {
         'status': newStatus,
         'moderationHistory': updatedHistory,
         'assignedModerator': user.uid,
-        'completedAt': action == ModerationAction.approve ||
+        'completedAt':
+            action == ModerationAction.approve ||
                 action == ModerationAction.reject
             ? Timestamp.now()
             : null,
@@ -180,7 +183,7 @@ class EnhancedModerationService {
   /// Get moderation queue with filtering and sorting
   Future<List<Map<String, dynamic>>> getModerationQueue({
     String?
-        status, // 'pending', 'approved', 'rejected', 'flagged', 'changes_requested'
+    status, // 'pending', 'approved', 'rejected', 'flagged', 'changes_requested'
     ModerationPriority? priority,
     String? category,
     String? assignedModerator,
@@ -224,8 +227,10 @@ class EnhancedModerationService {
 
         // Get artwork details
         final artworkId = data['artworkId'] as String;
-        final artworkDoc =
-            await _firestore.collection('artwork').doc(artworkId).get();
+        final artworkDoc = await _firestore
+            .collection('artwork')
+            .doc(artworkId)
+            .get();
 
         if (artworkDoc.exists) {
           data['artwork'] = ArtworkModel.fromFirestore(artworkDoc);
@@ -273,14 +278,18 @@ class EnhancedModerationService {
 
       // Calculate statistics
       final totalSubmissions = records.length;
-      final pendingCount =
-          records.where((r) => r['status'] == 'pending').length;
-      final approvedCount =
-          records.where((r) => r['status'] == 'approved').length;
-      final rejectedCount =
-          records.where((r) => r['status'] == 'rejected').length;
-      final flaggedCount =
-          records.where((r) => r['status'] == 'flagged').length;
+      final pendingCount = records
+          .where((r) => r['status'] == 'pending')
+          .length;
+      final approvedCount = records
+          .where((r) => r['status'] == 'approved')
+          .length;
+      final rejectedCount = records
+          .where((r) => r['status'] == 'rejected')
+          .length;
+      final flaggedCount = records
+          .where((r) => r['status'] == 'flagged')
+          .length;
 
       // Calculate average processing time
       double avgProcessingTime = 0.0;
@@ -395,10 +404,7 @@ class EnhancedModerationService {
 
       for (final doc in auditSnapshot.docs) {
         final data = doc.data();
-        auditTrail.add({
-          'type': 'audit_log',
-          ...data,
-        });
+        auditTrail.add({'type': 'audit_log', ...data});
       }
 
       // Sort by timestamp
@@ -479,12 +485,15 @@ class EnhancedModerationService {
   ) async {
     try {
       // Get artwork to find the owner
-      final artworkDoc =
-          await _firestore.collection('artwork').doc(artworkId).get();
+      final artworkDoc = await _firestore
+          .collection('artwork')
+          .doc(artworkId)
+          .get();
       if (!artworkDoc.exists) return;
 
       final artworkData = artworkDoc.data()!;
-      final ownerId = artworkData['userId'] as String? ??
+      final ownerId =
+          artworkData['userId'] as String? ??
           artworkData['artistProfileId'] as String?;
 
       if (ownerId == null) return;

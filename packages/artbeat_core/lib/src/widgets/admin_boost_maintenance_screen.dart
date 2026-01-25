@@ -17,10 +17,12 @@ class _AdminBoostMaintenanceScreenState
   static const String _functionsBaseUrl =
       'https://us-central1-wordnerd-artbeat.cloudfunctions.net';
 
-  final TextEditingController _migrateLimitController =
-      TextEditingController(text: '200');
-  final TextEditingController _backfillLimitController =
-      TextEditingController(text: '200');
+  final TextEditingController _migrateLimitController = TextEditingController(
+    text: '200',
+  );
+  final TextEditingController _backfillLimitController = TextEditingController(
+    text: '200',
+  );
 
   bool _isMigrating = false;
   bool _isBackfilling = false;
@@ -43,13 +45,10 @@ class _AdminBoostMaintenanceScreenState
     });
 
     try {
-      final result = await _callFunction(
-        'migrateGiftsToBoosts',
-        {
-          'limit': _migrateLimitController.text.trim(),
-          'dryRun': dryRun.toString(),
-        },
-      );
+      final result = await _callFunction('migrateGiftsToBoosts', {
+        'limit': _migrateLimitController.text.trim(),
+        'dryRun': dryRun.toString(),
+      });
 
       setState(() {
         _migrateResult = result;
@@ -74,12 +73,9 @@ class _AdminBoostMaintenanceScreenState
     });
 
     try {
-      final result = await _callFunction(
-        'backfillBoostMomentum',
-        {
-          'limit': _backfillLimitController.text.trim(),
-        },
-      );
+      final result = await _callFunction('backfillBoostMomentum', {
+        'limit': _backfillLimitController.text.trim(),
+      });
 
       setState(() {
         _backfillResult = result;
@@ -127,14 +123,13 @@ class _AdminBoostMaintenanceScreenState
   ) async {
     final query = Map<String, String>.from(queryParams)
       ..removeWhere((key, value) => value.isEmpty);
-    final uri = Uri.parse('$_functionsBaseUrl/$endpoint')
-        .replace(queryParameters: query);
+    final uri = Uri.parse(
+      '$_functionsBaseUrl/$endpoint',
+    ).replace(queryParameters: query);
 
     final response = await http.get(uri);
     if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw Exception(
-        'HTTP ${response.statusCode}: ${response.body}',
-      );
+      throw Exception('HTTP ${response.statusCode}: ${response.body}');
     }
 
     final body = response.body.trim();
@@ -191,10 +186,7 @@ class _AdminBoostMaintenanceScreenState
           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 6),
-        Text(
-          subtitle,
-          style: TextStyle(color: Colors.grey.shade600),
-        ),
+        Text(subtitle, style: TextStyle(color: Colors.grey.shade600)),
       ],
     );
   }

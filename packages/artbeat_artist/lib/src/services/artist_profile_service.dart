@@ -78,7 +78,8 @@ class ArtistProfileService {
 
   /// Get artist profile by user ID
   Future<core.ArtistProfileModel?> getArtistProfileByUserId(
-      String userId) async {
+    String userId,
+  ) async {
     try {
       final querySnapshot = await _artistProfilesCollection
           .where('userId', isEqualTo: userId)
@@ -100,14 +101,16 @@ class ArtistProfileService {
         username: data['username'] as String? ?? '',
         bio: data['bio'] as String?,
         userType: core.UserType.fromString(
-            (data['userType'] as String?) ?? core.UserType.artist.name),
+          (data['userType'] as String?) ?? core.UserType.artist.name,
+        ),
         location: data['location'] as String?,
         mediums: List<String>.from(data['mediums'] as Iterable? ?? []),
         styles: List<String>.from(data['styles'] as Iterable? ?? []),
         profileImageUrl: data['profileImageUrl'] as String?,
         coverImageUrl: data['coverImageUrl'] as String?,
-        socialLinks:
-            Map<String, String>.from(data['socialLinks'] as Map? ?? {}),
+        socialLinks: Map<String, String>.from(
+          data['socialLinks'] as Map? ?? {},
+        ),
         isVerified: (data['isVerified'] as bool?) ?? false,
         isFeatured: (data['isFeatured'] as bool?) ?? false,
         isPortfolioPublic: (data['isPortfolioPublic'] as bool?) ?? true,
@@ -117,7 +120,8 @@ class ArtistProfileService {
         ),
         createdAt: (data['createdAt'] as Timestamp).toDate(),
         updatedAt: (data['updatedAt'] as Timestamp).toDate(),
-        followersCount: (data['followersCount'] as int?) ??
+        followersCount:
+            (data['followersCount'] as int?) ??
             (data['followerCount'] as int?) ??
             0,
       );
@@ -128,7 +132,8 @@ class ArtistProfileService {
 
   /// Get artist profile by ID
   Future<core.ArtistProfileModel?> getArtistProfileById(
-      String profileId) async {
+    String profileId,
+  ) async {
     try {
       final doc = await _artistProfilesCollection.doc(profileId).get();
 
@@ -146,14 +151,16 @@ class ArtistProfileService {
         username: data['username'] as String? ?? '',
         bio: (data['bio'] as String?) ?? '',
         userType: core.UserType.fromString(
-            (data['userType'] as String?) ?? core.UserType.artist.name),
+          (data['userType'] as String?) ?? core.UserType.artist.name,
+        ),
         location: data['location'] as String?,
         mediums: List<String>.from(data['mediums'] as Iterable? ?? []),
         styles: List<String>.from(data['styles'] as Iterable? ?? []),
         profileImageUrl: data['profileImageUrl'] as String?,
         coverImageUrl: data['coverImageUrl'] as String?,
-        socialLinks:
-            Map<String, String>.from(data['socialLinks'] as Map? ?? {}),
+        socialLinks: Map<String, String>.from(
+          data['socialLinks'] as Map? ?? {},
+        ),
         isVerified: (data['isVerified'] as bool?) ?? false,
         isFeatured: (data['isFeatured'] as bool?) ?? false,
         isPortfolioPublic: (data['isPortfolioPublic'] as bool?) ?? true,
@@ -163,7 +170,8 @@ class ArtistProfileService {
         ),
         createdAt: (data['createdAt'] as Timestamp).toDate(),
         updatedAt: (data['updatedAt'] as Timestamp).toDate(),
-        followersCount: (data['followersCount'] as int?) ??
+        followersCount:
+            (data['followersCount'] as int?) ??
             (data['followerCount'] as int?) ??
             0,
       );
@@ -190,9 +198,7 @@ class ArtistProfileService {
     core.SubscriptionTier? subscriptionTier,
   }) async {
     try {
-      final updates = <String, dynamic>{
-        'updatedAt': DateTime.now(),
-      };
+      final updates = <String, dynamic>{'updatedAt': DateTime.now()};
 
       if (displayName != null) updates['displayName'] = displayName;
       if (bio != null) updates['bio'] = bio;
@@ -218,8 +224,9 @@ class ArtistProfileService {
   }
 
   /// Get featured artists
-  Future<List<core.ArtistProfileModel>> getFeaturedArtists(
-      {int limit = 10}) async {
+  Future<List<core.ArtistProfileModel>> getFeaturedArtists({
+    int limit = 10,
+  }) async {
     try {
       // Query users where userType = 'artist' and isFeatured = true
       final usersQuery = await _usersCollection
@@ -290,34 +297,40 @@ class ArtistProfileService {
         if (profileDoc.docs.isNotEmpty) {
           // User has a profile
           artists.add(
-              core.ArtistProfileModel.fromFirestore(profileDoc.docs.first));
+            core.ArtistProfileModel.fromFirestore(profileDoc.docs.first),
+          );
         } else {
           // User doesn't have a profile yet, create basic one from user data
-          artists.add(core.ArtistProfileModel(
-            id: userId,
-            userId: userId,
-            displayName: (userData['fullName'] as String?) ??
-                (userData['displayName'] as String?) ??
-                'Unknown Artist',
-            username: userData['username'] as String? ?? '',
-            bio: userData['bio'] as String? ?? '',
-            userType: core.UserType.artist,
-            location: userData['location'] as String?,
-            mediums: [],
-            styles: [],
-            profileImageUrl: userData['profileImageUrl'] as String?,
-            coverImageUrl: null,
-            socialLinks: {},
-            isVerified: false,
-            isFeatured: false,
-            isPortfolioPublic: true,
-            subscriptionTier: core.SubscriptionTier.free,
-            createdAt: (userData['createdAt'] as Timestamp?)?.toDate() ??
-                DateTime.now(),
-            updatedAt: (userData['updatedAt'] as Timestamp?)?.toDate() ??
-                DateTime.now(),
-            followersCount: 0,
-          ));
+          artists.add(
+            core.ArtistProfileModel(
+              id: userId,
+              userId: userId,
+              displayName:
+                  (userData['fullName'] as String?) ??
+                  (userData['displayName'] as String?) ??
+                  'Unknown Artist',
+              username: userData['username'] as String? ?? '',
+              bio: userData['bio'] as String? ?? '',
+              userType: core.UserType.artist,
+              location: userData['location'] as String?,
+              mediums: [],
+              styles: [],
+              profileImageUrl: userData['profileImageUrl'] as String?,
+              coverImageUrl: null,
+              socialLinks: {},
+              isVerified: false,
+              isFeatured: false,
+              isPortfolioPublic: true,
+              subscriptionTier: core.SubscriptionTier.free,
+              createdAt:
+                  (userData['createdAt'] as Timestamp?)?.toDate() ??
+                  DateTime.now(),
+              updatedAt:
+                  (userData['updatedAt'] as Timestamp?)?.toDate() ??
+                  DateTime.now(),
+              followersCount: 0,
+            ),
+          );
         }
       }
 
@@ -367,55 +380,62 @@ class ArtistProfileService {
         if (profileDoc.docs.isNotEmpty) {
           // User has a profile
           artists.add(
-              core.ArtistProfileModel.fromFirestore(profileDoc.docs.first));
+            core.ArtistProfileModel.fromFirestore(profileDoc.docs.first),
+          );
         } else {
           // User doesn't have a profile yet, create basic one from user data
           final now = DateTime.now();
-          artists.add(core.ArtistProfileModel(
-            id: userId, // Use userId as id since no profile document exists
-            userId: userId,
-            displayName: (userData['fullName'] as String?) ??
-                (userData['displayName'] as String?) ??
-                'Unknown Artist',
-            username: userData['username'] as String? ?? '',
-            bio: userData['bio'] as String? ?? '',
-            userType: core.UserType.artist,
-            location: userData['location'] as String?,
-            mediums: [],
-            styles: [],
-            profileImageUrl: userData['profileImageUrl'] as String?,
-            coverImageUrl: null,
-            socialLinks: {},
-            isVerified: false,
-            isFeatured: false,
-            isPortfolioPublic: true,
-            subscriptionTier: core.SubscriptionTier.free,
-            createdAt: (userData['createdAt'] as Timestamp?)?.toDate() ?? now,
-            updatedAt: (userData['updatedAt'] as Timestamp?)?.toDate() ?? now,
-            followersCount: 0,
-          ));
+          artists.add(
+            core.ArtistProfileModel(
+              id: userId, // Use userId as id since no profile document exists
+              userId: userId,
+              displayName:
+                  (userData['fullName'] as String?) ??
+                  (userData['displayName'] as String?) ??
+                  'Unknown Artist',
+              username: userData['username'] as String? ?? '',
+              bio: userData['bio'] as String? ?? '',
+              userType: core.UserType.artist,
+              location: userData['location'] as String?,
+              mediums: [],
+              styles: [],
+              profileImageUrl: userData['profileImageUrl'] as String?,
+              coverImageUrl: null,
+              socialLinks: {},
+              isVerified: false,
+              isFeatured: false,
+              isPortfolioPublic: true,
+              subscriptionTier: core.SubscriptionTier.free,
+              createdAt: (userData['createdAt'] as Timestamp?)?.toDate() ?? now,
+              updatedAt: (userData['updatedAt'] as Timestamp?)?.toDate() ?? now,
+              followersCount: 0,
+            ),
+          );
         }
       }
 
-      final viewerLocation =
-          await core.GeoWeightingUtils.resolveViewerLocation(currentUser);
+      final viewerLocation = await core.GeoWeightingUtils.resolveViewerLocation(
+        currentUser,
+      );
 
       final sorted =
           await core.GeoWeightingUtils.sortByDistance<core.ArtistProfileModel>(
-        items: artists,
-        idOf: (artist) => artist.userId,
-        locationOf: (artist) => artist.location,
-        viewerLocation: viewerLocation,
-        tieBreaker: (a, b) {
-          final boostCompare = b.boostScore.compareTo(a.boostScore);
-          if (boostCompare != 0) return boostCompare;
-          final aBoost = a.lastBoostAt ?? DateTime.fromMillisecondsSinceEpoch(0);
-          final bBoost = b.lastBoostAt ?? DateTime.fromMillisecondsSinceEpoch(0);
-          final boostTimeCompare = bBoost.compareTo(aBoost);
-          if (boostTimeCompare != 0) return boostTimeCompare;
-          return a.displayName.compareTo(b.displayName);
-        },
-      );
+            items: artists,
+            idOf: (artist) => artist.userId,
+            locationOf: (artist) => artist.location,
+            viewerLocation: viewerLocation,
+            tieBreaker: (a, b) {
+              final boostCompare = b.boostScore.compareTo(a.boostScore);
+              if (boostCompare != 0) return boostCompare;
+              final aBoost =
+                  a.lastBoostAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+              final bBoost =
+                  b.lastBoostAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+              final boostTimeCompare = bBoost.compareTo(aBoost);
+              if (boostTimeCompare != 0) return boostTimeCompare;
+              return a.displayName.compareTo(b.displayName);
+            },
+          );
 
       return sorted;
     } catch (e) {
@@ -436,8 +456,9 @@ class ArtistProfileService {
       final String queryLower = query.toLowerCase().trim();
 
       // First, get all users with userType = 'artist'
-      final usersQuery =
-          await _usersCollection.where('userType', isEqualTo: 'artist').get();
+      final usersQuery = await _usersCollection
+          .where('userType', isEqualTo: 'artist')
+          .get();
 
       final List<core.UserModel> artistUsers = usersQuery.docs
           .map((doc) => core.UserModel.fromFirestore(doc))
@@ -447,7 +468,7 @@ class ArtistProfileService {
       final filteredUsers = artistUsers.where((user) {
         final displayNameMatch =
             user.fullName.toLowerCase().contains(queryLower) ||
-                user.username.toLowerCase().contains(queryLower);
+            user.username.toLowerCase().contains(queryLower);
         final locationMatch = user.location.toLowerCase().contains(queryLower);
         final bioMatch = user.bio.toLowerCase().contains(queryLower);
 
@@ -491,30 +512,33 @@ class ArtistProfileService {
         if (profileDoc.docs.isNotEmpty) {
           // User has a profile
           artists.add(
-              core.ArtistProfileModel.fromFirestore(profileDoc.docs.first));
+            core.ArtistProfileModel.fromFirestore(profileDoc.docs.first),
+          );
         } else {
           // User doesn't have a profile yet, create basic one from user data
-          artists.add(core.ArtistProfileModel(
-            id: user.id,
-            userId: user.id,
-            displayName: user.fullName,
-            username: user.username,
-            bio: user.bio,
-            userType: core.UserType.artist,
-            location: user.location,
-            mediums: [],
-            styles: [],
-            profileImageUrl: user.profileImageUrl,
-            coverImageUrl: null,
-            socialLinks: {},
-            isVerified: false,
-            isFeatured: false,
-            isPortfolioPublic: true,
-            subscriptionTier: core.SubscriptionTier.free,
-            createdAt: user.createdAt,
-            updatedAt: user.createdAt,
-            followersCount: 0,
-          ));
+          artists.add(
+            core.ArtistProfileModel(
+              id: user.id,
+              userId: user.id,
+              displayName: user.fullName,
+              username: user.username,
+              bio: user.bio,
+              userType: core.UserType.artist,
+              location: user.location,
+              mediums: [],
+              styles: [],
+              profileImageUrl: user.profileImageUrl,
+              coverImageUrl: null,
+              socialLinks: {},
+              isVerified: false,
+              isFeatured: false,
+              isPortfolioPublic: true,
+              subscriptionTier: core.SubscriptionTier.free,
+              createdAt: user.createdAt,
+              updatedAt: user.createdAt,
+              followersCount: 0,
+            ),
+          );
         }
       }
 

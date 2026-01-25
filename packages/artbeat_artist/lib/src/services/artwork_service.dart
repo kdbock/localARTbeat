@@ -10,7 +10,8 @@ class ArtworkService {
 
   /// Get all artwork by artist profile ID
   Future<List<ArtworkModel>> getArtworkByArtistProfileId(
-      String artistProfileId) async {
+    String artistProfileId,
+  ) async {
     try {
       final snapshot = await _firestore
           .collection('artwork')
@@ -20,10 +21,7 @@ class ArtworkService {
 
       return snapshot.docs.map((doc) {
         final data = doc.data();
-        return ArtworkModel.fromMap({
-          'id': doc.id,
-          ...data,
-        });
+        return ArtworkModel.fromMap({'id': doc.id, ...data});
       }).toList();
     } catch (e) {
       ArtistLogger.error('Error getting artwork: $e');
@@ -38,10 +36,7 @@ class ArtworkService {
 
       if (!doc.exists) return null;
 
-      return ArtworkModel.fromMap({
-        'id': doc.id,
-        ...doc.data()!,
-      });
+      return ArtworkModel.fromMap({'id': doc.id, ...doc.data()!});
     } catch (e) {
       ArtistLogger.error('Error getting artwork by ID: $e');
       return null;
@@ -179,10 +174,7 @@ class ArtworkService {
           .get();
 
       return snapshot.docs.map((doc) {
-        return ArtworkModel.fromMap({
-          'id': doc.id,
-          ...doc.data(),
-        });
+        return ArtworkModel.fromMap({'id': doc.id, ...doc.data()});
       }).toList();
     } catch (e) {
       ArtistLogger.error('Error getting featured artwork: $e');
@@ -191,8 +183,10 @@ class ArtworkService {
   }
 
   /// Get artwork by location
-  Future<List<ArtworkModel>> getArtworkByLocation(String location,
-      {int limit = 10}) async {
+  Future<List<ArtworkModel>> getArtworkByLocation(
+    String location, {
+    int limit = 10,
+  }) async {
     try {
       final snapshot = await _firestore
           .collection('artwork')
@@ -202,10 +196,7 @@ class ArtworkService {
           .get();
 
       return snapshot.docs.map((doc) {
-        return ArtworkModel.fromMap({
-          'id': doc.id,
-          ...doc.data(),
-        });
+        return ArtworkModel.fromMap({'id': doc.id, ...doc.data()});
       }).toList();
     } catch (e) {
       ArtistLogger.error('Error getting artwork by location: $e');
@@ -224,10 +215,7 @@ class ArtworkService {
 
       return snapshot.docs.map((doc) {
         final data = doc.data();
-        return ArtworkModel.fromMap({
-          'id': doc.id,
-          ...data,
-        });
+        return ArtworkModel.fromMap({'id': doc.id, ...data});
       }).toList();
     } catch (e) {
       ArtistLogger.error('Error getting artwork by user ID: $e');

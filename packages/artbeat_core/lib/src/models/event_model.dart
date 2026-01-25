@@ -53,7 +53,8 @@ class EventModel {
       return null;
     }
 
-    final galleryImages = (data['imageUrls'] as List?)
+    final galleryImages =
+        (data['imageUrls'] as List?)
             ?.whereType<String>()
             .map((url) => url.trim())
             .where((url) => url.isNotEmpty)

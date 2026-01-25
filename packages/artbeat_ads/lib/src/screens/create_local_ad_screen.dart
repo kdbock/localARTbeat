@@ -28,7 +28,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
   final _contactController = TextEditingController();
   final _websiteController = TextEditingController();
 
-  LocalAdZone _selectedZone = LocalAdZone.home;
+  final LocalAdZone _selectedZone = LocalAdZone.home;
   LocalAdSize _selectedSize = LocalAdSize.small;
   LocalAdDuration _selectedDuration = LocalAdDuration.oneWeek;
   bool _showTitle = true;
@@ -178,8 +178,9 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'ads_create_local_ad_error_failed_to_post'
-                  .tr(namedArgs: {'error': e.toString()}),
+              'ads_create_local_ad_error_failed_to_post'.tr(
+                namedArgs: {'error': e.toString()},
+              ),
             ),
           ),
         );
@@ -490,7 +491,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: const Color(0xFF22D3EE),
+            activeThumbColor: const Color(0xFF22D3EE),
           ),
         ],
       ),
@@ -631,121 +632,6 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
                 ),
               ),
           ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAdPlacementSection(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFA074).withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(
-                Icons.location_on,
-                color: Color(0xFFFFA074),
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              'ads_create_local_ad_text_where_to_display'.tr(),
-              style: GoogleFonts.spaceGrotesk(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Choose where your ad will appear in the app',
-          style: GoogleFonts.spaceGrotesk(
-            color: Colors.white.withValues(alpha: 0.6),
-            fontSize: 13,
-          ),
-        ),
-        const SizedBox(height: 20),
-        Text(
-          'Display Zone',
-          style: GoogleFonts.spaceGrotesk(
-            color: Colors.white,
-            fontSize: 15,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.3,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          'Select the section where your ad will be shown',
-          style: GoogleFonts.spaceGrotesk(
-            color: Colors.white.withValues(alpha: 0.55),
-            fontSize: 12,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.3),
-              width: 1.5,
-            ),
-            borderRadius: BorderRadius.circular(14),
-            color: const Color(0xFF1A1F2E),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.3),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: DropdownButtonFormField<LocalAdZone>(
-            initialValue: _selectedZone,
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: Colors.transparent,
-              border: InputBorder.none,
-              enabledBorder: InputBorder.none,
-              focusedBorder: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 18,
-                vertical: 14,
-              ),
-            ),
-            style: GoogleFonts.spaceGrotesk(
-              color: Colors.white,
-              fontSize: 15,
-              fontWeight: FontWeight.w500,
-            ),
-            icon: const Icon(Icons.keyboard_arrow_down_rounded),
-            iconEnabledColor: Colors.white70,
-            dropdownColor: const Color(0xFF0F172A),
-            items: LocalAdZone.values
-                .map(
-                  (zone) => DropdownMenuItem(
-                    value: zone,
-                    child: Text(
-                      zone.displayName,
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                  ),
-                )
-                .toList(),
-            onChanged: (zone) {
-              if (zone != null) {
-                setState(() => _selectedZone = zone);
-              }
-            },
-          ),
         ),
       ],
     );
@@ -1165,9 +1051,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
                 color: Colors.white.withValues(alpha: 0.08),
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.15),
-                ),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
               ),
               alignment: Alignment.center,
               child: Icon(
@@ -1232,8 +1116,7 @@ class _CreateLocalAdScreenState extends State<CreateLocalAdScreen> {
           ),
           if (_selectedImages.isNotEmpty &&
               ((_showTitle && _titleController.text.isNotEmpty) ||
-                  (_showDescription &&
-                      _descriptionController.text.isNotEmpty)))
+                  (_showDescription && _descriptionController.text.isNotEmpty)))
             const SizedBox(height: 12),
           // Title preview
           if (_showTitle && _titleController.text.isNotEmpty)

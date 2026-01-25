@@ -38,7 +38,8 @@ class ArtworkCommentService {
             artworkId, // Reusing the existing field name for compatibility
         'artworkId': artworkId, // More specific field for artwork comments
         'userId': user.uid,
-        'userName': userData['displayName'] as String? ??
+        'userName':
+            userData['displayName'] as String? ??
             user.displayName ??
             'Anonymous',
         'userAvatarUrl': userData['profileImageUrl'] as String? ?? '',
@@ -55,8 +56,10 @@ class ArtworkCommentService {
       };
 
       // Check if the user is the artist of this artwork
-      final artworkDoc =
-          await _firestore.collection('artwork').doc(artworkId).get();
+      final artworkDoc = await _firestore
+          .collection('artwork')
+          .doc(artworkId)
+          .get();
       if (artworkDoc.exists) {
         final artworkData = artworkDoc.data() as Map<String, dynamic>;
         if (artworkData['userId'] == user.uid ||
@@ -79,9 +82,9 @@ class ArtworkCommentService {
             .collection('comments')
             .doc(parentCommentId)
             .update({
-          'replies': FieldValue.increment(1),
-          'updatedAt': Timestamp.now(),
-        });
+              'replies': FieldValue.increment(1),
+              'updatedAt': Timestamp.now(),
+            });
       }
 
       // Update artwork's comment count
@@ -226,15 +229,18 @@ class ArtworkCommentService {
       if (!commentDoc.exists) return false;
 
       final commentData = commentDoc.data() as Map<String, dynamic>;
-      final artworkDoc =
-          await _firestore.collection('artwork').doc(artworkId).get();
+      final artworkDoc = await _firestore
+          .collection('artwork')
+          .doc(artworkId)
+          .get();
 
       if (!artworkDoc.exists) return false;
 
       final artworkData = artworkDoc.data() as Map<String, dynamic>;
 
       // Check if user can delete (comment author or artwork owner)
-      final canDelete = commentData['userId'] == user.uid ||
+      final canDelete =
+          commentData['userId'] == user.uid ||
           artworkData['userId'] == user.uid ||
           artworkData['artistProfileId'] == user.uid;
 
@@ -256,9 +262,7 @@ class ArtworkCommentService {
             .doc(artworkId)
             .collection('comments')
             .doc(parentCommentId)
-            .update({
-          'replies': FieldValue.increment(-1),
-        });
+            .update({'replies': FieldValue.increment(-1)});
       }
 
       return true;
@@ -292,23 +296,16 @@ class ArtworkCommentService {
             .doc(artworkId)
             .collection('comments')
             .doc(commentId)
-            .update({
-          'likes': FieldValue.increment(-1),
-        });
+            .update({'likes': FieldValue.increment(-1)});
       } else {
         // Like
-        await likeDoc.set({
-          'userId': user.uid,
-          'createdAt': Timestamp.now(),
-        });
+        await likeDoc.set({'userId': user.uid, 'createdAt': Timestamp.now()});
         await _firestore
             .collection('artwork')
             .doc(artworkId)
             .collection('comments')
             .doc(commentId)
-            .update({
-          'likes': FieldValue.increment(1),
-        });
+            .update({'likes': FieldValue.increment(1)});
       }
 
       return true;
@@ -383,7 +380,10 @@ class ArtworkCommentService {
       query = query.where('parentCommentId', isEqualTo: '');
     }
 
-    return query.limit(limit).snapshots().map(
+    return query
+        .limit(limit)
+        .snapshots()
+        .map(
           (snapshot) => snapshot.docs
               .map((doc) => CommentModel.fromFirestore(doc))
               .toList(),
@@ -442,12 +442,15 @@ class ArtworkCommentService {
   ) async {
     try {
       // Get artwork to find the artist
-      final artworkDoc =
-          await _firestore.collection('artwork').doc(artworkId).get();
+      final artworkDoc = await _firestore
+          .collection('artwork')
+          .doc(artworkId)
+          .get();
       if (!artworkDoc.exists) return;
 
       final artworkData = artworkDoc.data() as Map<String, dynamic>;
-      final artistId = artworkData['userId'] as String? ??
+      final artistId =
+          artworkData['userId'] as String? ??
           artworkData['artistProfileId'] as String?;
 
       if (artistId == null) return;

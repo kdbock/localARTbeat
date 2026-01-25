@@ -4,10 +4,7 @@ import 'package:artbeat_core/src/theme/artbeat_typography.dart';
 class ArtistThemeWrapper extends StatelessWidget {
   final Widget child;
 
-  const ArtistThemeWrapper({
-    super.key,
-    required this.child,
-  });
+  const ArtistThemeWrapper({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -17,11 +14,11 @@ class ArtistThemeWrapper extends StatelessWidget {
       data: theme.copyWith(
         // Portfolio specific theme overrides
         listTileTheme: ListTileThemeData(
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 8,
           ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           titleTextStyle: ArtbeatTypography.textTheme.titleMedium,
           subtitleTextStyle: ArtbeatTypography.textTheme.bodyMedium,
         ),

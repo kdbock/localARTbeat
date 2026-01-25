@@ -10,10 +10,11 @@ class VisibilityService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   // Collection references
-  final CollectionReference _artworkViewsCollection =
-      FirebaseFirestore.instance.collection('artworkViews');
-  final CollectionReference _artistProfileViewsCollection =
-      FirebaseFirestore.instance.collection('artistProfileViews');
+  final CollectionReference _artworkViewsCollection = FirebaseFirestore.instance
+      .collection('artworkViews');
+  final CollectionReference _artistProfileViewsCollection = FirebaseFirestore
+      .instance
+      .collection('artistProfileViews');
 
   /// Get current user ID
   String? getCurrentUserId() {
@@ -41,10 +42,12 @@ class VisibilityService {
       final viewsSnapshot = await _artworkViewsCollection
           .where('artworkId', isEqualTo: artworkId)
           .where('viewerId', isEqualTo: userId)
-          .where('viewedAt',
-              isGreaterThan: Timestamp.fromDate(
-                DateTime.now().subtract(const Duration(hours: 24)),
-              ))
+          .where(
+            'viewedAt',
+            isGreaterThan: Timestamp.fromDate(
+              DateTime.now().subtract(const Duration(hours: 24)),
+            ),
+          )
           .limit(1)
           .get();
 
@@ -88,10 +91,12 @@ class VisibilityService {
       final viewsSnapshot = await _artistProfileViewsCollection
           .where('artistProfileId', isEqualTo: artistProfileId)
           .where('viewerId', isEqualTo: userId)
-          .where('viewedAt',
-              isGreaterThan: Timestamp.fromDate(
-                DateTime.now().subtract(const Duration(hours: 24)),
-              ))
+          .where(
+            'viewedAt',
+            isGreaterThan: Timestamp.fromDate(
+              DateTime.now().subtract(const Duration(hours: 24)),
+            ),
+          )
           .limit(1)
           .get();
 
@@ -125,8 +130,10 @@ class VisibilityService {
       // Get view counts for the specified date range
       final viewsSnapshot = await _artworkViewsCollection
           .where('artistId', isEqualTo: userId)
-          .where('viewedAt',
-              isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
+          .where(
+            'viewedAt',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(startDate),
+          )
           .where('viewedAt', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
           .get();
 
@@ -175,8 +182,10 @@ class VisibilityService {
       // Get profile view counts for the specified date range
       final viewsSnapshot = await _artistProfileViewsCollection
           .where('artistId', isEqualTo: userId)
-          .where('viewedAt',
-              isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
+          .where(
+            'viewedAt',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(startDate),
+          )
           .where('viewedAt', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
           .get();
 
@@ -196,8 +205,9 @@ class VisibilityService {
 
       // Get unique viewers count
       final uniqueViewers = viewsSnapshot.docs
-          .map((doc) =>
-              (doc.data() as Map<String, dynamic>)['viewerId'] as String)
+          .map(
+            (doc) => (doc.data() as Map<String, dynamic>)['viewerId'] as String,
+          )
           .toSet()
           .length;
       result['uniqueViewers'] = uniqueViewers;
@@ -236,8 +246,10 @@ class VisibilityService {
           .collection('artistFollowers')
           .doc(userId)
           .collection('followers')
-          .where('followedAt',
-              isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
+          .where(
+            'followedAt',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(startDate),
+          )
           .where('followedAt', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
           .get();
 
@@ -290,7 +302,8 @@ class VisibilityService {
 
       // Get associated artists
       final artistIds = List<String>.from(
-          (galleryData['galleryArtists'] as List<dynamic>?) ?? []);
+        (galleryData['galleryArtists'] as List<dynamic>?) ?? [],
+      );
       result['totalArtists'] = artistIds.length;
 
       // Get total artworks
@@ -313,8 +326,10 @@ class VisibilityService {
         // Get views
         final viewsSnapshot = await _artworkViewsCollection
             .where('artistId', isEqualTo: artistId)
-            .where('viewedAt',
-                isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
+            .where(
+              'viewedAt',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(startDate),
+            )
             .where('viewedAt', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
             .get();
 
@@ -324,8 +339,10 @@ class VisibilityService {
         final salesSnapshot = await _firestore
             .collection('sales')
             .where('artistId', isEqualTo: artistId)
-            .where('saleDate',
-                isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
+            .where(
+              'saleDate',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(startDate),
+            )
             .where('saleDate', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
             .get();
 
@@ -391,15 +408,18 @@ class VisibilityService {
 
       // Get associated artists
       final artistIds = List<String>.from(
-          (galleryData['galleryArtists'] as List<dynamic>?) ?? []);
+        (galleryData['galleryArtists'] as List<dynamic>?) ?? [],
+      );
 
       // Fetch performance data for each artist
       for (final artistId in artistIds) {
         final artistData = <String, dynamic>{};
 
         // Get artist profile
-        final artistDoc =
-            await _firestore.collection('artistProfiles').doc(artistId).get();
+        final artistDoc = await _firestore
+            .collection('artistProfiles')
+            .doc(artistId)
+            .get();
 
         if (artistDoc.exists) {
           final profile = artistDoc.data() as Map<String, dynamic>;
@@ -411,10 +431,14 @@ class VisibilityService {
           // Get artwork views
           final viewsSnapshot = await _artworkViewsCollection
               .where('artistId', isEqualTo: artistId)
-              .where('viewedAt',
-                  isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
-              .where('viewedAt',
-                  isLessThanOrEqualTo: Timestamp.fromDate(endDate))
+              .where(
+                'viewedAt',
+                isGreaterThanOrEqualTo: Timestamp.fromDate(startDate),
+              )
+              .where(
+                'viewedAt',
+                isLessThanOrEqualTo: Timestamp.fromDate(endDate),
+              )
               .get();
 
           artistData['artworkViews'] = viewsSnapshot.docs.length;
@@ -423,10 +447,14 @@ class VisibilityService {
           final salesSnapshot = await _firestore
               .collection('sales')
               .where('artistId', isEqualTo: artistId)
-              .where('saleDate',
-                  isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
-              .where('saleDate',
-                  isLessThanOrEqualTo: Timestamp.fromDate(endDate))
+              .where(
+                'saleDate',
+                isGreaterThanOrEqualTo: Timestamp.fromDate(startDate),
+              )
+              .where(
+                'saleDate',
+                isLessThanOrEqualTo: Timestamp.fromDate(endDate),
+              )
               .get();
 
           artistData['sales'] = salesSnapshot.docs.length;
@@ -454,7 +482,8 @@ class VisibilityService {
 
       // Sort by revenue in descending order
       result.sort(
-          (a, b) => (b['revenue'] as double).compareTo(a['revenue'] as double));
+        (a, b) => (b['revenue'] as double).compareTo(a['revenue'] as double),
+      );
     } catch (e) {
       logger.e('Error getting artist performance analytics: $e');
       throw Exception('Failed to load artist performance analytics: $e');
@@ -496,8 +525,10 @@ class VisibilityService {
         // Calculate pending and paid commissions
         if (data['transactions'] != null) {
           final transactions = List<Map<String, dynamic>>.from(
-              (data['transactions'] as List<dynamic>? ?? [])
-                  .map((e) => e as Map<String, dynamic>));
+            (data['transactions'] as List<dynamic>? ?? []).map(
+              (e) => e as Map<String, dynamic>,
+            ),
+          );
           for (final transaction in transactions) {
             final amount = (transaction['commissionAmount'] as num).toDouble();
 
@@ -556,7 +587,8 @@ class VisibilityService {
 
       // Get associated artists
       final artistIds = List<String>.from(
-          (galleryData['galleryArtists'] as List<dynamic>?) ?? []);
+        (galleryData['galleryArtists'] as List<dynamic>?) ?? [],
+      );
 
       // Create a map to store revenue by date
       final revenueByDate = <String, double>{};
@@ -566,8 +598,10 @@ class VisibilityService {
         final salesSnapshot = await _firestore
             .collection('sales')
             .where('artistId', isEqualTo: artistId)
-            .where('saleDate',
-                isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
+            .where(
+              'saleDate',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(startDate),
+            )
             .where('saleDate', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
             .get();
 
@@ -592,8 +626,11 @@ class VisibilityService {
       }
 
       // Generate a complete date range
-      DateTime current =
-          DateTime(startDate.year, startDate.month, startDate.day);
+      DateTime current = DateTime(
+        startDate.year,
+        startDate.month,
+        startDate.day,
+      );
       final end = DateTime(endDate.year, endDate.month, endDate.day);
 
       while (current.isBefore(end) || current.isAtSameMomentAs(end)) {
@@ -621,7 +658,8 @@ class VisibilityService {
 
       // Sort results by date
       result.sort(
-          (a, b) => (a['date'] as DateTime).compareTo(b['date'] as DateTime));
+        (a, b) => (a['date'] as DateTime).compareTo(b['date'] as DateTime),
+      );
     } catch (e) {
       logger.e('Error getting revenue timeline data: $e');
       throw Exception('Failed to load revenue timeline data: $e');
@@ -639,15 +677,19 @@ class VisibilityService {
       // Get artwork views
       final viewsSnapshot = await _artworkViewsCollection
           .where('artistId', isEqualTo: userId)
-          .where('viewedAt',
-              isGreaterThanOrEqualTo: Timestamp.fromDate(thirtyDaysAgo))
+          .where(
+            'viewedAt',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(thirtyDaysAgo),
+          )
           .get();
 
       // Get profile views
       final profileViewsSnapshot = await _artistProfileViewsCollection
           .where('artistId', isEqualTo: userId)
-          .where('viewedAt',
-              isGreaterThanOrEqualTo: Timestamp.fromDate(thirtyDaysAgo))
+          .where(
+            'viewedAt',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(thirtyDaysAgo),
+          )
           .get();
 
       // Get artwork stats (likes, comments, etc.)
@@ -685,16 +727,20 @@ class VisibilityService {
       // Get recent artwork views
       final viewsQuery = _artworkViewsCollection
           .where('artistId', isEqualTo: userId)
-          .where('viewedAt',
-              isGreaterThanOrEqualTo: Timestamp.fromDate(thirtyDaysAgo))
+          .where(
+            'viewedAt',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(thirtyDaysAgo),
+          )
           .orderBy('viewedAt', descending: true)
           .limit(10);
 
       // Get recent profile views
       final profileViewsQuery = _artistProfileViewsCollection
           .where('artistId', isEqualTo: userId)
-          .where('viewedAt',
-              isGreaterThanOrEqualTo: Timestamp.fromDate(thirtyDaysAgo))
+          .where(
+            'viewedAt',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(thirtyDaysAgo),
+          )
           .orderBy('viewedAt', descending: true)
           .limit(10);
 
@@ -702,8 +748,10 @@ class VisibilityService {
       final commentsQuery = _firestore
           .collection('comments')
           .where('artistId', isEqualTo: userId)
-          .where('createdAt',
-              isGreaterThanOrEqualTo: Timestamp.fromDate(thirtyDaysAgo))
+          .where(
+            'createdAt',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(thirtyDaysAgo),
+          )
           .orderBy('createdAt', descending: true)
           .limit(10);
 
@@ -750,8 +798,11 @@ class VisibilityService {
       }
 
       // Sort all activities by timestamp
-      activities.sort((a, b) =>
-          (b['timestamp'] as Timestamp).compareTo(a['timestamp'] as Timestamp));
+      activities.sort(
+        (a, b) => (b['timestamp'] as Timestamp).compareTo(
+          a['timestamp'] as Timestamp,
+        ),
+      );
 
       // Return most recent 10 activities
       return activities.take(10).toList();
@@ -790,8 +841,10 @@ class VisibilityService {
 
         if (data['transactions'] != null) {
           final transactions = List<Map<String, dynamic>>.from(
-              (data['transactions'] as List<dynamic>? ?? [])
-                  .map((e) => e as Map<String, dynamic>));
+            (data['transactions'] as List<dynamic>? ?? []).map(
+              (e) => e as Map<String, dynamic>,
+            ),
+          );
           for (final transaction in transactions) {
             final amount = (transaction['commissionAmount'] as num).toDouble();
             if (transaction['status'] == 'pending') {
@@ -815,8 +868,10 @@ class VisibilityService {
         final data = doc.data();
         if (data['transactions'] != null) {
           final transactions = List<Map<String, dynamic>>.from(
-              (data['transactions'] as List<dynamic>? ?? [])
-                  .map((e) => e as Map<String, dynamic>));
+            (data['transactions'] as List<dynamic>? ?? []).map(
+              (e) => e as Map<String, dynamic>,
+            ),
+          );
           for (final transaction in transactions) {
             final date = (transaction['date'] as Timestamp).toDate();
             if (date.isAfter(thirtyDaysAgo)) {
@@ -833,7 +888,8 @@ class VisibilityService {
 
       // Sort transactions by date
       recentTransactions.sort(
-          (a, b) => (b['date'] as DateTime).compareTo(a['date'] as DateTime));
+        (a, b) => (b['date'] as DateTime).compareTo(a['date'] as DateTime),
+      );
 
       result['recentTransactions'] = recentTransactions;
 
@@ -855,8 +911,10 @@ class VisibilityService {
       final artworkViewsSnapshot = await _firestore
           .collection('artworkViews')
           .where('artistId', isEqualTo: userId)
-          .where('viewedAt',
-              isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
+          .where(
+            'viewedAt',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(startDate),
+          )
           .where('viewedAt', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
           .get();
 
@@ -864,8 +922,10 @@ class VisibilityService {
       final profileViewsSnapshot = await _firestore
           .collection('artistProfileViews')
           .where('artistId', isEqualTo: userId)
-          .where('viewedAt',
-              isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
+          .where(
+            'viewedAt',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(startDate),
+          )
           .where('viewedAt', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
           .get();
 
@@ -882,15 +942,14 @@ class VisibilityService {
         'averageViewsPerArtwork': artworkSnapshot.docs.isEmpty
             ? 0.0
             : artworkViewsSnapshot.docs.length / artworkSnapshot.docs.length,
-        'artworkViews':
-            artworkViewsSnapshot.docs.map((doc) => doc.data()).toList(),
-        'profileViews':
-            profileViewsSnapshot.docs.map((doc) => doc.data()).toList(),
+        'artworkViews': artworkViewsSnapshot.docs
+            .map((doc) => doc.data())
+            .toList(),
+        'profileViews': profileViewsSnapshot.docs
+            .map((doc) => doc.data())
+            .toList(),
         'artwork': artworkSnapshot.docs
-            .map((doc) => {
-                  'id': doc.id,
-                  ...doc.data(),
-                })
+            .map((doc) => {'id': doc.id, ...doc.data()})
             .toList(),
       };
     } catch (e) {
@@ -900,7 +959,9 @@ class VisibilityService {
   }
 
   /// Get "First-Week Win" highlights for new artists
-  Future<List<Map<String, dynamic>>> getDiscoveryBoostHighlights(String userId) async {
+  Future<List<Map<String, dynamic>>> getDiscoveryBoostHighlights(
+    String userId,
+  ) async {
     try {
       // Check artist profile creation date
       final profileSnapshot = await _firestore
@@ -908,39 +969,40 @@ class VisibilityService {
           .where('userId', isEqualTo: userId)
           .limit(1)
           .get();
-      
+
       if (profileSnapshot.docs.isEmpty) return [];
-      
+
       final profileData = profileSnapshot.docs.first.data();
       final createdAt = (profileData['createdAt'] as Timestamp).toDate();
       final daysSinceJoined = DateTime.now().difference(createdAt).inDays;
-      
+
       // Only show boost highlights for the first 7 days
       if (daysSinceJoined > 7) return [];
-      
+
       // Get real data to make it authentic
       final viewsSnapshot = await _firestore
           .collection('artworkViews')
           .where('artistId', isEqualTo: userId)
           .get();
-          
+
       final savesSnapshot = await _firestore
           .collection('savedArtworks')
           .where('artistId', isEqualTo: userId)
           .get();
 
       final highlights = <Map<String, dynamic>>[];
-      
+
       // 1. Daily Reach Win
       if (viewsSnapshot.docs.isNotEmpty) {
         highlights.add({
           'title': 'Discovery Boost Active',
-          'message': '${viewsSnapshot.docs.length} people nearby saw your work today.',
+          'message':
+              '${viewsSnapshot.docs.length} people nearby saw your work today.',
           'icon': 'visibility',
           'color': 'blue',
         });
       }
-      
+
       // 2. Map Placement Win (Always true in first week as part of the shift)
       highlights.add({
         'title': 'Local Discovery Map',
@@ -948,7 +1010,7 @@ class VisibilityService {
         'icon': 'map',
         'color': 'green',
       });
-      
+
       // 3. First Save Win
       if (savesSnapshot.docs.isNotEmpty) {
         highlights.add({
@@ -966,7 +1028,7 @@ class VisibilityService {
           'color': 'purple',
         });
       }
-      
+
       return highlights;
     } catch (e) {
       return [];
@@ -984,16 +1046,20 @@ class VisibilityService {
       final artworkViewsSnapshot = await _firestore
           .collection('artworkViews')
           .where('artistId', isEqualTo: userId)
-          .where('viewedAt',
-              isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
+          .where(
+            'viewedAt',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(startDate),
+          )
           .where('viewedAt', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
           .get();
 
       final profileViewsSnapshot = await _firestore
           .collection('artistProfileViews')
           .where('artistId', isEqualTo: userId)
-          .where('viewedAt',
-              isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
+          .where(
+            'viewedAt',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(startDate),
+          )
           .where('viewedAt', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
           .get();
 

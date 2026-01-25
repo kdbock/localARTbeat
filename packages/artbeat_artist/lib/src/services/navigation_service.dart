@@ -11,8 +11,7 @@ class NavigationService {
   static Future<void> navigateToGalleryHub(BuildContext context) async {
     await Navigator.push<void>(
       context,
-      MaterialPageRoute<void>(
-          builder: (context) => const GalleryHubScreen()),
+      MaterialPageRoute<void>(builder: (context) => const GalleryHubScreen()),
     );
   }
 
@@ -21,7 +20,8 @@ class NavigationService {
     await Navigator.push<void>(
       context,
       MaterialPageRoute<void>(
-          builder: (context) => const ArtistProfileEditScreen()),
+        builder: (context) => const ArtistProfileEditScreen(),
+      ),
     );
   }
 
@@ -29,8 +29,7 @@ class NavigationService {
   static Future<void> navigateToEarnings(BuildContext context) async {
     await Navigator.push<void>(
       context,
-      MaterialPageRoute<void>(
-          builder: (context) => const ArtistEarningsHub()),
+      MaterialPageRoute<void>(builder: (context) => const ArtistEarningsHub()),
     );
   }
 
@@ -39,17 +38,20 @@ class NavigationService {
     await Navigator.push<void>(
       context,
       MaterialPageRoute<void>(
-          builder: (context) => const VisibilityInsightsScreen()),
+        builder: (context) => const VisibilityInsightsScreen(),
+      ),
     );
   }
 
   /// Navigate to subscription analytics
   static Future<void> navigateToSubscriptionAnalytics(
-      BuildContext context) async {
+    BuildContext context,
+  ) async {
     await Navigator.push<void>(
       context,
       MaterialPageRoute<void>(
-          builder: (context) => const SubscriptionAnalyticsScreen()),
+        builder: (context) => const SubscriptionAnalyticsScreen(),
+      ),
     );
   }
 
@@ -58,7 +60,8 @@ class NavigationService {
     await Navigator.push<void>(
       context,
       MaterialPageRoute<void>(
-          builder: (context) => const GalleryArtistsManagementScreen()),
+        builder: (context) => const GalleryArtistsManagementScreen(),
+      ),
     );
   }
 
@@ -67,7 +70,8 @@ class NavigationService {
     await Navigator.push<void>(
       context,
       MaterialPageRoute<void>(
-          builder: (context) => const EventCreationScreen()),
+        builder: (context) => const EventCreationScreen(),
+      ),
     );
   }
 
@@ -76,7 +80,8 @@ class NavigationService {
     await Navigator.push<void>(
       context,
       MaterialPageRoute<void>(
-          builder: (context) => const PaymentMethodsScreen()),
+        builder: (context) => const PaymentMethodsScreen(),
+      ),
     );
   }
 
@@ -112,7 +117,9 @@ class NavigationService {
 
   /// Navigate with replacement (no back navigation)
   static Future<void> navigateAndReplace(
-      BuildContext context, Widget screen) async {
+    BuildContext context,
+    Widget screen,
+  ) async {
     await Navigator.pushReplacement<void, void>(
       context,
       MaterialPageRoute<void>(builder: (context) => screen),
@@ -121,7 +128,9 @@ class NavigationService {
 
   /// Navigate and clear stack
   static Future<void> navigateAndClear(
-      BuildContext context, Widget screen) async {
+    BuildContext context,
+    Widget screen,
+  ) async {
     await Navigator.pushAndRemoveUntil<void>(
       context,
       MaterialPageRoute<void>(builder: (context) => screen),

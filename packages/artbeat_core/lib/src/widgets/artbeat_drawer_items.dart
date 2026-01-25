@@ -588,10 +588,7 @@ class ArtbeatDrawerItems {
       final creationTools = _filterItemsForRole(creationItems, userRole);
       if (creationTools.isNotEmpty) {
         sections.add(
-          DrawerSection(
-            title: 'drawer_section_create',
-            items: creationTools,
-          ),
+          DrawerSection(title: 'drawer_section_create', items: creationTools),
         );
       }
     }
@@ -608,10 +605,7 @@ class ArtbeatDrawerItems {
         final artistTools = _filterItemsForRole(artistItems, userRole);
         if (artistTools.isNotEmpty) {
           sections.add(
-            DrawerSection(
-              title: 'drawer_section_artist',
-              items: artistTools,
-            ),
+            DrawerSection(title: 'drawer_section_artist', items: artistTools),
           );
         }
         break;
@@ -619,10 +613,7 @@ class ArtbeatDrawerItems {
         final galleryTools = _filterItemsForRole(galleryItems, userRole);
         if (galleryTools.isNotEmpty) {
           sections.add(
-            DrawerSection(
-              title: 'drawer_section_gallery',
-              items: galleryTools,
-            ),
+            DrawerSection(title: 'drawer_section_gallery', items: galleryTools),
           );
         }
         break;

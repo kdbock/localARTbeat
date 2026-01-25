@@ -11,11 +11,7 @@ class ArtworkEditScreen extends StatefulWidget {
   final String artworkId;
   final ArtworkModel? artwork;
 
-  const ArtworkEditScreen({
-    super.key,
-    required this.artworkId,
-    this.artwork,
-  });
+  const ArtworkEditScreen({super.key, required this.artworkId, this.artwork});
 
   @override
   State<ArtworkEditScreen> createState() => _ArtworkEditScreenState();
@@ -61,7 +57,7 @@ class _ArtworkEditScreenState extends State<ArtworkEditScreen> {
     'Ceramics',
     'Printmaking',
     'Pen & Ink',
-    'Pencil'
+    'Pencil',
   ];
 
   final List<String> _availableStyles = [
@@ -78,7 +74,7 @@ class _ArtworkEditScreenState extends State<ArtworkEditScreen> {
     'Street Art',
     'Illustration',
     'Fantasy',
-    'Portrait'
+    'Portrait',
   ];
 
   @override
@@ -108,7 +104,8 @@ class _ArtworkEditScreenState extends State<ArtworkEditScreen> {
 
     try {
       // Use provided artwork or fetch from service
-      _artwork = widget.artwork ??
+      _artwork =
+          widget.artwork ??
           await _artworkService.getArtworkById(widget.artworkId);
 
       if (_artwork != null) {
@@ -134,9 +131,13 @@ class _ArtworkEditScreenState extends State<ArtworkEditScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('art_walk_error_loading_artwork'
-                  .tr()
-                  .replaceAll('{error}', e.toString()))),
+            content: Text(
+              'art_walk_error_loading_artwork'.tr().replaceAll(
+                '{error}',
+                e.toString(),
+              ),
+            ),
+          ),
         );
       }
     } finally {
@@ -164,9 +165,13 @@ class _ArtworkEditScreenState extends State<ArtworkEditScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('art_walk_error_picking_image'
-                  .tr()
-                  .replaceAll('{error}', e.toString()))),
+            content: Text(
+              'art_walk_error_picking_image'.tr().replaceAll(
+                '{error}',
+                e.toString(),
+              ),
+            ),
+          ),
         );
       }
     }
@@ -226,9 +231,13 @@ class _ArtworkEditScreenState extends State<ArtworkEditScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('art_walk_error_updating_artwork'
-                  .tr()
-                  .replaceAll('{error}', e.toString()))),
+            content: Text(
+              'art_walk_error_updating_artwork'.tr().replaceAll(
+                '{error}',
+                e.toString(),
+              ),
+            ),
+          ),
         );
       }
     } finally {
@@ -272,7 +281,8 @@ class _ArtworkEditScreenState extends State<ArtworkEditScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-                content: Text('art_walk_artwork_deleted_successfully'.tr())),
+              content: Text('art_walk_artwork_deleted_successfully'.tr()),
+            ),
           );
           Navigator.of(context).pop(true); // Return true to indicate deletion
         }
@@ -281,9 +291,13 @@ class _ArtworkEditScreenState extends State<ArtworkEditScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-                content: Text('art_walk_error_deleting_artwork'
-                    .tr()
-                    .replaceAll('{error}', e.toString()))),
+              content: Text(
+                'art_walk_error_deleting_artwork'.tr().replaceAll(
+                  '{error}',
+                  e.toString(),
+                ),
+              ),
+            ),
           );
         }
       } finally {
@@ -303,32 +317,34 @@ class _ArtworkEditScreenState extends State<ArtworkEditScreen> {
       appBar: HudTopBar(
         title: 'artwork_edit_title'.tr(),
         showBackButton: true,
-        onBackPressed: () => Navigator.of(context).maybePop(), subtitle: '',
+        onBackPressed: () => Navigator.of(context).maybePop(),
+        subtitle: '',
       ),
       child: WorldBackground(
         child: SafeArea(
           child: _isLoading
               ? const Center(
                   child: CircularProgressIndicator(
-                    valueColor:
-                        AlwaysStoppedAnimation<Color>(Color(0xFF22D3EE)),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Color(0xFF22D3EE),
+                    ),
                   ),
                 )
               : _artwork == null
-                  ? Center(
-                      child: GlassCard(
-                        padding: const EdgeInsets.all(20),
-                        child: Text(
-                          'artwork_edit_not_found'.tr(),
-                          style: GoogleFonts.spaceGrotesk(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
+              ? Center(
+                  child: GlassCard(
+                    padding: const EdgeInsets.all(20),
+                    child: Text(
+                      'artwork_edit_not_found'.tr(),
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
                       ),
-                    )
-                  : _buildEditForm(),
+                    ),
+                  ),
+                )
+              : _buildEditForm(),
         ),
       ),
     );
@@ -388,25 +404,21 @@ class _ArtworkEditScreenState extends State<ArtworkEditScreen> {
               child: _newImageFile != null
                   ? Image.file(_newImageFile!, fit: BoxFit.cover)
                   : _artwork!.imageUrl.isNotEmpty
-                      ? SecureNetworkImage(
-                          imageUrl: _artwork!.imageUrl,
-                          fit: BoxFit.cover,
-                          enableThumbnailFallback: true,
-                          errorWidget: const Center(
-                            child: Icon(
-                              Icons.image,
-                              size: 64,
-                              color: Colors.white54,
-                            ),
-                          ),
-                        )
-                      : const Center(
-                          child: Icon(
-                            Icons.image,
-                            size: 64,
-                            color: Colors.white54,
-                          ),
+                  ? SecureNetworkImage(
+                      imageUrl: _artwork!.imageUrl,
+                      fit: BoxFit.cover,
+                      enableThumbnailFallback: true,
+                      errorWidget: const Center(
+                        child: Icon(
+                          Icons.image,
+                          size: 64,
+                          color: Colors.white54,
                         ),
+                      ),
+                    )
+                  : const Center(
+                      child: Icon(Icons.image, size: 64, color: Colors.white54),
+                    ),
             ),
           ),
           const SizedBox(height: 12),
@@ -549,8 +561,7 @@ class _ArtworkEditScreenState extends State<ArtworkEditScreen> {
                 checkmarkColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(18),
-                  side:
-                      BorderSide(color: Colors.white.withValues(alpha: 0.14)),
+                  side: BorderSide(color: Colors.white.withValues(alpha: 0.14)),
                 ),
               );
             }).toList(),
@@ -618,9 +629,7 @@ class _ArtworkEditScreenState extends State<ArtworkEditScreen> {
             validator: (value) {
               if (value != null && value.isNotEmpty) {
                 final year = int.tryParse(value);
-                if (year == null ||
-                    year < 1000 ||
-                    year > DateTime.now().year) {
+                if (year == null || year < 1000 || year > DateTime.now().year) {
                   return 'artwork_edit_year_error'.tr();
                 }
               }

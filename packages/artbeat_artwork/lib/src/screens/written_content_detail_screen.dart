@@ -12,10 +12,7 @@ import 'package:easy_localization/easy_localization.dart';
 class WrittenContentDetailScreen extends StatefulWidget {
   final String artworkId;
 
-  const WrittenContentDetailScreen({
-    super.key,
-    required this.artworkId,
-  });
+  const WrittenContentDetailScreen({super.key, required this.artworkId});
 
   @override
   State<WrittenContentDetailScreen> createState() =>
@@ -28,7 +25,8 @@ class _WrittenContentDetailScreenState
   final ChapterService _chapterService = ChapterService();
   final artist.SubscriptionService _subscriptionService =
       artist.SubscriptionService();
-  final artist.VisibilityService _visibilityService = artist.VisibilityService();
+  final artist.VisibilityService _visibilityService =
+      artist.VisibilityService();
   final UnifiedPaymentService _paymentService = UnifiedPaymentService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -63,7 +61,8 @@ class _WrittenContentDetailScreenState
     if (_scrollController.hasClients &&
         _scrollController.position.maxScrollExtent > 0) {
       setState(() {
-        _scrollProgress = _scrollController.position.pixels /
+        _scrollProgress =
+            _scrollController.position.pixels /
             _scrollController.position.maxScrollExtent;
       });
     }
@@ -94,8 +93,9 @@ class _WrittenContentDetailScreenState
 
       // Load artist info
       try {
-        final artistProfile = await _subscriptionService
-            .getArtistProfileById(artwork.artistProfileId);
+        final artistProfile = await _subscriptionService.getArtistProfileById(
+          artwork.artistProfileId,
+        );
         _artist = artistProfile;
 
         // If artist profile not found, try to get user information as fallback
@@ -105,7 +105,8 @@ class _WrittenContentDetailScreenState
               .doc(artwork.artistProfileId)
               .get();
           final userData = userDoc.data();
-          _fallbackArtistName = (userData?['fullName'] as String?) ??
+          _fallbackArtistName =
+              (userData?['fullName'] as String?) ??
               (userData?['displayName'] as String?) ??
               'Unknown Artist';
         }
@@ -124,7 +125,8 @@ class _WrittenContentDetailScreenState
       }
 
       // Check access (free content or purchased/paid)
-      _hasAccess = _isOwner ||
+      _hasAccess =
+          _isOwner ||
           !artwork.isForSale ||
           artwork.price == null ||
           artwork.price == 0;
@@ -138,9 +140,13 @@ class _WrittenContentDetailScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('art_walk_error_loading_content'
-                  .tr()
-                  .replaceAll('{error}', e.toString()))),
+            content: Text(
+              'art_walk_error_loading_content'.tr().replaceAll(
+                '{error}',
+                e.toString(),
+              ),
+            ),
+          ),
         );
       }
     } finally {
@@ -191,10 +197,7 @@ class _WrittenContentDetailScreenState
         ),
       ),
       actions: [
-        IconButton(
-          icon: const Icon(Icons.share),
-          onPressed: _shareContent,
-        ),
+        IconButton(icon: const Icon(Icons.share), onPressed: _shareContent),
         if (_isOwner)
           IconButton(
             icon: const Icon(Icons.edit),
@@ -218,9 +221,9 @@ class _WrittenContentDetailScreenState
             // Title and author
             Text(
               _artwork?.title ?? '',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Row(
@@ -228,13 +231,18 @@ class _WrittenContentDetailScreenState
                 CircleAvatar(
                   radius: 16,
                   backgroundImage: ImageUrlValidator.safeNetworkImage(
-                      _artist?.profileImageUrl),
-                  child: !ImageUrlValidator.isValidImageUrl(
-                          _artist?.profileImageUrl)
-                      ? Text((_artist?.displayName ??
-                              _fallbackArtistName ??
-                              'A')[0]
-                          .toUpperCase())
+                    _artist?.profileImageUrl,
+                  ),
+                  child:
+                      !ImageUrlValidator.isValidImageUrl(
+                        _artist?.profileImageUrl,
+                      )
+                      ? Text(
+                          (_artist?.displayName ??
+                                  _fallbackArtistName ??
+                                  'A')[0]
+                              .toUpperCase(),
+                        )
                       : null,
                 ),
                 const SizedBox(width: 8),
@@ -304,9 +312,9 @@ class _WrittenContentDetailScreenState
       children: [
         Text(
           'Chapters',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         SizedBox(
@@ -334,10 +342,8 @@ class _WrittenContentDetailScreenState
                       children: [
                         Text(
                           'Chapter ${chapter.chapterNumber}',
-                          style:
-                              Theme.of(context).textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 4),
                         Text(
@@ -349,17 +355,16 @@ class _WrittenContentDetailScreenState
                         const Spacer(),
                         Row(
                           children: [
-                            const Icon(Icons.schedule,
-                                size: 14, color: Colors.grey),
+                            const Icon(
+                              Icons.schedule,
+                              size: 14,
+                              color: Colors.grey,
+                            ),
                             const SizedBox(width: 4),
                             Text(
                               '${chapter.estimatedReadingTime}min',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(
-                                    color: Colors.grey,
-                                  ),
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(color: Colors.grey),
                             ),
                           ],
                         ),
@@ -398,7 +403,8 @@ class _WrittenContentDetailScreenState
               ElevatedButton(
                 onPressed: _purchaseContent,
                 child: Text(
-                    'Purchase for \$${_artwork?.price?.toStringAsFixed(2) ?? '0.00'}'),
+                  'Purchase for \$${_artwork?.price?.toStringAsFixed(2) ?? '0.00'}',
+                ),
               ),
             ],
           ),
@@ -415,29 +421,27 @@ class _WrittenContentDetailScreenState
           data: content,
           controller: _scrollController,
           styleSheet: MarkdownStyleSheet(
-            p: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  height: 1.6,
-                ),
+            p: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.6),
             h1: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  height: 1.4,
-                ),
+              fontWeight: FontWeight.bold,
+              height: 1.4,
+            ),
             h2: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  height: 1.4,
-                ),
+              fontWeight: FontWeight.bold,
+              height: 1.4,
+            ),
             h3: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  height: 1.4,
-                ),
+              fontWeight: FontWeight.bold,
+              height: 1.4,
+            ),
             blockquote: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  fontStyle: FontStyle.italic,
-                  color: Colors.grey[600],
-                ),
+              fontStyle: FontStyle.italic,
+              color: Colors.grey[600],
+            ),
             code: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontFamily: 'monospace',
-                  backgroundColor: Colors.grey[100],
-                ),
+              fontFamily: 'monospace',
+              backgroundColor: Colors.grey[100],
+            ),
           ),
           onTapLink: (text, href, title) {
             // Handle link taps
@@ -482,7 +486,8 @@ class _WrittenContentDetailScreenState
               child: Column(
                 children: [
                   LinearProgressIndicator(
-                    value: (_currentChapterIndex + _scrollProgress) /
+                    value:
+                        (_currentChapterIndex + _scrollProgress) /
                         _chapters.length,
                     backgroundColor: Colors.grey[300],
                   ),
@@ -548,9 +553,9 @@ class _WrittenContentDetailScreenState
       // 4. Verification - the backend should handle the webhook,
       // but we can refresh local state
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Payment successful!')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Payment successful!')));
 
       // Reload content to check for updated access
       await _loadContent();
@@ -564,9 +569,9 @@ class _WrittenContentDetailScreenState
       }
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Purchase failed: $errorMessage')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Purchase failed: $errorMessage')));
     } finally {
       if (mounted) {
         setState(() {
@@ -579,9 +584,7 @@ class _WrittenContentDetailScreenState
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     if (_artwork == null) {

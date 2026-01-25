@@ -19,7 +19,9 @@ class EnvLoader {
         await dotenv.load(fileName: '.env');
         _envVars.addAll(dotenv.env);
       } catch (e) {
-        AppLogger.warning('⚠️ Could not load .env file, using environment defines: $e');
+        AppLogger.warning(
+          '⚠️ Could not load .env file, using environment defines: $e',
+        );
       }
 
       // Merge with String.fromEnvironment for build-time overrides
@@ -47,7 +49,9 @@ class EnvLoader {
       _envVars.putIfAbsent('API_BASE_URL', () => 'https://api.artbeat.app');
       _envVars.putIfAbsent('FIREBASE_REGION', () => 'us-central1');
 
-      AppLogger.info('✅ Environment variables loaded successfully (${_envVars.length} variables)');
+      AppLogger.info(
+        '✅ Environment variables loaded successfully (${_envVars.length} variables)',
+      );
     } catch (e) {
       AppLogger.error('❌ Error loading environment variables: $e');
     }

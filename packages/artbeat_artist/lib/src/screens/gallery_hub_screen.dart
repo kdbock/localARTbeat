@@ -126,16 +126,17 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
           .doc(userId)
           .get();
       final momentumData = momentumDoc.data() ?? {};
-      final rawMomentum =
-          (momentumData['momentum'] as num?)?.toDouble() ?? 0.0;
+      final rawMomentum = (momentumData['momentum'] as num?)?.toDouble() ?? 0.0;
       final weeklyMomentum =
           (momentumData['weeklyMomentum'] as num?)?.toDouble() ?? 0.0;
       final momentumLastUpdated =
           (momentumData['momentumLastUpdated'] as Timestamp?)?.toDate();
       final weeklyWindowStart =
           (momentumData['weeklyWindowStart'] as Timestamp?)?.toDate();
-      final decayedMomentum =
-          _calculateDecayedMomentum(rawMomentum, momentumLastUpdated);
+      final decayedMomentum = _calculateDecayedMomentum(
+        rawMomentum,
+        momentumLastUpdated,
+      );
 
       return {
         'artworkCount': artworkCount,
@@ -155,10 +156,7 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
     }
   }
 
-  double _calculateDecayedMomentum(
-    double momentum,
-    DateTime? lastUpdated,
-  ) {
+  double _calculateDecayedMomentum(double momentum, DateTime? lastUpdated) {
     if (momentum <= 0 || lastUpdated == null) return momentum;
     final elapsedHours = DateTime.now().difference(lastUpdated).inHours;
     if (elapsedHours <= 0) return momentum;
@@ -621,10 +619,12 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
     final weeklyMomentum =
         (_analytics['weeklyMomentum'] as num?)?.toDouble() ?? 0.0;
     final weekStart = _analytics['weeklyWindowStart'] as DateTime?;
-    final daysSinceStart =
-        weekStart != null ? DateTime.now().difference(weekStart).inDays : null;
-    final effectiveWeekly =
-        (daysSinceStart != null && daysSinceStart >= 7) ? 0.0 : weeklyMomentum;
+    final daysSinceStart = weekStart != null
+        ? DateTime.now().difference(weekStart).inDays
+        : null;
+    final effectiveWeekly = (daysSinceStart != null && daysSinceStart >= 7)
+        ? 0.0
+        : weeklyMomentum;
     final progress = (effectiveWeekly / _weeklyMomentumCap)
         .clamp(0.0, 1.0)
         .toDouble();
@@ -641,8 +641,11 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
         children: [
           Row(
             children: [
-              const Icon(Icons.local_fire_department,
-                  color: Color(0xFFFF8C42), size: 20),
+              const Icon(
+                Icons.local_fire_department,
+                color: Color(0xFFFF8C42),
+                size: 20,
+              ),
               const SizedBox(width: 8),
               Text(
                 'Momentum Meter',

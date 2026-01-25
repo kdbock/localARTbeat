@@ -18,20 +18,12 @@ import 'package:artbeat_artwork/artbeat_artwork.dart' show ArtworkService;
 // Video processing imports - simplified for now
 import 'package:video_player/video_player.dart';
 
-enum VideoContentUploadStep {
-  content,
-  basicInfo,
-  details,
-  review,
-}
+enum VideoContentUploadStep { content, basicInfo, details, review }
 
 class VideoContentUploadScreen extends StatefulWidget {
   final String? contentId;
 
-  const VideoContentUploadScreen({
-    super.key,
-    this.contentId,
-  });
+  const VideoContentUploadScreen({super.key, this.contentId});
 
   @override
   State<VideoContentUploadScreen> createState() =>
@@ -127,7 +119,7 @@ class _VideoContentUploadScreenState extends State<VideoContentUploadScreen> {
     'weekly',
     'bi-weekly',
     'monthly',
-    'custom'
+    'custom',
   ];
 
   @override
@@ -239,8 +231,10 @@ class _VideoContentUploadScreenState extends State<VideoContentUploadScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(
-                  'video_content_upload_file_error'.tr(args: [e.toString()]))),
+            content: Text(
+              'video_content_upload_file_error'.tr(args: [e.toString()]),
+            ),
+          ),
         );
       }
     }
@@ -263,7 +257,8 @@ class _VideoContentUploadScreenState extends State<VideoContentUploadScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-                content: Text('video_content_upload_unsupported_format'.tr())),
+              content: Text('video_content_upload_unsupported_format'.tr()),
+            ),
           );
         }
         return;
@@ -278,11 +273,16 @@ class _VideoContentUploadScreenState extends State<VideoContentUploadScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-                content: Text('video_content_upload_file_too_large'.tr(args: [
-              maxSize > 1024 * 1024 * 1024
-                  ? '${maxSize ~/ (1024 * 1024 * 1024)}GB'
-                  : '${maxSize ~/ (1024 * 1024)}MB'
-            ]))),
+              content: Text(
+                'video_content_upload_file_too_large'.tr(
+                  args: [
+                    maxSize > 1024 * 1024 * 1024
+                        ? '${maxSize ~/ (1024 * 1024 * 1024)}GB'
+                        : '${maxSize ~/ (1024 * 1024)}MB',
+                  ],
+                ),
+              ),
+            ),
           );
         }
         return;
@@ -315,8 +315,10 @@ class _VideoContentUploadScreenState extends State<VideoContentUploadScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('video_content_upload_process_error'
-                  .tr(args: [e.toString()]))),
+            content: Text(
+              'video_content_upload_process_error'.tr(args: [e.toString()]),
+            ),
+          ),
         );
       }
     }
@@ -361,8 +363,10 @@ class _VideoContentUploadScreenState extends State<VideoContentUploadScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('video_content_upload_thumbnail_error'
-                  .tr(args: [e.toString()]))),
+            content: Text(
+              'video_content_upload_thumbnail_error'.tr(args: [e.toString()]),
+            ),
+          ),
         );
       }
     }
@@ -387,11 +391,7 @@ class _VideoContentUploadScreenState extends State<VideoContentUploadScreen> {
 
     if (!_canUpload) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'video_content_upload_limit'.tr(),
-          ),
-        ),
+        SnackBar(content: Text('video_content_upload_limit'.tr())),
       );
       return;
     }
@@ -478,8 +478,10 @@ class _VideoContentUploadScreenState extends State<VideoContentUploadScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content:
-                  Text('video_content_upload_error'.tr(args: [e.toString()]))),
+            content: Text(
+              'video_content_upload_error'.tr(args: [e.toString()]),
+            ),
+          ),
         );
       }
     } finally {
@@ -550,7 +552,8 @@ class _VideoContentUploadScreenState extends State<VideoContentUploadScreen> {
                       ),
                     )
                   : Text(
-                      _currentStepIndex == 3 ? 'upload'.tr() : 'continue'.tr()),
+                      _currentStepIndex == 3 ? 'upload'.tr() : 'continue'.tr(),
+                    ),
             ),
           ),
         ],
@@ -591,9 +594,9 @@ class _VideoContentUploadScreenState extends State<VideoContentUploadScreen> {
                 const SizedBox(height: 8),
                 Text(
                   'video_content_upload_supported_formats'.tr(),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey[600],
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 16),
@@ -652,9 +655,7 @@ class _VideoContentUploadScreenState extends State<VideoContentUploadScreen> {
                       color: Colors.grey[200],
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Center(
-                      child: CircularProgressIndicator(),
-                    ),
+                    child: const Center(child: CircularProgressIndicator()),
                   ),
                 ],
                 const SizedBox(height: 16),
@@ -702,11 +703,7 @@ class _VideoContentUploadScreenState extends State<VideoContentUploadScreen> {
           child: Column(
             children: [
               if (_thumbnailFile == null) ...[
-                Icon(
-                  Icons.image_outlined,
-                  size: 32,
-                  color: Colors.grey[400],
-                ),
+                Icon(Icons.image_outlined, size: 32, color: Colors.grey[400]),
                 const SizedBox(height: 8),
                 Text(
                   'video_content_upload_select_thumbnail'.tr(),
@@ -808,10 +805,7 @@ class _VideoContentUploadScreenState extends State<VideoContentUploadScreen> {
               border: const OutlineInputBorder(),
             ),
             items: _contentTypes.map((type) {
-              return DropdownMenuItem(
-                value: type,
-                child: Text(type),
-              );
+              return DropdownMenuItem(value: type, child: Text(type));
             }).toList(),
             onChanged: (value) {
               setState(() {
@@ -1011,14 +1005,20 @@ class _VideoContentUploadScreenState extends State<VideoContentUploadScreen> {
         _buildReviewItem('title'.tr(), _titleController.text),
         _buildReviewItem('description'.tr(), _descriptionController.text),
         _buildReviewItem(
-            'video_content_upload_content_type'.tr(), _contentType),
+          'video_content_upload_content_type'.tr(),
+          _contentType,
+        ),
         _buildReviewItem('genres'.tr(), _genres.join(', ')),
         if (_directorController.text.isNotEmpty)
           _buildReviewItem(
-              'video_content_upload_director'.tr(), _directorController.text),
+            'video_content_upload_director'.tr(),
+            _directorController.text,
+          ),
         if (_producerController.text.isNotEmpty)
           _buildReviewItem(
-              'video_content_upload_producer'.tr(), _producerController.text),
+            'video_content_upload_producer'.tr(),
+            _producerController.text,
+          ),
         if (_isForSale)
           _buildReviewItem('price'.tr(), '\$${_priceController.text}'),
         const SizedBox(height: 24),
@@ -1056,16 +1056,13 @@ class _VideoContentUploadScreenState extends State<VideoContentUploadScreen> {
             width: 120,
             child: Text(
               label,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
           Expanded(
-            child: Text(
-              value,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
+            child: Text(value, style: Theme.of(context).textTheme.bodyMedium),
           ),
         ],
       ),
@@ -1108,32 +1105,36 @@ class _VideoContentUploadScreenState extends State<VideoContentUploadScreen> {
                 steps: [
                   Step(
                     title: Text('video_content_upload_step_content'.tr()),
-                    subtitle:
-                        Text('video_content_upload_step_content_desc'.tr()),
+                    subtitle: Text(
+                      'video_content_upload_step_content_desc'.tr(),
+                    ),
                     content: _buildContentStep(),
                     isActive: _currentStepIndex >= 0,
                     state: _getStepState(0),
                   ),
                   Step(
                     title: Text('video_content_upload_step_basic_info'.tr()),
-                    subtitle:
-                        Text('video_content_upload_step_basic_info_desc'.tr()),
+                    subtitle: Text(
+                      'video_content_upload_step_basic_info_desc'.tr(),
+                    ),
                     content: _buildBasicInfoStep(),
                     isActive: _currentStepIndex >= 1,
                     state: _getStepState(1),
                   ),
                   Step(
                     title: Text('video_content_upload_step_details'.tr()),
-                    subtitle:
-                        Text('video_content_upload_step_details_desc'.tr()),
+                    subtitle: Text(
+                      'video_content_upload_step_details_desc'.tr(),
+                    ),
                     content: _buildDetailsStep(),
                     isActive: _currentStepIndex >= 2,
                     state: _getStepState(2),
                   ),
                   Step(
                     title: Text('video_content_upload_step_review'.tr()),
-                    subtitle:
-                        Text('video_content_upload_step_review_desc'.tr()),
+                    subtitle: Text(
+                      'video_content_upload_step_review_desc'.tr(),
+                    ),
                     content: _buildReviewStep(),
                     isActive: _currentStepIndex >= 3,
                     state: _getStepState(3),

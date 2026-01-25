@@ -46,7 +46,8 @@ class _OnboardingCompletionScreenState
     // TODO: Get actual profile URL
     await SharePlus.instance.share(
       ShareParams(
-        text: 'Check out my artist profile on ArtBeat! artbeat.com/artist/username',
+        text:
+            'Check out my artist profile on ArtBeat! artbeat.com/artist/username',
       ),
     );
   }

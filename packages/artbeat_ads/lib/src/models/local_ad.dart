@@ -58,9 +58,8 @@ class LocalAd {
       title: (map['title'] ?? '') as String,
       description: (map['description'] ?? '') as String,
       imageUrl: map['imageUrl'] as String?,
-      imageUrls: (map['imageUrls'] as List?)
-          ?.whereType<String>()
-          .toList() ??
+      imageUrls:
+          (map['imageUrls'] as List?)?.whereType<String>().toList() ??
           (map['artworkUrls'] as List?)?.whereType<String>().toList(),
       contactInfo: map['contactInfo'] as String?,
       websiteUrl: map['websiteUrl'] as String?,
@@ -91,7 +90,8 @@ class LocalAd {
       'userId': userId,
       'title': title,
       'description': description,
-      'imageUrl': imageUrl ?? (urls != null && urls.isNotEmpty ? urls.first : null),
+      'imageUrl':
+          imageUrl ?? (urls != null && urls.isNotEmpty ? urls.first : null),
       if (urls != null && urls.isNotEmpty) 'imageUrls': urls,
       'contactInfo': contactInfo,
       'websiteUrl': websiteUrl,

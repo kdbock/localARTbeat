@@ -81,10 +81,7 @@ class _DashboardArtistsSectionState extends State<DashboardArtistsSection> {
               ),
               Text(
                 'dashboard_artists_subtitle'.tr(),
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.white70,
-                ),
+                style: const TextStyle(fontSize: 14, color: Colors.white70),
               ),
             ],
           ),
@@ -156,11 +153,7 @@ class _DashboardArtistsSectionState extends State<DashboardArtistsSection> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
-                  Icons.auto_awesome,
-                  color: Colors.white70,
-                  size: 28,
-                ),
+                const Icon(Icons.auto_awesome, color: Colors.white70, size: 28),
                 const SizedBox(height: 8),
                 Text(
                   'dashboard_kiosk_lane_empty'.tr(),
@@ -218,18 +211,13 @@ class _DashboardArtistsSectionState extends State<DashboardArtistsSection> {
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.12),
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
       ),
       child: Center(child: child),
     );
   }
 
-  Widget _buildKioskLaneCard(
-    BuildContext context,
-    ArtistProfileModel artist,
-  ) {
+  Widget _buildKioskLaneCard(BuildContext context, ArtistProfileModel artist) {
     return GestureDetector(
       onTap: () => Navigator.pushNamed(
         context,
@@ -256,9 +244,8 @@ class _DashboardArtistsSectionState extends State<DashboardArtistsSection> {
                   artist.profileImageUrl,
                 ),
                 backgroundColor: Colors.white.withValues(alpha: 0.15),
-                child: !ImageUrlValidator.isValidImageUrl(
-                  artist.profileImageUrl,
-                )
+                child:
+                    !ImageUrlValidator.isValidImageUrl(artist.profileImageUrl)
                     ? Text(
                         artist.displayName.isNotEmpty
                             ? artist.displayName[0].toUpperCase()

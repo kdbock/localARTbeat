@@ -53,8 +53,8 @@ class _VisibilityInsightsScreenState extends State<VisibilityInsightsScreen> {
     try {
       // Check if user has pro subscription
       final String userId = _auth.currentUser?.uid ?? '';
-      final userSubscription =
-          await _subscriptionService.getCurrentSubscription(userId);
+      final userSubscription = await _subscriptionService
+          .getCurrentSubscription(userId);
       final hasProAccess =
           userSubscription != null && userSubscription.isActive;
 
@@ -91,7 +91,8 @@ class _VisibilityInsightsScreenState extends State<VisibilityInsightsScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-              tr('artist_analytics_dashboard_error_error_loading_analytics')),
+            tr('artist_analytics_dashboard_error_error_loading_analytics'),
+          ),
         ),
       );
     }
@@ -134,10 +135,7 @@ class _VisibilityInsightsScreenState extends State<VisibilityInsightsScreen> {
         showLogo: false,
         showBackButton: true,
         actions: <Widget>[
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadData,
-          ),
+          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadData),
         ],
       ),
       child: _isLoading
@@ -194,8 +192,9 @@ class _VisibilityInsightsScreenState extends State<VisibilityInsightsScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color:
-              isSelected ? Theme.of(context).primaryColor : Colors.transparent,
+          color: isSelected
+              ? Theme.of(context).primaryColor
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Text(
@@ -242,7 +241,11 @@ class _VisibilityInsightsScreenState extends State<VisibilityInsightsScreen> {
         const SizedBox(height: 8),
         Row(
           children: <Widget>[
-            _buildMetricCard('People who saved your work', favorites, Icons.favorite),
+            _buildMetricCard(
+              'People who saved your work',
+              favorites,
+              Icons.favorite,
+            ),
             _buildMetricCard('Inquiries', leadClicks, Icons.link),
           ],
         ),
@@ -262,10 +265,7 @@ class _VisibilityInsightsScreenState extends State<VisibilityInsightsScreen> {
               const SizedBox(height: 8),
               Text(
                 title,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey,
-                ),
+                style: const TextStyle(fontSize: 14, color: Colors.grey),
               ),
               const SizedBox(height: 4),
               Text(
@@ -302,8 +302,8 @@ class _VisibilityInsightsScreenState extends State<VisibilityInsightsScreen> {
       final double yValue = value is double
           ? value
           : (value is int
-              ? value.toDouble()
-              : (double.tryParse(value.toString()) ?? 0.0));
+                ? value.toDouble()
+                : (double.tryParse(value.toString()) ?? 0.0));
       return FlSpot(e.key.toDouble(), yValue);
     }).toList();
 
@@ -390,9 +390,7 @@ class _VisibilityInsightsScreenState extends State<VisibilityInsightsScreen> {
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Row(
                   children: <Widget>[
-                    Expanded(
-                      child: Text(locationName),
-                    ),
+                    Expanded(child: Text(locationName)),
                     Text(
                       NumberFormat.compact().format(locationValue),
                       style: const TextStyle(fontWeight: FontWeight.bold),
@@ -426,8 +424,9 @@ class _VisibilityInsightsScreenState extends State<VisibilityInsightsScreen> {
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Center(
-                child:
-                    Text(tr('artist_analytics_dashboard_text_no_artwork_data')),
+                child: Text(
+                  tr('artist_analytics_dashboard_text_no_artwork_data'),
+                ),
               ),
             ),
           )
@@ -465,7 +464,8 @@ class _VisibilityInsightsScreenState extends State<VisibilityInsightsScreen> {
                       children: <Widget>[
                         AspectRatio(
                           aspectRatio: 1.2,
-                          child: artwork.imageUrl.isNotEmpty &&
+                          child:
+                              artwork.imageUrl.isNotEmpty &&
                                   Uri.tryParse(artwork.imageUrl)?.hasScheme ==
                                       true
                               ? SecureNetworkImage(
@@ -489,9 +489,7 @@ class _VisibilityInsightsScreenState extends State<VisibilityInsightsScreen> {
                           artwork.title,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 4),
                         Text(
@@ -499,8 +497,9 @@ class _VisibilityInsightsScreenState extends State<VisibilityInsightsScreen> {
                               ? '\$${artwork.price?.toStringAsFixed(2) ?? '0.00'}'
                               : 'Not for Sale',
                           style: TextStyle(
-                            color:
-                                artwork.isForSale ? Colors.green : Colors.grey,
+                            color: artwork.isForSale
+                                ? Colors.green
+                                : Colors.grey,
                           ),
                         ),
                       ],
@@ -561,9 +560,7 @@ class _VisibilityInsightsScreenState extends State<VisibilityInsightsScreen> {
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Row(
                   children: <Widget>[
-                    Expanded(
-                      child: Text(_formatReferralSource(sourceName)),
-                    ),
+                    Expanded(child: Text(_formatReferralSource(sourceName))),
                     Text(
                       NumberFormat.compact().format(sourceValue),
                       style: const TextStyle(fontWeight: FontWeight.bold),
@@ -613,14 +610,13 @@ class _VisibilityInsightsScreenState extends State<VisibilityInsightsScreen> {
           children: <Widget>[
             Text(
               tr('art_walk_upgrade_to_pro_for_advanced_analytics'),
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
-              tr('art_walk_get_access_to_location_breakdown__top_artwork_performance__referral_sources__and_more_detailed_insights'),
+              tr(
+                'art_walk_get_access_to_location_breakdown__top_artwork_performance__referral_sources__and_more_detailed_insights',
+              ),
             ),
             const SizedBox(height: 16),
             ElevatedButton(

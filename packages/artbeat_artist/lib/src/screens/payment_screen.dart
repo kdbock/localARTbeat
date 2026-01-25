@@ -10,10 +10,7 @@ import 'payment_methods_screen.dart';
 class PaymentScreen extends StatefulWidget {
   final SubscriptionTier tier;
 
-  const PaymentScreen({
-    super.key,
-    required this.tier,
-  });
+  const PaymentScreen({super.key, required this.tier});
 
   @override
   State<PaymentScreen> createState() => _PaymentScreenState();
@@ -57,8 +54,10 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.error_outline,
-                                color: Colors.red.shade700),
+                            Icon(
+                              Icons.error_outline,
+                              color: Colors.red.shade700,
+                            ),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
@@ -79,7 +78,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
                           foregroundColor: Colors.white,
                         ),
                         child: Text(
-                            'Subscribe Now - ${_getPriceString(widget.tier)}'),
+                          'Subscribe Now - ${_getPriceString(widget.tier)}',
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -99,9 +99,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
   Widget _buildPlanDetails() {
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -109,26 +107,17 @@ class _PaymentScreenState extends State<PaymentScreen> {
           children: [
             Text(
               _getTierName(widget.tier),
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
               _getPriceString(widget.tier),
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w500,
-              ),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 8),
             Text(
               _getPlanDescription(widget.tier),
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey.shade700,
-              ),
+              style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
             ),
           ],
         ),
@@ -142,10 +131,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
       children: [
         const Text(
           'Plan Features',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
         ..._getPlanFeatures(widget.tier).map(
@@ -161,10 +147,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Text(
-                    feature,
-                    style: const TextStyle(fontSize: 16),
-                  ),
+                  child: Text(feature, style: const TextStyle(fontSize: 16)),
                 ),
               ],
             ),
@@ -245,7 +228,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
             builder: (context) => AlertDialog(
               title: Text(tr('artist_payment_success_subscription_successful')),
               content: Text(
-                  'You\'ve successfully subscribed to the ${_getTierName(widget.tier)}!'),
+                'You\'ve successfully subscribed to the ${_getTierName(widget.tier)}!',
+              ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),

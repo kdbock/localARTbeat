@@ -31,7 +31,8 @@ class ArtbeatEvent {
   final DateTime createdAt;
   final DateTime updatedAt;
   final String category; // Added category field
-  final String moderationStatus; // pending, approved, rejected, flagged, under_review
+  final String
+  moderationStatus; // pending, approved, rejected, flagged, under_review
   final DateTime? lastModerated;
 
   // Recurring event fields
@@ -273,8 +274,9 @@ class ArtbeatEvent {
       'updatedAt': Timestamp.fromDate(updatedAt),
       'category': category, // Added category field
       'moderationStatus': moderationStatus,
-      'lastModerated':
-          lastModerated != null ? Timestamp.fromDate(lastModerated!) : null,
+      'lastModerated': lastModerated != null
+          ? Timestamp.fromDate(lastModerated!)
+          : null,
       'isRecurring': isRecurring,
       'recurrencePattern': recurrencePattern,
       'recurrenceInterval': recurrenceInterval,

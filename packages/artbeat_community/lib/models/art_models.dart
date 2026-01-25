@@ -197,7 +197,8 @@ class ArtistProfile {
       isVerified: data['isVerified'] as bool? ?? false,
       followersCount: data['followersCount'] as int? ?? 0,
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      boostScore: (data['boostScore'] as num?)?.toDouble() ??
+      boostScore:
+          (data['boostScore'] as num?)?.toDouble() ??
           (data['artistMomentum'] as num?)?.toDouble() ??
           (data['momentum'] as num?)?.toDouble() ??
           0.0,
@@ -205,8 +206,8 @@ class ArtistProfile {
           (data['lastBoostAt'] as Timestamp?)?.toDate() ??
           (data['boostedAt'] as Timestamp?)?.toDate(),
       boostStreakMonths: (data['boostStreakMonths'] as num?)?.toInt() ?? 0,
-      boostStreakUpdatedAt:
-          (data['boostStreakUpdatedAt'] as Timestamp?)?.toDate(),
+      boostStreakUpdatedAt: (data['boostStreakUpdatedAt'] as Timestamp?)
+          ?.toDate(),
       location: data['location'] as String? ?? data['zipCode'] as String?,
     );
   }
@@ -264,8 +265,7 @@ class ArtistProfile {
       boostScore: boostScore ?? this.boostScore,
       lastBoostAt: lastBoostAt ?? this.lastBoostAt,
       boostStreakMonths: boostStreakMonths ?? this.boostStreakMonths,
-      boostStreakUpdatedAt:
-          boostStreakUpdatedAt ?? this.boostStreakUpdatedAt,
+      boostStreakUpdatedAt: boostStreakUpdatedAt ?? this.boostStreakUpdatedAt,
       location: location ?? this.location,
     );
   }

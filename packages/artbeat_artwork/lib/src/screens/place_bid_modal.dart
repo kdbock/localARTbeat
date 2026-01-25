@@ -54,8 +54,10 @@ class _PlaceBidModalState extends State<PlaceBidModal> {
     });
 
     try {
-      final result =
-          await _auctionService.placeBid(widget.artworkId, bidAmount);
+      final result = await _auctionService.placeBid(
+        widget.artworkId,
+        bidAmount,
+      );
 
       if (result['success'] == true) {
         // Show success message
@@ -189,8 +191,9 @@ class _PlaceBidModalState extends State<PlaceBidModal> {
                 // Bid amount input
                 TextFormField(
                   controller: _bidController,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   decoration: InputDecoration(
                     labelText: 'auction.bid_amount'.tr(),
                     prefixText: '\$',
@@ -209,8 +212,9 @@ class _PlaceBidModalState extends State<PlaceBidModal> {
                     }
 
                     if (bidAmount < widget.minimumBid) {
-                      return 'auction.bid_too_low'
-                          .tr(args: [widget.minimumBid.toStringAsFixed(2)]);
+                      return 'auction.bid_too_low'.tr(
+                        args: [widget.minimumBid.toStringAsFixed(2)],
+                      );
                     }
 
                     return null;
@@ -266,7 +270,8 @@ class _PlaceBidModalState extends State<PlaceBidModal> {
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
                                   valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white),
+                                    Colors.white,
+                                  ),
                                 ),
                               )
                             : Text('auction.place_bid'.tr()),

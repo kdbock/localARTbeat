@@ -248,7 +248,10 @@ class _EventModerationDashboardScreenState
                   tooltip: 'Edit Event',
                 ),
                 IconButton(
-                  icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                  icon: const Icon(
+                    Icons.delete_outline,
+                    color: Colors.redAccent,
+                  ),
                   onPressed: () => _deleteEvent(event.id),
                   tooltip: 'Delete Event',
                 ),
@@ -343,7 +346,10 @@ class _EventModerationDashboardScreenState
                   tooltip: 'Edit Event',
                 ),
                 IconButton(
-                  icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                  icon: const Icon(
+                    Icons.delete_outline,
+                    color: Colors.redAccent,
+                  ),
                   onPressed: () => _deleteEvent(event.id),
                   tooltip: 'Delete Event',
                 ),
@@ -437,8 +443,10 @@ class _EventModerationDashboardScreenState
                   tooltip: 'Edit Event',
                 ),
                 IconButton(
-                  icon:
-                      const Icon(Icons.delete_outline, color: Colors.redAccent),
+                  icon: const Icon(
+                    Icons.delete_outline,
+                    color: Colors.redAccent,
+                  ),
                   onPressed: () => _deleteEvent(event.id),
                   tooltip: 'Delete Event',
                 ),

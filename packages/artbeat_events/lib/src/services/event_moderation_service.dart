@@ -139,8 +139,13 @@ class EventModerationService {
 
       return query.docs
           .map(ArtbeatEvent.fromFirestore)
-          .where((event) =>
-              ['flagged', 'under_review', 'pending'].contains(event.moderationStatus))
+          .where(
+            (event) => [
+              'flagged',
+              'under_review',
+              'pending',
+            ].contains(event.moderationStatus),
+          )
           .toList();
     } on FirebaseException catch (e) {
       _logger.e(

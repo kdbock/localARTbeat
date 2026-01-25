@@ -69,8 +69,9 @@ class ArtworkPaginationService {
       final bool hasMore = docs.length > _pageSize;
       final itemDocs = hasMore ? docs.sublist(0, _pageSize) : docs;
 
-      final artworks =
-          itemDocs.map((doc) => ArtworkModel.fromFirestore(doc)).toList();
+      final artworks = itemDocs
+          .map((doc) => ArtworkModel.fromFirestore(doc))
+          .toList();
 
       final lastDoc = itemDocs.isEmpty ? null : itemDocs.last;
 
@@ -118,8 +119,9 @@ class ArtworkPaginationService {
       final bool hasMore = docs.length > _pageSize;
       final itemDocs = hasMore ? docs.sublist(0, _pageSize) : docs;
 
-      final artworks =
-          itemDocs.map((doc) => ArtworkModel.fromFirestore(doc)).toList();
+      final artworks = itemDocs
+          .map((doc) => ArtworkModel.fromFirestore(doc))
+          .toList();
 
       final lastDoc = itemDocs.isEmpty ? null : itemDocs.last;
 
@@ -168,8 +170,9 @@ class ArtworkPaginationService {
       final bool hasMore = docs.length > _pageSize;
       final itemDocs = hasMore ? docs.sublist(0, _pageSize) : docs;
 
-      final artworks =
-          itemDocs.map((doc) => ArtworkModel.fromFirestore(doc)).toList();
+      final artworks = itemDocs
+          .map((doc) => ArtworkModel.fromFirestore(doc))
+          .toList();
 
       final lastDoc = itemDocs.isEmpty ? null : itemDocs.last;
 
@@ -216,8 +219,9 @@ class ArtworkPaginationService {
       final bool hasMore = docs.length > _pageSize;
       final itemDocs = hasMore ? docs.sublist(0, _pageSize) : docs;
 
-      final artworks =
-          itemDocs.map((doc) => ArtworkModel.fromFirestore(doc)).toList();
+      final artworks = itemDocs
+          .map((doc) => ArtworkModel.fromFirestore(doc))
+          .toList();
 
       final lastDoc = itemDocs.isEmpty ? null : itemDocs.last;
 
@@ -261,8 +265,9 @@ class ArtworkPaginationService {
       final bool hasMore = docs.length > _pageSize;
       final itemDocs = hasMore ? docs.sublist(0, _pageSize) : docs;
 
-      final artworks =
-          itemDocs.map((doc) => ArtworkModel.fromFirestore(doc)).toList();
+      final artworks = itemDocs
+          .map((doc) => ArtworkModel.fromFirestore(doc))
+          .toList();
 
       final lastDoc = itemDocs.isEmpty ? null : itemDocs.last;
 

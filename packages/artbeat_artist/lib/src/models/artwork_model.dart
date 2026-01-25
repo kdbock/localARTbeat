@@ -40,13 +40,14 @@ class ArtworkModel {
           : <String>[],
       price: map['price'] is num ? (map['price'] as num).toDouble() : null,
       isForSale: map['isForSale'] is bool ? map['isForSale'] as bool : false,
-      dimensions:
-          map['dimensions'] != null ? map['dimensions'].toString() : null,
+      dimensions: map['dimensions'] != null
+          ? map['dimensions'].toString()
+          : null,
       yearCreated: map['yearCreated'] is int
           ? map['yearCreated'] as int
           : (map['yearCreated'] != null
-              ? int.tryParse(map['yearCreated'].toString())
-              : null),
+                ? int.tryParse(map['yearCreated'].toString())
+                : null),
       artistProfileId: (map['artistProfileId'] ?? '').toString(),
       userId: (map['userId'] ?? '').toString(),
     );

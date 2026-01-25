@@ -42,7 +42,8 @@ class ArtworkRatingService {
         id: existingRating?.id ?? '',
         artworkId: artworkId,
         userId: user.uid,
-        userName: userData['displayName'] as String? ??
+        userName:
+            userData['displayName'] as String? ??
             user.displayName ??
             'Anonymous',
         userAvatarUrl: userData['profileImageUrl'] as String? ?? '',
@@ -103,7 +104,9 @@ class ArtworkRatingService {
 
   /// Get a user's rating for a specific artwork
   Future<ArtworkRatingModel?> getUserRatingForArtwork(
-      String artworkId, String userId) async {
+    String artworkId,
+    String userId,
+  ) async {
     try {
       final snapshot = await _firestore
           .collection('artwork')
@@ -206,7 +209,10 @@ class ArtworkRatingService {
 
   /// Report inappropriate rating/review
   Future<bool> reportRating(
-      String artworkId, String ratingId, String reason) async {
+    String artworkId,
+    String ratingId,
+    String reason,
+  ) async {
     try {
       final user = _auth.currentUser;
       if (user == null) return false;
@@ -272,14 +278,17 @@ class ArtworkRatingService {
         .collection('ratings')
         .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => ArtworkRatingModel.fromFirestore(doc))
-            .toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => ArtworkRatingModel.fromFirestore(doc))
+              .toList(),
+        );
   }
 
   /// Stream rating stats for real-time updates
   Stream<ArtworkRatingStats> streamArtworkRatingStats(String artworkId) {
-    return streamArtworkRatings(artworkId)
-        .map((ratings) => ArtworkRatingStats.fromRatings(ratings));
+    return streamArtworkRatings(
+      artworkId,
+    ).map((ratings) => ArtworkRatingStats.fromRatings(ratings));
   }
 }

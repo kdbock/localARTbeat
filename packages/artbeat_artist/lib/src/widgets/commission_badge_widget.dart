@@ -30,11 +30,7 @@ class CommissionBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.check_circle,
-            color: Colors.green.shade700,
-            size: 16,
-          ),
+          Icon(Icons.check_circle, color: Colors.green.shade700, size: 16),
           const SizedBox(width: 6),
           Text(
             tr('art_walk_accepting_commissions'),

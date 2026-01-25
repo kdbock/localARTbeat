@@ -217,10 +217,7 @@ class _MyTicketsScreenState extends State<MyTicketsScreen>
                   ),
                 ),
                 const SizedBox(width: 12),
-                GlassIconButton(
-                  icon: Icons.refresh,
-                  onTap: _loadTickets,
-                ),
+                GlassIconButton(icon: Icons.refresh, onTap: _loadTickets),
               ],
             ),
             const SizedBox(height: 16),
@@ -301,7 +298,10 @@ class _MyTicketsScreenState extends State<MyTicketsScreen>
               colors: [Color(0xFF7C4DFF), Color(0xFF22D3EE)],
             ),
           ),
-          indicatorPadding: const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
+          indicatorPadding: const EdgeInsets.symmetric(
+            horizontal: 2,
+            vertical: 4,
+          ),
           labelColor: const Color(0xF2FFFFFF),
           unselectedLabelColor: Colors.white.withValues(alpha: 0.6),
           labelStyle: const TextStyle(
@@ -396,10 +396,7 @@ class _MyTicketsScreenState extends State<MyTicketsScreen>
               label: EventUtils.formatEventDateTime(event.dateTime),
             ),
             const SizedBox(height: 6),
-            _buildMetaRow(
-              icon: Icons.location_on,
-              label: event.location,
-            ),
+            _buildMetaRow(icon: Icons.location_on, label: event.location),
             const SizedBox(height: 12),
             GlassSurface(
               radius: 20,
@@ -509,10 +506,7 @@ class _MyTicketsScreenState extends State<MyTicketsScreen>
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
         ),
         icon: Icon(icon, size: 18, color: color),
-        label: Text(
-          label,
-          style: const TextStyle(fontWeight: FontWeight.w700),
-        ),
+        label: Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
       ),
     );
   }
@@ -621,8 +615,11 @@ class _MyTicketsScreenState extends State<MyTicketsScreen>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.confirmation_number_outlined,
-                size: 48, color: Color(0xFF22D3EE)),
+            const Icon(
+              Icons.confirmation_number_outlined,
+              size: 48,
+              color: Color(0xFF22D3EE),
+            ),
             const SizedBox(height: 14),
             Text(
               message,
@@ -712,7 +709,9 @@ class _MyTicketsScreenState extends State<MyTicketsScreen>
                                   const SizedBox(height: 12),
                                   _buildMetaRow(
                                     icon: Icons.calendar_today,
-                                    label: EventUtils.formatEventDateTime(event.dateTime),
+                                    label: EventUtils.formatEventDateTime(
+                                      event.dateTime,
+                                    ),
                                   ),
                                   const SizedBox(height: 6),
                                   _buildMetaRow(
@@ -765,7 +764,8 @@ class _MyTicketsScreenState extends State<MyTicketsScreen>
                                     ),
                                   ],
                                   if (event.canRefund) ...[
-                                    if (ticket.isActive) const SizedBox(width: 12),
+                                    if (ticket.isActive)
+                                      const SizedBox(width: 12),
                                     Expanded(
                                       child: _buildGlassActionButton(
                                         icon: Icons.money_off,

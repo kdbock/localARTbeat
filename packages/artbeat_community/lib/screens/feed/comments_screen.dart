@@ -264,7 +264,8 @@ class _CommentsScreenState extends State<CommentsScreen> {
             tooltip: 'comments_refresh_tooltip'.tr(),
             onPressed: _isLoading ? null : _loadComments,
           ),
-        ], subtitle: '',
+        ],
+        subtitle: '',
       ),
       body: WorldBackground(
         child: SafeArea(
@@ -319,8 +320,9 @@ class _CommentsScreenState extends State<CommentsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'comments_header_title'
-                          .tr(namedArgs: {'name': widget.post.userName}),
+                      'comments_header_title'.tr(
+                        namedArgs: {'name': widget.post.userName},
+                      ),
                       style: GoogleFonts.spaceGrotesk(
                         fontSize: 18,
                         fontWeight: FontWeight.w900,
@@ -329,7 +331,9 @@ class _CommentsScreenState extends State<CommentsScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'comments_header_meta'.tr(namedArgs: {'date': _formatPostDate()}),
+                      'comments_header_meta'.tr(
+                        namedArgs: {'date': _formatPostDate()},
+                      ),
                       style: GoogleFonts.spaceGrotesk(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
@@ -546,8 +550,9 @@ class _CommentsScreenState extends State<CommentsScreen> {
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
-                  children:
-                      _commentCategories.map(_buildTypeChip).toList(growable: false),
+                  children: _commentCategories
+                      .map(_buildTypeChip)
+                      .toList(growable: false),
                 ),
                 const SizedBox(height: 16),
                 GlassTextField(
@@ -587,14 +592,13 @@ class _CommentsScreenState extends State<CommentsScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         children: [
-          Icon(
-            Icons.reply,
-            color: Colors.white.withValues(alpha: 0.9),
-          ),
+          Icon(Icons.reply, color: Colors.white.withValues(alpha: 0.9)),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              'comments_replying_to'.tr(namedArgs: {'name': _replyingTo!.userName}),
+              'comments_replying_to'.tr(
+                namedArgs: {'name': _replyingTo!.userName},
+              ),
               style: GoogleFonts.spaceGrotesk(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
@@ -627,7 +631,11 @@ class _CommentsScreenState extends State<CommentsScreen> {
               ? const LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [Color(0xFF7C4DFF), Color(0xFF22D3EE), Color(0xFF34D399)],
+                  colors: [
+                    Color(0xFF7C4DFF),
+                    Color(0xFF22D3EE),
+                    Color(0xFF34D399),
+                  ],
                 )
               : null,
           color: isSelected ? null : Colors.white.withValues(alpha: 0.08),

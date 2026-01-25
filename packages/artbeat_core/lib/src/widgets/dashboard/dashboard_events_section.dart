@@ -68,10 +68,7 @@ class DashboardEventsSection extends StatelessWidget {
               ),
               Text(
                 'dashboard_events_subtitle'.tr(),
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.white70,
-                ),
+                style: const TextStyle(fontSize: 14, color: Colors.white70),
               ),
             ],
           ),
@@ -431,5 +428,4 @@ class DashboardEventsSection extends StatelessWidget {
       return '${date.month}/${date.day}';
     }
   }
-
 }

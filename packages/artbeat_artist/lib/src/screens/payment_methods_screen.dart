@@ -47,10 +47,13 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
       }
 
       // Get customer data from Firestore
-      final customerDoc =
-          await _firestore.collection('customers').doc(userId).get();
+      final customerDoc = await _firestore
+          .collection('customers')
+          .doc(userId)
+          .get();
       core.AppLogger.info(
-          '🔷 PaymentMethodsScreen: Customer doc exists: ${customerDoc.exists}');
+        '🔷 PaymentMethodsScreen: Customer doc exists: ${customerDoc.exists}',
+      );
 
       if (!customerDoc.exists) {
         setState(() {
@@ -58,7 +61,8 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
           _paymentMethods = [];
         });
         core.AppLogger.info(
-            '🔷 PaymentMethodsScreen: No customer document found');
+          '🔷 PaymentMethodsScreen: No customer document found',
+        );
         return;
       }
 
@@ -68,7 +72,8 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
           customerData?['defaultPaymentMethodId'] as String?;
 
       core.AppLogger.info(
-          '🔷 PaymentMethodsScreen: Stripe Customer ID: $stripeCustomerId');
+        '🔷 PaymentMethodsScreen: Stripe Customer ID: $stripeCustomerId',
+      );
 
       if (stripeCustomerId == null) {
         setState(() {
@@ -76,14 +81,16 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
           _paymentMethods = [];
         });
         core.AppLogger.info(
-            '🔷 PaymentMethodsScreen: No Stripe customer ID found');
+          '🔷 PaymentMethodsScreen: No Stripe customer ID found',
+        );
         return;
       }
 
       // Load payment methods
       final methods = await _paymentService.getPaymentMethods(stripeCustomerId);
       core.AppLogger.info(
-          '🔷 PaymentMethodsScreen: Loaded ${methods.length} payment methods');
+        '🔷 PaymentMethodsScreen: Loaded ${methods.length} payment methods',
+      );
 
       setState(() {
         _isLoading = false;
@@ -91,7 +98,8 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
       });
     } catch (error, stackTrace) {
       core.AppLogger.error(
-          '❌ PaymentMethodsScreen: Error loading payment methods');
+        '❌ PaymentMethodsScreen: Error loading payment methods',
+      );
       core.AppLogger.error('Error: $error');
       core.AppLogger.error('Stack trace: $stackTrace');
       setState(() {
@@ -110,8 +118,10 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
       }
 
       // Get or create a customer
-      final customerDoc =
-          await _firestore.collection('customers').doc(userId).get();
+      final customerDoc = await _firestore
+          .collection('customers')
+          .doc(userId)
+          .get();
 
       String? stripeCustomerId;
       if (customerDoc.exists) {
@@ -140,8 +150,9 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
       // Setup payment sheet
       await _paymentService.setupPaymentSheet(
         customerId: stripeCustomerId,
-        setupIntentClientSecret:
-            await _paymentService.createSetupIntent(stripeCustomerId),
+        setupIntentClientSecret: await _paymentService.createSetupIntent(
+          stripeCustomerId,
+        ),
       );
 
       // Present payment sheet with crash prevention
@@ -180,8 +191,10 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
       }
 
       // Get customer ID
-      final customerDoc =
-          await _firestore.collection('customers').doc(userId).get();
+      final customerDoc = await _firestore
+          .collection('customers')
+          .doc(userId)
+          .get();
 
       if (!customerDoc.exists) {
         throw Exception('Customer not found');
@@ -257,7 +270,8 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
   @override
   Widget build(BuildContext context) {
     core.AppLogger.info(
-        '🔷 PaymentMethodsScreen: build() called - isLoading: $_isLoading, hasError: ${_errorMessage != null}');
+      '🔷 PaymentMethodsScreen: build() called - isLoading: $_isLoading, hasError: ${_errorMessage != null}',
+    );
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: _addPaymentMethod,
@@ -309,7 +323,9 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              tr('art_walk_add_a_credit_card_or_other_payment_method_to_manage_your_subscription'),
+              tr(
+                'art_walk_add_a_credit_card_or_other_payment_method_to_manage_your_subscription',
+              ),
               textAlign: TextAlign.center,
               style: const TextStyle(color: Colors.grey),
             ),
@@ -354,7 +370,9 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
         ),
         const SizedBox(height: 8),
         Text(
-          tr('art_walk_you_can_add__remove__or_set_a_default_payment_method_for_your_subscriptions'),
+          tr(
+            'art_walk_you_can_add__remove__or_set_a_default_payment_method_for_your_subscriptions',
+          ),
           style: const TextStyle(color: Colors.grey),
         ),
         const SizedBox(height: 24),
@@ -404,9 +422,9 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: Theme.of(context)
-                            .primaryColor
-                            .withAlpha(26), // Alpha 26 is approx 0.1 opacity
+                        color: Theme.of(context).primaryColor.withAlpha(
+                          26,
+                        ), // Alpha 26 is approx 0.1 opacity
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Text(
@@ -435,7 +453,8 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
                     TextButton(
                       onPressed: () => _setDefaultPaymentMethod(method.id),
                       child: Text(
-                          tr('artist_payment_methods_text_set_as_default')),
+                        tr('artist_payment_methods_text_set_as_default'),
+                      ),
                     ),
                   const SizedBox(width: 8),
                   TextButton(

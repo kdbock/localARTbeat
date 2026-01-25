@@ -75,7 +75,8 @@ class CollectionService {
 
   /// Get all collections for an artist
   Future<List<CollectionModel>> getCollectionsByArtist(
-      String artistProfileId) async {
+    String artistProfileId,
+  ) async {
     try {
       final query = await _firestore
           .collection(_collectionsCollection)
@@ -187,7 +188,9 @@ class CollectionService {
 
   /// Add artwork to collection
   Future<void> addArtworkToCollection(
-      String collectionId, String artworkId) async {
+    String collectionId,
+    String artworkId,
+  ) async {
     try {
       final collection = await getCollectionById(collectionId);
       if (collection == null) {
@@ -201,10 +204,7 @@ class CollectionService {
 
       final updatedArtworkIds = [...collection.artworkIds, artworkId];
 
-      await updateCollection(
-        collectionId,
-        artworkIds: updatedArtworkIds,
-      );
+      await updateCollection(collectionId, artworkIds: updatedArtworkIds);
     } catch (e) {
       throw Exception('Failed to add artwork to collection: $e');
     }
@@ -212,20 +212,20 @@ class CollectionService {
 
   /// Remove artwork from collection
   Future<void> removeArtworkFromCollection(
-      String collectionId, String artworkId) async {
+    String collectionId,
+    String artworkId,
+  ) async {
     try {
       final collection = await getCollectionById(collectionId);
       if (collection == null) {
         throw Exception('Collection not found');
       }
 
-      final updatedArtworkIds =
-          collection.artworkIds.where((id) => id != artworkId).toList();
+      final updatedArtworkIds = collection.artworkIds
+          .where((id) => id != artworkId)
+          .toList();
 
-      await updateCollection(
-        collectionId,
-        artworkIds: updatedArtworkIds,
-      );
+      await updateCollection(collectionId, artworkIds: updatedArtworkIds);
     } catch (e) {
       throw Exception('Failed to remove artwork from collection: $e');
     }
@@ -314,8 +314,9 @@ class CollectionService {
           .where((collection) {
             return collection.title.toLowerCase().contains(searchLower) ||
                 collection.description.toLowerCase().contains(searchLower) ||
-                collection.tags
-                    .any((tag) => tag.toLowerCase().contains(searchLower));
+                collection.tags.any(
+                  (tag) => tag.toLowerCase().contains(searchLower),
+                );
           })
           .take(limit)
           .toList();
@@ -332,9 +333,7 @@ class CollectionService {
       await _firestore
           .collection(_collectionsCollection)
           .doc(collectionId)
-          .update({
-        'viewCount': FieldValue.increment(1),
-      });
+          .update({'viewCount': FieldValue.increment(1)});
     } catch (e) {
       // Don't throw error for view count increment failures
       AppLogger.warning('Failed to increment collection view count: $e');
@@ -372,10 +371,13 @@ class CollectionService {
           .collection(_collectionsCollection)
           .where('artistProfileId', isEqualTo: artistProfileId)
           .where('isPortfolio', isEqualTo: true)
-          .where('visibility', whereIn: [
-            CollectionVisibility.public.name,
-            CollectionVisibility.unlisted.name,
-          ])
+          .where(
+            'visibility',
+            whereIn: [
+              CollectionVisibility.public.name,
+              CollectionVisibility.unlisted.name,
+            ],
+          )
           .limit(1)
           .get();
 

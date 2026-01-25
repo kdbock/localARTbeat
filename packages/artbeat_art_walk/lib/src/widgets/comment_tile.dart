@@ -95,9 +95,7 @@ class CommentTile extends StatelessWidget {
         const SizedBox(height: 10),
         Text(
           content,
-          style: AppTypography.body(
-            Colors.white.withValues(alpha: 0.9),
-          ),
+          style: AppTypography.body(Colors.white.withValues(alpha: 0.9)),
         ),
         const SizedBox(height: 14),
         Row(

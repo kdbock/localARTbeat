@@ -153,9 +153,7 @@ class _AdNativeCardWidgetState extends State<AdNativeCardWidget> {
     final images = (_ad!.imageUrls ?? [])
         .where((url) => url.isNotEmpty)
         .toList();
-    if (images.isEmpty &&
-        _ad!.imageUrl != null &&
-        _ad!.imageUrl!.isNotEmpty) {
+    if (images.isEmpty && _ad!.imageUrl != null && _ad!.imageUrl!.isNotEmpty) {
       images.add(_ad!.imageUrl!);
     }
     if (images.isEmpty) {

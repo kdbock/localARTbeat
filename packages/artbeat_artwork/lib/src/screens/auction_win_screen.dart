@@ -3,7 +3,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_artwork/artbeat_artwork.dart';
 import 'package:artbeat_core/shared_widgets.dart';
-import 'package:artbeat_core/artbeat_core.dart' as core
+import 'package:artbeat_core/artbeat_core.dart'
+    as core
     show StripePaymentService;
 
 /// Screen shown when user wins an auction
@@ -137,9 +138,7 @@ class _AuctionWinScreenState extends State<AuctionWinScreen> {
         ),
       ),
       body: Container(
-        decoration: const BoxDecoration(
-          color: Color(0xFF07060F),
-        ),
+        decoration: const BoxDecoration(color: Color(0xFF07060F)),
         child: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
@@ -155,7 +154,7 @@ class _AuctionWinScreenState extends State<AuctionWinScreen> {
                       colors: [
                         Color(0xFF7C4DFF),
                         Color(0xFF22D3EE),
-                        Color(0xFF34D399)
+                        Color(0xFF34D399),
                       ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
@@ -216,8 +215,9 @@ class _AuctionWinScreenState extends State<AuctionWinScreen> {
                       const SizedBox(height: 8),
 
                       Text(
-                        'auction.by_artist'
-                            .tr(args: [widget.artwork.artistName]),
+                        'auction.by_artist'.tr(
+                          args: [widget.artwork.artistName],
+                        ),
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontFamily: 'SpaceGrotesk',
                           fontWeight: FontWeight.w700,
@@ -231,21 +231,23 @@ class _AuctionWinScreenState extends State<AuctionWinScreen> {
                       // Final price
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
                             colors: [
                               Color(0xFF7C4DFF),
                               Color(0xFF22D3EE),
-                              Color(0xFF34D399)
+                              Color(0xFF34D399),
                             ],
                           ),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
-                          'auction.final_price'.tr(args: [
-                            '\$${widget.finalPrice.toStringAsFixed(2)}'
-                          ]),
+                          'auction.final_price'.tr(
+                            args: ['\$${widget.finalPrice.toStringAsFixed(2)}'],
+                          ),
                           style: theme.textTheme.titleLarge?.copyWith(
                             fontFamily: 'SpaceGrotesk',
                             fontWeight: FontWeight.w700,
@@ -329,30 +331,32 @@ class _AuctionWinScreenState extends State<AuctionWinScreen> {
                   height: 52,
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : _payForArtwork,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      padding: EdgeInsets.zero,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(26),
-                      ),
-                    ).copyWith(
-                      backgroundColor: WidgetStateProperty.resolveWith<Color>(
-                        (states) {
-                          if (states.contains(WidgetState.disabled)) {
-                            return Colors.grey.withValues(alpha: 0.3);
-                          }
-                          return Colors.transparent;
-                        },
-                      ),
-                      foregroundColor: WidgetStateProperty.all(Colors.white),
-                    ),
+                    style:
+                        ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          padding: EdgeInsets.zero,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(26),
+                          ),
+                        ).copyWith(
+                          backgroundColor:
+                              WidgetStateProperty.resolveWith<Color>((states) {
+                                if (states.contains(WidgetState.disabled)) {
+                                  return Colors.grey.withValues(alpha: 0.3);
+                                }
+                                return Colors.transparent;
+                              }),
+                          foregroundColor: WidgetStateProperty.all(
+                            Colors.white,
+                          ),
+                        ),
                     child: Ink(
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
                           colors: [
                             Color(0xFF7C4DFF),
                             Color(0xFF22D3EE),
-                            Color(0xFF34D399)
+                            Color(0xFF34D399),
                           ],
                         ),
                         borderRadius: BorderRadius.circular(26),
@@ -361,7 +365,8 @@ class _AuctionWinScreenState extends State<AuctionWinScreen> {
                         alignment: Alignment.center,
                         child: _isLoading
                             ? const CircularProgressIndicator(
-                                color: Colors.white)
+                                color: Colors.white,
+                              )
                             : Text(
                                 'auction.pay_now'.tr(),
                                 style: theme.textTheme.titleLarge?.copyWith(

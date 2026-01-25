@@ -304,31 +304,26 @@ class DashboardViewModel extends ChangeNotifier {
       if (notify) _safeNotifyListeners();
 
       final events = await _eventService.getUpcomingPublicEvents();
-      _events = events
-          .map(
-            (e) {
-              final coverImage = _selectBestEventImage(e);
-              final artistImage = _normalizeImageUrl(e.artistHeadshotUrl);
+      _events = events.map((e) {
+        final coverImage = _selectBestEventImage(e);
+        final artistImage = _normalizeImageUrl(e.artistHeadshotUrl);
 
-              return EventModel(
-                id: e.id,
-                title: e.title,
-                description: e.description,
-                startDate: e.dateTime,
-                location: e.location,
-                artistId: e.artistId,
-                isPublic: e.isPublic,
-                attendeeIds: e.attendeeIds,
-                createdAt: e.createdAt,
-                updatedAt: e.updatedAt,
-                imageUrl: coverImage,
-                artistProfileImageUrl:
-                    artistImage.isNotEmpty ? artistImage : null,
-                price: 0.0,
-              );
-            },
-          )
-          .toList();
+        return EventModel(
+          id: e.id,
+          title: e.title,
+          description: e.description,
+          startDate: e.dateTime,
+          location: e.location,
+          artistId: e.artistId,
+          isPublic: e.isPublic,
+          attendeeIds: e.attendeeIds,
+          createdAt: e.createdAt,
+          updatedAt: e.updatedAt,
+          imageUrl: coverImage,
+          artistProfileImageUrl: artistImage.isNotEmpty ? artistImage : null,
+          price: 0.0,
+        );
+      }).toList();
       _eventsError = null;
     } catch (e) {
       AppLogger.error('Error loading events: $e');
@@ -748,7 +743,7 @@ class DashboardViewModel extends ChangeNotifier {
         try {
           final loginResult = await rewardsService.processDailyLogin(userId);
           loginStreak = (loginResult['streak'] as int?) ?? 0;
-          
+
           // If a new login was processed today, refresh the user model to get updated XP/Level
           if (loginResult['alreadyLoggedIn'] == false) {
             AppLogger.info('✨ Daily login processed, refreshing user data...');

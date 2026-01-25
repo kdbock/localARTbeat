@@ -864,66 +864,66 @@ class RewardsService {
           final userDoc = await transaction.get(userRef);
           final userData = userDoc.data() ?? {};
 
-        final lastLoginDate = userData['lastLoginDate'] as String?;
-        final currentLoginStreak =
-            userData['stats']?['loginStreak'] as int? ?? 0;
-        final longestLoginStreak =
-            userData['stats']?['longestLoginStreak'] as int? ?? 0;
+          final lastLoginDate = userData['lastLoginDate'] as String?;
+          final currentLoginStreak =
+              userData['stats']?['loginStreak'] as int? ?? 0;
+          final longestLoginStreak =
+              userData['stats']?['longestLoginStreak'] as int? ?? 0;
 
-        // Check if already logged in today
-        if (lastLoginDate == todayKey) {
-          return {
-            'alreadyLoggedIn': true,
-            'streak': currentLoginStreak,
-            'xpAwarded': 0,
+          // Check if already logged in today
+          if (lastLoginDate == todayKey) {
+            return {
+              'alreadyLoggedIn': true,
+              'streak': currentLoginStreak,
+              'xpAwarded': 0,
+            };
+          }
+
+          // Calculate new streak
+          final yesterday = today.subtract(const Duration(days: 1));
+          final yesterdayKey =
+              '${yesterday.year}-${yesterday.month.toString().padLeft(2, '0')}-${yesterday.day.toString().padLeft(2, '0')}';
+
+          int newStreak;
+          if (lastLoginDate == yesterdayKey) {
+            // Continuing streak
+            newStreak = currentLoginStreak + 1;
+          } else {
+            // Streak broken or first login
+            newStreak = 1;
+          }
+
+          // Calculate XP reward based on streak
+          int xpReward = 10; // Base reward
+          if (newStreak >= 7)
+            xpReward = 50;
+          else if (newStreak >= 3)
+            xpReward = 25;
+          else if (newStreak >= 2)
+            xpReward = 15;
+
+          // Bonus for milestone days
+          if (newStreak == 7) xpReward += 50; // Day 7 bonus
+          if (newStreak == 30) xpReward += 100; // Day 30 bonus
+          if (newStreak == 100) xpReward += 500; // Day 100 bonus
+
+          // Update user data
+          final currentXP = userData['experiencePoints'] as int? ?? 0;
+          final newXP = currentXP + xpReward;
+          final newLevel = _calculateLevel(newXP);
+
+          final updates = <String, dynamic>{
+            'lastLoginDate': todayKey,
+            'experiencePoints': newXP,
+            'level': newLevel,
+            'stats.loginStreak': newStreak,
+            'stats.longestLoginStreak': newStreak > longestLoginStreak
+                ? newStreak
+                : longestLoginStreak,
+            'stats.totalLogins': FieldValue.increment(1),
           };
-        }
 
-        // Calculate new streak
-        final yesterday = today.subtract(const Duration(days: 1));
-        final yesterdayKey =
-            '${yesterday.year}-${yesterday.month.toString().padLeft(2, '0')}-${yesterday.day.toString().padLeft(2, '0')}';
-
-        int newStreak;
-        if (lastLoginDate == yesterdayKey) {
-          // Continuing streak
-          newStreak = currentLoginStreak + 1;
-        } else {
-          // Streak broken or first login
-          newStreak = 1;
-        }
-
-        // Calculate XP reward based on streak
-        int xpReward = 10; // Base reward
-        if (newStreak >= 7)
-          xpReward = 50;
-        else if (newStreak >= 3)
-          xpReward = 25;
-        else if (newStreak >= 2)
-          xpReward = 15;
-
-        // Bonus for milestone days
-        if (newStreak == 7) xpReward += 50; // Day 7 bonus
-        if (newStreak == 30) xpReward += 100; // Day 30 bonus
-        if (newStreak == 100) xpReward += 500; // Day 100 bonus
-
-        // Update user data
-        final currentXP = userData['experiencePoints'] as int? ?? 0;
-        final newXP = currentXP + xpReward;
-        final newLevel = _calculateLevel(newXP);
-
-        final updates = <String, dynamic>{
-          'lastLoginDate': todayKey,
-          'experiencePoints': newXP,
-          'level': newLevel,
-          'stats.loginStreak': newStreak,
-          'stats.longestLoginStreak': newStreak > longestLoginStreak
-              ? newStreak
-              : longestLoginStreak,
-          'stats.totalLogins': FieldValue.increment(1),
-        };
-
-        transaction.update(userRef, updates);
+          transaction.update(userRef, updates);
 
           return {
             'alreadyLoggedIn': false,

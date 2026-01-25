@@ -97,32 +97,34 @@ class _CuratedGalleryScreenState extends State<CuratedGalleryScreen> {
                 value: null,
                 child: Text('curated_gallery_filter_all'.tr()),
               ),
-              ...CollectionType.values.map((type) => PopupMenuItem(
-                    value: type,
-                    child: Text(type.displayName),
-                  )),
+              ...CollectionType.values.map(
+                (type) =>
+                    PopupMenuItem(value: type, child: Text(type.displayName)),
+              ),
             ],
           ),
-        ], subtitle: '',
+        ],
+        subtitle: '',
       ),
       body: WorldBackground(
         child: SafeArea(
           child: _isLoading
               ? const Center(
                   child: CircularProgressIndicator(
-                    valueColor:
-                        AlwaysStoppedAnimation<Color>(Color(0xFF22D3EE)),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Color(0xFF22D3EE),
+                    ),
                   ),
                 )
               : _error != null
-                  ? _buildErrorState()
-                  : RefreshIndicator(
-                      onRefresh: _refreshCollections,
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(12, 8, 12, 16),
-                        child: _buildContent(),
-                      ),
-                    ),
+              ? _buildErrorState()
+              : RefreshIndicator(
+                  onRefresh: _refreshCollections,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 8, 12, 16),
+                    child: _buildContent(),
+                  ),
+                ),
         ),
       ),
     );
@@ -194,57 +196,57 @@ class _CuratedGalleryScreenState extends State<CuratedGalleryScreen> {
     return CustomScrollView(
       slivers: [
         if (_featuredCollections.isNotEmpty) ...[
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: GlassCard(
-              radius: 22,
-              padding: const EdgeInsets.all(14),
-              child: Row(
-                children: [
-                  Container(
-                    height: 44,
-                    width: 44,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [Color(0xFFFFC857), Color(0xFF22D3EE)],
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: GlassCard(
+                radius: 22,
+                padding: const EdgeInsets.all(14),
+                child: Row(
+                  children: [
+                    Container(
+                      height: 44,
+                      width: 44,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [Color(0xFFFFC857), Color(0xFF22D3EE)],
+                        ),
+                      ),
+                      child: const Icon(Icons.star, color: Colors.white),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'curated_gallery_featured_section'.tr(),
+                            style: GoogleFonts.spaceGrotesk(
+                              color: Colors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'curated_gallery_subtitle'.tr(),
+                            style: GoogleFonts.spaceGrotesk(
+                              color: Colors.white.withValues(alpha: 0.72),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    child: const Icon(Icons.star, color: Colors.white),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'curated_gallery_featured_section'.tr(),
-                          style: GoogleFonts.spaceGrotesk(
-                            color: Colors.white,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'curated_gallery_subtitle'.tr(),
-                          style: GoogleFonts.spaceGrotesk(
-                            color: Colors.white.withValues(alpha: 0.72),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
-        ),
           SliverToBoxAdapter(
             child: SizedBox(
               height: 280,
@@ -254,7 +256,8 @@ class _CuratedGalleryScreenState extends State<CuratedGalleryScreen> {
                 itemCount: _featuredCollections.length,
                 itemBuilder: (context, index) {
                   return _buildFeaturedCollectionCard(
-                      _featuredCollections[index]);
+                    _featuredCollections[index],
+                  );
                 },
               ),
             ),
@@ -317,12 +320,9 @@ class _CuratedGalleryScreenState extends State<CuratedGalleryScreen> {
                 crossAxisSpacing: 16,
                 mainAxisSpacing: 16,
               ),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  return _buildPublicCollectionCard(_publicCollections[index]);
-                },
-                childCount: _publicCollections.length,
-              ),
+              delegate: SliverChildBuilderDelegate((context, index) {
+                return _buildPublicCollectionCard(_publicCollections[index]);
+              }, childCount: _publicCollections.length),
             ),
           ),
         const SliverToBoxAdapter(child: SizedBox(height: 80)),
@@ -348,8 +348,10 @@ class _CuratedGalleryScreenState extends State<CuratedGalleryScreen> {
                     shape: BoxShape.circle,
                     color: Colors.white.withValues(alpha: 0.08),
                   ),
-                  child: const Icon(Icons.collections_outlined,
-                      color: Colors.white70),
+                  child: const Icon(
+                    Icons.collections_outlined,
+                    color: Colors.white70,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -398,7 +400,9 @@ class _CuratedGalleryScreenState extends State<CuratedGalleryScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(22),
+              ),
               child: SizedBox(
                 height: 140,
                 width: double.infinity,
@@ -420,8 +424,11 @@ class _CuratedGalleryScreenState extends State<CuratedGalleryScreen> {
                           ),
                         ),
                         child: const Center(
-                          child: Icon(Icons.collections,
-                              size: 48, color: Colors.white),
+                          child: Icon(
+                            Icons.collections,
+                            size: 48,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
               ),
@@ -445,7 +452,9 @@ class _CuratedGalleryScreenState extends State<CuratedGalleryScreen> {
                       const Spacer(),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.amber[600],
                           borderRadius: BorderRadius.circular(12),
@@ -453,8 +462,11 @@ class _CuratedGalleryScreenState extends State<CuratedGalleryScreen> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.star,
-                                size: 12, color: Colors.white),
+                            const Icon(
+                              Icons.star,
+                              size: 12,
+                              color: Colors.white,
+                            ),
                             const SizedBox(width: 4),
                             Text(
                               'curated_gallery_featured_badge'.tr(),
@@ -505,8 +517,11 @@ class _CuratedGalleryScreenState extends State<CuratedGalleryScreen> {
                         ),
                       ),
                       const Spacer(),
-                      const Icon(Icons.visibility,
-                          size: 14, color: Colors.white70),
+                      const Icon(
+                        Icons.visibility,
+                        size: 14,
+                        color: Colors.white70,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         '${collection.viewCount}',
@@ -605,8 +620,11 @@ class _CuratedGalleryScreenState extends State<CuratedGalleryScreen> {
                       ),
                     ),
                     const Spacer(),
-                    const Icon(Icons.visibility,
-                        size: 12, color: Colors.white70),
+                    const Icon(
+                      Icons.visibility,
+                      size: 12,
+                      color: Colors.white70,
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       '${collection.viewCount}',

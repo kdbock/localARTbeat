@@ -47,8 +47,11 @@ class ArtistLogger {
   }
 
   /// Service-specific logger for artist service operations
-  static void artistService(String operation,
-      {String? details, Object? error}) {
+  static void artistService(
+    String operation, {
+    String? details,
+    Object? error,
+  }) {
     final message =
         'ArtistService: $operation${details != null ? ' - $details' : ''}';
     if (error != null) {
@@ -59,8 +62,11 @@ class ArtistLogger {
   }
 
   /// Service-specific logger for integration service operations
-  static void integrationService(String operation,
-      {String? details, Object? error}) {
+  static void integrationService(
+    String operation, {
+    String? details,
+    Object? error,
+  }) {
     final message =
         'IntegrationService: $operation${details != null ? ' - $details' : ''}';
     if (error != null) {
@@ -71,8 +77,11 @@ class ArtistLogger {
   }
 
   /// Service-specific logger for subscription operations
-  static void subscriptionService(String operation,
-      {String? details, Object? error}) {
+  static void subscriptionService(
+    String operation, {
+    String? details,
+    Object? error,
+  }) {
     final message =
         'SubscriptionService: $operation${details != null ? ' - $details' : ''}';
     if (error != null) {
@@ -83,8 +92,11 @@ class ArtistLogger {
   }
 
   /// Service-specific logger for community service operations
-  static void communityService(String operation,
-      {String? details, Object? error}) {
+  static void communityService(
+    String operation, {
+    String? details,
+    Object? error,
+  }) {
     final message =
         'CommunityService: $operation${details != null ? ' - $details' : ''}';
     if (error != null) {
@@ -95,8 +107,11 @@ class ArtistLogger {
   }
 
   /// Secure payment operation logging (never logs sensitive data)
-  static void paymentOperation(String operation,
-      {String? transactionId, Object? error}) {
+  static void paymentOperation(
+    String operation, {
+    String? transactionId,
+    Object? error,
+  }) {
     final message =
         'PaymentService: $operation${transactionId != null ? ' (ID: ${_sanitizeTransactionId(transactionId)})' : ''}';
     if (error != null) {
@@ -120,8 +135,10 @@ class ArtistLogger {
         .replaceAll(RegExp(r'sk_[a-zA-Z0-9_]+'), '[STRIPE_SECRET_KEY]')
         .replaceAll(RegExp(r'pk_[a-zA-Z0-9_]+'), '[STRIPE_PUBLIC_KEY]')
         .replaceAll(RegExp(r'\b[\w\.-]+@[\w\.-]+\.\w+\b'), '[EMAIL_ADDRESS]')
-        .replaceAll(RegExp(r'\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b'),
-            '[CARD_NUMBER]');
+        .replaceAll(
+          RegExp(r'\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b'),
+          '[CARD_NUMBER]',
+        );
 
     return sanitized;
   }

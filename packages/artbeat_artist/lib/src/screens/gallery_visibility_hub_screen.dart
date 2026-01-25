@@ -47,7 +47,8 @@ class _GalleryVisibilityHubScreenState
     try {
       // Check if user has premium subscription
       final subscription = await _subscriptionService.getUserSubscription();
-      final hasPremium = subscription != null &&
+      final hasPremium =
+          subscription != null &&
           (subscription.tier == core.SubscriptionTier.business ||
               subscription.tier == core.SubscriptionTier.enterprise) &&
           (subscription.status == 'active' ||
@@ -69,8 +70,8 @@ class _GalleryVisibilityHubScreenState
         throw Exception('User not authenticated');
       }
 
-      final galleryProfile =
-          await _subscriptionService.getArtistProfileByUserId(userId);
+      final galleryProfile = await _subscriptionService
+          .getArtistProfileByUserId(userId);
       if (galleryProfile == null ||
           galleryProfile.userType != core.UserType.gallery) {
         setState(() {
@@ -125,12 +126,12 @@ class _GalleryVisibilityHubScreenState
       );
 
       // Get artist performance data
-      final artistPerformance =
-          await _visibilityService.getArtistPerformanceAnalytics(
-        galleryProfileId: galleryProfileId,
-        startDate: startDate,
-        endDate: now,
-      );
+      final artistPerformance = await _visibilityService
+          .getArtistPerformanceAnalytics(
+            galleryProfileId: galleryProfileId,
+            startDate: startDate,
+            endDate: now,
+          );
 
       // Get commission metrics
       final commissionMetrics = await _visibilityService.getCommissionMetrics(
@@ -166,7 +167,11 @@ class _GalleryVisibilityHubScreenState
 
   /// Build a metric card for displaying analytics numbers
   Widget _buildMetricCard(
-      String title, dynamic value, String subtitle, IconData icon) {
+    String title,
+    dynamic value,
+    String subtitle,
+    IconData icon,
+  ) {
     String displayValue;
 
     if (value is double) {
@@ -205,18 +210,12 @@ class _GalleryVisibilityHubScreenState
             const SizedBox(height: 8),
             Text(
               displayValue,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
             Text(
               subtitle,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey.shade600,
-              ),
+              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
             ),
           ],
         ),
@@ -228,8 +227,9 @@ class _GalleryVisibilityHubScreenState
   Widget _buildRevenueChart() {
     if (_revenueData.isEmpty) {
       return Center(
-        child:
-            Text(tr('artist_gallery_analytics_dashboard_text_no_revenue_data')),
+        child: Text(
+          tr('artist_gallery_analytics_dashboard_text_no_revenue_data'),
+        ),
       );
     }
 
@@ -256,35 +256,22 @@ class _GalleryVisibilityHubScreenState
               show: true,
               drawVerticalLine: false,
               getDrawingHorizontalLine: (value) {
-                return FlLine(
-                  color: Colors.grey.shade200,
-                  strokeWidth: 1,
-                );
+                return FlLine(color: Colors.grey.shade200, strokeWidth: 1);
               },
             ),
             titlesData: const FlTitlesData(
               leftTitles: AxisTitles(
-                sideTitles: SideTitles(
-                  showTitles: true,
-                  reservedSize: 40,
-                ),
+                sideTitles: SideTitles(showTitles: true, reservedSize: 40),
               ),
               bottomTitles: AxisTitles(
-                sideTitles: SideTitles(
-                  showTitles: true,
-                  reservedSize: 22,
-                ),
+                sideTitles: SideTitles(showTitles: true, reservedSize: 22),
               ),
               rightTitles: AxisTitles(
                 sideTitles: SideTitles(showTitles: false),
               ),
-              topTitles: AxisTitles(
-                sideTitles: SideTitles(showTitles: false),
-              ),
+              topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
             ),
-            borderData: FlBorderData(
-              show: false,
-            ),
+            borderData: FlBorderData(show: false),
             minX: 0,
             maxX: (_revenueData.length - 1).toDouble(),
             minY: 0,
@@ -316,8 +303,9 @@ class _GalleryVisibilityHubScreenState
         padding: const EdgeInsets.all(16.0),
         child: Center(
           child: Text(
-              'artist_gallery_analytics_dashboard_text_no_artist_performance'
-                  .tr()),
+            'artist_gallery_analytics_dashboard_text_no_artist_performance'
+                .tr(),
+          ),
         ),
       );
     }
@@ -327,23 +315,29 @@ class _GalleryVisibilityHubScreenState
       child: DataTable(
         columns: [
           DataColumn(
-              label:
-                  Text(tr('artist_gallery_analytics_dashboard_text_artist'))),
+            label: Text(tr('artist_gallery_analytics_dashboard_text_artist')),
+          ),
           DataColumn(
-              label: Text(
-                  'artist_gallery_analytics_dashboard_text_artwork_views'
-                      .tr())),
+            label: Text(
+              'artist_gallery_analytics_dashboard_text_artwork_views'.tr(),
+            ),
+          ),
           DataColumn(
-              label: Text(tr('artist_gallery_analytics_dashboard_text_sales'))),
+            label: Text(tr('artist_gallery_analytics_dashboard_text_sales')),
+          ),
           DataColumn(
-              label:
-                  Text(tr('artist_gallery_analytics_dashboard_text_revenue'))),
+            label: Text(tr('artist_gallery_analytics_dashboard_text_revenue')),
+          ),
           DataColumn(
-              label: Text(
-                  tr('artist_gallery_analytics_dashboard_text_commission'))),
+            label: Text(
+              tr('artist_gallery_analytics_dashboard_text_commission'),
+            ),
+          ),
         ],
         rows: _artistPerformance
-            .map((artist) => DataRow(cells: [
+            .map(
+              (artist) => DataRow(
+                cells: [
                   DataCell(
                     Row(
                       children: [
@@ -351,29 +345,43 @@ class _GalleryVisibilityHubScreenState
                           radius: 16,
                           backgroundImage:
                               core.ImageUrlValidator.safeNetworkImage(
-                            artist['profileImageUrl']?.toString(),
-                          ),
-                          child: !core.ImageUrlValidator.isValidImageUrl(
-                            artist['profileImageUrl']?.toString(),
-                          )
+                                artist['profileImageUrl']?.toString(),
+                              ),
+                          child:
+                              !core.ImageUrlValidator.isValidImageUrl(
+                                artist['profileImageUrl']?.toString(),
+                              )
                               ? const Icon(Icons.person, size: 16)
                               : null,
                         ),
                         const SizedBox(width: 8),
-                        Text(artist['displayName'] as String? ??
-                            'Unknown Artist'),
+                        Text(
+                          artist['displayName'] as String? ?? 'Unknown Artist',
+                        ),
                       ],
                     ),
                   ),
-                  DataCell(Text(NumberFormat('#,###')
-                      .format(artist['artworkViews'] ?? 0))),
                   DataCell(
-                      Text(NumberFormat('#,###').format(artist['sales'] ?? 0))),
-                  DataCell(Text(
-                      '\$${(artist['revenue'] as double).toStringAsFixed(2)}')),
-                  DataCell(Text(
-                      '\$${(artist['commission'] as double).toStringAsFixed(2)}')),
-                ]))
+                    Text(
+                      NumberFormat('#,###').format(artist['artworkViews'] ?? 0),
+                    ),
+                  ),
+                  DataCell(
+                    Text(NumberFormat('#,###').format(artist['sales'] ?? 0)),
+                  ),
+                  DataCell(
+                    Text(
+                      '\$${(artist['revenue'] as double).toStringAsFixed(2)}',
+                    ),
+                  ),
+                  DataCell(
+                    Text(
+                      '\$${(artist['commission'] as double).toStringAsFixed(2)}',
+                    ),
+                  ),
+                ],
+              ),
+            )
             .toList(),
       ),
     );
@@ -384,9 +392,10 @@ class _GalleryVisibilityHubScreenState
     if (_isLoading) {
       return Scaffold(
         appBar: AppBar(
-            title: Text(
-                'artist_gallery_analytics_dashboard_text_gallery_analytics'
-                    .tr())),
+          title: Text(
+            'artist_gallery_analytics_dashboard_text_gallery_analytics'.tr(),
+          ),
+        ),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
@@ -395,27 +404,21 @@ class _GalleryVisibilityHubScreenState
     if (!_isPremiumGallery) {
       return Scaffold(
         appBar: AppBar(
-            title: Text(
-                'artist_gallery_analytics_dashboard_text_gallery_analytics'
-                    .tr())),
+          title: Text(
+            'artist_gallery_analytics_dashboard_text_gallery_analytics'.tr(),
+          ),
+        ),
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(24.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
-                  Icons.analytics,
-                  size: 80,
-                  color: Colors.grey,
-                ),
+                const Icon(Icons.analytics, size: 80, color: Colors.grey),
                 const SizedBox(height: 24),
                 const Text(
                   'Gallery Visibility Hub',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -438,8 +441,9 @@ class _GalleryVisibilityHubScreenState
                     ),
                   ),
                   child: Text(
-                      'artist_gallery_analytics_dashboard_text_upgrade_to_gallery'
-                          .tr()),
+                    'artist_gallery_analytics_dashboard_text_upgrade_to_gallery'
+                        .tr(),
+                  ),
                 ),
               ],
             ),
@@ -481,9 +485,9 @@ class _GalleryVisibilityHubScreenState
               // Reload data with new time range
               final userId = _auth.currentUser?.uid;
               if (userId != null) {
-                _subscriptionService
-                    .getArtistProfileByUserId(userId)
-                    .then((profile) {
+                _subscriptionService.getArtistProfileByUserId(userId).then((
+                  profile,
+                ) {
                   if (profile != null) {
                     _loadAnalyticsData(profile.id);
                   }
@@ -494,25 +498,26 @@ class _GalleryVisibilityHubScreenState
               PopupMenuItem(
                 value: 'week',
                 child: Text(
-                    tr('artist_gallery_analytics_dashboard_text_last_7_days')),
+                  tr('artist_gallery_analytics_dashboard_text_last_7_days'),
+                ),
               ),
               PopupMenuItem(
                 value: 'month',
                 child: Text(
-                    'artist_gallery_analytics_dashboard_text_last_30_days'
-                        .tr()),
+                  'artist_gallery_analytics_dashboard_text_last_30_days'.tr(),
+                ),
               ),
               PopupMenuItem(
                 value: 'quarter',
                 child: Text(
-                    'artist_gallery_analytics_dashboard_text_last_90_days'
-                        .tr()),
+                  'artist_gallery_analytics_dashboard_text_last_90_days'.tr(),
+                ),
               ),
               PopupMenuItem(
                 value: 'year',
                 child: Text(
-                    'artist_gallery_analytics_dashboard_text_last_12_months'
-                        .tr()),
+                  'artist_gallery_analytics_dashboard_text_last_12_months'.tr(),
+                ),
               ),
             ],
           ),
@@ -528,14 +533,22 @@ class _GalleryVisibilityHubScreenState
               children: [
                 // Time range indicator
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.grey.shade200,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    'Showing data for: ${_selectedTimeRange == 'week' ? 'Last 7 Days' : _selectedTimeRange == 'month' ? 'Last 30 Days' : _selectedTimeRange == 'quarter' ? 'Last 90 Days' : 'Last 12 Months'}',
+                    'Showing data for: ${_selectedTimeRange == 'week'
+                        ? 'Last 7 Days'
+                        : _selectedTimeRange == 'month'
+                        ? 'Last 30 Days'
+                        : _selectedTimeRange == 'quarter'
+                        ? 'Last 90 Days'
+                        : 'Last 12 Months'}',
                     style: TextStyle(
                       color: Colors.grey.shade700,
                       fontWeight: FontWeight.w500,
@@ -563,18 +576,42 @@ class _GalleryVisibilityHubScreenState
                   mainAxisSpacing: 8,
                   childAspectRatio: 1.5,
                   children: [
-                    _buildMetricCard('Total Views', totalViews,
-                        'Artwork views in period', Icons.visibility),
-                    _buildMetricCard('Total Sales', totalSales,
-                        'Artworks sold in period', Icons.shopping_cart),
-                    _buildMetricCard('Total Revenue', totalRevenue,
-                        'Sales revenue in period', Icons.attach_money),
-                    _buildMetricCard('Commission Earned', totalCommission,
-                        'Total gallery commission', Icons.monetization_on),
-                    _buildMetricCard('Conversion Rate', viewsToSalesRate,
-                        'Views to sales percentage', Icons.trending_up),
-                    _buildMetricCard('Avg. Commission', avgCommissionRate,
-                        'Average commission rate', Icons.percent),
+                    _buildMetricCard(
+                      'Total Views',
+                      totalViews,
+                      'Artwork views in period',
+                      Icons.visibility,
+                    ),
+                    _buildMetricCard(
+                      'Total Sales',
+                      totalSales,
+                      'Artworks sold in period',
+                      Icons.shopping_cart,
+                    ),
+                    _buildMetricCard(
+                      'Total Revenue',
+                      totalRevenue,
+                      'Sales revenue in period',
+                      Icons.attach_money,
+                    ),
+                    _buildMetricCard(
+                      'Commission Earned',
+                      totalCommission,
+                      'Total gallery commission',
+                      Icons.monetization_on,
+                    ),
+                    _buildMetricCard(
+                      'Conversion Rate',
+                      viewsToSalesRate,
+                      'Views to sales percentage',
+                      Icons.trending_up,
+                    ),
+                    _buildMetricCard(
+                      'Avg. Commission',
+                      avgCommissionRate,
+                      'Average commission rate',
+                      Icons.percent,
+                    ),
                   ],
                 ),
 
@@ -589,10 +626,7 @@ class _GalleryVisibilityHubScreenState
                   ),
                 ),
                 const SizedBox(height: 16),
-                Card(
-                  elevation: 4,
-                  child: _buildRevenueChart(),
-                ),
+                Card(elevation: 4, child: _buildRevenueChart()),
 
                 const SizedBox(height: 32),
 
@@ -633,8 +667,9 @@ class _GalleryVisibilityHubScreenState
                       children: [
                         ListTile(
                           title: Text(
-                              'artist_gallery_analytics_dashboard_text_pending_commissions'
-                                  .tr()),
+                            'artist_gallery_analytics_dashboard_text_pending_commissions'
+                                .tr(),
+                          ),
                           trailing: Text(
                             '\$${totalPendingCommission.toStringAsFixed(2)}',
                             style: const TextStyle(
@@ -646,8 +681,9 @@ class _GalleryVisibilityHubScreenState
                         const Divider(),
                         ListTile(
                           title: Text(
-                              'artist_gallery_analytics_dashboard_text_paid_commissions'
-                                  .tr()),
+                            'artist_gallery_analytics_dashboard_text_paid_commissions'
+                                .tr(),
+                          ),
                           trailing: Text(
                             '\$${totalPaidCommission.toStringAsFixed(2)}',
                             style: const TextStyle(
@@ -659,8 +695,9 @@ class _GalleryVisibilityHubScreenState
                         const Divider(),
                         ListTile(
                           title: Text(
-                              'artist_gallery_analytics_dashboard_text_total_commissions'
-                                  .tr()),
+                            'artist_gallery_analytics_dashboard_text_total_commissions'
+                                .tr(),
+                          ),
                           trailing: Text(
                             '\$${(totalPendingCommission + totalPaidCommission).toStringAsFixed(2)}',
                             style: TextStyle(
@@ -683,15 +720,19 @@ class _GalleryVisibilityHubScreenState
                     onPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text(tr(
-                              'art_walk_generating_report_pdf__check_your_downloads_folder')),
+                          content: Text(
+                            tr(
+                              'art_walk_generating_report_pdf__check_your_downloads_folder',
+                            ),
+                          ),
                         ),
                       );
                     },
                     icon: const Icon(Icons.download),
                     label: Text(
-                        'artist_gallery_analytics_dashboard_text_export_report'
-                            .tr()),
+                      'artist_gallery_analytics_dashboard_text_export_report'
+                          .tr(),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 24),

@@ -10,10 +10,7 @@ import '../services/event_service_adapter.dart';
 class EventCreationScreen extends StatefulWidget {
   final String? eventId; // Null for new event, non-null for editing
 
-  const EventCreationScreen({
-    super.key,
-    this.eventId,
-  });
+  const EventCreationScreen({super.key, this.eventId});
 
   @override
   State<EventCreationScreen> createState() => _EventCreationScreenState();
@@ -68,7 +65,8 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
 
     try {
       final subscription = await _subscriptionService.getUserSubscription();
-      final canCreateEvents = subscription != null &&
+      final canCreateEvents =
+          subscription != null &&
           (subscription.tier == core.SubscriptionTier.creator ||
               subscription.tier == core.SubscriptionTier.business ||
               subscription.tier == core.SubscriptionTier.enterprise) &&
@@ -145,8 +143,10 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(
-                  tr('artist_event_creation_error_error_selecting_image'))),
+            content: Text(
+              tr('artist_event_creation_error_error_selecting_image'),
+            ),
+          ),
         );
       }
     }
@@ -275,9 +275,10 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(
-                  'artist_event_creation_success_event_saved_successfully'
-                      .tr())),
+            content: Text(
+              'artist_event_creation_success_event_saved_successfully'.tr(),
+            ),
+          ),
         );
         Navigator.of(context).pop(true); // Return true to trigger refresh
       }
@@ -309,25 +310,19 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
     if (!_canCreateEvents) {
       return Scaffold(
         appBar: AppBar(
-            title: Text(tr('artist_artist_dashboard_text_create_event'))),
+          title: Text(tr('artist_artist_dashboard_text_create_event')),
+        ),
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(24.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
-                  Icons.event_busy,
-                  size: 80,
-                  color: Colors.grey,
-                ),
+                const Icon(Icons.event_busy, size: 80, color: Colors.grey),
                 const SizedBox(height: 24),
                 const Text(
                   'Event Creation',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -408,36 +403,31 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
                   child: _imageFile != null
                       ? ClipRRect(
                           borderRadius: BorderRadius.circular(12),
-                          child: Image.file(
-                            _imageFile!,
+                          child: Image.file(_imageFile!, fit: BoxFit.cover),
+                        )
+                      : _existingImageUrl != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.network(
+                            _existingImageUrl!,
                             fit: BoxFit.cover,
                           ),
                         )
-                      : _existingImageUrl != null
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: Image.network(
-                                _existingImageUrl!,
-                                fit: BoxFit.cover,
-                              ),
-                            )
-                          : Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.add_photo_alternate,
-                                  size: 50,
-                                  color: Colors.grey.shade400,
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  tr('art_walk_add_cover_image'),
-                                  style: TextStyle(
-                                    color: Colors.grey.shade600,
-                                  ),
-                                ),
-                              ],
+                      : Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.add_photo_alternate,
+                              size: 50,
+                              color: Colors.grey.shade400,
                             ),
+                            const SizedBox(height: 8),
+                            Text(
+                              tr('art_walk_add_cover_image'),
+                              style: TextStyle(color: Colors.grey.shade600),
+                            ),
+                          ],
+                        ),
                 ),
               ),
 
@@ -469,9 +459,7 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
                       children: [
                         Text(
                           tr('art_walk_start_date'),
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 8),
                         InkWell(
@@ -489,8 +477,9 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
                               children: [
                                 const Icon(Icons.calendar_today, size: 18),
                                 const SizedBox(width: 8),
-                                Text(DateFormat('MMM d, yyyy')
-                                    .format(_startDate)),
+                                Text(
+                                  DateFormat('MMM d, yyyy').format(_startDate),
+                                ),
                               ],
                             ),
                           ),
@@ -505,9 +494,7 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
                       children: [
                         Text(
                           tr('art_walk_end_date'),
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 8),
                         InkWell(
@@ -526,7 +513,8 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
                                 const Icon(Icons.calendar_today, size: 18),
                                 const SizedBox(width: 8),
                                 Text(
-                                    DateFormat('MMM d, yyyy').format(_endDate)),
+                                  DateFormat('MMM d, yyyy').format(_endDate),
+                                ),
                               ],
                             ),
                           ),
@@ -548,9 +536,7 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
                       children: [
                         Text(
                           tr('art_walk_start_time'),
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 8),
                         InkWell(
@@ -583,9 +569,7 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
                       children: [
                         Text(
                           tr('art_walk_end_time'),
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 8),
                         InkWell(
@@ -657,7 +641,8 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
               SwitchListTile(
                 title: Text(tr('artist_event_creation_text_public_event')),
                 subtitle: const Text(
-                    'Allow others to see and register for this event'),
+                  'Allow others to see and register for this event',
+                ),
                 value: _isPublic,
                 onChanged: (value) {
                   setState(() {
@@ -682,8 +667,9 @@ class _EventCreationScreenState extends State<EventCreationScreen> {
                           width: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
                           ),
                         )
                       : Text(

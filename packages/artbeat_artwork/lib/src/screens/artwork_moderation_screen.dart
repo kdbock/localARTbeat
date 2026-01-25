@@ -67,8 +67,9 @@ class _ArtworkModerationScreenState extends State<ArtworkModerationScreen> {
       query = query.orderBy('createdAt', descending: true).limit(50);
 
       final snapshot = await query.get();
-      final artworks =
-          snapshot.docs.map((doc) => ArtworkModel.fromFirestore(doc)).toList();
+      final artworks = snapshot.docs
+          .map((doc) => ArtworkModel.fromFirestore(doc))
+          .toList();
 
       setState(() {
         _artworks = artworks;
@@ -78,8 +79,10 @@ class _ArtworkModerationScreenState extends State<ArtworkModerationScreen> {
       // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: Text('moderation_error_loading'
-                .tr(namedArgs: {'error': e.toString()}))),
+          content: Text(
+            'moderation_error_loading'.tr(namedArgs: {'error': e.toString()}),
+          ),
+        ),
       );
     } finally {
       setState(() => _isLoading = false);
@@ -87,8 +90,10 @@ class _ArtworkModerationScreenState extends State<ArtworkModerationScreen> {
   }
 
   Future<void> _moderateArtwork(
-      ArtworkModel artwork, ArtworkModerationStatus status,
-      {String? notes}) async {
+    ArtworkModel artwork,
+    ArtworkModerationStatus status, {
+    String? notes,
+  }) async {
     try {
       await _artworkService.updateArtworkModeration(
         artworkId: artwork.id,
@@ -104,21 +109,31 @@ class _ArtworkModerationScreenState extends State<ArtworkModerationScreen> {
       // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: Text('moderation_success_status'
-                .tr(namedArgs: {'status': status.displayName.toLowerCase()}))),
+          content: Text(
+            'moderation_success_status'.tr(
+              namedArgs: {'status': status.displayName.toLowerCase()},
+            ),
+          ),
+        ),
       );
     } catch (e) {
       // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: Text('moderation_error_moderating'
-                .tr(namedArgs: {'error': e.toString()}))),
+          content: Text(
+            'moderation_error_moderating'.tr(
+              namedArgs: {'error': e.toString()},
+            ),
+          ),
+        ),
       );
     }
   }
 
-  Future<void> _bulkModerate(ArtworkModerationStatus status,
-      {String? notes}) async {
+  Future<void> _bulkModerate(
+    ArtworkModerationStatus status, {
+    String? notes,
+  }) async {
     final selectedIds = _selectedArtworks.entries
         .where((entry) => entry.value)
         .map((entry) => entry.key)
@@ -145,17 +160,24 @@ class _ArtworkModerationScreenState extends State<ArtworkModerationScreen> {
       // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: Text('moderation_success_bulk'.tr(namedArgs: {
-          'count': selectedIds.length.toString(),
-          'status': status.displayName.toLowerCase()
-        }))),
+          content: Text(
+            'moderation_success_bulk'.tr(
+              namedArgs: {
+                'count': selectedIds.length.toString(),
+                'status': status.displayName.toLowerCase(),
+              },
+            ),
+          ),
+        ),
       );
     } catch (e) {
       // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: Text('moderation_error_bulk'
-                .tr(namedArgs: {'error': e.toString()}))),
+          content: Text(
+            'moderation_error_bulk'.tr(namedArgs: {'error': e.toString()}),
+          ),
+        ),
       );
     } finally {
       setState(() => _isLoading = false);
@@ -169,7 +191,8 @@ class _ArtworkModerationScreenState extends State<ArtworkModerationScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
-            'moderation_dialog_title'.tr(namedArgs: {'title': artwork.title})),
+          'moderation_dialog_title'.tr(namedArgs: {'title': artwork.title}),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -193,16 +216,22 @@ class _ArtworkModerationScreenState extends State<ArtworkModerationScreen> {
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              _moderateArtwork(artwork, ArtworkModerationStatus.approved,
-                  notes: notesController.text);
+              _moderateArtwork(
+                artwork,
+                ArtworkModerationStatus.approved,
+                notes: notesController.text,
+              );
             },
             child: Text('moderation_dialog_approve'.tr()),
           ),
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              _moderateArtwork(artwork, ArtworkModerationStatus.rejected,
-                  notes: notesController.text);
+              _moderateArtwork(
+                artwork,
+                ArtworkModerationStatus.rejected,
+                notes: notesController.text,
+              );
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: Text('moderation_dialog_reject'.tr()),
@@ -214,16 +243,20 @@ class _ArtworkModerationScreenState extends State<ArtworkModerationScreen> {
 
   void _showBulkModerationDialog() {
     final notesController = TextEditingController();
-    final selectedCount =
-        _selectedArtworks.values.where((selected) => selected).length;
+    final selectedCount = _selectedArtworks.values
+        .where((selected) => selected)
+        .length;
 
     if (selectedCount == 0) return;
 
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('moderation_bulk_dialog_title'
-            .tr(namedArgs: {'count': selectedCount.toString()})),
+        title: Text(
+          'moderation_bulk_dialog_title'.tr(
+            namedArgs: {'count': selectedCount.toString()},
+          ),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -247,16 +280,20 @@ class _ArtworkModerationScreenState extends State<ArtworkModerationScreen> {
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              _bulkModerate(ArtworkModerationStatus.approved,
-                  notes: notesController.text);
+              _bulkModerate(
+                ArtworkModerationStatus.approved,
+                notes: notesController.text,
+              );
             },
             child: Text('moderation_bulk_dialog_approve_all'.tr()),
           ),
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              _bulkModerate(ArtworkModerationStatus.rejected,
-                  notes: notesController.text);
+              _bulkModerate(
+                ArtworkModerationStatus.rejected,
+                notes: notesController.text,
+              );
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: Text('moderation_bulk_dialog_reject_all'.tr()),
@@ -268,8 +305,9 @@ class _ArtworkModerationScreenState extends State<ArtworkModerationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final selectedCount =
-        _selectedArtworks.values.where((selected) => selected).length;
+    final selectedCount = _selectedArtworks.values
+        .where((selected) => selected)
+        .length;
 
     return MainLayout(
       currentIndex: 0,
@@ -282,14 +320,17 @@ class _ArtworkModerationScreenState extends State<ArtworkModerationScreen> {
             Padding(
               padding: const EdgeInsets.only(right: 8),
               child: GlassCard(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 radius: 18,
                 glassOpacity: 0.08,
                 borderOpacity: 0.16,
                 child: Text(
-                  'moderation_selected_count'
-                      .tr(namedArgs: {'count': selectedCount.toString()}),
+                  'moderation_selected_count'.tr(
+                    namedArgs: {'count': selectedCount.toString()},
+                  ),
                   style: GoogleFonts.spaceGrotesk(
                     color: Colors.white,
                     fontSize: 12,
@@ -298,7 +339,8 @@ class _ArtworkModerationScreenState extends State<ArtworkModerationScreen> {
                 ),
               ),
             ),
-        ], subtitle: '',
+        ],
+        subtitle: '',
       ),
       floatingActionButton: selectedCount > 0
           ? FloatingActionButton.extended(
@@ -327,21 +369,25 @@ class _ArtworkModerationScreenState extends State<ArtworkModerationScreen> {
                       ? const Center(
                           child: CircularProgressIndicator(
                             valueColor: AlwaysStoppedAnimation<Color>(
-                                Color(0xFF22D3EE)),
+                              Color(0xFF22D3EE),
+                            ),
                           ),
                         )
                       : _artworks.isEmpty
-                          ? _buildEmptyState()
-                          : ListView.builder(
-                              itemCount: _artworks.length,
-                              itemBuilder: (context, index) {
-                                final artwork = _artworks[index];
-                                final isSelected =
-                                    _selectedArtworks[artwork.id] ?? false;
-                                return _buildArtworkCard(
-                                    artwork, isSelected, selectedCount);
-                              },
-                            ),
+                      ? _buildEmptyState()
+                      : ListView.builder(
+                          itemCount: _artworks.length,
+                          itemBuilder: (context, index) {
+                            final artwork = _artworks[index];
+                            final isSelected =
+                                _selectedArtworks[artwork.id] ?? false;
+                            return _buildArtworkCard(
+                              artwork,
+                              isSelected,
+                              selectedCount,
+                            );
+                          },
+                        ),
                 ),
               ),
             ],
@@ -388,7 +434,9 @@ class _ArtworkModerationScreenState extends State<ArtworkModerationScreen> {
                   selectedColor: const Color(0xFF22D3EE).withValues(alpha: 0.3),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(18),
-                    side: BorderSide(color: Colors.white.withValues(alpha: 0.14)),
+                    side: BorderSide(
+                      color: Colors.white.withValues(alpha: 0.14),
+                    ),
                   ),
                 ),
               ),
@@ -416,8 +464,10 @@ class _ArtworkModerationScreenState extends State<ArtworkModerationScreen> {
                     shape: BoxShape.circle,
                     color: Colors.white.withValues(alpha: 0.08),
                   ),
-                  child: const Icon(Icons.inbox_outlined,
-                      color: Colors.white70),
+                  child: const Icon(
+                    Icons.inbox_outlined,
+                    color: Colors.white70,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -455,7 +505,10 @@ class _ArtworkModerationScreenState extends State<ArtworkModerationScreen> {
   }
 
   Widget _buildArtworkCard(
-      ArtworkModel artwork, bool isSelected, int selectedCount) {
+    ArtworkModel artwork,
+    bool isSelected,
+    int selectedCount,
+  ) {
     return GlassCard(
       radius: 24,
       padding: EdgeInsets.zero,
@@ -478,8 +531,9 @@ class _ArtworkModerationScreenState extends State<ArtworkModerationScreen> {
               ),
             ),
             subtitle: Text(
-              'moderation_by_artist'
-                  .tr(namedArgs: {'artist': artwork.artistProfileId}),
+              'moderation_by_artist'.tr(
+                namedArgs: {'artist': artwork.artistProfileId},
+              ),
               style: GoogleFonts.spaceGrotesk(
                 color: Colors.white.withValues(alpha: 0.72),
                 fontSize: 12,
@@ -489,8 +543,10 @@ class _ArtworkModerationScreenState extends State<ArtworkModerationScreen> {
             activeColor: const Color(0xFF22D3EE),
             checkColor: Colors.white,
             controlAffinity: ListTileControlAffinity.leading,
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 4,
+            ),
           ),
           ClipRRect(
             borderRadius: BorderRadius.circular(18),
@@ -612,7 +668,11 @@ class _ArtworkModerationScreenState extends State<ArtworkModerationScreen> {
     );
   }
 
-  Widget _buildChip({required String label, required Color color, IconData? icon}) {
+  Widget _buildChip({
+    required String label,
+    required Color color,
+    IconData? icon,
+  }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(

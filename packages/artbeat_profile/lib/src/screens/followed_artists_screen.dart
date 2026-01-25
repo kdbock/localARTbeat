@@ -135,8 +135,10 @@ class _FollowedArtistsScreenState extends State<FollowedArtistsScreen> {
                   onBackPressed: () => Navigator.of(context).maybePop(),
                   actions: [
                     IconButton(
-                      icon: const Icon(Icons.refresh_rounded,
-                          color: Colors.white),
+                      icon: const Icon(
+                        Icons.refresh_rounded,
+                        color: Colors.white,
+                      ),
                       onPressed: _loadFollowedArtists,
                     ),
                   ],
@@ -154,8 +156,8 @@ class _FollowedArtistsScreenState extends State<FollowedArtistsScreen> {
                             ),
                           )
                         : _artists.isEmpty
-                            ? _buildEmptyState()
-                            : _buildArtistList(),
+                        ? _buildEmptyState()
+                        : _buildArtistList(),
                   ),
                 ),
               ],
@@ -166,10 +168,7 @@ class _FollowedArtistsScreenState extends State<FollowedArtistsScreen> {
     );
 
     if (widget.embedInMainLayout) {
-      return MainLayout(
-        currentIndex: -1,
-        child: content,
-      );
+      return MainLayout(currentIndex: -1, child: content);
     }
 
     return content;
@@ -268,8 +267,9 @@ class _FollowedArtistsScreenState extends State<FollowedArtistsScreen> {
                   : TextButton(
                       onPressed: () => _unfollow(artist),
                       style: TextButton.styleFrom(
-                        backgroundColor:
-                            ArtbeatColors.primaryPurple.withAlpha(28),
+                        backgroundColor: ArtbeatColors.primaryPurple.withAlpha(
+                          28,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                           side: BorderSide(
@@ -291,10 +291,7 @@ class _FollowedArtistsScreenState extends State<FollowedArtistsScreen> {
                 Navigator.pushNamed(
                   context,
                   '/artist/profile',
-                  arguments: {
-                    'artistId': artist.id,
-                    'userId': artist.userId,
-                  },
+                  arguments: {'artistId': artist.id, 'userId': artist.userId},
                 );
               },
             ),
@@ -316,8 +313,10 @@ class _FollowedArtistsScreenState extends State<FollowedArtistsScreen> {
         padding: const EdgeInsets.only(top: 40, bottom: 32),
         children: [
           GlassCard(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 18.0, vertical: 26.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 18.0,
+              vertical: 26.0,
+            ),
             margin: EdgeInsets.zero,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,

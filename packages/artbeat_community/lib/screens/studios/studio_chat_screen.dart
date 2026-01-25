@@ -21,11 +21,7 @@ class _StudioChatPalette {
   static const Gradient primaryGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [
-      accentPurple,
-      accentTeal,
-      accentGreen,
-    ],
+    colors: [accentPurple, accentTeal, accentGreen],
   );
 }
 
@@ -106,22 +102,22 @@ class _StudioChatScreenState extends State<StudioChatScreen> {
 
     final studioDoc = _firestore.collection('studios').doc(widget.studioId);
     studioDoc.collection('online_users').doc(user.uid).set({
-          'online': true,
-          'lastSeen': FieldValue.serverTimestamp(),
-        });
+      'online': true,
+      'lastSeen': FieldValue.serverTimestamp(),
+    });
 
     _onlineSubscription = studioDoc
         .collection('online_users')
         .snapshots()
         .listen((snapshot) {
-      final onlineUsers = <String, bool>{};
-      for (final doc in snapshot.docs) {
-        onlineUsers[doc.id] = (doc.data()['online'] as bool?) ?? false;
-      }
-      if (mounted) {
-        setState(() => _onlineUsers = onlineUsers);
-      }
-    });
+          final onlineUsers = <String, bool>{};
+          for (final doc in snapshot.docs) {
+            onlineUsers[doc.id] = (doc.data()['online'] as bool?) ?? false;
+          }
+          if (mounted) {
+            setState(() => _onlineUsers = onlineUsers);
+          }
+        });
   }
 
   Future<void> _sendMessage() async {
@@ -137,13 +133,13 @@ class _StudioChatScreenState extends State<StudioChatScreen> {
           .doc(widget.studioId)
           .collection('messages')
           .add({
-        'text': text,
-        'senderId': user.uid,
-        'senderName':
-            user.displayName ?? 'community_studio_chat.unknown_sender'.tr(),
-        'timestamp': FieldValue.serverTimestamp(),
-        'messageType': 'text',
-      });
+            'text': text,
+            'senderId': user.uid,
+            'senderName':
+                user.displayName ?? 'community_studio_chat.unknown_sender'.tr(),
+            'timestamp': FieldValue.serverTimestamp(),
+            'messageType': 'text',
+          });
       _messageController.clear();
       await Future<void>.delayed(const Duration(milliseconds: 120));
       if (_scrollController.hasClients) {
@@ -176,15 +172,17 @@ class _StudioChatScreenState extends State<StudioChatScreen> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: HudTopBar(
-        title: 'community_studio_chat.app_bar'
-            .tr(namedArgs: {'studio': studioName}),
+        title: 'community_studio_chat.app_bar'.tr(
+          namedArgs: {'studio': studioName},
+        ),
         glassBackground: true,
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 12),
             child: FittedBox(child: _buildOnlineBadge()),
           ),
-        ], subtitle: '',
+        ],
+        subtitle: '',
       ),
       body: WorldBackground(
         child: SafeArea(
@@ -226,12 +224,15 @@ class _StudioChatScreenState extends State<StudioChatScreen> {
   }
 
   Widget _buildOnlineBadge() {
-    final onlineCount =
-        _onlineUsers.values.where((isOnline) => isOnline).length.toString();
+    final onlineCount = _onlineUsers.values
+        .where((isOnline) => isOnline)
+        .length
+        .toString();
 
     return GradientBadge(
-      text: 'community_studio_chat.online_count'
-          .tr(namedArgs: {'count': onlineCount}),
+      text: 'community_studio_chat.online_count'.tr(
+        namedArgs: {'count': onlineCount},
+      ),
       icon: Icons.bolt_rounded,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
     );
@@ -242,8 +243,8 @@ class _StudioChatScreenState extends State<StudioChatScreen> {
     final description = _studio?.description.trim().isNotEmpty == true
         ? _studio!.description.trim()
         : 'community_studio_chat.description_fallback'.tr();
-    final privacyType = (_studio?.privacyType.toLowerCase() ?? 'public') ==
-            'private'
+    final privacyType =
+        (_studio?.privacyType.toLowerCase() ?? 'public') == 'private'
         ? 'community_studio_chat.privacy_private'
         : 'community_studio_chat.privacy_public';
 
@@ -307,7 +308,8 @@ class _StudioChatScreenState extends State<StudioChatScreen> {
               ),
               GradientBadge(
                 text: privacyType.tr(),
-                icon: (_studio?.privacyType.toLowerCase() ?? 'public') ==
+                icon:
+                    (_studio?.privacyType.toLowerCase() ?? 'public') ==
                         'private'
                     ? Icons.lock
                     : Icons.explore,
@@ -345,8 +347,10 @@ class _StudioChatScreenState extends State<StudioChatScreen> {
                   text: '#$tag',
                   icon: Icons.tag,
                   fontSize: 10,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                 );
               }).toList(),
             ),
@@ -492,8 +496,7 @@ class _StudioChatScreenState extends State<StudioChatScreen> {
     );
 
     return Align(
-      alignment:
-          isCurrentUser ? Alignment.centerRight : Alignment.centerLeft,
+      alignment: isCurrentUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
         margin: EdgeInsetsDirectional.only(
           top: 8,
@@ -514,8 +517,9 @@ class _StudioChatScreenState extends State<StudioChatScreen> {
           boxShadow: isCurrentUser
               ? [
                   BoxShadow(
-                    color:
-                        _StudioChatPalette.accentPurple.withValues(alpha: 0.35),
+                    color: _StudioChatPalette.accentPurple.withValues(
+                      alpha: 0.35,
+                    ),
                     blurRadius: 24,
                     offset: const Offset(0, 10),
                   ),
@@ -542,8 +546,9 @@ class _StudioChatScreenState extends State<StudioChatScreen> {
               style: GoogleFonts.spaceGrotesk(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
-                color:
-                    isCurrentUser ? Colors.white : _StudioChatPalette.textPrimary,
+                color: isCurrentUser
+                    ? Colors.white
+                    : _StudioChatPalette.textPrimary,
                 height: 1.4,
               ),
             ),
@@ -621,18 +626,21 @@ class _StudioChatScreenState extends State<StudioChatScreen> {
 
     if (difference.inDays > 0) {
       final formatted = _timestampFormatter.format(timestamp);
-      return 'community_studio_chat.full_timestamp'
-          .tr(namedArgs: {'date': formatted});
+      return 'community_studio_chat.full_timestamp'.tr(
+        namedArgs: {'date': formatted},
+      );
     }
 
     if (difference.inHours > 0) {
-      return 'community_studio_chat.hours_ago'
-          .tr(namedArgs: {'hours': difference.inHours.toString()});
+      return 'community_studio_chat.hours_ago'.tr(
+        namedArgs: {'hours': difference.inHours.toString()},
+      );
     }
 
     if (difference.inMinutes > 0) {
-      return 'community_studio_chat.minutes_ago'
-          .tr(namedArgs: {'minutes': difference.inMinutes.toString()});
+      return 'community_studio_chat.minutes_ago'.tr(
+        namedArgs: {'minutes': difference.inMinutes.toString()},
+      );
     }
 
     return 'community_studio_chat.just_now'.tr();

@@ -152,7 +152,10 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             const Color(0xFFFF00F5).withValues(alpha: 0.2),
           ],
         ),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1), width: 1),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.1),
+          width: 1,
+        ),
       ),
       child: Stack(
         alignment: Alignment.center,

@@ -46,8 +46,8 @@ class _MyArtworkScreenState extends State<MyArtworkScreen> {
       }
 
       // Get the current user's artist profile
-      final artistProfile =
-          await _subscriptionService.getCurrentArtistProfile();
+      final artistProfile = await _subscriptionService
+          .getCurrentArtistProfile();
       if (artistProfile == null) {
         setState(() {
           _error =
@@ -58,8 +58,9 @@ class _MyArtworkScreenState extends State<MyArtworkScreen> {
       }
 
       // Get the user's artwork
-      final artworks =
-          await _artworkService.getArtworkByArtistProfileId(artistProfile.id);
+      final artworks = await _artworkService.getArtworkByArtistProfileId(
+        artistProfile.id,
+      );
 
       if (mounted) {
         setState(() {
@@ -97,10 +98,7 @@ class _MyArtworkScreenState extends State<MyArtworkScreen> {
     Navigator.pushNamed(
       context,
       '/artwork/edit',
-      arguments: {
-        'artworkId': artwork.id,
-        'artwork': artwork,
-      },
+      arguments: {'artworkId': artwork.id, 'artwork': artwork},
     ).then((_) {
       // Refresh the artwork list when returning from edit
       _refreshArtwork();
@@ -122,9 +120,7 @@ class _MyArtworkScreenState extends State<MyArtworkScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.red,
-            ),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: Text(tr('admin_modern_unified_admin_dashboard_text_delete')),
           ),
         ],
@@ -167,8 +163,9 @@ class _MyArtworkScreenState extends State<MyArtworkScreen> {
         // Show success message
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content:
-                Text(tr('artist_my_artwork_success_artworktitle_has_been')),
+            content: Text(
+              tr('artist_my_artwork_success_artworktitle_has_been'),
+            ),
             backgroundColor: core.ArtbeatColors.primaryGreen,
           ),
         );
@@ -296,8 +293,8 @@ class _MyArtworkScreenState extends State<MyArtworkScreen> {
                   Text(
                     '${_artworks.length} ${_artworks.length == 1 ? 'Artwork' : 'Artworks'}',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   TextButton.icon(
                     onPressed: _navigateToUpload,
@@ -317,13 +314,10 @@ class _MyArtworkScreenState extends State<MyArtworkScreen> {
                 crossAxisSpacing: 16,
                 mainAxisSpacing: 16,
               ),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final artwork = _artworks[index];
-                  return _buildArtworkCard(artwork);
-                },
-                childCount: _artworks.length,
-              ),
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final artwork = _artworks[index];
+                return _buildArtworkCard(artwork);
+              }, childCount: _artworks.length),
             ),
           ),
           const SliverToBoxAdapter(
@@ -337,9 +331,7 @@ class _MyArtworkScreenState extends State<MyArtworkScreen> {
   Widget _buildArtworkCard(ArtworkModel artwork) {
     return Card(
       elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Stack(
         children: [
           InkWell(
@@ -354,7 +346,8 @@ class _MyArtworkScreenState extends State<MyArtworkScreen> {
                     borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(12),
                     ),
-                    child: artwork.imageUrl.isNotEmpty &&
+                    child:
+                        artwork.imageUrl.isNotEmpty &&
                             Uri.tryParse(artwork.imageUrl)?.hasScheme == true
                         ? SecureNetworkImage(
                             imageUrl: artwork.imageUrl,
@@ -391,8 +384,8 @@ class _MyArtworkScreenState extends State<MyArtworkScreen> {
                       Text(
                         artwork.title,
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                          fontWeight: FontWeight.bold,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -400,10 +393,10 @@ class _MyArtworkScreenState extends State<MyArtworkScreen> {
                       if (artwork.medium.isNotEmpty)
                         Text(
                           artwork.medium,
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: core.ArtbeatColors.textSecondary,
-                                  ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: core.ArtbeatColors.textSecondary,
+                              ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -411,11 +404,11 @@ class _MyArtworkScreenState extends State<MyArtworkScreen> {
                       if (artwork.price != null)
                         Text(
                           '\$${artwork.price!.toStringAsFixed(2)}',
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: core.ArtbeatColors.primaryGreen,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: core.ArtbeatColors.primaryGreen,
+                                fontWeight: FontWeight.bold,
+                              ),
                         ),
                     ],
                   ),
@@ -452,8 +445,9 @@ class _MyArtworkScreenState extends State<MyArtworkScreen> {
                       children: [
                         const Icon(Icons.edit, size: 18),
                         const SizedBox(width: 8),
-                        Text(tr(
-                            'admin_modern_unified_admin_dashboard_text_edit')),
+                        Text(
+                          tr('admin_modern_unified_admin_dashboard_text_edit'),
+                        ),
                       ],
                     ),
                   ),
@@ -463,8 +457,10 @@ class _MyArtworkScreenState extends State<MyArtworkScreen> {
                       children: [
                         const Icon(Icons.delete, size: 18, color: Colors.red),
                         const SizedBox(width: 8),
-                        Text(tr('art_walk_delete'),
-                            style: const TextStyle(color: Colors.red)),
+                        Text(
+                          tr('art_walk_delete'),
+                          style: const TextStyle(color: Colors.red),
+                        ),
                       ],
                     ),
                   ),

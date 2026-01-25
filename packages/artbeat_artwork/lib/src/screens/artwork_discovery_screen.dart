@@ -94,7 +94,8 @@ class _ArtworkDiscoveryScreenState extends State<ArtworkDiscoveryScreen>
             tooltip: 'artwork_discover_loading'.tr(),
             onPressed: _loadDiscoveryContent,
           ),
-        ], subtitle: '',
+        ],
+        subtitle: '',
       ),
       child: WorldBackground(
         child: SafeArea(
@@ -112,10 +113,7 @@ class _ArtworkDiscoveryScreenState extends State<ArtworkDiscoveryScreen>
                       gradient: const LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: [
-                          Color(0xFF7C4DFF),
-                          Color(0xFF22D3EE),
-                        ],
+                        colors: [Color(0xFF7C4DFF), Color(0xFF22D3EE)],
                       ),
                     ),
                     labelStyle: GoogleFonts.spaceGrotesk(
@@ -143,15 +141,15 @@ class _ArtworkDiscoveryScreenState extends State<ArtworkDiscoveryScreen>
                   child: _isLoading
                       ? _buildLoadingView()
                       : _error != null
-                          ? _buildErrorView()
-                          : TabBarView(
-                              controller: _tabController,
-                              children: [
-                                _buildPersonalizedTab(),
-                                _buildTrendingTab(),
-                                _buildSimilarTab(),
-                              ],
-                            ),
+                      ? _buildErrorView()
+                      : TabBarView(
+                          controller: _tabController,
+                          children: [
+                            _buildPersonalizedTab(),
+                            _buildTrendingTab(),
+                            _buildSimilarTab(),
+                          ],
+                        ),
                 ),
               ),
             ],
@@ -209,8 +207,10 @@ class _ArtworkDiscoveryScreenState extends State<ArtworkDiscoveryScreen>
                     shape: BoxShape.circle,
                     color: Colors.white.withValues(alpha: 0.08),
                   ),
-                  child: const Icon(Icons.error_outline,
-                      color: Color(0xFFFF3D8D)),
+                  child: const Icon(
+                    Icons.error_outline,
+                    color: Color(0xFFFF3D8D),
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -351,10 +351,7 @@ class _ArtworkDiscoveryScreenState extends State<ArtworkDiscoveryScreen>
     );
   }
 
-  Widget _buildEmptyState({
-    required String title,
-    required String message,
-  }) {
+  Widget _buildEmptyState({required String title, required String message}) {
     return Center(
       child: GlassCard(
         padding: const EdgeInsets.all(20),
@@ -430,13 +427,10 @@ class _ArtworkDiscoveryScreenState extends State<ArtworkDiscoveryScreen>
             crossAxisSpacing: 12,
             mainAxisSpacing: 12,
           ),
-          delegate: SliverChildBuilderDelegate(
-            (context, index) {
-              final artwork = artworks[index];
-              return _buildArtworkCard(artwork);
-            },
-            childCount: artworks.length,
-          ),
+          delegate: SliverChildBuilderDelegate((context, index) {
+            final artwork = artworks[index];
+            return _buildArtworkCard(artwork);
+          }, childCount: artworks.length),
         ),
       ],
     );
@@ -457,9 +451,7 @@ class _ArtworkDiscoveryScreenState extends State<ArtworkDiscoveryScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ClipRRect(
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(22),
-            ),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
             child: AspectRatio(
               aspectRatio: 4 / 3,
               child: SecureNetworkImage(
@@ -486,10 +478,7 @@ class _ArtworkDiscoveryScreenState extends State<ArtworkDiscoveryScreen>
                 ),
                 const SizedBox(height: 6),
                 if (artwork.medium.isNotEmpty)
-                  _InfoRow(
-                    icon: Icons.palette_outlined,
-                    label: artwork.medium,
-                  ),
+                  _InfoRow(icon: Icons.palette_outlined, label: artwork.medium),
                 const SizedBox(height: 8),
                 Row(
                   children: [
@@ -528,22 +517,14 @@ class _InfoRow extends StatelessWidget {
   final String label;
   final Color? color;
 
-  const _InfoRow({
-    required this.icon,
-    required this.label,
-    this.color,
-  });
+  const _InfoRow({required this.icon, required this.label, this.color});
 
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(
-          icon,
-          size: 14,
-          color: color ?? Colors.white70,
-        ),
+        Icon(icon, size: 14, color: color ?? Colors.white70),
         const SizedBox(width: 4),
         Text(
           label,

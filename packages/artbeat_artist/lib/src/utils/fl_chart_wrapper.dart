@@ -5,10 +5,7 @@ import 'package:fl_chart/fl_chart.dart';
 class SafeLineChart extends StatelessWidget {
   final LineChartData data;
 
-  const SafeLineChart({
-    super.key,
-    required this.data,
-  });
+  const SafeLineChart({super.key, required this.data});
 
   @override
   Widget build(BuildContext context) {
@@ -20,10 +17,7 @@ class SafeLineChart extends StatelessWidget {
 class SafeBarChart extends StatelessWidget {
   final BarChartData data;
 
-  const SafeBarChart({
-    super.key,
-    required this.data,
-  });
+  const SafeBarChart({super.key, required this.data});
 
   @override
   Widget build(BuildContext context) {
@@ -35,10 +29,7 @@ class SafeBarChart extends StatelessWidget {
 class SafePieChart extends StatelessWidget {
   final PieChartData data;
 
-  const SafePieChart({
-    super.key,
-    required this.data,
-  });
+  const SafePieChart({super.key, required this.data});
 
   @override
   Widget build(BuildContext context) {

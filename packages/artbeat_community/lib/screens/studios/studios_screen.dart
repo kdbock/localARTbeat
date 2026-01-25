@@ -78,29 +78,23 @@ class _StudiosScreenState extends State<StudiosScreen> {
   }
 
   void _openCreateStudio() async {
-    await Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => const CreateStudioScreen(),
-      ),
-    );
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute<void>(builder: (_) => const CreateStudioScreen()));
     if (mounted) _loadStudios();
   }
 
   void _openStudio(StudioModel studio) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (context) => StudioChatScreen(
-          studioId: studio.id,
-          studio: studio,
-        ),
+        builder: (context) =>
+            StudioChatScreen(studioId: studio.id, studio: studio),
       ),
     );
   }
 
-  int get _totalMembers => _studios.fold(
-        0,
-        (sum, studio) => sum + studio.memberList.length,
-      );
+  int get _totalMembers =>
+      _studios.fold(0, (sum, studio) => sum + studio.memberList.length);
 
   int get _uniqueTagsCount =>
       _studios.expand((studio) => studio.tags).toSet().length;
@@ -122,7 +116,8 @@ class _StudiosScreenState extends State<StudiosScreen> {
             icon: const Icon(Icons.refresh, color: Colors.white),
             onPressed: _isLoading ? null : _loadStudios,
           ),
-        ], subtitle: '',
+        ],
+        subtitle: '',
       ),
       child: WorldBackground(
         child: SafeArea(
@@ -197,15 +192,19 @@ class _StudiosScreenState extends State<StudiosScreen> {
                   borderRadius: BorderRadius.circular(18),
                   boxShadow: [
                     BoxShadow(
-                      color:
-                          _StudiosPalette.accentPurple.withValues(alpha: 0.28),
+                      color: _StudiosPalette.accentPurple.withValues(
+                        alpha: 0.28,
+                      ),
                       blurRadius: 18,
                       offset: const Offset(0, 10),
                     ),
                   ],
                 ),
-                child: const Icon(Icons.groups_3_rounded,
-                    color: Colors.white, size: 28),
+                child: const Icon(
+                  Icons.groups_3_rounded,
+                  color: Colors.white,
+                  size: 28,
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -243,18 +242,21 @@ class _StudiosScreenState extends State<StudiosScreen> {
             children: [
               _buildMetricChip(
                 icon: Icons.wifi_tethering,
-                label: 'community_studios.stat_studios'
-                    .tr(namedArgs: {'count': _studios.length.toString()}),
+                label: 'community_studios.stat_studios'.tr(
+                  namedArgs: {'count': _studios.length.toString()},
+                ),
               ),
               _buildMetricChip(
                 icon: Icons.groups_outlined,
-                label: 'community_studios.stat_members'
-                    .tr(namedArgs: {'count': _totalMembers.toString()}),
+                label: 'community_studios.stat_members'.tr(
+                  namedArgs: {'count': _totalMembers.toString()},
+                ),
               ),
               _buildMetricChip(
                 icon: Icons.style_rounded,
-                label: 'community_studios.stat_tags'
-                    .tr(namedArgs: {'count': _uniqueTagsCount.toString()}),
+                label: 'community_studios.stat_tags'.tr(
+                  namedArgs: {'count': _uniqueTagsCount.toString()},
+                ),
               ),
             ],
           ),
@@ -304,8 +306,8 @@ class _StudiosScreenState extends State<StudiosScreen> {
     final crossAxisCount = screenWidth > 1100
         ? 3
         : screenWidth > 720
-            ? 2
-            : 1;
+        ? 2
+        : 1;
 
     return SliverGrid(
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -314,13 +316,10 @@ class _StudiosScreenState extends State<StudiosScreen> {
         crossAxisSpacing: 16,
         childAspectRatio: crossAxisCount == 1 ? 1.9 : 1.1,
       ),
-      delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          final studio = _filteredStudios[index];
-          return _buildStudioCard(studio);
-        },
-        childCount: _filteredStudios.length,
-      ),
+      delegate: SliverChildBuilderDelegate((context, index) {
+        final studio = _filteredStudios[index];
+        return _buildStudioCard(studio);
+      }, childCount: _filteredStudios.length),
     );
   }
 
@@ -440,8 +439,10 @@ class _StudiosScreenState extends State<StudiosScreen> {
               runSpacing: 8,
               children: studio.tags.take(3).map((tag) {
                 return Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: _StudiosPalette.glassFill(0.12),
                     borderRadius: BorderRadius.circular(16),

@@ -59,7 +59,8 @@ class _AuctionHubScreenState extends State<AuctionHubScreen>
           .get();
 
       debugPrint(
-          '✅ Auction Hub: Found ${artworksSnapshot.docs.length} artworks with auctions');
+        '✅ Auction Hub: Found ${artworksSnapshot.docs.length} artworks with auctions',
+      );
 
       final allAuctions = artworksSnapshot.docs
           .map((doc) => artwork.ArtworkModel.fromFirestore(doc))
@@ -72,7 +73,8 @@ class _AuctionHubScreenState extends State<AuctionHubScreen>
 
       for (final auction in allAuctions) {
         debugPrint(
-            '📦 Auction: ${auction.title}, auctionEnd: ${auction.auctionEnd}, now: $now');
+          '📦 Auction: ${auction.title}, auctionEnd: ${auction.auctionEnd}, now: $now',
+        );
 
         if (auction.auctionEnd == null) {
           debugPrint('   → Scheduled (no end date)');
@@ -108,7 +110,8 @@ class _AuctionHubScreenState extends State<AuctionHubScreen>
       ended.sort((a, b) => b.auctionEnd!.compareTo(a.auctionEnd!));
 
       debugPrint(
-          '📊 Auction Hub Summary: Active=${active.length}, Ended=${ended.length}, Scheduled=${scheduled.length}');
+        '📊 Auction Hub Summary: Active=${active.length}, Ended=${ended.length}, Scheduled=${scheduled.length}',
+      );
 
       setState(() {
         _activeAuctions = active;

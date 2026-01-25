@@ -20,7 +20,8 @@ class CommissionDisputeScreen extends StatefulWidget {
   final String otherPartyName;
 
   @override
-  State<CommissionDisputeScreen> createState() => _CommissionDisputeScreenState();
+  State<CommissionDisputeScreen> createState() =>
+      _CommissionDisputeScreenState();
 }
 
 class _CommissionDisputeScreenState extends State<CommissionDisputeScreen> {
@@ -83,17 +84,13 @@ class _CommissionDisputeScreenState extends State<CommissionDisputeScreen> {
         otherPartyName: widget.otherPartyName,
         reason: _selectedReason,
         description: description,
-        metadata: {
-          'selectedReason': _selectedReason.name,
-        },
+        metadata: {'selectedReason': _selectedReason.name},
       );
 
       _descriptionController.clear();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('commission_dispute_toast_success'.tr()),
-        ),
+        SnackBar(content: Text('commission_dispute_toast_success'.tr())),
       );
     } catch (e, stackTrace) {
       core.AppLogger.error(
@@ -117,9 +114,7 @@ class _CommissionDisputeScreenState extends State<CommissionDisputeScreen> {
 
   void _contactSupport() {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('commission_dispute_support_toast'.tr()),
-      ),
+      SnackBar(content: Text('commission_dispute_support_toast'.tr())),
     );
   }
 
@@ -130,7 +125,8 @@ class _CommissionDisputeScreenState extends State<CommissionDisputeScreen> {
         backgroundColor: Colors.transparent,
         appBar: HudTopBar(
           title: 'commission_dispute_title'.tr(),
-          glassBackground: true, subtitle: '',
+          glassBackground: true,
+          subtitle: '',
         ),
         body: SafeArea(
           child: SingleChildScrollView(
@@ -322,7 +318,11 @@ class _CommissionDisputeScreenState extends State<CommissionDisputeScreen> {
                         color: Colors.white.withValues(alpha: 0.12),
                       ),
                     ),
-                    child: const Icon(Icons.check, size: 16, color: Colors.white),
+                    child: const Icon(
+                      Icons.check,
+                      size: 16,
+                      color: Colors.white,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -384,10 +384,7 @@ class _CommissionDisputeScreenState extends State<CommissionDisputeScreen> {
                 borderRadius: BorderRadius.circular(18),
                 border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
               ),
-              child: Icon(
-                _reasonIcons[reason],
-                color: Colors.white,
-              ),
+              child: Icon(_reasonIcons[reason], color: Colors.white),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -489,10 +486,6 @@ class _DisputePalette {
   static const LinearGradient primaryGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [
-      Color(0xFF7C4DFF),
-      Color(0xFF22D3EE),
-      Color(0xFF34D399),
-    ],
+    colors: [Color(0xFF7C4DFF), Color(0xFF22D3EE), Color(0xFF34D399)],
   );
 }

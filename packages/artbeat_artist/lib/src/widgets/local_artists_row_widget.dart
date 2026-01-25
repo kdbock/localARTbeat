@@ -141,30 +141,30 @@ class LocalArtistsRowWidget extends StatelessWidget {
                   }
 
                   return FutureBuilder<List<ArtistProfileModel>>(
-                    future: GeoWeightingUtils.sortByDistance<
-                        ArtistProfileModel>(
-                      items: artists,
-                      idOf: (artist) => artist.userId,
-                      locationOf: (artist) => artist.location,
-                      viewerLocation: locationSnapshot.data,
-                      tieBreaker: (a, b) {
-                        final scoreCompare =
-                            b.boostScore.compareTo(a.boostScore);
-                        if (scoreCompare != 0) return scoreCompare;
-                        final aBoost =
-                            a.lastBoostAt ??
-                            DateTime.fromMillisecondsSinceEpoch(0);
-                        final bBoost =
-                            b.lastBoostAt ??
-                            DateTime.fromMillisecondsSinceEpoch(0);
-                        final boostTimeCompare = bBoost.compareTo(aBoost);
-                        if (boostTimeCompare != 0) return boostTimeCompare;
-                        return a.displayName.compareTo(b.displayName);
-                      },
-                    ),
+                    future:
+                        GeoWeightingUtils.sortByDistance<ArtistProfileModel>(
+                          items: artists,
+                          idOf: (artist) => artist.userId,
+                          locationOf: (artist) => artist.location,
+                          viewerLocation: locationSnapshot.data,
+                          tieBreaker: (a, b) {
+                            final scoreCompare = b.boostScore.compareTo(
+                              a.boostScore,
+                            );
+                            if (scoreCompare != 0) return scoreCompare;
+                            final aBoost =
+                                a.lastBoostAt ??
+                                DateTime.fromMillisecondsSinceEpoch(0);
+                            final bBoost =
+                                b.lastBoostAt ??
+                                DateTime.fromMillisecondsSinceEpoch(0);
+                            final boostTimeCompare = bBoost.compareTo(aBoost);
+                            if (boostTimeCompare != 0) return boostTimeCompare;
+                            return a.displayName.compareTo(b.displayName);
+                          },
+                        ),
                     builder: (context, sortedSnapshot) {
-                      final sortedArtists =
-                          sortedSnapshot.data ?? artists;
+                      final sortedArtists = sortedSnapshot.data ?? artists;
 
                       return ListView.builder(
                         scrollDirection: Axis.horizontal,
@@ -190,14 +190,12 @@ class LocalArtistsRowWidget extends StatelessWidget {
                                           top: 6,
                                           left: 6,
                                           child: Tooltip(
-                                            message:
-                                                'boost_badge_tooltip'.tr(),
+                                            message: 'boost_badge_tooltip'.tr(),
                                             child: Container(
                                               padding: const EdgeInsets.all(4),
                                               decoration: BoxDecoration(
                                                 shape: BoxShape.circle,
-                                                gradient:
-                                                    const LinearGradient(
+                                                gradient: const LinearGradient(
                                                   colors: [
                                                     Color(0xFFF97316),
                                                     Color(0xFF22D3EE),
@@ -205,11 +203,9 @@ class LocalArtistsRowWidget extends StatelessWidget {
                                                 ),
                                                 boxShadow: [
                                                   BoxShadow(
-                                                    color:
-                                                        const Color(0xFF22D3EE)
-                                                            .withValues(
-                                                      alpha: 0.4,
-                                                    ),
+                                                    color: const Color(
+                                                      0xFF22D3EE,
+                                                    ).withValues(alpha: 0.4),
                                                     blurRadius: 8,
                                                     offset: const Offset(0, 4),
                                                   ),
@@ -237,62 +233,62 @@ class LocalArtistsRowWidget extends StatelessWidget {
                                                     width: 2,
                                                   )
                                                 : artist.isFeatured
-                                                    ? Border.all(
-                                                        color: Colors.amber,
-                                                        width: 2,
-                                                      )
-                                                    : null,
-                                            borderRadius:
-                                                BorderRadius.circular(12),
+                                                ? Border.all(
+                                                    color: Colors.amber,
+                                                    width: 2,
+                                                  )
+                                                : null,
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
                                             boxShadow: artist.hasMapGlow
                                                 ? [
                                                     BoxShadow(
-                                                      color:
-                                                          const Color(0xFF22D3EE)
-                                                              .withValues(
-                                                        alpha: 0.45,
-                                                      ),
+                                                      color: const Color(
+                                                        0xFF22D3EE,
+                                                      ).withValues(alpha: 0.45),
                                                       blurRadius: 18,
                                                       spreadRadius: 2,
                                                     ),
                                                     BoxShadow(
-                                                      color:
-                                                          const Color(0xFFF97316)
-                                                              .withValues(
-                                                        alpha: 0.35,
-                                                      ),
+                                                      color: const Color(
+                                                        0xFFF97316,
+                                                      ).withValues(alpha: 0.35),
                                                       blurRadius: 12,
                                                       spreadRadius: 1,
                                                     ),
                                                   ]
                                                 : null,
-                                            image: (artist.profileImageUrl !=
+                                            image:
+                                                (artist.profileImageUrl !=
                                                         null &&
-                                                    artist.profileImageUrl!
+                                                    artist
+                                                        .profileImageUrl!
                                                         .isNotEmpty &&
                                                     (artist.profileImageUrl!
                                                             .startsWith(
-                                                          'http://',
-                                                        ) ||
+                                                              'http://',
+                                                            ) ||
                                                         artist.profileImageUrl!
                                                             .startsWith(
-                                                          'https://',
-                                                        )) &&
+                                                              'https://',
+                                                            )) &&
                                                     artist.profileImageUrl !=
                                                         'placeholder_headshot_url')
                                                 ? DecorationImage(
-                                                    image: ImageUrlValidator
-                                                        .safeNetworkImage(
-                                                      artist.profileImageUrl,
-                                                    )!,
+                                                    image:
+                                                        ImageUrlValidator.safeNetworkImage(
+                                                          artist
+                                                              .profileImageUrl,
+                                                        )!,
                                                     fit: BoxFit.cover,
                                                   )
                                                 : null,
                                           ),
-                                          child: !ImageUrlValidator
-                                                  .isValidImageUrl(
-                                            artist.profileImageUrl,
-                                          )
+                                          child:
+                                              !ImageUrlValidator.isValidImageUrl(
+                                                artist.profileImageUrl,
+                                              )
                                               ? const Icon(
                                                   Icons.person,
                                                   size: 60,

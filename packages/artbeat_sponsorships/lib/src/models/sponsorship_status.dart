@@ -20,10 +20,11 @@ extension SponsorshipStatusExtension on SponsorshipStatus {
   String get value => name;
 
   /// Convert a stored string value back into enum
-  static SponsorshipStatus fromString(String value) => SponsorshipStatus.values.firstWhere(
-      (status) => status.name == value,
-      orElse: () => SponsorshipStatus.pending,
-    );
+  static SponsorshipStatus fromString(String value) =>
+      SponsorshipStatus.values.firstWhere(
+        (status) => status.name == value,
+        orElse: () => SponsorshipStatus.pending,
+      );
 
   /// Convenience checks (logic only, no UI concerns)
   bool get isActive => this == SponsorshipStatus.active;

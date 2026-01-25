@@ -18,21 +18,18 @@ class SponsorshipSkuHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => GlassCard(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SponsorshipTierBadge(tier: tier),
-            const SizedBox(height: 16),
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(description),
-          ],
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SponsorshipTierBadge(tier: tier),
+        const SizedBox(height: 16),
+        Text(
+          title,
+          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
         ),
-      );
+        const SizedBox(height: 12),
+        Text(description),
+      ],
+    ),
+  );
 }

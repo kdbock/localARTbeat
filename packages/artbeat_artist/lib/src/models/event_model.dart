@@ -36,13 +36,14 @@ class EventModel {
     return EventModel(
       id: doc.id,
       title: data['title'] != null ? data['title'].toString() : '',
-      description:
-          data['description'] != null ? data['description'].toString() : '',
+      description: data['description'] != null
+          ? data['description'].toString()
+          : '',
       startDate: data['startDate'] is Timestamp
           ? (data['startDate'] as Timestamp).toDate()
           : data['dateTime'] is Timestamp
-              ? (data['dateTime'] as Timestamp).toDate()
-              : DateTime.now(),
+          ? (data['dateTime'] as Timestamp).toDate()
+          : DateTime.now(),
       endDate: data['endDate'] is Timestamp
           ? (data['endDate'] as Timestamp).toDate()
           : null,

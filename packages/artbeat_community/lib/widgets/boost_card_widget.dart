@@ -7,7 +7,11 @@ class ArtistBoostCardWidget extends StatelessWidget {
   final ArtistBoostModel boost;
   final VoidCallback? onSendBoost;
 
-  const ArtistBoostCardWidget({super.key, required this.boost, this.onSendBoost});
+  const ArtistBoostCardWidget({
+    super.key,
+    required this.boost,
+    this.onSendBoost,
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -116,7 +116,11 @@ class _AdsScreenState extends State<AdsScreen> {
               color: Color(0xFF22D3EE),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.ads_click_rounded, color: Colors.white, size: 24),
+            child: const Icon(
+              Icons.ads_click_rounded,
+              color: Colors.white,
+              size: 24,
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -459,22 +463,22 @@ class _AdsScreenState extends State<AdsScreen> {
             const SizedBox(height: 18),
             SizedBox(
               width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => _handleAdPurchase(size, duration),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: accent,
-                    foregroundColor: Colors.black,
+              child: ElevatedButton(
+                onPressed: () => _handleAdPurchase(size, duration),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: accent,
+                  foregroundColor: Colors.black,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
-                  child: Text(
-                    'Create Local Ad',
-                    style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
-                  ),
+                child: Text(
+                  'Create Local Ad',
+                  style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
                 ),
               ),
+            ),
           ],
         ),
       ),
@@ -616,31 +620,5 @@ class _AdsScreenState extends State<AdsScreen> {
         );
       }
     }
-  }
-}
-
-class _HeroBadge extends StatelessWidget {
-  final String label;
-
-  const _HeroBadge({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-        color: Colors.white.withValues(alpha: 0.08),
-      ),
-      child: Text(
-        label,
-        style: GoogleFonts.spaceGrotesk(
-          color: Colors.white,
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
   }
 }

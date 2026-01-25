@@ -17,41 +17,39 @@ class SubscriptionService {
 
   /// Get the current user's subscription
   Future<SubscriptionModel?> getUserSubscription() async {
-    return ErrorMonitoringService.safeExecute(
-      'getUserSubscription',
-      () async {
-        final userId = _auth.currentUser?.uid;
-        if (userId == null) {
-          ArtistLogger.warning('getUserSubscription: No authenticated user');
-          return null;
-        }
+    return ErrorMonitoringService.safeExecute('getUserSubscription', () async {
+      final userId = _auth.currentUser?.uid;
+      if (userId == null) {
+        ArtistLogger.warning('getUserSubscription: No authenticated user');
+        return null;
+      }
 
-        ArtistLogger.info('getUserSubscription: Querying for userId: $userId');
+      ArtistLogger.info('getUserSubscription: Querying for userId: $userId');
 
-        final snapshot = await _firestore
-            .collection('subscriptions')
-            .where('userId', isEqualTo: userId)
-            .where('isActive', isEqualTo: true)
-            .limit(1)
-            .get();
+      final snapshot = await _firestore
+          .collection('subscriptions')
+          .where('userId', isEqualTo: userId)
+          .where('isActive', isEqualTo: true)
+          .limit(1)
+          .get();
 
+      ArtistLogger.info(
+        'getUserSubscription: Found ${snapshot.docs.length} subscriptions',
+      );
+
+      if (snapshot.docs.isEmpty) {
         ArtistLogger.info(
-            'getUserSubscription: Found ${snapshot.docs.length} subscriptions');
+          'getUserSubscription: No active subscription found for user $userId',
+        );
+        return null;
+      }
 
-        if (snapshot.docs.isEmpty) {
-          ArtistLogger.info(
-              'getUserSubscription: No active subscription found for user $userId');
-          return null;
-        }
-
-        final subscription =
-            SubscriptionModel.fromFirestore(snapshot.docs.first);
-        ArtistLogger.info(
-            'getUserSubscription: Found subscription: ${subscription.tier}');
-        return subscription;
-      },
-      fallbackValue: null,
-    );
+      final subscription = SubscriptionModel.fromFirestore(snapshot.docs.first);
+      ArtistLogger.info(
+        'getUserSubscription: Found subscription: ${subscription.tier}',
+      );
+      return subscription;
+    }, fallbackValue: null);
   }
 
   /// Get current subscription for a specific user
@@ -59,8 +57,10 @@ class SubscriptionService {
     return ErrorMonitoringService.safeExecute(
       'getCurrentSubscription',
       () async {
-        final validationResult =
-            InputValidator.validateText(userId, fieldName: 'userId');
+        final validationResult = InputValidator.validateText(
+          userId,
+          fieldName: 'userId',
+        );
         final validUserId = validationResult.getOrThrow();
 
         final snapshot = await _firestore
@@ -80,14 +80,10 @@ class SubscriptionService {
 
   /// Get current subscription tier
   Future<SubscriptionTier> getCurrentTier() async {
-    return ErrorMonitoringService.safeExecute(
-      'getCurrentTier',
-      () async {
-        final sub = await getUserSubscription();
-        return sub?.tier ?? SubscriptionTier.free;
-      },
-      fallbackValue: SubscriptionTier.free,
-    );
+    return ErrorMonitoringService.safeExecute('getCurrentTier', () async {
+      final sub = await getUserSubscription();
+      return sub?.tier ?? SubscriptionTier.free;
+    }, fallbackValue: SubscriptionTier.free);
   }
 
   /// Create new artist profile
@@ -103,77 +99,80 @@ class SubscriptionService {
     String? profileImageUrl,
     String? coverImageUrl,
   }) async {
-    return ErrorMonitoringService.safeExecute(
-      'createArtistProfile',
-      () async {
-        // Validate required inputs
-        final userIdResult =
-            InputValidator.validateText(userId, fieldName: 'userId');
-        final displayNameResult =
-            InputValidator.validateText(displayName, fieldName: 'displayName');
-        final bioResult = InputValidator.validateText(bio, fieldName: 'bio');
-        final locationResult =
-            InputValidator.validateText(location, fieldName: 'location');
+    return ErrorMonitoringService.safeExecute('createArtistProfile', () async {
+      // Validate required inputs
+      final userIdResult = InputValidator.validateText(
+        userId,
+        fieldName: 'userId',
+      );
+      final displayNameResult = InputValidator.validateText(
+        displayName,
+        fieldName: 'displayName',
+      );
+      final bioResult = InputValidator.validateText(bio, fieldName: 'bio');
+      final locationResult = InputValidator.validateText(
+        location,
+        fieldName: 'location',
+      );
 
-        final validUserId = userIdResult.getOrThrow();
-        final validDisplayName = displayNameResult.getOrThrow();
-        final validBio = bioResult.getOrThrow();
-        final validLocation = locationResult.getOrThrow();
+      final validUserId = userIdResult.getOrThrow();
+      final validDisplayName = displayNameResult.getOrThrow();
+      final validBio = bioResult.getOrThrow();
+      final validLocation = locationResult.getOrThrow();
 
-        DocumentReference docRef;
+      DocumentReference docRef;
 
-        // Check if profile already exists
-        final existingProfile = await _firestore
+      // Check if profile already exists
+      final existingProfile = await _firestore
+          .collection('artistProfiles')
+          .where('userId', isEqualTo: validUserId)
+          .limit(1)
+          .get();
+
+      if (existingProfile.docs.isNotEmpty) {
+        // Update existing profile
+        docRef = _firestore
             .collection('artistProfiles')
-            .where('userId', isEqualTo: validUserId)
-            .limit(1)
-            .get();
+            .doc(existingProfile.docs.first.id);
 
-        if (existingProfile.docs.isNotEmpty) {
-          // Update existing profile
-          docRef = _firestore
-              .collection('artistProfiles')
-              .doc(existingProfile.docs.first.id);
+        await docRef.update({
+          'displayName': validDisplayName,
+          'bio': validBio,
+          'userType': userType.value,
+          'location': validLocation,
+          'mediums': mediums,
+          'styles': styles,
+          'socialLinks': socialLinks,
+          if (profileImageUrl != null) 'profileImageUrl': profileImageUrl,
+          if (coverImageUrl != null) 'coverImageUrl': coverImageUrl,
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+      } else {
+        // Create new profile
+        docRef = _firestore.collection('artistProfiles').doc();
 
-          await docRef.update({
-            'displayName': validDisplayName,
-            'bio': validBio,
-            'userType': userType.value,
-            'location': validLocation,
-            'mediums': mediums,
-            'styles': styles,
-            'socialLinks': socialLinks,
-            if (profileImageUrl != null) 'profileImageUrl': profileImageUrl,
-            if (coverImageUrl != null) 'coverImageUrl': coverImageUrl,
-            'updatedAt': FieldValue.serverTimestamp(),
-          });
-        } else {
-          // Create new profile
-          docRef = _firestore.collection('artistProfiles').doc();
+        await docRef.set({
+          'userId': validUserId,
+          'displayName': validDisplayName,
+          'bio': validBio,
+          'userType': userType.value,
+          'location': validLocation,
+          'mediums': mediums,
+          'styles': styles,
+          'socialLinks': socialLinks,
+          'profileImageUrl': profileImageUrl,
+          'coverImageUrl': coverImageUrl,
+          'isVerified': false,
+          'isFeatured': false,
+          'followerCount': 0,
+          'subscriptionTier': SubscriptionTier.free.apiName,
+          'createdAt': FieldValue.serverTimestamp(),
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+      }
 
-          await docRef.set({
-            'userId': validUserId,
-            'displayName': validDisplayName,
-            'bio': validBio,
-            'userType': userType.value,
-            'location': validLocation,
-            'mediums': mediums,
-            'styles': styles,
-            'socialLinks': socialLinks,
-            'profileImageUrl': profileImageUrl,
-            'coverImageUrl': coverImageUrl,
-            'isVerified': false,
-            'isFeatured': false,
-            'followerCount': 0,
-            'subscriptionTier': SubscriptionTier.free.apiName,
-            'createdAt': FieldValue.serverTimestamp(),
-            'updatedAt': FieldValue.serverTimestamp(),
-          });
-        }
-
-        return docRef.id;
-      },
-    );
+      return docRef.id;
+    });
   }
 
   /// Save or update artist profile
@@ -214,7 +213,8 @@ class SubscriptionService {
         }
       } catch (e) {
         ArtistLogger.warning(
-            'Error getting subscription, defaulting to basic: $e');
+          'Error getting subscription, defaulting to basic: $e',
+        );
       }
 
       // Prepare profile data
@@ -277,7 +277,8 @@ class SubscriptionService {
     try {
       // Use info level for normal operations instead of error
       ArtistLogger.info(
-          '🔍 getArtistProfileByUserId: Querying for userId: $userId');
+        '🔍 getArtistProfileByUserId: Querying for userId: $userId',
+      );
 
       final query = await _firestore
           .collection('artistProfiles')
@@ -286,17 +287,20 @@ class SubscriptionService {
           .get();
 
       ArtistLogger.info(
-          '📊 getArtistProfileByUserId: Found ${query.docs.length} documents');
+        '📊 getArtistProfileByUserId: Found ${query.docs.length} documents',
+      );
 
       if (query.docs.isEmpty) {
         ArtistLogger.warning(
-            '❌ getArtistProfileByUserId: No artist profile found for user $userId');
+          '❌ getArtistProfileByUserId: No artist profile found for user $userId',
+        );
         return null;
       }
 
       final profile = ArtistProfileModel.fromFirestore(query.docs.first);
       ArtistLogger.info(
-          '✅ getArtistProfileByUserId: Successfully loaded profile for ${profile.displayName}');
+        '✅ getArtistProfileByUserId: Successfully loaded profile for ${profile.displayName}',
+      );
       return profile;
     } catch (e) {
       ArtistLogger.error('❌ Error getting artist profile: $e');
@@ -356,8 +360,10 @@ class SubscriptionService {
   /// Get artist profile by ID
   Future<ArtistProfileModel?> getArtistProfileById(String id) async {
     try {
-      final docSnapshot =
-          await _firestore.collection('artistProfiles').doc(id).get();
+      final docSnapshot = await _firestore
+          .collection('artistProfiles')
+          .doc(id)
+          .get();
 
       if (!docSnapshot.exists) return null;
       return ArtistProfileModel.fromFirestore(docSnapshot);
@@ -392,7 +398,8 @@ class SubscriptionService {
       if (userId == null) throw Exception('User must be logged in');
 
       ArtistLogger.error(
-          'Following artist: userId=$userId, artistProfileId=$artistProfileId');
+        'Following artist: userId=$userId, artistProfileId=$artistProfileId',
+      );
 
       // First, create the follow relationship
       ArtistLogger.error('Creating artistFollows document...');
@@ -400,20 +407,17 @@ class SubscriptionService {
           .collection('artistFollows')
           .doc('${userId}_$artistProfileId')
           .set({
-        'userId': userId,
-        'artistProfileId': artistProfileId,
-        'createdAt': FieldValue.serverTimestamp(),
-      });
+            'userId': userId,
+            'artistProfileId': artistProfileId,
+            'createdAt': FieldValue.serverTimestamp(),
+          });
       ArtistLogger.error('artistFollows document created successfully');
 
       // Update follower count
       ArtistLogger.error('Updating follower count...');
-      await _firestore
-          .collection('artistProfiles')
-          .doc(artistProfileId)
-          .update({
-        'followerCount': FieldValue.increment(1),
-      });
+      await _firestore.collection('artistProfiles').doc(artistProfileId).update(
+        {'followerCount': FieldValue.increment(1)},
+      );
       ArtistLogger.error('Follower count updated successfully');
     } catch (e) {
       ArtistLogger.error('Error following artist: $e');
@@ -428,7 +432,8 @@ class SubscriptionService {
       if (userId == null) throw Exception('User must be logged in');
 
       ArtistLogger.error(
-          'Unfollowing artist: userId=$userId, artistProfileId=$artistProfileId');
+        'Unfollowing artist: userId=$userId, artistProfileId=$artistProfileId',
+      );
 
       // First, delete the follow relationship
       ArtistLogger.error('Deleting artistFollows document...');
@@ -440,12 +445,9 @@ class SubscriptionService {
 
       // Update follower count
       ArtistLogger.error('Updating follower count...');
-      await _firestore
-          .collection('artistProfiles')
-          .doc(artistProfileId)
-          .update({
-        'followerCount': FieldValue.increment(-1),
-      });
+      await _firestore.collection('artistProfiles').doc(artistProfileId).update(
+        {'followerCount': FieldValue.increment(-1)},
+      );
       ArtistLogger.error('Follower count updated successfully');
     } catch (e) {
       ArtistLogger.error('Error unfollowing artist: $e');
@@ -459,8 +461,9 @@ class SubscriptionService {
       final userId = getCurrentUserId();
       if (userId == null) throw Exception('User must be logged in');
 
-      final isCurrentlyFollowing =
-          await isFollowingArtist(artistProfileId: artistProfileId);
+      final isCurrentlyFollowing = await isFollowingArtist(
+        artistProfileId: artistProfileId,
+      );
 
       if (isCurrentlyFollowing) {
         await unfollowArtist(artistProfileId: artistProfileId);
@@ -497,8 +500,9 @@ class SubscriptionService {
 
       // Apply style filter in memory (since Firestore doesn't support multiple array-contains queries)
       if (style != null && style != 'All') {
-        artists =
-            artists.where((artist) => artist.styles.contains(style)).toList();
+        artists = artists
+            .where((artist) => artist.styles.contains(style))
+            .toList();
       }
 
       // Apply search filter in memory
@@ -517,8 +521,9 @@ class SubscriptionService {
         currentUser = null;
       }
 
-      final viewerLocation =
-          await GeoWeightingUtils.resolveViewerLocation(currentUser);
+      final viewerLocation = await GeoWeightingUtils.resolveViewerLocation(
+        currentUser,
+      );
 
       artists = await GeoWeightingUtils.sortByDistance<ArtistProfileModel>(
         items: artists,
@@ -526,8 +531,9 @@ class SubscriptionService {
         locationOf: (artist) => artist.location,
         viewerLocation: viewerLocation,
         tieBreaker: (a, b) {
-          final tierCompare =
-              b.subscriptionTier.index.compareTo(a.subscriptionTier.index);
+          final tierCompare = b.subscriptionTier.index.compareTo(
+            a.subscriptionTier.index,
+          );
           if (tierCompare != 0) return tierCompare;
 
           if (a.isFeatured != b.isFeatured) {
@@ -622,10 +628,12 @@ class SubscriptionService {
   }) async {
     try {
       ArtistLogger.info(
-          '🔝 Fetching top $limit followers for artist: $artistProfileId');
+        '🔝 Fetching top $limit followers for artist: $artistProfileId',
+      );
 
-      final followerIds =
-          await getFollowersForArtist(artistProfileId: artistProfileId);
+      final followerIds = await getFollowersForArtist(
+        artistProfileId: artistProfileId,
+      );
 
       if (followerIds.isEmpty) {
         ArtistLogger.info('No followers found for artist');
@@ -642,8 +650,10 @@ class SubscriptionService {
           );
 
           if (engagementScore > 0) {
-            final userDoc =
-                await _firestore.collection('users').doc(followerId).get();
+            final userDoc = await _firestore
+                .collection('users')
+                .doc(followerId)
+                .get();
 
             final followerName = userDoc['displayName'] as String? ?? 'User';
             final followerAvatarUrl = userDoc['profileImageUrl'] as String?;
@@ -666,8 +676,9 @@ class SubscriptionService {
         }
       }
 
-      topFollowers
-          .sort((a, b) => b.engagementScore.compareTo(a.engagementScore));
+      topFollowers.sort(
+        (a, b) => b.engagementScore.compareTo(a.engagementScore),
+      );
 
       final result = topFollowers.take(limit).toList();
       ArtistLogger.info('🔝 Found ${result.length} top followers');
@@ -684,8 +695,9 @@ class SubscriptionService {
     required String artistProfileId,
   }) async {
     try {
-      final followerIds =
-          await getFollowersForArtist(artistProfileId: artistProfileId);
+      final followerIds = await getFollowersForArtist(
+        artistProfileId: artistProfileId,
+      );
       final totalFollowers = followerIds.length;
 
       int totalEngagement = 0;
@@ -697,8 +709,9 @@ class SubscriptionService {
         totalEngagement += score;
       }
 
-      final avgEngagement =
-          totalFollowers > 0 ? totalEngagement ~/ totalFollowers : 0;
+      final avgEngagement = totalFollowers > 0
+          ? totalEngagement ~/ totalFollowers
+          : 0;
 
       return {
         'totalFollowers': totalFollowers,

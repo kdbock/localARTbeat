@@ -38,12 +38,17 @@ class LanguageSettingsScreen extends StatelessWidget {
                 ),
                 Expanded(
                   child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     itemCount: supportedLocales.length,
                     itemBuilder: (context, index) {
                       final locale = supportedLocales[index];
                       final isSelected = locale == currentLocale;
-                      final languageName = _getLanguageName(locale.languageCode);
+                      final languageName = _getLanguageName(
+                        locale.languageCode,
+                      );
 
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 12),
@@ -57,7 +62,10 @@ class LanguageSettingsScreen extends StatelessWidget {
                               ),
                             ),
                             trailing: isSelected
-                                ? const Icon(Icons.check_circle, color: Color(0xFF22D3EE))
+                                ? const Icon(
+                                    Icons.check_circle,
+                                    color: Color(0xFF22D3EE),
+                                  )
                                 : null,
                             onTap: () async {
                               await context.setLocale(locale);
@@ -81,14 +89,22 @@ class LanguageSettingsScreen extends StatelessWidget {
 
   String _getLanguageName(String code) {
     switch (code) {
-      case 'en': return 'English';
-      case 'es': return 'Español';
-      case 'fr': return 'Français';
-      case 'de': return 'Deutsch';
-      case 'pt': return 'Português';
-      case 'zh': return '中文';
-      case 'ar': return 'العربية';
-      default: return code.toUpperCase();
+      case 'en':
+        return 'English';
+      case 'es':
+        return 'Español';
+      case 'fr':
+        return 'Français';
+      case 'de':
+        return 'Deutsch';
+      case 'pt':
+        return 'Português';
+      case 'zh':
+        return '中文';
+      case 'ar':
+        return 'العربية';
+      default:
+        return code.toUpperCase();
     }
   }
 }

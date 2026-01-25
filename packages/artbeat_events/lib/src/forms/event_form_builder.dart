@@ -367,20 +367,21 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
       dropdownColor: Colors.grey[900],
       style: GoogleFonts.spaceGrotesk(color: Colors.white, fontSize: 12),
       underline: const SizedBox(),
-      items: [
-        'cover',
-        'contain',
-        'fill',
-        'fitWidth',
-        'fitHeight',
-        'scaleDown',
-        'none'
-      ].map((fit) {
-        return DropdownMenuItem<String>(
-          value: fit,
-          child: Text(fit.toUpperCase()),
-        );
-      }).toList(),
+      items:
+          [
+            'cover',
+            'contain',
+            'fill',
+            'fitWidth',
+            'fitHeight',
+            'scaleDown',
+            'none',
+          ].map((fit) {
+            return DropdownMenuItem<String>(
+              value: fit,
+              child: Text(fit.toUpperCase()),
+            );
+          }).toList(),
       onChanged: (val) {
         if (val != null) onChanged(val);
       },
@@ -422,7 +423,8 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
                     GestureDetector(
                       onTap: () async {
                         final image = await _imagePicker.pickImage(
-                            source: ImageSource.gallery);
+                          source: ImageSource.gallery,
+                        );
                         if (image != null) {
                           setState(() => _artistHeadshot = File(image.path));
                         }
@@ -446,16 +448,21 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
                                 ),
                               )
                             : (widget.initialEvent?.artistHeadshotUrl != null &&
-                                    widget.initialEvent!.artistHeadshotUrl
-                                        .isNotEmpty)
-                                ? ClipOval(
-                                    child: Image.network(
-                                      widget.initialEvent!.artistHeadshotUrl,
-                                      fit: _getBoxFit(_artistHeadshotFit),
-                                    ),
-                                  )
-                                : const Icon(Icons.person,
-                                    size: 40, color: Colors.white30),
+                                  widget
+                                      .initialEvent!
+                                      .artistHeadshotUrl
+                                      .isNotEmpty)
+                            ? ClipOval(
+                                child: Image.network(
+                                  widget.initialEvent!.artistHeadshotUrl,
+                                  fit: _getBoxFit(_artistHeadshotFit),
+                                ),
+                              )
+                            : const Icon(
+                                Icons.person,
+                                size: 40,
+                                color: Colors.white30,
+                              ),
                       ),
                     ),
                     _buildFitSelector(_artistHeadshotFit, (val) {
@@ -468,7 +475,9 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
                   child: Text(
                     'Artist headshot as seen in app (CircleAvatar). Tap to change.',
                     style: GoogleFonts.spaceGrotesk(
-                        fontSize: 12, color: Colors.white38),
+                      fontSize: 12,
+                      color: Colors.white38,
+                    ),
                   ),
                 ),
               ],
@@ -499,7 +508,8 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
                 GestureDetector(
                   onTap: () async {
                     final image = await _imagePicker.pickImage(
-                        source: ImageSource.gallery);
+                      source: ImageSource.gallery,
+                    );
                     if (image != null) {
                       setState(() => _eventBanner = File(image.path));
                     }
@@ -522,15 +532,18 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
                               fit: _getBoxFit(_eventBannerFit),
                             )
                           : (widget.initialEvent?.eventBannerUrl != null &&
-                                  widget.initialEvent!.eventBannerUrl
-                                      .isNotEmpty)
-                              ? Image.network(
-                                  widget.initialEvent!.eventBannerUrl,
-                                  fit: _getBoxFit(_eventBannerFit),
-                                )
-                              : const Center(
-                                  child: Icon(Icons.image,
-                                      size: 48, color: Colors.white30)),
+                                widget.initialEvent!.eventBannerUrl.isNotEmpty)
+                          ? Image.network(
+                              widget.initialEvent!.eventBannerUrl,
+                              fit: _getBoxFit(_eventBannerFit),
+                            )
+                          : const Center(
+                              child: Icon(
+                                Icons.image,
+                                size: 48,
+                                color: Colors.white30,
+                              ),
+                            ),
                     ),
                   ),
                 ),
@@ -538,7 +551,9 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
                 Text(
                   'Event banner as seen in hero section (Rounded 28). Tap to change.',
                   style: GoogleFonts.spaceGrotesk(
-                      fontSize: 11, color: Colors.white38),
+                    fontSize: 11,
+                    color: Colors.white38,
+                  ),
                 ),
               ],
             ),
@@ -573,8 +588,12 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
                       children: [
                         ClipRRect(
                           borderRadius: BorderRadius.circular(12),
-                          child: Image.network(url,
-                              width: 80, height: 80, fit: _getBoxFit(_imageFit)),
+                          child: Image.network(
+                            url,
+                            width: 80,
+                            height: 80,
+                            fit: _getBoxFit(_imageFit),
+                          ),
                         ),
                         // Note: For now we don't handle removing existing network images individually in this form
                         // but they are shown to reflect the app appearance
@@ -1662,7 +1681,8 @@ class _EventFormBuilderState extends State<EventFormBuilder> {
       return;
     }
 
-    if (_artistHeadshot == null && widget.initialEvent?.artistHeadshotUrl == null) {
+    if (_artistHeadshot == null &&
+        widget.initialEvent?.artistHeadshotUrl == null) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('events_select_headshot'.tr())));

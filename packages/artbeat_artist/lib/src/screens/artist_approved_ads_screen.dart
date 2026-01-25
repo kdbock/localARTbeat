@@ -29,8 +29,8 @@ class _ArtistApprovedAdsScreenState extends State<ArtistApprovedAdsScreen> {
                   Text(
                     tr('art_walk_artist_approved_ads'),
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Card(
@@ -51,7 +51,9 @@ class _ArtistApprovedAdsScreenState extends State<ArtistApprovedAdsScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            tr('art_walk_manage_your_approved_advertisements_and_promotional_content_here__this_feature_is_currently_under_development'),
+                            tr(
+                              'art_walk_manage_your_approved_advertisements_and_promotional_content_here__this_feature_is_currently_under_development',
+                            ),
                             style: Theme.of(context).textTheme.bodyMedium,
                             textAlign: TextAlign.center,
                           ),
@@ -63,8 +65,8 @@ class _ArtistApprovedAdsScreenState extends State<ArtistApprovedAdsScreen> {
                   Text(
                     tr('art_walk_features_coming_soon'),
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   const _FeatureItem(
@@ -114,10 +116,7 @@ class _FeatureItem extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
         children: [
-          Icon(
-            icon,
-            color: Theme.of(context).colorScheme.primary,
-          ),
+          Icon(icon, color: Theme.of(context).colorScheme.primary),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -125,14 +124,11 @@ class _FeatureItem extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
                 ),
-                Text(
-                  description,
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
+                Text(description, style: Theme.of(context).textTheme.bodySmall),
               ],
             ),
           ),

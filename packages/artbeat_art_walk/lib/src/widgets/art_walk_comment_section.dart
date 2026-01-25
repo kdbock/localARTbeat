@@ -63,7 +63,9 @@ class _ArtWalkCommentSectionState extends State<ArtWalkCommentSection> {
     setState(() => _isLoading = true);
 
     try {
-      final comments = await artWalkService.getArtWalkComments(widget.artWalkId);
+      final comments = await artWalkService.getArtWalkComments(
+        widget.artWalkId,
+      );
       setState(() {
         _comments = comments;
         _isLoading = false;
@@ -177,9 +179,7 @@ class _ArtWalkCommentSectionState extends State<ArtWalkCommentSection> {
         content: Text(
           'art_walk_art_walk_comment_section_text_are_you_sure_you_want_to_delete_this_comment'
               .tr(),
-          style: AppTypography.body(
-            Colors.white.withValues(alpha: 0.75),
-          ),
+          style: AppTypography.body(Colors.white.withValues(alpha: 0.75)),
         ),
         actions: [
           TextButton(
@@ -288,10 +288,12 @@ class _ArtWalkCommentSectionState extends State<ArtWalkCommentSection> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (!_isReplying) _RatingSelector(
-                  selectedRating: _selectedRating,
-                  onSelect: (rating) => setState(() => _selectedRating = rating),
-                ),
+                if (!_isReplying)
+                  _RatingSelector(
+                    selectedRating: _selectedRating,
+                    onSelect: (rating) =>
+                        setState(() => _selectedRating = rating),
+                  ),
                 if (_isReplying) ...[
                   _ReplyBanner(
                     authorName: _parentCommentAuthor ?? '',
@@ -305,7 +307,8 @@ class _ArtWalkCommentSectionState extends State<ArtWalkCommentSection> {
                   isReplying: _isReplying,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'art_walk_comment_section_error_empty_comment'.tr();
+                      return 'art_walk_comment_section_error_empty_comment'
+                          .tr();
                     }
                     return null;
                   },
@@ -317,8 +320,8 @@ class _ArtWalkCommentSectionState extends State<ArtWalkCommentSection> {
                       Expanded(
                         child: _GlassOutlineButton(
                           icon: Icons.close,
-                          label:
-                              'art_walk_comment_section_button_cancel_reply'.tr(),
+                          label: 'art_walk_comment_section_button_cancel_reply'
+                              .tr(),
                           onTap: _cancelReply,
                         ),
                       ),
@@ -328,7 +331,8 @@ class _ArtWalkCommentSectionState extends State<ArtWalkCommentSection> {
                       flex: 2,
                       child: GradientCTAButton(
                         label: _isReplying
-                            ? 'art_walk_comment_section_button_reply_submit'.tr()
+                            ? 'art_walk_comment_section_button_reply_submit'
+                                  .tr()
                             : 'art_walk_comment_section_button_post'.tr(),
                         icon: Icons.send,
                         onPressed: _submitComment,
@@ -353,8 +357,10 @@ class _ArtWalkCommentSectionState extends State<ArtWalkCommentSection> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.chat_bubble_outline,
-                    color: Colors.white.withValues(alpha: 0.7)),
+                Icon(
+                  Icons.chat_bubble_outline,
+                  color: Colors.white.withValues(alpha: 0.7),
+                ),
                 const SizedBox(height: 12),
                 Text(
                   'art_walk_comment_section_empty_state'.tr(),
@@ -391,7 +397,9 @@ class _ArtWalkCommentSectionState extends State<ArtWalkCommentSection> {
                     isAuthor: isAuthor,
                     onReply: () =>
                         _replyToComment(comment.id, comment.userName),
-                    onDelete: isAuthor ? () => _deleteComment(comment.id) : null,
+                    onDelete: isAuthor
+                        ? () => _deleteComment(comment.id)
+                        : null,
                     onLike: () => _toggleCommentLike(comment.id),
                   ),
                   if (replies.isNotEmpty)
@@ -434,10 +442,7 @@ class _RatingSelector extends StatelessWidget {
   final double? selectedRating;
   final ValueChanged<double> onSelect;
 
-  const _RatingSelector({
-    required this.selectedRating,
-    required this.onSelect,
-  });
+  const _RatingSelector({required this.selectedRating, required this.onSelect});
 
   @override
   Widget build(BuildContext context) {
@@ -507,16 +512,18 @@ class _ReplyBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(Icons.reply, color: Colors.white.withValues(alpha: 0.8), size: 18),
+          Icon(
+            Icons.reply,
+            color: Colors.white.withValues(alpha: 0.8),
+            size: 18,
+          ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               'art_walk_comment_section_replying_to'.tr(
                 namedArgs: {'author': authorName},
               ),
-              style: AppTypography.body(
-                Colors.white.withValues(alpha: 0.8),
-              ),
+              style: AppTypography.body(Colors.white.withValues(alpha: 0.8)),
             ),
           ),
           IconButton(
@@ -564,7 +571,10 @@ class _CommentInputField extends StatelessWidget {
         ),
         filled: true,
         fillColor: Colors.white.withValues(alpha: 0.05),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(22),
           borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
@@ -609,7 +619,9 @@ class _GlassOutlineButton extends StatelessWidget {
         ),
         style: OutlinedButton.styleFrom(
           side: BorderSide(color: Colors.white.withValues(alpha: 0.18)),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
           backgroundColor: Colors.white.withValues(alpha: 0.04),
         ),
         onPressed: onTap,

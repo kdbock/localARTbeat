@@ -33,8 +33,8 @@ class ReadingAnalyticsService {
         device: Platform.isAndroid
             ? 'android'
             : Platform.isIOS
-                ? 'ios'
-                : 'web',
+            ? 'ios'
+            : 'web',
       );
 
       await _firestore
@@ -68,9 +68,7 @@ class ReadingAnalyticsService {
     }
   }
 
-  Future<void> completeReadingSession({
-    required String sessionId,
-  }) async {
+  Future<void> completeReadingSession({required String sessionId}) async {
     try {
       await _firestore.collection('reading_analytics').doc(sessionId).update({
         'completedAt': Timestamp.now(),
@@ -114,8 +112,10 @@ class ReadingAnalyticsService {
     required String chapterId,
   }) async {
     try {
-      final doc =
-          await _firestore.collection('reading_analytics').doc(sessionId).get();
+      final doc = await _firestore
+          .collection('reading_analytics')
+          .doc(sessionId)
+          .get();
 
       if (!doc.exists) return;
 
@@ -126,8 +126,9 @@ class ReadingAnalyticsService {
           .toList();
 
       await _firestore.collection('reading_analytics').doc(sessionId).update({
-        'bookmarks':
-            bookmarks.map((b) => Bookmark.fromJson(b).toJson()).toList(),
+        'bookmarks': bookmarks
+            .map((b) => Bookmark.fromJson(b).toJson())
+            .toList(),
       });
 
       AppLogger.info('Bookmark removed from session: $sessionId');
@@ -138,8 +139,10 @@ class ReadingAnalyticsService {
 
   Future<ReadingAnalyticsModel?> getReadingSession(String sessionId) async {
     try {
-      final doc =
-          await _firestore.collection('reading_analytics').doc(sessionId).get();
+      final doc = await _firestore
+          .collection('reading_analytics')
+          .doc(sessionId)
+          .get();
 
       if (!doc.exists) return null;
       return ReadingAnalyticsModel.fromFirestore(doc);
@@ -171,7 +174,8 @@ class ReadingAnalyticsService {
   }
 
   Future<List<ReadingAnalyticsModel>> getArtworkReadingStats(
-      String artworkId) async {
+    String artworkId,
+  ) async {
     try {
       final snapshot = await _firestore
           .collection('reading_analytics')
@@ -189,17 +193,20 @@ class ReadingAnalyticsService {
   }
 
   Future<Map<String, dynamic>> getArtworkEngagementMetrics(
-      String artworkId) async {
+    String artworkId,
+  ) async {
     try {
       final stats = await getArtworkReadingStats(artworkId);
 
       final totalReaders = stats.map((s) => s.userId).toSet().length;
       final completedReads = stats.where((s) => s.isCompleted).length;
-      final totalTimeSpent =
-          stats.fold<int>(0, (sum, s) => sum + s.timeSpentSeconds);
+      final totalTimeSpent = stats.fold<int>(
+        0,
+        (sum, s) => sum + s.timeSpentSeconds,
+      );
       final averageCompletion = stats.isNotEmpty
           ? stats.fold<double>(0.0, (sum, s) => sum + s.completionPercentage) /
-              stats.length
+                stats.length
           : 0.0;
 
       return {
@@ -207,8 +214,8 @@ class ReadingAnalyticsService {
         'completedReads': completedReads,
         'totalTimeSpentSeconds': totalTimeSpent,
         'averageCompletionPercentage': averageCompletion.toStringAsFixed(2),
-        'completionRate':
-            ((completedReads / stats.length) * 100).toStringAsFixed(2),
+        'completionRate': ((completedReads / stats.length) * 100)
+            .toStringAsFixed(2),
       };
     } catch (e) {
       AppLogger.error('Error calculating engagement metrics: $e');
@@ -233,11 +240,13 @@ class ReadingAnalyticsService {
 
       final totalReads = stats.length;
       final completedReads = stats.where((s) => s.isCompleted).length;
-      final totalTimeSpent =
-          stats.fold<int>(0, (sum, s) => sum + s.timeSpentSeconds);
+      final totalTimeSpent = stats.fold<int>(
+        0,
+        (sum, s) => sum + s.timeSpentSeconds,
+      );
       final averageCompletion = stats.isNotEmpty
           ? stats.fold<double>(0.0, (sum, s) => sum + s.completionPercentage) /
-              stats.length
+                stats.length
           : 0.0;
 
       return {

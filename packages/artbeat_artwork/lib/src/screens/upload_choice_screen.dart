@@ -22,7 +22,8 @@ class UploadChoiceScreen extends StatelessWidget {
       appBar: HudTopBar(
         title: 'upload_choice_title'.tr(),
         showBackButton: true,
-        onBackPressed: () => Navigator.of(context).pop(), subtitle: '',
+        onBackPressed: () => Navigator.of(context).pop(),
+        subtitle: '',
       ),
       child: WorldBackground(
         child: SafeArea(
@@ -89,8 +90,9 @@ class UploadChoiceScreen extends StatelessWidget {
                         width: double.infinity,
                         text: 'upload_choice_primary_cta'.tr(),
                         icon: Icons.add,
-                        onPressed: () => Navigator.of(context)
-                            .pushNamed('/artwork/upload/visual'),
+                        onPressed: () => Navigator.of(
+                          context,
+                        ).pushNamed('/artwork/upload/visual'),
                       ),
                     ],
                   ),
@@ -186,10 +188,7 @@ class UploadOptionCard extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  color,
-                  const Color(0xFF22D3EE),
-                ],
+                colors: [color, const Color(0xFF22D3EE)],
               ),
               boxShadow: [
                 BoxShadow(

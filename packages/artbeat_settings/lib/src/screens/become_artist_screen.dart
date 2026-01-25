@@ -65,8 +65,7 @@ class BecomeArtistScreen extends StatelessWidget {
                   onPressed: () {
                     Navigator.of(context).push(
                       MaterialPageRoute<void>(
-                        builder: (context) =>
-                            const ArtistOnboardScreen(),
+                        builder: (context) => const ArtistOnboardScreen(),
                       ),
                     );
                   },

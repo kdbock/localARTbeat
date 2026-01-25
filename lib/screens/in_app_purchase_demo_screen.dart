@@ -209,9 +209,7 @@ class _InAppPurchaseDemoScreenState extends State<InAppPurchaseDemoScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Send an Artist Boost'),
-        content: const Text(
-          'Choose a boost tier to power up this artist.',
-        ),
+        content: const Text('Choose a boost tier to power up this artist.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),

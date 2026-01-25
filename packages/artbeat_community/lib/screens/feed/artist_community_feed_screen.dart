@@ -224,9 +224,7 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('artist_feed_appreciate_success'.tr()),
-          ),
+          SnackBar(content: Text('artist_feed_appreciate_success'.tr())),
         );
       }
     } catch (e) {
@@ -259,9 +257,7 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
       if (!postDoc.exists) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('artist_feed_feature_missing'.tr()),
-            ),
+            SnackBar(content: Text('artist_feed_feature_missing'.tr())),
           );
         }
         return;
@@ -272,9 +268,7 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('artist_feed_feature_success'.tr()),
-          ),
+          SnackBar(content: Text('artist_feed_feature_success'.tr())),
         );
       }
     } catch (e) {
@@ -322,10 +316,7 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
   void _handleShare(BaseGroupPost post) async {
     try {
       final shareText = 'artist_feed_share_text'.tr(
-        namedArgs: {
-          'content': post.content,
-          'artist': post.userName,
-        },
+        namedArgs: {'content': post.content, 'artist': post.userName},
       );
       await SharePlus.instance.share(ShareParams(text: shareText));
 
@@ -384,7 +375,9 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          'artist_feed_like_toast'.tr(namedArgs: {'name': widget.artist.displayName}),
+          'artist_feed_like_toast'.tr(
+            namedArgs: {'name': widget.artist.displayName},
+          ),
         ),
         duration: const Duration(seconds: 2),
       ),
@@ -395,7 +388,9 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          'artist_feed_follow_toast'.tr(namedArgs: {'name': widget.artist.displayName}),
+          'artist_feed_follow_toast'.tr(
+            namedArgs: {'name': widget.artist.displayName},
+          ),
         ),
         duration: const Duration(seconds: 2),
       ),
@@ -454,7 +449,10 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.volunteer_activism, color: Color(0xFF34D399)),
+                    const Icon(
+                      Icons.volunteer_activism,
+                      color: Color(0xFF34D399),
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -528,7 +526,9 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
                             SnackBar(
                               content: Text(
                                 'artist_feed_sponsor_thanks'.tr(
-                                  namedArgs: {'name': widget.artist.displayName},
+                                  namedArgs: {
+                                    'name': widget.artist.displayName,
+                                  },
                                 ),
                               ),
                               duration: const Duration(seconds: 3),
@@ -582,9 +582,10 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
                 backgroundImage: ImageUrlValidator.safeNetworkImage(
                   widget.artist.profileImageUrl,
                 ),
-                child: !ImageUrlValidator.isValidImageUrl(
-                  widget.artist.profileImageUrl,
-                )
+                child:
+                    !ImageUrlValidator.isValidImageUrl(
+                      widget.artist.profileImageUrl,
+                    )
                     ? const Icon(Icons.person, size: 36, color: Colors.white)
                     : null,
               ),
@@ -652,10 +653,12 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
               spacing: 8,
               runSpacing: 8,
               children: [
-                ...widget.artist.mediums
-                    .map((medium) => _buildTag(medium, const Color(0xFF7C4DFF))),
-                ...widget.artist.styles
-                    .map((style) => _buildTag(style, const Color(0xFFFFC857))),
+                ...widget.artist.mediums.map(
+                  (medium) => _buildTag(medium, const Color(0xFF7C4DFF)),
+                ),
+                ...widget.artist.styles.map(
+                  (style) => _buildTag(style, const Color(0xFFFFC857)),
+                ),
               ],
             ),
           ],
@@ -931,24 +934,24 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
                       _buildCreateOption(
                         icon: Icons.photo_camera,
                         title: 'artist_feed_create_option_artwork_title'.tr(),
-                        subtitle:
-                            'artist_feed_create_option_artwork_subtitle'.tr(),
+                        subtitle: 'artist_feed_create_option_artwork_subtitle'
+                            .tr(),
                         color: const Color(0xFF7C4DFF),
                         postType: 'artwork',
                       ),
                       _buildCreateOption(
                         icon: Icons.video_camera_back,
                         title: 'artist_feed_create_option_process_title'.tr(),
-                        subtitle:
-                            'artist_feed_create_option_process_subtitle'.tr(),
+                        subtitle: 'artist_feed_create_option_process_subtitle'
+                            .tr(),
                         color: const Color(0xFF22D3EE),
                         postType: 'process',
                       ),
                       _buildCreateOption(
                         icon: Icons.text_fields,
                         title: 'artist_feed_create_option_update_title'.tr(),
-                        subtitle:
-                            'artist_feed_create_option_update_subtitle'.tr(),
+                        subtitle: 'artist_feed_create_option_update_subtitle'
+                            .tr(),
                         color: const Color(0xFFFFC857),
                         postType: 'update',
                       ),
@@ -1051,7 +1054,10 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.search, color: Colors.white.withValues(alpha: 0.8)),
+                        Icon(
+                          Icons.search,
+                          color: Colors.white.withValues(alpha: 0.8),
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
@@ -1070,7 +1076,10 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
                       controller: searchController,
                       decoration: GlassInputDecoration(
                         hintText: 'artist_feed_search_hint'.tr(),
-                        prefixIcon: const Icon(Icons.search, color: Colors.white),
+                        prefixIcon: const Icon(
+                          Icons.search,
+                          color: Colors.white,
+                        ),
                       ),
                       onChanged: (value) {
                         setModalState(() {});
@@ -1169,7 +1178,8 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
             icon: const Icon(Icons.message, color: Colors.white),
             onPressed: () => Navigator.pushNamed(context, '/messaging'),
           ),
-        ], subtitle: '',
+        ],
+        subtitle: '',
       ),
       body: WorldBackground(
         child: SafeArea(
@@ -1227,7 +1237,8 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
           }
 
           final post = _filteredPosts[index];
-          final showEngagement = !_isCurrentUserArtist ||
+          final showEngagement =
+              !_isCurrentUserArtist ||
               post.userId != FirebaseAuth.instance.currentUser?.uid;
 
           return Padding(
@@ -1486,7 +1497,8 @@ class _CommissionRequestDialogState extends State<_CommissionRequestDialog> {
 
     try {
       // Create commission request
-      final requesterName = FirebaseAuth.instance.currentUser?.displayName ??
+      final requesterName =
+          FirebaseAuth.instance.currentUser?.displayName ??
           'artist_feed_commission_request_client'.tr();
       final commissionId = await _commissionService.createCommissionRequest(
         artistId: widget.artist.userId,
@@ -1667,7 +1679,10 @@ class _CommissionRequestDialogState extends State<_CommissionRequestDialog> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       else
-                        const Icon(Icons.add_photo_alternate, color: Colors.white),
+                        const Icon(
+                          Icons.add_photo_alternate,
+                          color: Colors.white,
+                        ),
                     ],
                   ),
                 ),
@@ -1722,7 +1737,9 @@ class _CommissionRequestDialogState extends State<_CommissionRequestDialog> {
                     child: HudButton(
                       isPrimary: false,
                       text: 'common_cancel'.tr(),
-                      onPressed: _isSubmitting ? null : () => Navigator.pop(context),
+                      onPressed: _isSubmitting
+                          ? null
+                          : () => Navigator.pop(context),
                       height: 48,
                     ),
                   ),
@@ -1731,7 +1748,9 @@ class _CommissionRequestDialogState extends State<_CommissionRequestDialog> {
                     child: GradientCTAButton(
                       text: 'artist_feed_commission_send_cta'.tr(),
                       icon: Icons.send,
-                      onPressed: _isSubmitting ? null : _submitCommissionRequest,
+                      onPressed: _isSubmitting
+                          ? null
+                          : _submitCommissionRequest,
                       isLoading: _isSubmitting,
                       height: 48,
                     ),

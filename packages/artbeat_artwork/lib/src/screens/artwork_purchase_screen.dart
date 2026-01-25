@@ -20,10 +20,7 @@ import '../services/artwork_service.dart';
 class ArtworkPurchaseScreen extends StatefulWidget {
   final String artworkId;
 
-  const ArtworkPurchaseScreen({
-    super.key,
-    required this.artworkId,
-  });
+  const ArtworkPurchaseScreen({super.key, required this.artworkId});
 
   @override
   State<ArtworkPurchaseScreen> createState() => _ArtworkPurchaseScreenState();
@@ -127,8 +124,9 @@ class _ArtworkPurchaseScreenState extends State<ArtworkPurchaseScreen> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('artwork_purchase_success'
-                .tr(namedArgs: {'id': transactionId})),
+            content: Text(
+              'artwork_purchase_success'.tr(namedArgs: {'id': transactionId}),
+            ),
             backgroundColor: Colors.green,
           ),
         );
@@ -148,8 +146,9 @@ class _ArtworkPurchaseScreenState extends State<ArtworkPurchaseScreen> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('artwork_purchase_failed'
-                .tr(namedArgs: {'error': e.toString()})),
+            content: Text(
+              'artwork_purchase_failed'.tr(namedArgs: {'error': e.toString()}),
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -164,13 +163,10 @@ class _ArtworkPurchaseScreenState extends State<ArtworkPurchaseScreen> {
       appBar: HudTopBar(
         title: 'artwork_purchase_title'.tr(),
         showBackButton: true,
-        onBackPressed: () => Navigator.pop(context), subtitle: '',
+        onBackPressed: () => Navigator.pop(context),
+        subtitle: '',
       ),
-      child: WorldBackground(
-        child: SafeArea(
-          child: _buildContent(),
-        ),
-      ),
+      child: WorldBackground(child: SafeArea(child: _buildContent())),
     );
   }
 
@@ -194,8 +190,11 @@ class _ArtworkPurchaseScreenState extends State<ArtworkPurchaseScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.error_outline,
-                      size: 48, color: Color(0xFFFF3D8D)),
+                  const Icon(
+                    Icons.error_outline,
+                    size: 48,
+                    color: Color(0xFFFF3D8D),
+                  ),
                   const SizedBox(height: 12),
                   Text(
                     'error_generic'.tr(),
@@ -319,8 +318,10 @@ class _ArtworkPurchaseScreenState extends State<ArtworkPurchaseScreen> {
                       TextFormField(
                         decoration: GlassInputDecoration.glass(
                           labelText: 'artwork_purchase_cardholder_name'.tr(),
-                          prefixIcon:
-                              const Icon(Icons.person, color: Colors.white70),
+                          prefixIcon: const Icon(
+                            Icons.person,
+                            color: Colors.white70,
+                          ),
                         ),
                         style: GoogleFonts.spaceGrotesk(
                           color: Colors.white,
@@ -335,8 +336,10 @@ class _ArtworkPurchaseScreenState extends State<ArtworkPurchaseScreen> {
                       TextFormField(
                         decoration: GlassInputDecoration.glass(
                           labelText: 'artwork_purchase_card_number'.tr(),
-                          prefixIcon: const Icon(Icons.credit_card,
-                              color: Colors.white70),
+                          prefixIcon: const Icon(
+                            Icons.credit_card,
+                            color: Colors.white70,
+                          ),
                           hintText: 'artwork_purchase_card_hint'.tr(),
                         ),
                         style: GoogleFonts.spaceGrotesk(
@@ -432,8 +435,11 @@ class _ArtworkPurchaseScreenState extends State<ArtworkPurchaseScreen> {
     );
   }
 
-  Widget _buildPriceRow(
-      {required String label, required String value, bool emphasize = false}) {
+  Widget _buildPriceRow({
+    required String label,
+    required String value,
+    bool emphasize = false,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [

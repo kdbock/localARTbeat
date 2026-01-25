@@ -47,7 +47,7 @@ class SecureFirebaseConfig {
             debugPrint('🛡️ $token');
             debugPrint('🛡️ ============================================');
           },
-          onError: (error) {
+          onError: (Object error) {
             debugPrint('⚠️ ============================================');
             debugPrint('⚠️ APP CHECK TOKEN ERROR: $error');
             debugPrint('⚠️ ============================================');
@@ -57,7 +57,7 @@ class SecureFirebaseConfig {
         debugPrint('🛡️ AppCheck activated with DEBUG provider');
 
         // Wait a moment for the provider to initialize
-        await Future.delayed(const Duration(milliseconds: 500));
+        await Future<void>.delayed(const Duration(milliseconds: 500));
 
         try {
           debugPrint('🛡️ Fetching debug token...');
@@ -79,7 +79,7 @@ class SecureFirebaseConfig {
 
           if (token == null || token.isEmpty) {
             debugPrint('⚠️ Token is null/empty, retrying...');
-            Future.delayed(const Duration(seconds: 2), () async {
+            Future<void>.delayed(const Duration(seconds: 2), () async {
               try {
                 final retryToken = await FirebaseAppCheck.instance.getToken(
                   true,
@@ -123,7 +123,7 @@ class SecureFirebaseConfig {
               try {
                 final parts = token.split('.');
                 if (parts.length >= 2) {
-                  final payload = parts[1];
+                  debugPrint('🛡️ Token payload length: ${parts[1].length}');
                   debugPrint(
                     '🛡️ Token type: Production (AppAttest or DeviceCheck)',
                   );
@@ -132,7 +132,7 @@ class SecureFirebaseConfig {
             }
             debugPrint('🛡️ ============================================');
           },
-          onError: (error) {
+          onError: (Object error) {
             debugPrint('⚠️ ============================================');
             debugPrint('⚠️ PRODUCTION APP CHECK TOKEN ERROR: $error');
             debugPrint('⚠️ ============================================');

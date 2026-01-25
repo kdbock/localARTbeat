@@ -51,7 +51,8 @@ class CommunityHeader extends StatelessWidget implements PreferredSizeWidget {
           ),
         const SizedBox(width: 8), // Small padding from right edge
       ],
-      glassBackground: true, subtitle: '',
+      glassBackground: true,
+      subtitle: '',
     );
   }
 

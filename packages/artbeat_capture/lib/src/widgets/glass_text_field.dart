@@ -31,8 +31,9 @@ class GlassTextField extends StatelessWidget {
       ),
       decoration: GlassInputDecoration(
         labelText: label,
-        prefixIcon:
-            icon != null ? Icon(icon, color: Colors.white70, size: 18) : null,
+        prefixIcon: icon != null
+            ? Icon(icon, color: Colors.white70, size: 18)
+            : null,
       ),
     );
   }

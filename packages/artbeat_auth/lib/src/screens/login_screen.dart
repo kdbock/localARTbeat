@@ -173,10 +173,9 @@ class _LoginScreenState extends State<LoginScreen>
       AppLogger.error('❌ Apple Sign-In failed in UI: $e');
 
       final failureTemplate = 'auth_apple_signin_failed'.tr();
-      final failureMessage =
-          failureTemplate == 'auth_apple_signin_failed'
-              ? 'Apple Sign-In failed: $errorMessage'
-              : failureTemplate.replaceAll('{error}', errorMessage);
+      final failureMessage = failureTemplate == 'auth_apple_signin_failed'
+          ? 'Apple Sign-In failed: $errorMessage'
+          : failureTemplate.replaceAll('{error}', errorMessage);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

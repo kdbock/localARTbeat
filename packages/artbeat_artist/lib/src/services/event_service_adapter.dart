@@ -86,8 +86,9 @@ class EventServiceAdapter {
   /// Get upcoming events
   Future<List<internal.EventModel>> getUpcomingEvents() async {
     try {
-      final artbeatEvents =
-          await _eventService.getUpcomingPublicEvents(limit: 50);
+      final artbeatEvents = await _eventService.getUpcomingPublicEvents(
+        limit: 50,
+      );
       return artbeatEvents.map(_convertFromArtbeatEvent).toList();
     } catch (e) {
       AppLogger.error('Error fetching upcoming events: $e');
@@ -197,8 +198,9 @@ class EventServiceAdapter {
         dateTime: startDate,
         location: location,
         isPublic: isPublic,
-        imageUrls:
-            newImageUrl != null ? [newImageUrl] : existingEvent.imageUrls,
+        imageUrls: newImageUrl != null
+            ? [newImageUrl]
+            : existingEvent.imageUrls,
         eventBannerUrl: newImageUrl ?? existingEvent.eventBannerUrl,
         updatedAt: DateTime.now(),
       );

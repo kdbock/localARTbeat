@@ -28,7 +28,7 @@ class _VerifiedArtistScreenState extends State<VerifiedArtistScreen> {
     'Watercolor',
     'Digital',
     'Mixed Media',
-    'Photography'
+    'Photography',
   ];
   final List<String> _styles = [
     'All',
@@ -37,7 +37,7 @@ class _VerifiedArtistScreenState extends State<VerifiedArtistScreen> {
     'Impressionism',
     'Pop Art',
     'Surrealism',
-    'Contemporary'
+    'Contemporary',
   ];
 
   @override
@@ -80,9 +80,11 @@ class _VerifiedArtistScreenState extends State<VerifiedArtistScreen> {
       if (_searchController.text.isNotEmpty) {
         final query = _searchController.text.toLowerCase();
         filteredArtists = filteredArtists
-            .where((artist) =>
-                artist.displayName.toLowerCase().contains(query) ||
-                (artist.bio?.toLowerCase().contains(query) ?? false))
+            .where(
+              (artist) =>
+                  artist.displayName.toLowerCase().contains(query) ||
+                  (artist.bio?.toLowerCase().contains(query) ?? false),
+            )
             .toList();
       }
 
@@ -96,8 +98,10 @@ class _VerifiedArtistScreenState extends State<VerifiedArtistScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(
-                  tr('artist_verified_artist_error_error_loading_verified'))),
+            content: Text(
+              tr('artist_verified_artist_error_error_loading_verified'),
+            ),
+          ),
         );
         setState(() {
           _isLoading = false;
@@ -136,7 +140,7 @@ class _VerifiedArtistScreenState extends State<VerifiedArtistScreen> {
                   end: Alignment.bottomRight,
                   colors: [
                     core.ArtbeatColors.verified,
-                    core.ArtbeatColors.primaryBlue
+                    core.ArtbeatColors.primaryBlue,
                   ],
                 ),
                 borderRadius: BorderRadius.only(
@@ -170,7 +174,9 @@ class _VerifiedArtistScreenState extends State<VerifiedArtistScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Text(
-                      tr('art_walk_explore_artists_who_have_been_verified_for_authenticity_and_quality'),
+                      tr(
+                        'art_walk_explore_artists_who_have_been_verified_for_authenticity_and_quality',
+                      ),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 16,
@@ -220,14 +226,16 @@ class _VerifiedArtistScreenState extends State<VerifiedArtistScreen> {
                 children: [
                   FilterChip(
                     label: Text(
-                        tr('artist_artist_browse_text_medium_selectedmedium')),
+                      tr('artist_artist_browse_text_medium_selectedmedium'),
+                    ),
                     selected: _selectedMedium != 'All',
                     onSelected: (_) => _showFilterDialog(),
                   ),
                   const SizedBox(width: 8),
                   FilterChip(
                     label: Text(
-                        tr('artist_artist_browse_text_style_selectedstyle')),
+                      tr('artist_artist_browse_text_style_selectedstyle'),
+                    ),
                     selected: _selectedStyle != 'All',
                     onSelected: (_) => _showFilterDialog(),
                   ),
@@ -240,28 +248,33 @@ class _VerifiedArtistScreenState extends State<VerifiedArtistScreen> {
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : _artists.isEmpty
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(Icons.verified_user,
-                                  size: 64, color: Colors.grey),
-                              const SizedBox(height: 16),
-                              Text(
-                                tr('art_walk_no_verified_artists_found'),
-                                style: const TextStyle(
-                                    fontSize: 18, color: Colors.grey),
-                              ),
-                            ],
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.verified_user,
+                            size: 64,
+                            color: Colors.grey,
                           ),
-                        )
-                      : ListView.builder(
-                          itemCount: _artists.length,
-                          itemBuilder: (context, index) {
-                            final artist = _artists[index];
-                            return _buildArtistCard(artist);
-                          },
-                        ),
+                          const SizedBox(height: 16),
+                          Text(
+                            tr('art_walk_no_verified_artists_found'),
+                            style: const TextStyle(
+                              fontSize: 18,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: _artists.length,
+                      itemBuilder: (context, index) {
+                        final artist = _artists[index];
+                        return _buildArtistCard(artist);
+                      },
+                    ),
             ),
           ],
         ),
@@ -280,7 +293,9 @@ class _VerifiedArtistScreenState extends State<VerifiedArtistScreen> {
         borderRadius: BorderRadius.circular(12),
         side: isPremium
             ? BorderSide(
-                color: Theme.of(context).colorScheme.primary, width: 1.5)
+                color: Theme.of(context).colorScheme.primary,
+                width: 1.5,
+              )
             : BorderSide.none,
       ),
       child: InkWell(
@@ -307,16 +322,21 @@ class _VerifiedArtistScreenState extends State<VerifiedArtistScreen> {
                     borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(12),
                     ),
-                    image: core.ImageUrlValidator.isValidImageUrl(
-                            artist.coverImageUrl)
+                    image:
+                        core.ImageUrlValidator.isValidImageUrl(
+                          artist.coverImageUrl,
+                        )
                         ? DecorationImage(
                             image: core.ImageUrlValidator.safeNetworkImage(
-                                artist.coverImageUrl)!,
+                              artist.coverImageUrl,
+                            )!,
                             fit: BoxFit.cover,
                           )
                         : null,
-                    color: !core.ImageUrlValidator.isValidImageUrl(
-                            artist.coverImageUrl)
+                    color:
+                        !core.ImageUrlValidator.isValidImageUrl(
+                          artist.coverImageUrl,
+                        )
                         ? Colors.grey[300]
                         : null,
                   ),
@@ -329,10 +349,7 @@ class _VerifiedArtistScreenState extends State<VerifiedArtistScreen> {
                   child: Container(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Colors.white,
-                        width: 3,
-                      ),
+                      border: Border.all(color: Colors.white, width: 3),
                     ),
                     child: core.UserAvatar(
                       imageUrl: artist.profileImageUrl,
@@ -347,8 +364,10 @@ class _VerifiedArtistScreenState extends State<VerifiedArtistScreen> {
                   top: 10,
                   right: 10,
                   child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: core.ArtbeatColors.verified,
                       borderRadius: BorderRadius.circular(12),
@@ -397,7 +416,6 @@ class _VerifiedArtistScreenState extends State<VerifiedArtistScreen> {
             ),
 
             const SizedBox(height: 45), // Space for profile pic
-
             // Artist info
             Padding(
               padding: const EdgeInsets.all(16.0),
@@ -421,10 +439,9 @@ class _VerifiedArtistScreenState extends State<VerifiedArtistScreen> {
                       if (artist.userType.name == core.UserType.gallery.name)
                         Chip(
                           label: Text(tr('artist_artist_browse_text_gallery')),
-                          backgroundColor: Theme.of(context)
-                              .colorScheme
-                              .secondary
-                              .withAlpha(51),
+                          backgroundColor: Theme.of(
+                            context,
+                          ).colorScheme.secondary.withAlpha(51),
                           labelStyle: TextStyle(
                             color: Theme.of(context).colorScheme.secondary,
                           ),
@@ -445,24 +462,35 @@ class _VerifiedArtistScreenState extends State<VerifiedArtistScreen> {
                     spacing: 8,
                     runSpacing: 8,
                     children: [
-                      ...artist.mediums.take(2).map((medium) => Chip(
-                            label: Text(medium),
-                            backgroundColor:
-                                Theme.of(context).chipTheme.backgroundColor,
-                            labelPadding:
-                                const EdgeInsets.symmetric(horizontal: 4),
-                            padding: EdgeInsets.zero,
-                            materialTapTargetSize:
-                                MaterialTapTargetSize.shrinkWrap,
-                          )),
+                      ...artist.mediums
+                          .take(2)
+                          .map(
+                            (medium) => Chip(
+                              label: Text(medium),
+                              backgroundColor: Theme.of(
+                                context,
+                              ).chipTheme.backgroundColor,
+                              labelPadding: const EdgeInsets.symmetric(
+                                horizontal: 4,
+                              ),
+                              padding: EdgeInsets.zero,
+                              materialTapTargetSize:
+                                  MaterialTapTargetSize.shrinkWrap,
+                            ),
+                          ),
                       if (artist.mediums.length > 2)
                         Chip(
-                          label: Text(tr(
-                              'artist_artist_browse_text_artistmediumslength_2')),
-                          backgroundColor:
-                              Theme.of(context).chipTheme.backgroundColor,
-                          labelPadding:
-                              const EdgeInsets.symmetric(horizontal: 4),
+                          label: Text(
+                            tr(
+                              'artist_artist_browse_text_artistmediumslength_2',
+                            ),
+                          ),
+                          backgroundColor: Theme.of(
+                            context,
+                          ).chipTheme.backgroundColor,
+                          labelPadding: const EdgeInsets.symmetric(
+                            horizontal: 4,
+                          ),
                           padding: EdgeInsets.zero,
                           materialTapTargetSize:
                               MaterialTapTargetSize.shrinkWrap,
@@ -486,15 +514,18 @@ class _VerifiedArtistScreenState extends State<VerifiedArtistScreen> {
         String tempStyle = _selectedStyle;
 
         return AlertDialog(
-          title:
-              Text(tr('artist_verified_artist_text_filter_verified_artists')),
+          title: Text(
+            tr('artist_verified_artist_text_filter_verified_artists'),
+          ),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Medium',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text(
+                  'Medium',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
@@ -511,8 +542,10 @@ class _VerifiedArtistScreenState extends State<VerifiedArtistScreen> {
                   }).toList(),
                 ),
                 const SizedBox(height: 16),
-                Text(tr('art_walk_style'),
-                    style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(
+                  tr('art_walk_style'),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,

@@ -88,9 +88,7 @@ class _ArtworkBrowseScreenState extends State<ArtworkBrowseScreen> {
   }
 
   List<String> _sortFilterOptions(Set<String> values) {
-    final sorted = values
-        .where((value) => value != 'common_all'.tr())
-        .toList()
+    final sorted = values.where((value) => value != 'common_all'.tr()).toList()
       ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
     return ['common_all'.tr(), ...sorted];
   }
@@ -108,7 +106,8 @@ class _ArtworkBrowseScreenState extends State<ArtworkBrowseScreen> {
             onPressed: () => Navigator.pushNamed(context, '/search'),
             icon: const Icon(Icons.search, color: Colors.white),
           ),
-        ], subtitle: '',
+        ],
+        subtitle: '',
       ),
       child: WorldBackground(
         child: SafeArea(
@@ -144,10 +143,7 @@ class _ArtworkBrowseScreenState extends State<ArtworkBrowseScreen> {
               gradient: const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF7C4DFF),
-                  Color(0xFF22D3EE),
-                ],
+                colors: [Color(0xFF7C4DFF), Color(0xFF22D3EE)],
               ),
             ),
             child: Text(
@@ -290,8 +286,7 @@ class _ArtworkBrowseScreenState extends State<ArtworkBrowseScreen> {
           if (_isLoadingFilters) ...[
             const SizedBox(height: 12),
             const LinearProgressIndicator(
-              valueColor:
-                  AlwaysStoppedAnimation<Color>(Color(0xFF22D3EE)),
+              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF22D3EE)),
               backgroundColor: Colors.white24,
             ),
           ],
@@ -351,10 +346,8 @@ class _ArtworkBrowseScreenState extends State<ArtworkBrowseScreen> {
       },
       items: options
           .map(
-            (option) => DropdownMenuItem<String>(
-              value: option,
-              child: Text(option),
-            ),
+            (option) =>
+                DropdownMenuItem<String>(value: option, child: Text(option)),
           )
           .toList(),
     );
@@ -418,8 +411,9 @@ class _ArtworkBrowseScreenState extends State<ArtworkBrowseScreen> {
           );
         }
 
-        final artworks =
-            docs.map((doc) => ArtworkModel.fromFirestore(doc)).toList();
+        final artworks = docs
+            .map((doc) => ArtworkModel.fromFirestore(doc))
+            .toList();
 
         return CustomScrollView(
           slivers: [
@@ -483,9 +477,7 @@ class _ArtworkBrowseScreenState extends State<ArtworkBrowseScreen> {
                 ),
               ),
             ),
-            const SliverToBoxAdapter(
-              child: SizedBox(height: 80),
-            ),
+            const SliverToBoxAdapter(child: SizedBox(height: 80)),
           ],
         );
       },
@@ -617,7 +609,11 @@ class _ArtworkBrowseScreenState extends State<ArtworkBrowseScreen> {
           ),
         ),
         child: const Center(
-          child: Icon(Icons.image_not_supported, color: Colors.white38, size: 32),
+          child: Icon(
+            Icons.image_not_supported,
+            color: Colors.white38,
+            size: 32,
+          ),
         ),
       );
     }
@@ -630,10 +626,7 @@ class _ArtworkBrowseScreenState extends State<ArtworkBrowseScreen> {
   }
 
   String? _primaryImageUrl(ArtworkModel artwork) {
-    final candidates = [
-      artwork.imageUrl,
-      ...artwork.additionalImageUrls,
-    ];
+    final candidates = [artwork.imageUrl, ...artwork.additionalImageUrls];
     for (final url in candidates) {
       if (url.isNotEmpty && Uri.tryParse(url)?.hasScheme == true) {
         return url;
@@ -658,8 +651,10 @@ class _ArtworkBrowseScreenState extends State<ArtworkBrowseScreen> {
     if (_searchController.text.isNotEmpty) {
       query = query
           .where('title', isGreaterThanOrEqualTo: _searchController.text)
-          .where('title',
-              isLessThanOrEqualTo: '${_searchController.text}\uf8ff');
+          .where(
+            'title',
+            isLessThanOrEqualTo: '${_searchController.text}\uf8ff',
+          );
     }
 
     return query.orderBy('createdAt', descending: true).snapshots();

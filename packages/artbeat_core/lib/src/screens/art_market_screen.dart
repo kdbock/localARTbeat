@@ -6,11 +6,8 @@ import 'package:google_fonts/google_fonts.dart';
 
 class ArtMarketScreen extends StatefulWidget {
   final bool isAuction;
-  
-  const ArtMarketScreen({
-    super.key,
-    required this.isAuction,
-  });
+
+  const ArtMarketScreen({super.key, required this.isAuction});
 
   @override
   State<ArtMarketScreen> createState() => _ArtMarketScreenState();
@@ -26,7 +23,7 @@ class _ArtMarketScreenState extends State<ArtMarketScreen> {
     _artistSearchController.dispose();
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
@@ -48,7 +45,9 @@ class _ArtMarketScreenState extends State<ArtMarketScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  widget.isAuction ? Icons.gavel_rounded : Icons.shopping_bag_rounded,
+                  widget.isAuction
+                      ? Icons.gavel_rounded
+                      : Icons.shopping_bag_rounded,
                   size: 64,
                   color: Colors.white.withValues(alpha: 0.3),
                 ),
@@ -110,11 +109,11 @@ class _ArtMarketScreenState extends State<ArtMarketScreen> {
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        childAspectRatio: 0.75,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 16,
-                      ),
+                            crossAxisCount: 2,
+                            childAspectRatio: 0.75,
+                            crossAxisSpacing: 16,
+                            mainAxisSpacing: 16,
+                          ),
                       itemCount: filteredDocs.length,
                       itemBuilder: (context, index) {
                         final doc = filteredDocs[index];
@@ -134,15 +133,16 @@ class _ArtMarketScreenState extends State<ArtMarketScreen> {
   }
 
   Stream<QuerySnapshot> _getArtworkStream() {
-    Query query = _firestore.collection('artwork')
+    Query query = _firestore
+        .collection('artwork')
         .where('isPublic', isEqualTo: true);
-    
+
     if (widget.isAuction) {
       query = query.where('auctionEnabled', isEqualTo: true);
     } else {
       query = query.where('isForSale', isEqualTo: true);
     }
-    
+
     return query.orderBy('createdAt', descending: true).snapshots();
   }
 
@@ -160,7 +160,8 @@ class _ArtMarketScreenState extends State<ArtMarketScreen> {
 
   String _extractArtistName(QueryDocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>? ?? {};
-    final candidate = data['artistName'] ??
+    final candidate =
+        data['artistName'] ??
         data['artistDisplayName'] ??
         data['displayName'] ??
         data['creatorName'] ??
@@ -276,7 +277,9 @@ class _ArtMarketScreenState extends State<ArtMarketScreen> {
           children: [
             Expanded(
               child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(20),
+                ),
                 child: SecureNetworkImage(
                   imageUrl: artwork.imageUrl,
                   fit: BoxFit.cover,

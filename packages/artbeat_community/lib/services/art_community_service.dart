@@ -173,8 +173,9 @@ class ArtCommunityService extends ChangeNotifier {
         viewerModel = null;
       }
 
-      final viewerLocation =
-          await GeoWeightingUtils.resolveViewerLocation(viewerModel);
+      final viewerLocation = await GeoWeightingUtils.resolveViewerLocation(
+        viewerModel,
+      );
 
       final sorted = await GeoWeightingUtils.sortByDistance<ArtistProfile>(
         items: artists,
@@ -184,8 +185,10 @@ class ArtCommunityService extends ChangeNotifier {
         tieBreaker: (a, b) {
           final boostCompare = b.boostScore.compareTo(a.boostScore);
           if (boostCompare != 0) return boostCompare;
-          final aBoost = a.lastBoostAt ?? DateTime.fromMillisecondsSinceEpoch(0);
-          final bBoost = b.lastBoostAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+          final aBoost =
+              a.lastBoostAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+          final bBoost =
+              b.lastBoostAt ?? DateTime.fromMillisecondsSinceEpoch(0);
           final boostTimeCompare = bBoost.compareTo(aBoost);
           if (boostTimeCompare != 0) return boostTimeCompare;
           return a.displayName.compareTo(b.displayName);
@@ -237,8 +240,9 @@ class ArtCommunityService extends ChangeNotifier {
           } catch (_) {
             currentUser = null;
           }
-          final viewerLocation =
-              await GeoWeightingUtils.resolveViewerLocation(currentUser);
+          final viewerLocation = await GeoWeightingUtils.resolveViewerLocation(
+            currentUser,
+          );
           _artistsCache = await GeoWeightingUtils.sortByDistance<ArtistProfile>(
             items: artists,
             idOf: (artist) => artist.userId,

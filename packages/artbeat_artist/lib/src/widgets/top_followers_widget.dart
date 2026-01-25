@@ -85,10 +85,7 @@ class _TopFollowersWidgetState extends State<TopFollowersWidget> {
     int index,
   ) {
     return Padding(
-      padding: EdgeInsets.only(
-        left: index == 0 ? 6.0 : 6.0,
-        right: 6.0,
-      ),
+      padding: EdgeInsets.only(left: index == 0 ? 6.0 : 6.0, right: 6.0),
       child: GestureDetector(
         onTap: () {
           Navigator.pushNamed(
@@ -122,8 +119,10 @@ class _TopFollowersWidgetState extends State<TopFollowersWidget> {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(18),
-                    child: ImageUrlValidator.isValidImageUrl(
-                            follower.followerAvatarUrl)
+                    child:
+                        ImageUrlValidator.isValidImageUrl(
+                          follower.followerAvatarUrl,
+                        )
                         ? Image(
                             image: ImageUrlValidator.safeNetworkImage(
                               follower.followerAvatarUrl,
@@ -155,8 +154,9 @@ class _TopFollowersWidgetState extends State<TopFollowersWidget> {
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color:
-                                const Color(0xFF22D3EE).withValues(alpha: 0.3),
+                            color: const Color(
+                              0xFF22D3EE,
+                            ).withValues(alpha: 0.3),
                             blurRadius: 12,
                           ),
                         ],
@@ -258,9 +258,7 @@ class _TopFollowersWidgetState extends State<TopFollowersWidget> {
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.18),
-              ),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
             ),
             child: Text(
               '$count',
@@ -337,9 +335,7 @@ class _TopFollowersWidgetState extends State<TopFollowersWidget> {
             decoration: BoxDecoration(
               color: Colors.red.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: Colors.red.withValues(alpha: 0.35),
-              ),
+              border: Border.all(color: Colors.red.withValues(alpha: 0.35)),
             ),
             child: Text(
               tr('art_walk_error_loading_top_fans'),
@@ -368,9 +364,7 @@ class _TopFollowersWidgetState extends State<TopFollowersWidget> {
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.06),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.12),
-              ),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
             ),
             child: Text(
               tr('art_walk_no_engaged_followers_yet'),

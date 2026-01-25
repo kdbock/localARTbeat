@@ -303,9 +303,9 @@ class _SubscriptionPurchaseScreenState
                 selected: _isYearlyPlan,
                 title: 'subscriptions_yearly'.tr(),
                 subtitle: savings > 0
-                    ? 'subscriptions_save_amount'.tr(args: [
-                        '\$${savings.toStringAsFixed(0)}'
-                      ])
+                    ? 'subscriptions_save_amount'.tr(
+                        args: ['\$${savings.toStringAsFixed(0)}'],
+                      )
                     : 'subscriptions_save_vs_monthly'.tr(),
                 price: '\$${yearly.toStringAsFixed(2)}',
                 onTap: () {

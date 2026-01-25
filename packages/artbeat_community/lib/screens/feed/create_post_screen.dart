@@ -179,9 +179,7 @@ class _CreatePostScreenState extends State<CreatePostScreen>
             );
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('create_post_image_skipped_size'.tr()),
-                ),
+                SnackBar(content: Text('create_post_image_skipped_size'.tr())),
               );
             }
           }
@@ -201,9 +199,7 @@ class _CreatePostScreenState extends State<CreatePostScreen>
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
               'create_post_error_pick_images'.tr(
@@ -260,7 +256,9 @@ class _CreatePostScreenState extends State<CreatePostScreen>
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
-                  'create_post_error_video_size'.tr(namedArgs: {'limit': '50MB'}),
+                  'create_post_error_video_size'.tr(
+                    namedArgs: {'limit': '50MB'},
+                  ),
                 ),
               ),
             );
@@ -272,9 +270,7 @@ class _CreatePostScreenState extends State<CreatePostScreen>
     } catch (e) {
       debugPrint('DEBUG: Error picking video: $e');
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
               'create_post_error_pick_video'.tr(
@@ -325,7 +321,9 @@ class _CreatePostScreenState extends State<CreatePostScreen>
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
-                  'create_post_error_audio_size'.tr(namedArgs: {'limit': '10MB'}),
+                  'create_post_error_audio_size'.tr(
+                    namedArgs: {'limit': '10MB'},
+                  ),
                 ),
               ),
             );
@@ -337,9 +335,7 @@ class _CreatePostScreenState extends State<CreatePostScreen>
     } catch (e) {
       debugPrint('DEBUG: Error picking audio: $e');
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
               'create_post_error_pick_audio'.tr(
@@ -382,9 +378,7 @@ class _CreatePostScreenState extends State<CreatePostScreen>
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
               'create_post_error_edit_image'.tr(
@@ -428,9 +422,7 @@ class _CreatePostScreenState extends State<CreatePostScreen>
         _selectedVideo == null &&
         _selectedAudio == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('create_post_validation_missing_content'.tr()),
-        ),
+        SnackBar(content: Text('create_post_validation_missing_content'.tr())),
       );
       return;
     }
@@ -617,19 +609,13 @@ class _CreatePostScreenState extends State<CreatePostScreen>
         );
         Navigator.pop(context);
       } else {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(
-          SnackBar(
-            content: Text('create_post_error_failed'.tr()),
-          ),
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('create_post_error_failed'.tr())),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
               'create_post_error_generic'.tr(
@@ -674,10 +660,12 @@ class _CreatePostScreenState extends State<CreatePostScreen>
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.postToEdit != null;
-    final title =
-        isEditing ? 'create_post_edit_title'.tr() : 'screen_title_create_post'.tr();
-    final actionLabel =
-        isEditing ? 'create_post_update_cta'.tr() : 'create_post_publish_cta'.tr();
+    final title = isEditing
+        ? 'create_post_edit_title'.tr()
+        : 'screen_title_create_post'.tr();
+    final actionLabel = isEditing
+        ? 'create_post_update_cta'.tr()
+        : 'create_post_publish_cta'.tr();
 
     return WorldBackground(
       child: Scaffold(
@@ -689,14 +677,16 @@ class _CreatePostScreenState extends State<CreatePostScreen>
               padding: const EdgeInsets.only(right: 8),
               child: GradientCTAButton(
                 text: actionLabel,
-                onPressed:
-                    (_isLoading || _isUploadingMedia) ? null : _createPostWithGuard,
+                onPressed: (_isLoading || _isUploadingMedia)
+                    ? null
+                    : _createPostWithGuard,
                 isLoading: _isLoading || _isUploadingMedia,
                 height: 44,
                 width: 160,
               ),
             ),
-          ], subtitle: '',
+          ],
+          subtitle: '',
         ),
         body: SafeArea(
           child: Padding(
@@ -759,10 +749,7 @@ class _CreatePostScreenState extends State<CreatePostScreen>
 
   String _mediaCountLabel(int current, int max) {
     return 'create_post_media_counter'.tr(
-      namedArgs: {
-        'current': current.toString(),
-        'max': max.toString(),
-      },
+      namedArgs: {'current': current.toString(), 'max': max.toString()},
     );
   }
 
@@ -804,7 +791,9 @@ class _CreatePostScreenState extends State<CreatePostScreen>
               CircleAvatar(
                 radius: 28,
                 backgroundColor: Colors.white.withValues(alpha: 0.08),
-                backgroundImage: ImageUrlValidator.safeNetworkImage(user?.photoURL),
+                backgroundImage: ImageUrlValidator.safeNetworkImage(
+                  user?.photoURL,
+                ),
                 child: !ImageUrlValidator.isValidImageUrl(user?.photoURL)
                     ? const Icon(Icons.person, color: Colors.white, size: 24)
                     : null,
@@ -926,8 +915,9 @@ class _CreatePostScreenState extends State<CreatePostScreen>
     required bool isActive,
     required VoidCallback onTap,
   }) {
-    final buttonColor =
-        isActive ? Colors.white.withValues(alpha: 0.18) : Colors.white.withValues(alpha: 0.08);
+    final buttonColor = isActive
+        ? Colors.white.withValues(alpha: 0.18)
+        : Colors.white.withValues(alpha: 0.08);
 
     return Expanded(
       child: Material(
@@ -1082,7 +1072,10 @@ class _CreatePostScreenState extends State<CreatePostScreen>
                         return Container(
                           color: Colors.white.withValues(alpha: 0.08),
                           alignment: Alignment.center,
-                          child: const Icon(Icons.broken_image, color: Colors.white),
+                          child: const Icon(
+                            Icons.broken_image,
+                            color: Colors.white,
+                          ),
                         );
                       },
                     ),
@@ -1120,7 +1113,9 @@ class _CreatePostScreenState extends State<CreatePostScreen>
         height: 192,
         child: Center(
           child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation(Colors.white.withValues(alpha: 0.7)),
+            valueColor: AlwaysStoppedAnimation(
+              Colors.white.withValues(alpha: 0.7),
+            ),
           ),
         ),
       );
@@ -1151,7 +1146,9 @@ class _CreatePostScreenState extends State<CreatePostScreen>
             bottom: 16,
             left: 16,
             child: _buildIconActionButton(
-              icon: _videoController!.value.isPlaying ? Icons.pause : Icons.play_arrow,
+              icon: _videoController!.value.isPlaying
+                  ? Icons.pause
+                  : Icons.play_arrow,
               onTap: () {
                 if (_videoController!.value.isPlaying) {
                   _videoController!.pause();
@@ -1185,10 +1182,7 @@ class _CreatePostScreenState extends State<CreatePostScreen>
               style: _grotesk(14, FontWeight.w600),
             ),
           ),
-          _buildIconActionButton(
-            icon: Icons.close,
-            onTap: _removeAudio,
-          ),
+          _buildIconActionButton(icon: Icons.close, onTap: _removeAudio),
         ],
       ),
     );
@@ -1255,7 +1249,9 @@ class _CreatePostScreenState extends State<CreatePostScreen>
                 value: _isArtistPost,
                 onChanged: (value) => setState(() => _isArtistPost = value),
                 activeThumbColor: const Color(0xFF22D3EE),
-                activeTrackColor: const Color(0xFF22D3EE).withValues(alpha: 0.4),
+                activeTrackColor: const Color(
+                  0xFF22D3EE,
+                ).withValues(alpha: 0.4),
                 inactiveThumbColor: Colors.white,
                 inactiveTrackColor: Colors.white.withValues(alpha: 0.2),
               ),
@@ -1268,7 +1264,9 @@ class _CreatePostScreenState extends State<CreatePostScreen>
 
   Widget _buildUploadProgress() {
     final isVideoUpload = _selectedVideo != null && _videoUploadProgress > 0;
-    final progressValue = isVideoUpload ? _videoUploadProgress : _uploadProgress;
+    final progressValue = isVideoUpload
+        ? _videoUploadProgress
+        : _uploadProgress;
     final title = isVideoUpload
         ? 'create_post_uploading_video_title'.tr()
         : 'create_post_uploading_media_title'.tr();

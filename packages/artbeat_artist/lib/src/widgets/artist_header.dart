@@ -49,9 +49,7 @@ class _ArtistHeaderState extends State<ArtistHeader> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        color: _headerColor,
-      ),
+      decoration: const BoxDecoration(color: _headerColor),
       child: SafeArea(
         bottom: false,
         child: Container(
@@ -79,19 +77,13 @@ class _ArtistHeaderState extends State<ArtistHeader> {
       margin: const EdgeInsets.only(left: 8),
       child: widget.showBackButton
           ? IconButton(
-              icon: const Icon(
-                Icons.arrow_back,
-                color: _iconTextColor,
-              ),
+              icon: const Icon(Icons.arrow_back, color: _iconTextColor),
               onPressed:
                   widget.onBackPressed ?? () => Navigator.maybePop(context),
               tooltip: 'Back',
             )
           : IconButton(
-              icon: const Icon(
-                Icons.menu,
-                color: _iconTextColor,
-              ),
+              icon: const Icon(Icons.menu, color: _iconTextColor),
               onPressed: widget.onMenuPressed ?? () => _openDrawer(),
               tooltip: 'Package Drawer',
             ),
@@ -127,10 +119,8 @@ class _ArtistHeaderState extends State<ArtistHeader> {
             width: 24,
             height: 24,
             color: _iconTextColor,
-            errorBuilder: (context, error, stackTrace) => const Icon(
-              Icons.search,
-              color: _iconTextColor,
-            ),
+            errorBuilder: (context, error, stackTrace) =>
+                const Icon(Icons.search, color: _iconTextColor),
           ),
           onPressed: widget.onSearchPressed ?? () => _navigateToSearch(),
           tooltip: 'Search',
@@ -147,10 +137,8 @@ class _ArtistHeaderState extends State<ArtistHeader> {
             width: 24,
             height: 24,
             color: _iconTextColor,
-            errorBuilder: (context, error, stackTrace) => const Icon(
-              Icons.chat_bubble_outline,
-              color: _iconTextColor,
-            ),
+            errorBuilder: (context, error, stackTrace) =>
+                const Icon(Icons.chat_bubble_outline, color: _iconTextColor),
           ),
           onPressed: widget.onChatPressed ?? () => _openMessaging(),
           tooltip: 'Messages',
@@ -161,10 +149,7 @@ class _ArtistHeaderState extends State<ArtistHeader> {
     // Profile Icon
     actions.add(
       IconButton(
-        icon: const Icon(
-          Icons.account_circle,
-          color: _iconTextColor,
-        ),
+        icon: const Icon(Icons.account_circle, color: _iconTextColor),
         onPressed: () => _showProfileMenu(),
         tooltip: 'Profile',
       ),
@@ -174,10 +159,7 @@ class _ArtistHeaderState extends State<ArtistHeader> {
     if (widget.showDeveloper) {
       actions.add(
         IconButton(
-          icon: const Icon(
-            Icons.developer_mode,
-            color: _iconTextColor,
-          ),
+          icon: const Icon(Icons.developer_mode, color: _iconTextColor),
           onPressed: widget.onDeveloperPressed ?? () => _showDeveloperMenu(),
           tooltip: 'Developer Tools',
         ),

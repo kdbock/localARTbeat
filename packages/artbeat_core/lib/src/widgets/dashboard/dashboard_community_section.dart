@@ -128,10 +128,7 @@ class _DashboardCommunitySectionState extends State<DashboardCommunitySection> {
               ),
               Text(
                 'dashboard_community_subtitle'.tr(),
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.white70,
-                ),
+                style: const TextStyle(fontSize: 14, color: Colors.white70),
               ),
             ],
           ),

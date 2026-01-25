@@ -992,7 +992,9 @@ class UnifiedPaymentService {
       await Stripe.instance.presentPaymentSheet();
     } catch (e) {
       if (e is StripeException) {
-        AppLogger.warning('Stripe payment sheet error: ${e.error.localizedMessage}');
+        AppLogger.warning(
+          'Stripe payment sheet error: ${e.error.localizedMessage}',
+        );
         rethrow;
       } else {
         AppLogger.error('Error presenting payment sheet: $e');

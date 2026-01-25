@@ -220,8 +220,8 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                             ),
 
                             onTap: () {
-                              if (!CrashPreventionService
-                                  .shouldAllowNavigation()) return;
+                              if (!CrashPreventionService.shouldAllowNavigation())
+                                return;
                               NavigationOverlay.of(context)?.startNavigation();
                               Navigator.of(context).push(
                                 MaterialPageRoute<Widget>(
@@ -265,8 +265,8 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                             ),
 
                             onTap: () {
-                              if (!CrashPreventionService
-                                  .shouldAllowNavigation()) return;
+                              if (!CrashPreventionService.shouldAllowNavigation())
+                                return;
                               NavigationOverlay.of(context)?.startNavigation();
                               Navigator.pushNamed(
                                 context,
@@ -308,8 +308,8 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                             ),
 
                             onTap: () {
-                              if (!CrashPreventionService
-                                  .shouldAllowNavigation()) return;
+                              if (!CrashPreventionService.shouldAllowNavigation())
+                                return;
                               NavigationOverlay.of(context)?.startNavigation();
                               Navigator.pushNamed(context, '/old-dashboard');
                             },
@@ -348,8 +348,8 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                             ),
 
                             onTap: () {
-                              if (!CrashPreventionService
-                                  .shouldAllowNavigation()) return;
+                              if (!CrashPreventionService.shouldAllowNavigation())
+                                return;
                               NavigationOverlay.of(context)?.startNavigation();
                               Navigator.pushNamed(context, '/community/hub');
                             },
@@ -366,8 +366,8 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
 
                           child: _BottomChips(
                             onArtist: () {
-                              if (!CrashPreventionService
-                                  .shouldAllowNavigation()) return;
+                              if (!CrashPreventionService.shouldAllowNavigation())
+                                return;
                               NavigationOverlay.of(context)?.startNavigation();
                               Navigator.pushNamed(
                                 context,
@@ -375,8 +375,8 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                               );
                             },
                             onBusiness: () {
-                              if (!CrashPreventionService
-                                  .shouldAllowNavigation()) return;
+                              if (!CrashPreventionService.shouldAllowNavigation())
+                                return;
                               NavigationOverlay.of(context)?.startNavigation();
                               Navigator.pushNamed(context, '/local-business');
                             },
@@ -389,10 +389,7 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                           showPlaceholder: true,
                         ),
 
-                        _LeaderboardSection(
-                          intro: _intro,
-                          index: 5,
-                        ),
+                        _LeaderboardSection(intro: _intro, index: 5),
 
                         const SizedBox(height: 16),
                       ],
@@ -1135,11 +1132,7 @@ class _XPBar extends StatelessWidget {
   final double progress;
   final int xp;
   final int level;
-  const _XPBar({
-    required this.progress,
-    required this.xp,
-    required this.level,
-  });
+  const _XPBar({required this.progress, required this.xp, required this.level});
 
   @override
   Widget build(BuildContext context) {
@@ -1680,10 +1673,7 @@ class _LeaderboardSection extends StatefulWidget {
   final AnimationController intro;
   final int index;
 
-  const _LeaderboardSection({
-    required this.intro,
-    required this.index,
-  });
+  const _LeaderboardSection({required this.intro, required this.index});
 
   @override
   State<_LeaderboardSection> createState() => _LeaderboardSectionState();
@@ -1714,10 +1704,12 @@ class _LeaderboardSectionState extends State<_LeaderboardSection> {
         LeaderboardCategory.totalXP,
         limit: 25,
       );
-      
+
       // If XP leaderboard is empty, try a different category as fallback to see if we get ANYTHING
       if (users.isEmpty) {
-        AppLogger.warning('🏆 Dashboard: XP Leaderboard empty, trying level fallback...');
+        AppLogger.warning(
+          '🏆 Dashboard: XP Leaderboard empty, trying level fallback...',
+        );
         users = await _leaderboardService.getLeaderboard(
           LeaderboardCategory.level,
           limit: 25,
@@ -1729,7 +1721,9 @@ class _LeaderboardSectionState extends State<_LeaderboardSection> {
           _topUsers = users;
           _isLoading = false;
         });
-        AppLogger.info('🏆 Dashboard: Hall of Legends loaded with ${users.length} users');
+        AppLogger.info(
+          '🏆 Dashboard: Hall of Legends loaded with ${users.length} users',
+        );
       }
     } catch (e) {
       AppLogger.error('❌ Dashboard: Error loading Hall of Legends: $e');
@@ -1751,9 +1745,7 @@ class _LeaderboardSectionState extends State<_LeaderboardSection> {
         margin: const EdgeInsets.only(top: 12),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: Colors.white.withValues(alpha: 0.12),
-          ),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -1907,22 +1899,24 @@ class _LeaderboardItem extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       decoration: BoxDecoration(
-        color: isTop3 
-          ? color.withValues(alpha: 0.08) 
-          : Colors.white.withValues(alpha: 0.04),
+        color: isTop3
+            ? color.withValues(alpha: 0.08)
+            : Colors.white.withValues(alpha: 0.04),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isTop3 
-            ? color.withValues(alpha: 0.3) 
-            : Colors.white.withValues(alpha: 0.08),
+          color: isTop3
+              ? color.withValues(alpha: 0.3)
+              : Colors.white.withValues(alpha: 0.08),
         ),
-        boxShadow: isTop3 ? [
-          BoxShadow(
-            color: color.withValues(alpha: 0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ] : null,
+        boxShadow: isTop3
+            ? [
+                BoxShadow(
+                  color: color.withValues(alpha: 0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ]
+            : null,
       ),
       child: Row(
         children: [

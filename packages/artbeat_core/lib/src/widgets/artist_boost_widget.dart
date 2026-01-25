@@ -177,7 +177,9 @@ class _ArtistBoostWidgetState extends State<ArtistBoostWidget> {
       final success = await _boostService.purchaseBoost(
         recipientId: widget.recipientId,
         boostProductId: boostId,
-        message: 'boost_fueled_by'.tr(args: [user.displayName ?? 'common_supporter'.tr().toUpperCase()]),
+        message: 'boost_fueled_by'.tr(
+          args: [user.displayName ?? 'common_supporter'.tr().toUpperCase()],
+        ),
       );
 
       AppLogger.info('🚨 Purchase result: $success');
@@ -304,7 +306,9 @@ class _ArtistBoostWidgetState extends State<ArtistBoostWidget> {
                           const SizedBox(width: 12),
                           Flexible(
                             child: Text(
-                              'boost_momentum_added'.tr(args: [momentum.toString()]),
+                              'boost_momentum_added'.tr(
+                                args: [momentum.toString()],
+                              ),
                               style: GoogleFonts.spaceGrotesk(
                                 fontSize: 28,
                                 fontWeight: FontWeight.w900,
@@ -680,12 +684,7 @@ class _ArtistBoostWidgetState extends State<ArtistBoostWidget> {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
-        child: Image.asset(
-          imagePath,
-          width: 56,
-          height: 56,
-          fit: BoxFit.cover,
-        ),
+        child: Image.asset(imagePath, width: 56, height: 56, fit: BoxFit.cover),
       ),
     );
   }

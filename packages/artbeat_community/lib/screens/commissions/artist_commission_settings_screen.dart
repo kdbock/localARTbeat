@@ -162,7 +162,8 @@ class _ArtistCommissionSettingsScreenState
       CommissionType.commercial: 100,
     };
     _sizePricing = {
-      for (final option in _sizeOptions) option.storageKey: _defaultSizePrice(option)
+      for (final option in _sizeOptions)
+        option.storageKey: _defaultSizePrice(option),
     };
     _basePriceController.text = '50';
     _termsController.text = 'commission_settings_default_terms'.tr();
@@ -231,7 +232,8 @@ class _ArtistCommissionSettingsScreenState
         backgroundColor: Colors.transparent,
         appBar: HudTopBar(
           title: 'commission_settings_title'.tr(),
-          glassBackground: true, subtitle: '',
+          glassBackground: true,
+          subtitle: '',
         ),
         body: SafeArea(
           child: _isLoading
@@ -298,7 +300,9 @@ class _ArtistCommissionSettingsScreenState
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: _CommissionPalette.accentPurple.withValues(alpha: 0.25),
+                  color: _CommissionPalette.accentPurple.withValues(
+                    alpha: 0.25,
+                  ),
                   blurRadius: 32,
                   offset: const Offset(0, 16),
                 ),
@@ -347,14 +351,17 @@ class _ArtistCommissionSettingsScreenState
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: (_acceptingCommissions
-                          ? _CommissionPalette.accentGreen
-                          : _CommissionPalette.accentPink)
-                      .withValues(alpha: 0.15),
+                  color:
+                      (_acceptingCommissions
+                              ? _CommissionPalette.accentGreen
+                              : _CommissionPalette.accentPink)
+                          .withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Icon(
-                  _acceptingCommissions ? Icons.check_circle : Icons.pause_circle,
+                  _acceptingCommissions
+                      ? Icons.check_circle
+                      : Icons.pause_circle,
                   color: Colors.white,
                 ),
               ),
@@ -389,7 +396,8 @@ class _ArtistCommissionSettingsScreenState
               ),
               Switch.adaptive(
                 value: _acceptingCommissions,
-                onChanged: (value) => setState(() => _acceptingCommissions = value),
+                onChanged: (value) =>
+                    setState(() => _acceptingCommissions = value),
                 thumbColor: WidgetStateProperty.resolveWith(
                   (states) => Colors.white,
                 ),
@@ -443,28 +451,33 @@ class _ArtistCommissionSettingsScreenState
           ),
           const SizedBox(height: 20),
           _buildSliderRow(
-            label: 'commission_settings_max_active_label'
-                .tr(namedArgs: {'count': '$_maxActiveCommissions'}),
+            label: 'commission_settings_max_active_label'.tr(
+              namedArgs: {'count': '$_maxActiveCommissions'},
+            ),
             value: _maxActiveCommissions.toDouble(),
             min: 1,
             max: 20,
             divisions: 19,
-            onChanged: (value) => setState(() => _maxActiveCommissions = value.round()),
+            onChanged: (value) =>
+                setState(() => _maxActiveCommissions = value.round()),
           ),
           const SizedBox(height: 12),
           _buildSliderRow(
-            label: 'commission_settings_turnaround_label'
-                .tr(namedArgs: {'days': '$_averageTurnaroundDays'}),
+            label: 'commission_settings_turnaround_label'.tr(
+              namedArgs: {'days': '$_averageTurnaroundDays'},
+            ),
             value: _averageTurnaroundDays.toDouble(),
             min: 1,
             max: 90,
             divisions: 89,
-            onChanged: (value) => setState(() => _averageTurnaroundDays = value.round()),
+            onChanged: (value) =>
+                setState(() => _averageTurnaroundDays = value.round()),
           ),
           const SizedBox(height: 12),
           _buildSliderRow(
-            label: 'commission_settings_deposit_label'
-                .tr(namedArgs: {'percent': '${_depositPercentage.round()}' }),
+            label: 'commission_settings_deposit_label'.tr(
+              namedArgs: {'percent': '${_depositPercentage.round()}'},
+            ),
             value: _depositPercentage,
             min: 25,
             max: 100,
@@ -532,9 +545,11 @@ class _ArtistCommissionSettingsScreenState
                   SizedBox(
                     width: 130,
                     child: TextFormField(
-                      initialValue: _typePricing[type]?.toStringAsFixed(0) ?? '0',
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
+                      initialValue:
+                          _typePricing[type]?.toStringAsFixed(0) ?? '0',
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
                       style: GoogleFonts.spaceGrotesk(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
@@ -542,8 +557,11 @@ class _ArtistCommissionSettingsScreenState
                       ),
                       decoration: GlassInputDecoration.glass(
                         hintText: '0',
-                        prefixIcon:
-                            const Icon(Icons.add, color: Colors.white, size: 16),
+                        prefixIcon: const Icon(
+                          Icons.add,
+                          color: Colors.white,
+                          size: 16,
+                        ),
                       ),
                       onChanged: (value) =>
                           _typePricing[type] = double.tryParse(value) ?? 0,
@@ -583,9 +601,10 @@ class _ArtistCommissionSettingsScreenState
                     child: TextFormField(
                       initialValue:
                           _sizePricing[option.storageKey]?.toStringAsFixed(0) ??
-                              '0',
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
+                          '0',
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
                       style: GoogleFonts.spaceGrotesk(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
@@ -593,12 +612,14 @@ class _ArtistCommissionSettingsScreenState
                       ),
                       decoration: GlassInputDecoration.glass(
                         hintText: '0',
-                        prefixIcon:
-                            const Icon(Icons.add, color: Colors.white, size: 16),
+                        prefixIcon: const Icon(
+                          Icons.add,
+                          color: Colors.white,
+                          size: 16,
+                        ),
                       ),
-                      onChanged: (value) =>
-                          _sizePricing[option.storageKey] =
-                              double.tryParse(value) ?? 0,
+                      onChanged: (value) => _sizePricing[option.storageKey] =
+                          double.tryParse(value) ?? 0,
                     ),
                   ),
                 ],
@@ -626,8 +647,9 @@ class _ArtistCommissionSettingsScreenState
               Expanded(
                 child: _buildBusinessStat(
                   icon: Icons.schedule,
-                  title: 'commission_settings_business_turnaround'
-                      .tr(namedArgs: {'days': '$_averageTurnaroundDays'}),
+                  title: 'commission_settings_business_turnaround'.tr(
+                    namedArgs: {'days': '$_averageTurnaroundDays'},
+                  ),
                   subtitle: 'commission_settings_business_turnaround_desc'.tr(),
                 ),
               ),
@@ -635,8 +657,9 @@ class _ArtistCommissionSettingsScreenState
               Expanded(
                 child: _buildBusinessStat(
                   icon: Icons.account_balance_wallet,
-                  title: 'commission_settings_business_deposit'
-                      .tr(namedArgs: {'percent': '${_depositPercentage.round()}'}),
+                  title: 'commission_settings_business_deposit'.tr(
+                    namedArgs: {'percent': '${_depositPercentage.round()}'},
+                  ),
                   subtitle: 'commission_settings_business_deposit_desc'.tr(),
                 ),
               ),
@@ -645,8 +668,9 @@ class _ArtistCommissionSettingsScreenState
           const SizedBox(height: 12),
           _buildBusinessStat(
             icon: Icons.work,
-            title: 'commission_settings_business_max_active'
-                .tr(namedArgs: {'count': '$_maxActiveCommissions'}),
+            title: 'commission_settings_business_max_active'.tr(
+              namedArgs: {'count': '$_maxActiveCommissions'},
+            ),
             subtitle: 'commission_settings_business_max_active_desc'.tr(),
           ),
         ],
@@ -756,7 +780,11 @@ class _ArtistCommissionSettingsScreenState
                               color: Colors.black.withValues(alpha: 0.6),
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.close, size: 16, color: Colors.white),
+                            child: const Icon(
+                              Icons.close,
+                              size: 16,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),
@@ -836,7 +864,9 @@ class _ArtistCommissionSettingsScreenState
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: _CommissionPalette.accentPurple.withValues(alpha: 0.2),
+                    color: _CommissionPalette.accentPurple.withValues(
+                      alpha: 0.2,
+                    ),
                     blurRadius: 24,
                   ),
                 ]
@@ -950,7 +980,9 @@ class _ArtistCommissionSettingsScreenState
             activeTrackColor: _CommissionPalette.accentTeal,
             inactiveTrackColor: Colors.white.withValues(alpha: 0.2),
             thumbColor: _CommissionPalette.accentPurple,
-            overlayColor: _CommissionPalette.accentPurple.withValues(alpha: 0.2),
+            overlayColor: _CommissionPalette.accentPurple.withValues(
+              alpha: 0.2,
+            ),
           ),
           child: Slider(
             value: value,

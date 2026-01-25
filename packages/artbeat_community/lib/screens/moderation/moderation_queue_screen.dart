@@ -203,7 +203,8 @@ class _ModerationQueueScreenState extends State<ModerationQueueScreen>
               icon: const Icon(Icons.refresh, color: Colors.white),
               onPressed: _isLoading ? null : _loadModerationQueue,
             ),
-          ], subtitle: '',
+          ],
+          subtitle: '',
         ),
         body: SafeArea(
           child: Padding(
@@ -435,9 +436,8 @@ class _ModerationQueueScreenState extends State<ModerationQueueScreen>
     return ListView.separated(
       physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.only(bottom: 24, top: 8),
-      itemBuilder: (context, index) => _buildCommentItem(
-        _flaggedComments[index],
-      ),
+      itemBuilder: (context, index) =>
+          _buildCommentItem(_flaggedComments[index]),
       separatorBuilder: (_, __) => const SizedBox(height: 8),
       itemCount: _flaggedComments.length,
     );

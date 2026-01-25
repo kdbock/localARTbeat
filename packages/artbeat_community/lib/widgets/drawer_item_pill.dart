@@ -153,7 +153,10 @@ class DrawerItemPillGradient extends DrawerItemPill {
               borderRadius: BorderRadius.circular(borderRadius),
               border: isSelected
                   ? null
-                  : Border.all(color: Colors.white.withValues(alpha: 0.08), width: 1),
+                  : Border.all(
+                      color: Colors.white.withValues(alpha: 0.08),
+                      width: 1,
+                    ),
             ),
             child: Row(
               children: [

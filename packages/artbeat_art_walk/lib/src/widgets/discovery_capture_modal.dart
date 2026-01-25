@@ -187,10 +187,8 @@ class _DiscoveryCaptureModalState extends State<DiscoveryCaptureModal> {
                 ),
                 padding: EdgeInsets.zero,
                 showPlaceholder: true,
-                onPlaceholderTap: () => Navigator.pushNamed(
-                  context,
-                  '/capture-sponsorship',
-                ),
+                onPlaceholderTap: () =>
+                    Navigator.pushNamed(context, '/capture-sponsorship'),
               ),
               const SizedBox(height: 24),
               if (!_captured)

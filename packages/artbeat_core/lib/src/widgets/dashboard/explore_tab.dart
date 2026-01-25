@@ -94,9 +94,11 @@ class ExploreTab extends StatelessWidget {
                                   ),
                                 ),
                                 Text(
-                                  'dashboard_explore_art_walk_count'.tr(namedArgs: {
-                                    'count': markers.length.toString(),
-                                  }),
+                                  'dashboard_explore_art_walk_count'.tr(
+                                    namedArgs: {
+                                      'count': markers.length.toString(),
+                                    },
+                                  ),
                                   style: const TextStyle(
                                     color: Colors.white70,
                                     fontSize: 14,

@@ -102,10 +102,7 @@ class LocalGalleriesWidget extends StatelessWidget {
                     Text(
                       tr('art_walk_no_galleries_or_museums_found_in_your_area'),
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Colors.grey,
-                        fontSize: 16,
-                      ),
+                      style: const TextStyle(color: Colors.grey, fontSize: 16),
                     ),
                     const SizedBox(height: 12),
                     OutlinedButton(
@@ -173,11 +170,13 @@ class LocalGalleriesWidget extends StatelessWidget {
                                 child: Container(
                                   decoration: BoxDecoration(
                                     image: DecorationImage(
-                                      image: ImageUrlValidator.safeNetworkImage(
-                                              gallery['imageUrl']
-                                                  ?.toString()) ??
+                                      image:
+                                          ImageUrlValidator.safeNetworkImage(
+                                            gallery['imageUrl']?.toString(),
+                                          ) ??
                                           const AssetImage(
-                                                  'assets/event_placeholder.png')
+                                                'assets/event_placeholder.png',
+                                              )
                                               as ImageProvider,
                                       fit: BoxFit.cover,
                                     ),
@@ -191,7 +190,9 @@ class LocalGalleriesWidget extends StatelessWidget {
                                   left: 8,
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(
-                                        horizontal: 8, vertical: 4),
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
                                     decoration: BoxDecoration(
                                       color: Colors.amber,
                                       borderRadius: BorderRadius.circular(12),
@@ -199,8 +200,11 @@ class LocalGalleriesWidget extends StatelessWidget {
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        const Icon(Icons.star,
-                                            size: 14, color: Colors.white),
+                                        const Icon(
+                                          Icons.star,
+                                          size: 14,
+                                          color: Colors.white,
+                                        ),
                                         const SizedBox(width: 2),
                                         Text(
                                           tr('art_walk_featured'),

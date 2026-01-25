@@ -475,7 +475,9 @@ class _UserExperienceCardState extends State<UserExperienceCard>
             ),
             const SizedBox(width: 8),
             Text(
-              'ux_card_level_perks'.tr(namedArgs: {'level': widget.user.level.toString()}),
+              'ux_card_level_perks'.tr(
+                namedArgs: {'level': widget.user.level.toString()},
+              ),
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
@@ -710,7 +712,9 @@ class _UserExperienceCardState extends State<UserExperienceCard>
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      'ux_card_badges_count'.tr(namedArgs: {'count': _unlockedCount.toString()}),
+                      'ux_card_badges_count'.tr(
+                        namedArgs: {'count': _unlockedCount.toString()},
+                      ),
                       style: const TextStyle(
                         fontSize: 12,
                         color: ArtbeatColors.primaryPurple,

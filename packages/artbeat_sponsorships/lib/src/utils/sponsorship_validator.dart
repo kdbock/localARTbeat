@@ -29,10 +29,7 @@ class SponsorshipValidator {
   }
 
   /// Validate that a placement is allowed for a tier
-  static bool isPlacementAllowed(
-    SponsorshipTier tier,
-    String placementKey,
-  ) {
+  static bool isPlacementAllowed(SponsorshipTier tier, String placementKey) {
     switch (tier) {
       case SponsorshipTier.title:
         return placementKey == SponsorshipPlacements.splash ||
@@ -47,12 +44,10 @@ class SponsorshipValidator {
             placementKey == SponsorshipPlacements.artWalkStopCard;
 
       case SponsorshipTier.capture:
-        return placementKey ==
-            SponsorshipPlacements.captureDetailBanner;
+        return placementKey == SponsorshipPlacements.captureDetailBanner;
 
       case SponsorshipTier.discover:
-        return placementKey ==
-            SponsorshipPlacements.discoverRadarBanner;
+        return placementKey == SponsorshipPlacements.discoverRadarBanner;
     }
   }
 

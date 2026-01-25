@@ -14,13 +14,15 @@ void main() {
   group('🎯 ArtBeat Authentication & Onboarding Tests (Complete)', () {
     group('1. AUTHENTICATION SCREENS - UI Tests', () {
       testWidgets('✅ Splash screen displays and animates', (tester) async {
-        await tester.pumpWidget(MaterialApp(
-          home: SplashScreen(
-            sponsorService: FirebaseTestSetup.createMockSponsorService(),
-            enableBackgroundAnimation: false,
-            autoNavigate: false,
+        await tester.pumpWidget(
+          MaterialApp(
+            home: SplashScreen(
+              sponsorService: FirebaseTestSetup.createMockSponsorService(),
+              enableBackgroundAnimation: false,
+              autoNavigate: false,
+            ),
           ),
-        ));
+        );
 
         // Wait for timers to complete
         await tester.pumpAndSettle();

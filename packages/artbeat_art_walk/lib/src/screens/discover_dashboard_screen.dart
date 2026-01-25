@@ -644,7 +644,8 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
           _buildStatCard(
             icon: Icons.explore,
             iconColor: ArtWalkDesignSystem.primaryTeal,
-            value: '${_currentUser?.engagementStats.captureCount ?? _currentUser?.captures.length ?? 0}',
+            value:
+                '${_currentUser?.engagementStats.captureCount ?? _currentUser?.captures.length ?? 0}',
             label: 'art_walk_dashboard_stat_discoveries'.tr(),
           ),
           const SizedBox(width: ArtWalkDesignSystem.paddingM),
@@ -953,7 +954,9 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
 
   Widget _buildKioskLaneSection() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: ArtWalkDesignSystem.paddingL),
+      padding: const EdgeInsets.symmetric(
+        horizontal: ArtWalkDesignSystem.paddingL,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1043,9 +1046,8 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
                   artist.profileImageUrl,
                 ),
                 backgroundColor: Colors.white.withValues(alpha: 0.15),
-                child: !ImageUrlValidator.isValidImageUrl(
-                  artist.profileImageUrl,
-                )
+                child:
+                    !ImageUrlValidator.isValidImageUrl(artist.profileImageUrl)
                     ? Text(
                         artist.displayName.isNotEmpty
                             ? artist.displayName[0].toUpperCase()

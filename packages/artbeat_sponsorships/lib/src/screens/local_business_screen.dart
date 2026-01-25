@@ -275,41 +275,40 @@ class _HeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => AnimatedBuilder(
-      animation: loop,
-      builder: (context, child) {
-        final sweep = loop.value % 1.0;
-        final power = (1.0 - (sweep - 0.55).abs() * 4.5).clamp(0.0, 1.0);
-        final breathe = 1.0 + 0.012 * math.sin(loop.value * 2 * math.pi);
+    animation: loop,
+    builder: (context, child) {
+      final sweep = loop.value % 1.0;
+      final power = (1.0 - (sweep - 0.55).abs() * 4.5).clamp(0.0, 1.0);
+      final breathe = 1.0 + 0.012 * math.sin(loop.value * 2 * math.pi);
 
-        return Transform.scale(
-          scale: breathe,
-          child: GlassCard(
-            padding: const EdgeInsets.all(26),
-            child: Stack(
-              children: [
-                Positioned.fill(
-                  child: IgnorePointer(
-                    child: Opacity(
-                      opacity: 0.70,
-                      child: Transform.translate(
-                        offset: Offset((sweep * 2 - 1) * 400 * 0.55, 0),
-                        child: Transform.rotate(
-                          angle: -0.55,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  Colors.transparent,
-                                  Colors.white.withValues(
-                                    alpha: 0.16 + 0.12 * power,
-                                  ),
-                                  const Color(
-                                    0xFF34D399,
-                                  ).withValues(alpha: 0.10 + 0.08 * power),
-                                  Colors.transparent,
-                                ],
-                                stops: const [0.0, 0.46, 0.58, 1.0],
-                              ),
+      return Transform.scale(
+        scale: breathe,
+        child: GlassCard(
+          padding: const EdgeInsets.all(26),
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: Opacity(
+                    opacity: 0.70,
+                    child: Transform.translate(
+                      offset: Offset((sweep * 2 - 1) * 400 * 0.55, 0),
+                      child: Transform.rotate(
+                        angle: -0.55,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.transparent,
+                                Colors.white.withValues(
+                                  alpha: 0.16 + 0.12 * power,
+                                ),
+                                const Color(
+                                  0xFF34D399,
+                                ).withValues(alpha: 0.10 + 0.08 * power),
+                                Colors.transparent,
+                              ],
+                              stops: const [0.0, 0.46, 0.58, 1.0],
                             ),
                           ),
                         ),
@@ -317,127 +316,128 @@ class _HeroCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        AnimatedBuilder(
-                          animation: loop,
-                          builder: (_, __) {
-                            final pulse =
-                                (math.sin(loop.value * math.pi * 2) + 1) / 2;
-                            return Container(
-                              width: 64,
-                              height: 64,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                gradient: LinearGradient(
-                                  colors: [
-                                    const Color(
-                                      0xFF7C4DFF,
-                                    ).withValues(alpha: 0.8 + pulse * 0.2),
-                                    const Color(
-                                      0xFF22D3EE,
-                                    ).withValues(alpha: 0.8 + pulse * 0.2),
-                                  ],
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: const Color(
-                                      0xFF22D3EE,
-                                    ).withValues(alpha: 0.4 + pulse * 0.3),
-                                    blurRadius: 20 + pulse * 10,
-                                  ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      AnimatedBuilder(
+                        animation: loop,
+                        builder: (_, __) {
+                          final pulse =
+                              (math.sin(loop.value * math.pi * 2) + 1) / 2;
+                          return Container(
+                            width: 64,
+                            height: 64,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: LinearGradient(
+                                colors: [
+                                  const Color(
+                                    0xFF7C4DFF,
+                                  ).withValues(alpha: 0.8 + pulse * 0.2),
+                                  const Color(
+                                    0xFF22D3EE,
+                                  ).withValues(alpha: 0.8 + pulse * 0.2),
                                 ],
                               ),
-                              child: const Icon(
-                                Icons.handshake,
-                                color: Colors.white,
-                                size: 30,
-                              ),
-                            );
-                          },
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(
+                                    0xFF22D3EE,
+                                  ).withValues(alpha: 0.4 + pulse * 0.3),
+                                  blurRadius: 20 + pulse * 10,
+                                ),
+                              ],
+                            ),
+                            child: const Icon(
+                              Icons.handshake,
+                              color: Colors.white,
+                              size: 30,
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(width: 18),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Partner with discovery, not feeds',
+                              style: Theme.of(context).textTheme.titleLarge
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w900,
+                                    color: Colors.white,
+                                  ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Local ARTbeat sponsors power quests, captures, and radar moments across the city. No auctions, no bidding wars—just curated placements with concierge review.',
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(color: Colors.white70),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 18),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Partner with discovery, not feeds',
-                                style: Theme.of(context).textTheme.titleLarge
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.w900,
-                                      color: Colors.white,
-                                    ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 18),
+                  const Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: [
+                      _HeroBadge(label: 'Manual approval'),
+                      _HeroBadge(label: 'Premium glass UI'),
+                      _HeroBadge(label: 'Radius targeting'),
+                    ],
+                  ),
+                  const SizedBox(height: 22),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: GradientCtaButton(
+                          label: 'Become a sponsor',
+                          icon: Icons.workspace_premium_outlined,
+                          onPressed: onPrimary,
+                          onTap: () {},
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: onSecondary,
+                          child: Container(
+                            height: 52,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(26),
+                              color: Colors.white.withValues(alpha: 0.05),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.18),
                               ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Local ARTbeat sponsors power quests, captures, and radar moments across the city. No auctions, no bidding wars—just curated placements with concierge review.',
+                            ),
+                            child: Center(
+                              child: Text(
+                                'Explore art walks',
                                 style: Theme.of(context).textTheme.bodyMedium
-                                    ?.copyWith(color: Colors.white70),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 18),
-                    const Wrap(
-                      spacing: 10,
-                      runSpacing: 10,
-                      children: [
-                        _HeroBadge(label: 'Manual approval'),
-                        _HeroBadge(label: 'Premium glass UI'),
-                        _HeroBadge(label: 'Radius targeting'),
-                      ],
-                    ),
-                    const SizedBox(height: 22),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: GradientCtaButton(
-                            label: 'Become a sponsor',
-                            icon: Icons.workspace_premium_outlined,
-                            onPressed: onPrimary,
-                            onTap: () {},
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: onSecondary,
-                            child: Container(
-                              height: 52,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(26),
-                                color: Colors.white.withValues(alpha: 0.05),
-                                border: Border.all(
-                                  color: Colors.white.withValues(alpha: 0.18),
-                                ),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  'Explore art walks',
-                                  style: Theme.of(context).textTheme.bodyMedium
-                                      ?.copyWith(fontWeight: FontWeight.w800),
-                                ),
+                                    ?.copyWith(fontWeight: FontWeight.w800),
                               ),
                             ),
                           ),
                         ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
           ),
-        );
-      },
-    );
+        ),
+      );
+    },
+  );
 }
 
 class _PerkChip extends StatelessWidget {
@@ -610,44 +610,43 @@ class _AnimatedSignalCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => AnimatedBuilder(
-      animation: loop,
-      builder: (context, child) {
-        final phase = index * 0.15;
-        final sweep = loop.value % 1.0;
-        final power = (1.0 - (sweep - 0.55).abs() * 4.5).clamp(0.0, 1.0);
-        final breathe =
-            1.0 + 0.012 * math.sin((loop.value + phase) * 2 * math.pi);
-        final edgeGlow = 0.10 + 0.22 * power;
+    animation: loop,
+    builder: (context, child) {
+      final phase = index * 0.15;
+      final sweep = loop.value % 1.0;
+      final power = (1.0 - (sweep - 0.55).abs() * 4.5).clamp(0.0, 1.0);
+      final breathe =
+          1.0 + 0.012 * math.sin((loop.value + phase) * 2 * math.pi);
+      final edgeGlow = 0.10 + 0.22 * power;
 
-        return Transform.scale(
-          scale: breathe,
-          child: GlassCard(
-            padding: const EdgeInsets.all(18),
-            child: Stack(
-              children: [
-                Positioned.fill(
-                  child: IgnorePointer(
-                    child: Opacity(
-                      opacity: 0.70,
-                      child: Transform.translate(
-                        offset: Offset((sweep * 2 - 1) * 200 * 0.55, 0),
-                        child: Transform.rotate(
-                          angle: -0.55,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  Colors.transparent,
-                                  Colors.white.withValues(
-                                    alpha: 0.16 + 0.12 * power,
-                                  ),
-                                  const Color(
-                                    0xFF22D3EE,
-                                  ).withValues(alpha: 0.10 + 0.08 * power),
-                                  Colors.transparent,
-                                ],
-                                stops: const [0.0, 0.46, 0.58, 1.0],
-                              ),
+      return Transform.scale(
+        scale: breathe,
+        child: GlassCard(
+          padding: const EdgeInsets.all(18),
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: Opacity(
+                    opacity: 0.70,
+                    child: Transform.translate(
+                      offset: Offset((sweep * 2 - 1) * 200 * 0.55, 0),
+                      child: Transform.rotate(
+                        angle: -0.55,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.transparent,
+                                Colors.white.withValues(
+                                  alpha: 0.16 + 0.12 * power,
+                                ),
+                                const Color(
+                                  0xFF22D3EE,
+                                ).withValues(alpha: 0.10 + 0.08 * power),
+                                Colors.transparent,
+                              ],
+                              stops: const [0.0, 0.46, 0.58, 1.0],
                             ),
                           ),
                         ),
@@ -655,52 +654,53 @@ class _AnimatedSignalCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white.withValues(alpha: 0.08),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(
-                              0xFF22D3EE,
-                            ).withValues(alpha: edgeGlow),
-                            blurRadius: 20,
-                          ),
-                        ],
-                      ),
-                      child: Icon(signal.icon, color: Colors.white),
+              ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withValues(alpha: 0.08),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(
+                            0xFF22D3EE,
+                          ).withValues(alpha: edgeGlow),
+                          blurRadius: 20,
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            signal.label,
-                            style: Theme.of(context).textTheme.titleSmall
-                                ?.copyWith(fontWeight: FontWeight.w800),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            signal.detail,
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(color: Colors.white70),
-                          ),
-                        ],
-                      ),
+                    child: Icon(signal.icon, color: Colors.white),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          signal.label,
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(fontWeight: FontWeight.w800),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          signal.detail,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: Colors.white70),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ],
-            ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        );
-      },
-    );
+        ),
+      );
+    },
+  );
 }
 
 class _AnimatedSponsorshipOptionCard extends StatelessWidget {
@@ -716,43 +716,42 @@ class _AnimatedSponsorshipOptionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => AnimatedBuilder(
-      animation: loop,
-      builder: (context, child) {
-        final phase = index * 0.12;
-        final sweep = loop.value % 1.0;
-        final power = (1.0 - (sweep - 0.55).abs() * 4.5).clamp(0.0, 1.0);
-        final breathe =
-            1.0 + 0.012 * math.sin((loop.value + phase) * 2 * math.pi);
+    animation: loop,
+    builder: (context, child) {
+      final phase = index * 0.12;
+      final sweep = loop.value % 1.0;
+      final power = (1.0 - (sweep - 0.55).abs() * 4.5).clamp(0.0, 1.0);
+      final breathe =
+          1.0 + 0.012 * math.sin((loop.value + phase) * 2 * math.pi);
 
-        return Transform.scale(
-          scale: breathe,
-          child: GlassCard(
-            padding: const EdgeInsets.all(22),
-            child: Stack(
-              children: [
-                Positioned.fill(
-                  child: IgnorePointer(
-                    child: Opacity(
-                      opacity: 0.70,
-                      child: Transform.translate(
-                        offset: Offset((sweep * 2 - 1) * 300 * 0.55, 0),
-                        child: Transform.rotate(
-                          angle: -0.55,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  Colors.transparent,
-                                  Colors.white.withValues(
-                                    alpha: 0.16 + 0.12 * power,
-                                  ),
-                                  const Color(
-                                    0xFF7C4DFF,
-                                  ).withValues(alpha: 0.10 + 0.08 * power),
-                                  Colors.transparent,
-                                ],
-                                stops: const [0.0, 0.46, 0.58, 1.0],
-                              ),
+      return Transform.scale(
+        scale: breathe,
+        child: GlassCard(
+          padding: const EdgeInsets.all(22),
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: Opacity(
+                    opacity: 0.70,
+                    child: Transform.translate(
+                      offset: Offset((sweep * 2 - 1) * 300 * 0.55, 0),
+                      child: Transform.rotate(
+                        angle: -0.55,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.transparent,
+                                Colors.white.withValues(
+                                  alpha: 0.16 + 0.12 * power,
+                                ),
+                                const Color(
+                                  0xFF7C4DFF,
+                                ).withValues(alpha: 0.10 + 0.08 * power),
+                                Colors.transparent,
+                              ],
+                              stops: const [0.0, 0.46, 0.58, 1.0],
                             ),
                           ),
                         ),
@@ -760,92 +759,92 @@ class _AnimatedSponsorshipOptionCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: LinearGradient(
-                              colors: [Color(0xFF7C4DFF), Color(0xFF22D3EE)],
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            colors: [Color(0xFF7C4DFF), Color(0xFF22D3EE)],
+                          ),
+                        ),
+                        child: Icon(option.icon, color: Colors.white),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              option.title,
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.w900),
                             ),
-                          ),
-                          child: Icon(option.icon, color: Colors.white),
+                            const SizedBox(height: 4),
+                            Text(
+                              option.description,
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(color: Colors.white70),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                option.title,
-                                style: Theme.of(context).textTheme.titleMedium
-                                    ?.copyWith(fontWeight: FontWeight.w900),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                option.description,
-                                style: Theme.of(context).textTheme.bodyMedium
-                                    ?.copyWith(color: Colors.white70),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Text(
-                          option.price,
-                          style: Theme.of(context).textTheme.titleLarge
-                              ?.copyWith(
-                                fontWeight: FontWeight.w900,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Text(
+                        option.price,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w900,
 
-                                color: Colors.white,
-                              ),
+                          color: Colors.white,
                         ),
-                        const SizedBox(width: 8),
-                        Text(
-                          option.duration,
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: Colors.white60),
-                        ),
-                        const Spacer(),
-                        const Icon(
-                          Icons.arrow_forward_ios,
-                          size: 16,
-                          color: Colors.white54,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    Wrap(
-                      spacing: 10,
-                      runSpacing: 10,
-                      children: [
-                        for (final perk in option.perks) _PerkChip(label: perk),
-                      ],
-                    ),
-                    const SizedBox(height: 18),
-                    GradientCtaButton(
-                      label: 'Start ${option.title.toLowerCase()}',
-                      onPressed: () =>
-                          Navigator.pushNamed(context, option.route),
-                      onTap: () {},
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        option.duration,
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodySmall?.copyWith(color: Colors.white60),
+                      ),
+                      const Spacer(),
+                      const Icon(
+                        Icons.arrow_forward_ios,
+                        size: 16,
+                        color: Colors.white54,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: [
+                      for (final perk in option.perks) _PerkChip(label: perk),
+                    ],
+                  ),
+                  const SizedBox(height: 18),
+                  GradientCtaButton(
+                    label: 'Start ${option.title.toLowerCase()}',
+                    onPressed: () => Navigator.pushNamed(context, option.route),
+                    onTap: () {},
+                  ),
+                ],
+              ),
+            ],
           ),
-        );
-      },
-    );
+        ),
+      );
+    },
+  );
 }
 
 class _QuickSignal {

@@ -63,9 +63,7 @@ class _QuietModeScreenState extends State<QuietModeScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _isLoading = false);
-      _showSnackBar(
-        'quiet_mode.load_error'.tr(namedArgs: {'error': '$e'}),
-      );
+      _showSnackBar('quiet_mode.load_error'.tr(namedArgs: {'error': '$e'}));
     }
   }
 
@@ -80,13 +78,10 @@ class _QuietModeScreenState extends State<QuietModeScreen> {
     setState(() => _isSaving = true);
 
     try {
-      await FirebaseFirestore.instance.collection('users').doc(userId).set(
-        {
-          'quietModeEnabled': _isQuietModeEnabled,
-          'quietModeMessage': _quietModeMessage,
-        },
-        SetOptions(merge: true),
-      );
+      await FirebaseFirestore.instance.collection('users').doc(userId).set({
+        'quietModeEnabled': _isQuietModeEnabled,
+        'quietModeMessage': _quietModeMessage,
+      }, SetOptions(merge: true));
 
       if (!mounted) return;
       setState(() => _isSaving = false);
@@ -94,9 +89,7 @@ class _QuietModeScreenState extends State<QuietModeScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _isSaving = false);
-      _showSnackBar(
-        'quiet_mode.save_error'.tr(namedArgs: {'error': '$e'}),
-      );
+      _showSnackBar('quiet_mode.save_error'.tr(namedArgs: {'error': '$e'}));
     }
   }
 
@@ -110,9 +103,9 @@ class _QuietModeScreenState extends State<QuietModeScreen> {
 
   void _showSnackBar(String message) {
     if (message.isEmpty) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -124,7 +117,8 @@ class _QuietModeScreenState extends State<QuietModeScreen> {
         appBar: HudTopBar(
           title: 'screen_title_quiet_mode'.tr(),
           glassBackground: true,
-          showBackButton: true, subtitle: '',
+          showBackButton: true,
+          subtitle: '',
         ),
         body: SafeArea(
           child: _isLoading
@@ -145,8 +139,7 @@ class _QuietModeScreenState extends State<QuietModeScreen> {
                         text: 'quiet_mode.cta_save'.tr(),
                         icon: Icons.shield_moon_outlined,
                         isLoading: _isSaving,
-                        onPressed:
-                            _isSaving ? null : _persistQuietModeSettings,
+                        onPressed: _isSaving ? null : _persistQuietModeSettings,
                       ),
                     ],
                   ),
@@ -228,9 +221,7 @@ class _QuietModeScreenState extends State<QuietModeScreen> {
                 ],
               )
             : null,
-        color: isActive
-            ? null
-            : Colors.white.withValues(alpha: 0.08),
+        color: isActive ? null : Colors.white.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
       ),
@@ -313,7 +304,9 @@ class _QuietModeScreenState extends State<QuietModeScreen> {
                         ? _QuietModePalette.accentTeal
                         : Colors.white.withValues(alpha: 0.3),
                   ),
-                  trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
+                  trackOutlineColor: WidgetStateProperty.all(
+                    Colors.transparent,
+                  ),
                 ),
               ),
             ),

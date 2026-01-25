@@ -407,7 +407,11 @@ class _GroupFeedWidgetState extends State<GroupFeedWidget>
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
-              HudButton(isPrimary: true, onPressed: _loadPosts, text: 'try_again'.tr()),
+              HudButton(
+                isPrimary: true,
+                onPressed: _loadPosts,
+                text: 'try_again'.tr(),
+              ),
             ],
           ),
         ),

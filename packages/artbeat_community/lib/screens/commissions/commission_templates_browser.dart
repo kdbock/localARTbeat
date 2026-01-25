@@ -96,7 +96,8 @@ class _CommissionTemplatesBrowserState extends State<CommissionTemplatesBrowser>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            tr('commission_templates_load_error',
+            tr(
+              'commission_templates_load_error',
               namedArgs: {'error': e.toString()},
             ),
           ),
@@ -159,7 +160,8 @@ class _CommissionTemplatesBrowserState extends State<CommissionTemplatesBrowser>
             tooltip: tr('commission_templates_refresh_tooltip'),
             onPressed: _isLoading ? null : _loadTemplates,
           ),
-        ], subtitle: '',
+        ],
+        subtitle: '',
       ),
       body: WorldBackground(
         child: SafeArea(
@@ -523,10 +525,12 @@ class _CommissionTemplatesBrowserState extends State<CommissionTemplatesBrowser>
       symbol: '\$',
       decimalDigits: 0,
     ).format(template.basePrice);
-    final deliveryLabel = tr('commission_templates_delivery_days_label',
+    final deliveryLabel = tr(
+      'commission_templates_delivery_days_label',
       namedArgs: {'days': template.estimatedDays.toString()},
     );
-    final usageLabel = tr('commission_templates_usage_count',
+    final usageLabel = tr(
+      'commission_templates_usage_count',
       namedArgs: {'count': template.useCount.toString()},
     );
 

@@ -21,10 +21,6 @@ class SafeBackdropFilter extends StatelessWidget {
     if (DeviceUtils.isSimulator) {
       return child;
     }
-    return BackdropFilter(
-      filter: filter,
-      blendMode: blendMode,
-      child: child,
-    );
+    return BackdropFilter(filter: filter, blendMode: blendMode, child: child);
   }
 }

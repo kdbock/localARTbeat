@@ -1903,7 +1903,7 @@ class AppRouter {
 
       case core.AppRoutes.boosts:
         return RouteUtils.createMainLayoutRoute(
-          child: const core.ArtistBoostsScreen(showAppBar: true),
+          child: const core.ArtistBoostsScreen(),
         );
 
       case core.AppRoutes.ads:

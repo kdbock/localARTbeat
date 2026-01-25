@@ -34,8 +34,9 @@ class _CommissionHubScreenState extends State<CommissionHubScreen> {
   final intl.DateFormat _dateFormat = intl.DateFormat('MMM d, yyyy');
   final intl.NumberFormat _compactCurrencyFormatter =
       intl.NumberFormat.compactCurrency(symbol: '\$');
-  final intl.NumberFormat _currencyFormatter =
-      intl.NumberFormat.currency(symbol: '\$');
+  final intl.NumberFormat _currencyFormatter = intl.NumberFormat.currency(
+    symbol: '\$',
+  );
 
   bool _isLoading = true;
   bool _isArtist = false;
@@ -76,7 +77,9 @@ class _CommissionHubScreenState extends State<CommissionHubScreen> {
         artistSettings = null;
       }
 
-      final commissions = await _commissionService.getCommissionsByUser(user.uid);
+      final commissions = await _commissionService.getCommissionsByUser(
+        user.uid,
+      );
       final recentCommissions = commissions.take(5).toList();
 
       final activeCount = commissions
@@ -103,8 +106,10 @@ class _CommissionHubScreenState extends State<CommissionHubScreen> {
           .where(
             (c) =>
                 c.artistId == user.uid &&
-                [CommissionStatus.completed, CommissionStatus.delivered]
-                    .contains(c.status),
+                [
+                  CommissionStatus.completed,
+                  CommissionStatus.delivered,
+                ].contains(c.status),
           )
           .fold<double>(0, (sum, c) => sum + c.totalPrice);
 
@@ -151,7 +156,8 @@ class _CommissionHubScreenState extends State<CommissionHubScreen> {
             icon: const Icon(Icons.refresh, color: Colors.white),
             onPressed: _isLoading ? null : _loadData,
           ),
-        ], subtitle: '',
+        ],
+        subtitle: '',
       ),
       body: WorldBackground(
         child: SafeArea(
@@ -160,16 +166,19 @@ class _CommissionHubScreenState extends State<CommissionHubScreen> {
             duration: const Duration(milliseconds: 300),
             child: _isLoading
                 ? const Center(
-                    child: CircularProgressIndicator(
-                      color: Color(0xFF7C4DFF),
-                    ),
+                    child: CircularProgressIndicator(color: Color(0xFF7C4DFF)),
                   )
                 : RefreshIndicator(
                     color: const Color(0xFF7C4DFF),
                     onRefresh: _loadData,
                     child: ListView(
                       physics: const AlwaysScrollableScrollPhysics(),
-                      padding: EdgeInsets.fromLTRB(16, 16, 16, bottomPadding + 32),
+                      padding: EdgeInsets.fromLTRB(
+                        16,
+                        16,
+                        16,
+                        bottomPadding + 32,
+                      ),
                       children: [
                         _buildHeroCard(),
                         const SizedBox(height: 16),
@@ -254,10 +263,11 @@ class _CommissionHubScreenState extends State<CommissionHubScreen> {
             children: [
               Expanded(
                 child: GradientCTAButton(
-                  text: (_isArtist
-                          ? 'commission_hub_hero_cta_artist_primary'
-                          : 'commission_hub_hero_cta_patron_primary')
-                      .tr(),
+                  text:
+                      (_isArtist
+                              ? 'commission_hub_hero_cta_artist_primary'
+                              : 'commission_hub_hero_cta_patron_primary')
+                          .tr(),
                   icon: _isArtist ? Icons.view_timeline : Icons.explore,
                   onPressed: _isArtist ? _openCommissions : _browseArtists,
                 ),
@@ -272,10 +282,11 @@ class _CommissionHubScreenState extends State<CommissionHubScreen> {
                   onPressed: _isArtist
                       ? () => _openSetupWizard(SetupMode.editing)
                       : _setupArtistProfile,
-                  text: (_isArtist
-                          ? 'commission_hub_hero_cta_artist_secondary'
-                          : 'commission_hub_hero_cta_patron_secondary')
-                      .tr(),
+                  text:
+                      (_isArtist
+                              ? 'commission_hub_hero_cta_artist_secondary'
+                              : 'commission_hub_hero_cta_patron_secondary')
+                          .tr(),
                   icon: _isArtist ? Icons.auto_fix_high : Icons.brush,
                 ),
               ),
@@ -342,7 +353,9 @@ class _CommissionHubScreenState extends State<CommissionHubScreen> {
                 spacing: 12,
                 runSpacing: 12,
                 children: stats.map((entry) {
-                  final width = singleColumn ? constraints.maxWidth : twoColumnWidth;
+                  final width = singleColumn
+                      ? constraints.maxWidth
+                      : twoColumnWidth;
                   return SizedBox(
                     width: width,
                     child: _StatTile(entry: entry),
@@ -418,7 +431,9 @@ class _CommissionHubScreenState extends State<CommissionHubScreen> {
                 spacing: 12,
                 runSpacing: 12,
                 children: actions.map((action) {
-                  final width = singleColumn ? constraints.maxWidth : twoColumnWidth;
+                  final width = singleColumn
+                      ? constraints.maxWidth
+                      : twoColumnWidth;
                   return _QuickActionButton(
                     width: width,
                     label: action.label,
@@ -437,7 +452,8 @@ class _CommissionHubScreenState extends State<CommissionHubScreen> {
   Widget _buildArtistSection() {
     final accepting = _artistSettings?.acceptingCommissions ?? false;
     final basePrice = _artistSettings?.basePrice ?? 0;
-    final availableTypes = _artistSettings?.availableTypes
+    final availableTypes =
+        _artistSettings?.availableTypes
             .map((type) => type.displayName)
             .join(', ') ??
         '';
@@ -479,10 +495,11 @@ class _CommissionHubScreenState extends State<CommissionHubScreen> {
                   height: 44,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: (accepting
-                            ? _CommissionPalette.greenAccent
-                            : _CommissionPalette.yellowAccent)
-                        .withValues(alpha: 0.18),
+                    color:
+                        (accepting
+                                ? _CommissionPalette.greenAccent
+                                : _CommissionPalette.yellowAccent)
+                            .withValues(alpha: 0.18),
                   ),
                   child: Icon(
                     accepting ? Icons.check_circle : Icons.pause_circle,
@@ -710,10 +727,12 @@ class _CommissionHubScreenState extends State<CommissionHubScreen> {
                           const SizedBox(height: 4),
                           Text(
                             isArtistView
-                                ? 'commission_hub_recent_meta_client'
-                                    .tr(namedArgs: {'name': commission.clientName})
-                                : 'commission_hub_recent_meta_artist'
-                                    .tr(namedArgs: {'name': commission.artistName}),
+                                ? 'commission_hub_recent_meta_client'.tr(
+                                    namedArgs: {'name': commission.clientName},
+                                  )
+                                : 'commission_hub_recent_meta_artist'.tr(
+                                    namedArgs: {'name': commission.artistName},
+                                  ),
                             style: GoogleFonts.spaceGrotesk(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
@@ -738,8 +757,10 @@ class _CommissionHubScreenState extends State<CommissionHubScreen> {
                 Row(
                   children: [
                     Container(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: statusColor.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(16),
@@ -834,11 +855,7 @@ class _CommissionHubScreenState extends State<CommissionHubScreen> {
       return const SizedBox.shrink();
     }
 
-    return Wrap(
-      spacing: 12,
-      runSpacing: 12,
-      children: actions,
-    );
+    return Wrap(spacing: 12, runSpacing: 12, children: actions);
   }
 
   Widget _buildGettingStartedCard() {
@@ -855,7 +872,11 @@ class _CommissionHubScreenState extends State<CommissionHubScreen> {
       padding: const EdgeInsets.all(24),
       child: Column(
         children: [
-          const Icon(Icons.auto_awesome, size: 48, color: _CommissionPalette.purpleAccent),
+          const Icon(
+            Icons.auto_awesome,
+            size: 48,
+            color: _CommissionPalette.purpleAccent,
+          ),
           const SizedBox(height: 16),
           Text(
             'commission_hub_getting_started_title'.tr(),
@@ -897,7 +918,11 @@ class _CommissionHubScreenState extends State<CommissionHubScreen> {
       ),
       child: Column(
         children: [
-          const Icon(Icons.auto_fix_off, size: 40, color: _CommissionPalette.textTertiary),
+          const Icon(
+            Icons.auto_fix_off,
+            size: 40,
+            color: _CommissionPalette.textTertiary,
+          ),
           const SizedBox(height: 12),
           Text(
             'commission_hub_recent_empty_title'.tr(),
@@ -1258,7 +1283,11 @@ class _QuickActionButton extends StatelessWidget {
                     ),
                   ),
                 ),
-                const Icon(Icons.arrow_forward, color: Colors.white54, size: 18),
+                const Icon(
+                  Icons.arrow_forward,
+                  color: Colors.white54,
+                  size: 18,
+                ),
               ],
             ),
           ),

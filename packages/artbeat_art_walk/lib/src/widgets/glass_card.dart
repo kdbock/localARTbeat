@@ -40,7 +40,8 @@ class GlassCard extends StatelessWidget {
         child: Container(
           padding: padding,
           decoration: BoxDecoration(
-            color: fillColor ??
+            color:
+                fillColor ??
                 const Color(0xFF000000).withValues(
                   red: 0.0,
                   green: 0.0,
@@ -75,9 +76,6 @@ class GlassCard extends StatelessWidget {
       );
     }
 
-    return Container(
-      margin: margin,
-      child: card,
-    );
+    return Container(margin: margin, child: card);
   }
 }

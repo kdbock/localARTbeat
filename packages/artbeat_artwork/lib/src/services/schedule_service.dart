@@ -2,12 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_core/artbeat_core.dart' show AppLogger;
 
-enum ReleaseSchedule {
-  weekly,
-  biWeekly,
-  monthly,
-  custom,
-}
+enum ReleaseSchedule { weekly, biWeekly, monthly, custom }
 
 class ScheduledRelease {
   final String id;
@@ -82,7 +77,8 @@ class ScheduleService {
           .set(scheduledRelease.toFirestore());
 
       AppLogger.info(
-          'Chapter scheduled for release: $chapterId at $releaseDateTime');
+        'Chapter scheduled for release: $chapterId at $releaseDateTime',
+      );
       return scheduledRelease;
     } catch (e) {
       AppLogger.error('Error scheduling chapter release: $e');
@@ -125,15 +121,15 @@ class ScheduleService {
     }
   }
 
-  Future<List<ScheduledRelease>> getUpcomingReleases({
-    int limit = 50,
-  }) async {
+  Future<List<ScheduledRelease>> getUpcomingReleases({int limit = 50}) async {
     try {
       final now = DateTime.now();
       final snapshot = await _firestore
           .collection('scheduled_releases')
-          .where('releaseDateTime',
-              isGreaterThanOrEqualTo: Timestamp.fromDate(now))
+          .where(
+            'releaseDateTime',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(now),
+          )
           .where('isScheduled', isEqualTo: true)
           .orderBy('releaseDateTime', descending: false)
           .limit(limit)
@@ -153,8 +149,10 @@ class ScheduleService {
       final now = DateTime.now();
       final snapshot = await _firestore
           .collection('scheduled_releases')
-          .where('releaseDateTime',
-              isLessThanOrEqualTo: Timestamp.fromDate(now))
+          .where(
+            'releaseDateTime',
+            isLessThanOrEqualTo: Timestamp.fromDate(now),
+          )
           .where('isReleased', isEqualTo: false)
           .orderBy('releaseDateTime', descending: false)
           .get();

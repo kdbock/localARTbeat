@@ -46,7 +46,7 @@ class _AdvancedArtworkSearchScreenState
     'Los Angeles',
     'Chicago',
     'Miami',
-    'Online'
+    'Online',
   ];
   final List<String> _mediums = [
     'All',
@@ -54,7 +54,7 @@ class _AdvancedArtworkSearchScreenState
     'Sculpture',
     'Digital',
     'Photography',
-    'Mixed Media'
+    'Mixed Media',
   ];
 
   @override
@@ -128,7 +128,7 @@ class _AdvancedArtworkSearchScreenState
       setState(() {
         _isLoading = false;
       });
-      // ignore: use_build_context_synchronously
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('advanced_search_error'.tr())),
       );
@@ -172,14 +172,17 @@ class _AdvancedArtworkSearchScreenState
                   };
 
                   await _artworkService.saveSearch(
-                      searchNameController.text, criteria);
+                    searchNameController.text,
+                    criteria,
+                  );
                   await _loadSavedSearches();
                   // ignore: use_build_context_synchronously
                   Navigator.pop(context);
                   // ignore: use_build_context_synchronously
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                        content: Text('advanced_search_saved_success'.tr())),
+                      content: Text('advanced_search_saved_success'.tr()),
+                    ),
                   );
                 } catch (e) {
                   // ignore: use_build_context_synchronously
@@ -291,8 +294,10 @@ class _AdvancedArtworkSearchScreenState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('advanced_search_popular'.tr(),
-                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Text(
+                    'advanced_search_popular'.tr(),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   Wrap(
                     spacing: 8,
                     children: _searchSuggestions.take(5).map((suggestion) {
@@ -316,8 +321,10 @@ class _AdvancedArtworkSearchScreenState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('advanced_search_saved'.tr(),
-                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Text(
+                    'advanced_search_saved'.tr(),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   SizedBox(
                     height: 40,
                     child: ListView.builder(
@@ -363,8 +370,8 @@ class _AdvancedArtworkSearchScreenState
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _searchController.text.isEmpty && _savedSearches.isEmpty
-                    ? Center(child: Text('advanced_search_empty_state'.tr()))
-                    : _buildSearchResults(),
+                ? Center(child: Text('advanced_search_empty_state'.tr()))
+                : _buildSearchResults(),
           ),
         ],
       ),
@@ -380,20 +387,28 @@ class _AdvancedArtworkSearchScreenState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('advanced_search_filters_title'.tr(),
-                  style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.bold)),
+              Text(
+                'advanced_search_filters_title'.tr(),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               const SizedBox(height: 16),
 
               // Location filter
-              Text('advanced_search_location'.tr(),
-                  style: const TextStyle(fontWeight: FontWeight.w500)),
+              Text(
+                'advanced_search_location'.tr(),
+                style: const TextStyle(fontWeight: FontWeight.w500),
+              ),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
                 initialValue: _selectedLocation,
                 items: _locations.map((location) {
                   return DropdownMenuItem(
-                      value: location, child: Text(location));
+                    value: location,
+                    child: Text(location),
+                  );
                 }).toList(),
                 onChanged: (value) =>
                     setState(() => _selectedLocation = value!),
@@ -403,8 +418,10 @@ class _AdvancedArtworkSearchScreenState
               const SizedBox(height: 16),
 
               // Medium filter
-              Text('advanced_search_medium'.tr(),
-                  style: const TextStyle(fontWeight: FontWeight.w500)),
+              Text(
+                'advanced_search_medium'.tr(),
+                style: const TextStyle(fontWeight: FontWeight.w500),
+              ),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
                 initialValue: _selectedMedium,
@@ -418,8 +435,10 @@ class _AdvancedArtworkSearchScreenState
               const SizedBox(height: 16),
 
               // Price range
-              Text('art_walk_price_range'.tr(),
-                  style: const TextStyle(fontWeight: FontWeight.w500)),
+              Text(
+                'art_walk_price_range'.tr(),
+                style: const TextStyle(fontWeight: FontWeight.w500),
+              ),
               const SizedBox(height: 8),
               Row(
                 children: [
@@ -452,8 +471,10 @@ class _AdvancedArtworkSearchScreenState
               const SizedBox(height: 16),
 
               // Date range
-              Text('art_walk_date_range'.tr(),
-                  style: const TextStyle(fontWeight: FontWeight.w500)),
+              Text(
+                'art_walk_date_range'.tr(),
+                style: const TextStyle(fontWeight: FontWeight.w500),
+              ),
               const SizedBox(height: 8),
               Row(
                 children: [
@@ -468,9 +489,11 @@ class _AdvancedArtworkSearchScreenState
                         );
                         if (date != null) setState(() => _startDate = date);
                       },
-                      child: Text(_startDate != null
-                          ? '${_startDate!.month}/${_startDate!.day}/${_startDate!.year}'
-                          : 'Start Date'),
+                      child: Text(
+                        _startDate != null
+                            ? '${_startDate!.month}/${_startDate!.day}/${_startDate!.year}'
+                            : 'Start Date',
+                      ),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -485,9 +508,11 @@ class _AdvancedArtworkSearchScreenState
                         );
                         if (date != null) setState(() => _endDate = date);
                       },
-                      child: Text(_endDate != null
-                          ? '${_endDate!.month}/${_endDate!.day}/${_endDate!.year}'
-                          : 'End Date'),
+                      child: Text(
+                        _endDate != null
+                            ? '${_endDate!.month}/${_endDate!.day}/${_endDate!.year}'
+                            : 'End Date',
+                      ),
                     ),
                   ),
                 ],
@@ -523,7 +548,8 @@ class _AdvancedArtworkSearchScreenState
   Widget _buildSearchResults() {
     if (_searchResults.isEmpty) {
       return Center(
-          child: Text('art_walk_no_artwork_found_matching_criteria'.tr()));
+        child: Text('art_walk_no_artwork_found_matching_criteria'.tr()),
+      );
     }
 
     return GridView.builder(
@@ -555,8 +581,10 @@ class _AdvancedArtworkSearchScreenState
                     width: double.infinity,
                     errorBuilder: (context, error, stackTrace) {
                       return const Center(
-                        child:
-                            Icon(Icons.image_not_supported, color: Colors.grey),
+                        child: Icon(
+                          Icons.image_not_supported,
+                          color: Colors.grey,
+                        ),
                       );
                     },
                   ),
@@ -577,7 +605,9 @@ class _AdvancedArtworkSearchScreenState
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                            color: Colors.grey.shade700, fontSize: 12),
+                          color: Colors.grey.shade700,
+                          fontSize: 12,
+                        ),
                       ),
                       if (artwork.isForSale && artwork.price != null)
                         Text(

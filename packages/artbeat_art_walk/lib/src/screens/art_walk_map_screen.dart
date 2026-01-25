@@ -751,9 +751,10 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
                           Icons.account_circle,
                           color: ArtWalkDesignSystem.hudInactiveColor,
                         ),
-                        onPressed: () =>
-                            Navigator.of(context, rootNavigator: true)
-                                .pushNamed(AppRoutes.profileMenu),
+                        onPressed: () => Navigator.of(
+                          context,
+                          rootNavigator: true,
+                        ).pushNamed(AppRoutes.profileMenu),
                       ),
                     ],
                   ),
@@ -1073,10 +1074,8 @@ class CaptureDetailBottomSheet extends StatelessWidget {
                       : null,
                   padding: EdgeInsets.zero,
                   showPlaceholder: true,
-                  onPlaceholderTap: () => Navigator.pushNamed(
-                    context,
-                    '/capture-sponsorship',
-                  ),
+                  onPlaceholderTap: () =>
+                      Navigator.pushNamed(context, '/capture-sponsorship'),
                 ),
                 const SizedBox(height: 24),
                 SizedBox(
@@ -1091,10 +1090,8 @@ class CaptureDetailBottomSheet extends StatelessWidget {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                          ArtWalkDesignSystem.hudActiveColor.withValues(
-                        alpha: 0.15,
-                      ),
+                      backgroundColor: ArtWalkDesignSystem.hudActiveColor
+                          .withValues(alpha: 0.15),
                       foregroundColor: ArtWalkDesignSystem.hudActiveColor,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(24),

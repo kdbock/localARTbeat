@@ -5,7 +5,7 @@ import 'package:artbeat_art_walk/artbeat_art_walk.dart' show ChallengeService;
 import 'package:artbeat_artwork/artbeat_artwork.dart';
 import 'package:artbeat_artist/artbeat_artist.dart' as artist;
 import 'package:artbeat_core/artbeat_core.dart'
-  hide ArtworkModel, GlassInputDecoration;
+    hide ArtworkModel, GlassInputDecoration;
 import 'package:share_plus/share_plus.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -13,10 +13,7 @@ import 'package:google_fonts/google_fonts.dart';
 class ArtworkDetailScreen extends StatefulWidget {
   final String artworkId;
 
-  const ArtworkDetailScreen({
-    super.key,
-    required this.artworkId,
-  });
+  const ArtworkDetailScreen({super.key, required this.artworkId});
 
   @override
   State<ArtworkDetailScreen> createState() => _ArtworkDetailScreenState();
@@ -26,7 +23,8 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
   final ArtworkService _artworkService = ArtworkService();
   final artist.SubscriptionService _subscriptionService =
       artist.SubscriptionService();
-  final artist.VisibilityService _visibilityService = artist.VisibilityService();
+  final artist.VisibilityService _visibilityService =
+      artist.VisibilityService();
   final AuctionService _auctionService = AuctionService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -74,8 +72,9 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
       }
 
       // Get artist profile
-      final artistProfile = await _subscriptionService
-          .getArtistProfileById(artwork.artistProfileId);
+      final artistProfile = await _subscriptionService.getArtistProfileById(
+        artwork.artistProfileId,
+      );
 
       // If artist profile not found, try to get user information as fallback
       String? fallbackArtistName;
@@ -84,7 +83,8 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
         try {
           final userService = UserService();
           final userData = await userService.getUserProfile(artwork.userId);
-          fallbackArtistName = (userData?['fullName'] as String?) ??
+          fallbackArtistName =
+              (userData?['fullName'] as String?) ??
               (userData?['displayName'] as String?) ??
               'Unknown Artist';
           fallbackArtistImageUrl = userData?['profileImageUrl'] as String?;
@@ -99,8 +99,9 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
       await _artworkService.incrementViewCount(widget.artworkId);
 
       // Refresh artwork to get updated view count
-      final updatedArtwork =
-          await _artworkService.getArtworkById(widget.artworkId);
+      final updatedArtwork = await _artworkService.getArtworkById(
+        widget.artworkId,
+      );
       if (updatedArtwork != null) {
         artwork = updatedArtwork;
       }
@@ -122,8 +123,9 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
       double? currentHighestBid;
       List<AuctionBidModel> bidHistory = [];
       if (artwork.auctionEnabled) {
-        currentHighestBid =
-            await _auctionService.getCurrentHighestBid(widget.artworkId);
+        currentHighestBid = await _auctionService.getCurrentHighestBid(
+          widget.artworkId,
+        );
         bidHistory = await _auctionService.getBidHistory(widget.artworkId);
       }
 
@@ -142,8 +144,10 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('artwork_error_loading'
-                  .tr(namedArgs: {'error': e.toString()}))),
+            content: Text(
+              'artwork_error_loading'.tr(namedArgs: {'error': e.toString()}),
+            ),
+          ),
         );
         setState(() {
           _isLoading = false;
@@ -189,10 +193,7 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
               const SizedBox(height: 8),
               Text(
                 '"$title" by $artistName',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
@@ -204,10 +205,12 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
                     label: 'artwork_share_messages'.tr(),
                     onTap: () async {
                       Navigator.pop(context);
-                      await SharePlus.instance.share(ShareParams(
-                        text: shareText,
-                        subject: 'Amazing artwork on ARTbeat',
-                      ));
+                      await SharePlus.instance.share(
+                        ShareParams(
+                          text: shareText,
+                          subject: 'Amazing artwork on ARTbeat',
+                        ),
+                      );
                       await _trackShare('messages');
                     },
                   ),
@@ -218,7 +221,8 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
                       Navigator.pop(context);
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                            content: Text('artwork_share_link_copied'.tr())),
+                          content: Text('artwork_share_link_copied'.tr()),
+                        ),
                       );
                       await _trackShare('copy_link');
                     },
@@ -228,10 +232,12 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
                     label: 'artwork_share_more'.tr(),
                     onTap: () async {
                       Navigator.pop(context);
-                      await SharePlus.instance.share(ShareParams(
-                        text: shareText,
-                        subject: 'Amazing artwork on ARTbeat',
-                      ));
+                      await SharePlus.instance.share(
+                        ShareParams(
+                          text: shareText,
+                          subject: 'Amazing artwork on ARTbeat',
+                        ),
+                      );
                       await _trackShare('system_share');
                     },
                   ),
@@ -250,7 +256,8 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
                       Navigator.pop(context);
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                            content: Text('artwork_share_stories_coming'.tr())),
+                          content: Text('artwork_share_stories_coming'.tr()),
+                        ),
                       );
                       await _trackShare('stories');
                     },
@@ -263,8 +270,8 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
                       Navigator.pop(context);
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                            content:
-                                Text('artwork_share_facebook_coming'.tr())),
+                          content: Text('artwork_share_facebook_coming'.tr()),
+                        ),
                       );
                       await _trackShare('facebook');
                     },
@@ -277,8 +284,8 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
                       Navigator.pop(context);
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                            content:
-                                Text('artwork_share_instagram_coming'.tr())),
+                          content: Text('artwork_share_instagram_coming'.tr()),
+                        ),
                       );
                       await _trackShare('instagram');
                     },
@@ -314,8 +321,9 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: (color ?? Theme.of(context).primaryColor)
-                    .withValues(alpha: 0.1),
+                color: (color ?? Theme.of(context).primaryColor).withValues(
+                  alpha: 0.1,
+                ),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
@@ -327,10 +335,7 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
             const SizedBox(height: 8),
             Text(
               label,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
               textAlign: TextAlign.center,
             ),
           ],
@@ -390,7 +395,8 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
               icon: const Icon(Icons.share, color: Colors.white),
               onPressed: _shareArtwork,
             ),
-          ], subtitle: '',
+          ],
+          subtitle: '',
         ),
         body: SingleChildScrollView(
           child: Padding(
@@ -460,8 +466,9 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
                                   Text(
                                     '${artwork.yearCreated}',
                                     style: GoogleFonts.spaceGrotesk(
-                                      color:
-                                          Colors.white.withValues(alpha: 0.7),
+                                      color: Colors.white.withValues(
+                                        alpha: 0.7,
+                                      ),
                                       fontSize: 13,
                                       fontWeight: FontWeight.w700,
                                     ),
@@ -475,7 +482,9 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
                           else if (artwork.isForSale)
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 10),
+                                horizontal: 16,
+                                vertical: 10,
+                              ),
                               decoration: BoxDecoration(
                                 gradient: const LinearGradient(
                                   colors: [
@@ -521,8 +530,9 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
                                     Text(
                                       artistProfile.displayName,
                                       style: GoogleFonts.spaceGrotesk(
-                                        color:
-                                            Colors.white.withValues(alpha: 0.9),
+                                        color: Colors.white.withValues(
+                                          alpha: 0.9,
+                                        ),
                                         fontWeight: FontWeight.w800,
                                       ),
                                     ),
@@ -531,8 +541,9 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
                                       Text(
                                         artistProfile.location!,
                                         style: GoogleFonts.spaceGrotesk(
-                                          color: Colors.white
-                                              .withValues(alpha: 0.7),
+                                          color: Colors.white.withValues(
+                                            alpha: 0.7,
+                                          ),
                                           fontSize: 12,
                                           fontWeight: FontWeight.w600,
                                         ),
@@ -540,8 +551,11 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
                                   ],
                                 ),
                               ),
-                              const Icon(Icons.chevron_right,
-                                  size: 18, color: Colors.white70),
+                              const Icon(
+                                Icons.chevron_right,
+                                size: 18,
+                                color: Colors.white70,
+                              ),
                             ],
                           ),
                         )
@@ -623,18 +637,19 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
                               .map(
                                 (tag) => Chip(
                                   label: Text(tag),
-                                  backgroundColor: Colors.white
-                                      .withValues(alpha: 0.08),
+                                  backgroundColor: Colors.white.withValues(
+                                    alpha: 0.08,
+                                  ),
                                   labelStyle: GoogleFonts.spaceGrotesk(
-                                    color:
-                                        Colors.white.withValues(alpha: 0.85),
+                                    color: Colors.white.withValues(alpha: 0.85),
                                     fontWeight: FontWeight.w700,
                                   ),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(16),
                                     side: BorderSide(
-                                      color: Colors.white
-                                          .withValues(alpha: 0.12),
+                                      color: Colors.white.withValues(
+                                        alpha: 0.12,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -658,7 +673,8 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
                         initialStats: artwork.engagementStats,
                         showSecondaryActions: true,
                         artistId: artwork.userId,
-                        artistName: _artist?.displayName ??
+                        artistName:
+                            _artist?.displayName ??
                             _fallbackArtistName ??
                             'Unknown Artist',
                       ),
@@ -666,8 +682,11 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.visibility,
-                              size: 16, color: Colors.white70),
+                          const Icon(
+                            Icons.visibility,
+                            size: 16,
+                            color: Colors.white70,
+                          ),
                           const SizedBox(width: 6),
                           Text(
                             '${artwork.viewCount} views',
@@ -720,12 +739,14 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
   Widget _buildAuctionActionButtons(ArtworkModel artwork) {
     final theme = Theme.of(context);
     final currentUser = _auth.currentUser;
-    final isAuctionActive = artwork.auctionStatus == 'open' &&
+    final isAuctionActive =
+        artwork.auctionStatus == 'open' &&
         artwork.auctionEnd != null &&
         artwork.auctionEnd!.isAfter(DateTime.now());
     final isWinning =
         currentUser != null && artwork.currentHighestBidder == currentUser.uid;
-    final canBid = currentUser != null &&
+    final canBid =
+        currentUser != null &&
         currentUser.uid != artwork.userId &&
         isAuctionActive;
 
@@ -754,7 +775,7 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
           else if (currentUser.uid == artwork.userId)
             _buildStatusMessage('auction.cannot_bid_own'.tr(), Colors.grey)
           else if (!isAuctionActive)
-            _buildStatusMessage('auction.auction_ended'.tr(), Colors.red)
+            _buildStatusMessage('auction.auction_ended'.tr(), Colors.red),
         ] else if (isWinning)
           _buildStatusMessage('auction.you_are_winning'.tr(), Colors.green),
 
@@ -800,10 +821,7 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
       ),
       child: Text(
         message,
-        style: TextStyle(
-          color: color,
-          fontWeight: FontWeight.w600,
-        ),
+        style: TextStyle(color: color, fontWeight: FontWeight.w600),
         textAlign: TextAlign.center,
       ),
     );
@@ -815,39 +833,44 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
       children: [
         Text(
           'auction.bid_history'.tr(),
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 12),
-        ..._bidHistory.take(5).map((bid) => Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              margin: const EdgeInsets.only(bottom: 8),
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    '\$${bid.amount.toStringAsFixed(2)}',
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  Text(
-                    _formatBidTime(bid.timestamp),
-                    style: TextStyle(
-                      color: Theme.of(context)
-                          .textTheme
-                          .bodyMedium
-                          ?.color
-                          ?.withValues(alpha: 0.6),
-                      fontSize: 12,
+        ..._bidHistory
+            .take(5)
+            .map(
+              (bid) => Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                margin: const EdgeInsets.only(bottom: 8),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '\$${bid.amount.toStringAsFixed(2)}',
+                      style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
-                  ),
-                ],
+                    Text(
+                      _formatBidTime(bid.timestamp),
+                      style: TextStyle(
+                        color: Theme.of(
+                          context,
+                        ).textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            )),
+            ),
       ],
     );
   }
@@ -871,8 +894,10 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
     if (_artwork == null) return;
 
     final currentBid = _currentHighestBid ?? _artwork!.startingPrice ?? 0.0;
-    final minimumBid =
-        _auctionService.getMinimumNextBid(currentBid, _artwork!.startingPrice);
+    final minimumBid = _auctionService.getMinimumNextBid(
+      currentBid,
+      _artwork!.startingPrice,
+    );
 
     showModalBottomSheet<dynamic>(
       context: context,
@@ -897,7 +922,8 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
   Widget _buildAuctionPriceDisplay(ArtworkModel artwork) {
     final theme = Theme.of(context);
     final currentBid = _currentHighestBid ?? artwork.startingPrice ?? 0.0;
-    final isAuctionActive = artwork.auctionStatus == 'open' &&
+    final isAuctionActive =
+        artwork.auctionStatus == 'open' &&
         artwork.auctionEnd != null &&
         artwork.auctionEnd!.isAfter(DateTime.now());
 
@@ -997,11 +1023,9 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
             Icon(
               Icons.timer,
               size: 16,
-              color: Theme.of(context)
-                  .textTheme
-                  .bodyMedium
-                  ?.color
-                  ?.withValues(alpha: 0.7),
+              color: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
             ),
             const SizedBox(width: 4),
             Text(
@@ -1009,11 +1033,9 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.color
-                    ?.withValues(alpha: 0.7),
+                color: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
               ),
             ),
           ],
@@ -1030,19 +1052,12 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
         children: [
           SizedBox(
             width: 100,
-            child: Text(
-              label,
-              style: TextStyle(
-                color: Colors.grey[600],
-              ),
-            ),
+            child: Text(label, style: TextStyle(color: Colors.grey[600])),
           ),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(
-                fontWeight: FontWeight.w500,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.w500),
             ),
           ),
         ],

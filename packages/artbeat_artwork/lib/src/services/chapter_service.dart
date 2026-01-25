@@ -65,7 +65,9 @@ class ChapterService {
   }
 
   Future<ChapterModel?> getChapterById(
-      String artworkId, String chapterId) async {
+    String artworkId,
+    String chapterId,
+  ) async {
     try {
       final doc = await _firestore
           .collection('artwork')

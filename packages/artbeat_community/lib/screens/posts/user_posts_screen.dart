@@ -86,8 +86,9 @@ class _UserPostsScreenState extends State<UserPostsScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = 'community_user_posts.error_loading'
-            .tr(namedArgs: {'message': e.toString()});
+        _error = 'community_user_posts.error_loading'.tr(
+          namedArgs: {'message': e.toString()},
+        );
         _isLoading = false;
       });
     }
@@ -110,7 +111,8 @@ class _UserPostsScreenState extends State<UserPostsScreen> {
             padding: const EdgeInsets.all(8),
             constraints: const BoxConstraints(minHeight: 44, minWidth: 44),
           ),
-        ], subtitle: '',
+        ],
+        subtitle: '',
       ),
       body: WorldBackground(
         child: SafeArea(
@@ -130,17 +132,16 @@ class _UserPostsScreenState extends State<UserPostsScreen> {
         width: 64,
         height: 64,
         child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(_UserPostsPalette.accentTeal),
+          valueColor: AlwaysStoppedAnimation<Color>(
+            _UserPostsPalette.accentTeal,
+          ),
         ),
       ),
     );
   }
 
   Widget _buildBody(double bottomInset) {
-    final children = <Widget>[
-      _buildHeroCard(),
-      const SizedBox(height: 16),
-    ];
+    final children = <Widget>[_buildHeroCard(), const SizedBox(height: 16)];
 
     if (_error != null) {
       children.add(_buildErrorCard());
@@ -417,7 +418,10 @@ class _UserPostsScreenState extends State<UserPostsScreen> {
                           color: Colors.white.withValues(alpha: 0.18),
                         ),
                       ),
-                      child: const Icon(Icons.delete_outline, color: Colors.white),
+                      child: const Icon(
+                        Icons.delete_outline,
+                        color: Colors.white,
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -515,16 +519,19 @@ class _UserPostsScreenState extends State<UserPostsScreen> {
     final difference = now.difference(date);
 
     if (difference.inDays >= 1) {
-      return 'community_user_posts.time_days'
-          .tr(namedArgs: {'count': difference.inDays.toString()});
+      return 'community_user_posts.time_days'.tr(
+        namedArgs: {'count': difference.inDays.toString()},
+      );
     }
     if (difference.inHours >= 1) {
-      return 'community_user_posts.time_hours'
-          .tr(namedArgs: {'count': difference.inHours.toString()});
+      return 'community_user_posts.time_hours'.tr(
+        namedArgs: {'count': difference.inHours.toString()},
+      );
     }
     if (difference.inMinutes >= 1) {
-      return 'community_user_posts.time_minutes'
-          .tr(namedArgs: {'count': difference.inMinutes.toString()});
+      return 'community_user_posts.time_minutes'.tr(
+        namedArgs: {'count': difference.inMinutes.toString()},
+      );
     }
     return 'community_user_posts.time_now'.tr();
   }
@@ -533,7 +540,8 @@ class _UserPostsScreenState extends State<UserPostsScreen> {
     QueryDocumentSnapshot<Map<String, dynamic>> doc,
   ) {
     final data = doc.data();
-    final createdAt = (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now();
+    final createdAt =
+        (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now();
     final imageUrls = [..._asStringList(data['imageUrls'])];
     final fallbackImage = (data['imageUrl'] as String?)?.trim();
     if (fallbackImage != null && fallbackImage.isNotEmpty) {
@@ -544,27 +552,37 @@ class _UserPostsScreenState extends State<UserPostsScreen> {
     final mentionedUsers = _asStringList(data['mentionedUsers']);
     final engagement = data['engagementStats'] as Map<String, dynamic>?;
 
-    final likes = _asInt(engagement?['likeCount']) ?? _asInt(data['likesCount']) ?? 0;
+    final likes =
+        _asInt(engagement?['likeCount']) ?? _asInt(data['likesCount']) ?? 0;
     final comments =
-        _asInt(engagement?['commentCount']) ?? _asInt(data['commentsCount']) ?? 0;
+        _asInt(engagement?['commentCount']) ??
+        _asInt(data['commentsCount']) ??
+        0;
     final shares =
         _asInt(engagement?['shareCount']) ?? _asInt(data['sharesCount']) ?? 0;
 
     return PostModel(
       id: doc.id,
-      userId: (data['userId'] as String?) ?? (data['authorId'] as String?) ?? '',
+      userId:
+          (data['userId'] as String?) ?? (data['authorId'] as String?) ?? '',
       userName:
-          (data['userName'] as String?) ?? (data['authorName'] as String?) ?? '',
-      userPhotoUrl: (data['userPhotoUrl'] as String?) ??
+          (data['userName'] as String?) ??
+          (data['authorName'] as String?) ??
+          '',
+      userPhotoUrl:
+          (data['userPhotoUrl'] as String?) ??
           (data['authorProfileImage'] as String?) ??
           '',
       content:
-          (data['content'] as String?) ?? (data['postContent'] as String?) ?? '',
+          (data['content'] as String?) ??
+          (data['postContent'] as String?) ??
+          '',
       imageUrls: imageUrls,
       videoUrl: data['videoUrl'] as String?,
       audioUrl: data['audioUrl'] as String?,
       tags: tags,
-      location: (data['location'] as String?) ?? (data['city'] as String?) ?? '',
+      location:
+          (data['location'] as String?) ?? (data['city'] as String?) ?? '',
       geoPoint: data['geoPoint'] as GeoPoint?,
       zipCode: data['zipCode'] as String?,
       createdAt: createdAt,
@@ -578,7 +596,9 @@ class _UserPostsScreenState extends State<UserPostsScreen> {
       mentionedUsers: mentionedUsers.isEmpty ? null : mentionedUsers,
       metadata: data['metadata'] as Map<String, dynamic>?,
       isUserVerified:
-          (data['isUserVerified'] as bool?) ?? (data['authorVerified'] as bool?) ?? false,
+          (data['isUserVerified'] as bool?) ??
+          (data['authorVerified'] as bool?) ??
+          false,
       moderationStatus: PostModerationStatus.fromString(
         (data['moderationStatus'] as String?) ?? 'approved',
       ),

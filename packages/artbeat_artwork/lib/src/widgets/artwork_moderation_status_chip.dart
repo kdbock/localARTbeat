@@ -18,16 +18,10 @@ class ArtworkModerationStatusChip extends StatelessWidget {
       avatar: showIcon ? _getStatusIcon() : null,
       label: Text(
         status.displayName,
-        style: TextStyle(
-          color: _getTextColor(),
-          fontSize: 12,
-        ),
+        style: TextStyle(color: _getTextColor(), fontSize: 12),
       ),
       backgroundColor: _getBackgroundColor(),
-      side: BorderSide(
-        color: _getBorderColor(),
-        width: 1,
-      ),
+      side: BorderSide(color: _getBorderColor(), width: 1),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
     );
   }
@@ -52,11 +46,7 @@ class ArtworkModerationStatusChip extends StatelessWidget {
         break;
     }
 
-    return Icon(
-      iconData,
-      size: 16,
-      color: _getTextColor(),
-    );
+    return Icon(iconData, size: 16, color: _getTextColor());
   }
 
   Color _getBackgroundColor() {

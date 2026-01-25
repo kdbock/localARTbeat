@@ -6,7 +6,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:artbeat_capture/artbeat_capture.dart';
-import 'package:artbeat_core/artbeat_core.dart' show AppLogger, CaptureStatus, CaptureModel;
+import 'package:artbeat_core/artbeat_core.dart'
+    show AppLogger, CaptureStatus, CaptureModel;
 
 class CaptureViewScreen extends StatefulWidget {
   final File imageFile;
@@ -43,7 +44,8 @@ class _CaptureViewScreenState extends State<CaptureViewScreen> {
         final serviceEnabled = await Geolocator.isLocationServiceEnabled();
         if (serviceEnabled) {
           final permission = await Geolocator.checkPermission();
-          if (permission != LocationPermission.denied && permission != LocationPermission.deniedForever) {
+          if (permission != LocationPermission.denied &&
+              permission != LocationPermission.deniedForever) {
             position = await Geolocator.getCurrentPosition(
               locationSettings: const LocationSettings(
                 accuracy: LocationAccuracy.high,
@@ -64,7 +66,7 @@ class _CaptureViewScreenState extends State<CaptureViewScreen> {
 
       // Create capture model
       final capture = CaptureModel(
-        id: '', 
+        id: '',
         userId: user.uid,
         imageUrl: imageUrl,
         createdAt: DateTime.now(),
@@ -84,9 +86,9 @@ class _CaptureViewScreenState extends State<CaptureViewScreen> {
       await captureService.createCapture(capture);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('capture_upload_success'.tr())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('capture_upload_success'.tr())));
         Navigator.popUntil(context, (route) => route.isFirst);
       }
     } catch (e) {
@@ -192,14 +194,16 @@ class _CaptureViewScreenState extends State<CaptureViewScreen> {
                                     child: HudButton(
                                       label: 'capture_view_edit'.tr(),
                                       icon: Icons.edit_rounded,
-                                      onTap: _isSubmitting ? () {} : () => Navigator.pop(context),
+                                      onTap: _isSubmitting
+                                          ? () {}
+                                          : () => Navigator.pop(context),
                                     ),
                                   ),
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: HudButton(
-                                      label: _isSubmitting 
-                                          ? 'capture_upload_submitting'.tr() 
+                                      label: _isSubmitting
+                                          ? 'capture_upload_submitting'.tr()
                                           : 'capture_view_submit'.tr(),
                                       icon: Icons.cloud_upload_rounded,
                                       onTap: _isSubmitting ? () {} : _submit,

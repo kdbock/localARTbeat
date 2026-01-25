@@ -16,7 +16,7 @@ class AdvancedArtworkAnalyticsService {
   Future<void> trackEngagementEvent({
     required String artworkId,
     required String
-        eventType, // view, like, comment, share, save, purchase_inquiry
+    eventType, // view, like, comment, share, save, purchase_inquiry
     Map<String, dynamic>? additionalData,
   }) async {
     try {
@@ -32,22 +32,24 @@ class AdvancedArtworkAnalyticsService {
           .doc('artwork_engagement')
           .collection('events')
           .add({
-        'artworkId': artworkId,
-        'userId': user.uid,
-        'eventType': eventType,
-        'timestamp': Timestamp.now(),
-        'userLocation': userData['location'] ?? 'Unknown',
-        'userType': userData['userType'] ?? 'User',
-        'deviceType': 'mobile', // Could be enhanced with device detection
-        'sessionId': _generateSessionId(),
-        'additionalData': additionalData ?? {},
-      });
+            'artworkId': artworkId,
+            'userId': user.uid,
+            'eventType': eventType,
+            'timestamp': Timestamp.now(),
+            'userLocation': userData['location'] ?? 'Unknown',
+            'userType': userData['userType'] ?? 'User',
+            'deviceType': 'mobile', // Could be enhanced with device detection
+            'sessionId': _generateSessionId(),
+            'additionalData': additionalData ?? {},
+          });
 
       // Update real-time counters
       await _updateRealTimeCounters(artworkId, eventType);
     } catch (e) {
-      developer.log('Error tracking engagement event: $e',
-          name: 'AdvancedArtworkAnalytics');
+      developer.log(
+        'Error tracking engagement event: $e',
+        name: 'AdvancedArtworkAnalytics',
+      );
     }
   }
 
@@ -62,8 +64,10 @@ class AdvancedArtworkAnalyticsService {
       );
 
       // Get artwork details
-      final artworkDoc =
-          await _firestore.collection('artwork').doc(artworkId).get();
+      final artworkDoc = await _firestore
+          .collection('artwork')
+          .doc(artworkId)
+          .get();
       if (!artworkDoc.exists) return {};
 
       final artwork = ArtworkModel.fromFirestore(artworkDoc);
@@ -92,15 +96,19 @@ class AdvancedArtworkAnalyticsService {
         'overallScore': _calculateOverallScore(futures),
       };
     } catch (e) {
-      developer.log('Error getting artwork analytics: $e',
-          name: 'AdvancedArtworkAnalytics');
+      developer.log(
+        'Error getting artwork analytics: $e',
+        name: 'AdvancedArtworkAnalytics',
+      );
       return {};
     }
   }
 
   /// Get engagement metrics (views, interactions, time spent)
   Future<Map<String, dynamic>> _getEngagementMetrics(
-      String artworkId, Timestamp cutoffDate) async {
+    String artworkId,
+    Timestamp cutoffDate,
+  ) async {
     try {
       final snapshot = await _firestore
           .collection('analytics')
@@ -111,16 +119,21 @@ class AdvancedArtworkAnalyticsService {
           .get();
 
       final events = snapshot.docs;
-      final viewEvents =
-          events.where((doc) => doc.data()['eventType'] == 'view').toList();
-      final likeEvents =
-          events.where((doc) => doc.data()['eventType'] == 'like').toList();
-      final commentEvents =
-          events.where((doc) => doc.data()['eventType'] == 'comment').toList();
-      final shareEvents =
-          events.where((doc) => doc.data()['eventType'] == 'share').toList();
-      final saveEvents =
-          events.where((doc) => doc.data()['eventType'] == 'save').toList();
+      final viewEvents = events
+          .where((doc) => doc.data()['eventType'] == 'view')
+          .toList();
+      final likeEvents = events
+          .where((doc) => doc.data()['eventType'] == 'like')
+          .toList();
+      final commentEvents = events
+          .where((doc) => doc.data()['eventType'] == 'comment')
+          .toList();
+      final shareEvents = events
+          .where((doc) => doc.data()['eventType'] == 'share')
+          .toList();
+      final saveEvents = events
+          .where((doc) => doc.data()['eventType'] == 'save')
+          .toList();
 
       // Calculate daily breakdown
       final dailyStats = <String, Map<String, int>>{};
@@ -149,12 +162,14 @@ class AdvancedArtworkAnalyticsService {
 
       // Calculate engagement rate
       final totalViews = viewEvents.length;
-      final totalInteractions = likeEvents.length +
+      final totalInteractions =
+          likeEvents.length +
           commentEvents.length +
           shareEvents.length +
           saveEvents.length;
-      final engagementRate =
-          totalViews > 0 ? (totalInteractions / totalViews) * 100 : 0.0;
+      final engagementRate = totalViews > 0
+          ? (totalInteractions / totalViews) * 100
+          : 0.0;
 
       return {
         'totalViews': totalViews,
@@ -168,15 +183,19 @@ class AdvancedArtworkAnalyticsService {
         'peakEngagementDay': _findPeakEngagementDay(dailyStats),
       };
     } catch (e) {
-      developer.log('Error getting engagement metrics: $e',
-          name: 'AdvancedArtworkAnalytics');
+      developer.log(
+        'Error getting engagement metrics: $e',
+        name: 'AdvancedArtworkAnalytics',
+      );
       return {};
     }
   }
 
   /// Get viewer demographics
   Future<Map<String, dynamic>> _getViewerDemographics(
-      String artworkId, Timestamp cutoffDate) async {
+    String artworkId,
+    Timestamp cutoffDate,
+  ) async {
     try {
       final snapshot = await _firestore
           .collection('analytics')
@@ -216,8 +235,10 @@ class AdvancedArtworkAnalyticsService {
         'primaryAudience': _getTopEntry(userTypeCounts),
       };
     } catch (e) {
-      developer.log('Error getting viewer demographics: $e',
-          name: 'AdvancedArtworkAnalytics');
+      developer.log(
+        'Error getting viewer demographics: $e',
+        name: 'AdvancedArtworkAnalytics',
+      );
       return {};
     }
   }
@@ -262,15 +283,19 @@ class AdvancedArtworkAnalyticsService {
         'engagementLevel': _getEngagementLevel(socialScore),
       };
     } catch (e) {
-      developer.log('Error getting social metrics: $e',
-          name: 'AdvancedArtworkAnalytics');
+      developer.log(
+        'Error getting social metrics: $e',
+        name: 'AdvancedArtworkAnalytics',
+      );
       return {};
     }
   }
 
   /// Get revenue metrics
   Future<Map<String, dynamic>> _getRevenueMetrics(
-      String artworkId, Timestamp cutoffDate) async {
+    String artworkId,
+    Timestamp cutoffDate,
+  ) async {
     try {
       // Get sales data
       final salesSnapshot = await _firestore
@@ -300,8 +325,9 @@ class AdvancedArtworkAnalyticsService {
       }
 
       final totalInquiries = inquirySnapshot.docs.length;
-      final conversionRate =
-          totalInquiries > 0 ? (totalSales / totalInquiries) * 100 : 0.0;
+      final conversionRate = totalInquiries > 0
+          ? (totalSales / totalInquiries) * 100
+          : 0.0;
 
       return {
         'totalRevenue': totalRevenue,
@@ -309,19 +335,25 @@ class AdvancedArtworkAnalyticsService {
         'totalInquiries': totalInquiries,
         'conversionRate': conversionRate,
         'averageSaleAmount': totalSales > 0 ? totalRevenue / totalSales : 0.0,
-        'revenuePerView':
-            await _calculateRevenuePerView(artworkId, totalRevenue),
+        'revenuePerView': await _calculateRevenuePerView(
+          artworkId,
+          totalRevenue,
+        ),
       };
     } catch (e) {
-      developer.log('Error getting revenue metrics: $e',
-          name: 'AdvancedArtworkAnalytics');
+      developer.log(
+        'Error getting revenue metrics: $e',
+        name: 'AdvancedArtworkAnalytics',
+      );
       return {};
     }
   }
 
   /// Get share metrics
   Future<Map<String, dynamic>> _getShareMetrics(
-      String artworkId, Timestamp cutoffDate) async {
+    String artworkId,
+    Timestamp cutoffDate,
+  ) async {
     try {
       final snapshot = await _firestore
           .collection('analytics')
@@ -349,15 +381,19 @@ class AdvancedArtworkAnalyticsService {
         'viralityScore': _calculateViralityScore(snapshot.docs.length),
       };
     } catch (e) {
-      developer.log('Error getting share metrics: $e',
-          name: 'AdvancedArtworkAnalytics');
+      developer.log(
+        'Error getting share metrics: $e',
+        name: 'AdvancedArtworkAnalytics',
+      );
       return {};
     }
   }
 
   /// Get search metrics
   Future<Map<String, dynamic>> _getSearchMetrics(
-      String artworkId, Timestamp cutoffDate) async {
+    String artworkId,
+    Timestamp cutoffDate,
+  ) async {
     try {
       final snapshot = await _firestore
           .collection('analytics')
@@ -378,12 +414,15 @@ class AdvancedArtworkAnalyticsService {
       return {
         'totalSearchAppearances': snapshot.docs.length,
         'topSearchTerms': _getTopEntries(searchTerms, 10),
-        'searchDiscoverability':
-            _calculateDiscoverabilityScore(snapshot.docs.length),
+        'searchDiscoverability': _calculateDiscoverabilityScore(
+          snapshot.docs.length,
+        ),
       };
     } catch (e) {
-      developer.log('Error getting search metrics: $e',
-          name: 'AdvancedArtworkAnalytics');
+      developer.log(
+        'Error getting search metrics: $e',
+        name: 'AdvancedArtworkAnalytics',
+      );
       return {};
     }
   }
@@ -416,15 +455,19 @@ class AdvancedArtworkAnalyticsService {
         'recommendations': _generateRecommendations(aggregateMetrics),
       };
     } catch (e) {
-      developer.log('Error generating performance report: $e',
-          name: 'AdvancedArtworkAnalytics');
+      developer.log(
+        'Error generating performance report: $e',
+        name: 'AdvancedArtworkAnalytics',
+      );
       return {};
     }
   }
 
   /// Helper methods
   Future<void> _updateRealTimeCounters(
-      String artworkId, String eventType) async {
+    String artworkId,
+    String eventType,
+  ) async {
     final counterPath = 'artwork/$artworkId/counters/${eventType}_count';
     await _firestore.doc(counterPath).set({
       'count': FieldValue.increment(1),
@@ -445,8 +488,10 @@ class AdvancedArtworkAnalyticsService {
     int maxEngagement = 0;
 
     for (final entry in dailyStats.entries) {
-      final dayEngagement =
-          entry.value.values.fold(0, (sum, count) => sum + count);
+      final dayEngagement = entry.value.values.fold(
+        0,
+        (sum, count) => sum + count,
+      );
       if (dayEngagement > maxEngagement) {
         maxEngagement = dayEngagement;
         peakDay = entry.key;
@@ -463,7 +508,9 @@ class AdvancedArtworkAnalyticsService {
   }
 
   List<Map<String, dynamic>> _getTopEntries(
-      Map<String, int> counts, int limit) {
+    Map<String, int> counts,
+    int limit,
+  ) {
     final sortedEntries = counts.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
 
@@ -491,13 +538,16 @@ class AdvancedArtworkAnalyticsService {
       'totalLikes': totalLikes,
       'repliesCount': repliesCount,
       'topLevelComments': totalComments - repliesCount,
-      'averageLikesPerComment':
-          totalComments > 0 ? totalLikes / totalComments : 0.0,
+      'averageLikesPerComment': totalComments > 0
+          ? totalLikes / totalComments
+          : 0.0,
     };
   }
 
   double _calculateSocialScore(
-      ArtworkRatingStats ratingStats, int commentCount) {
+    ArtworkRatingStats ratingStats,
+    int commentCount,
+  ) {
     // Weighted scoring algorithm
     final ratingScore =
         ratingStats.averageRating * ratingStats.totalRatings * 0.3;
@@ -514,7 +564,9 @@ class AdvancedArtworkAnalyticsService {
   }
 
   Future<double> _calculateRevenuePerView(
-      String artworkId, double totalRevenue) async {
+    String artworkId,
+    double totalRevenue,
+  ) async {
     try {
       final viewsSnapshot = await _firestore
           .collection('analytics')
@@ -551,7 +603,8 @@ class AdvancedArtworkAnalyticsService {
   }
 
   Map<String, dynamic> _calculateAggregateMetrics(
-      Map<String, Map<String, dynamic>> reports) {
+    Map<String, Map<String, dynamic>> reports,
+  ) {
     // Calculate aggregate metrics across all artworks
     return {
       'totalArtworks': reports.length,

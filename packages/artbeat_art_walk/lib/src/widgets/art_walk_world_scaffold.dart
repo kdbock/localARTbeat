@@ -39,7 +39,8 @@ class ArtWalkWorldScaffold extends StatelessWidget {
         key: scaffoldKey,
         backgroundColor: Colors.transparent,
         drawer: drawer,
-        appBar: appBar ??
+        appBar:
+            appBar ??
             ArtWalkDesignSystem.buildAppBar(
               title: resolvedTitle,
               showBackButton: showBackButton,

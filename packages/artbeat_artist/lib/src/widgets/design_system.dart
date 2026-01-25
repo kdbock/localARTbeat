@@ -11,11 +11,7 @@ class WorldBackground extends StatefulWidget {
   final Widget child;
   final bool animated;
 
-  const WorldBackground({
-    super.key,
-    required this.child,
-    this.animated = true,
-  });
+  const WorldBackground({super.key, required this.child, this.animated = true});
 
   @override
   State<WorldBackground> createState() => _WorldBackgroundState();
@@ -98,14 +94,42 @@ class _WorldBlobsPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    _drawBlob(canvas, size, const Color(0xFF22D3EE), 0.18, 0.20, 0.36,
-        phase: 0.0);
-    _drawBlob(canvas, size, const Color(0xFF7C4DFF), 0.84, 0.22, 0.30,
-        phase: 0.2);
-    _drawBlob(canvas, size, const Color(0xFFFF3D8D), 0.78, 0.76, 0.42,
-        phase: 0.45);
-    _drawBlob(canvas, size, const Color(0xFF34D399), 0.16, 0.78, 0.34,
-        phase: 0.62);
+    _drawBlob(
+      canvas,
+      size,
+      const Color(0xFF22D3EE),
+      0.18,
+      0.20,
+      0.36,
+      phase: 0.0,
+    );
+    _drawBlob(
+      canvas,
+      size,
+      const Color(0xFF7C4DFF),
+      0.84,
+      0.22,
+      0.30,
+      phase: 0.2,
+    );
+    _drawBlob(
+      canvas,
+      size,
+      const Color(0xFFFF3D8D),
+      0.78,
+      0.76,
+      0.42,
+      phase: 0.45,
+    );
+    _drawBlob(
+      canvas,
+      size,
+      const Color(0xFF34D399),
+      0.16,
+      0.78,
+      0.34,
+      phase: 0.62,
+    );
   }
 
   void _drawBlob(
@@ -172,7 +196,8 @@ class GlassCard extends StatelessWidget {
             border: Border.all(
               color: borderColor ?? Colors.white.withValues(alpha: 0.12),
             ),
-            boxShadow: shadows ??
+            boxShadow:
+                shadows ??
                 [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.35),
@@ -261,8 +286,10 @@ class HudTopBar extends StatelessWidget {
               if (onMenu != null)
                 IconButton(
                   onPressed: onMenu,
-                  icon:
-                      Icon(menuIcon ?? Icons.menu_rounded, color: Colors.white),
+                  icon: Icon(
+                    menuIcon ?? Icons.menu_rounded,
+                    color: Colors.white,
+                  ),
                 ),
               const SizedBox(width: 6),
               Expanded(
@@ -331,7 +358,8 @@ class HudButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final buttonGradient = gradient ??
+    final buttonGradient =
+        gradient ??
         const LinearGradient(
           colors: [Color(0xFF34D399), Color(0xFF22D3EE)],
           begin: Alignment.topLeft,
@@ -450,49 +478,51 @@ class GlassInputDecoration extends InputDecoration {
     super.suffixIcon,
     super.errorText,
     super.helperText,
-    super.contentPadding =
-        const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+    super.contentPadding = const EdgeInsets.symmetric(
+      horizontal: 16,
+      vertical: 16,
+    ),
   }) : super(
-          filled: true,
-          fillColor: const Color.fromRGBO(255, 255, 255, 0.06),
-          border: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(16)),
-            borderSide: BorderSide(color: Color.fromRGBO(255, 255, 255, 0.12)),
-          ),
-          enabledBorder: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(16)),
-            borderSide: BorderSide(color: Color.fromRGBO(255, 255, 255, 0.12)),
-          ),
-          focusedBorder: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(16)),
-            borderSide: BorderSide(color: Color.fromRGBO(255, 255, 255, 0.3)),
-          ),
-          errorBorder: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(16)),
-            borderSide: BorderSide(color: Color.fromRGBO(255, 107, 107, 0.5)),
-          ),
-          focusedErrorBorder: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(16)),
-            borderSide: BorderSide(color: Color.fromRGBO(255, 107, 107, 0.7)),
-          ),
-          hintStyle: const TextStyle(
-            color: Color.fromRGBO(255, 255, 255, 0.5),
-            fontSize: 14,
-          ),
-          labelStyle: const TextStyle(
-            color: Color.fromRGBO(255, 255, 255, 0.7),
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
-          errorStyle: const TextStyle(
-            color: Color.fromRGBO(255, 107, 107, 0.9),
-            fontSize: 12,
-          ),
-          helperStyle: const TextStyle(
-            color: Color.fromRGBO(255, 255, 255, 0.6),
-            fontSize: 12,
-          ),
-        );
+         filled: true,
+         fillColor: const Color.fromRGBO(255, 255, 255, 0.06),
+         border: const OutlineInputBorder(
+           borderRadius: BorderRadius.all(Radius.circular(16)),
+           borderSide: BorderSide(color: Color.fromRGBO(255, 255, 255, 0.12)),
+         ),
+         enabledBorder: const OutlineInputBorder(
+           borderRadius: BorderRadius.all(Radius.circular(16)),
+           borderSide: BorderSide(color: Color.fromRGBO(255, 255, 255, 0.12)),
+         ),
+         focusedBorder: const OutlineInputBorder(
+           borderRadius: BorderRadius.all(Radius.circular(16)),
+           borderSide: BorderSide(color: Color.fromRGBO(255, 255, 255, 0.3)),
+         ),
+         errorBorder: const OutlineInputBorder(
+           borderRadius: BorderRadius.all(Radius.circular(16)),
+           borderSide: BorderSide(color: Color.fromRGBO(255, 107, 107, 0.5)),
+         ),
+         focusedErrorBorder: const OutlineInputBorder(
+           borderRadius: BorderRadius.all(Radius.circular(16)),
+           borderSide: BorderSide(color: Color.fromRGBO(255, 107, 107, 0.7)),
+         ),
+         hintStyle: const TextStyle(
+           color: Color.fromRGBO(255, 255, 255, 0.5),
+           fontSize: 14,
+         ),
+         labelStyle: const TextStyle(
+           color: Color.fromRGBO(255, 255, 255, 0.7),
+           fontSize: 14,
+           fontWeight: FontWeight.w600,
+         ),
+         errorStyle: const TextStyle(
+           color: Color.fromRGBO(255, 107, 107, 0.9),
+           fontSize: 12,
+         ),
+         helperStyle: const TextStyle(
+           color: Color.fromRGBO(255, 255, 255, 0.6),
+           fontSize: 12,
+         ),
+       );
 }
 
 /// Section Header with accent dot
@@ -589,10 +619,7 @@ class EngagementButton extends StatelessWidget {
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: color.withValues(alpha: 0.3),
-                width: 1,
-              ),
+              border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
             ),
             child: Icon(icon, size: 20, color: color),
           ),

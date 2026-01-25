@@ -30,7 +30,8 @@ class MyApp extends StatelessWidget {
       }
 
       return _buildMainApp();
-    }, future: null,
+    },
+    future: null,
   );
 
   /// Builds the error state app

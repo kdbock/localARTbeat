@@ -27,10 +27,7 @@ class LocalArtworkRowWidget extends StatelessWidget {
             children: [
               const Text(
                 'Local Artwork',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               TextButton(
                 onPressed: onSeeAllPressed,
@@ -65,11 +62,7 @@ class LocalArtworkRowWidget extends StatelessWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
-                          Icons.error_outline,
-                          color: Colors.red,
-                          size: 36,
-                        ),
+                        Icon(Icons.error_outline, color: Colors.red, size: 36),
                         SizedBox(height: 8),
                         Text(
                           'Error loading artwork',
@@ -122,8 +115,10 @@ class LocalArtworkRowWidget extends StatelessWidget {
                   final artwork = artworks[index];
                   return GestureDetector(
                     onTap: () => Navigator.pushNamed(
-                        context, '/artist/artwork-detail',
-                        arguments: {'artworkId': artwork.id}),
+                      context,
+                      '/artist/artwork-detail',
+                      arguments: {'artworkId': artwork.id},
+                    ),
                     child: Container(
                       width: 170, // Increased width for better display
                       margin: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -141,7 +136,8 @@ class LocalArtworkRowWidget extends StatelessWidget {
                               children: [
                                 ClipRRect(
                                   borderRadius: const BorderRadius.vertical(
-                                      top: Radius.circular(12.0)),
+                                    top: Radius.circular(12.0),
+                                  ),
                                   child: SecureNetworkImage(
                                     imageUrl: artwork.imageUrl,
                                     width: 170,
@@ -153,8 +149,9 @@ class LocalArtworkRowWidget extends StatelessWidget {
                                       width: 170,
                                       height: 150,
                                       color: Colors.grey.shade300,
-                                      child:
-                                          const Icon(Icons.image_not_supported),
+                                      child: const Icon(
+                                        Icons.image_not_supported,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -164,7 +161,9 @@ class LocalArtworkRowWidget extends StatelessWidget {
                                     right: 8,
                                     child: Container(
                                       padding: const EdgeInsets.symmetric(
-                                          horizontal: 8, vertical: 4),
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
                                       decoration: BoxDecoration(
                                         color: Colors.red,
                                         borderRadius: BorderRadius.circular(12),
@@ -204,13 +203,16 @@ class LocalArtworkRowWidget extends StatelessWidget {
                                       String artistName = 'Unknown Artist';
                                       if (snapshot.hasData &&
                                           snapshot.data != null) {
-                                        final artistData = snapshot.data!.data()
-                                            as Map<String, dynamic>?;
+                                        final artistData =
+                                            snapshot.data!.data()
+                                                as Map<String, dynamic>?;
                                         if (artistData != null &&
-                                            artistData
-                                                .containsKey('displayName')) {
-                                          artistName = artistData['displayName']
-                                              as String;
+                                            artistData.containsKey(
+                                              'displayName',
+                                            )) {
+                                          artistName =
+                                              artistData['displayName']
+                                                  as String;
                                         }
                                       }
                                       return Text(

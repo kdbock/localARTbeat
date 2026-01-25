@@ -460,8 +460,9 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
             color: Colors.white.withValues(alpha: 0.12),
             image: hasImage
                 ? DecorationImage(
-                    image:
-                        ImageUrlValidator.safeNetworkImage(event.artistHeadshotUrl)!,
+                    image: ImageUrlValidator.safeNetworkImage(
+                      event.artistHeadshotUrl,
+                    )!,
                     fit: _getBoxFit(event.artistHeadshotFit),
                   )
                 : null,

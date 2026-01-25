@@ -35,13 +35,7 @@ class EnhancedArtworkUploadScreen extends StatefulWidget {
       _EnhancedArtworkUploadScreenState();
 }
 
-enum UploadStep {
-  media,
-  basicInfo,
-  details,
-  pricing,
-  review,
-}
+enum UploadStep { media, basicInfo, details, pricing, review }
 
 class _EnhancedArtworkUploadScreenState
     extends State<EnhancedArtworkUploadScreen> {
@@ -174,7 +168,7 @@ class _EnhancedArtworkUploadScreenState
     'Silver',
     'Gold',
     'Beige',
-    'Coral'
+    'Coral',
   ];
 
   @override
@@ -251,8 +245,10 @@ class _EnhancedArtworkUploadScreenState
     });
 
     try {
-      final doc =
-          await _firestore.collection('artwork').doc(widget.artworkId).get();
+      final doc = await _firestore
+          .collection('artwork')
+          .doc(widget.artworkId)
+          .get();
 
       if (!doc.exists) {
         if (mounted) {
@@ -273,18 +269,20 @@ class _EnhancedArtworkUploadScreenState
           _dimensionsController.text = (data['dimensions'] ?? '').toString();
           _materialsController.text = (data['materials'] ?? '').toString();
           _locationController.text = (data['location'] ?? '').toString();
-          _priceController.text =
-              data['price'] != null ? data['price'].toString() : '';
-          _yearController.text =
-              data['yearCreated'] != null ? data['yearCreated'].toString() : '';
+          _priceController.text = data['price'] != null
+              ? data['price'].toString()
+              : '';
+          _yearController.text = data['yearCreated'] != null
+              ? data['yearCreated'].toString()
+              : '';
           _imageUrl = data['imageUrl'] as String?;
           _additionalImageUrls =
               (data['additionalImageUrls'] as List<dynamic>? ?? [])
                   .cast<String>();
-          _videoUrls =
-              (data['videoUrls'] as List<dynamic>? ?? []).cast<String>();
-          _audioUrls =
-              (data['audioUrls'] as List<dynamic>? ?? []).cast<String>();
+          _videoUrls = (data['videoUrls'] as List<dynamic>? ?? [])
+              .cast<String>();
+          _audioUrls = (data['audioUrls'] as List<dynamic>? ?? [])
+              .cast<String>();
           _isForSale = data['isForSale'] as bool? ?? false;
           _medium = (data['medium'] ?? '').toString();
           _styles = (data['styles'] is List
@@ -305,8 +303,8 @@ class _EnhancedArtworkUploadScreenState
           _colorPalette = (data['colorPalette'] is List
               ? (data['colorPalette'] as List).map((e) => e.toString()).toList()
               : <String>[]);
-          _creationProcessController.text =
-              (data['creationProcess'] ?? '').toString();
+          _creationProcessController.text = (data['creationProcess'] ?? '')
+              .toString();
           _inspirationController.text = (data['inspiration'] ?? '').toString();
           _techniqueController.text = (data['technique'] ?? '').toString();
         });
@@ -315,8 +313,12 @@ class _EnhancedArtworkUploadScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('enhanced_upload_load_error'
-                  .tr(namedArgs: {'error': e.toString()}))),
+            content: Text(
+              'enhanced_upload_load_error'.tr(
+                namedArgs: {'error': e.toString()},
+              ),
+            ),
+          ),
         );
       }
     } finally {
@@ -346,8 +348,12 @@ class _EnhancedArtworkUploadScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('enhanced_upload_image_error'
-                  .tr(namedArgs: {'error': e.toString()}))),
+            content: Text(
+              'enhanced_upload_image_error'.tr(
+                namedArgs: {'error': e.toString()},
+              ),
+            ),
+          ),
         );
       }
     }
@@ -438,7 +444,8 @@ class _EnhancedArtworkUploadScreenState
         return uploadResult['imageUrl']!;
       } catch (e) {
         debugPrint(
-            '❌ Enhanced upload failed, falling back to legacy method: $e');
+          '❌ Enhanced upload failed, falling back to legacy method: $e',
+        );
       }
     }
 
@@ -566,17 +573,19 @@ class _EnhancedArtworkUploadScreenState
       }
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('enhanced_upload_success'.tr())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('enhanced_upload_success'.tr())));
         Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('enhanced_upload_error'
-                  .tr(namedArgs: {'error': e.toString()}))),
+            content: Text(
+              'enhanced_upload_error'.tr(namedArgs: {'error': e.toString()}),
+            ),
+          ),
         );
       }
     } finally {
@@ -686,7 +695,9 @@ class _EnhancedArtworkUploadScreenState
                   ElevatedButton(
                     onPressed: () {
                       Navigator.pushReplacementNamed(
-                          context, '/artist/subscription');
+                        context,
+                        '/artist/subscription',
+                      );
                     },
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
@@ -917,10 +928,7 @@ class _EnhancedArtworkUploadScreenState
       children: [
         Text(
           'enhanced_upload_media_title'.tr(),
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         Text(
@@ -953,10 +961,7 @@ class _EnhancedArtworkUploadScreenState
       children: [
         Text(
           'enhanced_upload_main_image_title'.tr(),
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 8),
         Text(
@@ -976,10 +981,7 @@ class _EnhancedArtworkUploadScreenState
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: Image.file(
-                _mainImageFile!,
-                fit: BoxFit.cover,
-              ),
+              child: Image.file(_mainImageFile!, fit: BoxFit.cover),
             ),
           ),
           const SizedBox(height: 8),
@@ -1010,17 +1012,15 @@ class _EnhancedArtworkUploadScreenState
             width: double.infinity,
             decoration: BoxDecoration(
               border: Border.all(
-                  color: Colors.grey[300]!, style: BorderStyle.solid),
+                color: Colors.grey[300]!,
+                style: BorderStyle.solid,
+              ),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.image,
-                  size: 48,
-                  color: Colors.grey[400],
-                ),
+                Icon(Icons.image, size: 48, color: Colors.grey[400]),
                 const SizedBox(height: 8),
                 Text(
                   'enhanced_upload_main_image_placeholder'.tr(),
@@ -1042,7 +1042,8 @@ class _EnhancedArtworkUploadScreenState
                 value: _mainImageUploadProgress,
                 backgroundColor: Colors.grey[200],
                 valueColor: AlwaysStoppedAnimation<Color>(
-                    Theme.of(context).primaryColor),
+                  Theme.of(context).primaryColor,
+                ),
               ),
               const SizedBox(height: 8),
               Text(
@@ -1100,10 +1101,7 @@ class _EnhancedArtworkUploadScreenState
         children: [
           Text(
             'enhanced_upload_basic_info_step_title'.tr(),
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Text(
@@ -1175,10 +1173,7 @@ class _EnhancedArtworkUploadScreenState
               DropdownButton<String>(
                 value: _dimensionUnit,
                 items: _dimensionUnits.map((unit) {
-                  return DropdownMenuItem(
-                    value: unit,
-                    child: Text(unit),
-                  );
+                  return DropdownMenuItem(value: unit, child: Text(unit));
                 }).toList(),
                 onChanged: (value) {
                   setState(() {
@@ -1225,10 +1220,7 @@ class _EnhancedArtworkUploadScreenState
       children: [
         Text(
           'enhanced_upload_details_step_title'.tr(),
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         Text(
@@ -1244,10 +1236,7 @@ class _EnhancedArtworkUploadScreenState
         // Rich Metadata
         Text(
           'enhanced_upload_rich_metadata_title'.tr(),
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
 
@@ -1329,10 +1318,7 @@ class _EnhancedArtworkUploadScreenState
       children: [
         Text(
           'enhanced_upload_pricing_step_title'.tr(),
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         Text(
@@ -1381,10 +1367,7 @@ class _EnhancedArtworkUploadScreenState
       children: [
         Text(
           'enhanced_upload_review_step_title'.tr(),
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         Text(
@@ -1413,12 +1396,13 @@ class _EnhancedArtworkUploadScreenState
                               fit: BoxFit.cover,
                             )
                           : ImageUrlValidator.isValidImageUrl(_imageUrl)
-                              ? DecorationImage(
-                                  image: ImageUrlValidator.safeNetworkImage(
-                                      _imageUrl)!,
-                                  fit: BoxFit.cover,
-                                )
-                              : null,
+                          ? DecorationImage(
+                              image: ImageUrlValidator.safeNetworkImage(
+                                _imageUrl,
+                              )!,
+                              fit: BoxFit.cover,
+                            )
+                          : null,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -1450,14 +1434,17 @@ class _EnhancedArtworkUploadScreenState
                       if (_medium.isNotEmpty)
                         Chip(
                           label: Text(_medium),
-                          backgroundColor:
-                              ArtbeatColors.primaryGreen.withAlpha(25),
+                          backgroundColor: ArtbeatColors.primaryGreen.withAlpha(
+                            25,
+                          ),
                         ),
                       if (_styles.isNotEmpty)
-                        ..._styles.map((style) => Chip(
-                              label: Text(style),
-                              backgroundColor: Colors.blue.withAlpha(25),
-                            )),
+                        ..._styles.map(
+                          (style) => Chip(
+                            label: Text(style),
+                            backgroundColor: Colors.blue.withAlpha(25),
+                          ),
+                        ),
                       if (_isForSale && _priceController.text.isNotEmpty)
                         Chip(
                           label: Text('\$${_priceController.text}'),
@@ -1465,7 +1452,7 @@ class _EnhancedArtworkUploadScreenState
                         ),
                     ],
                   ),
-                ]
+                ],
               ],
             ),
           ),
@@ -1691,10 +1678,7 @@ class _EnhancedArtworkUploadScreenState
       children: [
         Text(
           'enhanced_upload_media_styles_title'.tr(),
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
 
@@ -1734,10 +1718,7 @@ class _EnhancedArtworkUploadScreenState
         // Styles Multi-Select
         Text(
           'enhanced_upload_styles_label'.tr(),
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         Wrap(
@@ -1770,45 +1751,55 @@ class _EnhancedArtworkUploadScreenState
       children: [
         Text(
           'enhanced_upload_tags_title'.tr(),
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
 
         // Tags
-        _buildTagInput('enhanced_upload_tags_label'.tr(), _tagController, _tags,
-            _addTag, _removeTag),
+        _buildTagInput(
+          'enhanced_upload_tags_label'.tr(),
+          _tagController,
+          _tags,
+          _addTag,
+          _removeTag,
+        ),
         const SizedBox(height: 16),
 
         // Hashtags
-        _buildTagInput('enhanced_upload_hashtags_label'.tr(),
-            _hashtagController, _hashtags, _addHashtag, _removeHashtag),
+        _buildTagInput(
+          'enhanced_upload_hashtags_label'.tr(),
+          _hashtagController,
+          _hashtags,
+          _addHashtag,
+          _removeHashtag,
+        ),
         const SizedBox(height: 16),
 
         // Keywords
-        _buildTagInput('enhanced_upload_keywords_label'.tr(),
-            _keywordController, _keywords, _addKeyword, _removeKeyword),
+        _buildTagInput(
+          'enhanced_upload_keywords_label'.tr(),
+          _keywordController,
+          _keywords,
+          _addKeyword,
+          _removeKeyword,
+        ),
       ],
     );
   }
 
   Widget _buildTagInput(
-      String label,
-      TextEditingController controller,
-      List<String> list,
-      VoidCallback addFunction,
-      void Function(String) removeFunction) {
+    String label,
+    TextEditingController controller,
+    List<String> list,
+    VoidCallback addFunction,
+    void Function(String) removeFunction,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         Row(

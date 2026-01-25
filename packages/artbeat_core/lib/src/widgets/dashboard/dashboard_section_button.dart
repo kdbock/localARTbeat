@@ -42,8 +42,9 @@ class DashboardSectionButton extends StatelessWidget {
           ),
           child: Row(
             mainAxisSize: fullWidth ? MainAxisSize.max : MainAxisSize.min,
-            mainAxisAlignment:
-                fullWidth ? MainAxisAlignment.center : MainAxisAlignment.start,
+            mainAxisAlignment: fullWidth
+                ? MainAxisAlignment.center
+                : MainAxisAlignment.start,
             children: [
               if (icon != null) ...[
                 Icon(icon, color: Colors.white, size: 18),

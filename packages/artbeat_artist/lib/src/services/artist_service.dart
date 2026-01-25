@@ -30,9 +30,11 @@ class ArtistService {
       'getFeaturedArtists',
       () async {
         ArtistLogger.warning(
-            'DEPRECATED: artbeat_artist.ArtistService.getFeaturedArtists()');
+          'DEPRECATED: artbeat_artist.ArtistService.getFeaturedArtists()',
+        );
         ArtistLogger.info(
-            'Please migrate to: artbeat_core.ArtistService.getFeaturedArtistProfiles()');
+          'Please migrate to: artbeat_core.ArtistService.getFeaturedArtistProfiles()',
+        );
         ArtistLogger.artistService('Fetching featured artists');
 
         final snapshot = await _firestore
@@ -42,12 +44,15 @@ class ArtistService {
             .timeout(const Duration(seconds: 10));
 
         final artists = snapshot.docs
-            .map((doc) =>
-                ArtistProfileModel.fromMap(doc.data()..['id'] = doc.id))
+            .map(
+              (doc) => ArtistProfileModel.fromMap(doc.data()..['id'] = doc.id),
+            )
             .toList();
 
-        ArtistLogger.artistService('Fetched featured artists',
-            details: '${artists.length} artists loaded');
+        ArtistLogger.artistService(
+          'Fetched featured artists',
+          details: '${artists.length} artists loaded',
+        );
         return artists;
       },
       fallbackValue: [],

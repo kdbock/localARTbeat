@@ -62,16 +62,16 @@ class HudButton extends StatelessWidget {
     bool isLoading = false,
     bool isDestructive = false,
   }) : this(
-          key: key,
-          text: text,
-          onPressed: onPressed,
-          icon: icon,
-          width: width,
-          height: height,
-          isPrimary: true,
-          isLoading: isLoading,
-          isDestructive: isDestructive,
-        );
+         key: key,
+         text: text,
+         onPressed: onPressed,
+         icon: icon,
+         width: width,
+         height: height,
+         isPrimary: true,
+         isLoading: isLoading,
+         isDestructive: isDestructive,
+       );
 
   const HudButton.secondary({
     Key? key,
@@ -83,16 +83,16 @@ class HudButton extends StatelessWidget {
     bool isLoading = false,
     bool isDestructive = false,
   }) : this(
-          key: key,
-          text: text,
-          onPressed: onPressed,
-          icon: icon,
-          width: width,
-          height: height,
-          isPrimary: false,
-          isLoading: isLoading,
-          isDestructive: isDestructive,
-        );
+         key: key,
+         text: text,
+         onPressed: onPressed,
+         icon: icon,
+         width: width,
+         height: height,
+         isPrimary: false,
+         isLoading: isLoading,
+         isDestructive: isDestructive,
+       );
 
   const HudButton.destructive({
     Key? key,
@@ -103,16 +103,16 @@ class HudButton extends StatelessWidget {
     double? height,
     bool isLoading = false,
   }) : this(
-          key: key,
-          text: text,
-          onPressed: onPressed,
-          icon: icon,
-          width: width,
-          height: height,
-          isPrimary: true,
-          isLoading: isLoading,
-          isDestructive: true,
-        );
+         key: key,
+         text: text,
+         onPressed: onPressed,
+         icon: icon,
+         width: width,
+         height: height,
+         isPrimary: true,
+         isLoading: isLoading,
+         isDestructive: true,
+       );
 
   @override
   Widget build(BuildContext context) {
@@ -126,8 +126,8 @@ class HudButton extends StatelessWidget {
           backgroundColor: isDestructive
               ? const Color(0xFFFF3D8D)
               : isPrimary
-                  ? const Color(0xFF00fd8a)
-                  : Colors.white.withValues(alpha: 0.1),
+              ? const Color(0xFF00fd8a)
+              : Colors.white.withValues(alpha: 0.1),
           foregroundColor: isPrimary && !isDestructive
               ? Colors.black
               : Colors.white,

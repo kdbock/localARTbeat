@@ -79,7 +79,9 @@ class ArtworkCleanupService {
 
   /// Fix broken artwork image by setting a placeholder
   Future<void> _fixBrokenArtworkImage(
-      String artworkId, ArtworkModel artwork) async {
+    String artworkId,
+    ArtworkModel artwork,
+  ) async {
     try {
       // Instead of using an external placeholder, we'll use a local asset or remove the image
       // For now, we'll set it to empty and mark it as needing a new image
@@ -106,7 +108,8 @@ class ArtworkCleanupService {
     }
 
     AppLogger.info(
-        '🗑️ Starting removal of broken artwork (dryRun: $dryRun)...');
+      '🗑️ Starting removal of broken artwork (dryRun: $dryRun)...',
+    );
 
     try {
       final snapshot = await _firestore.collection('artwork').get();
@@ -123,7 +126,8 @@ class ArtworkCleanupService {
           if (!isAccessible) {
             brokenArtwork++;
             debugPrint(
-                '❌ Would remove broken artwork: ${artwork.title} (${artwork.id})');
+              '❌ Would remove broken artwork: ${artwork.title} (${artwork.id})',
+            );
 
             if (!dryRun) {
               await doc.reference.delete();
@@ -161,7 +165,8 @@ class ArtworkCleanupService {
           .get();
 
       AppLogger.analytics(
-          '📊 Found ${snapshot.docs.length} artwork with this URL');
+        '📊 Found ${snapshot.docs.length} artwork with this URL',
+      );
 
       for (final doc in snapshot.docs) {
         final artwork = ArtworkModel.fromFirestore(doc);

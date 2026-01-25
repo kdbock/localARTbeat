@@ -50,11 +50,7 @@ class _CommissionRatingScreenState extends State<CommissionRatingScreen> {
   static const LinearGradient _primaryGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [
-      Color(0xFF7C4DFF),
-      Color(0xFF22D3EE),
-      Color(0xFF34D399),
-    ],
+    colors: [Color(0xFF7C4DFF), Color(0xFF22D3EE), Color(0xFF34D399)],
   );
 
   @override
@@ -72,7 +68,9 @@ class _CommissionRatingScreenState extends State<CommissionRatingScreen> {
   Future<void> _submitRating() async {
     if (_commentController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('commission_rating_error_comment_required'.tr())),
+        SnackBar(
+          content: Text('commission_rating_error_comment_required'.tr()),
+        ),
       );
       return;
     }
@@ -122,7 +120,8 @@ class _CommissionRatingScreenState extends State<CommissionRatingScreen> {
         backgroundColor: Colors.transparent,
         appBar: HudTopBar(
           title: 'commission_rating_title'.tr(),
-          glassBackground: true, subtitle: '',
+          glassBackground: true,
+          subtitle: '',
         ),
         body: SafeArea(
           child: SingleChildScrollView(
@@ -556,8 +555,7 @@ class _CommissionRatingScreenState extends State<CommissionRatingScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 24),
           decoration: BoxDecoration(
             gradient: isSelected ? _primaryGradient : null,
-            color:
-                isSelected ? null : Colors.white.withValues(alpha: 0.08),
+            color: isSelected ? null : Colors.white.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
               color: isSelected

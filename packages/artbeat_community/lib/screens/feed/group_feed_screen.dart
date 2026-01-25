@@ -237,10 +237,12 @@ class _GroupFeedScreenState extends State<GroupFeedScreen> {
           IconButton(
             tooltip: 'community_group_feed.refresh_cta'.tr(),
             icon: const Icon(Icons.refresh, color: Colors.white),
-            onPressed:
-                (_isLoading || _checkingMembership) ? null : _loadGroupPosts,
+            onPressed: (_isLoading || _checkingMembership)
+                ? null
+                : _loadGroupPosts,
           ),
-        ], subtitle: '',
+        ],
+        subtitle: '',
       ),
       body: WorldBackground(
         child: SafeArea(
@@ -384,7 +386,9 @@ class _GroupFeedScreenState extends State<GroupFeedScreen> {
               Expanded(
                 child: GradientCTAButton(
                   text: 'community_group_feed.create_cta'.tr(),
-                  onPressed: _isLoading ? null : () => _createGroupPost(context),
+                  onPressed: _isLoading
+                      ? null
+                      : () => _createGroupPost(context),
                 ),
               ),
               const SizedBox(width: 16),
@@ -602,9 +606,7 @@ class _GroupFeedScreenState extends State<GroupFeedScreen> {
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(32),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.12),
-              ),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
             ),
             child: const Icon(
               Icons.article_outlined,

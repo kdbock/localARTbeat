@@ -5,10 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 class ArtistSubscriptionCTAWidget extends StatelessWidget {
   final VoidCallback? onSubscribePressed;
 
-  const ArtistSubscriptionCTAWidget({
-    super.key,
-    this.onSubscribePressed,
-  });
+  const ArtistSubscriptionCTAWidget({super.key, this.onSubscribePressed});
 
   @override
   Widget build(BuildContext context) {
@@ -37,11 +34,7 @@ class ArtistSubscriptionCTAWidget extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  const Icon(
-                    Icons.palette,
-                    color: Colors.white,
-                    size: 28,
-                  ),
+                  const Icon(Icons.palette, color: Colors.white, size: 28),
                   const SizedBox(width: 12),
                   Text(
                     tr('art_walk_are_you_an_artist'),
@@ -55,7 +48,9 @@ class ArtistSubscriptionCTAWidget extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               Text(
-                tr('art_walk_showcase_your_work_to_local_art_lovers__get_discovered__and_grow_your_career'),
+                tr(
+                  'art_walk_showcase_your_work_to_local_art_lovers__get_discovered__and_grow_your_career',
+                ),
                 style: TextStyle(
                   color: Colors.white.withAlpha(230),
                   fontSize: 14,
@@ -119,19 +114,12 @@ class ArtistSubscriptionCTAWidget extends StatelessWidget {
   Widget _buildFeatureItem({required IconData icon, required String text}) {
     return Column(
       children: [
-        Icon(
-          icon,
-          color: Colors.white,
-          size: 24,
-        ),
+        Icon(icon, color: Colors.white, size: 24),
         const SizedBox(height: 4),
         Text(
           text,
           textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Colors.white.withAlpha(230),
-            fontSize: 12,
-          ),
+          style: TextStyle(color: Colors.white.withAlpha(230), fontSize: 12),
         ),
       ],
     );

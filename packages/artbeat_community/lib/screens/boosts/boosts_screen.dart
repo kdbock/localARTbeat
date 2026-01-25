@@ -112,7 +112,8 @@ class _ViewReceivedBoostsScreenState extends State<ViewReceivedBoostsScreen> {
   double get _totalBoostValue =>
       _boosts.fold<double>(0, (sum, boost) => sum + boost.amount);
 
-  int get _pendingBoostCount => _boosts.where((boost) => boost.isPending).length;
+  int get _pendingBoostCount =>
+      _boosts.where((boost) => boost.isPending).length;
 
   int get _uniqueSenderCount => _boosts
       .map((boost) => boost.senderId)
@@ -150,7 +151,8 @@ class _ViewReceivedBoostsScreenState extends State<ViewReceivedBoostsScreen> {
             icon: const Icon(Icons.rule_rounded, color: Colors.white),
             onPressed: _openBoostRules,
           ),
-        ], subtitle: '',
+        ],
+        subtitle: '',
       ),
       body: WorldBackground(
         child: SafeArea(
@@ -304,11 +306,7 @@ class _ViewReceivedBoostsScreenState extends State<ViewReceivedBoostsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(
-            Icons.bolt,
-            color: _BoostsPalette.accentPink,
-            size: 32,
-          ),
+          const Icon(Icons.bolt, color: _BoostsPalette.accentPink, size: 32),
           const SizedBox(height: 16),
           Text(
             'community_boosts.empty.title'.tr(),
@@ -472,9 +470,7 @@ class _BoostDetailSheet extends StatelessWidget {
                     ),
                     Text(
                       'community_boosts.detail.received_on'.tr(
-                        args: [
-                          intl.DateFormat.yMMMd().format(boost.timestamp),
-                        ],
+                        args: [intl.DateFormat.yMMMd().format(boost.timestamp)],
                       ),
                       style: GoogleFonts.spaceGrotesk(
                         fontSize: 14,

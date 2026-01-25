@@ -32,7 +32,8 @@ class IntegrationService {
   Future<UnifiedArtistData?> getUnifiedArtistData(String userId) async {
     try {
       ArtistLogger.error(
-          '🔗 IntegrationService: Getting unified artist data for $userId');
+        '🔗 IntegrationService: Getting unified artist data for $userId',
+      );
 
       // Get core user data
       final userModel = await _userService.getUserById(userId);
@@ -42,14 +43,14 @@ class IntegrationService {
       }
 
       // Get artist profile if exists
-      final artistProfile =
-          await _artistSubscriptionService.getArtistProfileByUserId(userId);
+      final artistProfile = await _artistSubscriptionService
+          .getArtistProfileByUserId(userId);
 
       // Get subscription information from both sources
-      final coreSubscription =
-          await _coreSubscriptionService.getUserSubscription();
-      final artistSubscription =
-          await _artistSubscriptionService.getCurrentSubscription(userId);
+      final coreSubscription = await _coreSubscriptionService
+          .getUserSubscription();
+      final artistSubscription = await _artistSubscriptionService
+          .getCurrentSubscription(userId);
 
       return UnifiedArtistData(
         userModel: userModel,
@@ -59,7 +60,8 @@ class IntegrationService {
       );
     } catch (e) {
       ArtistLogger.error(
-          '❌ IntegrationService: Error getting unified data: $e');
+        '❌ IntegrationService: Error getting unified data: $e',
+      );
       return null;
     }
   }
@@ -68,7 +70,8 @@ class IntegrationService {
   /// - Core handles basic subscription management
   /// - Artist handles artist-specific subscription features
   Future<SubscriptionCapabilities> getSubscriptionCapabilities(
-      String userId) async {
+    String userId,
+  ) async {
     try {
       final unifiedData = await getUnifiedArtistData(userId);
       if (unifiedData == null) {
@@ -76,9 +79,11 @@ class IntegrationService {
       }
 
       // Determine capabilities based on subscriptions
-      final hasCore = unifiedData.coreSubscription != null &&
+      final hasCore =
+          unifiedData.coreSubscription != null &&
           unifiedData.coreSubscription!.isActive;
-      final hasArtist = unifiedData.artistSubscription != null &&
+      final hasArtist =
+          unifiedData.artistSubscription != null &&
           unifiedData.artistSubscription!.isActive;
       final isArtist = unifiedData.artistProfile != null;
 
@@ -94,7 +99,8 @@ class IntegrationService {
       );
     } catch (e) {
       ArtistLogger.error(
-          '❌ IntegrationService: Error determining capabilities: $e');
+        '❌ IntegrationService: Error determining capabilities: $e',
+      );
       return SubscriptionCapabilities.none();
     }
   }
@@ -124,14 +130,16 @@ class IntegrationService {
   Future<bool> enableArtistFeatures(String userId) async {
     try {
       ArtistLogger.error(
-          '🎨 IntegrationService: Enabling artist features for $userId');
+        '🎨 IntegrationService: Enabling artist features for $userId',
+      );
 
       // Check if user already has artist profile
-      final existingProfile =
-          await _artistSubscriptionService.getArtistProfileByUserId(userId);
+      final existingProfile = await _artistSubscriptionService
+          .getArtistProfileByUserId(userId);
       if (existingProfile != null) {
         ArtistLogger.error(
-            'ℹ️ IntegrationService: Artist profile already exists');
+          'ℹ️ IntegrationService: Artist profile already exists',
+        );
         return true;
       }
 
@@ -139,19 +147,22 @@ class IntegrationService {
       final userModel = await _userService.getUserById(userId);
       if (userModel == null) {
         ArtistLogger.error(
-            '❌ IntegrationService: Cannot create artist profile - user not found');
+          '❌ IntegrationService: Cannot create artist profile - user not found',
+        );
         return false;
       }
 
       // Create artist profile with basic information
       final profileId = await _artistSubscriptionService.createArtistProfile(
         userId: userId,
-        displayName:
-            userModel.fullName.isNotEmpty ? userModel.fullName : 'New Artist',
+        displayName: userModel.fullName.isNotEmpty
+            ? userModel.fullName
+            : 'New Artist',
         bio: 'Welcome to my artist profile!',
         userType: UserType.artist,
-        location:
-            userModel.location.isNotEmpty ? userModel.location : 'Location',
+        location: userModel.location.isNotEmpty
+            ? userModel.location
+            : 'Location',
         mediums: ['Digital Art'], // Default medium
         styles: ['Contemporary'], // Default style
         socialLinks: {},
@@ -160,23 +171,27 @@ class IntegrationService {
       final success = profileId.isNotEmpty;
       if (success) {
         ArtistLogger.error(
-            '✅ IntegrationService: Artist features enabled successfully');
+          '✅ IntegrationService: Artist features enabled successfully',
+        );
       } else {
         ArtistLogger.error(
-            '❌ IntegrationService: Failed to enable artist features');
+          '❌ IntegrationService: Failed to enable artist features',
+        );
       }
 
       return success;
     } catch (e) {
       ArtistLogger.error(
-          '❌ IntegrationService: Error enabling artist features: $e');
+        '❌ IntegrationService: Error enabling artist features: $e',
+      );
       return false;
     }
   }
 
   /// Get recommended subscription upgrade path
   Future<SubscriptionRecommendation> getSubscriptionRecommendation(
-      String userId) async {
+    String userId,
+  ) async {
     try {
       final capabilities = await getSubscriptionCapabilities(userId);
       final unifiedData = await getUnifiedArtistData(userId);
@@ -207,7 +222,8 @@ class IntegrationService {
       );
     } catch (e) {
       ArtistLogger.error(
-          '❌ IntegrationService: Error getting recommendation: $e');
+        '❌ IntegrationService: Error getting recommendation: $e',
+      );
       return SubscriptionRecommendation(
         type: 'error',
         title: 'Unable to load recommendations',
@@ -223,9 +239,9 @@ class UnifiedArtistData {
   final UserModel userModel;
   final ArtistProfileModel? artistProfile;
   final core_subscription.SubscriptionModel?
-      coreSubscription; // artbeat_core subscription
+  coreSubscription; // artbeat_core subscription
   final artist_subscription.SubscriptionModel?
-      artistSubscription; // artbeat_artist subscription
+  artistSubscription; // artbeat_artist subscription
 
   UnifiedArtistData({
     required this.userModel,

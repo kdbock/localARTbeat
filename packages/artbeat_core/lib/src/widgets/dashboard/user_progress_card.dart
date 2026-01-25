@@ -160,7 +160,11 @@ class UserProgressCard extends StatelessWidget {
                 const SizedBox(height: 4),
 
                 Text(
-                  'progress_card_complete'.tr(namedArgs: {'percent': '${(progressPercent * 100).round()}'}),
+                  'progress_card_complete'.tr(
+                    namedArgs: {
+                      'percent': '${(progressPercent * 100).round()}',
+                    },
+                  ),
                   style: TextStyle(
                     color: Colors.black87.withValues(alpha: 0.7),
                     fontSize: 12,

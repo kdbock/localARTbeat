@@ -325,7 +325,8 @@ class _AdminArtWalkModerationScreenState
               Expanded(
                 child: ArtWalkScreenTemplate.buildLoadingState(
                   message:
-                      'art_walk_admin_art_walk_moderation_text_loading_art_walks'.tr(),
+                      'art_walk_admin_art_walk_moderation_text_loading_art_walks'
+                          .tr(),
                 ),
               )
             else if (_artWalks.isEmpty)
@@ -340,8 +341,7 @@ class _AdminArtWalkModerationScreenState
           : ArtWalkDesignSystem.buildFloatingActionButton(
               onPressed: _loadArtWalks,
               icon: Icons.refresh,
-              tooltip:
-                  'art_walk_admin_art_walk_moderation_text_refresh'.tr(),
+              tooltip: 'art_walk_admin_art_walk_moderation_text_refresh'.tr(),
             ),
     );
   }
@@ -442,7 +442,7 @@ class _AdminArtWalkModerationScreenState
         : 'art_walk_admin_art_walk_moderation_text_no_art_walks'.tr();
     final subtitle = isReported
         ? 'art_walk_admin_art_walk_moderation_text_no_reported_walks_subtitle'
-            .tr()
+              .tr()
         : 'art_walk_admin_art_walk_moderation_text_no_art_walks_subtitle'.tr();
 
     return ArtWalkScreenTemplate.buildEmptyState(
@@ -484,8 +484,7 @@ class _AdminArtWalkModerationScreenState
                     ],
                   ),
                 ),
-                if (walk.reportCount > 0)
-                  _buildReportBadge(walk.reportCount),
+                if (walk.reportCount > 0) _buildReportBadge(walk.reportCount),
               ],
             ),
             const SizedBox(height: 16),
@@ -493,9 +492,7 @@ class _AdminArtWalkModerationScreenState
               walk.description,
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
-              style: AppTypography.body(
-                Colors.white.withValues(alpha: 0.75),
-              ),
+              style: AppTypography.body(Colors.white.withValues(alpha: 0.75)),
             ),
             const SizedBox(height: 16),
             Wrap(
@@ -557,9 +554,7 @@ class _AdminArtWalkModerationScreenState
         _buildMetadataChip(
           Icons.access_time,
           'art_walk_art_walk_card_text_duration'.tr(
-            namedArgs: {
-              'minutes': walk.estimatedDuration!.toStringAsFixed(0),
-            },
+            namedArgs: {'minutes': walk.estimatedDuration!.toStringAsFixed(0)},
           ),
         ),
       );
@@ -570,9 +565,7 @@ class _AdminArtWalkModerationScreenState
         _buildMetadataChip(
           Icons.straighten,
           'art_walk_art_walk_card_text_distance'.tr(
-            namedArgs: {
-              'miles': walk.estimatedDistance!.toStringAsFixed(1),
-            },
+            namedArgs: {'miles': walk.estimatedDistance!.toStringAsFixed(1)},
           ),
         ),
       );
@@ -607,10 +600,7 @@ class _AdminArtWalkModerationScreenState
         children: [
           Icon(icon, size: 14, color: Colors.white),
           const SizedBox(width: 6),
-          Text(
-            label,
-            style: AppTypography.badge(),
-          ),
+          Text(label, style: AppTypography.badge()),
         ],
       ),
     );
@@ -671,10 +661,7 @@ class _AdminArtWalkModerationScreenState
             children: [
               Icon(icon, size: 18, color: chipColor),
               const SizedBox(width: 6),
-              Text(
-                label,
-                style: AppTypography.body(chipColor),
-              ),
+              Text(label, style: AppTypography.body(chipColor)),
             ],
           ),
         ),
@@ -695,10 +682,7 @@ class _AdminArtWalkModerationScreenState
         children: [
           const Icon(Icons.flag, size: 14, color: Colors.pinkAccent),
           const SizedBox(width: 4),
-          Text(
-            count.toString(),
-            style: AppTypography.body(Colors.pinkAccent),
-          ),
+          Text(count.toString(), style: AppTypography.body(Colors.pinkAccent)),
         ],
       ),
     );

@@ -17,7 +17,8 @@ class HudTopBar extends StatelessWidget implements PreferredSizeWidget {
     this.onBackPressed,
     this.showBackButton = true,
     this.glassBackground = true,
-    this.height = 64, required String subtitle,
+    this.height = 64,
+    required String subtitle,
   });
 
   @override

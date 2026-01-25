@@ -19,20 +19,12 @@ import 'package:artbeat_artwork/artbeat_artwork.dart' show ArtworkService;
 // Audio processing imports - simplified for now
 import 'package:permission_handler/permission_handler.dart';
 
-enum AudioContentUploadStep {
-  content,
-  basicInfo,
-  details,
-  review,
-}
+enum AudioContentUploadStep { content, basicInfo, details, review }
 
 class AudioContentUploadScreen extends StatefulWidget {
   final String? contentId;
 
-  const AudioContentUploadScreen({
-    super.key,
-    this.contentId,
-  });
+  const AudioContentUploadScreen({super.key, this.contentId});
 
   @override
   State<AudioContentUploadScreen> createState() =>
@@ -120,14 +112,14 @@ class _AudioContentUploadScreenState extends State<AudioContentUploadScreen> {
     'Podcast',
     'Audiobook',
     'Soundtrack',
-    'Spoken Word'
+    'Spoken Word',
   ];
   final List<String> _releaseSchedules = [
     'immediate',
     'weekly',
     'bi-weekly',
     'monthly',
-    'custom'
+    'custom',
   ];
 
   @override
@@ -221,8 +213,10 @@ class _AudioContentUploadScreenState extends State<AudioContentUploadScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(
-                  'audio_content_upload_file_error'.tr(args: [e.toString()]))),
+            content: Text(
+              'audio_content_upload_file_error'.tr(args: [e.toString()]),
+            ),
+          ),
         );
       }
     }
@@ -245,7 +239,8 @@ class _AudioContentUploadScreenState extends State<AudioContentUploadScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-                content: Text('audio_content_upload_unsupported_format'.tr())),
+              content: Text('audio_content_upload_unsupported_format'.tr()),
+            ),
           );
         }
         return;
@@ -260,11 +255,16 @@ class _AudioContentUploadScreenState extends State<AudioContentUploadScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-                content: Text('audio_content_upload_file_too_large'.tr(args: [
-              maxSize > 1024 * 1024 * 1024
-                  ? '${maxSize ~/ (1024 * 1024 * 1024)}GB'
-                  : '${maxSize ~/ (1024 * 1024)}MB'
-            ]))),
+              content: Text(
+                'audio_content_upload_file_too_large'.tr(
+                  args: [
+                    maxSize > 1024 * 1024 * 1024
+                        ? '${maxSize ~/ (1024 * 1024 * 1024)}GB'
+                        : '${maxSize ~/ (1024 * 1024)}MB',
+                  ],
+                ),
+              ),
+            ),
           );
         }
         return;
@@ -287,8 +287,10 @@ class _AudioContentUploadScreenState extends State<AudioContentUploadScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('audio_content_upload_process_error'
-                  .tr(args: [e.toString()]))),
+            content: Text(
+              'audio_content_upload_process_error'.tr(args: [e.toString()]),
+            ),
+          ),
         );
       }
     }
@@ -307,7 +309,8 @@ class _AudioContentUploadScreenState extends State<AudioContentUploadScreen> {
 
     // For now, we'll create a simple mock waveform
     await Future<void>.delayed(
-        const Duration(seconds: 2)); // Simulate processing time
+      const Duration(seconds: 2),
+    ); // Simulate processing time
 
     // Mock waveform data - in reality this would be actual audio waveform samples
     final mockWaveform = List.generate(100, (index) => (index % 20) + 10);
@@ -340,8 +343,10 @@ class _AudioContentUploadScreenState extends State<AudioContentUploadScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-                content: Text(
-                    'audio_content_upload_recording_permission_denied'.tr())),
+              content: Text(
+                'audio_content_upload_recording_permission_denied'.tr(),
+              ),
+            ),
           );
         }
         return;
@@ -431,8 +436,10 @@ class _AudioContentUploadScreenState extends State<AudioContentUploadScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(
-                  'audio_content_upload_image_error'.tr(args: [e.toString()]))),
+            content: Text(
+              'audio_content_upload_image_error'.tr(args: [e.toString()]),
+            ),
+          ),
         );
       }
     }
@@ -457,11 +464,7 @@ class _AudioContentUploadScreenState extends State<AudioContentUploadScreen> {
 
     if (!_canUpload) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'audio_content_upload_limit'.tr(),
-          ),
-        ),
+        SnackBar(content: Text('audio_content_upload_limit'.tr())),
       );
       return;
     }
@@ -502,8 +505,9 @@ class _AudioContentUploadScreenState extends State<AudioContentUploadScreen> {
                   'trackNumber': int.tryParse(_trackNumberController.text) ?? 1,
                 }
               : null,
-          'lyrics':
-              _lyricsController.text.isNotEmpty ? _lyricsController.text : null,
+          'lyrics': _lyricsController.text.isNotEmpty
+              ? _lyricsController.text
+              : null,
           'isrc': _isrcController.text.isNotEmpty ? _isrcController.text : null,
           'composer': _composerController.text.isNotEmpty
               ? _composerController.text
@@ -513,8 +517,9 @@ class _AudioContentUploadScreenState extends State<AudioContentUploadScreen> {
               : null,
           'recordingDate': DateTime.now()
               .toIso8601String(), // Would be user input in real implementation
-          'studio':
-              _studioController.text.isNotEmpty ? _studioController.text : null,
+          'studio': _studioController.text.isNotEmpty
+              ? _studioController.text
+              : null,
           'releaseSchedule': _releaseSchedule,
           'waveformData': _waveformData,
         };
@@ -536,8 +541,10 @@ class _AudioContentUploadScreenState extends State<AudioContentUploadScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content:
-                  Text('audio_content_upload_error'.tr(args: [e.toString()]))),
+            content: Text(
+              'audio_content_upload_error'.tr(args: [e.toString()]),
+            ),
+          ),
         );
       }
     } finally {
@@ -581,32 +588,36 @@ class _AudioContentUploadScreenState extends State<AudioContentUploadScreen> {
                 steps: [
                   Step(
                     title: Text('audio_content_upload_step_content'.tr()),
-                    subtitle:
-                        Text('audio_content_upload_step_content_desc'.tr()),
+                    subtitle: Text(
+                      'audio_content_upload_step_content_desc'.tr(),
+                    ),
                     content: _buildContentStep(),
                     isActive: _currentStepIndex >= 0,
                     state: _getStepState(0),
                   ),
                   Step(
                     title: Text('audio_content_upload_step_basic_info'.tr()),
-                    subtitle:
-                        Text('audio_content_upload_step_basic_info_desc'.tr()),
+                    subtitle: Text(
+                      'audio_content_upload_step_basic_info_desc'.tr(),
+                    ),
                     content: _buildBasicInfoStep(),
                     isActive: _currentStepIndex >= 1,
                     state: _getStepState(1),
                   ),
                   Step(
                     title: Text('audio_content_upload_step_details'.tr()),
-                    subtitle:
-                        Text('audio_content_upload_step_details_desc'.tr()),
+                    subtitle: Text(
+                      'audio_content_upload_step_details_desc'.tr(),
+                    ),
                     content: _buildDetailsStep(),
                     isActive: _currentStepIndex >= 2,
                     state: _getStepState(2),
                   ),
                   Step(
                     title: Text('audio_content_upload_step_review'.tr()),
-                    subtitle:
-                        Text('audio_content_upload_step_review_desc'.tr()),
+                    subtitle: Text(
+                      'audio_content_upload_step_review_desc'.tr(),
+                    ),
                     content: _buildReviewStep(),
                     isActive: _currentStepIndex >= 3,
                     state: _getStepState(3),
@@ -649,9 +660,11 @@ class _AudioContentUploadScreenState extends State<AudioContentUploadScreen> {
               onPressed: _currentStepIndex == 3
                   ? _uploadAudioContent
                   : details.onStepContinue,
-              child: Text(_currentStepIndex == 3
-                  ? 'audio_content_upload_button'.tr()
-                  : 'audio_content_upload_continue'.tr()),
+              child: Text(
+                _currentStepIndex == 3
+                    ? 'audio_content_upload_button'.tr()
+                    : 'audio_content_upload_continue'.tr(),
+              ),
             ),
           ),
         ],
@@ -709,10 +722,7 @@ class _AudioContentUploadScreenState extends State<AudioContentUploadScreen> {
       children: [
         Text(
           'audio_content_upload_content_step_title'.tr(),
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         Text(
@@ -730,18 +740,13 @@ class _AudioContentUploadScreenState extends State<AudioContentUploadScreen> {
         DropdownButtonFormField<String>(
           initialValue: _contentType,
           decoration: InputDecoration(
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
             labelText: 'audio_content_upload_content_type_label'.tr(),
             labelStyle: const TextStyle(color: Colors.black87),
           ),
           style: const TextStyle(color: Colors.black87),
           items: _contentTypes.map((type) {
-            return DropdownMenuItem(
-              value: type,
-              child: Text(type),
-            );
+            return DropdownMenuItem(value: type, child: Text(type));
           }).toList(),
           onChanged: (value) {
             setState(() {
@@ -763,8 +768,9 @@ class _AudioContentUploadScreenState extends State<AudioContentUploadScreen> {
               child: ElevatedButton(
                 onPressed: _toggleAudioInputMode,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      _useFileUpload ? ArtbeatColors.primaryGreen : Colors.grey,
+                  backgroundColor: _useFileUpload
+                      ? ArtbeatColors.primaryGreen
+                      : Colors.grey,
                 ),
                 child: Text('audio_content_upload_file_mode'.tr()),
               ),
@@ -840,13 +846,15 @@ class _AudioContentUploadScreenState extends State<AudioContentUploadScreen> {
               children: [
                 Text(
                   _isRecording
-                      ? 'audio_content_upload_recording_time'
-                          .tr(args: [_recordingTime])
+                      ? 'audio_content_upload_recording_time'.tr(
+                          args: [_recordingTime],
+                        )
                       : 'audio_content_upload_recording_hint'.tr(),
                   style: TextStyle(
                     color: _isRecording ? Colors.red : Colors.grey[600],
-                    fontWeight:
-                        _isRecording ? FontWeight.bold : FontWeight.normal,
+                    fontWeight: _isRecording
+                        ? FontWeight.bold
+                        : FontWeight.normal,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -854,12 +862,15 @@ class _AudioContentUploadScreenState extends State<AudioContentUploadScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     ElevatedButton.icon(
-                      onPressed:
-                          _isRecording ? _stopRecording : _startRecording,
+                      onPressed: _isRecording
+                          ? _stopRecording
+                          : _startRecording,
                       icon: Icon(_isRecording ? Icons.stop : Icons.mic),
-                      label: Text(_isRecording
-                          ? 'audio_content_upload_stop_recording'.tr()
-                          : 'audio_content_upload_start_recording'.tr()),
+                      label: Text(
+                        _isRecording
+                            ? 'audio_content_upload_stop_recording'.tr()
+                            : 'audio_content_upload_start_recording'.tr(),
+                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: _isRecording
                             ? Colors.red
@@ -876,10 +887,7 @@ class _AudioContentUploadScreenState extends State<AudioContentUploadScreen> {
         // Audio preview and metadata
         if (_audioFile != null && _isValidAudio) ...[
           const SizedBox(height: 24),
-          Text(
-            'Audio Preview',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
+          Text('Audio Preview', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.all(16),
@@ -893,9 +901,7 @@ class _AudioContentUploadScreenState extends State<AudioContentUploadScreen> {
                 if (_isGeneratingWaveform) ...[
                   const SizedBox(
                     height: 60,
-                    child: Center(
-                      child: CircularProgressIndicator(),
-                    ),
+                    child: Center(child: CircularProgressIndicator()),
                   ),
                   Text('audio_content_upload_waveform_loading'.tr()),
                 ] else if (_waveformData != null) ...[
@@ -965,19 +971,10 @@ class _AudioContentUploadScreenState extends State<AudioContentUploadScreen> {
   Widget _buildMetadataItem(String label, String value) {
     return Column(
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey[600],
-          ),
-        ),
+        Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
         Text(
           value,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
         ),
       ],
     );
@@ -1003,10 +1000,7 @@ class _AudioContentUploadScreenState extends State<AudioContentUploadScreen> {
       children: [
         Text(
           'audio_content_upload_basic_info_step_title'.tr(),
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         Text(
@@ -1035,10 +1029,7 @@ class _AudioContentUploadScreenState extends State<AudioContentUploadScreen> {
               borderRadius: BorderRadius.circular(8),
             ),
             child: _coverImageFile != null
-                ? Image.file(
-                    _coverImageFile!,
-                    fit: BoxFit.cover,
-                  )
+                ? Image.file(_coverImageFile!, fit: BoxFit.cover)
                 : Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -1072,9 +1063,7 @@ class _AudioContentUploadScreenState extends State<AudioContentUploadScreen> {
           controller: _titleController,
           decoration: InputDecoration(
             labelText: 'audio_content_upload_title_label'.tr(),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
           ),
           validator: (value) {
             if (value?.isEmpty ?? true) {
@@ -1090,9 +1079,7 @@ class _AudioContentUploadScreenState extends State<AudioContentUploadScreen> {
           controller: _descriptionController,
           decoration: InputDecoration(
             labelText: 'audio_content_upload_description_label'.tr(),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
           ),
           maxLines: 4,
           validator: (value) {
@@ -1112,10 +1099,7 @@ class _AudioContentUploadScreenState extends State<AudioContentUploadScreen> {
       children: [
         Text(
           'audio_content_upload_details_step_title'.tr(),
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         Text(
@@ -1204,9 +1188,7 @@ class _AudioContentUploadScreenState extends State<AudioContentUploadScreen> {
           decoration: InputDecoration(
             labelText: 'audio_content_upload_lyrics_label'.tr(),
             hintText: 'audio_content_upload_lyrics_hint'.tr(),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
           ),
           maxLines: 6,
         ),
@@ -1285,9 +1267,7 @@ class _AudioContentUploadScreenState extends State<AudioContentUploadScreen> {
         DropdownButtonFormField<String>(
           initialValue: _releaseSchedule,
           decoration: InputDecoration(
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
             labelText: 'audio_content_upload_schedule_label'.tr(),
             labelStyle: const TextStyle(color: Colors.black87),
           ),
@@ -1346,10 +1326,7 @@ class _AudioContentUploadScreenState extends State<AudioContentUploadScreen> {
       children: [
         Text(
           'audio_content_upload_review_step_title'.tr(),
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         Text(
@@ -1439,10 +1416,9 @@ class _AudioContentUploadScreenState extends State<AudioContentUploadScreen> {
                   const Text('Lyrics: Available'),
                 ],
                 Text(
-                    'Schedule: ${_releaseSchedule.replaceAll('_', ' ').toUpperCase()}'),
-                if (_isForSale) ...[
-                  Text('Price: \$${_priceController.text}'),
-                ],
+                  'Schedule: ${_releaseSchedule.replaceAll('_', ' ').toUpperCase()}',
+                ),
+                if (_isForSale) ...[Text('Price: \$${_priceController.text}')],
               ],
             ),
           ),

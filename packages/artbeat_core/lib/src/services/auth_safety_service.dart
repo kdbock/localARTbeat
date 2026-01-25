@@ -27,7 +27,7 @@ class AuthSafetyService {
       // Initialize Google Sign-In with null safety
       try {
         await GoogleSignIn.instance.initialize();
-        
+
         // Listen to authentication events to track the current user
         GoogleSignIn.instance.authenticationEvents.listen((event) {
           if (event is GoogleSignInAuthenticationEventSignIn) {
@@ -36,7 +36,7 @@ class AuthSafetyService {
             _lastAuthenticatedUser = null;
           }
         });
-        
+
         _googleSignInAvailable = true;
         AppLogger.info('✅ Google Sign-In initialized');
       } catch (e) {

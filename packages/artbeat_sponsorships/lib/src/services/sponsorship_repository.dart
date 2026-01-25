@@ -5,7 +5,7 @@ import '../models/sponsorship_status.dart';
 
 class SponsorshipRepository {
   SponsorshipRepository({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+    : _firestore = firestore ?? FirebaseFirestore.instance;
 
   final FirebaseFirestore _firestore;
 
@@ -34,9 +34,7 @@ class SponsorshipRepository {
         .orderBy('createdAt', descending: true)
         .get();
 
-    return snapshot.docs
-        .map(Sponsorship.fromSnapshot)
-        .toList();
+    return snapshot.docs.map(Sponsorship.fromSnapshot).toList();
   }
 
   /// Fetch sponsorships by status (admin use)
@@ -47,9 +45,7 @@ class SponsorshipRepository {
         .orderBy('createdAt', descending: true)
         .get();
 
-    return snapshot.docs
-        .map(Sponsorship.fromSnapshot)
-        .toList();
+    return snapshot.docs.map(Sponsorship.fromSnapshot).toList();
   }
 
   /// Update sponsorship status (admin controlled)

@@ -28,9 +28,7 @@ class ImageModerationService {
           'Content-Type': 'application/json',
           'Authorization': 'Api-Key $apiKey',
         },
-        body: jsonEncode({
-          'image_base64': base64Image,
-        }),
+        body: jsonEncode({'image_base64': base64Image}),
       );
 
       if (response.statusCode == 200) {
@@ -41,7 +39,8 @@ class ImageModerationService {
 
         // Return formatted result
         return {
-          'isAppropriate': data['rating_index'] <
+          'isAppropriate':
+              data['rating_index'] <
               2, // 0-1 are appropriate, 2+ are inappropriate
           'confidence': data['rating_confidence'],
           'classification': data['rating_label'],
@@ -69,7 +68,9 @@ class ImageModerationService {
 
   // Log moderation results for audit and improvement
   Future<void> _logModerationResult(
-      Map<String, dynamic> result, int imageSize) async {
+    Map<String, dynamic> result,
+    int imageSize,
+  ) async {
     try {
       final userId = _auth.currentUser?.uid;
       if (userId == null) return;
@@ -87,7 +88,8 @@ class ImageModerationService {
 
   // Check batch of images
   Future<List<Map<String, dynamic>>> checkMultipleImages(
-      List<File> images) async {
+    List<File> images,
+  ) async {
     final results = <Map<String, dynamic>>[];
     for (final image in images) {
       final result = await checkImage(image);

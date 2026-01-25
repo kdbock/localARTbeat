@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_capture/artbeat_capture.dart';
 
-
 class CaptureDetailScreen extends StatelessWidget {
   final File imageFile;
   final String title;

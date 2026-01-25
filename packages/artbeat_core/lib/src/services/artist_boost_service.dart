@@ -101,7 +101,9 @@ class ArtistBoostService {
       // Validate boost product
       if (!_boostProducts.containsKey(boostProductId)) {
         AppLogger.error('❌ Invalid boost product: $boostProductId');
-        AppLogger.error('Available products: ${_boostProducts.keys.join(', ')}');
+        AppLogger.error(
+          'Available products: ${_boostProducts.keys.join(', ')}',
+        );
         throw Exception('Invalid boost product: $boostProductId');
       }
       AppLogger.info('✅ Boost product validated');
@@ -218,15 +220,11 @@ class ArtistBoostService {
             return;
           }
         }
-        transaction.set(
-          boostRef,
-          {
-            ...boost.toFirestore(),
-            _effectsApplyingField: true,
-            _effectsAppliedField: false,
-          },
-          SetOptions(merge: true),
-        );
+        transaction.set(boostRef, {
+          ...boost.toFirestore(),
+          _effectsApplyingField: true,
+          _effectsAppliedField: false,
+        }, SetOptions(merge: true));
         shouldApplyEffects = true;
       });
 
@@ -246,10 +244,7 @@ class ArtistBoostService {
         boostData['momentum'] as int,
       );
       if (momentumUpdate != null) {
-        await _updateArtistProfileBoostFields(
-          recipientId,
-          momentumUpdate,
-        );
+        await _updateArtistProfileBoostFields(recipientId, momentumUpdate);
       }
 
       await _createArtistFeatures(senderId, recipientId, productId);
@@ -281,8 +276,9 @@ class ArtistBoostService {
     int momentumAmount,
   ) async {
     final now = DateTime.now();
-    final momentumRef =
-        _firestore.collection('artist_momentum').doc(recipientId);
+    final momentumRef = _firestore
+        .collection('artist_momentum')
+        .doc(recipientId);
     final userRef = _firestore.collection('users').doc(recipientId);
 
     try {
@@ -336,32 +332,23 @@ class ArtistBoostService {
         newWeeklyMomentum = weeklyMomentum + effectiveAdd;
         newMomentum = currentMomentum + effectiveAdd;
 
-        transaction.set(
-          momentumRef,
-          {
-            'momentum': newMomentum,
-            'weeklyMomentum': newWeeklyMomentum,
-            'weeklyWindowStart': Timestamp.fromDate(weekStart),
-            'momentumLastUpdated': Timestamp.fromDate(now),
-            'lastBoostAt': Timestamp.fromDate(now),
-            'lifetimeMomentum': FieldValue.increment(effectiveAdd),
-          },
-          SetOptions(merge: true),
-        );
+        transaction.set(momentumRef, {
+          'momentum': newMomentum,
+          'weeklyMomentum': newWeeklyMomentum,
+          'weeklyWindowStart': Timestamp.fromDate(weekStart),
+          'momentumLastUpdated': Timestamp.fromDate(now),
+          'lastBoostAt': Timestamp.fromDate(now),
+          'lifetimeMomentum': FieldValue.increment(effectiveAdd),
+        }, SetOptions(merge: true));
 
-        transaction.set(
-          userRef,
-          {
-            'artistMomentum': newMomentum,
-            'artistMomentumUpdatedAt': Timestamp.fromDate(now),
-            'artistMomentumWeekly': newWeeklyMomentum,
-            'artistMomentumWeekStart': Timestamp.fromDate(weekStart),
-            'artistXP': FieldValue.increment(momentumAmount),
-            'totalXPReceived': FieldValue.increment(momentumAmount),
-          },
-          SetOptions(merge: true),
-        );
-
+        transaction.set(userRef, {
+          'artistMomentum': newMomentum,
+          'artistMomentumUpdatedAt': Timestamp.fromDate(now),
+          'artistMomentumWeekly': newWeeklyMomentum,
+          'artistMomentumWeekStart': Timestamp.fromDate(weekStart),
+          'artistXP': FieldValue.increment(momentumAmount),
+          'totalXPReceived': FieldValue.increment(momentumAmount),
+        }, SetOptions(merge: true));
       });
 
       AppLogger.info(
@@ -391,15 +378,12 @@ class ArtistBoostService {
 
       if (snapshot.docs.isEmpty) return;
 
-      await snapshot.docs.first.reference.set(
-        {
-          'boostScore': update.newMomentum,
-          'lastBoostAt': FieldValue.serverTimestamp(),
-          'weeklyBoostMomentum': update.newWeeklyMomentum,
-          'boostMomentumUpdatedAt': FieldValue.serverTimestamp(),
-        },
-        SetOptions(merge: true),
-      );
+      await snapshot.docs.first.reference.set({
+        'boostScore': update.newMomentum,
+        'lastBoostAt': FieldValue.serverTimestamp(),
+        'weeklyBoostMomentum': update.newWeeklyMomentum,
+        'boostMomentumUpdatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
     } catch (e) {
       AppLogger.error('Error updating artist profile boost fields: $e');
     }
@@ -427,7 +411,10 @@ class ArtistBoostService {
   ) async {
     try {
       // Get sender information
-      final senderDoc = await _firestore.collection('users').doc(senderId).get();
+      final senderDoc = await _firestore
+          .collection('users')
+          .doc(senderId)
+          .get();
       final senderName = senderDoc.exists
           ? (senderDoc.data()!['displayName'] as String? ?? 'A Supporter')
           : 'A Supporter';
@@ -575,9 +562,7 @@ class ArtistBoostService {
     try {
       final currentBalance = await getArtistXPBalance(userId);
       if (currentBalance < amount) {
-        AppLogger.warning(
-          'Insufficient Artist XP: $currentBalance < $amount',
-        );
+        AppLogger.warning('Insufficient Artist XP: $currentBalance < $amount');
         return false;
       }
 

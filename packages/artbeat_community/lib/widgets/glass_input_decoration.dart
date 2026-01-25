@@ -202,7 +202,8 @@ class GlassTextField extends StatelessWidget {
         color: Colors.white,
       ),
       cursorColor: const Color(0xFF22D3EE),
-      decoration: decoration ??
+      decoration:
+          decoration ??
           GlassInputDecoration(
             hintText: hintText,
             labelText: labelText,

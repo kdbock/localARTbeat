@@ -19,17 +19,23 @@ class IntegrationExamples {
 
     core.AppLogger.info('🎯 User Capabilities:');
     debugPrint(
-        '  Can access basic features: ${capabilities.canAccessBasicFeatures}');
+      '  Can access basic features: ${capabilities.canAccessBasicFeatures}',
+    );
     debugPrint(
-        '  Can access pro features: ${capabilities.canAccessProFeatures}');
+      '  Can access pro features: ${capabilities.canAccessProFeatures}',
+    );
     core.AppLogger.info(
-        '  Can create artwork: ${capabilities.canCreateArtwork}');
+      '  Can create artwork: ${capabilities.canCreateArtwork}',
+    );
     core.AppLogger.analytics(
-        '  Can access analytics: ${capabilities.canAccessAnalytics}');
+      '  Can access analytics: ${capabilities.canAccessAnalytics}',
+    );
     debugPrint(
-        '  Max artwork uploads: ${capabilities.maxArtworkUploads == -1 ? "Unlimited" : capabilities.maxArtworkUploads}');
+      '  Max artwork uploads: ${capabilities.maxArtworkUploads == -1 ? "Unlimited" : capabilities.maxArtworkUploads}',
+    );
     debugPrint(
-        '  Preferred subscription source: ${capabilities.preferredSubscriptionSource}');
+      '  Preferred subscription source: ${capabilities.preferredSubscriptionSource}',
+    );
   }
 
   /// Example 2: Get unified user data
@@ -45,9 +51,11 @@ class IntegrationExamples {
       core.AppLogger.info('  User: ${unifiedData.userModel.fullName}');
       core.AppLogger.info('  Is Artist: ${unifiedData.artistProfile != null}');
       debugPrint(
-          '  Core Subscription: ${unifiedData.coreSubscription?.tier.displayName ?? "None"}');
+        '  Core Subscription: ${unifiedData.coreSubscription?.tier.displayName ?? "None"}',
+      );
       debugPrint(
-          '  Artist Subscription: ${unifiedData.artistSubscription?.tier.displayName ?? "None"}');
+        '  Artist Subscription: ${unifiedData.artistSubscription?.tier.displayName ?? "None"}',
+      );
     }
   }
 
@@ -72,8 +80,9 @@ class IntegrationExamples {
     if (userId == null) return;
 
     final integration = IntegrationService.instance;
-    final recommendation =
-        await integration.getSubscriptionRecommendation(userId);
+    final recommendation = await integration.getSubscriptionRecommendation(
+      userId,
+    );
 
     core.AppLogger.info('💡 Recommendation:');
     core.AppLogger.info('  Type: ${recommendation.type}');
@@ -121,19 +130,29 @@ class IntegrationExamples {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildCapabilityTile(
-                'Analytics Access', capabilities.canAccessAnalytics),
+              'Analytics Access',
+              capabilities.canAccessAnalytics,
+            ),
             _buildCapabilityTile(
-                'Artwork Creation', capabilities.canCreateArtwork),
+              'Artwork Creation',
+              capabilities.canCreateArtwork,
+            ),
             _buildCapabilityTile(
-                'Event Management', capabilities.canCreateEvents),
+              'Event Management',
+              capabilities.canCreateEvents,
+            ),
             _buildCapabilityTile(
-                'Gallery Management', capabilities.canManageGallery),
+              'Gallery Management',
+              capabilities.canManageGallery,
+            ),
             if (capabilities.maxArtworkUploads > 0)
               ListTile(
                 title: const Text('Upload Limit'),
-                subtitle: Text(capabilities.maxArtworkUploads == -1
-                    ? 'Unlimited'
-                    : '${capabilities.maxArtworkUploads} artworks'),
+                subtitle: Text(
+                  capabilities.maxArtworkUploads == -1
+                      ? 'Unlimited'
+                      : '${capabilities.maxArtworkUploads} artworks',
+                ),
                 leading: const Icon(Icons.cloud_upload),
               ),
           ],
@@ -169,8 +188,9 @@ class IntegrationExamples {
     if (userId == null) return;
 
     final integration = IntegrationService.instance;
-    final recommendation =
-        await integration.getSubscriptionRecommendation(userId);
+    final recommendation = await integration.getSubscriptionRecommendation(
+      userId,
+    );
 
     switch (recommendation.type) {
       case 'enable-artist':
@@ -198,9 +218,11 @@ class IntegrationExamples {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(success
-                    ? 'Artist features enabled!'
-                    : 'Failed to enable artist features'),
+                content: Text(
+                  success
+                      ? 'Artist features enabled!'
+                      : 'Failed to enable artist features',
+                ),
                 backgroundColor: success ? Colors.green : Colors.red,
               ),
             );
@@ -268,9 +290,7 @@ class _IntegrationWorkflowExampleState
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return Scaffold(
@@ -307,15 +327,18 @@ class _IntegrationWorkflowExampleState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('User Information',
-                style: Theme.of(context).textTheme.headlineSmall),
+            Text(
+              'User Information',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
             const SizedBox(height: 8),
             Text('Name: ${unifiedData!.userModel.fullName}'),
             Text('Email: ${unifiedData!.userModel.email}'),
             Text('Is Artist: ${unifiedData!.artistProfile != null}'),
             if (unifiedData!.artistProfile != null)
               Text(
-                  'Artist Display Name: ${unifiedData!.artistProfile!.displayName}'),
+                'Artist Display Name: ${unifiedData!.artistProfile!.displayName}',
+              ),
           ],
         ),
       ),
@@ -338,21 +361,34 @@ class _IntegrationWorkflowExampleState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Capabilities',
-                style: Theme.of(context).textTheme.headlineSmall),
+            Text(
+              'Capabilities',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
             const SizedBox(height: 8),
             _buildCapabilityRow(
-                'Basic Features', capabilities!.canAccessBasicFeatures),
+              'Basic Features',
+              capabilities!.canAccessBasicFeatures,
+            ),
             _buildCapabilityRow(
-                'Pro Features', capabilities!.canAccessProFeatures),
+              'Pro Features',
+              capabilities!.canAccessProFeatures,
+            ),
             _buildCapabilityRow(
-                'Create Artwork', capabilities!.canCreateArtwork),
+              'Create Artwork',
+              capabilities!.canCreateArtwork,
+            ),
             _buildCapabilityRow(
-                'Analytics Access', capabilities!.canAccessAnalytics),
+              'Analytics Access',
+              capabilities!.canAccessAnalytics,
+            ),
             _buildCapabilityRow(
-                'Gallery Management', capabilities!.canManageGallery),
+              'Gallery Management',
+              capabilities!.canManageGallery,
+            ),
             Text(
-                'Max Uploads: ${capabilities!.maxArtworkUploads == -1 ? "Unlimited" : capabilities!.maxArtworkUploads}'),
+              'Max Uploads: ${capabilities!.maxArtworkUploads == -1 ? "Unlimited" : capabilities!.maxArtworkUploads}',
+            ),
           ],
         ),
       ),
@@ -411,9 +447,11 @@ class _IntegrationWorkflowExampleState
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(success
-              ? 'Artist features enabled!'
-              : 'Failed to enable artist features'),
+          content: Text(
+            success
+                ? 'Artist features enabled!'
+                : 'Failed to enable artist features',
+          ),
           backgroundColor: success ? Colors.green : Colors.red,
         ),
       );
@@ -428,8 +466,9 @@ class _IntegrationWorkflowExampleState
     final userId = FirebaseAuth.instance.currentUser?.uid;
     if (userId == null) return;
 
-    final recommendation =
-        await integration.getSubscriptionRecommendation(userId);
+    final recommendation = await integration.getSubscriptionRecommendation(
+      userId,
+    );
 
     if (mounted) {
       showDialog<void>(

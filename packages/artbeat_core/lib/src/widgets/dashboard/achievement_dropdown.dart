@@ -46,10 +46,12 @@ class AchievementDropdown extends StatelessWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'dashboard_achievements_count'.tr(namedArgs: {
-                        'unlocked': unlockedCount.toString(),
-                        'total': achievements.length.toString(),
-                      }),
+                      'dashboard_achievements_count'.tr(
+                        namedArgs: {
+                          'unlocked': unlockedCount.toString(),
+                          'total': achievements.length.toString(),
+                        },
+                      ),
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -98,7 +100,10 @@ class AchievementDropdown extends StatelessWidget {
                     child: Center(
                       child: Text(
                         'dashboard_achievements_none'.tr(),
-                        style: const TextStyle(color: Colors.grey, fontSize: 14),
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 14,
+                        ),
                       ),
                     ),
                   ),

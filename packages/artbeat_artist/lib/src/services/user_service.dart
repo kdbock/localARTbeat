@@ -7,7 +7,8 @@ class UserService {
 
   // Example: Get user's calendar preferences
   Future<Map<String, dynamic>?> getUserCalendarPreferences(
-      String userId) async {
+    String userId,
+  ) async {
     try {
       final doc = await _firestore
           .collection('users')
@@ -24,7 +25,9 @@ class UserService {
 
   // Example: Update user's calendar preferences
   Future<void> updateUserCalendarPreferences(
-      String userId, Map<String, dynamic> preferences) async {
+    String userId,
+    Map<String, dynamic> preferences,
+  ) async {
     try {
       await _firestore
           .collection('users')

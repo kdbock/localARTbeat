@@ -198,7 +198,9 @@ class _ArtistCTAWidgetState extends State<ArtistCTAWidget> {
                           ),
                         ),
                         child: Text(
-                          'artist_cta_button'.tr(namedArgs: {'price': r'$4.99'}),
+                          'artist_cta_button'.tr(
+                            namedArgs: {'price': r'$4.99'},
+                          ),
                           style: Theme.of(context).textTheme.bodyLarge
                               ?.copyWith(
                                 color: Colors.white,

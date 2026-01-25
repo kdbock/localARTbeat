@@ -86,25 +86,28 @@ class _ArtistListWidgetState extends State<ArtistListWidget>
         currentUser = null;
       }
 
-      final viewerLocation =
-          await GeoWeightingUtils.resolveViewerLocation(currentUser);
+      final viewerLocation = await GeoWeightingUtils.resolveViewerLocation(
+        currentUser,
+      );
 
       final sortedArtists =
           await GeoWeightingUtils.sortByDistance<ArtistProfileModel>(
-        items: loadedArtists,
-        idOf: (artist) => artist.userId,
-        locationOf: (artist) => artist.location,
-        viewerLocation: viewerLocation,
-        tieBreaker: (a, b) {
-          final scoreCompare = b.boostScore.compareTo(a.boostScore);
-          if (scoreCompare != 0) return scoreCompare;
-          final aBoost = a.lastBoostAt ?? DateTime.fromMillisecondsSinceEpoch(0);
-          final bBoost = b.lastBoostAt ?? DateTime.fromMillisecondsSinceEpoch(0);
-          final boostTimeCompare = bBoost.compareTo(aBoost);
-          if (boostTimeCompare != 0) return boostTimeCompare;
-          return a.displayName.compareTo(b.displayName);
-        },
-      );
+            items: loadedArtists,
+            idOf: (artist) => artist.userId,
+            locationOf: (artist) => artist.location,
+            viewerLocation: viewerLocation,
+            tieBreaker: (a, b) {
+              final scoreCompare = b.boostScore.compareTo(a.boostScore);
+              if (scoreCompare != 0) return scoreCompare;
+              final aBoost =
+                  a.lastBoostAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+              final bBoost =
+                  b.lastBoostAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+              final boostTimeCompare = bBoost.compareTo(aBoost);
+              if (boostTimeCompare != 0) return boostTimeCompare;
+              return a.displayName.compareTo(b.displayName);
+            },
+          );
 
       if (mounted) {
         setState(() {
@@ -260,9 +263,7 @@ class _ArtistListWidgetState extends State<ArtistListWidget>
                     artist.profileImageUrl,
                   ),
                   child:
-                      !ImageUrlValidator.isValidImageUrl(
-                        artist.profileImageUrl,
-                      )
+                      !ImageUrlValidator.isValidImageUrl(artist.profileImageUrl)
                       ? const Icon(Icons.person, size: 30)
                       : null,
                 ),
@@ -319,8 +320,8 @@ class _ArtistListWidgetState extends State<ArtistListWidget>
                                     color: ArtbeatColors.primaryGreen,
                                   ),
                                   const SizedBox(width: 4),
-                                Text(
-                                  'boost_badge_label'.tr(),
+                                  Text(
+                                    'boost_badge_label'.tr(),
                                     style: GoogleFonts.spaceGrotesk(
                                       fontSize: 10,
                                       fontWeight: FontWeight.w700,

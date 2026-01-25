@@ -111,8 +111,9 @@ class _ArtworkDiscoveryWidgetState extends State<ArtworkDiscoveryWidget> {
             ),
             const SizedBox(height: 8),
             Text(
-              'art_walk_failed_to_load_recommendations'
-                  .tr(namedArgs: {'error': _error ?? '—'}),
+              'art_walk_failed_to_load_recommendations'.tr(
+                namedArgs: {'error': _error ?? '—'},
+              ),
               style: GoogleFonts.spaceGrotesk(
                 color: Colors.white.withValues(alpha: 0.78),
                 fontSize: 12,
@@ -282,10 +283,7 @@ class _ArtworkDiscoveryWidgetState extends State<ArtworkDiscoveryWidget> {
             ),
             const SizedBox(height: 6),
             if (artwork.medium.isNotEmpty)
-              _InfoRow(
-                icon: Icons.palette_outlined,
-                label: artwork.medium,
-              ),
+              _InfoRow(icon: Icons.palette_outlined, label: artwork.medium),
             if (artwork.isForSale && artwork.price != null) ...[
               const SizedBox(height: 6),
               _InfoRow(
@@ -306,21 +304,13 @@ class _InfoRow extends StatelessWidget {
   final String label;
   final Color? color;
 
-  const _InfoRow({
-    required this.icon,
-    required this.label,
-    this.color,
-  });
+  const _InfoRow({required this.icon, required this.label, this.color});
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(
-          icon,
-          size: 14,
-          color: color ?? Colors.white70,
-        ),
+        Icon(icon, size: 14, color: color ?? Colors.white70),
         const SizedBox(width: 6),
         Expanded(
           child: Text(

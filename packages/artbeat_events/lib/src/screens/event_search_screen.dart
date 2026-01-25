@@ -331,7 +331,9 @@ class _EventSearchScreenState extends State<EventSearchScreen> {
 
   Widget _buildFilterRow() {
     final bool hasActiveFilters =
-        _selectedCategory != 'All' || _startDate != null || _selectedLocation != null;
+        _selectedCategory != 'All' ||
+        _startDate != null ||
+        _selectedLocation != null;
 
     final chips = <Widget>[
       _buildFilterChip(
@@ -582,7 +584,11 @@ class _EventSearchScreenState extends State<EventSearchScreen> {
                   colors: [Color(0xFF7C4DFF), Color(0xFF22D3EE)],
                 ),
               ),
-              child: const Icon(Icons.search_off, color: Colors.white, size: 30),
+              child: const Icon(
+                Icons.search_off,
+                color: Colors.white,
+                size: 30,
+              ),
             ),
             const SizedBox(height: 18),
             Text(

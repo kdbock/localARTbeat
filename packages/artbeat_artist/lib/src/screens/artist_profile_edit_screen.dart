@@ -10,10 +10,7 @@ import 'package:artbeat_core/artbeat_core.dart' as core;
 class ArtistProfileEditScreen extends StatefulWidget {
   final String? artistProfileId;
 
-  const ArtistProfileEditScreen({
-    super.key,
-    this.artistProfileId,
-  });
+  const ArtistProfileEditScreen({super.key, this.artistProfileId});
 
   @override
   State<ArtistProfileEditScreen> createState() =>
@@ -63,7 +60,7 @@ class _ArtistProfileEditScreenState extends State<ArtistProfileEditScreen> {
     'Ceramics',
     'Printmaking',
     'Pen & Ink',
-    'Pencil'
+    'Pencil',
   ];
 
   final List<String> _availableStyles = [
@@ -80,7 +77,7 @@ class _ArtistProfileEditScreenState extends State<ArtistProfileEditScreen> {
     'Street Art',
     'Illustration',
     'Fantasy',
-    'Portrait'
+    'Portrait',
   ];
 
   @override
@@ -113,8 +110,9 @@ class _ArtistProfileEditScreenState extends State<ArtistProfileEditScreen> {
 
       if (widget.artistProfileId != null) {
         // Load specific profile by ID (for admin editing)
-        artistProfile = await _subscriptionService
-            .getArtistProfileById(widget.artistProfileId!);
+        artistProfile = await _subscriptionService.getArtistProfileById(
+          widget.artistProfileId!,
+        );
       } else {
         // Load current user's profile (most common case)
         artistProfile = await _subscriptionService.getCurrentArtistProfile();
@@ -146,9 +144,10 @@ class _ArtistProfileEditScreenState extends State<ArtistProfileEditScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(
-                  'artist_artist_profile_edit_error_error_loading_profile'
-                      .tr())),
+            content: Text(
+              'artist_artist_profile_edit_error_error_loading_profile'.tr(),
+            ),
+          ),
         );
       }
     } finally {
@@ -185,17 +184,21 @@ class _ArtistProfileEditScreenState extends State<ArtistProfileEditScreen> {
         bio: _bioController.text,
         mediums: _selectedMediums,
         styles: _selectedStyles,
-        location:
-            _locationController.text.isEmpty ? null : _locationController.text,
-        websiteUrl:
-            _websiteController.text.isEmpty ? null : _websiteController.text,
+        location: _locationController.text.isEmpty
+            ? null
+            : _locationController.text,
+        websiteUrl: _websiteController.text.isEmpty
+            ? null
+            : _websiteController.text,
         instagram: _instagramController.text.isEmpty
             ? null
             : _instagramController.text,
-        facebook:
-            _facebookController.text.isEmpty ? null : _facebookController.text,
-        twitter:
-            _twitterController.text.isEmpty ? null : _twitterController.text,
+        facebook: _facebookController.text.isEmpty
+            ? null
+            : _facebookController.text,
+        twitter: _twitterController.text.isEmpty
+            ? null
+            : _twitterController.text,
         etsy: _etsyController.text.isEmpty ? null : _etsyController.text,
         userType: _userType,
         profileImageUrl: _profileImageUrl,
@@ -205,9 +208,10 @@ class _ArtistProfileEditScreenState extends State<ArtistProfileEditScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(
-                  'artist_artist_profile_edit_success_artist_profile_saved'
-                      .tr())),
+            content: Text(
+              'artist_artist_profile_edit_success_artist_profile_saved'.tr(),
+            ),
+          ),
         );
         // Navigate to main dashboard after successful profile creation
         // The dashboard will detect the user is an artist and show appropriate content
@@ -221,9 +225,10 @@ class _ArtistProfileEditScreenState extends State<ArtistProfileEditScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(
-                  'artist_artist_profile_edit_error_error_saving_profile'
-                      .tr())),
+            content: Text(
+              'artist_artist_profile_edit_error_error_saving_profile'.tr(),
+            ),
+          ),
         );
       }
     } finally {
@@ -258,8 +263,9 @@ class _ArtistProfileEditScreenState extends State<ArtistProfileEditScreen> {
   // Pick profile image
   Future<void> _pickProfileImage() async {
     final ImagePicker picker = ImagePicker();
-    final XFile? pickedFile =
-        await picker.pickImage(source: ImageSource.gallery);
+    final XFile? pickedFile = await picker.pickImage(
+      source: ImageSource.gallery,
+    );
 
     if (pickedFile != null) {
       setState(() {
@@ -271,8 +277,9 @@ class _ArtistProfileEditScreenState extends State<ArtistProfileEditScreen> {
   // Pick cover image
   Future<void> _pickCoverImage() async {
     final ImagePicker picker = ImagePicker();
-    final XFile? pickedFile =
-        await picker.pickImage(source: ImageSource.gallery);
+    final XFile? pickedFile = await picker.pickImage(
+      source: ImageSource.gallery,
+    );
 
     if (pickedFile != null) {
       setState(() {
@@ -316,8 +323,9 @@ class _ArtistProfileEditScreenState extends State<ArtistProfileEditScreen> {
                         ButtonSegment(
                           value: core.UserType.artist,
                           label: Text(
-                              'artist_artist_profile_edit_text_individual_artist'
-                                  .tr()),
+                            'artist_artist_profile_edit_text_individual_artist'
+                                .tr(),
+                          ),
                           icon: const Icon(Icons.person),
                         ),
                         ButtonSegment(
@@ -350,8 +358,9 @@ class _ArtistProfileEditScreenState extends State<ArtistProfileEditScreen> {
                           child: Column(
                             children: [
                               Text(
-                                  'artist_artist_profile_edit_text_profile_image'
-                                      .tr()),
+                                'artist_artist_profile_edit_text_profile_image'
+                                    .tr(),
+                              ),
                               const SizedBox(height: 8),
                               GestureDetector(
                                 onTap: _pickProfileImage,
@@ -363,22 +372,25 @@ class _ArtistProfileEditScreenState extends State<ArtistProfileEditScreen> {
                                     shape: BoxShape.circle,
                                     image: _profileImageFile != null
                                         ? DecorationImage(
-                                            image:
-                                                FileImage(_profileImageFile!),
+                                            image: FileImage(
+                                              _profileImageFile!,
+                                            ),
                                             fit: BoxFit.cover,
                                           )
-                                        : core.ImageUrlValidator
-                                                .isValidImageUrl(
-                                                    _profileImageUrl)
-                                            ? DecorationImage(
-                                                image: core.ImageUrlValidator
-                                                    .safeNetworkImage(
-                                                        _profileImageUrl)!,
-                                                fit: BoxFit.cover,
-                                              )
-                                            : null,
+                                        : core.ImageUrlValidator.isValidImageUrl(
+                                            _profileImageUrl,
+                                          )
+                                        ? DecorationImage(
+                                            image:
+                                                core.ImageUrlValidator.safeNetworkImage(
+                                                  _profileImageUrl,
+                                                )!,
+                                            fit: BoxFit.cover,
+                                          )
+                                        : null,
                                   ),
-                                  child: _profileImageFile == null &&
+                                  child:
+                                      _profileImageFile == null &&
                                           _profileImageUrl == null
                                       ? const Icon(Icons.add_a_photo, size: 40)
                                       : null,
@@ -390,8 +402,10 @@ class _ArtistProfileEditScreenState extends State<ArtistProfileEditScreen> {
                         Expanded(
                           child: Column(
                             children: [
-                              Text('artist_artist_profile_edit_text_cover_image'
-                                  .tr()),
+                              Text(
+                                'artist_artist_profile_edit_text_cover_image'
+                                    .tr(),
+                              ),
                               const SizedBox(height: 8),
                               GestureDetector(
                                 onTap: _pickCoverImage,
@@ -406,20 +420,25 @@ class _ArtistProfileEditScreenState extends State<ArtistProfileEditScreen> {
                                             image: FileImage(_coverImageFile!),
                                             fit: BoxFit.cover,
                                           )
-                                        : core.ImageUrlValidator
-                                                .isValidImageUrl(_coverImageUrl)
-                                            ? DecorationImage(
-                                                image: core.ImageUrlValidator
-                                                    .safeNetworkImage(
-                                                        _coverImageUrl)!,
-                                                fit: BoxFit.cover,
-                                              )
-                                            : null,
+                                        : core.ImageUrlValidator.isValidImageUrl(
+                                            _coverImageUrl,
+                                          )
+                                        ? DecorationImage(
+                                            image:
+                                                core.ImageUrlValidator.safeNetworkImage(
+                                                  _coverImageUrl,
+                                                )!,
+                                            fit: BoxFit.cover,
+                                          )
+                                        : null,
                                   ),
-                                  child: _coverImageFile == null &&
+                                  child:
+                                      _coverImageFile == null &&
                                           _coverImageUrl == null
-                                      ? const Icon(Icons.add_photo_alternate,
-                                          size: 40)
+                                      ? const Icon(
+                                          Icons.add_photo_alternate,
+                                          size: 40,
+                                        )
                                       : null,
                                 ),
                               ),
@@ -624,7 +643,8 @@ class _ArtistProfileEditScreenState extends State<ArtistProfileEditScreen> {
                       child: SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: _isSaving ||
+                          onPressed:
+                              _isSaving ||
                                   _selectedMediums.isEmpty ||
                                   _selectedStyles.isEmpty
                               ? null

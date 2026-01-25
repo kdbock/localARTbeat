@@ -192,7 +192,8 @@ class _PortfoliosScreenState extends State<PortfoliosScreen> {
             icon: const Icon(Icons.refresh, color: Colors.white),
             onPressed: _isLoading ? null : _loadPortfolios,
           ),
-        ], subtitle: '',
+        ],
+        subtitle: '',
       ),
       body: WorldBackground(
         child: SafeArea(
@@ -521,7 +522,9 @@ class _PortfolioCard extends StatelessWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: _PortfolioPalette.accentTeal.withValues(alpha: 0.18),
+                      color: _PortfolioPalette.accentTeal.withValues(
+                        alpha: 0.18,
+                      ),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
@@ -631,7 +634,11 @@ class _PortfolioDetailsScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: HudTopBar(title: displayName, glassBackground: true, subtitle: '',),
+      appBar: HudTopBar(
+        title: displayName,
+        glassBackground: true,
+        subtitle: '',
+      ),
       body: WorldBackground(
         child: SafeArea(
           child: SingleChildScrollView(
@@ -1225,7 +1232,8 @@ class _PortfolioDataUtils {
   }
 
   static double boostScore(Map<String, dynamic> data) {
-    final value = data['boostScore'] ?? data['artistMomentum'] ?? data['momentum'];
+    final value =
+        data['boostScore'] ?? data['artistMomentum'] ?? data['momentum'];
     if (value is num) return value.toDouble();
     return 0.0;
   }

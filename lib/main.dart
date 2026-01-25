@@ -168,11 +168,9 @@ Future<void> _initializeCoreServices() async {
         try {
           await SecureFirebaseConfig.configureAppCheck(
             teamId: 'H49R32NPY6',
-            forceDebug:
-                false, // Set to true only for debugging production App Check issues
           ).timeout(const Duration(seconds: 8));
           debugPrint('🛡️ ✅ configureAppCheck completed successfully');
-        } catch (e) {
+        } on Exception catch (e) {
           debugPrint('⚠️ configureAppCheck error: $e');
           // Don't rethrow - allow app to continue without App Check
         }

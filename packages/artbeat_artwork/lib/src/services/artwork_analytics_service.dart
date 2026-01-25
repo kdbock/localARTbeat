@@ -33,8 +33,11 @@ class ArtworkAnalyticsService {
   }
 
   /// Track search analytics
-  Future<void> trackSearch(String query, int resultCount,
-      {String? source}) async {
+  Future<void> trackSearch(
+    String query,
+    int resultCount, {
+    String? source,
+  }) async {
     try {
       final userId = getCurrentUserId();
       await firestore.collection('search_analytics').add({
@@ -51,8 +54,12 @@ class ArtworkAnalyticsService {
   }
 
   /// Track artwork sale/revenue
-  Future<void> trackArtworkSale(String artworkId, double amount,
-      {String? buyerId, String? paymentMethod}) async {
+  Future<void> trackArtworkSale(
+    String artworkId,
+    double amount, {
+    String? buyerId,
+    String? paymentMethod,
+  }) async {
     try {
       final userId = getCurrentUserId();
       await firestore.collection('sales_analytics').add({
@@ -109,8 +116,9 @@ class ArtworkAnalyticsService {
         'totalViews': viewCount,
         'totalEngagement': engagementCount,
         'recentViews': recentViews,
-        'engagementRate':
-            viewCount > 0 ? (engagementCount / viewCount) * 100 : 0.0,
+        'engagementRate': viewCount > 0
+            ? (engagementCount / viewCount) * 100
+            : 0.0,
       };
     } catch (e) {
       AppLogger.error('Error getting artwork performance: $e');
@@ -124,8 +132,10 @@ class ArtworkAnalyticsService {
   }
 
   /// Get top performing artworks for an artist
-  Future<List<Map<String, dynamic>>> getTopArtworks(String artistId,
-      {int limit = 10}) async {
+  Future<List<Map<String, dynamic>>> getTopArtworks(
+    String artistId, {
+    int limit = 10,
+  }) async {
     try {
       // Get artist's artworks
       final artworksSnapshot = await firestore
@@ -142,8 +152,9 @@ class ArtworkAnalyticsService {
 
       for (final artworkId in artworkIds) {
         final performance = await getArtworkPerformance(artworkId);
-        final artworkDoc =
-            artworksSnapshot.docs.firstWhere((doc) => doc.id == artworkId);
+        final artworkDoc = artworksSnapshot.docs.firstWhere(
+          (doc) => doc.id == artworkId,
+        );
         final artworkData = artworkDoc.data();
 
         performanceData.add({
@@ -155,7 +166,8 @@ class ArtworkAnalyticsService {
 
       // Sort by total views
       performanceData.sort(
-          (a, b) => (b['totalViews'] as int).compareTo(a['totalViews'] as int));
+        (a, b) => (b['totalViews'] as int).compareTo(a['totalViews'] as int),
+      );
 
       return performanceData.take(limit).toList();
     } catch (e) {
@@ -190,8 +202,10 @@ class ArtworkAnalyticsService {
   }
 
   /// Get view trends over time
-  Future<List<Map<String, dynamic>>> getViewTrends(String artworkId,
-      {int days = 30}) async {
+  Future<List<Map<String, dynamic>>> getViewTrends(
+    String artworkId, {
+    int days = 30,
+  }) async {
     try {
       final startDate = DateTime.now().subtract(Duration(days: days));
 
@@ -220,10 +234,7 @@ class ArtworkAnalyticsService {
         final viewCount =
             dailyViews[DateTime(date.year, date.month, date.day)] ?? 0;
 
-        trends.add({
-          'date': date,
-          'views': viewCount,
-        });
+        trends.add({'date': date, 'views': viewCount});
       }
 
       return trends;
@@ -260,15 +271,19 @@ class ArtworkAnalyticsService {
 
       // Get top queries
       final queryEntries = queryFrequency.entries.toList();
-      queryEntries.sort((MapEntry<String, int> a, MapEntry<String, int> b) =>
-          b.value.compareTo(a.value));
+      queryEntries.sort(
+        (MapEntry<String, int> a, MapEntry<String, int> b) =>
+            b.value.compareTo(a.value),
+      );
 
       final topQueries = queryEntries
           .take(10)
-          .map((MapEntry<String, int> entry) => {
-                'query': entry.key,
-                'count': entry.value,
-              })
+          .map(
+            (MapEntry<String, int> entry) => {
+              'query': entry.key,
+              'count': entry.value,
+            },
+          )
           .toList();
 
       return {
@@ -277,9 +292,9 @@ class ArtworkAnalyticsService {
         'topQueries': topQueries,
         'averageResults': snapshot.docs.isNotEmpty
             ? snapshot.docs
-                    .map((doc) => (doc.data()['resultCount'] as int?) ?? 0)
-                    .reduce((a, b) => a + b) /
-                snapshot.docs.length
+                      .map((doc) => (doc.data()['resultCount'] as int?) ?? 0)
+                      .reduce((a, b) => a + b) /
+                  snapshot.docs.length
             : 0.0,
       };
     } catch (e) {
@@ -294,8 +309,10 @@ class ArtworkAnalyticsService {
   }
 
   /// Get revenue analytics for an artist
-  Future<Map<String, dynamic>> getRevenueAnalytics(String artistId,
-      {int days = 30}) async {
+  Future<Map<String, dynamic>> getRevenueAnalytics(
+    String artistId, {
+    int days = 30,
+  }) async {
     try {
       final startDate = DateTime.now().subtract(Duration(days: days));
 
@@ -307,7 +324,9 @@ class ArtworkAnalyticsService {
           .get();
 
       final totalRevenue = snapshot.docs.fold<double>(
-          0, (sum, doc) => sum + (doc.data()['amount'] as double? ?? 0));
+        0,
+        (sum, doc) => sum + (doc.data()['amount'] as double? ?? 0),
+      );
 
       final totalSales = snapshot.docs.length;
 
@@ -332,14 +351,14 @@ class ArtworkAnalyticsService {
         dailyRevenue[date] = (dailyRevenue[date] ?? 0) + amount;
       }
 
-      final revenueTrend = dailyRevenue.entries
-          .map((entry) => {
-                'date': entry.key,
-                'revenue': entry.value,
-              })
-          .toList()
-        ..sort(
-            (a, b) => (a['date'] as DateTime).compareTo(b['date'] as DateTime));
+      final revenueTrend =
+          dailyRevenue.entries
+              .map((entry) => {'date': entry.key, 'revenue': entry.value})
+              .toList()
+            ..sort(
+              (a, b) =>
+                  (a['date'] as DateTime).compareTo(b['date'] as DateTime),
+            );
 
       return {
         'totalRevenue': totalRevenue,
@@ -374,19 +393,25 @@ class ArtworkAnalyticsService {
 
       // Calculate correlations
       final totalViews = topArtworks.fold<int>(
-          0, (sum, artwork) => sum + (artwork['totalViews'] as int? ?? 0));
+        0,
+        (sum, artwork) => sum + (artwork['totalViews'] as int? ?? 0),
+      );
 
       final totalRevenue = revenueAnalytics['totalRevenue'] as double? ?? 0.0;
 
-      final conversionRate =
-          totalViews > 0 ? (totalRevenue / totalViews) * 100 : 0.0;
+      final conversionRate = totalViews > 0
+          ? (totalRevenue / totalViews) * 100
+          : 0.0;
 
       // Engagement to revenue correlation
       final totalEngagement = topArtworks.fold<int>(
-          0, (sum, artwork) => sum + (artwork['totalEngagement'] as int? ?? 0));
+        0,
+        (sum, artwork) => sum + (artwork['totalEngagement'] as int? ?? 0),
+      );
 
-      final engagementToRevenueRatio =
-          totalRevenue > 0 ? totalEngagement / totalRevenue : 0.0;
+      final engagementToRevenueRatio = totalRevenue > 0
+          ? totalEngagement / totalRevenue
+          : 0.0;
 
       return {
         'totalViews': totalViews,
@@ -412,8 +437,10 @@ class ArtworkAnalyticsService {
   }
 
   /// Export analytics data
-  Future<String> exportAnalytics(String artistId,
-      {String format = 'json'}) async {
+  Future<String> exportAnalytics(
+    String artistId, {
+    String format = 'json',
+  }) async {
     try {
       final crossPackageData = await getCrossPackageAnalytics(artistId);
 
@@ -447,10 +474,12 @@ class ArtworkAnalyticsService {
         buffer.writeln('Metric,Value');
         buffer.writeln('Total Views,${crossPackageData['totalViews']}');
         buffer.writeln('Total Revenue,${crossPackageData['totalRevenue']}');
-        buffer
-            .writeln('Conversion Rate,${crossPackageData['conversionRate']}%');
         buffer.writeln(
-            'Engagement to Revenue Ratio,${crossPackageData['engagementToRevenueRatio']}');
+          'Conversion Rate,${crossPackageData['conversionRate']}%',
+        );
+        buffer.writeln(
+          'Engagement to Revenue Ratio,${crossPackageData['engagementToRevenueRatio']}',
+        );
         buffer.writeln('');
 
         // Top artworks section
@@ -460,7 +489,8 @@ class ArtworkAnalyticsService {
         for (final artwork in topArtworks) {
           final data = artwork as Map<String, dynamic>;
           buffer.writeln(
-              '${data['title']},${data['totalViews']},${data['totalEngagement']},${data['engagementRate']}');
+            '${data['title']},${data['totalViews']},${data['totalEngagement']},${data['engagementRate']}',
+          );
         }
 
         return buffer.toString();
@@ -508,10 +538,11 @@ class ArtworkAnalyticsService {
 
       // Process sales data
       final totalRevenue = salesDocs.docs.fold<double>(
-          0,
-          (sum, doc) =>
-              sum +
-              ((doc.data() as Map<String, dynamic>)['amount'] as double? ?? 0));
+        0,
+        (sum, doc) =>
+            sum +
+            ((doc.data() as Map<String, dynamic>)['amount'] as double? ?? 0),
+      );
 
       return {
         'totalAnalytics': analyticsCount.count,

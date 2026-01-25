@@ -11,8 +11,11 @@ import '../../services/in_app_purchase_setup.dart';
 class SubscriptionsScreen extends StatefulWidget {
   final bool showAppBar;
   final bool isPreview;
-  const SubscriptionsScreen({Key? key, this.showAppBar = true, this.isPreview = false})
-    : super(key: key);
+  const SubscriptionsScreen({
+    Key? key,
+    this.showAppBar = true,
+    this.isPreview = false,
+  }) : super(key: key);
 
   @override
   State<SubscriptionsScreen> createState() => _SubscriptionsScreenState();
@@ -125,10 +128,7 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            color.withValues(alpha: 0.2),
-            color.withValues(alpha: 0.05),
-          ],
+          colors: [color.withValues(alpha: 0.2), color.withValues(alpha: 0.05)],
         ),
         border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
@@ -142,7 +142,11 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
               color: color.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.workspace_premium_rounded, color: color, size: 20),
+            child: Icon(
+              Icons.workspace_premium_rounded,
+              color: color,
+              size: 20,
+            ),
           ),
           const SizedBox(height: 12),
           Text(
@@ -355,11 +359,13 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
                         ),
                       ),
                       Text(
-                        'subscriptions_billing_pattern'.tr(args: [
-                          'subscriptions_per_month'.tr(),
-                          tier['yearlyPrice'] as String,
-                          'subscriptions_per_year'.tr()
-                        ]),
+                        'subscriptions_billing_pattern'.tr(
+                          args: [
+                            'subscriptions_per_month'.tr(),
+                            tier['yearlyPrice'] as String,
+                            'subscriptions_per_year'.tr(),
+                          ],
+                        ),
                         style: GoogleFonts.spaceGrotesk(
                           color: Colors.white.withValues(alpha: 0.7),
                           fontSize: 12,

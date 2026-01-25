@@ -93,10 +93,7 @@ void main() {
           find.byType(TextFormField),
           findsAtLeastNWidgets(2),
         ); // Email and password fields
-        expect(
-          find.byType(InkWell),
-          findsAtLeastNWidgets(1),
-        ); // Login button
+        expect(find.byType(InkWell), findsAtLeastNWidgets(1)); // Login button
       });
 
       testWidgets('Register screen displays correctly with Firebase', (
@@ -159,10 +156,7 @@ void main() {
         // Check for essential elements
         expect(find.byType(Form), findsOneWidget);
         expect(find.byType(TextFormField), findsOneWidget); // Email field
-        expect(
-          find.byType(InkWell),
-          findsAtLeastNWidgets(1),
-        ); // Reset button
+        expect(find.byType(InkWell), findsAtLeastNWidgets(1)); // Reset button
       });
 
       testWidgets('Email verification screen displays correctly', (

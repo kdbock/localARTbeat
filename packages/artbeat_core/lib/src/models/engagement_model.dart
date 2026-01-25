@@ -222,7 +222,10 @@ class EngagementStats {
       sponsorCount: data['sponsorCount'] as int? ?? 0,
       messageCount: data['messageCount'] as int? ?? 0,
       commissionCount: data['commissionCount'] as int? ?? 0,
-      totalBoostValue: (data['totalBoostValue'] as num? ?? data['totalGiftValue'] as num?)?.toDouble() ?? 0.0,
+      totalBoostValue:
+          (data['totalBoostValue'] as num? ?? data['totalGiftValue'] as num?)
+              ?.toDouble() ??
+          0.0,
       totalSponsorValue: (data['totalSponsorValue'] as num?)?.toDouble() ?? 0.0,
       lastUpdated:
           (data['lastUpdated'] as Timestamp?)?.toDate() ?? DateTime.now(),
@@ -243,7 +246,10 @@ class EngagementStats {
       sponsorCount: data['sponsorCount'] as int? ?? 0,
       messageCount: data['messageCount'] as int? ?? 0,
       commissionCount: data['commissionCount'] as int? ?? 0,
-      totalBoostValue: (data['totalBoostValue'] as num? ?? data['totalGiftValue'] as num?)?.toDouble() ?? 0.0,
+      totalBoostValue:
+          (data['totalBoostValue'] as num? ?? data['totalGiftValue'] as num?)
+              ?.toDouble() ??
+          0.0,
       totalSponsorValue: (data['totalSponsorValue'] as num?)?.toDouble() ?? 0.0,
       lastUpdated: data['lastUpdated'] is Timestamp
           ? (data['lastUpdated'] as Timestamp).toDate()

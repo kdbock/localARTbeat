@@ -39,9 +39,9 @@ class EnhancedArtworkCard extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: isCompact ? 16 : 20,
-                      backgroundColor: const Color(0xFF7C4DFF).withValues(
-                        alpha: 0.1,
-                      ),
+                      backgroundColor: const Color(
+                        0xFF7C4DFF,
+                      ).withValues(alpha: 0.1),
                       child: Icon(
                         Icons.person,
                         color: const Color(0xFF7C4DFF),
@@ -81,16 +81,27 @@ class EnhancedArtworkCard extends StatelessWidget {
                 ),
               ),
 
-            // Artwork Image
-            SizedBox(
-              width: double.infinity,
-              height: isCompact ? 200 : 300,
-              child: artwork.imageUrl.isNotEmpty
-                  ? SecureNetworkImage(
-                      imageUrl: artwork.imageUrl,
-                      fit: BoxFit.cover,
-                      enableThumbnailFallback: true,
-                      errorWidget: Container(
+              // Artwork Image
+              SizedBox(
+                width: double.infinity,
+                height: isCompact ? 200 : 300,
+                child: artwork.imageUrl.isNotEmpty
+                    ? SecureNetworkImage(
+                        imageUrl: artwork.imageUrl,
+                        fit: BoxFit.cover,
+                        enableThumbnailFallback: true,
+                        errorWidget: Container(
+                          color: ArtbeatColors.backgroundSecondary,
+                          child: const Center(
+                            child: Icon(
+                              Icons.image,
+                              size: 64,
+                              color: ArtbeatColors.textSecondary,
+                            ),
+                          ),
+                        ),
+                      )
+                    : Container(
                         color: ArtbeatColors.backgroundSecondary,
                         child: const Center(
                           child: Icon(
@@ -100,157 +111,147 @@ class EnhancedArtworkCard extends StatelessWidget {
                           ),
                         ),
                       ),
-                    )
-                  : Container(
-                      color: ArtbeatColors.backgroundSecondary,
-                      child: const Center(
-                        child: Icon(
-                          Icons.image,
-                          size: 64,
-                          color: ArtbeatColors.textSecondary,
-                        ),
-                      ),
-                    ),
-            ),
+              ),
 
-            // Artwork Details
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Title and Description
-                  Text(
-                    artwork.title,
-                    style: GoogleFonts.spaceGrotesk(
-                      fontSize: isCompact ? 16 : 18,
-                      fontWeight: FontWeight.w900,
-                      color: const Color(0xFF92FFFFFF),
-                    ),
-                  ),
-                  if (artwork.description.isNotEmpty) ...[
-                    const SizedBox(height: 8),
+              // Artwork Details
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Title and Description
                     Text(
-                      artwork.description,
+                      artwork.title,
                       style: GoogleFonts.spaceGrotesk(
-                        fontSize: isCompact ? 13 : 14,
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFF70FFFFFF),
-                        height: 1.4,
+                        fontSize: isCompact ? 16 : 18,
+                        fontWeight: FontWeight.w900,
+                        color: const Color(0xFF92FFFFFF),
                       ),
-                      maxLines: isCompact ? 2 : 3,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                  ],
+                    if (artwork.description.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        artwork.description,
+                        style: GoogleFonts.spaceGrotesk(
+                          fontSize: isCompact ? 13 : 14,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF70FFFFFF),
+                          height: 1.4,
+                        ),
+                        maxLines: isCompact ? 2 : 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
 
-                  // Artwork Tags
-                  if (artwork.tags.isNotEmpty) ...[
-                    const SizedBox(height: 12),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 4,
-                      children: artwork.tags.take(3).map((tag) {
-                        return Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF7C4DFF).withValues(
-                              alpha: 0.1,
+                    // Artwork Tags
+                    if (artwork.tags.isNotEmpty) ...[
+                      const SizedBox(height: 12),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 4,
+                        children: artwork.tags.take(3).map((tag) {
+                          return Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
                             ),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: const Color(0xFF7C4DFF).withValues(
-                                alpha: 0.3,
+                            decoration: BoxDecoration(
+                              color: const Color(
+                                0xFF7C4DFF,
+                              ).withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: const Color(
+                                  0xFF7C4DFF,
+                                ).withValues(alpha: 0.3),
                               ),
                             ),
-                          ),
-                          child: Text(
-                            tag,
-                            style: GoogleFonts.spaceGrotesk(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFF7C4DFF),
+                            child: Text(
+                              tag,
+                              style: GoogleFonts.spaceGrotesk(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFF7C4DFF),
+                              ),
                             ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ],
-
-                  // Price and Sale Info
-                  if (!artwork.isSold && artwork.price > 0) ...[
-                    const SizedBox(height: 12),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
+                          );
+                        }).toList(),
                       ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFFC857).withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: const Color(0xFFFFC857).withValues(
-                            alpha: 0.3,
+                    ],
+
+                    // Price and Sale Info
+                    if (!artwork.isSold && artwork.price > 0) ...[
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFC857).withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: const Color(
+                              0xFFFFC857,
+                            ).withValues(alpha: 0.3),
                           ),
                         ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.attach_money,
-                            size: 16,
-                            color: Color(0xFFFFC857),
-                          ),
-                          Text(
-                            '\$${artwork.price.toStringAsFixed(0)}',
-                            style: GoogleFonts.spaceGrotesk(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w800,
-                              color: const Color(0xFFFFC857),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.attach_money,
+                              size: 16,
+                              color: Color(0xFFFFC857),
                             ),
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            'for_sale'.tr(),
-                            style: GoogleFonts.spaceGrotesk(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: const Color(0xFFFFC857),
+                            Text(
+                              '\$${artwork.price.toStringAsFixed(0)}',
+                              style: GoogleFonts.spaceGrotesk(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w800,
+                                color: const Color(0xFFFFC857),
+                              ),
                             ),
-                          ),
-                        ],
+                            const SizedBox(width: 4),
+                            Text(
+                              'for_sale'.tr(),
+                              style: GoogleFonts.spaceGrotesk(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFFFFC857),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
 
-            // Engagement Bar
-            if (showEngagement)
-              ContentEngagementBar(
-                contentId: artwork.id,
-                contentType: 'artwork',
-                initialStats: EngagementStats(
-                  likeCount: artwork.applauseCount,
-                  commentCount: 0,
-                  shareCount: 0,
-                  seenCount: artwork.viewsCount,
-                  lastUpdated: artwork.createdAt,
+              // Engagement Bar
+              if (showEngagement)
+                ContentEngagementBar(
+                  contentId: artwork.id,
+                  contentType: 'artwork',
+                  initialStats: EngagementStats(
+                    likeCount: artwork.applauseCount,
+                    commentCount: 0,
+                    shareCount: 0,
+                    seenCount: artwork.viewsCount,
+                    lastUpdated: artwork.createdAt,
+                  ),
+                  isCompact: isCompact,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                 ),
-                isCompact: isCompact,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
-    ));
+    );
   }
 
   String _formatTimeAgo(DateTime dateTime) {

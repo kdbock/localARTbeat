@@ -74,8 +74,10 @@ class _ArtworkAnalyticsDashboardState extends State<ArtworkAnalyticsDashboard> {
       final userId = _artworkService.getCurrentUserId();
       if (userId == null) return;
 
-      final exportData =
-          await _analyticsService.exportAnalytics(userId, format: 'json');
+      final exportData = await _analyticsService.exportAnalytics(
+        userId,
+        format: 'json',
+      );
 
       // Show export options dialog
       showDialog<void>(
@@ -202,15 +204,20 @@ class _ArtworkAnalyticsDashboardState extends State<ArtworkAnalyticsDashboard> {
 
   Widget _buildOverviewCards() {
     final totalViews = _topArtworks.fold<int>(
-        0, (sum, artwork) => sum + (artwork['totalViews'] as int? ?? 0));
+      0,
+      (sum, artwork) => sum + (artwork['totalViews'] as int? ?? 0),
+    );
     final totalEngagement = _topArtworks.fold<int>(
-        0, (sum, artwork) => sum + (artwork['totalEngagement'] as int? ?? 0));
+      0,
+      (sum, artwork) => sum + (artwork['totalEngagement'] as int? ?? 0),
+    );
     final avgEngagementRate = _topArtworks.isNotEmpty
         ? _topArtworks.fold<double>(
                 0,
                 (sum, artwork) =>
-                    sum + (artwork['engagementRate'] as double? ?? 0)) /
-            _topArtworks.length
+                    sum + (artwork['engagementRate'] as double? ?? 0),
+              ) /
+              _topArtworks.length
         : 0.0;
 
     return Row(
@@ -246,12 +253,14 @@ class _ArtworkAnalyticsDashboardState extends State<ArtworkAnalyticsDashboard> {
   }
 
   Widget _buildMetricCard(
-      String title, String value, IconData icon, Color color) {
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Card(
       elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -260,18 +269,12 @@ class _ArtworkAnalyticsDashboardState extends State<ArtworkAnalyticsDashboard> {
             const SizedBox(height: 8),
             Text(
               value,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
             Text(
               title,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey.shade600,
-              ),
+              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
               textAlign: TextAlign.center,
             ),
           ],
@@ -290,10 +293,7 @@ class _ArtworkAnalyticsDashboardState extends State<ArtworkAnalyticsDashboard> {
       children: [
         Text(
           'artwork_analytics_revenue_section'.tr(),
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
         Row(
@@ -341,10 +341,7 @@ class _ArtworkAnalyticsDashboardState extends State<ArtworkAnalyticsDashboard> {
       children: [
         Text(
           'artwork_analytics_cross_package'.tr(),
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
         Row(
@@ -381,16 +378,18 @@ class _ArtworkAnalyticsDashboardState extends State<ArtworkAnalyticsDashboard> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'artwork_analytics_insights_conversion'.tr(namedArgs: {
-                    'rate': conversionRate.toStringAsFixed(2),
-                  }),
+                  'artwork_analytics_insights_conversion'.tr(
+                    namedArgs: {'rate': conversionRate.toStringAsFixed(2)},
+                  ),
                   style: TextStyle(color: Colors.grey.shade700, fontSize: 14),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'artwork_analytics_insights_engagement'.tr(namedArgs: {
-                    'ratio': engagementToRevenueRatio.toStringAsFixed(2),
-                  }),
+                  'artwork_analytics_insights_engagement'.tr(
+                    namedArgs: {
+                      'ratio': engagementToRevenueRatio.toStringAsFixed(2),
+                    },
+                  ),
                   style: TextStyle(color: Colors.grey.shade700, fontSize: 14),
                 ),
               ],
@@ -407,10 +406,7 @@ class _ArtworkAnalyticsDashboardState extends State<ArtworkAnalyticsDashboard> {
       children: [
         Text(
           'artwork_analytics_top_artworks'.tr(),
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
         _topArtworks.isEmpty
@@ -431,11 +427,13 @@ class _ArtworkAnalyticsDashboardState extends State<ArtworkAnalyticsDashboard> {
                     child: ListTile(
                       title: Text(artwork['title'] as String? ?? 'Untitled'),
                       subtitle: Text(
-                        'artwork_analytics_views_engagement'.tr(namedArgs: {
-                          'views': (artwork['totalViews'] as int).toString(),
-                          'rate': (artwork['engagementRate'] as double)
-                              .toStringAsFixed(1),
-                        }),
+                        'artwork_analytics_views_engagement'.tr(
+                          namedArgs: {
+                            'views': (artwork['totalViews'] as int).toString(),
+                            'rate': (artwork['engagementRate'] as double)
+                                .toStringAsFixed(1),
+                          },
+                        ),
                       ),
                       trailing: IconButton(
                         icon: const Icon(Icons.analytics),
@@ -460,10 +458,7 @@ class _ArtworkAnalyticsDashboardState extends State<ArtworkAnalyticsDashboard> {
       children: [
         Text(
           'artwork_analytics_search_section'.tr(),
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
         Row(
@@ -500,10 +495,7 @@ class _ArtworkAnalyticsDashboardState extends State<ArtworkAnalyticsDashboard> {
         if (topQueries.isNotEmpty) ...[
           Text(
             'artwork_analytics_top_queries'.tr(),
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 8),
           Card(
@@ -601,7 +593,9 @@ class _ArtworkAnalyticsDashboardState extends State<ArtworkAnalyticsDashboard> {
                   Text(
                     'artwork_analytics_action_breakdown'.tr(),
                     style: const TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.bold),
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   ...actionBreakdown.entries.map((entry) {
@@ -650,7 +644,8 @@ class _ArtworkAnalyticsDashboardState extends State<ArtworkAnalyticsDashboard> {
             Text('Total Engagement: ${artwork['totalEngagement']}'),
             Text('Recent Views: ${artwork['recentViews']}'),
             Text(
-                'Engagement Rate: ${artwork['engagementRate'].toStringAsFixed(1)}%'),
+              'Engagement Rate: ${artwork['engagementRate'].toStringAsFixed(1)}%',
+            ),
           ],
         ),
         actions: [

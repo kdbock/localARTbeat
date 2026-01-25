@@ -47,9 +47,9 @@ class _EventsScreenState extends State<EventsScreen> {
         _errorMessage = 'Error loading events: $e';
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(_errorMessage!)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(_errorMessage!)));
     }
   }
 
@@ -80,17 +80,24 @@ class _EventsScreenState extends State<EventsScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(Icons.event_busy,
-                                size: 64, color: Colors.grey),
+                            const Icon(
+                              Icons.event_busy,
+                              size: 64,
+                              color: Colors.grey,
+                            ),
                             const SizedBox(height: 16),
                             Text(
                               tr('art_walk_no_events_found'),
                               style: const TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.bold),
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              tr('art_walk_create_your_first_event_by_tapping_the___button'),
+                              tr(
+                                'art_walk_create_your_first_event_by_tapping_the___button',
+                              ),
                               style: TextStyle(color: Colors.grey[600]),
                               textAlign: TextAlign.center,
                             ),
@@ -106,7 +113,9 @@ class _EventsScreenState extends State<EventsScreen> {
                         return Card(
                           elevation: 2,
                           margin: const EdgeInsets.symmetric(
-                              vertical: 8.0, horizontal: 4.0),
+                            vertical: 8.0,
+                            horizontal: 4.0,
+                          ),
                           child: ListTile(
                             leading: event.imageUrl != null
                                 ? ClipRRect(
@@ -119,11 +128,11 @@ class _EventsScreenState extends State<EventsScreen> {
                                       errorBuilder:
                                           (context, error, stackTrace) =>
                                               Container(
-                                        width: 56,
-                                        height: 56,
-                                        color: Colors.grey[300],
-                                        child: const Icon(Icons.event),
-                                      ),
+                                                width: 56,
+                                                height: 56,
+                                                color: Colors.grey[300],
+                                                child: const Icon(Icons.event),
+                                              ),
                                     ),
                                   )
                                 : Container(
@@ -137,8 +146,9 @@ class _EventsScreenState extends State<EventsScreen> {
                                   ),
                             title: Text(
                               event.title,
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,

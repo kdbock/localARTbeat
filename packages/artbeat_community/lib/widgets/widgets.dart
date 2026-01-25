@@ -2,7 +2,14 @@
 
 // Existing Widgets
 export 'package:artbeat_core/shared_widgets.dart'
-    show GlassCard, HudTopBar, WorldBackground, GradientCTAButton, GlassInputDecoration, GlassTextField, HudButton;
+    show
+        GlassCard,
+        HudTopBar,
+        WorldBackground,
+        GradientCTAButton,
+        GlassInputDecoration,
+        GlassTextField,
+        HudButton;
 export 'activity_card.dart';
 export 'applause_button.dart';
 export 'art_critique_slider.dart';

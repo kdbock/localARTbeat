@@ -23,10 +23,11 @@ extension SponsorshipTierExtension on SponsorshipTier {
   String get value => name;
 
   /// Convert Firestore string back to enum
-  static SponsorshipTier fromString(String value) => SponsorshipTier.values.firstWhere(
-      (tier) => tier.name == value,
-      orElse: () => SponsorshipTier.capture,
-    );
+  static SponsorshipTier fromString(String value) =>
+      SponsorshipTier.values.firstWhere(
+        (tier) => tier.name == value,
+        orElse: () => SponsorshipTier.capture,
+      );
 
   /// Logical helpers (no UI text, no pricing)
   bool get isGlobal => this == SponsorshipTier.title;

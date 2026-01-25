@@ -10,7 +10,7 @@ import '../utils/sponsorship_placements.dart';
 
 class SponsorService {
   SponsorService({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+    : _firestore = firestore ?? FirebaseFirestore.instance;
 
   final FirebaseFirestore _firestore;
 
@@ -45,9 +45,7 @@ class SponsorService {
 
     if (snapshot.docs.isEmpty) return null;
 
-    final sponsors = snapshot.docs
-        .map(Sponsorship.fromSnapshot)
-        .toList();
+    final sponsors = snapshot.docs.map(Sponsorship.fromSnapshot).toList();
 
     // 1️⃣ Title sponsor override (global, exclusive)
     final Sponsorship? titleSponsor = sponsors
@@ -59,17 +57,13 @@ class SponsorService {
       return titleSponsor;
     }
 
-
     // 2️⃣ Apply radius filtering where applicable
     final filteredByRadius = sponsors.where((sponsor) {
       if (sponsor.radiusMiles == null) return true;
 
       if (userLocation == null) return false;
 
-      return _isWithinRadius(
-        userLocation,
-        sponsor.radiusMiles!,
-      );
+      return _isWithinRadius(userLocation, sponsor.radiusMiles!);
     }).toList();
 
     if (filteredByRadius.isEmpty) return null;
@@ -99,9 +93,7 @@ class SponsorService {
         .where('endDate', isGreaterThanOrEqualTo: Timestamp.fromDate(now))
         .get();
 
-    return snapshot.docs
-        .map(Sponsorship.fromSnapshot)
-        .toList();
+    return snapshot.docs.map(Sponsorship.fromSnapshot).toList();
   }
 
   /// Pure lifecycle check
@@ -117,10 +109,7 @@ class SponsorService {
   /// NOTE:
   /// This is a placeholder distance check.
   /// Replace with geodesic calculation if/when needed.
-  bool _isWithinRadius(
-    LatLng userLocation,
-    double radiusMiles,
-  ) =>
+  bool _isWithinRadius(LatLng userLocation, double radiusMiles) =>
       // TODO(artbeat): Replace with proper Haversine calculation if required; radius logic validated server-side.
       true;
 }

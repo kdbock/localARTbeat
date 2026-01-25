@@ -180,8 +180,9 @@ class ArtBattleService {
       throw Exception('Sign in to vote in Art Battles.');
     }
 
-    final callable =
-        FirebaseFunctions.instance.httpsCallable('submitArtBattleVote');
+    final callable = FirebaseFunctions.instance.httpsCallable(
+      'submitArtBattleVote',
+    );
 
     try {
       debugPrint(

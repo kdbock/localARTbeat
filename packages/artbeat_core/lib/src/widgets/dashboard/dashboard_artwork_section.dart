@@ -69,10 +69,7 @@ class DashboardArtworkSection extends StatelessWidget {
               ),
               Text(
                 'dashboard_artwork_subtitle'.tr(),
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.white70,
-                ),
+                style: const TextStyle(fontSize: 14, color: Colors.white70),
               ),
             ],
           ),

@@ -124,12 +124,7 @@ class SubscriptionPlanValidator {
 
   /// Validate subscription data structure
   bool isValidSubscriptionData(Map<String, dynamic> subscriptionData) {
-    final requiredFields = [
-      'userId',
-      'tier',
-      'status',
-      'startDate',
-    ];
+    final requiredFields = ['userId', 'tier', 'status', 'startDate'];
 
     for (final field in requiredFields) {
       if (!subscriptionData.containsKey(field) ||
@@ -142,7 +137,8 @@ class SubscriptionPlanValidator {
     // Validate tier exists
     if (!getAllTiers().contains(subscriptionData['tier'])) {
       ArtistLogger.error(
-          'Invalid subscription tier: ${subscriptionData['tier']}');
+        'Invalid subscription tier: ${subscriptionData['tier']}',
+      );
       return false;
     }
 
@@ -150,7 +146,8 @@ class SubscriptionPlanValidator {
     final validStatuses = ['active', 'inactive', 'cancelled', 'pending'];
     if (!validStatuses.contains(subscriptionData['status'])) {
       ArtistLogger.error(
-          'Invalid subscription status: ${subscriptionData['status']}');
+        'Invalid subscription status: ${subscriptionData['status']}',
+      );
       return false;
     }
 
@@ -250,11 +247,6 @@ class SubscriptionPlanValidator {
   }
 
   Map<String, int> _getTierHierarchy() {
-    return {
-      'free': 0,
-      'artist_basic': 1,
-      'artist_pro': 2,
-      'gallery': 3,
-    };
+    return {'free': 0, 'artist_basic': 1, 'artist_pro': 2, 'gallery': 3};
   }
 }

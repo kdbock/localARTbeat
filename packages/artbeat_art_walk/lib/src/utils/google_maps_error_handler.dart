@@ -85,10 +85,7 @@ class GoogleMapsErrorHandler {
         duration: const Duration(seconds: 5),
         action: onRetry == null
             ? null
-            : SnackBarAction(
-                label: 'Retry',
-                onPressed: onRetry,
-              ),
+            : SnackBarAction(label: 'Retry', onPressed: onRetry),
       ),
     );
   }

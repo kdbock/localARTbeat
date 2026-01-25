@@ -114,31 +114,24 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 
   Widget _buildWorldShell(Widget child) {
-    final content = WorldBackground(
-      child: SafeArea(
-        top: false,
-        child: child,
-      ),
-    );
+    final content = WorldBackground(child: SafeArea(top: false, child: child));
 
     if (widget.useScaffold) {
-      return Scaffold(
-        backgroundColor: const Color(0xFF07060F),
-        body: content,
-      );
+      return Scaffold(backgroundColor: const Color(0xFF07060F), body: content);
     }
 
     return content;
   }
 
   Widget _buildHudTopBar({required bool showActions}) => Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-        child: HudTopBar(
-          title: 'notifications_title'.tr(),
-          onBackPressed: () => Navigator.of(context).maybePop(),
-          actions: showActions ? _buildHudActions() : const [], subtitle: '',
-        ),
-      );
+    padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+    child: HudTopBar(
+      title: 'notifications_title'.tr(),
+      onBackPressed: () => Navigator.of(context).maybePop(),
+      actions: showActions ? _buildHudActions() : const [],
+      subtitle: '',
+    ),
+  );
 
   List<Widget> _buildHudActions() {
     final actions = <Widget>[
@@ -170,217 +163,207 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 
   Widget _buildFilterBar() => GlassCard(
-        margin: EdgeInsets.zero,
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-        child: Wrap(
-          spacing: 10,
-          runSpacing: 8,
-          children: _NotificationFilter.values.map((filter) {
-            final selected = _activeFilter == filter;
-            final label = _trWithFallback(
-              filter.labelKey,
-              filter.fallbackLabel,
-            );
+    margin: EdgeInsets.zero,
+    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+    child: Wrap(
+      spacing: 10,
+      runSpacing: 8,
+      children: _NotificationFilter.values.map((filter) {
+        final selected = _activeFilter == filter;
+        final label = _trWithFallback(filter.labelKey, filter.fallbackLabel);
 
-            return ChoiceChip(
-              label: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(filter.icon, size: 16),
-                  const SizedBox(width: 6),
-                  Text(label),
-                ],
-              ),
-              selected: selected,
-              onSelected: (value) {
-                if (value && _activeFilter != filter) {
-                  setState(() => _activeFilter = filter);
-                }
-              },
-              labelStyle: GoogleFonts.spaceGrotesk(
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-              ),
-              backgroundColor: Colors.white.withValues(alpha: 0.06),
-              selectedColor: ArtbeatColors.primaryPurple.withValues(alpha: 0.35),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(999),
-              ),
-              elevation: 0,
-            );
-          }).toList(),
-        ),
-      );
-
-  Widget _buildNotificationsStream(User user) => StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .collection('notifications')
-          .orderBy('createdAt', descending: true)
-          .snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (snapshot.hasError) {
-          return _buildErrorState(snapshot.error?.toString() ?? 'Error');
-        }
-
-        final docs = snapshot.data?.docs ?? [];
-        if (docs.isEmpty) {
-          return _buildEmptyNotificationsState();
-        }
-
-        final unreadCount = docs
-            .where((doc) => doc.data()['read'] != true)
-            .length;
-
-        final filteredDocs = docs
-            .where((doc) => _activeFilter.appliesTo(doc.data()))
-            .toList();
-
-        final summaryCard = _buildSummaryCard(
-          total: docs.length,
-          unread: unreadCount,
-          lastUpdated: _extractLatestDate(docs),
+        return ChoiceChip(
+          label: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(filter.icon, size: 16),
+              const SizedBox(width: 6),
+              Text(label),
+            ],
+          ),
+          selected: selected,
+          onSelected: (value) {
+            if (value && _activeFilter != filter) {
+              setState(() => _activeFilter = filter);
+            }
+          },
+          labelStyle: GoogleFonts.spaceGrotesk(
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
+          backgroundColor: Colors.white.withValues(alpha: 0.06),
+          selectedColor: ArtbeatColors.primaryPurple.withValues(alpha: 0.35),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(999),
+          ),
+          elevation: 0,
         );
+      }).toList(),
+    ),
+  );
 
-        if (filteredDocs.isEmpty) {
-          return ListView(
+  Widget _buildNotificationsStream(User user) =>
+      StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+        stream: FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('notifications')
+            .orderBy('createdAt', descending: true)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return _buildErrorState(snapshot.error?.toString() ?? 'Error');
+          }
+
+          final docs = snapshot.data?.docs ?? [];
+          if (docs.isEmpty) {
+            return _buildEmptyNotificationsState();
+          }
+
+          final unreadCount = docs
+              .where((doc) => doc.data()['read'] != true)
+              .length;
+
+          final filteredDocs = docs
+              .where((doc) => _activeFilter.appliesTo(doc.data()))
+              .toList();
+
+          final summaryCard = _buildSummaryCard(
+            total: docs.length,
+            unread: unreadCount,
+            lastUpdated: _extractLatestDate(docs),
+          );
+
+          if (filteredDocs.isEmpty) {
+            return ListView(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+              physics: const BouncingScrollPhysics(),
+              children: [
+                summaryCard,
+                const SizedBox(height: 12),
+                _buildFilterEmptyState(),
+              ],
+            );
+          }
+
+          return ListView.builder(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
             physics: const BouncingScrollPhysics(),
-            children: [
-              summaryCard,
-              const SizedBox(height: 12),
-              _buildFilterEmptyState(),
-            ],
-          );
-        }
+            itemCount: filteredDocs.length + 1,
+            itemBuilder: (context, index) {
+              if (index == 0) {
+                return Column(
+                  children: [summaryCard, const SizedBox(height: 12)],
+                );
+              }
 
-        return ListView.builder(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
-          physics: const BouncingScrollPhysics(),
-          itemCount: filteredDocs.length + 1,
-          itemBuilder: (context, index) {
-            if (index == 0) {
-              return Column(
-                children: [
-                  summaryCard,
-                  const SizedBox(height: 12),
-                ],
+              final doc = filteredDocs[index - 1];
+              final data = doc.data();
+              final title = _parseTitle(data);
+              final message = _parseMessage(data);
+              final type = (data['type'] as String?) ?? '';
+              final timestamp = data['createdAt'] as Timestamp?;
+              final createdAt = timestamp?.toDate();
+              final isRead = data['read'] == true;
+
+              return _buildNotificationCard(
+                notificationId: doc.id,
+                data: data,
+                title: title,
+                message: message,
+                type: type,
+                isRead: isRead,
+                createdAt: createdAt,
               );
-            }
-
-            final doc = filteredDocs[index - 1];
-            final data = doc.data();
-            final title = _parseTitle(data);
-            final message = _parseMessage(data);
-            final type = (data['type'] as String?) ?? '';
-            final timestamp = data['createdAt'] as Timestamp?;
-            final createdAt = timestamp?.toDate();
-            final isRead = data['read'] == true;
-
-            return _buildNotificationCard(
-              notificationId: doc.id,
-              data: data,
-              title: title,
-              message: message,
-              type: type,
-              isRead: isRead,
-              createdAt: createdAt,
-            );
-          },
-        );
-      },
-    );
+            },
+          );
+        },
+      );
 
   Widget _buildSummaryCard({
     required int total,
     required int unread,
     required DateTime? lastUpdated,
   }) => GlassCard(
-      margin: EdgeInsets.zero,
-      padding: const EdgeInsets.all(18),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            _trWithFallback('notifications_summary_title', 'Notification Center'),
-            style: GoogleFonts.spaceGrotesk(
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
-              color: Colors.white,
-            ),
+    margin: EdgeInsets.zero,
+    padding: const EdgeInsets.all(18),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          _trWithFallback('notifications_summary_title', 'Notification Center'),
+          style: GoogleFonts.spaceGrotesk(
+            fontSize: 16,
+            fontWeight: FontWeight.w800,
+            color: Colors.white,
           ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              _buildSummaryMetric(
-                value: total.toString(),
-                label: _trWithFallback(
-                  'notifications_stat_total',
-                  'Total',
-                ),
-              ),
-              const SizedBox(width: 12),
-              _buildSummaryMetric(
-                value: unread.toString(),
-                label: _trWithFallback(
-                  'notifications_stat_unread',
-                  'Unread',
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _buildSummaryMetric(
-                  value: lastUpdated != null
-                      ? _formatNotificationDate(lastUpdated)
-                      : '—',
-                  label: _trWithFallback(
-                    'notifications_stat_recent',
-                    'Last update',
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-
-  Widget _buildSummaryMetric({required String value, required String label}) => Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          color: Colors.white.withValues(alpha: 0.04),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        const SizedBox(height: 12),
+        Row(
           children: [
-            Text(
-              value,
-              style: GoogleFonts.spaceGrotesk(
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-                color: Colors.white,
-              ),
+            _buildSummaryMetric(
+              value: total.toString(),
+              label: _trWithFallback('notifications_stat_total', 'Total'),
             ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: GoogleFonts.spaceGrotesk(
-                fontSize: 12,
-                color: Colors.white.withValues(alpha: 0.8),
+            const SizedBox(width: 12),
+            _buildSummaryMetric(
+              value: unread.toString(),
+              label: _trWithFallback('notifications_stat_unread', 'Unread'),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildSummaryMetric(
+                value: lastUpdated != null
+                    ? _formatNotificationDate(lastUpdated)
+                    : '—',
+                label: _trWithFallback(
+                  'notifications_stat_recent',
+                  'Last update',
+                ),
               ),
             ),
           ],
         ),
-      ),
-    );
+      ],
+    ),
+  );
+
+  Widget _buildSummaryMetric({required String value, required String label}) =>
+      Expanded(
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            color: Colors.white.withValues(alpha: 0.04),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                value,
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 12,
+                  color: Colors.white.withValues(alpha: 0.8),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
 
   Widget _buildNotificationCard({
     required String notificationId,
@@ -411,16 +394,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  accent,
-                  accent.withValues(alpha: 0.65),
-                ],
+                colors: [accent, accent.withValues(alpha: 0.65)],
               ),
             ),
-            child: Icon(
-              _getNotificationIcon(type),
-              color: Colors.white,
-            ),
+            child: Icon(_getNotificationIcon(type), color: Colors.white),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -434,8 +411,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                         title,
                         style: GoogleFonts.spaceGrotesk(
                           fontSize: 15,
-                          fontWeight:
-                              isRead ? FontWeight.w600 : FontWeight.w800,
+                          fontWeight: isRead
+                              ? FontWeight.w600
+                              : FontWeight.w800,
                           color: Colors.white,
                         ),
                       ),
@@ -479,185 +457,189 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 
   Widget _buildTypeChip(String type, Color accent) => Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(999),
-        color: accent.withValues(alpha: 0.25),
-        border: Border.all(color: accent.withValues(alpha: 0.6)),
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(999),
+      color: accent.withValues(alpha: 0.25),
+      border: Border.all(color: accent.withValues(alpha: 0.6)),
+    ),
+    child: Text(
+      _formatTypeLabel(type),
+      style: GoogleFonts.spaceGrotesk(
+        fontSize: 12,
+        fontWeight: FontWeight.w700,
+        color: Colors.white,
       ),
-      child: Text(
-        _formatTypeLabel(type),
-        style: GoogleFonts.spaceGrotesk(
-          fontSize: 12,
-          fontWeight: FontWeight.w700,
-          color: Colors.white,
-        ),
-      ),
-    );
+    ),
+  );
 
   Widget _buildUnreadChip() => Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(999),
-        color: ArtbeatColors.secondaryTeal.withValues(alpha: 0.2),
-        border: Border.all(
-          color: ArtbeatColors.secondaryTeal.withValues(alpha: 0.65),
-        ),
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(999),
+      color: ArtbeatColors.secondaryTeal.withValues(alpha: 0.2),
+      border: Border.all(
+        color: ArtbeatColors.secondaryTeal.withValues(alpha: 0.65),
       ),
-      child: Text(
-        _trWithFallback('notifications_badge_new', 'New'),
-        style: GoogleFonts.spaceGrotesk(
-          fontSize: 12,
-          fontWeight: FontWeight.w700,
-          color: Colors.white,
-        ),
+    ),
+    child: Text(
+      _trWithFallback('notifications_badge_new', 'New'),
+      style: GoogleFonts.spaceGrotesk(
+        fontSize: 12,
+        fontWeight: FontWeight.w700,
+        color: Colors.white,
       ),
-    );
+    ),
+  );
 
   Widget _buildFilterEmptyState() => GlassCard(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        children: [
-          Icon(
-            Icons.filter_list_off,
-            size: 40,
-            color: Colors.white.withValues(alpha: 0.7),
+    padding: const EdgeInsets.all(20),
+    child: Column(
+      children: [
+        Icon(
+          Icons.filter_list_off,
+          size: 40,
+          color: Colors.white.withValues(alpha: 0.7),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          _trWithFallback(
+            'notifications_filter_empty',
+            'No notifications match this filter.',
           ),
-          const SizedBox(height: 12),
-          Text(
-            _trWithFallback(
-              'notifications_filter_empty',
-              'No notifications match this filter.',
-            ),
-            style: GoogleFonts.spaceGrotesk(
-              color: Colors.white.withValues(alpha: 0.85),
-              fontWeight: FontWeight.w600,
-            ),
-            textAlign: TextAlign.center,
+          style: GoogleFonts.spaceGrotesk(
+            color: Colors.white.withValues(alpha: 0.85),
+            fontWeight: FontWeight.w600,
           ),
-          const SizedBox(height: 16),
-          TextButton.icon(
-            onPressed: () => setState(() => _activeFilter = _NotificationFilter.all),
-            icon: const Icon(Icons.refresh, size: 18),
-            label: Text(
-              _trWithFallback('notifications_reset_filter', 'Show all'),
-              style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
-            ),
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.white,
-              backgroundColor: Colors.white.withValues(alpha: 0.08),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(999),
-              ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 16),
+        TextButton.icon(
+          onPressed: () =>
+              setState(() => _activeFilter = _NotificationFilter.all),
+          icon: const Icon(Icons.refresh, size: 18),
+          label: Text(
+            _trWithFallback('notifications_reset_filter', 'Show all'),
+            style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700),
+          ),
+          style: TextButton.styleFrom(
+            foregroundColor: Colors.white,
+            backgroundColor: Colors.white.withValues(alpha: 0.08),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(999),
             ),
           ),
-        ],
-      ),
-    );
+        ),
+      ],
+    ),
+  );
 
   Widget _buildEmptyNotificationsState() => Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: GlassCard(
-          margin: const EdgeInsets.only(top: 32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.notifications_off_outlined,
-                size: 48,
-                color: Colors.white.withValues(alpha: 0.6),
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: GlassCard(
+        margin: const EdgeInsets.only(top: 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.notifications_off_outlined,
+              size: 48,
+              color: Colors.white.withValues(alpha: 0.6),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'notifications_empty_title'.tr(),
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
               ),
-              const SizedBox(height: 12),
-              Text(
-                'notifications_empty_title'.tr(),
-                style: GoogleFonts.spaceGrotesk(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                ),
-                textAlign: TextAlign.center,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'notifications_empty_subtitle'.tr(),
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 13,
+                color: Colors.white.withValues(alpha: 0.8),
               ),
-              const SizedBox(height: 8),
-              Text(
-                'notifications_empty_subtitle'.tr(),
-                style: GoogleFonts.spaceGrotesk(
-                  fontSize: 13,
-                  color: Colors.white.withValues(alpha: 0.8),
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
       ),
-    );
+    ),
+  );
 
   Widget _buildErrorState(String message) => Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: GlassCard(
-          margin: const EdgeInsets.only(top: 32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.error_outline,
-                size: 48,
-                color: Colors.redAccent.withValues(alpha: 0.8),
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: GlassCard(
+        margin: const EdgeInsets.only(top: 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 48,
+              color: Colors.redAccent.withValues(alpha: 0.8),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              _trWithFallback(
+                'notifications_error_title',
+                'Something went wrong',
               ),
-              const SizedBox(height: 12),
-              Text(
-                _trWithFallback('notifications_error_title', 'Something went wrong'),
-                style: GoogleFonts.spaceGrotesk(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                ),
-                textAlign: TextAlign.center,
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
               ),
-              const SizedBox(height: 8),
-              Text(
-                message,
-                style: GoogleFonts.spaceGrotesk(
-                  fontSize: 13,
-                  color: Colors.white.withValues(alpha: 0.8),
-                ),
-                textAlign: TextAlign.center,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              message,
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 13,
+                color: Colors.white.withValues(alpha: 0.8),
               ),
-            ],
-          ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
       ),
-    );
+    ),
+  );
 
   Widget _buildDebugTools() => GlassCard(
-      margin: EdgeInsets.zero,
-      padding: const EdgeInsets.all(18),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Debug Tools',
-            style: GoogleFonts.spaceGrotesk(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
-            ),
+    margin: EdgeInsets.zero,
+    padding: const EdgeInsets.all(18),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Debug Tools',
+          style: GoogleFonts.spaceGrotesk(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
           ),
-          const SizedBox(height: 12),
-          ElevatedButton.icon(
-            onPressed: _runImageCleanup,
-            icon: const Icon(Icons.build_rounded),
-            label: Text('notifications_fix_images'.tr()),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: ArtbeatColors.primaryPurple,
-              foregroundColor: Colors.white,
-            ),
+        ),
+        const SizedBox(height: 12),
+        ElevatedButton.icon(
+          onPressed: _runImageCleanup,
+          icon: const Icon(Icons.build_rounded),
+          label: Text('notifications_fix_images'.tr()),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: ArtbeatColors.primaryPurple,
+            foregroundColor: Colors.white,
           ),
-        ],
-      ),
-    );
+        ),
+      ],
+    ),
+  );
 
   Future<void> _markAllAsRead() async {
     try {
@@ -672,10 +654,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     } on Exception catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString()),
-          backgroundColor: Colors.red,
-        ),
+        SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
       );
     }
   }
@@ -688,24 +667,29 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       await _notificationService.sendNotification(
         userId: user.uid,
         title: _trWithFallback('notifications_test_title', 'Test notification'),
-        message: _trWithFallback('notifications_test_message', 'This is a test notification'),
+        message: _trWithFallback(
+          'notifications_test_message',
+          'This is a test notification',
+        ),
         type: NotificationType.achievement,
         data: {'testData': 'This is test data'},
       );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(_trWithFallback('notifications_test_created', 'Test notification created')),
+          content: Text(
+            _trWithFallback(
+              'notifications_test_created',
+              'Test notification created',
+            ),
+          ),
           duration: const Duration(seconds: 2),
         ),
       );
     } on Exception catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString()),
-          backgroundColor: Colors.red,
-        ),
+        SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
       );
     }
   }
@@ -852,14 +836,17 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     if (difference.inMinutes < 1) {
       return 'notifications_just_now'.tr();
     } else if (difference.inMinutes < 60) {
-      return 'notifications_minutes_ago'
-          .tr(namedArgs: {'count': difference.inMinutes.toString()});
+      return 'notifications_minutes_ago'.tr(
+        namedArgs: {'count': difference.inMinutes.toString()},
+      );
     } else if (difference.inHours < 24) {
-      return 'notifications_hours_ago'
-          .tr(namedArgs: {'count': difference.inHours.toString()});
+      return 'notifications_hours_ago'.tr(
+        namedArgs: {'count': difference.inHours.toString()},
+      );
     } else if (difference.inDays < 7) {
-      return 'notifications_days_ago'
-          .tr(namedArgs: {'count': difference.inDays.toString()});
+      return 'notifications_days_ago'.tr(
+        namedArgs: {'count': difference.inDays.toString()},
+      );
     } else {
       return intl.DateFormat('MMM d, y').format(date);
     }
@@ -890,7 +877,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
 enum _NotificationFilter { all, unread, social, system }
 
-const Set<String> _socialTypes = {'follow', 'like', 'comment', 'message', 'mention'};
+const Set<String> _socialTypes = {
+  'follow',
+  'like',
+  'comment',
+  'message',
+  'mention',
+};
 const Set<String> _systemTypes = {
   'achievement',
   'galleryinvitation',

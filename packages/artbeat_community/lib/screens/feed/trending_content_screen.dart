@@ -231,9 +231,7 @@ class _TrendingContentScreenState extends State<TrendingContentScreen> {
 
   Future<void> _openCommentsScreen(PostModel post) async {
     await Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (context) => CommentsScreen(post: post),
-      ),
+      MaterialPageRoute<void>(builder: (context) => CommentsScreen(post: post)),
     );
   }
 
@@ -389,13 +387,16 @@ class _TrendingContentScreenState extends State<TrendingContentScreen> {
           Row(
             children: [
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   gradient: _Palette.primaryGradient,
                   borderRadius: BorderRadius.circular(18),
-                  border:
-                      Border.all(color: Colors.white.withValues(alpha: 0.14)),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.14),
+                  ),
                   boxShadow: [
                     BoxShadow(
                       color: _Palette.teal.withValues(alpha: 0.2),
@@ -407,8 +408,11 @@ class _TrendingContentScreenState extends State<TrendingContentScreen> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.local_fire_department,
-                        color: Colors.white, size: 18),
+                    const Icon(
+                      Icons.local_fire_department,
+                      color: Colors.white,
+                      size: 18,
+                    ),
                     const SizedBox(width: 6),
                     Text(
                       'trending_content.hero_badge_title'.tr(),
@@ -603,10 +607,7 @@ class _TrendingContentScreenState extends State<TrendingContentScreen> {
     );
   }
 
-  String _localizedOptionValue(
-    String value,
-    List<_FilterOption> options,
-  ) {
+  String _localizedOptionValue(String value, List<_FilterOption> options) {
     final match = options.firstWhere(
       (option) => option.value == value,
       orElse: () => options.first,
@@ -707,10 +708,7 @@ class _TrendingContentScreenState extends State<TrendingContentScreen> {
     return const Center(
       child: Padding(
         padding: EdgeInsets.all(12.0),
-        child: CircularProgressIndicator(
-          color: _Palette.teal,
-          strokeWidth: 3,
-        ),
+        child: CircularProgressIndicator(color: _Palette.teal, strokeWidth: 3),
       ),
     );
   }
@@ -725,10 +723,10 @@ class _Palette {
   static const Color textSecondary = Color(0xB3FFFFFF);
 
   static LinearGradient get primaryGradient => const LinearGradient(
-        colors: [purple, teal, green],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      );
+    colors: [purple, teal, green],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
 }
 
 class _FilterOption {

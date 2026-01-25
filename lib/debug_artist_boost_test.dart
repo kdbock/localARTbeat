@@ -8,10 +8,12 @@ class DebugArtistBoostTestScreen extends StatefulWidget {
   const DebugArtistBoostTestScreen({super.key});
 
   @override
-  State<DebugArtistBoostTestScreen> createState() => _DebugArtistBoostTestScreenState();
+  State<DebugArtistBoostTestScreen> createState() =>
+      _DebugArtistBoostTestScreenState();
 }
 
-class _DebugArtistBoostTestScreenState extends State<DebugArtistBoostTestScreen> {
+class _DebugArtistBoostTestScreenState
+    extends State<DebugArtistBoostTestScreen> {
   final ArtistBoostService _boostService = ArtistBoostService();
   final InAppPurchaseService _purchaseService = InAppPurchaseService();
   String _status = 'Checking...';

@@ -421,9 +421,7 @@ class AuthService {
       );
 
       // Create an OAuth credential from the credential returned by Apple
-      final oauthCredential = OAuthProvider(
-        "apple.com",
-      ).credential(
+      final oauthCredential = OAuthProvider("apple.com").credential(
         idToken: appleCredential.identityToken!,
         accessToken: appleCredential.authorizationCode,
         rawNonce: rawNonce,

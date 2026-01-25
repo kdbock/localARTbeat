@@ -28,11 +28,7 @@ class GradientCtaButton extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(26),
           gradient: const LinearGradient(
-            colors: [
-              Color(0xFF7C4DFF),
-              Color(0xFF22D3EE),
-              Color(0xFF34D399),
-            ],
+            colors: [Color(0xFF7C4DFF), Color(0xFF22D3EE), Color(0xFF34D399)],
           ),
         ),
         child: Center(

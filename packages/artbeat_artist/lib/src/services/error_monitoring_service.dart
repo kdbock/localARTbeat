@@ -32,8 +32,11 @@ class ErrorMonitoringService {
 
       ArtistLogger.info('Error monitoring initialized successfully');
     } catch (e, stackTrace) {
-      ArtistLogger.error('Failed to initialize error monitoring',
-          error: e, stackTrace: stackTrace);
+      ArtistLogger.error(
+        'Failed to initialize error monitoring',
+        error: e,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -48,8 +51,11 @@ class ErrorMonitoringService {
     try {
       // Skip Firebase calls in test environment
       if (_isTestEnvironment) {
-        ArtistLogger.error('Test Mode: Would record error to Crashlytics',
-            error: exception, stackTrace: stackTrace);
+        ArtistLogger.error(
+          'Test Mode: Would record error to Crashlytics',
+          error: exception,
+          stackTrace: stackTrace,
+        );
         return;
       }
 
@@ -179,7 +185,7 @@ class ErrorMonitoringService {
       'card',
       'stripe',
       'payment',
-      'billing'
+      'billing',
     ];
 
     return sensitive.any((s) => fieldName.contains(s));
@@ -192,7 +198,9 @@ class ErrorMonitoringService {
         .replaceAll(RegExp(r'pk_[a-zA-Z0-9_]+'), '[STRIPE_PUBLIC]')
         .replaceAll(RegExp(r'\b[\w\.-]+@[\w\.-]+\.\w+\b'), '[EMAIL]')
         .replaceAll(
-            RegExp(r'\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b'), '[CARD]')
+          RegExp(r'\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b'),
+          '[CARD]',
+        )
         .replaceAll(RegExp(r'\b\d{3}-\d{2}-\d{4}\b'), '[SSN]');
   }
 

@@ -40,7 +40,7 @@ class _CaptureScreenState extends State<CaptureScreen> {
 
     try {
       final imagePath = await _cameraService.captureAdvancedImage();
-      
+
       if (imagePath != null && mounted) {
         final imageFile = File(imagePath);
         if (widget.isPicker) {
@@ -48,7 +48,8 @@ class _CaptureScreenState extends State<CaptureScreen> {
         } else {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute<void>(
-              builder: (context) => CaptureUploadScreen(initialImage: imageFile),
+              builder: (context) =>
+                  CaptureUploadScreen(initialImage: imageFile),
             ),
           );
         }
@@ -57,7 +58,9 @@ class _CaptureScreenState extends State<CaptureScreen> {
       if (mounted) {
         AppLogger.error('Camera capture failed: $e');
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to take picture. Please try again.')),
+          const SnackBar(
+            content: Text('Failed to take picture. Please try again.'),
+          ),
         );
       }
     } finally {
@@ -95,10 +98,10 @@ class _CaptureScreenState extends State<CaptureScreen> {
       body: Stack(
         children: [
           // Camera Preview
-          if (!_isInitializing && _cameraService.isInitialized && _cameraService.controller != null)
-            Center(
-              child: CameraPreview(_cameraService.controller!),
-            )
+          if (!_isInitializing &&
+              _cameraService.isInitialized &&
+              _cameraService.controller != null)
+            Center(child: CameraPreview(_cameraService.controller!))
           else if (_isInitializing)
             const Center(child: CircularProgressIndicator(color: Colors.white))
           else
@@ -115,12 +118,19 @@ class _CaptureScreenState extends State<CaptureScreen> {
               children: [
                 // Top Bar
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.close, color: Colors.white, size: 30),
+                        icon: const Icon(
+                          Icons.close,
+                          color: Colors.white,
+                          size: 30,
+                        ),
                         onPressed: () => Navigator.of(context).pop(),
                       ),
                       IconButton(
@@ -144,7 +154,6 @@ class _CaptureScreenState extends State<CaptureScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       const SizedBox(width: 60), // Spacer for balance
-                      
                       // Capture Button
                       GestureDetector(
                         onTap: _takePicture,
@@ -164,7 +173,9 @@ class _CaptureScreenState extends State<CaptureScreen> {
                                 shape: BoxShape.circle,
                               ),
                               child: _isTakingPicture
-                                  ? const CircularProgressIndicator(color: Colors.black)
+                                  ? const CircularProgressIndicator(
+                                      color: Colors.black,
+                                    )
                                   : null,
                             ),
                           ),
@@ -173,7 +184,11 @@ class _CaptureScreenState extends State<CaptureScreen> {
 
                       // Switch Camera
                       IconButton(
-                        icon: const Icon(Icons.flip_camera_ios, color: Colors.white, size: 30),
+                        icon: const Icon(
+                          Icons.flip_camera_ios,
+                          color: Colors.white,
+                          size: 30,
+                        ),
                         onPressed: () async {
                           await _cameraService.switchCamera();
                           setState(() {});

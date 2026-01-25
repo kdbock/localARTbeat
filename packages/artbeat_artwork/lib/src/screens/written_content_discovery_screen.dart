@@ -48,7 +48,7 @@ class _WrittenContentDiscoveryScreenState
     'Historical',
     'Self-Help',
     'Children',
-    'Other'
+    'Other',
   ];
 
   final List<String> _sortOptions = [
@@ -56,7 +56,7 @@ class _WrittenContentDiscoveryScreenState
     'Oldest',
     'Most Popular',
     'Highest Rated',
-    'Most Viewed'
+    'Most Viewed',
   ];
 
   @override
@@ -79,11 +79,20 @@ class _WrittenContentDiscoveryScreenState
       // Load different types of written content in parallel
       final results = await Future.wait([
         _artworkService.getWrittenContent(
-            limit: 50, includeSerialized: true, includeCompleted: true),
+          limit: 50,
+          includeSerialized: true,
+          includeCompleted: true,
+        ),
         _artworkService.getWrittenContent(
-            limit: 30, includeSerialized: true, includeCompleted: false),
+          limit: 30,
+          includeSerialized: true,
+          includeCompleted: false,
+        ),
         _artworkService.getWrittenContent(
-            limit: 30, includeSerialized: false, includeCompleted: true),
+          limit: 30,
+          includeSerialized: false,
+          includeCompleted: true,
+        ),
       ]);
 
       setState(() {
@@ -115,8 +124,9 @@ class _WrittenContentDiscoveryScreenState
 
     // Apply free content filter
     if (_showOnlyFree) {
-      filtered =
-          filtered.where((artwork) => artwork.isForSale == false).toList();
+      filtered = filtered
+          .where((artwork) => artwork.isForSale == false)
+          .toList();
     }
 
     // Apply sorting
@@ -129,12 +139,14 @@ class _WrittenContentDiscoveryScreenState
         break;
       case 'Most Popular':
         filtered.sort((a, b) {
-          final aTotal = a.engagementStats.likeCount +
+          final aTotal =
+              a.engagementStats.likeCount +
               a.engagementStats.commentCount +
               a.engagementStats.shareCount +
               a.engagementStats.seenCount +
               a.engagementStats.followCount;
-          final bTotal = b.engagementStats.likeCount +
+          final bTotal =
+              b.engagementStats.likeCount +
               b.engagementStats.commentCount +
               b.engagementStats.shareCount +
               b.engagementStats.seenCount +
@@ -144,8 +156,11 @@ class _WrittenContentDiscoveryScreenState
         break;
       case 'Highest Rated':
         // If averageRating is not available, fallback to likeCount or another metric
-        filtered.sort((a, b) =>
-            b.engagementStats.likeCount.compareTo(a.engagementStats.likeCount));
+        filtered.sort(
+          (a, b) => b.engagementStats.likeCount.compareTo(
+            a.engagementStats.likeCount,
+          ),
+        );
         break;
       case 'Most Viewed':
         filtered.sort((a, b) => b.viewCount.compareTo(a.viewCount));
@@ -188,15 +203,15 @@ class _WrittenContentDiscoveryScreenState
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
-              ? _buildErrorView()
-              : TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _buildContentGrid(_getFilteredContent(_allWrittenContent)),
-                    _buildContentGrid(_getFilteredContent(_serializedStories)),
-                    _buildContentGrid(_getFilteredContent(_completedBooks)),
-                  ],
-                ),
+          ? _buildErrorView()
+          : TabBarView(
+              controller: _tabController,
+              children: [
+                _buildContentGrid(_getFilteredContent(_allWrittenContent)),
+                _buildContentGrid(_getFilteredContent(_serializedStories)),
+                _buildContentGrid(_getFilteredContent(_completedBooks)),
+              ],
+            ),
     );
   }
 
@@ -284,16 +299,16 @@ class _WrittenContentDiscoveryScreenState
                           width: double.infinity,
                           errorBuilder: (context, error, stackTrace) =>
                               Container(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .surfaceContainerHighest,
-                            child: const Icon(Icons.book, size: 48),
-                          ),
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.surfaceContainerHighest,
+                                child: const Icon(Icons.book, size: 48),
+                              ),
                         )
                       : Container(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .surfaceContainerHighest,
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.surfaceContainerHighest,
                           child: const Icon(Icons.book, size: 48),
                         ),
                 ),
@@ -309,10 +324,8 @@ class _WrittenContentDiscoveryScreenState
                         // Title
                         Text(
                           artwork.title,
-                          style:
-                              Theme.of(context).textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(fontWeight: FontWeight.bold),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -322,12 +335,12 @@ class _WrittenContentDiscoveryScreenState
                         // Author
                         Text(
                           authorName,
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurfaceVariant,
-                                  ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -424,10 +437,7 @@ class _WrittenContentDiscoveryScreenState
                 DropdownButtonFormField<String>(
                   initialValue: _selectedGenre,
                   items: _genres.map((genre) {
-                    return DropdownMenuItem(
-                      value: genre,
-                      child: Text(genre),
-                    );
+                    return DropdownMenuItem(value: genre, child: Text(genre));
                   }).toList(),
                   onChanged: (value) {
                     setState(() => _selectedGenre = value!);
@@ -445,10 +455,7 @@ class _WrittenContentDiscoveryScreenState
                 DropdownButtonFormField<String>(
                   initialValue: _selectedSort,
                   items: _sortOptions.map((sort) {
-                    return DropdownMenuItem(
-                      value: sort,
-                      child: Text(sort),
-                    );
+                    return DropdownMenuItem(value: sort, child: Text(sort));
                   }).toList(),
                   onChanged: (value) {
                     setState(() => _selectedSort = value!);

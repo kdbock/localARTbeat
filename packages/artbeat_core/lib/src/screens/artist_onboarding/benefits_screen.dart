@@ -117,7 +117,6 @@ class _BenefitsScreenState extends State<BenefitsScreen>
     _tabController = TabController(length: _tiers.length, vsync: this);
     _tabController.addListener(() {
       if (_tabController.indexIsChanging) {
-
         // Track tier viewed
         final viewModel = context.read<ArtistOnboardingViewModel>();
         viewModel.trackTierViewed(_tiers[_tabController.index].name);
@@ -243,10 +242,7 @@ class _BenefitsScreenState extends State<BenefitsScreen>
                 children: [
                   Icon(tier.icon, size: 16),
                   const SizedBox(width: 4),
-                  Text(
-                    tier.name,
-                    style: const TextStyle(fontSize: 12),
-                  ),
+                  Text(tier.name, style: const TextStyle(fontSize: 12)),
                   if (tier.badge != null) ...[
                     const SizedBox(width: 2),
                     const Icon(Icons.star, size: 10, color: Colors.amber),

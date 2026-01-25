@@ -91,9 +91,7 @@ class _ArtistFeedScreenState extends State<ArtistFeedScreen> {
       if (user == null) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('community_artist_feed.sign_in_like'.tr()),
-          ),
+          SnackBar(content: Text('community_artist_feed.sign_in_like'.tr())),
         );
         return;
       }
@@ -105,8 +103,9 @@ class _ArtistFeedScreenState extends State<ArtistFeedScreen> {
           final isCurrentlyLiked = _posts[postIndex].isLikedByCurrentUser;
 
           final newEngagementStats = EngagementStats(
-            likeCount:
-                isCurrentlyLiked ? currentLikeCount - 1 : currentLikeCount + 1,
+            likeCount: isCurrentlyLiked
+                ? currentLikeCount - 1
+                : currentLikeCount + 1,
             commentCount: _posts[postIndex].engagementStats.commentCount,
             shareCount: _posts[postIndex].engagementStats.shareCount,
             lastUpdated: DateTime.now(),
@@ -126,8 +125,9 @@ class _ArtistFeedScreenState extends State<ArtistFeedScreen> {
           final isCurrentlyLiked = _posts[postIndex].isLikedByCurrentUser;
 
           final revertedEngagementStats = EngagementStats(
-            likeCount:
-                isCurrentlyLiked ? currentLikeCount - 1 : currentLikeCount + 1,
+            likeCount: isCurrentlyLiked
+                ? currentLikeCount - 1
+                : currentLikeCount + 1,
             commentCount: _posts[postIndex].engagementStats.commentCount,
             shareCount: _posts[postIndex].engagementStats.shareCount,
             lastUpdated: DateTime.now(),
@@ -142,9 +142,7 @@ class _ArtistFeedScreenState extends State<ArtistFeedScreen> {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              'community_artist_feed.update_like_failed'.tr(),
-            ),
+            content: Text('community_artist_feed.update_like_failed'.tr()),
           ),
         );
       }
@@ -159,16 +157,12 @@ class _ArtistFeedScreenState extends State<ArtistFeedScreen> {
       if (user == null) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('community_artist_feed.sign_in_share'.tr()),
-          ),
+          SnackBar(content: Text('community_artist_feed.sign_in_share'.tr())),
         );
         return;
       }
 
-      final sections = <String>[
-        'community_artist_feed.share_prefix'.tr(),
-      ];
+      final sections = <String>['community_artist_feed.share_prefix'.tr()];
 
       if (post.content.isNotEmpty) {
         sections.add('"${post.content}"');
@@ -191,9 +185,7 @@ class _ArtistFeedScreenState extends State<ArtistFeedScreen> {
       if (post.tags.isNotEmpty) {
         sections.add(
           'community_artist_feed.share_tags'.tr(
-            namedArgs: {
-              'tags': post.tags.map((tag) => '#$tag').join(' '),
-            },
+            namedArgs: {'tags': post.tags.map((tag) => '#$tag').join(' ')},
           ),
         );
       }
@@ -210,9 +202,7 @@ class _ArtistFeedScreenState extends State<ArtistFeedScreen> {
       if (postId != null) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('community_artist_feed.share_success'.tr()),
-            ),
+            SnackBar(content: Text('community_artist_feed.share_success'.tr())),
           );
         }
 
@@ -225,9 +215,7 @@ class _ArtistFeedScreenState extends State<ArtistFeedScreen> {
       AppLogger.error('Error sharing post: $e');
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('community_artist_feed.share_failure'.tr()),
-        ),
+        SnackBar(content: Text('community_artist_feed.share_failure'.tr())),
       );
     }
   }
@@ -269,7 +257,8 @@ class _ArtistFeedScreenState extends State<ArtistFeedScreen> {
             icon: const Icon(Icons.refresh, color: Colors.white),
             onPressed: _isLoading ? null : _loadArtistAndPosts,
           ),
-        ], subtitle: '',
+        ],
+        subtitle: '',
       ),
       body: WorldBackground(
         child: SafeArea(
@@ -436,12 +425,7 @@ class _ArtistFeedScreenState extends State<ArtistFeedScreen> {
           spacing: spacing,
           runSpacing: spacing,
           children: tiles
-              .map(
-                (tile) => SizedBox(
-                  width: tileWidth,
-                  child: tile,
-                ),
-              )
+              .map((tile) => SizedBox(width: tileWidth, child: tile))
               .toList(),
         );
       },
@@ -460,11 +444,13 @@ class _ArtistFeedScreenState extends State<ArtistFeedScreen> {
             decoration: BoxDecoration(
               color: _Palette.purple.withValues(alpha: 0.18),
               shape: BoxShape.circle,
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.18),
-              ),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
             ),
-            child: const Icon(Icons.brush_rounded, color: Colors.white, size: 32),
+            child: const Icon(
+              Icons.brush_rounded,
+              color: Colors.white,
+              size: 32,
+            ),
           ),
           const SizedBox(height: 16),
           Text(

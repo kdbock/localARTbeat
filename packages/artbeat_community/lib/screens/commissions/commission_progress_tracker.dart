@@ -36,7 +36,8 @@ class CommissionProgressTracker extends StatelessWidget {
       backgroundColor: Colors.transparent,
       appBar: HudTopBar(
         title: 'commission_progress_app_bar'.tr(),
-        glassBackground: true, subtitle: '',
+        glassBackground: true,
+        subtitle: '',
       ),
       body: WorldBackground(
         child: SafeArea(
@@ -346,7 +347,10 @@ class CommissionProgressTracker extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionHeader({required String title, required String subtitle}) {
+  Widget _buildSectionHeader({
+    required String title,
+    required String subtitle,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -687,10 +691,7 @@ class _StatusBadge extends StatelessWidget {
                   ? accent.withValues(alpha: 0.4)
                   : Colors.white.withValues(alpha: 0.12),
             ),
-            child: Icon(
-              icon,
-              color: Colors.white,
-            ),
+            child: Icon(icon, color: Colors.white),
           ),
           const SizedBox(height: 16),
           Text(
@@ -752,8 +753,10 @@ class _MilestoneTile extends StatelessWidget {
                 ),
               ),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: accent.withValues(alpha: 0.25),
                   borderRadius: BorderRadius.circular(20),
@@ -830,7 +833,11 @@ class _MilestoneTile extends StatelessWidget {
 }
 
 class _DateEntry {
-  const _DateEntry({required this.label, required this.date, required this.icon});
+  const _DateEntry({
+    required this.label,
+    required this.date,
+    required this.icon,
+  });
 
   final String label;
   final DateTime date;

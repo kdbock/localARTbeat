@@ -317,17 +317,16 @@ class ArtworkModel {
     this.artBattleWins = 0,
     this.artBattleLastShownAt,
     this.artBattleLastWinAt,
-  })  :
-        // Create defensive copies of all lists to prevent external modification
-        additionalImageUrls = List.unmodifiable(additionalImageUrls),
-        videoUrls = List.unmodifiable(videoUrls),
-        audioUrls = List.unmodifiable(audioUrls),
-        styles = List.unmodifiable(styles),
-        tags = tags != null ? List.unmodifiable(tags) : null,
-        hashtags = hashtags != null ? List.unmodifiable(hashtags) : null,
-        keywords = keywords != null ? List.unmodifiable(keywords) : null,
-        engagementStats =
-            engagementStats ?? EngagementStats(lastUpdated: DateTime.now());
+  }) : // Create defensive copies of all lists to prevent external modification
+       additionalImageUrls = List.unmodifiable(additionalImageUrls),
+       videoUrls = List.unmodifiable(videoUrls),
+       audioUrls = List.unmodifiable(audioUrls),
+       styles = List.unmodifiable(styles),
+       tags = tags != null ? List.unmodifiable(tags) : null,
+       hashtags = hashtags != null ? List.unmodifiable(hashtags) : null,
+       keywords = keywords != null ? List.unmodifiable(keywords) : null,
+       engagementStats =
+           engagementStats ?? EngagementStats(lastUpdated: DateTime.now());
 
   /// Create ArtworkModel from Firestore document
   factory ArtworkModel.fromFirestore(DocumentSnapshot doc) {
@@ -336,14 +335,15 @@ class ArtworkModel {
       id: doc.id,
       // Handle legacy documents that have artistId instead of userId/artistProfileId
       userId: data['userId'] as String? ?? data['artistId'] as String? ?? '',
-      artistProfileId: data['artistProfileId'] as String? ??
+      artistProfileId:
+          data['artistProfileId'] as String? ??
           data['artistId'] as String? ??
           '',
       title: data['title'] as String? ?? '',
       description: data['description'] as String? ?? '',
       imageUrl: data['imageUrl'] as String? ?? '',
-      additionalImageUrls:
-          (data['additionalImageUrls'] as List<dynamic>? ?? []).cast<String>(),
+      additionalImageUrls: (data['additionalImageUrls'] as List<dynamic>? ?? [])
+          .cast<String>(),
       videoUrls: (data['videoUrls'] as List<dynamic>? ?? []).cast<String>(),
       audioUrls: (data['audioUrls'] as List<dynamic>? ?? []).cast<String>(),
       medium: data['medium'] as String? ?? '',
@@ -383,13 +383,17 @@ class ArtworkModel {
       flaggedAt: (data['flaggedAt'] as Timestamp?)?.toDate(),
       moderationNotes: data['moderationNotes'] as String?,
       contentType: ArtworkContentType.fromString(
-          data['contentType'] as String? ?? 'visual'),
+        data['contentType'] as String? ?? 'visual',
+      ),
       isSerializing: data['isSerializing'] as bool? ?? false,
       totalChapters: data['totalChapters'] as int?,
       releasedChapters: data['releasedChapters'] as int?,
       readingMetadata: data['readingMetadata'] as Map<String, dynamic>?,
       serializationConfig: data['serializationConfig'] as Map<String, dynamic>?,
-      auctionEnabled: data['auctionEnabled'] as bool? ?? data['isAuction'] as bool? ?? false,
+      auctionEnabled:
+          data['auctionEnabled'] as bool? ??
+          data['isAuction'] as bool? ??
+          false,
       auctionEnd: (data['auctionEnd'] as Timestamp?)?.toDate(),
       startingPrice: data['startingPrice'] != null
           ? (data['startingPrice'] as num).toDouble()
@@ -409,8 +413,8 @@ class ArtworkModel {
       artBattleScore: data['artBattleScore'] as int? ?? 0,
       artBattleAppearances: data['artBattleAppearances'] as int? ?? 0,
       artBattleWins: data['artBattleWins'] as int? ?? 0,
-      artBattleLastShownAt:
-          (data['artBattleLastShownAt'] as Timestamp?)?.toDate(),
+      artBattleLastShownAt: (data['artBattleLastShownAt'] as Timestamp?)
+          ?.toDate(),
       artBattleLastWinAt: (data['artBattleLastWinAt'] as Timestamp?)?.toDate(),
     );
   }

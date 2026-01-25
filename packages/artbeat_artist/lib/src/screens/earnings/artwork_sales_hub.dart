@@ -52,10 +52,11 @@ class _ArtworkSalesHubState extends State<ArtworkSalesHub>
       final stats = results[1] as Map<String, dynamic>;
 
       if (earnings != null) {
-        final salesTransactions =
-            await _earningsService.getEarningsTransactions();
-        final filteredSales =
-            salesTransactions.where((t) => t.type == 'artwork_sale').toList();
+        final salesTransactions = await _earningsService
+            .getEarningsTransactions();
+        final filteredSales = salesTransactions
+            .where((t) => t.type == 'artwork_sale')
+            .toList();
 
         setState(() {
           _earnings = earnings;
@@ -117,10 +118,7 @@ class _ArtworkSalesHubState extends State<ArtworkSalesHub>
             Expanded(
               child: TabBarView(
                 controller: _tabController,
-                children: [
-                  _buildOverviewTab(),
-                  _buildSalesTab(),
-                ],
+                children: [_buildOverviewTab(), _buildSalesTab()],
               ),
             ),
           ],
@@ -146,9 +144,9 @@ class _ArtworkSalesHubState extends State<ArtworkSalesHub>
               const SizedBox(height: 8),
               Text(
                 _errorMessage!,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey[600],
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
@@ -199,9 +197,9 @@ class _ArtworkSalesHubState extends State<ArtworkSalesHub>
                 child: Text(
                   tr('art_walk_artwork_sales_revenue'),
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -210,9 +208,9 @@ class _ArtworkSalesHubState extends State<ArtworkSalesHub>
           Text(
             '\$${totalSalesRevenue.toStringAsFixed(2)}',
             style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 16),
           Row(
@@ -242,7 +240,11 @@ class _ArtworkSalesHubState extends State<ArtworkSalesHub>
   }
 
   Widget _buildMetricCard(
-      String title, String value, Color bgColor, Color textColor) {
+    String title,
+    String value,
+    Color bgColor,
+    Color textColor,
+  ) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -297,8 +299,11 @@ class _ArtworkSalesHubState extends State<ArtworkSalesHub>
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
-              Icon(Icons.image_not_supported,
-                  size: 48, color: Colors.grey[300]),
+              Icon(
+                Icons.image_not_supported,
+                size: 48,
+                color: Colors.grey[300],
+              ),
               const SizedBox(height: 16),
               Text(
                 tr('art_walk_no_sales_yet'),
@@ -307,9 +312,9 @@ class _ArtworkSalesHubState extends State<ArtworkSalesHub>
               const SizedBox(height: 8),
               Text(
                 tr('art_walk_start_by_uploading_and_listing_your_artwork'),
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.grey[600],
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -326,9 +331,9 @@ class _ArtworkSalesHubState extends State<ArtworkSalesHub>
       children: [
         Text(
           tr('art_walk_sales_summary'),
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
         GridView.count(
@@ -402,16 +407,16 @@ class _ArtworkSalesHubState extends State<ArtworkSalesHub>
             const SizedBox(height: 12),
             Text(
               value,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
             Text(
               label,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey[600],
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
             ),
           ],
         ),
@@ -439,17 +444,17 @@ class _ArtworkSalesHubState extends State<ArtworkSalesHub>
           children: [
             Text(
               tr('art_walk_top_collectors'),
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             if (topBuyers.isEmpty)
               Text(
                 tr('art_walk_no_collectors_yet'),
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.grey[600],
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
               )
             else
               ListView.separated(
@@ -480,11 +485,11 @@ class _ArtworkSalesHubState extends State<ArtworkSalesHub>
                         ),
                         child: Text(
                           '${entry.value} purchase${entry.value > 1 ? 's' : ''}',
-                          style:
-                              Theme.of(context).textTheme.labelSmall?.copyWith(
-                                    color: Colors.purple,
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(
+                                color: Colors.purple,
+                                fontWeight: FontWeight.w500,
+                              ),
                         ),
                       ),
                     ],
@@ -506,9 +511,9 @@ class _ArtworkSalesHubState extends State<ArtworkSalesHub>
           children: [
             Text(
               tr('art_walk_quick_actions'),
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             SizedBox(
@@ -517,8 +522,9 @@ class _ArtworkSalesHubState extends State<ArtworkSalesHub>
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content:
-                          Text(tr('art_walk_navigating_to_upload_artwork')),
+                      content: Text(
+                        tr('art_walk_navigating_to_upload_artwork'),
+                      ),
                     ),
                   );
                 },
@@ -533,8 +539,9 @@ class _ArtworkSalesHubState extends State<ArtworkSalesHub>
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content:
-                          Text(tr('art_walk_navigating_to_manage_listings')),
+                      content: Text(
+                        tr('art_walk_navigating_to_manage_listings'),
+                      ),
                     ),
                   );
                 },
@@ -556,9 +563,9 @@ class _ArtworkSalesHubState extends State<ArtworkSalesHub>
         children: [
           Text(
             tr('art_walk_recent_sales'),
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
           if (_salesTransactions.isEmpty)
@@ -568,9 +575,9 @@ class _ArtworkSalesHubState extends State<ArtworkSalesHub>
                 child: Center(
                   child: Text(
                     tr('art_walk_no_sales_transactions_yet'),
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.grey[600],
-                        ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
                   ),
                 ),
               ),
@@ -601,10 +608,7 @@ class _ArtworkSalesHubState extends State<ArtworkSalesHub>
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           gradient: LinearGradient(
-            colors: [
-              Colors.purple.withValues(alpha: 0.05),
-              Colors.transparent,
-            ],
+            colors: [Colors.purple.withValues(alpha: 0.05), Colors.transparent],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -622,9 +626,7 @@ class _ArtworkSalesHubState extends State<ArtworkSalesHub>
                       children: [
                         Text(
                           transaction.description,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
+                          style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(fontWeight: FontWeight.w500),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -632,9 +634,7 @@ class _ArtworkSalesHubState extends State<ArtworkSalesHub>
                         const SizedBox(height: 4),
                         Text(
                           'by ${transaction.fromUserName}',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall
+                          style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(color: Colors.grey[600]),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -648,9 +648,9 @@ class _ArtworkSalesHubState extends State<ArtworkSalesHub>
                       Text(
                         '\$${transaction.amount.toStringAsFixed(2)}',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.green,
-                            ),
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Container(
@@ -664,11 +664,11 @@ class _ArtworkSalesHubState extends State<ArtworkSalesHub>
                         ),
                         child: Text(
                           transaction.status.toUpperCase(),
-                          style:
-                              Theme.of(context).textTheme.labelSmall?.copyWith(
-                                    color: Colors.green,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(
+                                color: Colors.green,
+                                fontWeight: FontWeight.w600,
+                              ),
                         ),
                       ),
                     ],
@@ -681,27 +681,33 @@ class _ArtworkSalesHubState extends State<ArtworkSalesHub>
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.calendar_today,
-                          size: 14, color: Colors.grey[500]),
+                      Icon(
+                        Icons.calendar_today,
+                        size: 14,
+                        color: Colors.grey[500],
+                      ),
                       const SizedBox(width: 6),
                       Text(
                         dateFormatted,
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: Colors.grey[600],
-                            ),
+                          color: Colors.grey[600],
+                        ),
                       ),
                     ],
                   ),
                   Row(
                     children: [
-                      Icon(Icons.check_circle,
-                          size: 14, color: Colors.green[600]),
+                      Icon(
+                        Icons.check_circle,
+                        size: 14,
+                        color: Colors.green[600],
+                      ),
                       const SizedBox(width: 6),
                       Text(
                         tr('art_walk_completed'),
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: Colors.green[600],
-                            ),
+                          color: Colors.green[600],
+                        ),
                       ),
                     ],
                   ),

@@ -61,10 +61,10 @@ class _MyBidsScreenState extends State<MyBidsScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _errorMessage != null
-              ? _buildErrorView()
-              : _userBids.isEmpty
-                  ? _buildEmptyView()
-                  : _buildBidsList(),
+          ? _buildErrorView()
+          : _userBids.isEmpty
+          ? _buildEmptyView()
+          : _buildBidsList(),
     );
   }
 
@@ -114,12 +114,10 @@ class _MyBidsScreenState extends State<MyBidsScreen> {
           Text(
             'auction.no_bids_description'.tr(),
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context)
-                      .textTheme
-                      .bodyMedium
-                      ?.color
-                      ?.withValues(alpha: 0.7),
-                ),
+              color: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+            ),
             textAlign: TextAlign.center,
           ),
         ],
@@ -150,9 +148,8 @@ class _MyBidsScreenState extends State<MyBidsScreen> {
                 // Navigate to artwork detail
                 Navigator.of(context).push(
                   MaterialPageRoute<dynamic>(
-                    builder: (context) => ArtworkDetailScreen(
-                      artworkId: artwork.id,
-                    ),
+                    builder: (context) =>
+                        ArtworkDetailScreen(artworkId: artwork.id),
                   ),
                 );
               },
@@ -181,21 +178,15 @@ class _MyBidsScreenState extends State<MyBidsScreen> {
                         children: [
                           Text(
                             artwork.title,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium
-                                ?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.w600),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                           const SizedBox(height: 4),
                           Text(
                             artwork.artistName,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
+                            style: Theme.of(context).textTheme.bodyMedium
                                 ?.copyWith(
                                   color: Theme.of(context)
                                       .textTheme
@@ -209,9 +200,7 @@ class _MyBidsScreenState extends State<MyBidsScreen> {
                             children: [
                               Text(
                                 'auction.your_bid'.tr(),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
+                                style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(
                                       color: Theme.of(context)
                                           .textTheme
@@ -223,12 +212,8 @@ class _MyBidsScreenState extends State<MyBidsScreen> {
                               const SizedBox(width: 4),
                               Text(
                                 '\$${bid.amount.toStringAsFixed(2)}',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(fontWeight: FontWeight.w600),
                               ),
                             ],
                           ),
@@ -246,14 +231,14 @@ class _MyBidsScreenState extends State<MyBidsScreen> {
                         const SizedBox(height: 4),
                         Text(
                           _getTimeAgo(bid.timestamp),
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Theme.of(context)
-                                        .textTheme
-                                        .bodySmall
-                                        ?.color
-                                        ?.withValues(alpha: 0.5),
-                                  ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.color
+                                    ?.withValues(alpha: 0.5),
+                              ),
                         ),
                       ],
                     ),
@@ -287,10 +272,7 @@ class _MyBidsScreenState extends State<MyBidsScreen> {
       decoration: BoxDecoration(
         color: statusColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: statusColor.withValues(alpha: 0.3),
-          width: 1,
-        ),
+        border: Border.all(color: statusColor.withValues(alpha: 0.3), width: 1),
       ),
       child: Text(
         statusText,

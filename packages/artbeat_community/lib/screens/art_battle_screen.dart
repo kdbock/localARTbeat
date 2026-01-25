@@ -32,10 +32,14 @@ class _ArtBattleScreenState extends State<ArtBattleScreen> {
   }
 
   Future<void> _loadNextMatch() async {
-    debugPrint('[ArtBattle] Loading next match (current: ${_currentMatch?.id ?? 'none'})');
+    debugPrint(
+      '[ArtBattle] Loading next match (current: ${_currentMatch?.id ?? 'none'})',
+    );
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      debugPrint('[ArtBattle] No authenticated user; prompting sign-in for Art Battle.');
+      debugPrint(
+        '[ArtBattle] No authenticated user; prompting sign-in for Art Battle.',
+      );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Please sign in to view Art Battles.')),
@@ -67,11 +71,15 @@ class _ArtBattleScreenState extends State<ArtBattleScreen> {
 
       final match = await _battleService.generateMatchup();
       if (match != null) {
-        debugPrint('[ArtBattle] Generated match ${match.id} between ${match.artworkAId} and ${match.artworkBId}');
+        debugPrint(
+          '[ArtBattle] Generated match ${match.id} between ${match.artworkAId} and ${match.artworkBId}',
+        );
         // Load artwork details
         final artworkA = await _loadArtwork(match.artworkAId);
         final artworkB = await _loadArtwork(match.artworkBId);
-        debugPrint('[ArtBattle] Loaded artwork docs A:${artworkA?.id ?? 'null'} B:${artworkB?.id ?? 'null'}');
+        debugPrint(
+          '[ArtBattle] Loaded artwork docs A:${artworkA?.id ?? 'null'} B:${artworkB?.id ?? 'null'}',
+        );
 
         setState(() {
           _currentMatch = match;
@@ -111,15 +119,19 @@ class _ArtBattleScreenState extends State<ArtBattleScreen> {
   Future<ArtworkModel?> _loadArtwork(String id) async {
     try {
       // Try primary 'artwork' collection first
-      final doc =
-          await FirebaseFirestore.instance.collection('artwork').doc(id).get();
+      final doc = await FirebaseFirestore.instance
+          .collection('artwork')
+          .doc(id)
+          .get();
       if (doc.exists) {
         return ArtworkModel.fromFirestore(doc);
       }
 
       // Fallback to 'artworks' collection (legacy/analytics)
-      final docPlural =
-          await FirebaseFirestore.instance.collection('artworks').doc(id).get();
+      final docPlural = await FirebaseFirestore.instance
+          .collection('artworks')
+          .doc(id)
+          .get();
       if (docPlural.exists) {
         return ArtworkModel.fromFirestore(docPlural);
       }
@@ -220,8 +232,10 @@ class _ArtBattleScreenState extends State<ArtBattleScreen> {
             child: Column(
               children: [
                 Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                   child: Row(
                     children: [
                       _GlassIconButton(
@@ -333,7 +347,9 @@ class _ArtworkCard extends StatelessWidget {
               fit: BoxFit.cover,
               enableThumbnailFallback: true,
               placeholder: const Center(child: CircularProgressIndicator()),
-              errorWidget: const Center(child: Icon(Icons.error, color: Colors.white)),
+              errorWidget: const Center(
+                child: Icon(Icons.error, color: Colors.white),
+              ),
             ),
             Container(
               decoration: BoxDecoration(
@@ -347,11 +363,7 @@ class _ArtworkCard extends StatelessWidget {
                 ),
               ),
             ),
-            Positioned(
-              top: 12,
-              left: 12,
-              child: _LabelChip(text: label),
-            ),
+            Positioned(top: 12, left: 12, child: _LabelChip(text: label)),
             Positioned(
               left: 16,
               bottom: 16,
@@ -362,7 +374,11 @@ class _ArtworkCard extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.touch_app, color: Colors.white, size: 20),
+                      const Icon(
+                        Icons.touch_app,
+                        color: Colors.white,
+                        size: 20,
+                      ),
                       const SizedBox(width: 6),
                       Text(
                         'Tap to choose',
@@ -446,8 +462,11 @@ class _SponsorCTA extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
               child: Row(
                 children: [
-                  const Icon(Icons.business_center,
-                      color: Color(0xFF22D3EE), size: 20),
+                  const Icon(
+                    Icons.business_center,
+                    color: Color(0xFF22D3EE),
+                    size: 20,
+                  ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
@@ -468,8 +487,11 @@ class _SponsorCTA extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  const Icon(Icons.arrow_forward_ios,
-                      color: Colors.white70, size: 16),
+                  const Icon(
+                    Icons.arrow_forward_ios,
+                    color: Colors.white70,
+                    size: 16,
+                  ),
                 ],
               ),
             ),
@@ -479,6 +501,7 @@ class _SponsorCTA extends StatelessWidget {
     );
   }
 }
+
 class _WorldBackground extends StatelessWidget {
   const _WorldBackground();
 
@@ -489,11 +512,7 @@ class _WorldBackground extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF07060F),
-            Color(0xFF0A1330),
-            Color(0xFF071C18),
-          ],
+          colors: [Color(0xFF07060F), Color(0xFF0A1330), Color(0xFF071C18)],
         ),
       ),
       child: Stack(

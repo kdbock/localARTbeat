@@ -19,7 +19,7 @@ class DeviceUtils {
   /// Initialize device information
   static Future<void> initialize() async {
     if (_initialized) return;
-    
+
     if (kIsWeb) {
       _isSimulator = false;
     } else {
@@ -37,7 +37,7 @@ class DeviceUtils {
         _isSimulator = false;
       }
     }
-    
+
     _initialized = true;
   }
 }

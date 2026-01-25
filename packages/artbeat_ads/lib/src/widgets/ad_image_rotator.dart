@@ -104,10 +104,7 @@ class _AdImageRotatorState extends State<AdImageRotator> {
       return child;
     }
 
-    return ClipRRect(
-      borderRadius: widget.borderRadius!,
-      child: child,
-    );
+    return ClipRRect(borderRadius: widget.borderRadius!, child: child);
   }
 
   Widget _buildImage(String url) {

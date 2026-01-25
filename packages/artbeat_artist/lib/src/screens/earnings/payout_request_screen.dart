@@ -134,9 +134,9 @@ class _PayoutRequestScreenState extends State<PayoutRequestScreen> {
                 const SizedBox(width: 12),
                 Text(
                   tr('art_walk_available_balance'),
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -144,16 +144,18 @@ class _PayoutRequestScreenState extends State<PayoutRequestScreen> {
             Text(
               '\$${widget.availableBalance.toStringAsFixed(2)}',
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: Colors.green[700],
-                    fontWeight: FontWeight.bold,
-                  ),
+                color: Colors.green[700],
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
-              tr('art_walk_this_is_the_amount_available_for_payout_after_processing_fees'),
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey[600],
-                  ),
+              tr(
+                'art_walk_this_is_the_amount_available_for_payout_after_processing_fees',
+              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
             ),
           ],
         ),
@@ -170,15 +172,16 @@ class _PayoutRequestScreenState extends State<PayoutRequestScreen> {
           children: [
             Text(
               tr('art_walk_payout_amount'),
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             TextFormField(
               controller: _amountController,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               decoration: const InputDecoration(
                 labelText: 'Amount (\$)',
                 prefixIcon: Icon(Icons.attach_money),
@@ -216,8 +219,8 @@ class _PayoutRequestScreenState extends State<PayoutRequestScreen> {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () {
-                      _amountController.text =
-                          (widget.availableBalance * 0.25).toStringAsFixed(2);
+                      _amountController.text = (widget.availableBalance * 0.25)
+                          .toStringAsFixed(2);
                     },
                     child: Text(tr('art_walk_25')),
                   ),
@@ -226,8 +229,8 @@ class _PayoutRequestScreenState extends State<PayoutRequestScreen> {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () {
-                      _amountController.text =
-                          (widget.availableBalance * 0.5).toStringAsFixed(2);
+                      _amountController.text = (widget.availableBalance * 0.5)
+                          .toStringAsFixed(2);
                     },
                     child: Text(tr('art_walk_50')),
                   ),
@@ -236,8 +239,8 @@ class _PayoutRequestScreenState extends State<PayoutRequestScreen> {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () {
-                      _amountController.text =
-                          (widget.availableBalance * 0.75).toStringAsFixed(2);
+                      _amountController.text = (widget.availableBalance * 0.75)
+                          .toStringAsFixed(2);
                     },
                     child: Text(tr('art_walk_75')),
                   ),
@@ -246,8 +249,8 @@ class _PayoutRequestScreenState extends State<PayoutRequestScreen> {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () {
-                      _amountController.text =
-                          widget.availableBalance.toStringAsFixed(2);
+                      _amountController.text = widget.availableBalance
+                          .toStringAsFixed(2);
                     },
                     child: Text(tr('art_walk_all')),
                   ),
@@ -273,8 +276,8 @@ class _PayoutRequestScreenState extends State<PayoutRequestScreen> {
                   child: Text(
                     tr('art_walk_payout_account'),
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 TextButton.icon(
@@ -298,19 +301,24 @@ class _PayoutRequestScreenState extends State<PayoutRequestScreen> {
                 ),
                 child: Column(
                   children: [
-                    Icon(Icons.account_balance,
-                        color: Colors.orange[700], size: 48),
+                    Icon(
+                      Icons.account_balance,
+                      color: Colors.orange[700],
+                      size: 48,
+                    ),
                     const SizedBox(height: 12),
                     Text(
                       tr('art_walk_no_payout_accounts'),
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.orange[700],
-                          ),
+                        fontWeight: FontWeight.bold,
+                        color: Colors.orange[700],
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      tr('art_walk_you_need_to_add_a_payout_account_before_requesting_a_payout'),
+                      tr(
+                        'art_walk_you_need_to_add_a_payout_account_before_requesting_a_payout',
+                      ),
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.orange[700]),
                     ),
@@ -385,8 +393,8 @@ class _PayoutRequestScreenState extends State<PayoutRequestScreen> {
                 Text(
                   tr('art_walk_payout_information'),
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -403,11 +411,10 @@ class _PayoutRequestScreenState extends State<PayoutRequestScreen> {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
-                tr('art_walk_payouts_are_processed_securely_through_our_payment_partner__you_will_receive_an_email_confirmation_once_the_payout_is_initiated'),
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.blue[700],
+                tr(
+                  'art_walk_payouts_are_processed_securely_through_our_payment_partner__you_will_receive_an_email_confirmation_once_the_payout_is_initiated',
                 ),
+                style: TextStyle(fontSize: 12, color: Colors.blue[700]),
               ),
             ),
           ],
@@ -422,16 +429,13 @@ class _PayoutRequestScreenState extends State<PayoutRequestScreen> {
       child: Row(
         children: [
           Expanded(
-            child: Text(
-              label,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
+            child: Text(label, style: Theme.of(context).textTheme.bodyMedium),
           ),
           Text(
             value,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
           ),
         ],
       ),

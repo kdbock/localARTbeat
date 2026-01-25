@@ -46,12 +46,13 @@ class GlassCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final effectiveRadius = borderRadius ?? radius;
     final borderRadiusGeometry = BorderRadius.circular(effectiveRadius);
-    final effectiveGlassColor = glassBackground ??
+    final effectiveGlassColor =
+        glassBackground ??
         fillColor ??
         glassColor ??
         Colors.white.withValues(alpha: glassOpacity ?? 0.06);
-    final effectiveBorderColor = borderColor ??
-        Colors.white.withValues(alpha: borderOpacity ?? 0.12);
+    final effectiveBorderColor =
+        borderColor ?? Colors.white.withValues(alpha: borderOpacity ?? 0.12);
     final shadowList =
         shadows ?? (shadow != null ? <BoxShadow>[shadow!] : null);
 
@@ -60,10 +61,9 @@ class GlassCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: effectiveGlassColor,
         borderRadius: borderRadiusGeometry,
-        border: Border.all(
-          color: effectiveBorderColor,
-        ),
-        boxShadow: shadowList ??
+        border: Border.all(color: effectiveBorderColor),
+        boxShadow:
+            shadowList ??
             [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.35),
@@ -72,8 +72,9 @@ class GlassCard extends StatelessWidget {
               ),
               if (showAccentGlow)
                 BoxShadow(
-                  color: (accentColor ?? const Color(0xFF00FD8A))
-                      .withValues(alpha: 0.25),
+                  color: (accentColor ?? const Color(0xFF00FD8A)).withValues(
+                    alpha: 0.25,
+                  ),
                   blurRadius: 32,
                   spreadRadius: 2,
                 ),

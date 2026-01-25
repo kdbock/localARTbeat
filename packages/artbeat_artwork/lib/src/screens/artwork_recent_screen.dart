@@ -129,7 +129,8 @@ class _ArtworkRecentScreenState extends State<ArtworkRecentScreen> {
             onPressed: () => Navigator.pushNamed(context, '/search'),
             icon: const Icon(Icons.search, color: Colors.white),
           ),
-        ], subtitle: '',
+        ],
+        subtitle: '',
       ),
       child: WorldBackground(
         child: SafeArea(

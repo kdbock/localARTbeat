@@ -1,5 +1,4 @@
 class TourEvent {
-
   const TourEvent({
     required this.name,
     required this.venue,

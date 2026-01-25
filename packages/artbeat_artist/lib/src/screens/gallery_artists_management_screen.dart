@@ -110,8 +110,8 @@ class _GalleryArtistsManagementScreenState
       }
 
       // Get current gallery profile
-      final galleryProfile =
-          await _artistProfileService.getArtistProfileByUserId(currentUser.uid);
+      final galleryProfile = await _artistProfileService
+          .getArtistProfileByUserId(currentUser.uid);
       if (galleryProfile == null) {
         throw Exception('Gallery profile not found');
       }
@@ -130,8 +130,10 @@ class _GalleryArtistsManagementScreenState
       // Load artist profiles
       final Map<String, core.ArtistProfileModel> artistProfiles = {};
       for (final artistId in artistIds) {
-        final artistDoc =
-            await _firestore.collection('artistProfiles').doc(artistId).get();
+        final artistDoc = await _firestore
+            .collection('artistProfiles')
+            .doc(artistId)
+            .get();
         if (artistDoc.exists) {
           final artist = core.ArtistProfileModel.fromFirestore(artistDoc);
           artistProfiles[artistId] = artist;
@@ -157,8 +159,8 @@ class _GalleryArtistsManagementScreenState
       if (currentUser == null) return;
 
       // Get current gallery profile
-      final galleryProfile =
-          await _artistProfileService.getArtistProfileByUserId(currentUser.uid);
+      final galleryProfile = await _artistProfileService
+          .getArtistProfileByUserId(currentUser.uid);
       if (galleryProfile == null) return;
 
       // Load pending invitations from Firestore
@@ -189,15 +191,17 @@ class _GalleryArtistsManagementScreenState
       }
 
       // Get current gallery profile
-      final galleryProfile =
-          await _artistProfileService.getArtistProfileByUserId(currentUser.uid);
+      final galleryProfile = await _artistProfileService
+          .getArtistProfileByUserId(currentUser.uid);
       if (galleryProfile == null) {
         throw Exception('Gallery profile not found');
       }
 
       // Get artist user information for email
-      final artistUserDoc =
-          await _firestore.collection('users').doc(artist.userId).get();
+      final artistUserDoc = await _firestore
+          .collection('users')
+          .doc(artist.userId)
+          .get();
 
       final artistEmail = artistUserDoc.data()?['email'] as String? ?? '';
 
@@ -250,8 +254,11 @@ class _GalleryArtistsManagementScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(tr(
-                'artist_gallery_artists_management_success_invitation_sent_successfully')),
+            content: Text(
+              tr(
+                'artist_gallery_artists_management_success_invitation_sent_successfully',
+              ),
+            ),
             backgroundColor: Colors.green,
           ),
         );
@@ -260,8 +267,10 @@ class _GalleryArtistsManagementScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(tr(
-                  'artist_gallery_artists_management_error_failed_to_send'))),
+            content: Text(
+              tr('artist_gallery_artists_management_error_failed_to_send'),
+            ),
+          ),
         );
       }
     }
@@ -273,9 +282,9 @@ class _GalleryArtistsManagementScreenState
           .collection('galleryInvitations')
           .doc(invitationId)
           .update({
-        'status': 'cancelled',
-        'respondedAt': FieldValue.serverTimestamp(),
-      });
+            'status': 'cancelled',
+            'respondedAt': FieldValue.serverTimestamp(),
+          });
 
       // Refresh invitations
       await _loadPendingInvitations();
@@ -283,8 +292,9 @@ class _GalleryArtistsManagementScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(tr(
-                'artist_gallery_artists_management_text_invitation_cancelled')),
+            content: Text(
+              tr('artist_gallery_artists_management_text_invitation_cancelled'),
+            ),
             backgroundColor: Colors.orange,
           ),
         );
@@ -293,8 +303,10 @@ class _GalleryArtistsManagementScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(tr(
-                  'artist_gallery_artists_management_error_failed_to_cancel'))),
+            content: Text(
+              tr('artist_gallery_artists_management_error_failed_to_cancel'),
+            ),
+          ),
         );
       }
     }
@@ -308,8 +320,8 @@ class _GalleryArtistsManagementScreenState
       }
 
       // Get current gallery profile
-      final galleryProfile =
-          await _artistProfileService.getArtistProfileByUserId(currentUser.uid);
+      final galleryProfile = await _artistProfileService
+          .getArtistProfileByUserId(currentUser.uid);
       if (galleryProfile == null) {
         throw Exception('Gallery profile not found');
       }
@@ -327,9 +339,9 @@ class _GalleryArtistsManagementScreenState
             .collection('galleryArtists')
             .doc(relationshipQuery.docs.first.id)
             .update({
-          'status': 'inactive',
-          'updatedAt': FieldValue.serverTimestamp(),
-        });
+              'status': 'inactive',
+              'updatedAt': FieldValue.serverTimestamp(),
+            });
       }
 
       setState(() {
@@ -340,8 +352,11 @@ class _GalleryArtistsManagementScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(tr(
-                'artist_gallery_artists_management_success_artist_removed_from')),
+            content: Text(
+              tr(
+                'artist_gallery_artists_management_success_artist_removed_from',
+              ),
+            ),
             backgroundColor: Colors.green,
           ),
         );
@@ -350,8 +365,10 @@ class _GalleryArtistsManagementScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(tr(
-                  'artist_gallery_artists_management_error_failed_to_remove'))),
+            content: Text(
+              tr('artist_gallery_artists_management_error_failed_to_remove'),
+            ),
+          ),
         );
       }
     }
@@ -364,7 +381,8 @@ class _GalleryArtistsManagementScreenState
       child: Scaffold(
         appBar: AppBar(
           title: Text(
-              tr('artist_gallery_artists_management_text_gallery_artists')),
+            tr('artist_gallery_artists_management_text_gallery_artists'),
+          ),
           bottom: TabBar(
             controller: _tabController,
             tabs: const [
@@ -375,10 +393,7 @@ class _GalleryArtistsManagementScreenState
         ),
         body: TabBarView(
           controller: _tabController,
-          children: [
-            _buildArtistsList(),
-            _buildPendingInvitations(),
-          ],
+          children: [_buildArtistsList(), _buildPendingInvitations()],
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () async {
@@ -413,12 +428,13 @@ class _GalleryArtistsManagementScreenState
         final artist = _galleryArtists[index];
         return ListTile(
           leading: CircleAvatar(
-            backgroundImage:
-                core.ImageUrlValidator.safeNetworkImage(artist.profileImageUrl),
+            backgroundImage: core.ImageUrlValidator.safeNetworkImage(
+              artist.profileImageUrl,
+            ),
             child:
                 !core.ImageUrlValidator.isValidImageUrl(artist.profileImageUrl)
-                    ? const Icon(Icons.person)
-                    : null,
+                ? const Icon(Icons.person)
+                : null,
           ),
           title: Text(artist.displayName),
           subtitle: Text(artist.bio ?? ''),
@@ -441,26 +457,16 @@ class _GalleryArtistsManagementScreenState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.mail_outline,
-              size: 64,
-              color: Colors.grey,
-            ),
+            const Icon(Icons.mail_outline, size: 64, color: Colors.grey),
             const SizedBox(height: 16),
             Text(
               tr('art_walk_no_pending_invitations'),
-              style: const TextStyle(
-                fontSize: 18,
-                color: Colors.grey,
-              ),
+              style: const TextStyle(fontSize: 18, color: Colors.grey),
             ),
             const SizedBox(height: 8),
             Text(
               tr('art_walk_use_the___button_to_invite_artists_to_your_gallery'),
-              style: const TextStyle(
-                fontSize: 14,
-                color: Colors.grey,
-              ),
+              style: const TextStyle(fontSize: 14, color: Colors.grey),
             ),
           ],
         ),
@@ -477,9 +483,12 @@ class _GalleryArtistsManagementScreenState
           child: ListTile(
             leading: CircleAvatar(
               backgroundImage: core.ImageUrlValidator.safeNetworkImage(
-                  invitation.artistProfileImage),
-              child: !core.ImageUrlValidator.isValidImageUrl(
-                      invitation.artistProfileImage)
+                invitation.artistProfileImage,
+              ),
+              child:
+                  !core.ImageUrlValidator.isValidImageUrl(
+                    invitation.artistProfileImage,
+                  )
                   ? const Icon(Icons.person)
                   : null,
             ),
@@ -494,10 +503,7 @@ class _GalleryArtistsManagementScreenState
                 const SizedBox(height: 4),
                 Text(
                   'Invited ${_formatDate(invitation.createdAt)}',
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(color: Colors.grey[600], fontSize: 12),
                 ),
               ],
             ),
@@ -542,7 +548,8 @@ class _GalleryArtistsManagementScreenState
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
-            tr('artist_gallery_artists_management_text_cancel_invitation')),
+          tr('artist_gallery_artists_management_text_cancel_invitation'),
+        ),
         content: Text(
           'Are you sure you want to cancel the invitation to ${invitation.artistName}?',
         ),
@@ -571,8 +578,8 @@ class _GalleryArtistsManagementScreenState
       }
 
       // Get current gallery profile
-      final galleryProfile =
-          await _artistProfileService.getArtistProfileByUserId(currentUser.uid);
+      final galleryProfile = await _artistProfileService
+          .getArtistProfileByUserId(currentUser.uid);
       if (galleryProfile == null) {
         throw Exception('Gallery profile not found');
       }
@@ -596,8 +603,11 @@ class _GalleryArtistsManagementScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(tr(
-                'artist_gallery_artists_management_text_invitation_reminder_sent')),
+            content: Text(
+              tr(
+                'artist_gallery_artists_management_text_invitation_reminder_sent',
+              ),
+            ),
             backgroundColor: Colors.green,
           ),
         );
@@ -606,8 +616,10 @@ class _GalleryArtistsManagementScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(tr(
-                  'artist_gallery_artists_management_error_failed_to_resend'))),
+            content: Text(
+              tr('artist_gallery_artists_management_error_failed_to_resend'),
+            ),
+          ),
         );
       }
     }
@@ -656,8 +668,10 @@ class _ArtistSearchDialogState extends State<_ArtistSearchDialog> {
     try {
       // Use ArtistProfileService to search for artists
       final artistProfileService = ArtistProfileService();
-      final results =
-          await artistProfileService.searchArtists(query, limit: 20);
+      final results = await artistProfileService.searchArtists(
+        query,
+        limit: 20,
+      );
 
       setState(() {
         // Filter out artists already in the gallery
@@ -676,8 +690,11 @@ class _ArtistSearchDialogState extends State<_ArtistSearchDialog> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(tr(
-                'artist_gallery_artists_management_error_error_searching_artists')),
+            content: Text(
+              tr(
+                'artist_gallery_artists_management_error_error_searching_artists',
+              ),
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -697,10 +714,7 @@ class _ArtistSearchDialogState extends State<_ArtistSearchDialog> {
           children: [
             Text(
               tr('art_walk_find_artists'),
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             TextField(
@@ -719,43 +733,44 @@ class _ArtistSearchDialogState extends State<_ArtistSearchDialog> {
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : _searchResults.isEmpty
-                      ? Center(
-                          child: Text(
-                            _searchController.text.isEmpty
-                                ? 'Type to search for artists'
-                                : 'No artists found',
-                            style: TextStyle(color: Colors.grey.shade700),
+                  ? Center(
+                      child: Text(
+                        _searchController.text.isEmpty
+                            ? 'Type to search for artists'
+                            : 'No artists found',
+                        style: TextStyle(color: Colors.grey.shade700),
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: _searchResults.length,
+                      itemBuilder: (context, index) {
+                        final artist = _searchResults[index];
+                        return ListTile(
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 8,
+                            horizontal: 16,
                           ),
-                        )
-                      : ListView.builder(
-                          itemCount: _searchResults.length,
-                          itemBuilder: (context, index) {
-                            final artist = _searchResults[index];
-                            return ListTile(
-                              contentPadding: const EdgeInsets.symmetric(
-                                vertical: 8,
-                                horizontal: 16,
-                              ),
-                              leading: CircleAvatar(
-                                backgroundImage:
-                                    core.ImageUrlValidator.safeNetworkImage(
-                                        artist.profileImageUrl),
-                                child: !core.ImageUrlValidator.isValidImageUrl(
-                                        artist.profileImageUrl)
-                                    ? const Icon(Icons.person)
-                                    : null,
-                              ),
-                              title: Text(artist.displayName),
-                              subtitle: Text(
-                                artist.location ?? 'No location',
-                              ),
-                              onTap: () {
-                                widget.onArtistSelected(artist);
-                                Navigator.of(context).pop();
-                              },
-                            );
+                          leading: CircleAvatar(
+                            backgroundImage:
+                                core.ImageUrlValidator.safeNetworkImage(
+                                  artist.profileImageUrl,
+                                ),
+                            child:
+                                !core.ImageUrlValidator.isValidImageUrl(
+                                  artist.profileImageUrl,
+                                )
+                                ? const Icon(Icons.person)
+                                : null,
+                          ),
+                          title: Text(artist.displayName),
+                          subtitle: Text(artist.location ?? 'No location'),
+                          onTap: () {
+                            widget.onArtistSelected(artist);
+                            Navigator.of(context).pop();
                           },
-                        ),
+                        );
+                      },
+                    ),
             ),
             const SizedBox(height: 16),
             TextButton(

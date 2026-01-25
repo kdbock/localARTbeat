@@ -216,10 +216,8 @@ class _InstantDiscoveryRadarState extends State<InstantDiscoveryRadar>
               widget.userPosition.longitude,
             ),
             showPlaceholder: true,
-            onPlaceholderTap: () => Navigator.pushNamed(
-              context,
-              '/discover-sponsorship',
-            ),
+            onPlaceholderTap: () =>
+                Navigator.pushNamed(context, '/discover-sponsorship'),
           ),
           // Art list
           _buildArtList(),

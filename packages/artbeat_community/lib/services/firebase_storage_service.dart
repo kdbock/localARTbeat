@@ -90,10 +90,7 @@ class FirebaseStorageService {
     final ref = _storage.ref().child(path);
 
     return ref
-        .putFile(
-          imageFile,
-          SettableMetadata(contentType: 'image/jpeg'),
-        )
+        .putFile(imageFile, SettableMetadata(contentType: 'image/jpeg'))
         .snapshotEvents;
   }
 
@@ -131,9 +128,7 @@ class FirebaseStorageService {
     if (onProgress != null) {
       uploadTask.snapshotEvents.listen((snapshot) {
         if (snapshot.totalBytes > 0) {
-          onProgress(
-            snapshot.bytesTransferred / snapshot.totalBytes,
-          );
+          onProgress(snapshot.bytesTransferred / snapshot.totalBytes);
         }
       });
     }

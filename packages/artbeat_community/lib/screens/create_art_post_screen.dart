@@ -45,16 +45,43 @@ class _CreateArtPostScreenState extends State<CreateArtPostScreen> {
 
   final List<File> _selectedImages = [];
   static const List<_QuickTag> _quickTags = [
-    _QuickTag(value: 'Painting', labelKey: 'create_art_post_quick_tag_painting'),
-    _QuickTag(value: 'Digital Art', labelKey: 'create_art_post_quick_tag_digital'),
-    _QuickTag(value: 'Photography', labelKey: 'create_art_post_quick_tag_photography'),
-    _QuickTag(value: 'Sculpture', labelKey: 'create_art_post_quick_tag_sculpture'),
-    _QuickTag(value: 'Abstract', labelKey: 'create_art_post_quick_tag_abstract'),
+    _QuickTag(
+      value: 'Painting',
+      labelKey: 'create_art_post_quick_tag_painting',
+    ),
+    _QuickTag(
+      value: 'Digital Art',
+      labelKey: 'create_art_post_quick_tag_digital',
+    ),
+    _QuickTag(
+      value: 'Photography',
+      labelKey: 'create_art_post_quick_tag_photography',
+    ),
+    _QuickTag(
+      value: 'Sculpture',
+      labelKey: 'create_art_post_quick_tag_sculpture',
+    ),
+    _QuickTag(
+      value: 'Abstract',
+      labelKey: 'create_art_post_quick_tag_abstract',
+    ),
     _QuickTag(value: 'Realism', labelKey: 'create_art_post_quick_tag_realism'),
-    _QuickTag(value: 'Watercolor', labelKey: 'create_art_post_quick_tag_watercolor'),
-    _QuickTag(value: 'Charcoal', labelKey: 'create_art_post_quick_tag_charcoal'),
-    _QuickTag(value: 'Mixed Media', labelKey: 'create_art_post_quick_tag_mixed_media'),
-    _QuickTag(value: 'Street Art', labelKey: 'create_art_post_quick_tag_street_art'),
+    _QuickTag(
+      value: 'Watercolor',
+      labelKey: 'create_art_post_quick_tag_watercolor',
+    ),
+    _QuickTag(
+      value: 'Charcoal',
+      labelKey: 'create_art_post_quick_tag_charcoal',
+    ),
+    _QuickTag(
+      value: 'Mixed Media',
+      labelKey: 'create_art_post_quick_tag_mixed_media',
+    ),
+    _QuickTag(
+      value: 'Street Art',
+      labelKey: 'create_art_post_quick_tag_street_art',
+    ),
   ];
 
   bool _isArtistPost = false;
@@ -224,9 +251,7 @@ class _CreateArtPostScreenState extends State<CreateArtPostScreen> {
     } catch (e) {
       if (!mounted) return;
       _showSnackBar(
-        'create_art_post_error_creating'.tr(
-          namedArgs: {'error': e.toString()},
-        ),
+        'create_art_post_error_creating'.tr(namedArgs: {'error': e.toString()}),
       );
     } finally {
       if (mounted) {
@@ -279,7 +304,8 @@ class _CreateArtPostScreenState extends State<CreateArtPostScreen> {
         backgroundColor: Colors.transparent,
         appBar: HudTopBar(
           title: 'create_art_post_title'.tr(),
-          glassBackground: true, subtitle: '',
+          glassBackground: true,
+          subtitle: '',
         ),
         body: SafeArea(
           child: Padding(
@@ -308,8 +334,9 @@ class _CreateArtPostScreenState extends State<CreateArtPostScreen> {
                 ),
                 const SizedBox(height: 16),
                 HudButton.primary(
-                  onPressed:
-                      (_isLoading || _isUploadingImages) ? null : _createPost,
+                  onPressed: (_isLoading || _isUploadingImages)
+                      ? null
+                      : _createPost,
                   text: 'create_art_post_submit'.tr(),
                   isLoading: _isLoading || _isUploadingImages,
                 ),
@@ -335,7 +362,9 @@ class _CreateArtPostScreenState extends State<CreateArtPostScreen> {
               borderRadius: BorderRadius.circular(24),
               boxShadow: [
                 BoxShadow(
-                  color: _CreatePostPalette.accentPurple.withValues(alpha: 0.25),
+                  color: _CreatePostPalette.accentPurple.withValues(
+                    alpha: 0.25,
+                  ),
                   blurRadius: 28,
                   offset: const Offset(0, 12),
                 ),
@@ -390,7 +419,10 @@ class _CreateArtPostScreenState extends State<CreateArtPostScreen> {
                   gradient: _CreatePostPalette.primaryGradient,
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: const Icon(Icons.add_photo_alternate, color: Colors.white),
+                child: const Icon(
+                  Icons.add_photo_alternate,
+                  color: Colors.white,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -426,8 +458,9 @@ class _CreateArtPostScreenState extends State<CreateArtPostScreen> {
             _buildSelectedMedia(),
           const SizedBox(height: 16),
           HudButton.secondary(
-            onPressed:
-                (_isPickingImages || _isUploadingImages) ? null : _pickImages,
+            onPressed: (_isPickingImages || _isUploadingImages)
+                ? null
+                : _pickImages,
             text: 'create_art_post_add_media_cta'.tr(),
             icon: Icons.add,
             height: 48,
@@ -445,7 +478,10 @@ class _CreateArtPostScreenState extends State<CreateArtPostScreen> {
         height: 200,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1.5),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.2),
+            width: 1.5,
+          ),
           color: Colors.white.withValues(alpha: 0.04),
         ),
         child: Column(
@@ -541,7 +577,11 @@ class _CreateArtPostScreenState extends State<CreateArtPostScreen> {
                           color: Colors.black.withValues(alpha: 0.6),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.close, size: 16, color: Colors.white),
+                        child: const Icon(
+                          Icons.close,
+                          size: 16,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),

@@ -288,7 +288,9 @@ class HudGlass extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: fillAlpha),
             borderRadius: BorderRadius.circular(radius),
-            border: Border.all(color: Colors.white.withValues(alpha: borderAlpha)),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: borderAlpha),
+            ),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.45),
@@ -305,7 +307,11 @@ class HudGlass extends StatelessWidget {
 }
 
 class HudGradientIconChip extends StatelessWidget {
-  const HudGradientIconChip({super.key, required this.icon, required this.size});
+  const HudGradientIconChip({
+    super.key,
+    required this.icon,
+    required this.size,
+  });
 
   final IconData icon;
   final double size;
@@ -438,10 +444,8 @@ class HudPalette {
   static const Color textTertiary = Color(0x73FFFFFF);
 
   static Color glassFill([double a = 0.08]) =>
-      Colors.white
-          .withValues(alpha: a.clamp(0.0, 1.0).toDouble());
+      Colors.white.withValues(alpha: a.clamp(0.0, 1.0).toDouble());
 
   static Color glassBorder([double a = 0.14]) =>
-      Colors.white
-          .withValues(alpha: a.clamp(0.0, 1.0).toDouble());
+      Colors.white.withValues(alpha: a.clamp(0.0, 1.0).toDouble());
 }

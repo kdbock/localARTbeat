@@ -151,7 +151,8 @@ class _CommissionGalleryScreenState extends State<CommissionGalleryScreen> {
             tooltip: 'community_commission_gallery_refresh_button'.tr(),
             onPressed: _isLoading ? null : _loadCommissions,
           ),
-        ], subtitle: '',
+        ],
+        subtitle: '',
       ),
       body: WorldBackground(
         child: SafeArea(

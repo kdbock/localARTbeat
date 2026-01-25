@@ -105,9 +105,7 @@ class _SponsorBannerState extends State<SponsorBanner> {
       if (widget.showPlaceholder) {
         return Padding(
           padding: widget.padding,
-          child: SponsorPlaceholder(
-            onTap: widget.onPlaceholderTap,
-          ),
+          child: SponsorPlaceholder(onTap: widget.onPlaceholderTap),
         );
       }
       return const SizedBox.shrink();
@@ -125,10 +123,7 @@ class _SponsorBannerState extends State<SponsorBanner> {
         return _TitleSponsorView(sponsor: sponsor);
 
       case SponsorshipTier.event:
-        return _LabeledBanner(
-          sponsor: sponsor,
-          label: 'Sponsored by',
-        );
+        return _LabeledBanner(sponsor: sponsor, label: 'Sponsored by');
 
       case SponsorshipTier.artWalk:
         return _LabeledBanner(
@@ -157,22 +152,18 @@ class _TitleSponsorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => GestureDetector(
-      onTap: () => _openLink(context, sponsor.linkUrl),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: sponsor.bannerUrl != null
-            ? Image.network(
-                sponsor.bannerUrl!,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              )
-            : Image.network(
-                sponsor.logoUrl,
-                height: 96,
-                fit: BoxFit.contain,
-              ),
-      ),
-    );
+    onTap: () => _openLink(context, sponsor.linkUrl),
+    child: ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: sponsor.bannerUrl != null
+          ? Image.network(
+              sponsor.bannerUrl!,
+              width: double.infinity,
+              fit: BoxFit.cover,
+            )
+          : Image.network(sponsor.logoUrl, height: 96, fit: BoxFit.contain),
+    ),
+  );
 }
 
 class _LabeledBanner extends StatelessWidget {
@@ -188,64 +179,62 @@ class _LabeledBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => GestureDetector(
-      onTap: () => _openLink(context, sponsor.linkUrl),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          color: Theme.of(context).colorScheme.surface,
-          boxShadow: [
-            BoxShadow(
-              blurRadius: 6,
-              offset: const Offset(0, 3),
-              color: Colors.black.withValues(alpha: 0.08),
-            ),
-          ],
-        ),
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.network(
-                sponsor.logoUrl,
-                width: 48,
-                height: 48,
-                fit: BoxFit.cover,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: Theme.of(context)
-                        .textTheme
-                        .labelSmall
-                        ?.copyWith(color: Colors.grey[600]),
-                  ),
-                  Text(
-                    sponsor.businessId,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleSmall,
-                  ),
-                  if (sublabel != null)
-                    Text(
-                      sublabel!,
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodySmall
-                          ?.copyWith(color: Colors.grey[600]),
-                    ),
-                ],
-              ),
-            ),
-          ],
-        ),
+    onTap: () => _openLink(context, sponsor.linkUrl),
+    child: Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: Theme.of(context).colorScheme.surface,
+        boxShadow: [
+          BoxShadow(
+            blurRadius: 6,
+            offset: const Offset(0, 3),
+            color: Colors.black.withValues(alpha: 0.08),
+          ),
+        ],
       ),
-    );
+      padding: const EdgeInsets.all(12),
+      child: Row(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.network(
+              sponsor.logoUrl,
+              width: 48,
+              height: 48,
+              fit: BoxFit.cover,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.labelSmall?.copyWith(color: Colors.grey[600]),
+                ),
+                Text(
+                  sponsor.businessId,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                if (sublabel != null)
+                  Text(
+                    sublabel!,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 class _CompactBanner extends StatelessWidget {
@@ -255,16 +244,16 @@ class _CompactBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => GestureDetector(
-      onTap: () => _openLink(context, sponsor.linkUrl),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(10),
-        child: Image.network(
-          sponsor.bannerUrl ?? sponsor.logoUrl,
-          height: 56,
-          fit: BoxFit.cover,
-        ),
+    onTap: () => _openLink(context, sponsor.linkUrl),
+    child: ClipRRect(
+      borderRadius: BorderRadius.circular(10),
+      child: Image.network(
+        sponsor.bannerUrl ?? sponsor.logoUrl,
+        height: 56,
+        fit: BoxFit.cover,
       ),
-    );
+    ),
+  );
 }
 
 /// A placeholder shown when no sponsor is active, encouraging businesses to sponsor.
@@ -275,63 +264,60 @@ class SponsorPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 60,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: Colors.white.withValues(alpha: 0.1),
-            width: 1.5,
-          ),
-          color: Colors.white.withValues(alpha: 0.05),
+    onTap: onTap,
+    child: Container(
+      height: 60,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.1),
+          width: 1.5,
         ),
-        child: Row(
-          children: [
-            const SizedBox(width: 16),
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.add_business,
-                color: Colors.white70,
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Sponsor this space',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  Text(
-                    'Connect with local art explorers',
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Colors.white60,
-                        ),
-                  ),
-                ],
-              ),
-            ),
-            const Icon(
-              Icons.chevron_right,
-              color: Colors.white38,
-            ),
-            const SizedBox(width: 12),
-          ],
-        ),
+        color: Colors.white.withValues(alpha: 0.05),
       ),
-    );
+      child: Row(
+        children: [
+          const SizedBox(width: 16),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.add_business,
+              color: Colors.white70,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Sponsor this space',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  'Connect with local art explorers',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.labelSmall?.copyWith(color: Colors.white60),
+                ),
+              ],
+            ),
+          ),
+          const Icon(Icons.chevron_right, color: Colors.white38),
+          const SizedBox(width: 12),
+        ],
+      ),
+    ),
+  );
 }
 
 /* -------------------------------------------------------------------------- */

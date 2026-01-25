@@ -12,22 +12,17 @@ class GlassOutlineButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => GestureDetector(
-      onTap: onPressed,
-      child: Container(
-        height: 52,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(26),
-          color: Colors.white.withValues(alpha: 0.06),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: const TextStyle(
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ),
+    onTap: onPressed,
+    child: Container(
+      height: 52,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(26),
+        color: Colors.white.withValues(alpha: 0.06),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
       ),
-    );
+      child: Center(
+        child: Text(label, style: const TextStyle(fontWeight: FontWeight.w800)),
+      ),
+    ),
+  );
 }

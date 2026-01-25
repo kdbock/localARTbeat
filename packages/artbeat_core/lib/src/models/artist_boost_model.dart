@@ -11,7 +11,8 @@ class ArtistBoostModel {
   final String id;
   final String senderId;
   final String recipientId;
-  final String boostType; // Small Boost, Medium Boost, Large Boost, Premium Boost, or Custom
+  final String
+  boostType; // Small Boost, Medium Boost, Large Boost, Premium Boost, or Custom
   final double amount;
   final int xpAmount;
   final int momentumAmount;
@@ -50,7 +51,8 @@ class ArtistBoostModel {
       id: doc.id,
       senderId: data['senderId'] as String? ?? '',
       recipientId: data['recipientId'] as String? ?? '',
-      boostType: data['boostType'] as String? ?? data['giftType'] as String? ?? '',
+      boostType:
+          data['boostType'] as String? ?? data['giftType'] as String? ?? '',
       amount: (data['amount'] as num? ?? 0).toDouble(),
       xpAmount: data['xpAmount'] as int? ?? data['xp'] as int? ?? 0,
       momentumAmount:

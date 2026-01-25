@@ -63,7 +63,10 @@ class _BoostPulseRingState extends State<BoostPulseRing>
     final mediaQuery = MediaQuery.maybeOf(context);
     final reduceMotion =
         (mediaQuery?.disableAnimations ?? false) ||
-        WidgetsBinding.instance.platformDispatcher.accessibilityFeatures
+        WidgetsBinding
+            .instance
+            .platformDispatcher
+            .accessibilityFeatures
             .disableAnimations;
 
     if (!widget.enabled || _controller == null || reduceMotion) {
@@ -118,8 +121,9 @@ class _PulseRingPainter extends CustomPainter {
     final opacity = (1 - t).clamp(0.0, 1.0) * 0.55;
     if (opacity <= 0) return;
 
-    final ringColors =
-        colors.map((color) => color.withValues(alpha: opacity)).toList();
+    final ringColors = colors
+        .map((color) => color.withValues(alpha: opacity))
+        .toList();
 
     final paint = Paint()
       ..style = PaintingStyle.stroke

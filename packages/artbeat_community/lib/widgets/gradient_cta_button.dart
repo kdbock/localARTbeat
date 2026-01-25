@@ -12,11 +12,7 @@ class GradientCTAButton extends StatelessWidget {
     this.gradient = const LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
-      colors: [
-        Color(0xFF7C4DFF),
-        Color(0xFF22D3EE),
-        Color(0xFF34D399),
-      ],
+      colors: [Color(0xFF7C4DFF), Color(0xFF22D3EE), Color(0xFF34D399)],
     ),
     this.isLoading = false,
   });
@@ -74,8 +70,7 @@ class GradientCTAButton extends StatelessWidget {
                       height: 18,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        valueColor:
-                            AlwaysStoppedAnimation<Color>(Colors.white),
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       ),
                     ),
                     const SizedBox(width: 12),

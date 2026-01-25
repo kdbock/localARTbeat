@@ -506,7 +506,9 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer>
 
                   final userModel = _cachedUserModel;
                   final displayName =
-                      userModel?.fullName ?? user.displayName ?? 'drawer_user_default'.tr();
+                      userModel?.fullName ??
+                      user.displayName ??
+                      'drawer_user_default'.tr();
                   final profileImageUrl = userModel?.profileImageUrl;
 
                   final role = _getUserRole();
@@ -534,9 +536,7 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer>
   Widget _buildModeChip(String? role) {
     // "Local ARTbeat" brand chip (always)
     final brand = 'drawer_local_brand'.tr();
-    final label = role == null
-        ? brand
-        : "$brand • ${role.toUpperCase()}";
+    final label = role == null ? brand : "$brand • ${role.toUpperCase()}";
     return _NeonChip(
       label: label,
       accent: const Color(0xFF22D3EE),

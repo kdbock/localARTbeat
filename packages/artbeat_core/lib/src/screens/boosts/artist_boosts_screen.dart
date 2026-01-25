@@ -7,10 +7,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-
 class ArtistBoostsScreen extends StatefulWidget {
   final bool showAppBar;
-  const ArtistBoostsScreen({Key? key, this.showAppBar = true}) : super(key: key);
+  const ArtistBoostsScreen({Key? key, this.showAppBar = true})
+    : super(key: key);
 
   @override
   State<ArtistBoostsScreen> createState() => _ArtistBoostsScreenState();
@@ -322,7 +322,6 @@ class _ArtistBoostsScreenState extends State<ArtistBoostsScreen> {
     );
   }
 
-
   Widget _buildSearchField() {
     return Container(
       decoration: BoxDecoration(
@@ -548,8 +547,9 @@ class _ArtistBoostsScreenState extends State<ArtistBoostsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'boosts_supporting_artist'
-                      .tr(namedArgs: {'name': _selectedArtist!.fullName}),
+                  'boosts_supporting_artist'.tr(
+                    namedArgs: {'name': _selectedArtist!.fullName},
+                  ),
                   style: GoogleFonts.spaceGrotesk(
                     color: Colors.white,
                     fontWeight: FontWeight.w700,
@@ -944,31 +944,5 @@ class _ArtistBoostsScreenState extends State<ArtistBoostsScreen> {
         ),
       );
     }
-  }
-}
-
-class _HeroBadge extends StatelessWidget {
-  final String label;
-
-  const _HeroBadge({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-        color: Colors.white.withValues(alpha: 0.08),
-      ),
-      child: Text(
-        label,
-        style: GoogleFonts.spaceGrotesk(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: Colors.white,
-        ),
-      ),
-    );
   }
 }

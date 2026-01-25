@@ -409,8 +409,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
     bool isCurrentUser = false,
   }) {
     // Some entries have an empty profile image URL which breaks CachedNetworkImageProvider.
-    final profileImageUrl =
-        _profileImageUrlOrNull(entry.profileImageUrl);
+    final profileImageUrl = _profileImageUrlOrNull(entry.profileImageUrl);
     final gradient = isCurrentUser
         ? const [Color(0xFF22D3EE), Color(0xFF34D399)]
         : _rankGradient(entry.rank);

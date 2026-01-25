@@ -118,7 +118,10 @@ class DashboardAppExplanation extends StatelessWidget {
                   ),
                   child: Text(
                     'dashboard_explanation_get_started'.tr(),
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),
@@ -138,7 +141,10 @@ class DashboardAppExplanation extends StatelessWidget {
                   ),
                   child: Text(
                     'dashboard_explanation_sign_in'.tr(),
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),

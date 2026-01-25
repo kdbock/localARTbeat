@@ -8,10 +8,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'art_market_screen.dart';
-import 'ads/ads_screen.dart';
-import 'boosts/artist_boosts_screen.dart';
-import 'subscriptions/subscriptions_screen.dart';
 
 class ArtbeatStoreScreen extends StatefulWidget {
   const ArtbeatStoreScreen({super.key});
@@ -156,7 +152,12 @@ class _ArtbeatStoreScreenState extends State<ArtbeatStoreScreen> {
           ),
           if (onTap != null) ...[
             const SizedBox(width: 12),
-            _buildGlassButton('store_view_all'.tr(), onTap, color: color, small: true),
+            _buildGlassButton(
+              'store_view_all'.tr(),
+              onTap,
+              color: color,
+              small: true,
+            ),
           ],
         ],
       ),
@@ -462,7 +463,9 @@ class _ArtbeatStoreScreenState extends State<ArtbeatStoreScreen> {
                 const Color(0xFFA855F7).withValues(alpha: 0.05),
               ],
             ),
-            border: Border.all(color: const Color(0xFFA855F7).withValues(alpha: 0.3)),
+            border: Border.all(
+              color: const Color(0xFFA855F7).withValues(alpha: 0.3),
+            ),
           ),
           child: Row(
             children: [
@@ -472,7 +475,11 @@ class _ArtbeatStoreScreenState extends State<ArtbeatStoreScreen> {
                   color: Color(0xFFA855F7),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.workspace_premium_rounded, color: Colors.white, size: 24),
+                child: const Icon(
+                  Icons.workspace_premium_rounded,
+                  color: Colors.white,
+                  size: 24,
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(

@@ -46,8 +46,10 @@ class UpcomingEventsRowWidget extends StatelessWidget {
           child: StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
                 .collection('events')
-                .where('startDate',
-                    isGreaterThanOrEqualTo: Timestamp.fromDate(now))
+                .where(
+                  'startDate',
+                  isGreaterThanOrEqualTo: Timestamp.fromDate(now),
+                )
                 .limit(40) // Fetch more to allow for local filtering
                 .snapshots(),
             builder: (context, snapshot) {
@@ -72,9 +74,10 @@ class UpcomingEventsRowWidget extends StatelessWidget {
               final events = snapshot.data!.docs
                   .map((doc) => ArtbeatEvent.fromFirestore(doc))
                   .where((event) {
-                // Filter to only show public events with locations containing the zipCode
-                return event.isPublic && event.location.contains(zipCode);
-              }).toList();
+                    // Filter to only show public events with locations containing the zipCode
+                    return event.isPublic && event.location.contains(zipCode);
+                  })
+                  .toList();
 
               // Sort locally by date
               events.sort((a, b) => a.startDate.compareTo(b.startDate));
@@ -95,8 +98,9 @@ class UpcomingEventsRowWidget extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 12.0),
                 itemBuilder: (context, index) {
                   final event = events[index];
-                  final formattedDate =
-                      DateFormat.MMMd().format(event.dateTime);
+                  final formattedDate = DateFormat.MMMd().format(
+                    event.dateTime,
+                  );
                   final formattedTime = DateFormat.jm().format(event.dateTime);
 
                   return Container(
@@ -108,9 +112,8 @@ class UpcomingEventsRowWidget extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute<void>(
-                              builder: (context) => EventDetailsScreen(
-                                eventId: event.id,
-                              ),
+                              builder: (context) =>
+                                  EventDetailsScreen(eventId: event.id),
                             ),
                           );
                         },
@@ -121,10 +124,12 @@ class UpcomingEventsRowWidget extends StatelessWidget {
                               borderRadius: const BorderRadius.vertical(
                                 top: Radius.circular(4.0),
                               ),
-                              child: event.imageUrls.isNotEmpty &&
+                              child:
+                                  event.imageUrls.isNotEmpty &&
                                       event.imageUrls.first.isNotEmpty &&
-                                      Uri.tryParse(event.imageUrls.first)
-                                              ?.hasScheme ==
+                                      Uri.tryParse(
+                                            event.imageUrls.first,
+                                          )?.hasScheme ==
                                           true
                                   ? Image.network(
                                       event.imageUrls.first,

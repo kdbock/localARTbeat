@@ -76,8 +76,9 @@ class AuctionResultModel {
       'winnerUserId': winnerUserId,
       'finalPrice': finalPrice,
       'paymentStatus': paymentStatus,
-      'paymentDeadline':
-          paymentDeadline != null ? Timestamp.fromDate(paymentDeadline!) : null,
+      'paymentDeadline': paymentDeadline != null
+          ? Timestamp.fromDate(paymentDeadline!)
+          : null,
       'createdAt': Timestamp.fromDate(createdAt),
     };
   }

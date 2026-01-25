@@ -1875,7 +1875,9 @@ class PaymentService {
         if (processResponse.statusCode != 200) {
           final errorData = json.decode(processResponse.body);
           AppLogger.error('🚀 Backend error data: $errorData');
-          throw Exception('Failed to process free boost: ${errorData['error']}');
+          throw Exception(
+            'Failed to process free boost: ${errorData['error']}',
+          );
         }
 
         final processData =

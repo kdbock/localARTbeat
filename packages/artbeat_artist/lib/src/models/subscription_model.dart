@@ -66,8 +66,9 @@ class SubscriptionModel {
       stripeSubscriptionId: map['stripeSubscriptionId'] != null
           ? map['stripeSubscriptionId'].toString()
           : null,
-      stripePriceId:
-          map['stripePriceId'] != null ? map['stripePriceId'].toString() : null,
+      stripePriceId: map['stripePriceId'] != null
+          ? map['stripePriceId'].toString()
+          : null,
       stripeCustomerId: map['stripeCustomerId'] != null
           ? map['stripeCustomerId'].toString()
           : null,

@@ -18,9 +18,9 @@ void main() {
     group('1. AUTHENTICATION & ONBOARDING - Core UI Tests', () {
       testWidgets('✅ Splash screen displays on app launch', (tester) async {
         final mockSponsorService = FirebaseTestSetup.createMockSponsorService();
-        await tester.pumpWidget(MaterialApp(
-          home: SplashScreen(sponsorService: mockSponsorService),
-        ));
+        await tester.pumpWidget(
+          MaterialApp(home: SplashScreen(sponsorService: mockSponsorService)),
+        );
 
         // Wait for timers to complete
         await tester.pumpAndSettle();
@@ -54,10 +54,7 @@ void main() {
           find.byType(TextFormField),
           findsAtLeastNWidgets(2),
         ); // Email and password fields
-        expect(
-          find.byType(InkWell),
-          findsAtLeastNWidgets(1),
-        ); // Login button
+        expect(find.byType(InkWell), findsAtLeastNWidgets(1)); // Login button
       });
 
       testWidgets('Register screen displays correctly', (tester) async {
@@ -93,10 +90,7 @@ void main() {
         // Check for essential elements
         expect(find.byType(Form), findsOneWidget);
         expect(find.byType(TextFormField), findsOneWidget); // Email field
-        expect(
-          find.byType(InkWell),
-          findsAtLeastNWidgets(1),
-        ); // Reset button
+        expect(find.byType(InkWell), findsAtLeastNWidgets(1)); // Reset button
       });
 
       testWidgets('Email verification screen displays correctly', (
@@ -413,10 +407,11 @@ void main() {
 
       group('Screen Layout Tests', () {
         testWidgets('Splash screen has proper layout', (tester) async {
-          final mockSponsorService = FirebaseTestSetup.createMockSponsorService();
-          await tester.pumpWidget(MaterialApp(
-            home: SplashScreen(sponsorService: mockSponsorService),
-          ));
+          final mockSponsorService =
+              FirebaseTestSetup.createMockSponsorService();
+          await tester.pumpWidget(
+            MaterialApp(home: SplashScreen(sponsorService: mockSponsorService)),
+          );
 
           // Wait for any timers to complete
           await tester.pumpAndSettle();
@@ -461,13 +456,15 @@ void main() {
       group('Integration Readiness Tests', () {
         testWidgets('Screens handle navigation properly', (tester) async {
           final mockAuthService = FirebaseTestSetup.createMockAuthService();
-          final mockSponsorService = FirebaseTestSetup.createMockSponsorService();
+          final mockSponsorService =
+              FirebaseTestSetup.createMockSponsorService();
 
           await tester.pumpWidget(
             MaterialApp(
               initialRoute: '/',
               routes: {
-                '/': (context) => SplashScreen(sponsorService: mockSponsorService),
+                '/': (context) =>
+                    SplashScreen(sponsorService: mockSponsorService),
                 '/login': (context) => LoginScreen(
                   authService: mockAuthService,
                   enableBackgroundAnimation: false,

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_core/artbeat_core.dart'
-    as core show ArtistProfileModel, ArtbeatColors;
+    as core
+    show ArtistProfileModel, ArtbeatColors;
 import 'package:artbeat_core/shared_widgets.dart';
 import '../models/artwork_model.dart';
 import 'avatar_widget.dart';
@@ -9,7 +10,7 @@ import 'avatar_widget.dart';
 class CanvasFeed extends StatelessWidget {
   final List<ArtworkModel> artworks;
   final void Function(core.ArtistProfileModel)
-      onArtistTap; // Updated to accept ArtistProfileModel
+  onArtistTap; // Updated to accept ArtistProfileModel
 
   const CanvasFeed({
     super.key,

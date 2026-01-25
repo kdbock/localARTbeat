@@ -50,7 +50,8 @@ class _SubscriptionAnalyticsScreenState
     });
     try {
       final subscription = await _subscriptionService.getUserSubscription();
-      final hasProAccess = subscription != null &&
+      final hasProAccess =
+          subscription != null &&
           (subscription.tier == core.SubscriptionTier.creator ||
               subscription.tier == core.SubscriptionTier.business ||
               subscription.tier == core.SubscriptionTier.enterprise) &&
@@ -84,9 +85,11 @@ class _SubscriptionAnalyticsScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(
-                  'artist_subscription_analytics_error_error_loading_analytics'
-                      .tr())),
+            content: Text(
+              'artist_subscription_analytics_error_error_loading_analytics'
+                  .tr(),
+            ),
+          ),
         );
         setState(() {
           _isLoading = false;
@@ -98,7 +101,8 @@ class _SubscriptionAnalyticsScreenState
 
   /// Get detailed subscription information
   Future<Map<String, dynamic>> _getSubscriptionDetails(
-      SubscriptionModel subscription) async {
+    SubscriptionModel subscription,
+  ) async {
     final Map<String, dynamic> details = {};
     details['tier'] = subscription.tier;
     details['isActive'] =
@@ -116,8 +120,9 @@ class _SubscriptionAnalyticsScreenState
           .limit(5)
           .get();
 
-      details['recentPayments'] =
-          paymentsSnapshot.docs.map((doc) => doc.data()).toList();
+      details['recentPayments'] = paymentsSnapshot.docs
+          .map((doc) => doc.data())
+          .toList();
     } catch (e) {
       _logger.e('Error loading payment history: $e');
       details['recentPayments'] = <Map<String, dynamic>>[];
@@ -177,7 +182,10 @@ class _SubscriptionAnalyticsScreenState
 
   /// Calculate engagement rate based on views and follows
   double _calculateEngagementRate(
-      int profileViews, int artworkViews, int newFollowers) {
+    int profileViews,
+    int artworkViews,
+    int newFollowers,
+  ) {
     final totalViews = profileViews + artworkViews;
 
     if (totalViews == 0) {
@@ -236,112 +244,121 @@ class _SubscriptionAnalyticsScreenState
     // Show upgrade prompt for users without Pro access
     if (!_hasProAccess) {
       return core.MainLayout(
-          currentIndex: -1,
-          child: Scaffold(
-            appBar: const core.EnhancedUniversalHeader(
-              title: 'Subscription Analytics',
-              showLogo: false,
-            ),
-            body: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.analytics, size: 80, color: Colors.grey),
-                  const SizedBox(height: 16),
-                  Text(
-                    tr('art_walk_subscription_analytics'),
-                    style: const TextStyle(
-                        fontSize: 22, fontWeight: FontWeight.bold),
+        currentIndex: -1,
+        child: Scaffold(
+          appBar: const core.EnhancedUniversalHeader(
+            title: 'Subscription Analytics',
+            showLogo: false,
+          ),
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.analytics, size: 80, color: Colors.grey),
+                const SizedBox(height: 16),
+                Text(
+                  tr('art_walk_subscription_analytics'),
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    tr('art_walk_get_detailed_insights_about_your_subscription_performance'),
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  tr(
+                    'art_walk_get_detailed_insights_about_your_subscription_performance',
                   ),
-                  const SizedBox(height: 24),
-                  Text(
-                    tr('art_walk_available_with_artist_pro_plan'),
-                    style:
-                        const TextStyle(fontSize: 18, color: Colors.deepPurple),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  tr('art_walk_available_with_artist_pro_plan'),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    color: Colors.deepPurple,
                   ),
-                  const SizedBox(height: 32),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/artist/subscription');
-                    },
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 32,
-                        vertical: 12,
-                      ),
+                ),
+                const SizedBox(height: 32),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/artist/subscription');
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 32,
+                      vertical: 12,
                     ),
-                    child:
-                        Text(tr('artist_event_creation_text_upgrade_to_pro')),
                   ),
-                ],
-              ),
+                  child: Text(tr('artist_event_creation_text_upgrade_to_pro')),
+                ),
+              ],
             ),
-          ));
+          ),
+        ),
+      );
     }
 
     return core.MainLayout(
-        currentIndex: -1,
-        child: Scaffold(
-          appBar: core.EnhancedUniversalHeader(
-            title: 'Subscription Analytics',
-            showLogo: false,
-            actions: [
-              PopupMenuButton<String>(
-                onSelected: _updateDateRange,
-                itemBuilder: (context) => [
-                  PopupMenuItem(
-                    value: 'last_30_days',
-                    child: Text(
-                        'artist_gallery_analytics_dashboard_text_last_30_days'
-                            .tr()),
+      currentIndex: -1,
+      child: Scaffold(
+        appBar: core.EnhancedUniversalHeader(
+          title: 'Subscription Analytics',
+          showLogo: false,
+          actions: [
+            PopupMenuButton<String>(
+              onSelected: _updateDateRange,
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: 'last_30_days',
+                  child: Text(
+                    'artist_gallery_analytics_dashboard_text_last_30_days'.tr(),
                   ),
-                  PopupMenuItem(
-                    value: 'last_90_days',
-                    child: Text(
-                        'artist_gallery_analytics_dashboard_text_last_90_days'
-                            .tr()),
+                ),
+                PopupMenuItem(
+                  value: 'last_90_days',
+                  child: Text(
+                    'artist_gallery_analytics_dashboard_text_last_90_days'.tr(),
                   ),
-                  PopupMenuItem(
-                    value: 'this_year',
-                    child: Text(
-                        tr('artist_subscription_analytics_text_this_year')),
+                ),
+                PopupMenuItem(
+                  value: 'this_year',
+                  child: Text(
+                    tr('artist_subscription_analytics_text_this_year'),
                   ),
-                  PopupMenuItem(
-                    value: 'all_time',
-                    child:
-                        Text(tr('artist_subscription_analytics_text_all_time')),
+                ),
+                PopupMenuItem(
+                  value: 'all_time',
+                  child: Text(
+                    tr('artist_subscription_analytics_text_all_time'),
                   ),
-                ],
-              ),
-            ],
-          ),
-          body: RefreshIndicator(
-            onRefresh: _loadData,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildSubscriptionCard(),
-                  const SizedBox(height: 24),
-                  _buildAnalyticsSummary(),
-                  const SizedBox(height: 32),
-                  _buildPerformanceChart(),
-                  const SizedBox(height: 32),
-                  _buildFollowerGrowthChart(),
-                  const SizedBox(height: 32),
-                  _buildRecentPayments(),
-                ],
-              ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        body: RefreshIndicator(
+          onRefresh: _loadData,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSubscriptionCard(),
+                const SizedBox(height: 24),
+                _buildAnalyticsSummary(),
+                const SizedBox(height: 32),
+                _buildPerformanceChart(),
+                const SizedBox(height: 32),
+                _buildFollowerGrowthChart(),
+                const SizedBox(height: 32),
+                _buildRecentPayments(),
+              ],
             ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 
   Widget _buildSubscriptionCard() {
@@ -385,7 +402,8 @@ class _SubscriptionAnalyticsScreenState
                       ? 'Active'
                       : 'Inactive',
                   style: TextStyle(
-                    color: (_subscription!.status == 'active' ||
+                    color:
+                        (_subscription!.status == 'active' ||
                             _subscription!.status == 'trialing')
                         ? Colors.green.shade700
                         : Colors.red.shade700,
@@ -403,10 +421,7 @@ class _SubscriptionAnalyticsScreenState
                   children: [
                     Text(
                       tr('art_walk_start_date'),
-                      style: const TextStyle(
-                        color: Colors.grey,
-                        fontSize: 12,
-                      ),
+                      style: const TextStyle(color: Colors.grey, fontSize: 12),
                     ),
                     Text(
                       formatter.format(_subscription!.startDate),
@@ -419,14 +434,12 @@ class _SubscriptionAnalyticsScreenState
                   children: [
                     Text(
                       tr('art_walk_next_billing_date'),
-                      style: const TextStyle(
-                        color: Colors.grey,
-                        fontSize: 12,
-                      ),
+                      style: const TextStyle(color: Colors.grey, fontSize: 12),
                     ),
                     Text(
-                      formatter
-                          .format(_subscription!.endDate ?? DateTime.now()),
+                      formatter.format(
+                        _subscription!.endDate ?? DateTime.now(),
+                      ),
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ],
@@ -450,8 +463,9 @@ class _SubscriptionAnalyticsScreenState
                     Navigator.pushNamed(context, '/artist/subscription');
                   },
                   child: Text(
-                      'artist_subscription_analytics_text_manage_subscription'
-                          .tr()),
+                    'artist_subscription_analytics_text_manage_subscription'
+                        .tr(),
+                  ),
                 ),
               ],
             ),
@@ -526,7 +540,11 @@ class _SubscriptionAnalyticsScreenState
   }
 
   Widget _buildStatCard(
-      String title, String value, IconData icon, Color color) {
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -548,18 +566,12 @@ class _SubscriptionAnalyticsScreenState
           const SizedBox(height: 8),
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 4),
           Text(
             title,
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey.shade700,
-            ),
+            style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
             textAlign: TextAlign.center,
           ),
         ],
@@ -609,7 +621,8 @@ class _SubscriptionAnalyticsScreenState
             const SizedBox(height: 32),
             Center(
               child: Text(
-                  tr('artist_subscription_analytics_text_no_data_available')),
+                tr('artist_subscription_analytics_text_no_data_available'),
+              ),
             ),
             const SizedBox(height: 32),
           ],
@@ -666,9 +679,7 @@ class _SubscriptionAnalyticsScreenState
                     ),
                   ),
                   leftTitles: const AxisTitles(
-                    sideTitles: SideTitles(
-                      reservedSize: 40,
-                    ),
+                    sideTitles: SideTitles(reservedSize: 40),
                   ),
                 ),
                 borderData: FlBorderData(show: true),
@@ -680,9 +691,7 @@ class _SubscriptionAnalyticsScreenState
                     barWidth: 3,
                     isStrokeCapRound: true,
                     dotData: const FlDotData(show: false),
-                    belowBarData: BarAreaData(
-                      color: Colors.blue.withAlpha(51),
-                    ),
+                    belowBarData: BarAreaData(color: Colors.blue.withAlpha(51)),
                   ),
                 ],
               ),
@@ -735,7 +744,8 @@ class _SubscriptionAnalyticsScreenState
             const SizedBox(height: 32),
             Center(
               child: Text(
-                  tr('artist_subscription_analytics_text_no_data_available')),
+                tr('artist_subscription_analytics_text_no_data_available'),
+              ),
             ),
             const SizedBox(height: 32),
           ],
@@ -767,9 +777,7 @@ class _SubscriptionAnalyticsScreenState
           SizedBox(
             height: 200,
             child: BarChart(
-              BarChartData(
-                gridData: const FlGridData(show: false),
-              ),
+              BarChartData(gridData: const FlGridData(show: false)),
             ),
           ),
         ],
@@ -814,10 +822,7 @@ class _SubscriptionAnalyticsScreenState
                     color: Colors.green.shade100,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(
-                    Icons.check_circle,
-                    color: Colors.green.shade700,
-                  ),
+                  child: Icon(Icons.check_circle, color: Colors.green.shade700),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -826,9 +831,7 @@ class _SubscriptionAnalyticsScreenState
                     children: [
                       Text(
                         tr('art_walk_payment_completed'),
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       if (createdAt != null)
                         Text(

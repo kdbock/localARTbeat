@@ -141,10 +141,14 @@ class AuctionService {
 
   /// Check if user can bid on artwork
   Future<Map<String, dynamic>> canUserBid(
-      String artworkId, String userId) async {
+    String artworkId,
+    String userId,
+  ) async {
     try {
-      final artworkDoc =
-          await _firestore.collection('artworks').doc(artworkId).get();
+      final artworkDoc = await _firestore
+          .collection('artworks')
+          .doc(artworkId)
+          .get();
       if (!artworkDoc.exists) {
         return {'canBid': false, 'reason': 'Artwork not found'};
       }
@@ -189,11 +193,9 @@ class AuctionService {
 
   /// Stream auction updates for an artwork (polling approach)
   Stream<ArtworkModel?> streamAuctionUpdates(String artworkId) {
-    return _firestore
-        .collection('artworks')
-        .doc(artworkId)
-        .snapshots()
-        .map((doc) {
+    return _firestore.collection('artworks').doc(artworkId).snapshots().map((
+      doc,
+    ) {
       if (!doc.exists) return null;
       final artwork = ArtworkModel.fromFirestore(doc);
       return artwork.auctionEnabled ? artwork : null;

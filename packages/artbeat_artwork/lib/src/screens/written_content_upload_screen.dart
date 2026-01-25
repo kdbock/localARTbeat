@@ -18,20 +18,12 @@ import 'package:artbeat_artwork/artbeat_artwork.dart'
 // Rich text editing imports
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 
-enum WrittenContentUploadStep {
-  content,
-  basicInfo,
-  details,
-  review,
-}
+enum WrittenContentUploadStep { content, basicInfo, details, review }
 
 class WrittenContentUploadScreen extends StatefulWidget {
   final String? contentId;
 
-  const WrittenContentUploadScreen({
-    super.key,
-    this.contentId,
-  });
+  const WrittenContentUploadScreen({super.key, this.contentId});
 
   @override
   State<WrittenContentUploadScreen> createState() =>
@@ -110,14 +102,14 @@ class _WrittenContentUploadScreenState
     'Book',
     'Serial Story',
     'Webtoon',
-    'Audiobook'
+    'Audiobook',
   ];
   final List<String> _releaseSchedules = [
     'immediate',
     'weekly',
     'bi-weekly',
     'monthly',
-    'custom'
+    'custom',
   ];
 
   @override
@@ -213,8 +205,10 @@ class _WrittenContentUploadScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('written_content_upload_file_error'
-                  .tr(args: [e.toString()]))),
+            content: Text(
+              'written_content_upload_file_error'.tr(args: [e.toString()]),
+            ),
+          ),
         );
       }
     }
@@ -231,8 +225,10 @@ class _WrittenContentUploadScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('written_content_upload_process_error'
-                  .tr(args: [e.toString()]))),
+            content: Text(
+              'written_content_upload_process_error'.tr(args: [e.toString()]),
+            ),
+          ),
         );
       }
     }
@@ -372,8 +368,10 @@ class _WrittenContentUploadScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('written_content_upload_image_error'
-                  .tr(args: [e.toString()]))),
+            content: Text(
+              'written_content_upload_image_error'.tr(args: [e.toString()]),
+            ),
+          ),
         );
       }
     }
@@ -398,11 +396,7 @@ class _WrittenContentUploadScreenState
 
     if (!_canUpload) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'written_content_upload_limit'.tr(),
-          ),
-        ),
+        SnackBar(content: Text('written_content_upload_limit'.tr())),
       );
       return;
     }
@@ -491,8 +485,10 @@ class _WrittenContentUploadScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(
-                  'written_content_upload_error'.tr(args: [e.toString()]))),
+            content: Text(
+              'written_content_upload_error'.tr(args: [e.toString()]),
+            ),
+          ),
         );
       }
     } finally {
@@ -508,13 +504,16 @@ class _WrittenContentUploadScreenState
         artworkId: artworkId,
         chapterNumber: chapter['number'] as int,
         title: chapter['title'] as String,
-        description: (chapter['content'] as String)
-            .substring(0, 100.clamp(0, (chapter['content'] as String).length)),
+        description: (chapter['content'] as String).substring(
+          0,
+          100.clamp(0, (chapter['content'] as String).length),
+        ),
         content: chapter['content'] as String,
         estimatedReadingTime: chapter['readingTime'] as int,
         wordCount: chapter['wordCount'] as int,
-        releaseDate: DateTime.now()
-            .add(Duration(days: 7 * ((chapter['number'] as int) - 1))),
+        releaseDate: DateTime.now().add(
+          Duration(days: 7 * ((chapter['number'] as int) - 1)),
+        ),
         tags: _tags,
       );
     }
@@ -556,8 +555,9 @@ class _WrittenContentUploadScreenState
                 steps: [
                   Step(
                     title: Text('written_content_upload_step_content'.tr()),
-                    subtitle:
-                        Text('written_content_upload_step_content_desc'.tr()),
+                    subtitle: Text(
+                      'written_content_upload_step_content_desc'.tr(),
+                    ),
                     content: _buildContentStep(),
                     isActive: _currentStepIndex >= 0,
                     state: _getStepState(0),
@@ -565,23 +565,26 @@ class _WrittenContentUploadScreenState
                   Step(
                     title: Text('written_content_upload_step_basic_info'.tr()),
                     subtitle: Text(
-                        'written_content_upload_step_basic_info_desc'.tr()),
+                      'written_content_upload_step_basic_info_desc'.tr(),
+                    ),
                     content: _buildBasicInfoStep(),
                     isActive: _currentStepIndex >= 1,
                     state: _getStepState(1),
                   ),
                   Step(
                     title: Text('written_content_upload_step_details'.tr()),
-                    subtitle:
-                        Text('written_content_upload_step_details_desc'.tr()),
+                    subtitle: Text(
+                      'written_content_upload_step_details_desc'.tr(),
+                    ),
                     content: _buildDetailsStep(),
                     isActive: _currentStepIndex >= 2,
                     state: _getStepState(2),
                   ),
                   Step(
                     title: Text('written_content_upload_step_review'.tr()),
-                    subtitle:
-                        Text('written_content_upload_step_review_desc'.tr()),
+                    subtitle: Text(
+                      'written_content_upload_step_review_desc'.tr(),
+                    ),
                     content: _buildReviewStep(),
                     isActive: _currentStepIndex >= 3,
                     state: _getStepState(3),
@@ -624,9 +627,11 @@ class _WrittenContentUploadScreenState
               onPressed: _currentStepIndex == 3
                   ? _uploadContent
                   : details.onStepContinue,
-              child: Text(_currentStepIndex == 3
-                  ? 'written_content_upload_button'.tr()
-                  : 'written_content_upload_continue'.tr()),
+              child: Text(
+                _currentStepIndex == 3
+                    ? 'written_content_upload_button'.tr()
+                    : 'written_content_upload_continue'.tr(),
+              ),
             ),
           ),
         ],
@@ -700,10 +705,7 @@ class _WrittenContentUploadScreenState
       children: [
         Text(
           'written_content_upload_content_step_title'.tr(),
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         Text(
@@ -721,18 +723,13 @@ class _WrittenContentUploadScreenState
         DropdownButtonFormField<String>(
           initialValue: _contentType,
           decoration: InputDecoration(
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
             labelText: 'written_content_upload_content_type_label'.tr(),
             labelStyle: const TextStyle(color: Colors.black87),
           ),
           style: const TextStyle(color: Colors.black87),
           items: _contentTypes.map((type) {
-            return DropdownMenuItem(
-              value: type,
-              child: Text(type),
-            );
+            return DropdownMenuItem(value: type, child: Text(type));
           }).toList(),
           onChanged: (value) {
             setState(() {
@@ -754,8 +751,9 @@ class _WrittenContentUploadScreenState
               child: ElevatedButton(
                 onPressed: _toggleContentInputMode,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      _useFileUpload ? ArtbeatColors.primaryGreen : Colors.grey,
+                  backgroundColor: _useFileUpload
+                      ? ArtbeatColors.primaryGreen
+                      : Colors.grey,
                 ),
                 child: Text('written_content_upload_file_mode'.tr()),
               ),
@@ -827,9 +825,11 @@ class _WrittenContentUploadScreenState
             child: ElevatedButton.icon(
               onPressed: _toggleRichTextMode,
               icon: Icon(_useRichText ? Icons.text_fields : Icons.format_bold),
-              label: Text(_useRichText
-                  ? 'written_content_upload_plain_text_mode'.tr()
-                  : 'written_content_upload_rich_text_mode'.tr()),
+              label: Text(
+                _useRichText
+                    ? 'written_content_upload_plain_text_mode'.tr()
+                    : 'written_content_upload_rich_text_mode'.tr(),
+              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: _useRichText
                     ? ArtbeatColors.primaryGreen
@@ -851,8 +851,10 @@ class _WrittenContentUploadScreenState
                 children: [
                   // Formatting toolbar
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.grey.shade100,
                       borderRadius: const BorderRadius.only(
@@ -929,10 +931,7 @@ class _WrittenContentUploadScreenState
       children: [
         Text(
           'written_content_upload_basic_info_step_title'.tr(),
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         Text(
@@ -961,10 +960,7 @@ class _WrittenContentUploadScreenState
               borderRadius: BorderRadius.circular(8),
             ),
             child: _coverImageFile != null
-                ? Image.file(
-                    _coverImageFile!,
-                    fit: BoxFit.cover,
-                  )
+                ? Image.file(_coverImageFile!, fit: BoxFit.cover)
                 : Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -998,9 +994,7 @@ class _WrittenContentUploadScreenState
           controller: _titleController,
           decoration: InputDecoration(
             labelText: 'written_content_upload_title_label'.tr(),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
           ),
           validator: (value) {
             if (value?.isEmpty ?? true) {
@@ -1016,9 +1010,7 @@ class _WrittenContentUploadScreenState
           controller: _descriptionController,
           decoration: InputDecoration(
             labelText: 'written_content_upload_description_label'.tr(),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
           ),
           maxLines: 4,
           validator: (value) {
@@ -1038,10 +1030,7 @@ class _WrittenContentUploadScreenState
       children: [
         Text(
           'written_content_upload_details_step_title'.tr(),
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         Text(
@@ -1108,9 +1097,7 @@ class _WrittenContentUploadScreenState
           controller: _authorNoteController,
           decoration: InputDecoration(
             labelText: 'written_content_upload_author_note_label'.tr(),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
           ),
           maxLines: 3,
         ),
@@ -1242,10 +1229,7 @@ class _WrittenContentUploadScreenState
       children: [
         Text(
           'written_content_upload_review_step_title'.tr(),
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         Text(
@@ -1283,9 +1267,13 @@ class _WrittenContentUploadScreenState
                         styleSheet: MarkdownStyleSheet(
                           p: const TextStyle(fontSize: 14),
                           h1: const TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                           h2: const TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
@@ -1360,7 +1348,8 @@ class _WrittenContentUploadScreenState
                     _chapterController.text.isNotEmpty ||
                     _seriesController.text.isNotEmpty) ...[
                   Text(
-                      'Volume: ${_volumeController.text}, Chapter: ${_chapterController.text}, Series: ${_seriesController.text}'),
+                    'Volume: ${_volumeController.text}, Chapter: ${_chapterController.text}, Series: ${_seriesController.text}',
+                  ),
                   const SizedBox(height: 8),
                 ],
                 if (_authorNoteController.text.isNotEmpty) ...[
@@ -1371,11 +1360,10 @@ class _WrittenContentUploadScreenState
                 if (_isSerialized) ...[
                   Text('Chapters: ${_chaptersController.text}'),
                   Text(
-                      'Schedule: ${_releaseSchedule.replaceAll('_', ' ').toUpperCase()}'),
+                    'Schedule: ${_releaseSchedule.replaceAll('_', ' ').toUpperCase()}',
+                  ),
                 ],
-                if (_isForSale) ...[
-                  Text('Price: \$${_priceController.text}'),
-                ],
+                if (_isForSale) ...[Text('Price: \$${_priceController.text}')],
               ],
             ),
           ),

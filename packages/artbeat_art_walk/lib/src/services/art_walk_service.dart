@@ -231,12 +231,11 @@ class ArtWalkService {
       if (clusters.isEmpty) return [];
 
       // Collect all unique primary art IDs to fetch in batch
-      final primaryArtIds =
-          clusters
-              .map((c) => c.primaryArtId)
-              .where((id) => id.isNotEmpty)
-              .toSet()
-              .toList();
+      final primaryArtIds = clusters
+          .map((c) => c.primaryArtId)
+          .where((id) => id.isNotEmpty)
+          .toSet()
+          .toList();
 
       if (primaryArtIds.isEmpty) return [];
 
@@ -245,15 +244,15 @@ class ArtWalkService {
       // Firestore whereIn supports up to 30 elements
       // Using batch queries to avoid N+1 problem
       for (var i = 0; i < primaryArtIds.length; i += 30) {
-        final end =
-            (i + 30 < primaryArtIds.length) ? i + 30 : primaryArtIds.length;
+        final end = (i + 30 < primaryArtIds.length)
+            ? i + 30
+            : primaryArtIds.length;
         final chunk = primaryArtIds.sublist(i, end);
 
         try {
-          final snapshot =
-              await _publicArtCollection
-                  .where(FieldPath.documentId, whereIn: chunk)
-                  .get();
+          final snapshot = await _publicArtCollection
+              .where(FieldPath.documentId, whereIn: chunk)
+              .get();
 
           nearbyArt.addAll(
             snapshot.docs.map((doc) => PublicArtModel.fromFirestore(doc)),
@@ -643,13 +642,15 @@ class ArtWalkService {
 
       // Fetch all art pieces in the walk from Firestore in batches to avoid N+1 queries
       final List<PublicArtModel> artPieces = [];
-      final List<String> allIds = walk.artworkIds.where((id) => id.isNotEmpty).toList();
+      final List<String> allIds = walk.artworkIds
+          .where((id) => id.isNotEmpty)
+          .toList();
 
       if (allIds.isEmpty) return [];
 
       // We need to check both collections for each ID.
       // To optimize, we'll try to fetch all from publicArt first, then whatever is missing from captures.
-      
+
       final List<PublicArtModel> foundArt = [];
       final Set<String> missingIds = Set.from(allIds);
 
@@ -657,9 +658,11 @@ class ArtWalkService {
       for (var i = 0; i < allIds.length; i += 30) {
         final end = (i + 30 < allIds.length) ? i + 30 : allIds.length;
         final chunk = allIds.sublist(i, end);
-        
+
         try {
-          final snapshot = await _publicArtCollection.where(FieldPath.documentId, whereIn: chunk).get();
+          final snapshot = await _publicArtCollection
+              .where(FieldPath.documentId, whereIn: chunk)
+              .get();
           for (final doc in snapshot.docs) {
             final art = PublicArtModel.fromFirestore(doc);
             if (_isValidPublicArt(art)) {
@@ -676,11 +679,15 @@ class ArtWalkService {
       if (missingIds.isNotEmpty) {
         final List<String> remainingList = missingIds.toList();
         for (var i = 0; i < remainingList.length; i += 30) {
-          final end = (i + 30 < remainingList.length) ? i + 30 : remainingList.length;
+          final end = (i + 30 < remainingList.length)
+              ? i + 30
+              : remainingList.length;
           final chunk = remainingList.sublist(i, end);
-          
+
           try {
-            final snapshot = await _capturesCollection.where(FieldPath.documentId, whereIn: chunk).get();
+            final snapshot = await _capturesCollection
+                .where(FieldPath.documentId, whereIn: chunk)
+                .get();
             for (final doc in snapshot.docs) {
               final capture = CaptureModel.fromFirestore(
                 doc as DocumentSnapshot<Map<String, dynamic>>,

@@ -48,8 +48,10 @@ class _FeaturedArtistScreenState extends State<FeaturedArtistScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(
-                  tr('artist_featured_artist_error_error_loading_featured'))),
+            content: Text(
+              tr('artist_featured_artist_error_error_loading_featured'),
+            ),
+          ),
         );
         setState(() {
           _isLoading = false;
@@ -91,8 +93,10 @@ class _FeaturedArtistScreenState extends State<FeaturedArtistScreen> {
                     Row(
                       children: [
                         IconButton(
-                          icon:
-                              const Icon(Icons.arrow_back, color: Colors.white),
+                          icon: const Icon(
+                            Icons.arrow_back,
+                            color: Colors.white,
+                          ),
                           onPressed: () => Navigator.of(context).pop(),
                         ),
                         Expanded(
@@ -111,7 +115,9 @@ class _FeaturedArtistScreenState extends State<FeaturedArtistScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      tr('art_walk_discover_exceptional_artists_making_waves_in_the_community'),
+                      tr(
+                        'art_walk_discover_exceptional_artists_making_waves_in_the_community',
+                      ),
                       style: const TextStyle(
                         color: Colors.white70,
                         fontSize: 16,
@@ -130,8 +136,8 @@ class _FeaturedArtistScreenState extends State<FeaturedArtistScreen> {
                         child: CircularProgressIndicator(color: Colors.white),
                       )
                     : _featuredArtists.isEmpty
-                        ? _buildEmptyState()
-                        : _buildFeaturedContent(),
+                    ? _buildEmptyState()
+                    : _buildFeaturedContent(),
               ),
             ],
           ),
@@ -158,10 +164,7 @@ class _FeaturedArtistScreenState extends State<FeaturedArtistScreen> {
           const SizedBox(height: 8),
           Text(
             tr('art_walk_check_back_soon_for_amazing_featured_artists'),
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 16,
-            ),
+            style: const TextStyle(color: Colors.white70, fontSize: 16),
             textAlign: TextAlign.center,
           ),
         ],
@@ -200,9 +203,7 @@ class _FeaturedArtistScreenState extends State<FeaturedArtistScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Expanded(
-                  child: _buildArtistsGrid(),
-                ),
+                Expanded(child: _buildArtistsGrid()),
               ],
             ),
           ),
@@ -323,7 +324,9 @@ class _FeaturedArtistScreenState extends State<FeaturedArtistScreen> {
                       const SizedBox(height: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 4),
+                          horizontal: 12,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.white.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(12),
@@ -370,9 +373,7 @@ class _FeaturedArtistScreenState extends State<FeaturedArtistScreen> {
   Widget _buildArtistCard(core.ArtistProfileModel artist) {
     return Card(
       elevation: 8,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: () => _navigateToArtistProfile(artist),
@@ -410,8 +411,11 @@ class _FeaturedArtistScreenState extends State<FeaturedArtistScreen> {
                           fit: BoxFit.cover,
                           memCacheWidth: 600,
                           errorWidget: (context, url, error) => const Center(
-                            child: Icon(Icons.image,
-                                color: Colors.white, size: 40),
+                            child: Icon(
+                              Icons.image,
+                              color: Colors.white,
+                              size: 40,
+                            ),
                           ),
                         ),
                       ),
@@ -422,7 +426,9 @@ class _FeaturedArtistScreenState extends State<FeaturedArtistScreen> {
                       right: 8,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.orange,
                           borderRadius: BorderRadius.circular(8),
@@ -459,8 +465,9 @@ class _FeaturedArtistScreenState extends State<FeaturedArtistScreen> {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             border: Border.all(
-                                color: core.ArtbeatColors.primaryPurple,
-                                width: 2),
+                              color: core.ArtbeatColors.primaryPurple,
+                              width: 2,
+                            ),
                           ),
                           child: ClipOval(
                             child: artist.profileImageUrl != null
@@ -468,10 +475,7 @@ class _FeaturedArtistScreenState extends State<FeaturedArtistScreen> {
                                     imageUrl: artist.profileImageUrl!,
                                     fit: BoxFit.cover,
                                     errorWidget: (context, url, error) =>
-                                        const Icon(
-                                      Icons.person,
-                                      size: 16,
-                                    ),
+                                        const Icon(Icons.person, size: 16),
                                   )
                                 : const Icon(Icons.person, size: 16),
                           ),

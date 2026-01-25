@@ -24,7 +24,7 @@ class EnhancedArtworkSearchService {
     bool? isForSale,
     bool? isFeatured,
     String?
-        sortBy, // 'relevance', 'price_asc', 'price_desc', 'newest', 'oldest', 'popular'
+    sortBy, // 'relevance', 'price_asc', 'price_desc', 'newest', 'oldest', 'popular'
     int limit = 20,
     DocumentSnapshot? startAfter,
   }) async {
@@ -43,8 +43,9 @@ class EnhancedArtworkSearchService {
       });
 
       // Build base query
-      Query artworkQuery =
-          _firestore.collection('artwork').where('isPublic', isEqualTo: true);
+      Query artworkQuery = _firestore
+          .collection('artwork')
+          .where('isPublic', isEqualTo: true);
 
       // Apply filters
       if (mediums != null && mediums.isNotEmpty) {
@@ -97,8 +98,9 @@ class EnhancedArtworkSearchService {
 
       // Execute query
       final snapshot = await artworkQuery.get();
-      List<ArtworkModel> results =
-          snapshot.docs.map((doc) => ArtworkModel.fromFirestore(doc)).toList();
+      List<ArtworkModel> results = snapshot.docs
+          .map((doc) => ArtworkModel.fromFirestore(doc))
+          .toList();
 
       // Apply text search and price filters on client side (due to Firestore limitations)
       if (query != null && query.isNotEmpty) {
@@ -163,8 +165,9 @@ class EnhancedArtworkSearchService {
           .limit(200) // Limit to avoid performance issues
           .get();
 
-      final artworks =
-          snapshot.docs.map((doc) => ArtworkModel.fromFirestore(doc)).toList();
+      final artworks = snapshot.docs
+          .map((doc) => ArtworkModel.fromFirestore(doc))
+          .toList();
 
       // Calculate semantic similarity scores
       final scoredResults = <_ScoredArtwork>[];
@@ -216,14 +219,15 @@ class EnhancedArtworkSearchService {
             .where('isDefault', isEqualTo: true)
             .get()
             .then((snapshot) {
-          for (final doc in snapshot.docs) {
-            doc.reference.update({'isDefault': false});
-          }
-        });
+              for (final doc in snapshot.docs) {
+                doc.reference.update({'isDefault': false});
+              }
+            });
       }
 
-      final docRef =
-          await _firestore.collection('saved_searches').add(searchData);
+      final docRef = await _firestore
+          .collection('saved_searches')
+          .add(searchData);
       return docRef.id;
     } catch (e) {
       _logger.e('Error saving search: $e', error: e);
@@ -265,8 +269,10 @@ class EnhancedArtworkSearchService {
   /// Execute a saved search
   Future<Map<String, dynamic>> executeSavedSearch(String searchId) async {
     try {
-      final searchDoc =
-          await _firestore.collection('saved_searches').doc(searchId).get();
+      final searchDoc = await _firestore
+          .collection('saved_searches')
+          .doc(searchId)
+          .get();
       if (!searchDoc.exists) {
         throw Exception('Saved search not found');
       }
@@ -311,8 +317,10 @@ class EnhancedArtworkSearchService {
       if (user == null) return false;
 
       // Verify ownership
-      final searchDoc =
-          await _firestore.collection('saved_searches').doc(searchId).get();
+      final searchDoc = await _firestore
+          .collection('saved_searches')
+          .doc(searchId)
+          .get();
       if (!searchDoc.exists) return false;
 
       final data = searchDoc.data()!;
@@ -351,8 +359,9 @@ class EnhancedArtworkSearchService {
       }
 
       // Also get suggestions from artwork titles and tags
-      final artworkSuggestions =
-          await _getArtworkBasedSuggestions(partialQuery);
+      final artworkSuggestions = await _getArtworkBasedSuggestions(
+        partialQuery,
+      );
       suggestions.addAll(artworkSuggestions);
 
       // Remove duplicates and return top suggestions
@@ -364,8 +373,9 @@ class EnhancedArtworkSearchService {
   }
 
   /// Get trending search terms
-  Future<List<Map<String, dynamic>>> getTrendingSearches(
-      {int limit = 10}) async {
+  Future<List<Map<String, dynamic>>> getTrendingSearches({
+    int limit = 10,
+  }) async {
     try {
       final now = DateTime.now();
       final lastWeek = now.subtract(const Duration(days: 7));
@@ -392,11 +402,13 @@ class EnhancedArtworkSearchService {
 
       return sortedTerms
           .take(limit)
-          .map((entry) => {
-                'term': entry.key,
-                'count': entry.value,
-                'trend': 'up', // Could be enhanced with trend calculation
-              })
+          .map(
+            (entry) => {
+              'term': entry.key,
+              'count': entry.value,
+              'trend': 'up', // Could be enhanced with trend calculation
+            },
+          )
           .toList();
     } catch (e) {
       _logger.e('Error getting trending searches: $e', error: e);
@@ -420,8 +432,10 @@ class EnhancedArtworkSearchService {
 
       final queries = snapshot.docs;
       final totalSearches = queries.length;
-      final uniqueQueries =
-          queries.map((doc) => doc.data()['query']).toSet().length;
+      final uniqueQueries = queries
+          .map((doc) => doc.data()['query'])
+          .toSet()
+          .length;
 
       // Calculate zero-result searches
       int zeroResultSearches = 0;
@@ -442,8 +456,9 @@ class EnhancedArtworkSearchService {
             ? queries.fold(
                     0,
                     (sum, doc) =>
-                        sum + ((doc.data()['resultCount'] as int?) ?? 0)) /
-                totalSearches
+                        sum + ((doc.data()['resultCount'] as int?) ?? 0),
+                  ) /
+                  totalSearches
             : 0.0,
         'timeframeDays': days,
       };
@@ -456,7 +471,9 @@ class EnhancedArtworkSearchService {
   /// Private helper methods
 
   Future<void> _trackSearchEvent(
-      String query, Map<String, dynamic> filters) async {
+    String query,
+    Map<String, dynamic> filters,
+  ) async {
     try {
       final user = _auth.currentUser;
 
@@ -465,12 +482,12 @@ class EnhancedArtworkSearchService {
           .doc('search_events')
           .collection('queries')
           .add({
-        'query': query,
-        'filters': filters,
-        'userId': user?.uid,
-        'timestamp': Timestamp.now(),
-        'resultCount': 0, // Will be updated after search completes
-      });
+            'query': query,
+            'filters': filters,
+            'userId': user?.uid,
+            'timestamp': Timestamp.now(),
+            'resultCount': 0, // Will be updated after search completes
+          });
 
       // Update popular search terms counter
       if (query.isNotEmpty) {
@@ -480,10 +497,10 @@ class EnhancedArtworkSearchService {
             .collection('popular')
             .doc(query.toLowerCase())
             .set({
-          'term': query,
-          'count': FieldValue.increment(1),
-          'lastSearched': Timestamp.now(),
-        }, SetOptions(merge: true));
+              'term': query,
+              'count': FieldValue.increment(1),
+              'lastSearched': Timestamp.now(),
+            }, SetOptions(merge: true));
       }
     } catch (e) {
       _logger.e('Error tracking search event: $e', error: e);
@@ -491,7 +508,9 @@ class EnhancedArtworkSearchService {
   }
 
   List<ArtworkModel> _filterByTextSearch(
-      List<ArtworkModel> artworks, String query) {
+    List<ArtworkModel> artworks,
+    String query,
+  ) {
     final queryTerms = query.toLowerCase().split(' ');
 
     return artworks.where((artwork) {
@@ -503,7 +522,10 @@ class EnhancedArtworkSearchService {
   }
 
   List<ArtworkModel> _filterByPriceRange(
-      List<ArtworkModel> artworks, double? minPrice, double? maxPrice) {
+    List<ArtworkModel> artworks,
+    double? minPrice,
+    double? maxPrice,
+  ) {
     return artworks.where((artwork) {
       if (artwork.price == null) return false;
 
@@ -515,7 +537,9 @@ class EnhancedArtworkSearchService {
   }
 
   List<ArtworkModel> _filterByStyles(
-      List<ArtworkModel> artworks, List<String> styles) {
+    List<ArtworkModel> artworks,
+    List<String> styles,
+  ) {
     return artworks.where((artwork) {
       if (artwork.styles.isEmpty) return false;
       return artwork.styles.any((style) => styles.contains(style));
@@ -523,12 +547,16 @@ class EnhancedArtworkSearchService {
   }
 
   double _calculateSemanticSimilarity(
-      ArtworkModel artwork, List<String> queryTerms) {
+    ArtworkModel artwork,
+    List<String> queryTerms,
+  ) {
     final artworkText =
         '${artwork.title} ${artwork.description} ${artwork.tags?.join(' ') ?? ''} ${artwork.styles.join(' ')}'
             .toLowerCase();
-    final artworkWords =
-        artworkText.split(' ').where((word) => word.isNotEmpty).toList();
+    final artworkWords = artworkText
+        .split(' ')
+        .where((word) => word.isNotEmpty)
+        .toList();
 
     double score = 0.0;
 

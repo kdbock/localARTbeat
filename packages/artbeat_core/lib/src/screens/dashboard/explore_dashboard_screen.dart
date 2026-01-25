@@ -1582,8 +1582,8 @@ class _ArtistEventCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final dateLabel = intl.DateFormat('EEE, MMM d').format(event.startDate);
     final timeLabel = intl.DateFormat('h:mm a').format(event.startDate);
-    final coverImage =
-        (event.imageUrl ?? event.artistProfileImageUrl ?? '').trim();
+    final coverImage = (event.imageUrl ?? event.artistProfileImageUrl ?? '')
+        .trim();
     final priceLabel = event.price != null && event.price! > 0
         ? '\$${event.price!.toStringAsFixed(0)}'
         : 'Free RSVP';

@@ -440,12 +440,12 @@ class _EnhancedBottomNavState extends State<EnhancedBottomNav>
                                 borderRadius: BorderRadius.circular(18),
                                 gradient: LinearGradient(
                                   colors: [
-                                    ArtbeatColors.primaryPurple.withValues(alpha: 
-                                      0.95,
+                                    ArtbeatColors.primaryPurple.withValues(
+                                      alpha: 0.95,
                                     ),
                                     activeColor.withValues(alpha: 0.85),
-                                    ArtbeatColors.primaryGreen.withValues(alpha: 
-                                      0.70,
+                                    ArtbeatColors.primaryGreen.withValues(
+                                      alpha: 0.70,
                                     ),
                                   ],
                                   begin: Alignment.topLeft,
@@ -453,8 +453,8 @@ class _EnhancedBottomNavState extends State<EnhancedBottomNav>
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: activeColor.withValues(alpha: 
-                                      0.22 + 0.10 * anim,
+                                    color: activeColor.withValues(
+                                      alpha: 0.22 + 0.10 * anim,
                                     ),
                                     blurRadius: 18 + 10 * anim,
                                     spreadRadius: 1,
@@ -484,8 +484,8 @@ class _EnhancedBottomNavState extends State<EnhancedBottomNav>
                                                 gradient: LinearGradient(
                                                   colors: [
                                                     Colors.transparent,
-                                                    Colors.white.withValues(alpha: 
-                                                      0.24,
+                                                    Colors.white.withValues(
+                                                      alpha: 0.24,
                                                     ),
                                                     Colors.transparent,
                                                   ],

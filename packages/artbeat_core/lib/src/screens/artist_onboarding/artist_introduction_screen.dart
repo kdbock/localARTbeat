@@ -181,7 +181,10 @@ class _ArtistIntroductionScreenState extends State<ArtistIntroductionScreen> {
         const SizedBox(width: 8),
         Text(
           'Saving...',
-          style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 14),
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.5),
+            fontSize: 14,
+          ),
         ),
       ],
     );
@@ -192,10 +195,7 @@ class _ArtistIntroductionScreenState extends State<ArtistIntroductionScreen> {
       children: [
         Icon(Icons.check_circle, size: 16, color: Color(0xFF00F5FF)),
         SizedBox(width: 8),
-        Text(
-          'Saved',
-          style: TextStyle(color: Color(0xFF00F5FF), fontSize: 14),
-        ),
+        Text('Saved', style: TextStyle(color: Color(0xFF00F5FF), fontSize: 14)),
       ],
     );
   }

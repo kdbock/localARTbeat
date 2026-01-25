@@ -87,7 +87,7 @@ class _ArtworkUploadScreenState extends State<ArtworkUploadScreen> {
     'Ceramics',
     'Printmaking',
     'Pen & Ink',
-    'Pencil'
+    'Pencil',
   ];
 
   final List<String> _availableStyles = [
@@ -104,7 +104,7 @@ class _ArtworkUploadScreenState extends State<ArtworkUploadScreen> {
     'Street Art',
     'Illustration',
     'Fantasy',
-    'Portrait'
+    'Portrait',
   ];
 
   @override
@@ -156,8 +156,12 @@ class _ArtworkUploadScreenState extends State<ArtworkUploadScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('artwork_upload_pick_image'
-                  .tr(namedArgs: {'error': e.toString()}))),
+            content: Text(
+              'artwork_upload_pick_image'.tr(
+                namedArgs: {'error': e.toString()},
+              ),
+            ),
+          ),
         );
       }
     }
@@ -207,8 +211,10 @@ class _ArtworkUploadScreenState extends State<ArtworkUploadScreen> {
     });
 
     try {
-      final doc =
-          await _firestore.collection('artwork').doc(widget.artworkId).get();
+      final doc = await _firestore
+          .collection('artwork')
+          .doc(widget.artworkId)
+          .get();
 
       if (!doc.exists) {
         if (mounted) {
@@ -229,10 +235,12 @@ class _ArtworkUploadScreenState extends State<ArtworkUploadScreen> {
           _dimensionsController.text = (data['dimensions'] ?? '').toString();
           _materialsController.text = (data['materials'] ?? '').toString();
           _locationController.text = (data['location'] ?? '').toString();
-          _priceController.text =
-              data['price'] != null ? data['price'].toString() : '';
-          _yearController.text =
-              data['yearCreated'] != null ? data['yearCreated'].toString() : '';
+          _priceController.text = data['price'] != null
+              ? data['price'].toString()
+              : '';
+          _yearController.text = data['yearCreated'] != null
+              ? data['yearCreated'].toString()
+              : '';
           _imageUrl = data['imageUrl'] as String?;
           _isForSale = data['isForSale'] as bool? ?? false;
           _medium = (data['medium'] ?? '').toString();
@@ -248,9 +256,13 @@ class _ArtworkUploadScreenState extends State<ArtworkUploadScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('art_walk_error_loading_artwork'
-                  .tr()
-                  .replaceAll('{error}', e.toString()))),
+            content: Text(
+              'art_walk_error_loading_artwork'.tr().replaceAll(
+                '{error}',
+                e.toString(),
+              ),
+            ),
+          ),
         );
       }
     } finally {
@@ -266,21 +278,21 @@ class _ArtworkUploadScreenState extends State<ArtworkUploadScreen> {
   Future<void> _saveArtwork() async {
     if (!_formKey.currentState!.validate()) return;
     if (_imageFile == null && _imageUrl == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('artwork_upload_no_image'.tr())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('artwork_upload_no_image'.tr())));
       return;
     }
     if (_medium.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('artwork_upload_no_medium'.tr())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('artwork_upload_no_medium'.tr())));
       return;
     }
     if (_styles.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('artwork_upload_no_styles'.tr())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('artwork_upload_no_styles'.tr())));
       return;
     }
 
@@ -344,17 +356,19 @@ class _ArtworkUploadScreenState extends State<ArtworkUploadScreen> {
       }
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('artwork_upload_success'.tr())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('artwork_upload_success'.tr())));
         Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('artwork_upload_error'
-                  .tr(namedArgs: {'error': e.toString()}))),
+            content: Text(
+              'artwork_upload_error'.tr(namedArgs: {'error': e.toString()}),
+            ),
+          ),
         );
       }
     } finally {
@@ -383,7 +397,8 @@ class _ArtworkUploadScreenState extends State<ArtworkUploadScreen> {
       return uploadResult['imageUrl']!;
     } catch (e) {
       AppLogger.error(
-          '❌ Enhanced upload failed, falling back to legacy method: $e');
+        '❌ Enhanced upload failed, falling back to legacy method: $e',
+      );
 
       // Fallback to legacy method but with better path structure
       final fileName = '${DateTime.now().millisecondsSinceEpoch}_$userId';
@@ -419,8 +434,9 @@ class _ArtworkUploadScreenState extends State<ArtworkUploadScreen> {
     return MainLayout(
       currentIndex: -1,
       appBar: HudTopBar(
-        title:
-            widget.artworkId == null ? 'artwork_upload_title'.tr() : 'artwork_edit_title'.tr(),
+        title: widget.artworkId == null
+            ? 'artwork_upload_title'.tr()
+            : 'artwork_edit_title'.tr(),
         showBackButton: true,
         onBackPressed: () => Navigator.of(context).pop(),
         actions: [
@@ -436,19 +452,22 @@ class _ArtworkUploadScreenState extends State<ArtworkUploadScreen> {
                 ),
               ),
             ),
-        ], subtitle: '',
+        ],
+        subtitle: '',
       ),
       child: WorldBackground(
         child: SafeArea(
           child: _isLoading
               ? const Center(
                   child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF22D3EE)),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Color(0xFF22D3EE),
+                    ),
                   ),
                 )
               : (!_canUpload && widget.artworkId == null)
-                  ? _buildUploadLimitReached()
-                  : _buildForm(),
+              ? _buildUploadLimitReached()
+              : _buildForm(),
         ),
       ),
     );
@@ -537,8 +556,8 @@ class _ArtworkUploadScreenState extends State<ArtworkUploadScreen> {
               text: _isSaving
                   ? 'artwork_purchase_processing'.tr()
                   : (widget.artworkId == null
-                      ? 'artwork_upload_button'.tr()
-                      : 'artwork_edit_save_button'.tr()),
+                        ? 'artwork_upload_button'.tr()
+                        : 'artwork_edit_save_button'.tr()),
               icon: Icons.cloud_upload,
               isLoading: _isSaving,
               onPressed: _isSaving ? null : _saveArtwork,
@@ -575,28 +594,31 @@ class _ArtworkUploadScreenState extends State<ArtworkUploadScreen> {
                 child: _imageFile != null
                     ? Image.file(_imageFile!, fit: BoxFit.cover)
                     : (_imageUrl != null &&
-                            ImageUrlValidator.isValidImageUrl(_imageUrl!) &&
-                            _isValidImageUrl(_imageUrl))
-                        ? SecureNetworkImage(
-                            imageUrl: _imageUrl!,
-                            fit: BoxFit.cover,
-                            enableThumbnailFallback: true,
-                          )
-                        : Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(Icons.add_photo_alternate,
-                                  size: 48, color: Colors.white70),
-                              const SizedBox(height: 8),
-                              Text(
-                                'art_walk_select_image'.tr(),
-                                style: GoogleFonts.spaceGrotesk(
-                                  color: Colors.white.withValues(alpha: 0.8),
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
+                          ImageUrlValidator.isValidImageUrl(_imageUrl!) &&
+                          _isValidImageUrl(_imageUrl))
+                    ? SecureNetworkImage(
+                        imageUrl: _imageUrl!,
+                        fit: BoxFit.cover,
+                        enableThumbnailFallback: true,
+                      )
+                    : Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.add_photo_alternate,
+                            size: 48,
+                            color: Colors.white70,
                           ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'art_walk_select_image'.tr(),
+                            style: GoogleFonts.spaceGrotesk(
+                              color: Colors.white.withValues(alpha: 0.8),
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
               ),
             ),
           ),
@@ -623,8 +645,9 @@ class _ArtworkUploadScreenState extends State<ArtworkUploadScreen> {
               color: Colors.white,
               fontWeight: FontWeight.w700,
             ),
-            validator: (value) =>
-                value == null || value.isEmpty ? 'artwork_edit_title_error'.tr() : null,
+            validator: (value) => value == null || value.isEmpty
+                ? 'artwork_edit_title_error'.tr()
+                : null,
           ),
           const SizedBox(height: 12),
           TextFormField(
@@ -692,8 +715,9 @@ class _ArtworkUploadScreenState extends State<ArtworkUploadScreen> {
                 setState(() => _medium = value);
               }
             },
-            validator: (value) =>
-                value == null || value.isEmpty ? 'artwork_edit_medium_error'.tr() : null,
+            validator: (value) => value == null || value.isEmpty
+                ? 'artwork_edit_medium_error'.tr()
+                : null,
           ),
           const SizedBox(height: 12),
           Text(
@@ -875,8 +899,10 @@ class _ArtworkUploadScreenState extends State<ArtworkUploadScreen> {
             runSpacing: 6,
             children: _tags.map((tag) {
               return GlassCard(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 radius: 16,
                 glassOpacity: 0.08,
                 borderOpacity: 0.18,
@@ -894,8 +920,11 @@ class _ArtworkUploadScreenState extends State<ArtworkUploadScreen> {
                     const SizedBox(width: 6),
                     GestureDetector(
                       onTap: () => _removeTag(tag),
-                      child: const Icon(Icons.close,
-                          size: 14, color: Colors.white70),
+                      child: const Icon(
+                        Icons.close,
+                        size: 14,
+                        color: Colors.white70,
+                      ),
                     ),
                   ],
                 ),

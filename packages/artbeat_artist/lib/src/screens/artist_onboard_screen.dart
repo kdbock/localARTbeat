@@ -13,8 +13,7 @@ class ArtistOnboardScreen extends StatefulWidget {
   const ArtistOnboardScreen({super.key, this.preselectedPlan});
 
   @override
-  State<ArtistOnboardScreen> createState() =>
-      _ArtistOnboardScreenState();
+  State<ArtistOnboardScreen> createState() => _ArtistOnboardScreenState();
 }
 
 class _ArtistOnboardScreenState extends State<ArtistOnboardScreen>
@@ -42,7 +41,7 @@ class _ArtistOnboardScreenState extends State<ArtistOnboardScreen>
     'Illustration',
     'Animation',
     '3D Modeling',
-    'Ceramics'
+    'Ceramics',
   ];
 
   final Map<String, String> _experienceLevels = {
@@ -50,7 +49,7 @@ class _ArtistOnboardScreenState extends State<ArtistOnboardScreen>
     'hobbyist': 'Creating for personal joy',
     'emerging': 'Ready to reach more people',
     'professional': 'Full-time Artist',
-    'business': 'Gallery or Collective'
+    'business': 'Gallery or Collective',
   };
 
   @override
@@ -80,15 +79,19 @@ class _ArtistOnboardScreenState extends State<ArtistOnboardScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A), // Deeper navy for better contrast
+      backgroundColor: const Color(
+        0xFF0F172A,
+      ), // Deeper navy for better contrast
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new, // More modern icon
-              color: Colors.white.withValues(alpha: 0.92),
-              size: 20),
+          icon: Icon(
+            Icons.arrow_back_ios_new, // More modern icon
+            color: Colors.white.withValues(alpha: 0.92),
+            size: 20,
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
@@ -206,7 +209,9 @@ class _ArtistOnboardScreenState extends State<ArtistOnboardScreen>
                   boxShadow: i == _currentPage
                       ? [
                           BoxShadow(
-                            color: const Color(0xFF22D3EE).withValues(alpha: 0.4),
+                            color: const Color(
+                              0xFF22D3EE,
+                            ).withValues(alpha: 0.4),
                             blurRadius: 8,
                             spreadRadius: 1,
                           ),
@@ -241,7 +246,8 @@ class _ArtistOnboardScreenState extends State<ArtistOnboardScreen>
                       borderRadius: BorderRadius.circular(32),
                       image: const DecorationImage(
                         image: NetworkImage(
-                            'https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=800&auto=format&fit=crop'),
+                          'https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=800&auto=format&fit=crop',
+                        ),
                         fit: BoxFit.cover,
                       ),
                       boxShadow: [
@@ -272,7 +278,9 @@ class _ArtistOnboardScreenState extends State<ArtistOnboardScreen>
                         children: [
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 6),
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
                             decoration: BoxDecoration(
                               color: const Color(0xFF22D3EE),
                               borderRadius: BorderRadius.circular(8),
@@ -422,7 +430,9 @@ class _ArtistOnboardScreenState extends State<ArtistOnboardScreen>
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    tr('art_walk_select_all_that_apply_to_personalize_your_experience'),
+                    tr(
+                      'art_walk_select_all_that_apply_to_personalize_your_experience',
+                    ),
                     style: GoogleFonts.spaceGrotesk(
                       fontSize: 16,
                       color: Colors.white.withValues(alpha: 0.5),
@@ -464,8 +474,10 @@ class _ArtistOnboardScreenState extends State<ArtistOnboardScreen>
               borderRadius: BorderRadius.circular(16),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 14,
+                ),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
@@ -482,11 +494,15 @@ class _ArtistOnboardScreenState extends State<ArtistOnboardScreen>
                           ],
                         )
                       : null,
-                  color: isSelected ? null : Colors.white.withValues(alpha: 0.03),
+                  color: isSelected
+                      ? null
+                      : Colors.white.withValues(alpha: 0.03),
                   boxShadow: isSelected
                       ? [
                           BoxShadow(
-                            color: const Color(0xFF22D3EE).withValues(alpha: 0.2),
+                            color: const Color(
+                              0xFF22D3EE,
+                            ).withValues(alpha: 0.2),
                             blurRadius: 12,
                             spreadRadius: -2,
                           ),
@@ -500,8 +516,9 @@ class _ArtistOnboardScreenState extends State<ArtistOnboardScreen>
                       interest,
                       style: GoogleFonts.spaceGrotesk(
                         fontSize: 15,
-                        fontWeight:
-                            isSelected ? FontWeight.w700 : FontWeight.w500,
+                        fontWeight: isSelected
+                            ? FontWeight.w700
+                            : FontWeight.w500,
                         color: isSelected
                             ? Colors.white
                             : Colors.white.withValues(alpha: 0.7),
@@ -557,7 +574,9 @@ class _ArtistOnboardScreenState extends State<ArtistOnboardScreen>
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    tr('art_walk_this_helps_us_recommend_the_right_plan_for_you'),
+                    tr(
+                      'art_walk_this_helps_us_recommend_the_right_plan_for_you',
+                    ),
                     style: GoogleFonts.spaceGrotesk(
                       fontSize: 16,
                       color: Colors.white.withValues(alpha: 0.5),
@@ -594,8 +613,9 @@ class _ArtistOnboardScreenState extends State<ArtistOnboardScreen>
                               gradient: isSelected
                                   ? LinearGradient(
                                       colors: [
-                                        const Color(0xFF34D399)
-                                            .withValues(alpha: 0.15),
+                                        const Color(
+                                          0xFF34D399,
+                                        ).withValues(alpha: 0.15),
                                         const Color(0xFF0F172A),
                                       ],
                                       begin: Alignment.topLeft,
@@ -613,8 +633,9 @@ class _ArtistOnboardScreenState extends State<ArtistOnboardScreen>
                                   height: 48,
                                   decoration: BoxDecoration(
                                     color: isSelected
-                                        ? const Color(0xFF34D399)
-                                            .withValues(alpha: 0.2)
+                                        ? const Color(
+                                            0xFF34D399,
+                                          ).withValues(alpha: 0.2)
                                         : Colors.white.withValues(alpha: 0.05),
                                     borderRadius: BorderRadius.circular(16),
                                   ),
@@ -639,8 +660,9 @@ class _ArtistOnboardScreenState extends State<ArtistOnboardScreen>
                                           fontWeight: FontWeight.w700,
                                           color: isSelected
                                               ? Colors.white
-                                              : Colors.white
-                                                  .withValues(alpha: 0.8),
+                                              : Colors.white.withValues(
+                                                  alpha: 0.8,
+                                                ),
                                         ),
                                       ),
                                     ],
@@ -732,8 +754,11 @@ class _ArtistOnboardScreenState extends State<ArtistOnboardScreen>
                         children: [
                           Row(
                             children: [
-                              const Icon(Icons.auto_awesome,
-                                  color: Color(0xFF22D3EE), size: 20),
+                              const Icon(
+                                Icons.auto_awesome,
+                                color: Color(0xFF22D3EE),
+                                size: 20,
+                              ),
                               const SizedBox(width: 8),
                               Text(
                                 'AI RECOMMENDED',
@@ -799,8 +824,9 @@ class _ArtistOnboardScreenState extends State<ArtistOnboardScreen>
                         SubscriptionTier.business,
                       ])
                         _buildSelectablePlanCard(
-                          details: SubscriptionService()
-                              .getSubscriptionDetails(tier),
+                          details: SubscriptionService().getSubscriptionDetails(
+                            tier,
+                          ),
                           tier: tier,
                         ),
                     ],
@@ -817,30 +843,36 @@ class _ArtistOnboardScreenState extends State<ArtistOnboardScreen>
                     ),
                   ),
                   const SizedBox(height: 16),
-                  ... (SubscriptionService()
-                          .getSubscriptionDetails(
-                            _tierForPlanName(_selectedPlanName ?? "") ?? 
-                            SubscriptionTier.free
-                          )['features'] as List? ?? [])
-                      .map((f) => Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.check_circle_outline,
-                                    size: 20, color: Color(0xFF34D399)),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(
-                                    f as String,
-                                    style: GoogleFonts.spaceGrotesk(
-                                      fontSize: 15,
-                                      color: Colors.white.withValues(alpha: 0.7),
-                                    ),
+                  ...(SubscriptionService().getSubscriptionDetails(
+                                _tierForPlanName(_selectedPlanName ?? "") ??
+                                    SubscriptionTier.free,
+                              )['features']
+                              as List? ??
+                          [])
+                      .map(
+                        (f) => Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.check_circle_outline,
+                                size: 20,
+                                color: Color(0xFF34D399),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  f as String,
+                                  style: GoogleFonts.spaceGrotesk(
+                                    fontSize: 15,
+                                    color: Colors.white.withValues(alpha: 0.7),
                                   ),
                                 ),
-                              ],
-                            ),
-                          )),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                   const SizedBox(height: 40),
                 ],
               ),
@@ -869,8 +901,11 @@ class _ArtistOnboardScreenState extends State<ArtistOnboardScreen>
                   duration: const Duration(milliseconds: 400),
                   curve: Curves.easeOutQuart,
                 ),
-                icon: const Icon(Icons.arrow_back_ios_new,
-                    color: Colors.white, size: 20),
+                icon: const Icon(
+                  Icons.arrow_back_ios_new,
+                  color: Colors.white,
+                  size: 20,
+                ),
                 padding: const EdgeInsets.all(16),
               ),
             ),
@@ -913,8 +948,9 @@ class _ArtistOnboardScreenState extends State<ArtistOnboardScreen>
                             width: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
                             ),
                           )
                         : Text(
@@ -938,8 +974,10 @@ class _ArtistOnboardScreenState extends State<ArtistOnboardScreen>
     );
   }
 
-  Widget _buildSelectablePlanCard(
-      {required Map<String, dynamic> details, required SubscriptionTier tier}) {
+  Widget _buildSelectablePlanCard({
+    required Map<String, dynamic> details,
+    required SubscriptionTier tier,
+  }) {
     final name = details['name'] as String? ?? '';
     final priceRaw = details['price'];
     final price = priceRaw is num
@@ -1003,8 +1041,11 @@ class _ArtistOnboardScreenState extends State<ArtistOnboardScreen>
                 if (isSelected)
                   const Icon(Icons.check_circle, color: Color(0xFF22D3EE))
                 else
-                  Icon(Icons.circle_outlined,
-                      color: Colors.white.withValues(alpha: 0.2), size: 24),
+                  Icon(
+                    Icons.circle_outlined,
+                    color: Colors.white.withValues(alpha: 0.2),
+                    size: 24,
+                  ),
               ],
             ),
           ),
@@ -1033,15 +1074,18 @@ class _ArtistOnboardScreenState extends State<ArtistOnboardScreen>
   }
 
   Future<void> _completeOnboarding() async {
-    final tier =
-        _selectedPlanName != null ? _tierForPlanName(_selectedPlanName!) : null;
+    final tier = _selectedPlanName != null
+        ? _tierForPlanName(_selectedPlanName!)
+        : null;
 
     if (tier == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(
-                  tr('artist_modern_2025_onboarding_text_please_select_a'))),
+            content: Text(
+              tr('artist_modern_2025_onboarding_text_please_select_a'),
+            ),
+          ),
         );
       }
       return;
@@ -1075,8 +1119,10 @@ class _ArtistOnboardScreenState extends State<ArtistOnboardScreen>
       });
 
       if (tier == SubscriptionTier.free) {
-        await SubscriptionService()
-            .changeTierWithValidation(tier, validateOnly: false);
+        await SubscriptionService().changeTierWithValidation(
+          tier,
+          validateOnly: false,
+        );
       } else {
         if (!mounted) return;
         final purchaseSuccess = await Navigator.push<bool>(
@@ -1098,9 +1144,9 @@ class _ArtistOnboardScreenState extends State<ArtistOnboardScreen>
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     } finally {
       if (mounted) setState(() => _isProcessingPlan = false);
@@ -1112,7 +1158,8 @@ class _ArtistOnboardScreenState extends State<ArtistOnboardScreen>
       return {
         'name': SubscriptionTier.free.displayName,
         'price': 'Free',
-        'description': 'Perfect for getting started and exploring local discovery',
+        'description':
+            'Perfect for getting started and exploring local discovery',
         'tier': SubscriptionTier.free,
       };
     } else if (_experienceLevel == 'emerging') {
@@ -1143,19 +1190,22 @@ class _ArtistOnboardScreenState extends State<ArtistOnboardScreen>
     switch (_currentPage) {
       case 0:
         return () => _pageController.nextPage(
-            duration: const Duration(milliseconds: 400),
-            curve: Curves.easeOutQuart);
+          duration: const Duration(milliseconds: 400),
+          curve: Curves.easeOutQuart,
+        );
       case 1:
         return _selectedInterests.isNotEmpty
             ? () => _pageController.nextPage(
                 duration: const Duration(milliseconds: 400),
-                curve: Curves.easeOutQuart)
+                curve: Curves.easeOutQuart,
+              )
             : null;
       case 2:
         return _experienceLevel.isNotEmpty
             ? () => _pageController.nextPage(
                 duration: const Duration(milliseconds: 400),
-                curve: Curves.easeOutQuart)
+                curve: Curves.easeOutQuart,
+              )
             : null;
       case 3:
         return () => _completeOnboarding();
@@ -1166,11 +1216,16 @@ class _ArtistOnboardScreenState extends State<ArtistOnboardScreen>
 
   String _getNextButtonText() {
     switch (_currentPage) {
-      case 0: return 'Get Started';
-      case 1: return 'Continue';
-      case 2: return 'See My Plan';
-      case 3: return 'Launch Studio';
-      default: return 'Next';
+      case 0:
+        return 'Get Started';
+      case 1:
+        return 'Continue';
+      case 2:
+        return 'See My Plan';
+      case 3:
+        return 'Launch Studio';
+      default:
+        return 'Next';
     }
   }
 

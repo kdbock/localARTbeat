@@ -121,9 +121,9 @@ class _PayoutAccountsScreenState extends State<PayoutAccountsScreen> {
             const SizedBox(height: 8),
             Text(
               _errorMessage!,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey[600],
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
@@ -144,24 +144,22 @@ class _PayoutAccountsScreenState extends State<PayoutAccountsScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.account_balance,
-              size: 80,
-              color: Colors.grey[400],
-            ),
+            Icon(Icons.account_balance, size: 80, color: Colors.grey[400]),
             const SizedBox(height: 24),
             Text(
               tr('art_walk_no_payout_accounts'),
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             Text(
-              tr('art_walk_add_a_bank_account_or_paypal_account_to_receive_your_earnings'),
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.grey[600],
-                  ),
+              tr(
+                'art_walk_add_a_bank_account_or_paypal_account_to_receive_your_earnings',
+              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
@@ -170,8 +168,10 @@ class _PayoutAccountsScreenState extends State<PayoutAccountsScreen> {
               icon: const Icon(Icons.add),
               label: Text(tr('art_walk_add_payout_account')),
               style: ElevatedButton.styleFrom(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
               ),
             ),
           ],
@@ -210,10 +210,8 @@ class _PayoutAccountsScreenState extends State<PayoutAccountsScreen> {
                     children: [
                       Text(
                         account.accountHolderName,
-                        style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -221,8 +219,8 @@ class _PayoutAccountsScreenState extends State<PayoutAccountsScreen> {
                             ? '${account.bankName ?? 'Bank Account'} •••• ${account.accountNumber.length >= 4 ? account.accountNumber.substring(account.accountNumber.length - 4) : account.accountNumber}'
                             : 'PayPal Account',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Colors.grey[600],
-                            ),
+                          color: Colors.grey[600],
+                        ),
                       ),
                     ],
                   ),
@@ -246,8 +244,10 @@ class _PayoutAccountsScreenState extends State<PayoutAccountsScreen> {
                         children: [
                           const Icon(Icons.delete, color: Colors.red),
                           const SizedBox(width: 8),
-                          Text(tr('art_walk_delete'),
-                              style: const TextStyle(color: Colors.red)),
+                          Text(
+                            tr('art_walk_delete'),
+                            style: const TextStyle(color: Colors.red),
+                          ),
                         ],
                       ),
                     ),
@@ -284,7 +284,9 @@ class _PayoutAccountsScreenState extends State<PayoutAccountsScreen> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        tr('art_walk_account_verification_is_pending__you_cannot_receive_payouts_until_verification_is_complete'),
+                        tr(
+                          'art_walk_account_verification_is_pending__you_cannot_receive_payouts_until_verification_is_complete',
+                        ),
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.orange[700],
@@ -334,19 +336,15 @@ class _PayoutAccountsScreenState extends State<PayoutAccountsScreen> {
   void _showAddAccountDialog() {
     showDialog<void>(
       context: context,
-      builder: (context) => _AddAccountDialog(
-        onAccountAdded: _loadAccounts,
-      ),
+      builder: (context) => _AddAccountDialog(onAccountAdded: _loadAccounts),
     );
   }
 
   void _showEditAccountDialog(PayoutAccountModel account) {
     showDialog<void>(
       context: context,
-      builder: (context) => _EditAccountDialog(
-        account: account,
-        onAccountUpdated: _loadAccounts,
-      ),
+      builder: (context) =>
+          _EditAccountDialog(account: account, onAccountUpdated: _loadAccounts),
     );
   }
 
@@ -356,7 +354,9 @@ class _PayoutAccountsScreenState extends State<PayoutAccountsScreen> {
       builder: (context) => AlertDialog(
         title: Text(tr('art_walk_delete_account')),
         content: Text(
-          tr('art_walk_are_you_sure_you_want_to_delete_this_payout_account__this_action_cannot_be_undone'),
+          tr(
+            'art_walk_are_you_sure_you_want_to_delete_this_payout_account__this_action_cannot_be_undone',
+          ),
         ),
         actions: [
           TextButton(
@@ -476,10 +476,8 @@ class _AddAccountDialogState extends State<_AddAccountDialog> {
                   Expanded(
                     child: Text(
                       tr('art_walk_add_payout_account'),
-                      style:
-                          Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                   ),
                   IconButton(
@@ -591,8 +589,9 @@ class _AddAccountDialogState extends State<_AddAccountDialog> {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed:
-                          _isLoading ? null : () => Navigator.pop(context),
+                      onPressed: _isLoading
+                          ? null
+                          : () => Navigator.pop(context),
                       child: Text(tr('art_walk_cancel')),
                     ),
                   ),

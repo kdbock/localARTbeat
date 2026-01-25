@@ -31,8 +31,7 @@ import '../widgets/commission_artists_browser.dart';
 import '../widgets/fullscreen_image_viewer.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_artwork/artbeat_artwork.dart';
-import 'package:artbeat_artist/artbeat_artist.dart'
-    show ArtistOnboardScreen;
+import 'package:artbeat_artist/artbeat_artist.dart' show ArtistOnboardScreen;
 import 'package:google_fonts/google_fonts.dart';
 
 import 'art_battle_screen.dart';

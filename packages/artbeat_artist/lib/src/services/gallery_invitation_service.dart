@@ -13,8 +13,8 @@ class GalleryInvitationService {
   final Logger _logger = Logger();
 
   // Collection references
-  final CollectionReference _invitationsCollection =
-      FirebaseFirestore.instance.collection('galleryInvitations');
+  final CollectionReference _invitationsCollection = FirebaseFirestore.instance
+      .collection('galleryInvitations');
 
   /// Get current user ID
   String? getCurrentUserId() {
@@ -35,8 +35,8 @@ class GalleryInvitationService {
 
     try {
       // Get gallery profile (sender)
-      final galleryProfile =
-          await _artistProfileService.getArtistProfileByUserId(userId);
+      final galleryProfile = await _artistProfileService
+          .getArtistProfileByUserId(userId);
       if (galleryProfile == null) {
         throw Exception('Gallery profile not found');
       }
@@ -47,8 +47,9 @@ class GalleryInvitationService {
       }
 
       // Get artist profile (recipient)
-      final artistProfile =
-          await _artistProfileService.getArtistProfileById(artistProfileId);
+      final artistProfile = await _artistProfileService.getArtistProfileById(
+        artistProfileId,
+      );
       if (artistProfile == null) {
         throw Exception('Artist profile not found');
       }
@@ -132,8 +133,9 @@ class GalleryInvitationService {
 
     try {
       // Get invitation
-      final invitationDoc =
-          await _invitationsCollection.doc(invitationId).get();
+      final invitationDoc = await _invitationsCollection
+          .doc(invitationId)
+          .get();
       if (!invitationDoc.exists) {
         throw Exception('Invitation not found');
       }
@@ -141,16 +143,17 @@ class GalleryInvitationService {
       final invitationData = invitationDoc.data() as Map<String, dynamic>;
 
       // Verify this artist is the recipient
-      final artistProfile =
-          await _artistProfileService.getArtistProfileByUserId(userId);
+      final artistProfile = await _artistProfileService
+          .getArtistProfileByUserId(userId);
       if (artistProfile == null ||
           artistProfile.id != invitationData['artistId']) {
         throw Exception('You are not authorized to respond to this invitation');
       }
 
       // Update invitation status
-      final newStatus =
-          accept ? InvitationStatus.accepted : InvitationStatus.declined;
+      final newStatus = accept
+          ? InvitationStatus.accepted
+          : InvitationStatus.declined;
       await _invitationsCollection.doc(invitationId).update({
         'status': newStatus.name,
         'respondedAt': FieldValue.serverTimestamp(),
@@ -159,29 +162,31 @@ class GalleryInvitationService {
       // If accepted, update gallery's artist list
       if (accept) {
         final galleryId = invitationData['galleryId'] as String;
-        final galleryProfileDoc =
-            await _firestore.collection('artistProfiles').doc(galleryId).get();
+        final galleryProfileDoc = await _firestore
+            .collection('artistProfiles')
+            .doc(galleryId)
+            .get();
 
         if (galleryProfileDoc.exists) {
           final galleryArtists = List<String>.from(
-              (galleryProfileDoc.get('galleryArtists') as List<dynamic>?) ??
-                  []);
+            (galleryProfileDoc.get('galleryArtists') as List<dynamic>?) ?? [],
+          );
 
           if (!galleryArtists.contains(artistProfile.id)) {
-            await _firestore
-                .collection('artistProfiles')
-                .doc(galleryId)
-                .update({
-              'galleryArtists': FieldValue.arrayUnion([artistProfile.id]),
-              'updatedAt': FieldValue.serverTimestamp(),
-            });
+            await _firestore.collection('artistProfiles').doc(galleryId).update(
+              {
+                'galleryArtists': FieldValue.arrayUnion([artistProfile.id]),
+                'updatedAt': FieldValue.serverTimestamp(),
+              },
+            );
           }
         }
       }
 
       // Send notification to gallery
-      final notificationTitle =
-          accept ? 'Invitation Accepted' : 'Invitation Declined';
+      final notificationTitle = accept
+          ? 'Invitation Accepted'
+          : 'Invitation Declined';
       final notificationBody = accept
           ? '${artistProfile.displayName} has accepted your gallery invitation'
           : '${artistProfile.displayName} has declined your gallery invitation';
@@ -216,8 +221,8 @@ class GalleryInvitationService {
         throw Exception('User not authenticated');
       }
 
-      final galleryProfile =
-          await _artistProfileService.getArtistProfileByUserId(userId);
+      final galleryProfile = await _artistProfileService
+          .getArtistProfileByUserId(userId);
       if (galleryProfile == null) {
         throw Exception('Gallery profile not found');
       }
@@ -250,8 +255,8 @@ class GalleryInvitationService {
         throw Exception('User not authenticated');
       }
 
-      final artistProfile =
-          await _artistProfileService.getArtistProfileByUserId(userId);
+      final artistProfile = await _artistProfileService
+          .getArtistProfileByUserId(userId);
       if (artistProfile == null) {
         throw Exception('Artist profile not found');
       }
@@ -279,8 +284,9 @@ class GalleryInvitationService {
 
     try {
       // Get invitation
-      final invitationDoc =
-          await _invitationsCollection.doc(invitationId).get();
+      final invitationDoc = await _invitationsCollection
+          .doc(invitationId)
+          .get();
       if (!invitationDoc.exists) {
         throw Exception('Invitation not found');
       }
@@ -293,8 +299,8 @@ class GalleryInvitationService {
         throw Exception('User not authenticated');
       }
 
-      final galleryProfile =
-          await _artistProfileService.getArtistProfileByUserId(userId);
+      final galleryProfile = await _artistProfileService
+          .getArtistProfileByUserId(userId);
       if (galleryProfile == null) {
         throw Exception('Gallery profile not found');
       }
@@ -316,10 +322,7 @@ class GalleryInvitationService {
         title: 'Invitation Cancelled',
         message: '${galleryProfile.displayName} has cancelled their invitation',
         type: NotificationType.invitationCancelled,
-        data: {
-          'galleryId': galleryProfile.id,
-          'invitationId': invitationId,
-        },
+        data: {'galleryId': galleryProfile.id, 'invitationId': invitationId},
       );
     } catch (e) {
       throw Exception('Error cancelling invitation: $e');

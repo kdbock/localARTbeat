@@ -167,7 +167,9 @@ class LeaderboardService extends ChangeNotifier {
     String? currentUserId,
   }) async {
     try {
-      AppLogger.info('🏆 Getting leaderboard for ${category.displayName} from collection: ${_usersCollection.path}');
+      AppLogger.info(
+        '🏆 Getting leaderboard for ${category.displayName} from collection: ${_usersCollection.path}',
+      );
 
       Query query;
 
@@ -197,7 +199,9 @@ class LeaderboardService extends ChangeNotifier {
       }
 
       final snapshot = await query.get();
-      AppLogger.info('🏆 Firestore returned ${snapshot.docs.length} documents for ${category.displayName}');
+      AppLogger.info(
+        '🏆 Firestore returned ${snapshot.docs.length} documents for ${category.displayName}',
+      );
 
       final List<LeaderboardEntry> entries = [];
 
@@ -221,14 +225,18 @@ class LeaderboardService extends ChangeNotifier {
       AppLogger.error('❌ Error getting leaderboard: $e');
       // If the ordered query fails (e.g. index missing), try a simple fetch as last resort
       try {
-        AppLogger.warning('🏆 Trying fallback simple fetch for ${category.displayName}...');
+        AppLogger.warning(
+          '🏆 Trying fallback simple fetch for ${category.displayName}...',
+        );
         final fallbackSnapshot = await _usersCollection.limit(limit).get();
         final List<LeaderboardEntry> fallbackEntries = [];
         for (int i = 0; i < fallbackSnapshot.docs.length; i++) {
           final doc = fallbackSnapshot.docs[i];
           final userData = doc.data() as Map<String, dynamic>;
           userData['id'] = doc.id;
-          fallbackEntries.add(LeaderboardEntry.fromUserData(userData, category, i + 1));
+          fallbackEntries.add(
+            LeaderboardEntry.fromUserData(userData, category, i + 1),
+          );
         }
         return fallbackEntries;
       } catch (fallbackError) {

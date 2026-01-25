@@ -110,7 +110,8 @@ class ArtistProfileModel {
       artworksCount: data['artworksCount'] as int? ?? 0,
       followersCount:
           data['followersCount'] as int? ?? data['followerCount'] as int? ?? 0,
-      boostScore: (data['boostScore'] as num?)?.toDouble() ??
+      boostScore:
+          (data['boostScore'] as num?)?.toDouble() ??
           (data['artistMomentum'] as num?)?.toDouble() ??
           (data['momentum'] as num?)?.toDouble() ??
           0.0,
@@ -118,8 +119,8 @@ class ArtistProfileModel {
           (data['lastBoostAt'] as Timestamp?)?.toDate() ??
           (data['boostedAt'] as Timestamp?)?.toDate(),
       boostStreakMonths: (data['boostStreakMonths'] as num?)?.toInt() ?? 0,
-      boostStreakUpdatedAt:
-          (data['boostStreakUpdatedAt'] as Timestamp?)?.toDate(),
+      boostStreakUpdatedAt: (data['boostStreakUpdatedAt'] as Timestamp?)
+          ?.toDate(),
       mapGlowUntil: (data['mapGlowUntil'] as Timestamp?)?.toDate(),
       kioskLaneUntil: (data['kioskLaneUntil'] as Timestamp?)?.toDate(),
     );
@@ -314,8 +315,7 @@ class ArtistProfileModel {
       boostScore: boostScore ?? this.boostScore,
       lastBoostAt: lastBoostAt ?? this.lastBoostAt,
       boostStreakMonths: boostStreakMonths ?? this.boostStreakMonths,
-      boostStreakUpdatedAt:
-          boostStreakUpdatedAt ?? this.boostStreakUpdatedAt,
+      boostStreakUpdatedAt: boostStreakUpdatedAt ?? this.boostStreakUpdatedAt,
       mapGlowUntil: mapGlowUntil ?? this.mapGlowUntil,
       kioskLaneUntil: kioskLaneUntil ?? this.kioskLaneUntil,
     );

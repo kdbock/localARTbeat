@@ -73,7 +73,8 @@ class InputValidator {
       final decimalPlaces = amountString.split('.')[1].length;
       if (decimalPlaces > 2) {
         return ValidationResult.invalid(
-            'Payment amount cannot have more than 2 decimal places');
+          'Payment amount cannot have more than 2 decimal places',
+        );
       }
     }
 
@@ -107,18 +108,21 @@ class InputValidator {
 
     if (sanitized.length < minLength) {
       return ValidationResult.invalid(
-          '$fieldName must be at least $minLength characters');
+        '$fieldName must be at least $minLength characters',
+      );
     }
 
     if (sanitized.length > maxLength) {
       return ValidationResult.invalid(
-          '$fieldName cannot exceed $maxLength characters');
+        '$fieldName cannot exceed $maxLength characters',
+      );
     }
 
     // In strict mode, only allow safe characters (after sanitization)
     if (strictMode && !_safeTextPattern.hasMatch(sanitized)) {
       return ValidationResult.invalid(
-          '$fieldName contains unsupported characters');
+        '$fieldName contains unsupported characters',
+      );
     }
 
     return ValidationResult.valid(data: sanitized);
@@ -141,7 +145,8 @@ class InputValidator {
     // Check for suspicious patterns
     if (url.contains('<script') || url.contains('javascript:')) {
       return ValidationResult.invalid(
-          'URL contains potentially malicious content');
+        'URL contains potentially malicious content',
+      );
     }
 
     return ValidationResult.valid();
@@ -192,7 +197,7 @@ class InputValidator {
       'installation',
       'performance',
       'video',
-      'other'
+      'other',
     ];
 
     if (medium == null || medium.isEmpty) {
@@ -208,7 +213,9 @@ class InputValidator {
 
   /// Validate date range
   static ValidationResult<void> validateDateRange(
-      DateTime? startDate, DateTime? endDate) {
+    DateTime? startDate,
+    DateTime? endDate,
+  ) {
     if (startDate == null) {
       return ValidationResult.invalid('Start date is required');
     }
@@ -244,7 +251,9 @@ class InputValidator {
 
   /// Validate map data structure
   static ValidationResult<void> validateMapData(
-      Map<String, dynamic>? data, List<String> requiredFields) {
+    Map<String, dynamic>? data,
+    List<String> requiredFields,
+  ) {
     if (data == null || data.isEmpty) {
       return ValidationResult.invalid('Data is required');
     }
@@ -277,7 +286,8 @@ class InputValidator {
     // Check for invalid characters in Firebase document IDs
     if (docId.contains('/') || docId.contains('__')) {
       return ValidationResult.invalid(
-          'Document ID contains invalid characters');
+        'Document ID contains invalid characters',
+      );
     }
 
     return ValidationResult.valid();

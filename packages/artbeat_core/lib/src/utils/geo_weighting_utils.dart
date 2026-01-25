@@ -29,13 +29,9 @@ class GeoWeightingUtils {
     final viewerLocation = await resolveViewerLocation(viewer);
     if (viewerLocation == null) return artists;
 
-    final distances = await _distanceMapForLocations(
-      viewerLocation,
-      {
-        for (final artist in artists)
-          artist.userId: artist.location ?? '',
-      },
-    );
+    final distances = await _distanceMapForLocations(viewerLocation, {
+      for (final artist in artists) artist.userId: artist.location ?? '',
+    });
 
     final sorted = List<ArtistProfileModel>.from(artists);
     sorted.sort((a, b) {
@@ -64,12 +60,9 @@ class GeoWeightingUtils {
   }) async {
     if (viewerLocation == null) return items;
 
-    final distances = await _distanceMapForLocations(
-      viewerLocation,
-      {
-        for (final item in items) idOf(item): locationOf(item) ?? '',
-      },
-    );
+    final distances = await _distanceMapForLocations(viewerLocation, {
+      for (final item in items) idOf(item): locationOf(item) ?? '',
+    });
 
     final sorted = List<T>.from(items);
     sorted.sort((a, b) {
@@ -160,9 +153,9 @@ class GeoWeightingUtils {
     final commaMatch = RegExp(
       r'(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)',
     ).firstMatch(input);
-    final match = commaMatch ??
-        RegExp(r'(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)')
-            .firstMatch(input);
+    final match =
+        commaMatch ??
+        RegExp(r'(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)').firstMatch(input);
     if (match == null) return null;
     final lat = double.tryParse(match.group(1) ?? '');
     final lng = double.tryParse(match.group(2) ?? '');

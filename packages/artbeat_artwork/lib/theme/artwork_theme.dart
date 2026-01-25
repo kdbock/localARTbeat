@@ -4,10 +4,7 @@ import 'package:artbeat_core/src/theme/artbeat_typography.dart';
 class ArtworkThemeWrapper extends StatelessWidget {
   final Widget child;
 
-  const ArtworkThemeWrapper({
-    super.key,
-    required this.child,
-  });
+  const ArtworkThemeWrapper({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -18,9 +15,7 @@ class ArtworkThemeWrapper extends StatelessWidget {
         // Artwork grid and list view styles
         listTileTheme: ListTileThemeData(
           contentPadding: const EdgeInsets.all(4),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
         // Artwork detail view styles
         cardTheme: CardThemeData(
@@ -44,8 +39,9 @@ class ArtworkThemeWrapper extends StatelessWidget {
         ),
         // Artwork metadata styles
         dividerTheme: DividerThemeData(
-          color: theme.colorScheme.outline
-              .withAlpha(51), // 0.2 opacity = 51 in alpha
+          color: theme.colorScheme.outline.withAlpha(
+            51,
+          ), // 0.2 opacity = 51 in alpha
           space: 32,
           thickness: 1,
         ),

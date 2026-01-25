@@ -112,7 +112,10 @@ class _SearchResultsScreenState extends State<SearchResultsScreen>
                       hintText: _currentTabIndex == 0
                           ? 'art_walk_search_hint_walks'.tr()
                           : 'art_walk_search_hint_public_art'.tr(),
-                      prefixIcon: const Icon(Icons.search, color: Colors.white70),
+                      prefixIcon: const Icon(
+                        Icons.search,
+                        color: Colors.white70,
+                      ),
                     ),
                     onSubmitted: (q) {
                       _updateCriteria(q);

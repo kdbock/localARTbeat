@@ -729,8 +729,9 @@ class _ArtistCardState extends State<ArtistCard> {
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: const Color(0xFF22D3EE)
-                                        .withValues(alpha: 0.35),
+                                    color: const Color(
+                                      0xFF22D3EE,
+                                    ).withValues(alpha: 0.35),
                                     blurRadius: 8,
                                     offset: const Offset(0, 4),
                                   ),

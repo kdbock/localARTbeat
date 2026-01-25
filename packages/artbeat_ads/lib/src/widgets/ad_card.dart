@@ -108,9 +108,7 @@ class AdCard extends StatelessWidget {
   }
 
   Widget _buildAdImage(LocalAd ad) {
-    final images = (ad.imageUrls ?? [])
-        .where((url) => url.isNotEmpty)
-        .toList();
+    final images = (ad.imageUrls ?? []).where((url) => url.isNotEmpty).toList();
     if (images.isEmpty && ad.imageUrl != null && ad.imageUrl!.isNotEmpty) {
       images.add(ad.imageUrl!);
     }

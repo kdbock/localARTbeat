@@ -10,10 +10,11 @@ class ArtworkDiscoveryService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   // Collection references
-  final CollectionReference _artworkCollection =
-      FirebaseFirestore.instance.collection('artwork');
-  final CollectionReference _userPreferencesCollection =
-      FirebaseFirestore.instance.collection('user_artwork_preferences');
+  final CollectionReference _artworkCollection = FirebaseFirestore.instance
+      .collection('artwork');
+  final CollectionReference _userPreferencesCollection = FirebaseFirestore
+      .instance
+      .collection('user_artwork_preferences');
 
   /// Get similar artworks based on tags, styles, and medium
   Future<List<ArtworkModel>> getSimilarArtworks(
@@ -41,16 +42,20 @@ class ArtworkDiscoveryService {
             .get(),
         // Same styles
         _artworkCollection
-            .where('styles',
-                arrayContainsAny: sourceArtwork.styles.take(3).toList())
+            .where(
+              'styles',
+              arrayContainsAny: sourceArtwork.styles.take(3).toList(),
+            )
             .where('isPublic', isEqualTo: true)
             .limit(limit * 2)
             .get(),
         // Same tags
         if (sourceArtwork.tags != null && sourceArtwork.tags!.isNotEmpty)
           _artworkCollection
-              .where('tags',
-                  arrayContainsAny: sourceArtwork.tags!.take(3).toList())
+              .where(
+                'tags',
+                arrayContainsAny: sourceArtwork.tags!.take(3).toList(),
+              )
               .where('isPublic', isEqualTo: true)
               .limit(limit * 2)
               .get()
@@ -112,8 +117,9 @@ class ArtworkDiscoveryService {
           .limit(limit * 3) // Get more to filter
           .get();
 
-      final artworks =
-          query.docs.map((doc) => ArtworkModel.fromFirestore(doc)).toList();
+      final artworks = query.docs
+          .map((doc) => ArtworkModel.fromFirestore(doc))
+          .toList();
 
       // Calculate trending score for each artwork
       final scoredArtworks = <ArtworkModel, double>{};
@@ -237,23 +243,21 @@ class ArtworkDiscoveryService {
       feed.addAll(personalized);
 
       // Get trending artworks (30% of feed)
-      final trending = await getTrendingArtworks(
-        limit: (limit * 0.3).round(),
-      );
+      final trending = await getTrendingArtworks(limit: (limit * 0.3).round());
       // Remove duplicates
       final trendingFiltered = trending
           .where(
-              (artwork) => !feed.any((existing) => existing.id == artwork.id))
+            (artwork) => !feed.any((existing) => existing.id == artwork.id),
+          )
           .toList();
       feed.addAll(trendingFiltered);
 
       // Get featured/popular artworks (30% of feed)
-      final featured = await _getFeaturedArtworks(
-        limit: (limit * 0.3).round(),
-      );
+      final featured = await _getFeaturedArtworks(limit: (limit * 0.3).round());
       final featuredFiltered = featured
           .where(
-              (artwork) => !feed.any((existing) => existing.id == artwork.id))
+            (artwork) => !feed.any((existing) => existing.id == artwork.id),
+          )
           .toList();
       feed.addAll(featuredFiltered);
 
@@ -277,14 +281,16 @@ class ArtworkDiscoveryService {
     }
 
     // Style matches
-    final commonStyles =
-        source.styles.toSet().intersection(target.styles.toSet());
+    final commonStyles = source.styles.toSet().intersection(
+      target.styles.toSet(),
+    );
     score += commonStyles.length * 2.0;
 
     // Tag matches
     if (source.tags != null && target.tags != null) {
-      final commonTags =
-          source.tags!.toSet().intersection(target.tags!.toSet());
+      final commonTags = source.tags!.toSet().intersection(
+        target.tags!.toSet(),
+      );
       score += commonTags.length * 1.5;
     }
 
@@ -435,7 +441,9 @@ class ArtworkDiscoveryService {
 
   /// Update user preferences based on interactions
   Future<void> updateUserPreferences(
-      String userId, ArtworkModel artwork) async {
+    String userId,
+    ArtworkModel artwork,
+  ) async {
     try {
       final preferences = await _getUserPreferences(userId);
 

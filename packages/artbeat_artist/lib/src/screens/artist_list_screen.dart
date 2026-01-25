@@ -8,11 +8,8 @@ class ArtistListScreen extends StatefulWidget {
   final String? title;
   final bool showFeaturedOnly;
 
-  const ArtistListScreen({
-    Key? key,
-    this.title,
-    this.showFeaturedOnly = false,
-  }) : super(key: key);
+  const ArtistListScreen({Key? key, this.title, this.showFeaturedOnly = false})
+    : super(key: key);
 
   @override
   State<ArtistListScreen> createState() => _ArtistListScreenState();
@@ -37,8 +34,8 @@ class _ArtistListScreenState extends State<ArtistListScreen> {
       });
 
       final artistProfileService = ArtistProfileService();
-      final List<ArtistProfileModel> artists =
-          await artistProfileService.getAllArtists(limit: 20);
+      final List<ArtistProfileModel> artists = await artistProfileService
+          .getAllArtists(limit: 20);
 
       setState(() {
         _artists = artists;
@@ -66,10 +63,10 @@ class _ArtistListScreenState extends State<ArtistListScreen> {
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : _error != null
-                ? _buildErrorWidget()
-                : _artists.isEmpty
-                    ? _buildEmptyWidget()
-                    : _buildArtistsList(),
+            ? _buildErrorWidget()
+            : _artists.isEmpty
+            ? _buildEmptyWidget()
+            : _buildArtistsList(),
       ),
     );
   }
@@ -83,8 +80,10 @@ class _ArtistListScreenState extends State<ArtistListScreen> {
           const SizedBox(height: 16),
           Text(tr('artist_artist_list_error_failed_to_load')),
           const SizedBox(height: 8),
-          Text(_error ?? 'Unknown error',
-              style: const TextStyle(color: Colors.grey)),
+          Text(
+            _error ?? 'Unknown error',
+            style: const TextStyle(color: Colors.grey),
+          ),
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: _loadArtists,
@@ -152,8 +151,9 @@ class _ArtistListScreenState extends State<ArtistListScreen> {
               // Artist Avatar
               CircleAvatar(
                 radius: 30,
-                backgroundColor:
-                    ArtbeatColors.primaryPurple.withValues(alpha: 0.1),
+                backgroundColor: ArtbeatColors.primaryPurple.withValues(
+                  alpha: 0.1,
+                ),
                 backgroundImage: artist.profileImageUrl != null
                     ? CachedNetworkImageProvider(artist.profileImageUrl!)
                     : null,

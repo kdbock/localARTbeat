@@ -35,10 +35,12 @@ class GalleryInvitationModel {
       id: doc.id,
       galleryId: data['galleryId'] != null ? data['galleryId'].toString() : '',
       artistId: data['artistId'] != null ? data['artistId'].toString() : '',
-      galleryName:
-          data['galleryName'] != null ? data['galleryName'].toString() : '',
-      artistName:
-          data['artistName'] != null ? data['artistName'].toString() : '',
+      galleryName: data['galleryName'] != null
+          ? data['galleryName'].toString()
+          : '',
+      artistName: data['artistName'] != null
+          ? data['artistName'].toString()
+          : '',
       message: data['message'] != null ? data['message'].toString() : '',
       status: data['status'] != null ? data['status'].toString() : '',
       createdAt: data['createdAt'] is Timestamp

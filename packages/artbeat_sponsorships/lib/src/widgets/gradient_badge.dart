@@ -7,8 +7,10 @@ class GradientBadge extends StatelessWidget {
     this.label,
     this.icon,
     this.size = 40,
-  }) : assert(child != null || label != null || icon != null,
-            'Provide a child, label, or icon');
+  }) : assert(
+         child != null || label != null || icon != null,
+         'Provide a child, label, or icon',
+       );
 
   final Widget? child;
   final String? label;
@@ -17,16 +19,12 @@ class GradientBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final content = child ??
+    final content =
+        child ??
         Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (icon != null)
-              Icon(
-                icon,
-                color: Colors.white,
-                size: size * 0.5,
-              ),
+            if (icon != null) Icon(icon, color: Colors.white, size: size * 0.5),
             if (label != null) ...[
               const SizedBox(height: 4),
               Text(
@@ -49,10 +47,7 @@ class GradientBadge extends StatelessWidget {
       decoration: const BoxDecoration(
         shape: BoxShape.circle,
         gradient: LinearGradient(
-          colors: [
-            Color(0xFF7C4DFF),
-            Color(0xFF22D3EE),
-          ],
+          colors: [Color(0xFF7C4DFF), Color(0xFF22D3EE)],
         ),
       ),
       child: Center(child: content),

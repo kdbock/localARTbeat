@@ -260,13 +260,15 @@ class _CommissionSetupWizardScreenState
                   style: _sectionTitleStyle,
                 ),
                 const SizedBox(height: 16),
-                HudButton(isPrimary: true,
+                HudButton(
+                  isPrimary: true,
                   onPressed: () => Navigator.pop(context, ImageSource.gallery),
                   text: 'commission_setup_image_source_gallery'.tr(),
                   icon: Icons.photo_library,
                 ),
                 const SizedBox(height: 12),
-                HudButton(isPrimary: false,
+                HudButton(
+                  isPrimary: false,
                   onPressed: () => Navigator.pop(context, ImageSource.camera),
                   text: 'commission_setup_image_source_camera'.tr(),
                   icon: Icons.camera_alt,
@@ -343,7 +345,8 @@ class _CommissionSetupWizardScreenState
             title: widget.mode == SetupMode.firstTime
                 ? 'commission_setup_title'.tr()
                 : 'commission_setup_edit_title'.tr(),
-            glassBackground: true, subtitle: '',
+            glassBackground: true,
+            subtitle: '',
           ),
           body: SafeArea(
             child: _isLoading
@@ -404,7 +407,9 @@ class _CommissionSetupWizardScreenState
                 (index) => Expanded(
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
-                    margin: EdgeInsets.symmetric(horizontal: index == 0 ? 0 : 4),
+                    margin: EdgeInsets.symmetric(
+                      horizontal: index == 0 ? 0 : 4,
+                    ),
                     height: 4,
                     decoration: BoxDecoration(
                       gradient: index <= _currentStep
@@ -440,7 +445,8 @@ class _CommissionSetupWizardScreenState
       child: Row(
         children: [
           Expanded(
-            child: HudButton(isPrimary: false,
+            child: HudButton(
+              isPrimary: false,
               onPressed: _currentStep == 0 ? null : _handleBack,
               text: 'commission_setup_action_back'.tr(),
               icon: Icons.arrow_back,
@@ -461,387 +467,376 @@ class _CommissionSetupWizardScreenState
   }
 
   Widget _buildStep1Welcome() {
-    return _buildStepWrapper(
-      [
-        GlassCard(
-          padding: const EdgeInsets.all(20),
-          showAccentGlow: true,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildBadge('commission_setup_intro_badge'.tr()),
-              const SizedBox(height: 16),
-              Text('commission_setup_intro_title'.tr(), style: _heroTitleStyle),
-              const SizedBox(height: 8),
-              Text(
-                'commission_setup_intro_subtitle'.tr(),
-                style: _bodyStyle(opacity: 0.75),
-              ),
-            ],
-          ),
+    return _buildStepWrapper([
+      GlassCard(
+        padding: const EdgeInsets.all(20),
+        showAccentGlow: true,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildBadge('commission_setup_intro_badge'.tr()),
+            const SizedBox(height: 16),
+            Text('commission_setup_intro_title'.tr(), style: _heroTitleStyle),
+            const SizedBox(height: 8),
+            Text(
+              'commission_setup_intro_subtitle'.tr(),
+              style: _bodyStyle(opacity: 0.75),
+            ),
+          ],
         ),
-        GlassCard(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            children: _benefitItems
-                .map(
-                  (benefit) => Padding(
-                    padding: EdgeInsets.only(
-                      bottom: benefit == _benefitItems.last ? 0 : 16,
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.08),
-                            borderRadius: BorderRadius.circular(18),
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.12),
-                            ),
-                          ),
-                          child: Icon(benefit.icon, color: Colors.white),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                benefit.titleKey.tr(),
-                                style: _sectionTitleStyle,
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                benefit.subtitleKey.tr(),
-                                style: _bodyStyle(opacity: 0.72),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+      ),
+      GlassCard(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: _benefitItems
+              .map(
+                (benefit) => Padding(
+                  padding: EdgeInsets.only(
+                    bottom: benefit == _benefitItems.last ? 0 : 16,
                   ),
-                )
-                .toList(),
-          ),
-        ),
-        GlassCard(
-          padding: const EdgeInsets.all(20),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'commission_setup_accept_label'.tr(),
-                      style: _sectionTitleStyle,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'commission_setup_accept_subtitle'.tr(),
-                      style: _bodyStyle(opacity: 0.7, fontSize: 12),
-                    ),
-                  ],
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.12),
+                          ),
+                        ),
+                        child: Icon(benefit.icon, color: Colors.white),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              benefit.titleKey.tr(),
+                              style: _sectionTitleStyle,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              benefit.subtitleKey.tr(),
+                              style: _bodyStyle(opacity: 0.72),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              Switch.adaptive(
-                value: _acceptingCommissions,
-                onChanged: (value) =>
-                    setState(() => _acceptingCommissions = value),
-                thumbColor: WidgetStateProperty.all(Colors.white),
-                trackColor: WidgetStateProperty.resolveWith(
-                  (states) => states.contains(WidgetState.selected)
-                      ? _WizardPalette.accentTeal.withValues(alpha: 0.6)
-                      : Colors.white.withValues(alpha: 0.2),
-                ),
-              ),
-            ],
-          ),
+              )
+              .toList(),
         ),
-      ],
-    );
+      ),
+      GlassCard(
+        padding: const EdgeInsets.all(20),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'commission_setup_accept_label'.tr(),
+                    style: _sectionTitleStyle,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'commission_setup_accept_subtitle'.tr(),
+                    style: _bodyStyle(opacity: 0.7, fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+            Switch.adaptive(
+              value: _acceptingCommissions,
+              onChanged: (value) =>
+                  setState(() => _acceptingCommissions = value),
+              thumbColor: WidgetStateProperty.all(Colors.white),
+              trackColor: WidgetStateProperty.resolveWith(
+                (states) => states.contains(WidgetState.selected)
+                    ? _WizardPalette.accentTeal.withValues(alpha: 0.6)
+                    : Colors.white.withValues(alpha: 0.2),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ]);
   }
 
   Widget _buildStep2Types() {
-    return _buildStepWrapper(
-      [
-        GlassCard(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildSectionHeader(
-                'commission_setup_types_title'.tr(),
-                'commission_setup_types_subtitle'.tr(),
+    return _buildStepWrapper([
+      GlassCard(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildSectionHeader(
+              'commission_setup_types_title'.tr(),
+              'commission_setup_types_subtitle'.tr(),
+            ),
+            const SizedBox(height: 16),
+            ...CommissionType.values.map(
+              (type) => Padding(
+                padding: EdgeInsets.only(
+                  bottom: type == CommissionType.values.last ? 0 : 16,
+                ),
+                child: _buildTypeOption(type),
               ),
+            ),
+            if (_selectedTypes.isEmpty) ...[
               const SizedBox(height: 16),
-              ...CommissionType.values.map(
-                (type) => Padding(
-                  padding: EdgeInsets.only(
-                    bottom: type == CommissionType.values.last ? 0 : 16,
-                  ),
-                  child: _buildTypeOption(type),
-                ),
+              Text(
+                'commission_setup_types_hint'.tr(),
+                style: _bodyStyle(opacity: 0.65, fontSize: 12),
               ),
-              if (_selectedTypes.isEmpty) ...[
-                const SizedBox(height: 16),
-                Text(
-                  'commission_setup_types_hint'.tr(),
-                  style: _bodyStyle(opacity: 0.65, fontSize: 12),
-                ),
-              ],
             ],
-          ),
+          ],
         ),
-      ],
-    );
+      ),
+    ]);
   }
 
   Widget _buildStep3Pricing() {
-    return _buildStepWrapper(
-      [
-        GlassCard(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildSectionHeader(
-                'commission_setup_pricing_title'.tr(),
-                'commission_setup_pricing_subtitle'.tr(),
-              ),
-              const SizedBox(height: 16),
-              _buildStatRow(
-                'commission_settings_base_price_label'.tr(),
-                _formatCurrency(_basePrice),
-                icon: Icons.attach_money,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'commission_setup_pricing_base_helper'.tr(),
-                style: _bodyStyle(opacity: 0.65, fontSize: 12),
-              ),
-              _buildSlider(
-                value: _basePrice,
-                min: 25,
-                max: 1000,
-                divisions: 39,
-                label: _formatCurrency(_basePrice),
-                onChanged: (value) => setState(() => _basePrice = value),
-              ),
-              const SizedBox(height: 24),
-              _buildStatRow(
-                'commission_setup_pricing_turnaround_label'.tr(),
-                '${_turnaroundDays} ${'commission_setup_label_days'.tr()}',
-                icon: Icons.schedule,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'commission_setup_pricing_turnaround_helper'.tr(),
-                style: _bodyStyle(opacity: 0.65, fontSize: 12),
-              ),
-              _buildSlider(
-                value: _turnaroundDays.toDouble(),
-                min: 1,
-                max: 90,
-                divisions: 89,
-                label:
-                    '${_turnaroundDays} ${'commission_setup_label_days'.tr()}',
-                onChanged: (value) =>
-                    setState(() => _turnaroundDays = value.toInt()),
-              ),
-            ],
-          ),
+    return _buildStepWrapper([
+      GlassCard(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildSectionHeader(
+              'commission_setup_pricing_title'.tr(),
+              'commission_setup_pricing_subtitle'.tr(),
+            ),
+            const SizedBox(height: 16),
+            _buildStatRow(
+              'commission_settings_base_price_label'.tr(),
+              _formatCurrency(_basePrice),
+              icon: Icons.attach_money,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'commission_setup_pricing_base_helper'.tr(),
+              style: _bodyStyle(opacity: 0.65, fontSize: 12),
+            ),
+            _buildSlider(
+              value: _basePrice,
+              min: 25,
+              max: 1000,
+              divisions: 39,
+              label: _formatCurrency(_basePrice),
+              onChanged: (value) => setState(() => _basePrice = value),
+            ),
+            const SizedBox(height: 24),
+            _buildStatRow(
+              'commission_setup_pricing_turnaround_label'.tr(),
+              '${_turnaroundDays} ${'commission_setup_label_days'.tr()}',
+              icon: Icons.schedule,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'commission_setup_pricing_turnaround_helper'.tr(),
+              style: _bodyStyle(opacity: 0.65, fontSize: 12),
+            ),
+            _buildSlider(
+              value: _turnaroundDays.toDouble(),
+              min: 1,
+              max: 90,
+              divisions: 89,
+              label: '${_turnaroundDays} ${'commission_setup_label_days'.tr()}',
+              onChanged: (value) =>
+                  setState(() => _turnaroundDays = value.toInt()),
+            ),
+          ],
         ),
-      ],
-    );
+      ),
+    ]);
   }
 
   Widget _buildStep4Portfolio() {
-    return _buildStepWrapper(
-      [
-        GlassCard(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildSectionHeader(
-                'commission_setup_portfolio_title'.tr(),
-                'commission_setup_portfolio_subtitle'.tr(),
-              ),
-              const SizedBox(height: 16),
-              if (_portfolioImages.isEmpty)
-                Container(
-                  width: double.infinity,
-                  height: 200,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.04),
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.12),
-                    ),
+    return _buildStepWrapper([
+      GlassCard(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildSectionHeader(
+              'commission_setup_portfolio_title'.tr(),
+              'commission_setup_portfolio_subtitle'.tr(),
+            ),
+            const SizedBox(height: 16),
+            if (_portfolioImages.isEmpty)
+              Container(
+                width: double.infinity,
+                height: 200,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.04),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.12),
                   ),
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.photo_library,
-                          color: Colors.white.withValues(alpha: 0.5),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'commission_setup_portfolio_empty_title'.tr(),
-                          style: _sectionTitleStyle,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'commission_setup_portfolio_empty_subtitle'.tr(),
-                          textAlign: TextAlign.center,
-                          style: _bodyStyle(opacity: 0.7, fontSize: 12),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              else
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  padding: EdgeInsets.zero,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                  ),
-                  itemCount: _portfolioImages.length,
-                  itemBuilder: (context, index) => _buildPortfolioTile(index),
                 ),
-              const SizedBox(height: 16),
-              HudButton.secondary(
-                onPressed: _isUploadingImage ? null : _addPortfolioImage,
-                text: _isUploadingImage
-                    ? 'commission_setup_portfolio_uploading'.tr()
-                    : 'commission_setup_portfolio_add_button'.tr(),
-                icon: Icons.add_photo_alternate,
-                isLoading: _isUploadingImage,
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.photo_library,
+                        color: Colors.white.withValues(alpha: 0.5),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'commission_setup_portfolio_empty_title'.tr(),
+                        style: _sectionTitleStyle,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'commission_setup_portfolio_empty_subtitle'.tr(),
+                        textAlign: TextAlign.center,
+                        style: _bodyStyle(opacity: 0.7, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                padding: EdgeInsets.zero,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                ),
+                itemCount: _portfolioImages.length,
+                itemBuilder: (context, index) => _buildPortfolioTile(index),
               ),
-            ],
-          ),
+            const SizedBox(height: 16),
+            HudButton.secondary(
+              onPressed: _isUploadingImage ? null : _addPortfolioImage,
+              text: _isUploadingImage
+                  ? 'commission_setup_portfolio_uploading'.tr()
+                  : 'commission_setup_portfolio_add_button'.tr(),
+              icon: Icons.add_photo_alternate,
+              isLoading: _isUploadingImage,
+            ),
+          ],
         ),
-      ],
-    );
+      ),
+    ]);
   }
 
   Widget _buildStep5AdvancedPricing() {
-    return _buildStepWrapper(
-      [
-        GlassCard(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildSectionHeader(
-                'commission_setup_advanced_title'.tr(),
-                'commission_setup_advanced_subtitle'.tr(),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'commission_setup_advanced_types_label'.tr(),
-                style: _sectionTitleStyle,
-              ),
-              const SizedBox(height: 12),
-              ..._selectedTypes.map(
-                (type) => Padding(
-                  padding: EdgeInsets.only(
-                    bottom: type == _selectedTypes.last ? 0 : 16,
-                  ),
-                  child: _buildModifierSlider(
-                    label: _typeLabelKeys[type]!.tr(),
-                    value: _typePricing[type] ?? 0,
-                    onChanged: (value) => setState(() {
-                      _typePricing[type] = value;
-                    }),
-                  ),
+    return _buildStepWrapper([
+      GlassCard(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildSectionHeader(
+              'commission_setup_advanced_title'.tr(),
+              'commission_setup_advanced_subtitle'.tr(),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'commission_setup_advanced_types_label'.tr(),
+              style: _sectionTitleStyle,
+            ),
+            const SizedBox(height: 12),
+            ..._selectedTypes.map(
+              (type) => Padding(
+                padding: EdgeInsets.only(
+                  bottom: type == _selectedTypes.last ? 0 : 16,
+                ),
+                child: _buildModifierSlider(
+                  label: _typeLabelKeys[type]!.tr(),
+                  value: _typePricing[type] ?? 0,
+                  onChanged: (value) => setState(() {
+                    _typePricing[type] = value;
+                  }),
                 ),
               ),
-              if (_selectedTypes.isEmpty)
-                Text(
-                  'commission_setup_types_hint'.tr(),
-                  style: _bodyStyle(opacity: 0.65, fontSize: 12),
-                ),
-              if (_selectedTypes.isNotEmpty) const SizedBox(height: 24),
+            ),
+            if (_selectedTypes.isEmpty)
               Text(
-                'commission_setup_advanced_sizes_label'.tr(),
-                style: _sectionTitleStyle,
-              ),
-              const SizedBox(height: 12),
-              ..._sizeOptions.map(
-                (option) => Padding(
-                  padding: EdgeInsets.only(
-                    bottom: option == _sizeOptions.last ? 0 : 16,
-                  ),
-                  child: _buildModifierSlider(
-                    label: option.labelKey.tr(),
-                    value: _sizePricing[option.storageKey] ?? 0,
-                    onChanged: (value) => setState(() {
-                      _sizePricing[option.storageKey] = value;
-                    }),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        GlassCard(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'commission_setup_advanced_max_label'.tr(),
-                style: _sectionTitleStyle,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'commission_setup_advanced_max_helper'.tr(),
+                'commission_setup_types_hint'.tr(),
                 style: _bodyStyle(opacity: 0.65, fontSize: 12),
               ),
-              _buildSlider(
-                value: _maxActiveCommissions.toDouble(),
-                min: 1,
-                max: 20,
-                divisions: 19,
-                label: '$_maxActiveCommissions',
-                onChanged: (value) =>
-                    setState(() => _maxActiveCommissions = value.toInt()),
+            if (_selectedTypes.isNotEmpty) const SizedBox(height: 24),
+            Text(
+              'commission_setup_advanced_sizes_label'.tr(),
+              style: _sectionTitleStyle,
+            ),
+            const SizedBox(height: 12),
+            ..._sizeOptions.map(
+              (option) => Padding(
+                padding: EdgeInsets.only(
+                  bottom: option == _sizeOptions.last ? 0 : 16,
+                ),
+                child: _buildModifierSlider(
+                  label: option.labelKey.tr(),
+                  value: _sizePricing[option.storageKey] ?? 0,
+                  onChanged: (value) => setState(() {
+                    _sizePricing[option.storageKey] = value;
+                  }),
+                ),
               ),
-              const SizedBox(height: 24),
-              Text(
-                'commission_setup_advanced_deposit_label'.tr(),
-                style: _sectionTitleStyle,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'commission_setup_advanced_deposit_helper'.tr(),
-                style: _bodyStyle(opacity: 0.65, fontSize: 12),
-              ),
-              _buildSlider(
-                value: _depositPercentage,
-                min: 25,
-                max: 100,
-                divisions: 15,
-                label: '${_depositPercentage.toStringAsFixed(0)}%',
-                onChanged: (value) => setState(() => _depositPercentage = value),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
-      ],
-    );
+      ),
+      GlassCard(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'commission_setup_advanced_max_label'.tr(),
+              style: _sectionTitleStyle,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'commission_setup_advanced_max_helper'.tr(),
+              style: _bodyStyle(opacity: 0.65, fontSize: 12),
+            ),
+            _buildSlider(
+              value: _maxActiveCommissions.toDouble(),
+              min: 1,
+              max: 20,
+              divisions: 19,
+              label: '$_maxActiveCommissions',
+              onChanged: (value) =>
+                  setState(() => _maxActiveCommissions = value.toInt()),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'commission_setup_advanced_deposit_label'.tr(),
+              style: _sectionTitleStyle,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'commission_setup_advanced_deposit_helper'.tr(),
+              style: _bodyStyle(opacity: 0.65, fontSize: 12),
+            ),
+            _buildSlider(
+              value: _depositPercentage,
+              min: 25,
+              max: 100,
+              divisions: 15,
+              label: '${_depositPercentage.toStringAsFixed(0)}%',
+              onChanged: (value) => setState(() => _depositPercentage = value),
+            ),
+          ],
+        ),
+      ),
+    ]);
   }
 
   Widget _buildStep6Review() {
@@ -856,85 +851,83 @@ class _CommissionSetupWizardScreenState
       namedArgs: {'count': _portfolioImages.length.toString()},
     );
 
-    return _buildStepWrapper(
-      [
-        GlassCard(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildSectionHeader(
-                'commission_setup_review_title'.tr(),
-                'commission_setup_review_subtitle'.tr(),
-              ),
-              const SizedBox(height: 16),
-              _buildReviewRow(
-                'commission_setup_review_accepting_label'.tr(),
-                acceptingValue,
-              ),
-              _buildReviewRow(
-                'commission_setup_review_types_label'.tr(),
-                typeSummary,
-              ),
-              _buildReviewRow(
-                'commission_setup_review_base_label'.tr(),
-                _formatCurrency(_basePrice),
-              ),
-              _buildReviewRow(
-                'commission_setup_review_turnaround_label'.tr(),
-                '${_turnaroundDays} ${'commission_setup_label_days'.tr()}',
-              ),
-              _buildReviewRow(
-                'commission_setup_review_portfolio_label'.tr(),
-                portfolioCount,
-              ),
-              _buildReviewRow(
-                'commission_setup_review_pricing_label'.tr(),
-                '$_maxActiveCommissions',
-              ),
-              _buildReviewRow(
-                'commission_setup_review_deposit_label'.tr(),
-                '${_depositPercentage.toStringAsFixed(0)}%',
-              ),
-            ],
-          ),
+    return _buildStepWrapper([
+      GlassCard(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildSectionHeader(
+              'commission_setup_review_title'.tr(),
+              'commission_setup_review_subtitle'.tr(),
+            ),
+            const SizedBox(height: 16),
+            _buildReviewRow(
+              'commission_setup_review_accepting_label'.tr(),
+              acceptingValue,
+            ),
+            _buildReviewRow(
+              'commission_setup_review_types_label'.tr(),
+              typeSummary,
+            ),
+            _buildReviewRow(
+              'commission_setup_review_base_label'.tr(),
+              _formatCurrency(_basePrice),
+            ),
+            _buildReviewRow(
+              'commission_setup_review_turnaround_label'.tr(),
+              '${_turnaroundDays} ${'commission_setup_label_days'.tr()}',
+            ),
+            _buildReviewRow(
+              'commission_setup_review_portfolio_label'.tr(),
+              portfolioCount,
+            ),
+            _buildReviewRow(
+              'commission_setup_review_pricing_label'.tr(),
+              '$_maxActiveCommissions',
+            ),
+            _buildReviewRow(
+              'commission_setup_review_deposit_label'.tr(),
+              '${_depositPercentage.toStringAsFixed(0)}%',
+            ),
+          ],
         ),
-        GlassCard(
-          padding: const EdgeInsets.all(20),
-          showAccentGlow: true,
-          child: Row(
-            children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  gradient: _WizardPalette.primaryGradient,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Icon(Icons.rocket_launch, color: Colors.white),
+      ),
+      GlassCard(
+        padding: const EdgeInsets.all(20),
+        showAccentGlow: true,
+        child: Row(
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                gradient: _WizardPalette.primaryGradient,
+                borderRadius: BorderRadius.circular(20),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'commission_setup_review_ready_title'.tr(),
-                      style: _heroTitleStyle,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'commission_setup_review_ready_subtitle'.tr(),
-                      style: _bodyStyle(opacity: 0.8),
-                    ),
-                  ],
-                ),
+              child: const Icon(Icons.rocket_launch, color: Colors.white),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'commission_setup_review_ready_title'.tr(),
+                    style: _heroTitleStyle,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'commission_setup_review_ready_subtitle'.tr(),
+                    style: _bodyStyle(opacity: 0.8),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-      ],
-    );
+      ),
+    ]);
   }
 
   Widget _buildStepWrapper(List<Widget> children) {
@@ -1122,10 +1115,7 @@ class _CommissionSetupWizardScreenState
         Row(
           children: [
             Expanded(
-              child: Text(
-                label,
-                style: _bodyStyle(opacity: 0.9, fontSize: 14),
-              ),
+              child: Text(label, style: _bodyStyle(opacity: 0.9, fontSize: 14)),
             ),
             Text(
               '+${_formatCurrency(value)}',
@@ -1163,10 +1153,7 @@ class _CommissionSetupWizardScreenState
           if (imageProvider != null)
             DecoratedBox(
               decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: imageProvider,
-                  fit: BoxFit.cover,
-                ),
+                image: DecorationImage(image: imageProvider, fit: BoxFit.cover),
               ),
             )
           else
@@ -1203,10 +1190,7 @@ class _CommissionSetupWizardScreenState
         children: [
           Expanded(
             flex: 2,
-            child: Text(
-              label,
-              style: _bodyStyle(opacity: 0.7, fontSize: 12),
-            ),
+            child: Text(label, style: _bodyStyle(opacity: 0.7, fontSize: 12)),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -1269,8 +1253,9 @@ class _CommissionSetupWizardScreenState
   }
 
   String _formatCurrency(double value) {
-    final formatted =
-        value % 1 == 0 ? value.toStringAsFixed(0) : value.toStringAsFixed(2);
+    final formatted = value % 1 == 0
+        ? value.toStringAsFixed(0)
+        : value.toStringAsFixed(2);
     return '\$$formatted';
   }
 
@@ -1295,16 +1280,16 @@ class _CommissionSetupWizardScreenState
   }
 
   TextStyle get _heroTitleStyle => GoogleFonts.spaceGrotesk(
-        fontSize: 18,
-        fontWeight: FontWeight.w900,
-        color: _WizardPalette.textPrimary,
-      );
+    fontSize: 18,
+    fontWeight: FontWeight.w900,
+    color: _WizardPalette.textPrimary,
+  );
 
   TextStyle get _sectionTitleStyle => GoogleFonts.spaceGrotesk(
-        fontSize: 15,
-        fontWeight: FontWeight.w800,
-        color: _WizardPalette.textPrimary,
-      );
+    fontSize: 15,
+    fontWeight: FontWeight.w800,
+    color: _WizardPalette.textPrimary,
+  );
 
   TextStyle _bodyStyle({double opacity = 0.8, double fontSize = 13}) {
     return GoogleFonts.spaceGrotesk(
@@ -1342,10 +1327,7 @@ class _BenefitItem {
 }
 
 class _SizeOption {
-  const _SizeOption({
-    required this.storageKey,
-    required this.labelKey,
-  });
+  const _SizeOption({required this.storageKey, required this.labelKey});
 
   final String storageKey;
   final String labelKey;

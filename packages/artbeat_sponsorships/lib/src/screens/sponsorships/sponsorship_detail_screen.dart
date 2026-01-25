@@ -9,38 +9,32 @@ class SponsorshipDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => WorldBackground(
-      child: Column(
-        children: [
-          HudTopBar(
-            title: 'Sponsorship Details',
-            onBack: () => Navigator.pop(context),
-          ),
-          Expanded(
-            child: ListView(
-              children: const [
-                SponsorshipSection(
-                  title: 'Details',
-                  child: Column(
-                    children: [
-                      SponsorshipReviewRow(
-                        label: 'Status',
-                        value: 'Active',
-                      ),
-                      SponsorshipReviewRow(
-                        label: 'Type',
-                        value: 'Capture Sponsorship',
-                      ),
-                      SponsorshipReviewRow(
-                        label: 'Ends',
-                        value: 'Aug 31, 2026',
-                      ),
-                    ],
-                  ),
+    child: Column(
+      children: [
+        HudTopBar(
+          title: 'Sponsorship Details',
+          onBack: () => Navigator.pop(context),
+        ),
+        Expanded(
+          child: ListView(
+            children: const [
+              SponsorshipSection(
+                title: 'Details',
+                child: Column(
+                  children: [
+                    SponsorshipReviewRow(label: 'Status', value: 'Active'),
+                    SponsorshipReviewRow(
+                      label: 'Type',
+                      value: 'Capture Sponsorship',
+                    ),
+                    SponsorshipReviewRow(label: 'Ends', value: 'Aug 31, 2026'),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
-    );
+        ),
+      ],
+    ),
+  );
 }

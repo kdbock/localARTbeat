@@ -34,10 +34,12 @@ class _CommissionDetailScreenState extends State<CommissionDetailScreen>
   String? _currentUserId;
 
   final intl.DateFormat _dateFormatter = intl.DateFormat('MMM d, yyyy');
-  final intl.DateFormat _dateTimeFormatter =
-      intl.DateFormat('MMM d, yyyy • h:mm a');
-  final intl.NumberFormat _currencyFormatter =
-      intl.NumberFormat.currency(symbol: '\$');
+  final intl.DateFormat _dateTimeFormatter = intl.DateFormat(
+    'MMM d, yyyy • h:mm a',
+  );
+  final intl.NumberFormat _currencyFormatter = intl.NumberFormat.currency(
+    symbol: '\$',
+  );
 
   final Map<CommissionStatus, IconData> _statusIcons = {
     CommissionStatus.pending: Icons.schedule,
@@ -106,7 +108,8 @@ class _CommissionDetailScreenState extends State<CommissionDetailScreen>
 
   final Map<MilestoneStatus, String> _milestoneStatusKeys = {
     MilestoneStatus.pending: 'commission_detail_milestone_status_pending',
-    MilestoneStatus.inProgress: 'commission_detail_milestone_status_in_progress',
+    MilestoneStatus.inProgress:
+        'commission_detail_milestone_status_in_progress',
     MilestoneStatus.completed: 'commission_detail_milestone_status_completed',
     MilestoneStatus.paid: 'commission_detail_milestone_status_paid',
   };
@@ -169,7 +172,8 @@ class _CommissionDetailScreenState extends State<CommissionDetailScreen>
                 onSelected: _handleMenuAction,
                 itemBuilder: (context) => _buildMenuItems(commission),
               ),
-          ], subtitle: '',
+          ],
+          subtitle: '',
         ),
         body: SafeArea(
           child: commission == null
@@ -186,7 +190,9 @@ class _CommissionDetailScreenState extends State<CommissionDetailScreen>
                           fontSize: 13,
                           fontWeight: FontWeight.w800,
                         ),
-                        unselectedLabelColor: Colors.white.withValues(alpha: 0.6),
+                        unselectedLabelColor: Colors.white.withValues(
+                          alpha: 0.6,
+                        ),
                         labelColor: Colors.white,
                         indicator: BoxDecoration(
                           gradient: _DetailPalette.primaryGradient,
@@ -233,8 +239,9 @@ class _CommissionDetailScreenState extends State<CommissionDetailScreen>
     }
     descriptionKey ??= _statusDescriptionNeutralKeys[status];
 
-    final description =
-        descriptionKey != null ? descriptionKey.tr() : status.displayName;
+    final description = descriptionKey != null
+        ? descriptionKey.tr()
+        : status.displayName;
 
     return GlassCard(
       showAccentGlow: true,
@@ -251,10 +258,7 @@ class _CommissionDetailScreenState extends State<CommissionDetailScreen>
                   gradient: _DetailPalette.primaryGradient,
                   borderRadius: BorderRadius.circular(18),
                 ),
-                child: Icon(
-                  _statusIcons[status],
-                  color: Colors.white,
-                ),
+                child: Icon(_statusIcons[status], color: Colors.white),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -456,8 +460,7 @@ class _CommissionDetailScreenState extends State<CommissionDetailScreen>
                           margin: const EdgeInsets.only(bottom: 12),
                           padding: const EdgeInsets.all(14),
                           constraints: BoxConstraints(
-                            maxWidth:
-                                MediaQuery.of(context).size.width * 0.75,
+                            maxWidth: MediaQuery.of(context).size.width * 0.75,
                           ),
                           decoration: BoxDecoration(
                             gradient: bubbleColor,
@@ -571,10 +574,7 @@ class _CommissionDetailScreenState extends State<CommissionDetailScreen>
                       gradient: _DetailPalette.secondaryGradient,
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    child: Icon(
-                      _getFileIcon(file.name),
-                      color: Colors.white,
-                    ),
+                    child: Icon(_getFileIcon(file.name), color: Colors.white),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -611,10 +611,7 @@ class _CommissionDetailScreenState extends State<CommissionDetailScreen>
                 ],
               ),
               const SizedBox(height: 12),
-              _buildInfoRow(
-                'commission_detail_file_type'.tr(),
-                file.type,
-              ),
+              _buildInfoRow('commission_detail_file_type'.tr(), file.type),
               _buildInfoRow(
                 'commission_detail_file_size'.tr(),
                 _formatFileSize(file.sizeBytes),
@@ -654,7 +651,8 @@ class _CommissionDetailScreenState extends State<CommissionDetailScreen>
         final statusColor =
             _milestoneStatusColors[milestone.status] ?? Colors.white;
         final statusLabel =
-            _milestoneStatusKeys[milestone.status]?.tr() ?? milestone.status.name;
+            _milestoneStatusKeys[milestone.status]?.tr() ??
+            milestone.status.name;
 
         return GlassCard(
           padding: const EdgeInsets.all(20),
@@ -674,13 +672,16 @@ class _CommissionDetailScreenState extends State<CommissionDetailScreen>
                     ),
                   ),
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: statusColor.withValues(alpha: 0.18),
                       borderRadius: BorderRadius.circular(16),
-                      border:
-                          Border.all(color: statusColor.withValues(alpha: 0.4)),
+                      border: Border.all(
+                        color: statusColor.withValues(alpha: 0.4),
+                      ),
                     ),
                     child: Text(
                       statusLabel,
@@ -771,7 +772,9 @@ class _CommissionDetailScreenState extends State<CommissionDetailScreen>
           ),
           Expanded(
             child: Text(
-              value.isEmpty ? 'commission_detail_value_not_provided'.tr() : value,
+              value.isEmpty
+                  ? 'commission_detail_value_not_provided'.tr()
+                  : value,
               style: GoogleFonts.spaceGrotesk(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
@@ -818,7 +821,9 @@ class _CommissionDetailScreenState extends State<CommissionDetailScreen>
     );
   }
 
-  List<PopupMenuEntry<String>> _buildMenuItems(DirectCommissionModel commission) {
+  List<PopupMenuEntry<String>> _buildMenuItems(
+    DirectCommissionModel commission,
+  ) {
     final items = <PopupMenuEntry<String>>[];
 
     if (_isArtist && commission.status == CommissionStatus.pending) {
@@ -890,10 +895,11 @@ class _CommissionDetailScreenState extends State<CommissionDetailScreen>
     } else if (status == CommissionStatus.quoted && _isClient) {
       return 'commission_detail_action_accept_quote'.tr();
     } else if (_shouldShowDepositAction()) {
-      return 'commission_detail_action_pay_deposit'
-          .tr(namedArgs: {
-        'amount': _currencyFormatter.format(_commission!.depositAmount),
-      });
+      return 'commission_detail_action_pay_deposit'.tr(
+        namedArgs: {
+          'amount': _currencyFormatter.format(_commission!.depositAmount),
+        },
+      );
     } else if (status == CommissionStatus.inProgress && _isArtist) {
       return 'commission_detail_action_mark_complete'.tr();
     }
@@ -949,7 +955,9 @@ class _CommissionDetailScreenState extends State<CommissionDetailScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'commission_detail_error_message_send'.tr(namedArgs: {'error': '$e'}),
+            'commission_detail_error_message_send'.tr(
+              namedArgs: {'error': '$e'},
+            ),
           ),
         ),
       );
@@ -981,7 +989,8 @@ class _CommissionDetailScreenState extends State<CommissionDetailScreen>
     final milestones = milestoneMaps
         .map(
           (m) => CommissionMilestone(
-            id: DateTime.now().millisecondsSinceEpoch.toString() +
+            id:
+                DateTime.now().millisecondsSinceEpoch.toString() +
                 m['title'].hashCode.toString(),
             title: m['title'] as String,
             description: m['description'] as String,
@@ -1012,7 +1021,9 @@ class _CommissionDetailScreenState extends State<CommissionDetailScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'commission_detail_toast_quote_error'.tr(namedArgs: {'error': '$e'}),
+            'commission_detail_toast_quote_error'.tr(
+              namedArgs: {'error': '$e'},
+            ),
           ),
         ),
       );
@@ -1025,9 +1036,7 @@ class _CommissionDetailScreenState extends State<CommissionDetailScreen>
       await _loadCommissionDetails();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('commission_detail_toast_accept_success'.tr()),
-        ),
+        SnackBar(content: Text('commission_detail_toast_accept_success'.tr())),
       );
     } catch (e) {
       core.AppLogger.error('Failed to accept commission quote: $e');
@@ -1035,7 +1044,9 @@ class _CommissionDetailScreenState extends State<CommissionDetailScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'commission_detail_toast_accept_error'.tr(namedArgs: {'error': '$e'}),
+            'commission_detail_toast_accept_error'.tr(
+              namedArgs: {'error': '$e'},
+            ),
           ),
         ),
       );
@@ -1047,8 +1058,9 @@ class _CommissionDetailScreenState extends State<CommissionDetailScreen>
       await _stripeService.processCommissionDeposit(
         commissionId: _commission!.id,
         amount: _commission!.depositAmount,
-        message: 'commission_detail_payment_deposit_memo'
-            .tr(namedArgs: {'title': _commission!.title}),
+        message: 'commission_detail_payment_deposit_memo'.tr(
+          namedArgs: {'title': _commission!.title},
+        ),
       );
       await _loadCommissionDetails();
       if (!mounted) return;
@@ -1061,8 +1073,9 @@ class _CommissionDetailScreenState extends State<CommissionDetailScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'commission_detail_toast_deposit_error'
-                .tr(namedArgs: {'error': '$e'}),
+            'commission_detail_toast_deposit_error'.tr(
+              namedArgs: {'error': '$e'},
+            ),
           ),
         ),
       );
@@ -1075,7 +1088,9 @@ class _CommissionDetailScreenState extends State<CommissionDetailScreen>
       await _loadCommissionDetails();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('commission_detail_toast_complete_success'.tr())),
+        SnackBar(
+          content: Text('commission_detail_toast_complete_success'.tr()),
+        ),
       );
     } catch (e) {
       core.AppLogger.error('Failed to mark commission complete: $e');
@@ -1083,8 +1098,9 @@ class _CommissionDetailScreenState extends State<CommissionDetailScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'commission_detail_toast_complete_error'
-                .tr(namedArgs: {'error': '$e'}),
+            'commission_detail_toast_complete_error'.tr(
+              namedArgs: {'error': '$e'},
+            ),
           ),
         ),
       );
@@ -1116,8 +1132,9 @@ class _CommissionDetailScreenState extends State<CommissionDetailScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'commission_detail_toast_cancel_error'
-                .tr(namedArgs: {'error': '$e'}),
+            'commission_detail_toast_cancel_error'.tr(
+              namedArgs: {'error': '$e'},
+            ),
           ),
         ),
       );
@@ -1130,8 +1147,9 @@ class _CommissionDetailScreenState extends State<CommissionDetailScreen>
         commissionId: _commission!.id,
         milestoneId: milestone.id,
         amount: milestone.amount,
-        message: 'commission_detail_payment_milestone_memo'
-            .tr(namedArgs: {'title': milestone.title}),
+        message: 'commission_detail_payment_milestone_memo'.tr(
+          namedArgs: {'title': milestone.title},
+        ),
       );
       await _loadCommissionDetails();
       if (!mounted) return;
@@ -1146,8 +1164,9 @@ class _CommissionDetailScreenState extends State<CommissionDetailScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'commission_detail_toast_milestone_error'
-                .tr(namedArgs: {'error': '$e'}),
+            'commission_detail_toast_milestone_error'.tr(
+              namedArgs: {'error': '$e'},
+            ),
           ),
         ),
       );
@@ -1160,9 +1179,9 @@ class _CommissionDetailScreenState extends State<CommissionDetailScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'commission_detail_toast_download_start'.tr(namedArgs: {
-              'name': file.name,
-            }),
+            'commission_detail_toast_download_start'.tr(
+              namedArgs: {'name': file.name},
+            ),
           ),
         ),
       );
@@ -1190,9 +1209,9 @@ class _CommissionDetailScreenState extends State<CommissionDetailScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'commission_detail_toast_download_success'.tr(namedArgs: {
-              'path': localFile.path,
-            }),
+            'commission_detail_toast_download_success'.tr(
+              namedArgs: {'path': localFile.path},
+            ),
           ),
           duration: const Duration(seconds: 5),
         ),
@@ -1203,8 +1222,9 @@ class _CommissionDetailScreenState extends State<CommissionDetailScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'commission_detail_toast_download_error'
-                .tr(namedArgs: {'error': '$e'}),
+            'commission_detail_toast_download_error'.tr(
+              namedArgs: {'error': '$e'},
+            ),
           ),
         ),
       );
@@ -1247,22 +1267,25 @@ class _CommissionDetailScreenState extends State<CommissionDetailScreen>
     final now = DateTime.now();
     final lowerTimeline = timeline.toLowerCase().trim();
 
-    final weekMatch =
-        RegExp(r'(\d+)(?:\s*-\s*\d+)?\s*week').firstMatch(lowerTimeline);
+    final weekMatch = RegExp(
+      r'(\d+)(?:\s*-\s*\d+)?\s*week',
+    ).firstMatch(lowerTimeline);
     if (weekMatch != null) {
       final weeks = int.tryParse(weekMatch.group(1) ?? '1') ?? 1;
       return now.add(Duration(days: weeks * 7));
     }
 
-    final monthMatch =
-        RegExp(r'(\d+)(?:\s*-\s*\d+)?\s*month').firstMatch(lowerTimeline);
+    final monthMatch = RegExp(
+      r'(\d+)(?:\s*-\s*\d+)?\s*month',
+    ).firstMatch(lowerTimeline);
     if (monthMatch != null) {
       final months = int.tryParse(monthMatch.group(1) ?? '1') ?? 1;
       return DateTime(now.year, now.month + months, now.day);
     }
 
-    final dayMatch =
-        RegExp(r'(\d+)(?:\s*-\s*\d+)?\s*day').firstMatch(lowerTimeline);
+    final dayMatch = RegExp(
+      r'(\d+)(?:\s*-\s*\d+)?\s*day',
+    ).firstMatch(lowerTimeline);
     if (dayMatch != null) {
       final days = int.tryParse(dayMatch.group(1) ?? '1') ?? 1;
       return now.add(Duration(days: days));
@@ -1338,8 +1361,10 @@ class _QuoteProvisionDialogState extends State<QuoteProvisionDialog> {
                   decoration: GlassInputDecoration(
                     labelText: 'commission_detail_quote_price_label'.tr(),
                     hintText: 'commission_detail_quote_price_hint'.tr(),
-                    prefixIcon:
-                        const Icon(Icons.attach_money, color: Colors.white),
+                    prefixIcon: const Icon(
+                      Icons.attach_money,
+                      color: Colors.white,
+                    ),
                   ),
                   keyboardType: TextInputType.number,
                   validator: (value) {
@@ -1441,7 +1466,10 @@ class _QuoteProvisionDialogState extends State<QuoteProvisionDialog> {
                                 ),
                                 IconButton(
                                   onPressed: () => _removeMilestone(index),
-                                  icon: const Icon(Icons.delete, color: Colors.white),
+                                  icon: const Icon(
+                                    Icons.delete,
+                                    color: Colors.white,
+                                  ),
                                 ),
                               ],
                             ),
@@ -1462,14 +1490,16 @@ class _QuoteProvisionDialogState extends State<QuoteProvisionDialog> {
                               children: [
                                 Expanded(
                                   child: TextFormField(
-                                    initialValue:
-                                        milestone['amount'].toString(),
+                                    initialValue: milestone['amount']
+                                        .toString(),
                                     decoration: GlassInputDecoration(
                                       labelText:
                                           'commission_detail_quote_milestone_amount'
                                               .tr(),
-                                      prefixIcon: const Icon(Icons.payments,
-                                          color: Colors.white),
+                                      prefixIcon: const Icon(
+                                        Icons.payments,
+                                        color: Colors.white,
+                                      ),
                                     ),
                                     keyboardType: TextInputType.number,
                                     onChanged: (value) {
@@ -1489,13 +1519,18 @@ class _QuoteProvisionDialogState extends State<QuoteProvisionDialog> {
                                       labelText:
                                           'commission_detail_quote_milestone_due'
                                               .tr(),
-                                      hintText: 'commission_detail_quote_date_hint'
-                                          .tr(),
+                                      hintText:
+                                          'commission_detail_quote_date_hint'
+                                              .tr(),
                                     ),
                                     onChanged: (value) {
                                       final date = _parseDate(value);
                                       if (date != null) {
-                                        _updateMilestone(index, 'dueDate', date);
+                                        _updateMilestone(
+                                          index,
+                                          'dueDate',
+                                          date,
+                                        );
                                       }
                                     },
                                   ),
@@ -1586,8 +1621,7 @@ class _QuoteProvisionDialogState extends State<QuoteProvisionDialog> {
           (milestone['amount'] as double) <= 0) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content:
-                Text('commission_detail_quote_milestones_error'.tr()),
+            content: Text('commission_detail_quote_milestones_error'.tr()),
           ),
         );
         return;
@@ -1675,9 +1709,10 @@ class _CancellationDialogState extends State<CancellationDialog> {
                             }
                           });
                         },
-                        selectedColor: const Color(0xFFFF3D8D).withValues(alpha: 0.2),
-                        backgroundColor:
-                            Colors.white.withValues(alpha: 0.05),
+                        selectedColor: const Color(
+                          0xFFFF3D8D,
+                        ).withValues(alpha: 0.2),
+                        backgroundColor: Colors.white.withValues(alpha: 0.05),
                         labelStyle: GoogleFonts.spaceGrotesk(
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
@@ -1739,9 +1774,7 @@ class _CancellationDialogState extends State<CancellationDialog> {
       reason = _selectedReason.tr();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('commission_detail_cancel_reason_select'.tr()),
-        ),
+        SnackBar(content: Text('commission_detail_cancel_reason_select'.tr())),
       );
       return;
     }

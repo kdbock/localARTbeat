@@ -247,9 +247,9 @@ class _EnhancedPostCardState extends State<EnhancedPostCard> {
     } catch (e) {
       AppLogger.error('Error adding comment in EnhancedPostCard: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to add comment')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Failed to add comment')));
       }
     } finally {
       if (mounted) {
@@ -394,9 +394,10 @@ class _EnhancedPostCardState extends State<EnhancedPostCard> {
                         backgroundImage: ImageUrlValidator.safeNetworkImage(
                           comment.userAvatarUrl,
                         ),
-                        child: !ImageUrlValidator.isValidImageUrl(
-                          comment.userAvatarUrl,
-                        )
+                        child:
+                            !ImageUrlValidator.isValidImageUrl(
+                              comment.userAvatarUrl,
+                            )
                             ? Text(
                                 comment.userName.isNotEmpty
                                     ? comment.userName[0].toUpperCase()

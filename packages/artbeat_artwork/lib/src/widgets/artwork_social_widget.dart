@@ -95,9 +95,11 @@ class _ArtworkSocialWidgetState extends State<ArtworkSocialWidget>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(_userRating == null
-                ? 'Rating submitted successfully!'
-                : 'Rating updated successfully!'),
+            content: Text(
+              _userRating == null
+                  ? 'Rating submitted successfully!'
+                  : 'Rating updated successfully!',
+            ),
             backgroundColor: Colors.green,
           ),
         );
@@ -181,8 +183,8 @@ class _ArtworkSocialWidgetState extends State<ArtworkSocialWidget>
                 Text(
                   'Ratings',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -217,9 +219,9 @@ class _ArtworkSocialWidgetState extends State<ArtworkSocialWidget>
                 _userRating == null
                     ? 'Rate this artwork:'
                     : 'Update your rating:',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
               ),
               const SizedBox(height: 8),
               Row(
@@ -282,8 +284,8 @@ class _ArtworkSocialWidgetState extends State<ArtworkSocialWidget>
                 Text(
                   'Comments',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -331,9 +333,7 @@ class _ArtworkSocialWidgetState extends State<ArtworkSocialWidget>
                 }
 
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Center(
-                    child: Text('art_walk_no_comments_yet'.tr()),
-                  );
+                  return Center(child: Text('art_walk_no_comments_yet'.tr()));
                 }
 
                 return Column(
@@ -346,9 +346,12 @@ class _ArtworkSocialWidgetState extends State<ArtworkSocialWidget>
                       child: ListTile(
                         leading: CircleAvatar(
                           backgroundImage: ImageUrlValidator.safeNetworkImage(
-                              comment.userAvatarUrl),
-                          child: !ImageUrlValidator.isValidImageUrl(
-                                  comment.userAvatarUrl)
+                            comment.userAvatarUrl,
+                          ),
+                          child:
+                              !ImageUrlValidator.isValidImageUrl(
+                                comment.userAvatarUrl,
+                              )
                               ? Text(comment.userName[0].toUpperCase())
                               : null,
                         ),
@@ -453,9 +456,12 @@ class _ArtworkSocialWidgetState extends State<ArtworkSocialWidget>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('art_walk_error_reporting_comment'
-                .tr()
-                .replaceAll('{error}', e.toString())),
+            content: Text(
+              'art_walk_error_reporting_comment'.tr().replaceAll(
+                '{error}',
+                e.toString(),
+              ),
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -488,11 +494,6 @@ class _ArtworkSocialWidgetState extends State<ArtworkSocialWidget>
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _buildRatingSection(),
-        _buildCommentSection(),
-      ],
-    );
+    return Column(children: [_buildRatingSection(), _buildCommentSection()]);
   }
 }

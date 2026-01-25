@@ -84,8 +84,9 @@ class FilterService {
           final artistSpecialties = (artistSpecialtiesRaw as List<dynamic>)
               .map((e) => e.toString())
               .toList();
-          return specialties
-              .any((specialty) => artistSpecialties.contains(specialty));
+          return specialties.any(
+            (specialty) => artistSpecialties.contains(specialty),
+          );
         }).toList();
       }
 
@@ -184,13 +185,14 @@ class FilterService {
       if (searchTerm != null && searchTerm.isNotEmpty) {
         results = results.where((artwork) {
           final title = (artwork['title'] ?? '').toString().toLowerCase();
-          final description =
-              (artwork['description'] ?? '').toString().toLowerCase();
+          final description = (artwork['description'] ?? '')
+              .toString()
+              .toLowerCase();
           final tagsRaw = artwork['tags'];
           final tags = tagsRaw != null
               ? (tagsRaw as List<dynamic>)
-                  .map((tag) => tag.toString().toLowerCase())
-                  .toList()
+                    .map((tag) => tag.toString().toLowerCase())
+                    .toList()
               : <String>[];
           final searchLower = searchTerm.toLowerCase();
 
@@ -260,8 +262,9 @@ class FilterService {
       if (searchTerm != null && searchTerm.isNotEmpty) {
         results = results.where((event) {
           final title = (event['title'] ?? '').toString().toLowerCase();
-          final description =
-              (event['description'] ?? '').toString().toLowerCase();
+          final description = (event['description'] ?? '')
+              .toString()
+              .toLowerCase();
           final venue = (event['venue'] ?? '').toString().toLowerCase();
           final searchLower = searchTerm.toLowerCase();
 
@@ -314,11 +317,7 @@ class FilterService {
       };
     } catch (e) {
       ArtistLogger.error('Error getting artist filter options: $e');
-      return {
-        'locations': [],
-        'specialties': [],
-        'subscriptionTiers': [],
-      };
+      return {'locations': [], 'specialties': [], 'subscriptionTiers': []};
     }
   }
 
@@ -354,11 +353,7 @@ class FilterService {
       };
     } catch (e) {
       ArtistLogger.error('Error getting artwork filter options: $e');
-      return {
-        'mediums': [],
-        'categories': [],
-        'locations': [],
-      };
+      return {'mediums': [], 'categories': [], 'locations': []};
     }
   }
 
@@ -371,10 +366,7 @@ class FilterService {
     int limit = 20,
     int offset = 0,
   }) {
-    final query = <String, dynamic>{
-      'limit': limit,
-      'offset': offset,
-    };
+    final query = <String, dynamic>{'limit': limit, 'offset': offset};
 
     if (searchTerm != null && searchTerm.isNotEmpty) {
       query['searchTerm'] = searchTerm;

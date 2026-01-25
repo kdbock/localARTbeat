@@ -13,10 +13,7 @@ import 'package:easy_localization/easy_localization.dart';
 class AudioContentDetailScreen extends StatefulWidget {
   final String artworkId;
 
-  const AudioContentDetailScreen({
-    super.key,
-    required this.artworkId,
-  });
+  const AudioContentDetailScreen({super.key, required this.artworkId});
 
   @override
   State<AudioContentDetailScreen> createState() =>
@@ -110,8 +107,9 @@ class _AudioContentDetailScreenState extends State<AudioContentDetailScreen> {
 
       // Load artist info
       try {
-        final artistProfile = await _subscriptionService
-            .getArtistProfileById(artwork.artistProfileId);
+        final artistProfile = await _subscriptionService.getArtistProfileById(
+          artwork.artistProfileId,
+        );
         _artist = artistProfile;
 
         // If artist profile not found, try to get user information as fallback
@@ -128,7 +126,8 @@ class _AudioContentDetailScreenState extends State<AudioContentDetailScreen> {
       }
 
       // Check access permissions - audio is free if not for sale or price is 0
-      _hasAccess = _isOwner ||
+      _hasAccess =
+          _isOwner ||
           !artwork.isForSale ||
           artwork.price == null ||
           artwork.price == 0;
@@ -148,9 +147,13 @@ class _AudioContentDetailScreenState extends State<AudioContentDetailScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('art_walk_error_loading_audio_content'
-                  .tr()
-                  .replaceAll('{error}', e.toString()))),
+            content: Text(
+              'art_walk_error_loading_audio_content'.tr().replaceAll(
+                '{error}',
+                e.toString(),
+              ),
+            ),
+          ),
         );
       }
     }
@@ -206,18 +209,14 @@ class _AudioContentDetailScreenState extends State<AudioContentDetailScreen> {
     if (_isLoading) {
       return const MainLayout(
         currentIndex: 1,
-        child: Center(
-          child: CircularProgressIndicator(),
-        ),
+        child: Center(child: CircularProgressIndicator()),
       );
     }
 
     if (_artwork == null) {
       return MainLayout(
         currentIndex: 1,
-        child: Center(
-          child: Text('art_walk_audio_content_not_found'.tr()),
-        ),
+        child: Center(child: Text('art_walk_audio_content_not_found'.tr())),
       );
     }
 
@@ -231,10 +230,7 @@ class _AudioContentDetailScreenState extends State<AudioContentDetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header with back button
-            EnhancedUniversalHeader(
-              title: artwork.title,
-              showBackButton: true,
-            ),
+            EnhancedUniversalHeader(title: artwork.title, showBackButton: true),
 
             // Audio content display
             Container(
@@ -252,15 +248,15 @@ class _AudioContentDetailScreenState extends State<AudioContentDetailScreen> {
                       image: ImageUrlValidator.isValidImageUrl(artwork.imageUrl)
                           ? DecorationImage(
                               image: ImageUrlValidator.safeNetworkImage(
-                                  artwork.imageUrl)!,
+                                artwork.imageUrl,
+                              )!,
                               fit: BoxFit.cover,
                             )
                           : null,
                       color:
                           !ImageUrlValidator.isValidImageUrl(artwork.imageUrl)
-                              ? ArtbeatColors.primaryGreen
-                                  .withValues(alpha: 0.1)
-                              : null,
+                          ? ArtbeatColors.primaryGreen.withValues(alpha: 0.1)
+                          : null,
                     ),
                     child: artwork.imageUrl.isEmpty
                         ? const Icon(
@@ -312,8 +308,8 @@ class _AudioContentDetailScreenState extends State<AudioContentDetailScreen> {
                           _isBuffering
                               ? Icons.hourglass_empty
                               : _isPlaying
-                                  ? Icons.pause
-                                  : Icons.play_arrow,
+                              ? Icons.pause
+                              : Icons.play_arrow,
                           color: Colors.white,
                           size: 40,
                         ),
@@ -324,8 +320,9 @@ class _AudioContentDetailScreenState extends State<AudioContentDetailScreen> {
                     Container(
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        color:
-                            ArtbeatColors.primaryGreen.withValues(alpha: 0.1),
+                        color: ArtbeatColors.primaryGreen.withValues(
+                          alpha: 0.1,
+                        ),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Column(
@@ -425,10 +422,7 @@ class _AudioContentDetailScreenState extends State<AudioContentDetailScreen> {
                           const SizedBox(height: 8),
                           Text(
                             artwork.description,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              height: 1.5,
-                            ),
+                            style: const TextStyle(fontSize: 16, height: 1.5),
                           ),
                           const SizedBox(height: 16),
                         ],
@@ -444,18 +438,25 @@ class _AudioContentDetailScreenState extends State<AudioContentDetailScreen> {
                           ),
                           const SizedBox(height: 8),
                           _buildMetadataRow(
-                              'Format',
-                              (artwork.readingMetadata!['format'] as String?) ??
-                                  'Unknown'),
+                            'Format',
+                            (artwork.readingMetadata!['format'] as String?) ??
+                                'Unknown',
+                          ),
                           _buildMetadataRow(
-                              'Duration', _formatDuration(_duration)),
+                            'Duration',
+                            _formatDuration(_duration),
+                          ),
                           if (artwork.readingMetadata!['fileSize'] != null) ...[
-                            _buildMetadataRow('File Size',
-                                '${((artwork.readingMetadata!['fileSize'] as num) / 1024 / 1024).toStringAsFixed(1)} MB'),
+                            _buildMetadataRow(
+                              'File Size',
+                              '${((artwork.readingMetadata!['fileSize'] as num) / 1024 / 1024).toStringAsFixed(1)} MB',
+                            ),
                           ],
                           if (artwork.readingMetadata!['bitrate'] != null) ...[
-                            _buildMetadataRow('Bitrate',
-                                '${artwork.readingMetadata!['bitrate']} kbps'),
+                            _buildMetadataRow(
+                              'Bitrate',
+                              '${artwork.readingMetadata!['bitrate']} kbps',
+                            ),
                           ],
                           const SizedBox(height: 16),
                         ],
@@ -545,9 +546,7 @@ class _AudioContentDetailScreenState extends State<AudioContentDetailScreen> {
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(
-                color: ArtbeatColors.textPrimary,
-              ),
+              style: const TextStyle(color: ArtbeatColors.textPrimary),
             ),
           ),
         ],

@@ -109,24 +109,19 @@ class _ArtistJourneyScreenState extends State<ArtistJourneyScreen> {
                 ],
               ),
             ),
-            child: const Icon(
-              Icons.palette,
-              size: 80,
-              color: Colors.white,
-            ),
+            child: const Icon(Icons.palette, size: 80, color: Colors.white),
           ),
           const SizedBox(height: 32),
           Text(
             tr('art_walk_welcome_to_the_artist_community'),
-            style: const TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
           Text(
-            tr('art_walk_transform_your_artbeat_experience_and_unlock_powerful_tools_designed_specifically_for_artists_and_creators'),
+            tr(
+              'art_walk_transform_your_artbeat_experience_and_unlock_powerful_tools_designed_specifically_for_artists_and_creators',
+            ),
             style: TextStyle(
               fontSize: 16,
               color: Colors.grey.shade600,
@@ -148,7 +143,9 @@ class _ArtistJourneyScreenState extends State<ArtistJourneyScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    tr('art_walk_this_will_upgrade_your_account_to_unlock_artist_features_and_opportunities'),
+                    tr(
+                      'art_walk_this_will_upgrade_your_account_to_unlock_artist_features_and_opportunities',
+                    ),
                     style: TextStyle(
                       color: Colors.blue.shade700,
                       fontWeight: FontWeight.w500,
@@ -169,35 +166,35 @@ class _ArtistJourneyScreenState extends State<ArtistJourneyScreen> {
         'icon': Icons.storefront,
         'title': 'Your Own Gallery',
         'description':
-            'Create a professional profile to showcase and sell your artwork'
+            'Create a professional profile to showcase and sell your artwork',
       },
       {
         'icon': Icons.trending_up,
         'title': 'Increased Visibility',
         'description':
-            'Get discovered by art collectors and enthusiasts worldwide'
+            'Get discovered by art collectors and enthusiasts worldwide',
       },
       {
         'icon': Icons.people,
         'title': 'Artist Community',
         'description':
-            'Connect with fellow artists and participate in exclusive events'
+            'Connect with fellow artists and participate in exclusive events',
       },
       {
         'icon': Icons.analytics,
         'title': 'Performance Analytics',
         'description':
-            'Track your artwork views, engagement, and sales performance'
+            'Track your artwork views, engagement, and sales performance',
       },
       {
         'icon': Icons.event,
         'title': 'Event Management',
-        'description': 'Create and promote your exhibitions and art shows'
+        'description': 'Create and promote your exhibitions and art shows',
       },
       {
         'icon': Icons.verified_user,
         'title': 'Verified Badge',
-        'description': 'Get a verified artist badge to build trust with buyers'
+        'description': 'Get a verified artist badge to build trust with buyers',
       },
     ];
 
@@ -207,19 +204,15 @@ class _ArtistJourneyScreenState extends State<ArtistJourneyScreen> {
         children: [
           Text(
             tr('art_walk_what_you__ll_get_as_an_artist'),
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Text(
-            tr('art_walk_unlock_powerful_tools_and_opportunities_designed_for_creators'),
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey.shade600,
+            tr(
+              'art_walk_unlock_powerful_tools_and_opportunities_designed_for_creators',
             ),
+            style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 32),
@@ -248,9 +241,9 @@ class _ArtistJourneyScreenState extends State<ArtistJourneyScreen> {
                         width: 48,
                         height: 48,
                         decoration: BoxDecoration(
-                          color: Theme.of(context)
-                              .primaryColor
-                              .withValues(alpha: 0.1),
+                          color: Theme.of(
+                            context,
+                          ).primaryColor.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Icon(
@@ -302,19 +295,13 @@ class _ArtistJourneyScreenState extends State<ArtistJourneyScreen> {
           children: [
             Text(
               tr('art_walk_what_changes_in_your_account'),
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
               tr('art_walk_here__s_what_happens_when_you_become_an_artist'),
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey.shade600,
-              ),
+              style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
@@ -363,7 +350,9 @@ class _ArtistJourneyScreenState extends State<ArtistJourneyScreen> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      tr('art_walk_don__t_worry__you_can_always_switch_back_to_a_regular_user_account_if_needed'),
+                      tr(
+                        'art_walk_don__t_worry__you_can_always_switch_back_to_a_regular_user_account_if_needed',
+                      ),
                       style: TextStyle(
                         color: Colors.green.shade700,
                         fontWeight: FontWeight.w500,
@@ -489,19 +478,15 @@ class _ArtistJourneyScreenState extends State<ArtistJourneyScreen> {
         children: [
           Text(
             tr('art_walk_choose_your_artist_plan'),
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Text(
-            tr('art_walk_start_free_and_upgrade_anytime___plans_built_for_creators_in_2025'),
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey.shade600,
+            tr(
+              'art_walk_start_free_and_upgrade_anytime___plans_built_for_creators_in_2025',
             ),
+            style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 32),
@@ -543,7 +528,8 @@ class _ArtistJourneyScreenState extends State<ArtistJourneyScreen> {
                 _buildPlanPreview(
                   title: 'Creator Plan',
                   price: '\$12.99/month',
-                  description: 'For full-time artists seeking maximum visibility',
+                  description:
+                      'For full-time artists seeking maximum visibility',
                   features: [
                     'Up to 100 artworks',
                     'Featured Placement (3-5x reach)',
@@ -583,7 +569,9 @@ class _ArtistJourneyScreenState extends State<ArtistJourneyScreen> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          tr('art_walk_if_you__re_unsure_which_plan_fits__complete_the_modern_onboarding_for_a_personalized_recommendation'),
+                          tr(
+                            'art_walk_if_you__re_unsure_which_plan_fits__complete_the_modern_onboarding_for_a_personalized_recommendation',
+                          ),
                           style: TextStyle(
                             color: Colors.blue.shade700,
                             fontWeight: FontWeight.w500,
@@ -626,8 +614,8 @@ class _ArtistJourneyScreenState extends State<ArtistJourneyScreen> {
               color: isSelected
                   ? Theme.of(context).primaryColor
                   : (isRecommended
-                      ? Theme.of(context).primaryColor
-                      : Colors.grey.shade300),
+                        ? Theme.of(context).primaryColor
+                        : Colors.grey.shade300),
               width: isSelected ? 2.5 : (isRecommended ? 2 : 1),
             ),
             boxShadow: [
@@ -660,7 +648,9 @@ class _ArtistJourneyScreenState extends State<ArtistJourneyScreen> {
                               const SizedBox(width: 8),
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 2),
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
                                 decoration: BoxDecoration(
                                   color: Theme.of(context).primaryColor,
                                   borderRadius: BorderRadius.circular(12),
@@ -699,33 +689,35 @@ class _ArtistJourneyScreenState extends State<ArtistJourneyScreen> {
               ),
               const SizedBox(height: 12),
               ...features
-                  .map((feature) => Padding(
-                        padding: const EdgeInsets.only(bottom: 4),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 20,
-                              height: 20,
-                              decoration: BoxDecoration(
-                                color: Colors.green.shade100,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Icon(
-                                Icons.check,
-                                size: 14,
-                                color: Colors.green.shade700,
-                              ),
+                  .map(
+                    (feature) => Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 20,
+                            height: 20,
+                            decoration: BoxDecoration(
+                              color: Colors.green.shade100,
+                              borderRadius: BorderRadius.circular(6),
                             ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                feature,
-                                style: const TextStyle(fontSize: 14),
-                              ),
+                            child: Icon(
+                              Icons.check,
+                              size: 14,
+                              color: Colors.green.shade700,
                             ),
-                          ],
-                        ),
-                      ))
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              feature,
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
                   .toList(),
             ],
           ),
@@ -813,9 +805,7 @@ class _ArtistJourneyScreenState extends State<ArtistJourneyScreen> {
         await Navigator.push<void>(
           context,
           MaterialPageRoute<void>(
-            builder: (context) => ArtistOnboardScreen(
-              key: UniqueKey(),
-            ),
+            builder: (context) => ArtistOnboardScreen(key: UniqueKey()),
           ),
         );
       }
@@ -823,7 +813,8 @@ class _ArtistJourneyScreenState extends State<ArtistJourneyScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(tr('admin_unified_admin_dashboard_error_error_e'))),
+            content: Text(tr('admin_unified_admin_dashboard_error_error_e')),
+          ),
         );
       }
     } finally {
@@ -875,7 +866,8 @@ class _ArtistJourneyScreenState extends State<ArtistJourneyScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(tr('admin_unified_admin_dashboard_error_error_e'))),
+            content: Text(tr('admin_unified_admin_dashboard_error_error_e')),
+          ),
         );
       }
     } finally {

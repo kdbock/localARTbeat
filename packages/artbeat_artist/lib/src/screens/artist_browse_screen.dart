@@ -4,15 +4,11 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-
 class _FilterOption {
   final String value;
   final String labelKey;
 
-  const _FilterOption({
-    required this.value,
-    required this.labelKey,
-  });
+  const _FilterOption({required this.value, required this.labelKey});
 }
 
 /// Screen for browsing artists
@@ -35,10 +31,7 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
   final TextEditingController _searchController = TextEditingController();
 
   static const List<_FilterOption> _mediumOptions = [
-    _FilterOption(
-      value: 'All',
-      labelKey: 'artist_artist_browse_filter_all',
-    ),
+    _FilterOption(value: 'All', labelKey: 'artist_artist_browse_filter_all'),
     _FilterOption(
       value: 'Oil Paint',
       labelKey: 'artist_artist_browse_medium_oil_paint',
@@ -66,10 +59,7 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
   ];
 
   static const List<_FilterOption> _styleOptions = [
-    _FilterOption(
-      value: 'All',
-      labelKey: 'artist_artist_browse_filter_all',
-    ),
+    _FilterOption(value: 'All', labelKey: 'artist_artist_browse_filter_all'),
     _FilterOption(
       value: 'Abstract',
       labelKey: 'artist_artist_browse_style_abstract',
@@ -138,8 +128,10 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content:
-                  Text(tr('artist_artist_browse_error_error_loading_artists'))),
+            content: Text(
+              tr('artist_artist_browse_error_error_loading_artists'),
+            ),
+          ),
         );
         setState(() {
           _isLoading = false;
@@ -212,8 +204,10 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
           Row(
             children: [
               GradientBadge(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -279,11 +273,17 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
             ),
             decoration: GlassInputDecoration(
               hintText: tr('artist_artist_browse_hint_search'),
-              prefixIcon: const Icon(Icons.search_rounded,
-                  color: Colors.white, size: 22),
+              prefixIcon: const Icon(
+                Icons.search_rounded,
+                color: Colors.white,
+                size: 22,
+              ),
               suffixIcon: _searchController.text.isNotEmpty
                   ? IconButton(
-                      icon: const Icon(Icons.close_rounded, color: Colors.white),
+                      icon: const Icon(
+                        Icons.close_rounded,
+                        color: Colors.white,
+                      ),
                       tooltip: tr('artist_artist_browse_a11y_clear_search'),
                       onPressed: () {
                         _searchController.clear();
@@ -303,9 +303,7 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
                 icon: Icons.palette_rounded,
                 label: tr(
                   'artist_artist_browse_pill_medium',
-                  namedArgs: {
-                    'value': tr(_selectedMedium.labelKey),
-                  },
+                  namedArgs: {'value': tr(_selectedMedium.labelKey)},
                 ),
                 onTap: _showFilterDialog,
               ),
@@ -313,9 +311,7 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
                 icon: Icons.auto_awesome_rounded,
                 label: tr(
                   'artist_artist_browse_pill_style',
-                  namedArgs: {
-                    'value': tr(_selectedStyle.labelKey),
-                  },
+                  namedArgs: {'value': tr(_selectedStyle.labelKey)},
                 ),
                 onTap: _showFilterDialog,
               ),
@@ -400,8 +396,7 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
   Widget _buildArtistCard(core.ArtistProfileModel artist) {
     final bool isPremium =
         artist.subscriptionTier != core.SubscriptionTier.free;
-    final bool isGallery =
-        artist.userType.name == core.UserType.gallery.name;
+    final bool isGallery = artist.userType.name == core.UserType.gallery.name;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
@@ -422,18 +417,19 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
                       child: Container(
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
-                            colors: [
-                              Color(0xFF0A1330),
-                              Color(0xFF071C18),
-                            ],
+                            colors: [Color(0xFF0A1330), Color(0xFF071C18)],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
-                          image: core.ImageUrlValidator.isValidImageUrl(
-                                  artist.coverImageUrl)
+                          image:
+                              core.ImageUrlValidator.isValidImageUrl(
+                                artist.coverImageUrl,
+                              )
                               ? DecorationImage(
-                                  image: core.ImageUrlValidator.safeNetworkImage(
-                                      artist.coverImageUrl)!,
+                                  image:
+                                      core.ImageUrlValidator.safeNetworkImage(
+                                        artist.coverImageUrl,
+                                      )!,
                                   fit: BoxFit.cover,
                                 )
                               : null,
@@ -464,8 +460,11 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(Icons.auto_awesome_rounded,
-                                      size: 16, color: Colors.white),
+                                  const Icon(
+                                    Icons.auto_awesome_rounded,
+                                    size: 16,
+                                    color: Colors.white,
+                                  ),
                                   const SizedBox(width: 6),
                                   Text(
                                     tr('artist_artist_browse_badge_featured'),
@@ -484,13 +483,19 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
                               message: 'boost_badge_tooltip'.tr(),
                               child: GradientBadge(
                                 gradient: const LinearGradient(
-                                  colors: [Color(0xFFF97316), Color(0xFF22D3EE)],
+                                  colors: [
+                                    Color(0xFFF97316),
+                                    Color(0xFF22D3EE),
+                                  ],
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    const Icon(Icons.bolt_rounded,
-                                        size: 16, color: Colors.white),
+                                    const Icon(
+                                      Icons.bolt_rounded,
+                                      size: 16,
+                                      color: Colors.white,
+                                    ),
                                     const SizedBox(width: 6),
                                     Text(
                                       'boost_badge_label'.tr(),
@@ -514,8 +519,11 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(Icons.verified_rounded,
-                                      size: 16, color: Colors.white),
+                                  const Icon(
+                                    Icons.verified_rounded,
+                                    size: 16,
+                                    color: Colors.white,
+                                  ),
                                   const SizedBox(width: 6),
                                   Text(
                                     tr('artist_artist_browse_badge_verified'),
@@ -550,9 +558,7 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withValues(
-                                      alpha: 0.4,
-                                    ),
+                                    color: Colors.black.withValues(alpha: 0.4),
                                     blurRadius: 12,
                                     offset: const Offset(0, 6),
                                   ),
@@ -584,18 +590,22 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
                                     _GlassTag(
                                       icon: Icons.store_mall_directory_rounded,
                                       label: tr(
-                                          'artist_artist_browse_text_gallery'),
+                                        'artist_artist_browse_text_gallery',
+                                      ),
                                     ),
                                   if (isPremium) ...[
                                     if (isGallery) const SizedBox(width: 8),
                                     _GlassTag(
                                       icon: Icons.star_rounded,
-                                      label: artist.subscriptionTier ==
+                                      label:
+                                          artist.subscriptionTier ==
                                               core.SubscriptionTier.business
                                           ? tr(
-                                              'artist_artist_browse_badge_business')
+                                              'artist_artist_browse_badge_business',
+                                            )
                                           : tr(
-                                              'artist_artist_browse_badge_premium'),
+                                              'artist_artist_browse_badge_premium',
+                                            ),
                                     ),
                                   ],
                                 ],
@@ -632,7 +642,9 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
                       label: tr('artist_artist_browse_text_medium_unknown'),
                     )
                   else ...[
-                    ...artist.mediums.take(3).map(
+                    ...artist.mediums
+                        .take(3)
+                        .map(
                           (medium) => _GlassTag(
                             icon: Icons.brush_rounded,
                             label: medium,
@@ -669,7 +681,10 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
 
         return Dialog(
           backgroundColor: Colors.transparent,
-          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 24,
+          ),
           child: StatefulBuilder(
             builder: (context, setInnerState) {
               return GlassCard(
@@ -705,9 +720,8 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
                               (option) => _FilterChoicePill(
                                 option: option,
                                 selected: tempMedium == option,
-                                onTap: () => setInnerState(
-                                  () => tempMedium = option,
-                                ),
+                                onTap: () =>
+                                    setInnerState(() => tempMedium = option),
                               ),
                             )
                             .toList(),
@@ -730,9 +744,8 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
                               (option) => _FilterChoicePill(
                                 option: option,
                                 selected: tempStyle == option,
-                                onTap: () => setInnerState(
-                                  () => tempStyle = option,
-                                ),
+                                onTap: () =>
+                                    setInnerState(() => tempStyle = option),
                               ),
                             )
                             .toList(),
@@ -742,8 +755,9 @@ class _ArtistBrowseScreenState extends State<ArtistBrowseScreen> {
                         children: [
                           Expanded(
                             child: GlassButton(
-                              label:
-                                  tr('artist_artist_browse_cta_reset_filters'),
+                              label: tr(
+                                'artist_artist_browse_cta_reset_filters',
+                              ),
                               icon: Icons.refresh_rounded,
                               onPressed: () {
                                 setInnerState(() {
@@ -903,10 +917,7 @@ class _GlassTag extends StatelessWidget {
   final IconData icon;
   final String label;
 
-  const _GlassTag({
-    required this.icon,
-    required this.label,
-  });
+  const _GlassTag({required this.icon, required this.label});
 
   @override
   Widget build(BuildContext context) {
@@ -915,9 +926,7 @@ class _GlassTag extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.16),
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

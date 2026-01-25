@@ -5,14 +5,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_core/artbeat_core.dart' show AppLogger;
 import 'package:artbeat_capture/artbeat_capture.dart';
 
-
 class CaptureEditScreen extends StatefulWidget {
   final CaptureModel capture;
 
-  const CaptureEditScreen({
-    super.key,
-    required this.capture,
-  });
+  const CaptureEditScreen({super.key, required this.capture});
 
   @override
   State<CaptureEditScreen> createState() => _CaptureEditScreenState();
@@ -34,7 +30,7 @@ class _CaptureEditScreenState extends State<CaptureEditScreen> {
       text: widget.capture.description,
     );
     // Placeholder - will be shown using NetworkImage if not new
-    _imageFile = File(''); 
+    _imageFile = File('');
   }
 
   Future<void> _pickNewImage() async {
@@ -81,9 +77,9 @@ class _CaptureEditScreenState extends State<CaptureEditScreen> {
       await captureService.updateCapture(widget.capture.id, updates);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('capture_edit_success'.tr())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('capture_edit_success'.tr())));
         Navigator.pop(context, true);
       }
     } catch (e) {
@@ -149,24 +145,32 @@ class _CaptureEditScreenState extends State<CaptureEditScreen> {
                                   borderRadius: BorderRadius.circular(22),
                                   child: Stack(
                                     children: [
-                                      _isNewImage 
-                                        ? Image.file(
-                                            _imageFile,
-                                            width: double.infinity,
-                                            height: 200,
-                                            fit: BoxFit.cover,
-                                          )
-                                        : Image.network(
-                                            widget.capture.imageUrl,
-                                            width: double.infinity,
-                                            height: 200,
-                                            fit: BoxFit.cover,
-                                            errorBuilder: (context, error, stackTrace) => Container(
+                                      _isNewImage
+                                          ? Image.file(
+                                              _imageFile,
+                                              width: double.infinity,
                                               height: 200,
-                                              color: Colors.grey[900],
-                                              child: const Icon(Icons.error, color: Colors.white70),
+                                              fit: BoxFit.cover,
+                                            )
+                                          : Image.network(
+                                              widget.capture.imageUrl,
+                                              width: double.infinity,
+                                              height: 200,
+                                              fit: BoxFit.cover,
+                                              errorBuilder:
+                                                  (
+                                                    context,
+                                                    error,
+                                                    stackTrace,
+                                                  ) => Container(
+                                                    height: 200,
+                                                    color: Colors.grey[900],
+                                                    child: const Icon(
+                                                      Icons.error,
+                                                      color: Colors.white70,
+                                                    ),
+                                                  ),
                                             ),
-                                          ),
                                       Positioned.fill(
                                         child: Container(
                                           color: Colors.black.withAlpha(

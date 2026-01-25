@@ -4,7 +4,6 @@ import 'sponsorship_status.dart';
 import 'sponsorship_tier.dart';
 
 class Sponsorship {
-
   Sponsorship({
     required this.id,
     required this.businessId,
@@ -21,32 +20,31 @@ class Sponsorship {
     this.relatedEntityId,
   });
 
-  factory Sponsorship.fromSnapshot(DocumentSnapshot snapshot) => Sponsorship.fromMap(
-      snapshot.id,
-      snapshot.data() as Map<String, dynamic>,
-    );
+  factory Sponsorship.fromSnapshot(DocumentSnapshot snapshot) =>
+      Sponsorship.fromMap(snapshot.id, snapshot.data() as Map<String, dynamic>);
 
-  factory Sponsorship.fromMap(String id, Map<String, dynamic> data) => Sponsorship(
-      id: id,
-      businessId: data['businessId'] as String,
-      tier: SponsorshipTierExtension.fromString(
-        data['tier'] as String? ?? '',
-      ),
-      status: SponsorshipStatusExtension.fromString(
-        data['status'] as String? ?? '',
-      ),
-      startDate: (data['startDate'] as Timestamp).toDate(),
-      endDate: (data['endDate'] as Timestamp).toDate(),
-      radiusMiles: (data['radiusMiles'] as num?)?.toDouble(),
-      placementKeys: (data['placementKeys'] as List<dynamic>? ?? [])
-    .map((e) => e as String)
-    .toList(),
-      logoUrl: data['logoUrl'] as String,
-      bannerUrl: data['bannerUrl'] as String?,
-      linkUrl: data['linkUrl'] as String,
-      relatedEntityId: data['relatedEntityId'] as String?,
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
-    );
+  factory Sponsorship.fromMap(String id, Map<String, dynamic> data) =>
+      Sponsorship(
+        id: id,
+        businessId: data['businessId'] as String,
+        tier: SponsorshipTierExtension.fromString(
+          data['tier'] as String? ?? '',
+        ),
+        status: SponsorshipStatusExtension.fromString(
+          data['status'] as String? ?? '',
+        ),
+        startDate: (data['startDate'] as Timestamp).toDate(),
+        endDate: (data['endDate'] as Timestamp).toDate(),
+        radiusMiles: (data['radiusMiles'] as num?)?.toDouble(),
+        placementKeys: (data['placementKeys'] as List<dynamic>? ?? [])
+            .map((e) => e as String)
+            .toList(),
+        logoUrl: data['logoUrl'] as String,
+        bannerUrl: data['bannerUrl'] as String?,
+        linkUrl: data['linkUrl'] as String,
+        relatedEntityId: data['relatedEntityId'] as String?,
+        createdAt: (data['createdAt'] as Timestamp).toDate(),
+      );
   final String id;
   final String businessId;
   final SponsorshipTier tier;
@@ -66,19 +64,19 @@ class Sponsorship {
   final DateTime createdAt;
 
   Map<String, dynamic> toMap() => {
-      'businessId': businessId,
-      'tier': tier.value,
-      'status': status.value,
-      'startDate': Timestamp.fromDate(startDate),
-      'endDate': Timestamp.fromDate(endDate),
-      'radiusMiles': radiusMiles,
-      'placementKeys': placementKeys,
-      'logoUrl': logoUrl,
-      'bannerUrl': bannerUrl,
-      'linkUrl': linkUrl,
-      'relatedEntityId': relatedEntityId,
-      'createdAt': Timestamp.fromDate(createdAt),
-    };
+    'businessId': businessId,
+    'tier': tier.value,
+    'status': status.value,
+    'startDate': Timestamp.fromDate(startDate),
+    'endDate': Timestamp.fromDate(endDate),
+    'radiusMiles': radiusMiles,
+    'placementKeys': placementKeys,
+    'logoUrl': logoUrl,
+    'bannerUrl': bannerUrl,
+    'linkUrl': linkUrl,
+    'relatedEntityId': relatedEntityId,
+    'createdAt': Timestamp.fromDate(createdAt),
+  };
 
   /// ----- Pure logic helpers (no UI concerns) -----
 

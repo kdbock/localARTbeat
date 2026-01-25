@@ -32,17 +32,19 @@ class CommunityService {
             .collection('follows')
             .doc('${currentUser.uid}_$artistId')
             .set({
-          'followerId': currentUser.uid,
-          'followedId': artistId,
-          'createdAt': FieldValue.serverTimestamp(),
-          'type': 'artist',
-        });
+              'followerId': currentUser.uid,
+              'followedId': artistId,
+              'createdAt': FieldValue.serverTimestamp(),
+              'type': 'artist',
+            });
 
         // Update follower counts
         await _updateFollowerCounts(currentUser.uid, artistId, isFollow: true);
 
-        ArtistLogger.communityService('Follow artist successful',
-            details: 'Artist: $artistId');
+        ArtistLogger.communityService(
+          'Follow artist successful',
+          details: 'Artist: $artistId',
+        );
         return true;
       },
       fallbackValue: false,
@@ -61,7 +63,8 @@ class CommunityService {
         final currentUser = _auth.currentUser;
         if (currentUser == null) {
           ArtistLogger.warning(
-              'Unfollow artist failed: User not authenticated');
+            'Unfollow artist failed: User not authenticated',
+          );
           return false;
         }
 
@@ -73,8 +76,10 @@ class CommunityService {
         // Update follower counts
         await _updateFollowerCounts(currentUser.uid, artistId, isFollow: false);
 
-        ArtistLogger.communityService('Unfollow artist successful',
-            details: 'Artist: $artistId');
+        ArtistLogger.communityService(
+          'Unfollow artist successful',
+          details: 'Artist: $artistId',
+        );
         return true;
       },
       fallbackValue: false,
@@ -106,8 +111,10 @@ class CommunityService {
   }
 
   /// Get artist followers
-  Future<List<core.UserModel>> getArtistFollowers(String artistId,
-      {int limit = 20}) async {
+  Future<List<core.UserModel>> getArtistFollowers(
+    String artistId, {
+    int limit = 20,
+  }) async {
     return ErrorMonitoringService.safeExecute(
       'getArtistFollowers',
       () async {
@@ -125,8 +132,10 @@ class CommunityService {
             .toList();
 
         if (followerIds.isEmpty) {
-          ArtistLogger.communityService('No followers found for artist',
-              details: 'Artist: $artistId');
+          ArtistLogger.communityService(
+            'No followers found for artist',
+            details: 'Artist: $artistId',
+          );
           return <core.UserModel>[];
         }
 
@@ -139,22 +148,26 @@ class CommunityService {
             .map((doc) => core.UserModel.fromJson(doc.data()..['id'] = doc.id))
             .toList();
 
-        ArtistLogger.communityService('Retrieved artist followers',
-            details: 'Artist: $artistId, Count: ${followers.length}');
+        ArtistLogger.communityService(
+          'Retrieved artist followers',
+          details: 'Artist: $artistId, Count: ${followers.length}',
+        );
         return followers;
       },
       fallbackValue: <core.UserModel>[],
       context: {
         'artistId': artistId,
         'operation': 'getFollowers',
-        'limit': limit
+        'limit': limit,
       },
     );
   }
 
   /// Get artists followed by user
-  Future<List<core.UserModel>> getFollowedArtists(String userId,
-      {int limit = 20}) async {
+  Future<List<core.UserModel>> getFollowedArtists(
+    String userId, {
+    int limit = 20,
+  }) async {
     return ErrorMonitoringService.safeExecute(
       'getFollowedArtists',
       () async {
@@ -173,8 +186,10 @@ class CommunityService {
             .toList();
 
         if (artistIds.isEmpty) {
-          ArtistLogger.communityService('No followed artists found for user',
-              details: 'User: $userId');
+          ArtistLogger.communityService(
+            'No followed artists found for user',
+            details: 'User: $userId',
+          );
           return <core.UserModel>[];
         }
 
@@ -187,22 +202,25 @@ class CommunityService {
             .map((doc) => core.UserModel.fromJson(doc.data()..['id'] = doc.id))
             .toList();
 
-        ArtistLogger.communityService('Retrieved followed artists',
-            details: 'User: $userId, Count: ${followedArtists.length}');
+        ArtistLogger.communityService(
+          'Retrieved followed artists',
+          details: 'User: $userId, Count: ${followedArtists.length}',
+        );
         return followedArtists;
       },
       fallbackValue: <core.UserModel>[],
       context: {
         'userId': userId,
         'operation': 'getFollowedArtists',
-        'limit': limit
+        'limit': limit,
       },
     );
   }
 
   /// Get artist collaboration requests
   Future<List<Map<String, dynamic>>> getCollaborationRequests(
-      String artistId) async {
+    String artistId,
+  ) async {
     return ErrorMonitoringService.safeExecute(
       'getCollaborationRequests',
       () async {
@@ -216,11 +234,14 @@ class CommunityService {
             .orderBy('createdAt', descending: true)
             .get();
 
-        final requests =
-            snapshot.docs.map((doc) => doc.data()..['id'] = doc.id).toList();
+        final requests = snapshot.docs
+            .map((doc) => doc.data()..['id'] = doc.id)
+            .toList();
 
-        ArtistLogger.communityService('Retrieved collaboration requests',
-            details: 'Artist: $artistId, Count: ${requests.length}');
+        ArtistLogger.communityService(
+          'Retrieved collaboration requests',
+          details: 'Artist: $artistId, Count: ${requests.length}',
+        );
         return requests;
       },
       fallbackValue: <Map<String, dynamic>>[],
@@ -230,23 +251,29 @@ class CommunityService {
 
   /// Send collaboration request
   Future<bool> sendCollaborationRequest(
-      String recipientId, String message, String projectType) async {
+    String recipientId,
+    String message,
+    String projectType,
+  ) async {
     return ErrorMonitoringService.safeExecute(
       'sendCollaborationRequest',
       () async {
         // Validate inputs
         InputValidator.validateUserId(recipientId).throwIfInvalid();
-        final validatedMessage =
-            InputValidator.validateText(message, fieldName: 'message')
-                .getOrThrow();
-        final validatedProjectType =
-            InputValidator.validateText(projectType, fieldName: 'projectType')
-                .getOrThrow();
+        final validatedMessage = InputValidator.validateText(
+          message,
+          fieldName: 'message',
+        ).getOrThrow();
+        final validatedProjectType = InputValidator.validateText(
+          projectType,
+          fieldName: 'projectType',
+        ).getOrThrow();
 
         final currentUser = _auth.currentUser;
         if (currentUser == null) {
           ArtistLogger.warning(
-              'Send collaboration request failed: User not authenticated');
+            'Send collaboration request failed: User not authenticated',
+          );
           return false;
         }
 
@@ -259,84 +286,97 @@ class CommunityService {
           'createdAt': FieldValue.serverTimestamp(),
         });
 
-        ArtistLogger.communityService('Collaboration request sent successfully',
-            details: 'Recipient: $recipientId, Project: $validatedProjectType');
+        ArtistLogger.communityService(
+          'Collaboration request sent successfully',
+          details: 'Recipient: $recipientId, Project: $validatedProjectType',
+        );
         return true;
       },
       fallbackValue: false,
       context: {
         'recipientId': recipientId,
         'projectType': projectType,
-        'operation': 'sendCollaborationRequest'
+        'operation': 'sendCollaborationRequest',
       },
     );
   }
 
   /// Update collaboration request status
   Future<bool> updateCollaborationRequestStatus(
-      String requestId, String status) async {
+    String requestId,
+    String status,
+  ) async {
     return ErrorMonitoringService.safeExecute(
       'updateCollaborationRequestStatus',
       () async {
         // Validate inputs
-        final validatedRequestId =
-            InputValidator.validateText(requestId, fieldName: 'requestId')
-                .getOrThrow();
-        final validatedStatus =
-            InputValidator.validateText(status, fieldName: 'status')
-                .getOrThrow();
+        final validatedRequestId = InputValidator.validateText(
+          requestId,
+          fieldName: 'requestId',
+        ).getOrThrow();
+        final validatedStatus = InputValidator.validateText(
+          status,
+          fieldName: 'status',
+        ).getOrThrow();
 
         await _firestore
             .collection('collaborationRequests')
             .doc(validatedRequestId)
             .update({
-          'status': validatedStatus,
-          'updatedAt': FieldValue.serverTimestamp(),
-        });
+              'status': validatedStatus,
+              'updatedAt': FieldValue.serverTimestamp(),
+            });
 
-        ArtistLogger.communityService('Collaboration request status updated',
-            details: 'Request: $validatedRequestId, Status: $validatedStatus');
+        ArtistLogger.communityService(
+          'Collaboration request status updated',
+          details: 'Request: $validatedRequestId, Status: $validatedStatus',
+        );
         return true;
       },
       fallbackValue: false,
       context: {
         'requestId': requestId,
         'status': status,
-        'operation': 'updateCollaborationRequestStatus'
+        'operation': 'updateCollaborationRequestStatus',
       },
     );
   }
 
   /// Get artist community feed (posts from followed artists)
-  Stream<List<Map<String, dynamic>>> getArtistCommunityFeed(String userId,
-      {int limit = 20}) {
+  Stream<List<Map<String, dynamic>>> getArtistCommunityFeed(
+    String userId, {
+    int limit = 20,
+  }) {
     return _firestore
         .collection('follows')
         .where('followerId', isEqualTo: userId)
         .snapshots()
         .asyncMap((followSnapshot) async {
-      if (followSnapshot.docs.isEmpty) return <Map<String, dynamic>>[];
+          if (followSnapshot.docs.isEmpty) return <Map<String, dynamic>>[];
 
-      final followedIds = followSnapshot.docs
-          .map((doc) => doc.data()['followedId'] as String)
-          .toList();
+          final followedIds = followSnapshot.docs
+              .map((doc) => doc.data()['followedId'] as String)
+              .toList();
 
-      final feedSnapshot = await _firestore
-          .collection('posts')
-          .where('userId', whereIn: followedIds)
-          .orderBy('createdAt', descending: true)
-          .limit(limit)
-          .get();
+          final feedSnapshot = await _firestore
+              .collection('posts')
+              .where('userId', whereIn: followedIds)
+              .orderBy('createdAt', descending: true)
+              .limit(limit)
+              .get();
 
-      return feedSnapshot.docs
-          .map((doc) => doc.data()..['id'] = doc.id)
-          .toList();
-    });
+          return feedSnapshot.docs
+              .map((doc) => doc.data()..['id'] = doc.id)
+              .toList();
+        });
   }
 
   /// Update follower counts helper method
-  Future<void> _updateFollowerCounts(String followerId, String followedId,
-      {required bool isFollow}) async {
+  Future<void> _updateFollowerCounts(
+    String followerId,
+    String followedId, {
+    required bool isFollow,
+  }) async {
     final batch = _firestore.batch();
 
     // Update follower's following count
@@ -356,7 +396,9 @@ class CommunityService {
 
   /// Get mutual connections between two artists
   Future<List<core.UserModel>> getMutualConnections(
-      String artistId1, String artistId2) async {
+    String artistId1,
+    String artistId2,
+  ) async {
     return ErrorMonitoringService.safeExecute(
       'getMutualConnections',
       () async {
@@ -382,12 +424,15 @@ class CommunityService {
             .map((doc) => doc.data()['followedId'] as String)
             .toSet();
 
-        final mutualIds =
-            artist1FollowedIds.intersection(artist2FollowedIds).toList();
+        final mutualIds = artist1FollowedIds
+            .intersection(artist2FollowedIds)
+            .toList();
 
         if (mutualIds.isEmpty) {
-          ArtistLogger.communityService('No mutual connections found',
-              details: 'Artists: $artistId1, $artistId2');
+          ArtistLogger.communityService(
+            'No mutual connections found',
+            details: 'Artists: $artistId1, $artistId2',
+          );
           return <core.UserModel>[];
         }
 
@@ -400,16 +445,18 @@ class CommunityService {
             .map((doc) => core.UserModel.fromJson(doc.data()..['id'] = doc.id))
             .toList();
 
-        ArtistLogger.communityService('Retrieved mutual connections',
-            details:
-                'Artists: $artistId1, $artistId2, Count: ${mutualConnections.length}');
+        ArtistLogger.communityService(
+          'Retrieved mutual connections',
+          details:
+              'Artists: $artistId1, $artistId2, Count: ${mutualConnections.length}',
+        );
         return mutualConnections;
       },
       fallbackValue: <core.UserModel>[],
       context: {
         'artistId1': artistId1,
         'artistId2': artistId2,
-        'operation': 'getMutualConnections'
+        'operation': 'getMutualConnections',
       },
     );
   }

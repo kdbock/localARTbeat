@@ -87,8 +87,9 @@ class SubscriptionValidationService {
       if (targetTier == 'gallery') {
         final hasBusinessInfo = await _hasBusinessInformation(userId);
         if (!hasBusinessInfo) {
-          validationErrors
-              .add('Business information required for gallery tier');
+          validationErrors.add(
+            'Business information required for gallery tier',
+          );
         }
       }
 
@@ -157,7 +158,7 @@ class SubscriptionValidationService {
             isValid: false,
             message: 'Cannot cancel gallery subscription with active events',
             validationErrors: [
-              'Active events must be completed or cancelled first'
+              'Active events must be completed or cancelled first',
             ],
           );
         }
@@ -202,8 +203,10 @@ class SubscriptionValidationService {
 
       // Validate payment method exists and is valid
       final paymentMethodId = paymentData['paymentMethodId'] as String;
-      final isValidPaymentMethod =
-          await _validatePaymentMethod(paymentMethodId, userId);
+      final isValidPaymentMethod = await _validatePaymentMethod(
+        paymentMethodId,
+        userId,
+      );
       if (!isValidPaymentMethod) {
         validationErrors.add('Invalid or expired payment method');
       }
@@ -237,7 +240,8 @@ class SubscriptionValidationService {
 
   /// Validate business information for gallery subscriptions
   Future<ValidationResult> validateBusinessInformation(
-      Map<String, dynamic> businessInfo) async {
+    Map<String, dynamic> businessInfo,
+  ) async {
     final validationErrors = <String>[];
 
     // Required fields for gallery subscription
@@ -254,7 +258,8 @@ class SubscriptionValidationService {
       if (businessInfo[field] == null ||
           businessInfo[field].toString().trim().isEmpty) {
         validationErrors.add(
-            '${field.replaceAll(RegExp(r'([A-Z])'), ' \$1').toLowerCase()} is required');
+          '${field.replaceAll(RegExp(r'([A-Z])'), ' \$1').toLowerCase()} is required',
+        );
       }
     }
 
@@ -287,18 +292,9 @@ class SubscriptionValidationService {
 
   Future<Map<String, dynamic>?> _getTierRequirements(String tier) async {
     final requirements = {
-      'free': {
-        'profileCompleteness': false,
-        'minArtworks': 0,
-      },
-      'artist_basic': {
-        'profileCompleteness': true,
-        'minArtworks': 1,
-      },
-      'artist_pro': {
-        'profileCompleteness': true,
-        'minArtworks': 5,
-      },
+      'free': {'profileCompleteness': false, 'minArtworks': 0},
+      'artist_basic': {'profileCompleteness': true, 'minArtworks': 1},
+      'artist_pro': {'profileCompleteness': true, 'minArtworks': 5},
       'gallery': {
         'profileCompleteness': true,
         'minArtworks': 0,
@@ -321,8 +317,10 @@ class SubscriptionValidationService {
 
   bool _isProfileComplete(Map<String, dynamic> profile) {
     final requiredFields = ['displayName', 'bio', 'profilePictureUrl'];
-    return requiredFields.every((field) =>
-        profile[field] != null && profile[field].toString().trim().isNotEmpty);
+    return requiredFields.every(
+      (field) =>
+          profile[field] != null && profile[field].toString().trim().isNotEmpty,
+    );
   }
 
   Future<int> _getArtworkCount(String userId) async {
@@ -406,7 +404,9 @@ class SubscriptionValidationService {
   }
 
   Future<bool> _validatePaymentMethod(
-      String paymentMethodId, String userId) async {
+    String paymentMethodId,
+    String userId,
+  ) async {
     try {
       final doc = await _firestore
           .collection('paymentMethods')

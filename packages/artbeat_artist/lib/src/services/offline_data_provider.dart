@@ -41,7 +41,8 @@ class OfflineDataProvider {
       return null;
     } catch (e) {
       ArtistLogger.error(
-          'Error retrieving artist profile from offline storage: $e');
+        'Error retrieving artist profile from offline storage: $e',
+      );
       return null;
     }
   }
@@ -69,7 +70,8 @@ class OfflineDataProvider {
       return null;
     } catch (e) {
       ArtistLogger.error(
-          'Error retrieving data from offline storage for key $key: $e');
+        'Error retrieving data from offline storage for key $key: $e',
+      );
       return null;
     }
   }
@@ -176,8 +178,9 @@ class OfflineDataProvider {
   }
 
   /// Check if data needs synchronization (older than specified duration)
-  Future<bool> needsSynchronization(
-      {Duration maxAge = const Duration(hours: 1)}) async {
+  Future<bool> needsSynchronization({
+    Duration maxAge = const Duration(hours: 1),
+  }) async {
     final lastSync = await getLastSyncTime();
     if (lastSync == null) return true;
 
