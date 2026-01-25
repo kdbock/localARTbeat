@@ -17,7 +17,7 @@ class EnvLoader {
     try {
       // Load from .env files if they exist
       try {
-        const primaryEnv = kReleaseMode ? '.env.production' : '.env';
+        const primaryEnv = kReleaseMode ? '.env.production' : '.env.example';
         await dotenv.load(fileName: primaryEnv);
         _envVars.addAll(dotenv.env);
       } catch (e) {
