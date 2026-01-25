@@ -34,10 +34,7 @@ void main() {
     ),
   );
 
-  Future<void> pumpLocalized(
-    WidgetTester tester,
-    Widget child,
-  ) async {
+  Future<void> pumpLocalized(WidgetTester tester, Widget child) async {
     await tester.pumpWidget(wrapWithLocalization(child));
     await tester.pumpAndSettle();
   }
@@ -50,10 +47,7 @@ void main() {
     testWidgets('UserProgressCard displays correctly', (
       WidgetTester tester,
     ) async {
-      await pumpLocalized(
-        tester,
-        const Scaffold(body: UserProgressCard()),
-      );
+      await pumpLocalized(tester, const Scaffold(body: UserProgressCard()));
 
       // Verify the card is displayed (it uses Container, not Card)
       expect(find.byType(UserProgressCard), findsOneWidget);
@@ -64,10 +58,7 @@ void main() {
     testWidgets('UserProgressCard shows streak information', (
       WidgetTester tester,
     ) async {
-      await pumpLocalized(
-        tester,
-        const Scaffold(body: UserProgressCard()),
-      );
+      await pumpLocalized(tester, const Scaffold(body: UserProgressCard()));
 
       // Check for streak-related text (case sensitive)
       expect(find.textContaining('Streak'), findsWidgets);

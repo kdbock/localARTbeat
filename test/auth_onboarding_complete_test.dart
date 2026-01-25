@@ -38,10 +38,7 @@ void main() {
     ),
   );
 
-  Future<void> pumpLocalized(
-    WidgetTester tester,
-    Widget child,
-  ) async {
+  Future<void> pumpLocalized(WidgetTester tester, Widget child) async {
     await tester.pumpWidget(wrapWithLocalization(child));
     // Avoid pumpAndSettle to prevent timeouts from animations/timers.
     await tester.pump();
@@ -131,10 +128,7 @@ void main() {
       testWidgets('Email verification screen displays correctly', (
         tester,
       ) async {
-        await pumpLocalized(
-          tester,
-          const TestEmailVerificationScreen(),
-        );
+        await pumpLocalized(tester, const TestEmailVerificationScreen());
 
         // Verify email verification screen loads
         expect(find.byType(TestEmailVerificationScreen), findsOneWidget);
