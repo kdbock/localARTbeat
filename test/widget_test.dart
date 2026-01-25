@@ -5,6 +5,7 @@ import 'package:artbeat_core/src/widgets/dashboard/user_progress_card.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'auth_test_helpers.dart';
 
@@ -12,6 +13,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUpAll(() async {
+    SharedPreferences.setMockInitialValues(const {});
     await EasyLocalization.ensureInitialized();
   });
 
@@ -32,6 +34,14 @@ void main() {
     ),
   );
 
+  Future<void> pumpLocalized(
+    WidgetTester tester,
+    Widget child,
+  ) async {
+    await tester.pumpWidget(wrapWithLocalization(child));
+    await tester.pumpAndSettle();
+  }
+
   // Note: MyApp widget tests are skipped because they require Firebase initialization
   // which is complex to mock in widget tests. These tests should be covered by
   // integration tests instead.
@@ -40,8 +50,9 @@ void main() {
     testWidgets('UserProgressCard displays correctly', (
       WidgetTester tester,
     ) async {
-      await tester.pumpWidget(
-        wrapWithLocalization(const Scaffold(body: UserProgressCard())),
+      await pumpLocalized(
+        tester,
+        const Scaffold(body: UserProgressCard()),
       );
 
       // Verify the card is displayed (it uses Container, not Card)
@@ -53,8 +64,9 @@ void main() {
     testWidgets('UserProgressCard shows streak information', (
       WidgetTester tester,
     ) async {
-      await tester.pumpWidget(
-        wrapWithLocalization(const Scaffold(body: UserProgressCard())),
+      await pumpLocalized(
+        tester,
+        const Scaffold(body: UserProgressCard()),
       );
 
       // Check for streak-related text (case sensitive)

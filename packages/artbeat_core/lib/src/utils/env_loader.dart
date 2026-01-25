@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'logger.dart';
 
@@ -14,14 +15,23 @@ class EnvLoader {
   /// Initialize environment variables
   Future<void> init() async {
     try {
-      // Load from .env file if it exists
+      // Load from .env files if they exist
       try {
-        await dotenv.load(fileName: '.env');
+        const primaryEnv = kReleaseMode ? '.env.production' : '.env';
+        await dotenv.load(fileName: primaryEnv);
         _envVars.addAll(dotenv.env);
       } catch (e) {
         AppLogger.warning(
-          '⚠️ Could not load .env file, using environment defines: $e',
+          '⚠️ Could not load primary .env file, trying fallback: $e',
         );
+        try {
+          await dotenv.load(fileName: '.env');
+          _envVars.addAll(dotenv.env);
+        } catch (fallbackError) {
+          AppLogger.warning(
+            '⚠️ Could not load fallback .env file, using environment defines: $fallbackError',
+          );
+        }
       }
 
       // Merge with String.fromEnvironment for build-time overrides

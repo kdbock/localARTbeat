@@ -14,6 +14,7 @@ import 'package:artbeat_settings/artbeat_settings.dart' as settings_pkg;
 import 'package:artbeat_sponsorships/artbeat_sponsorships.dart' as sponsorships;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
@@ -107,6 +108,9 @@ class AppRouter {
         );
 
       case '/debug/payment':
+        if (!kDebugMode) {
+          return RouteUtils.createNotFoundRoute('debug');
+        }
         return RouteUtils.createSimpleRoute(child: const PaymentDebugScreen());
 
       case core.AppRoutes.login:
@@ -196,6 +200,9 @@ class AppRouter {
         );
 
       case core.AppRoutes.inAppPurchaseDemo:
+        if (!kDebugMode) {
+          return RouteUtils.createNotFoundRoute('debug');
+        }
         return RouteUtils.createMainNavRoute(
           child: const InAppPurchaseDemoScreen(),
         );

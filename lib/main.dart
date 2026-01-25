@@ -130,10 +130,15 @@ Future<void> main() async {
 }
 
 Future<void> _initializeCoreServices() async {
+  await _guardedInit(EnvLoader().init, 'EnvLoader');
+  final envValid = EnvValidator().validateAll();
+  if (!envValid && kReleaseMode) {
+    throw Exception('Missing required environment variables');
+  }
+
   await Future.wait([
     _guardedInit(ConfigService.instance.initialize, 'ConfigService'),
     _guardedInit(MapsConfig.initialize, 'MapsConfig'),
-    _guardedInit(EnvLoader().init, 'EnvLoader'),
     _guardedInit(
       () async {
         debugPrint('🛡️ ========================================');

@@ -16,6 +16,10 @@ val keystorePropertiesFile = rootProject.file("key.properties")
 if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(keystorePropertiesFile.inputStream())
 }
+val isReleaseTask = gradle.startParameter.taskNames.any {
+    it.contains("release", ignoreCase = true)
+}
+val mapsApiKey = keystoreProperties.getProperty("mapsApiKey", "")
 
 android {
     namespace = "com.wordnerd.artbeat"
@@ -66,7 +70,7 @@ android {
         multiDexEnabled = true
         
         // Pass API keys to the build
-        manifestPlaceholders["mapsApiKey"] = keystoreProperties.getProperty("mapsApiKey", "")
+        manifestPlaceholders["mapsApiKey"] = mapsApiKey
         
         // Override manifest attributes for plugins with incompatible minSdk
         manifestPlaceholders["minSdkVersion"] = 24
@@ -80,6 +84,16 @@ android {
                 keystoreProperties.getProperty("keyAlias") != null &&
                 keystoreProperties.getProperty("keyPassword") != null &&
                 rootProject.file(keystoreProperties.getProperty("storeFile")).exists()
+            if (isReleaseTask && !hasReleaseKeystore) {
+                throw GradleException(
+                    "Release build requires a valid signing config in key.properties."
+                )
+            }
+            if (isReleaseTask && mapsApiKey.isBlank()) {
+                throw GradleException(
+                    "Release build requires mapsApiKey in key.properties."
+                )
+            }
             signingConfig = if (hasReleaseKeystore) {
                 signingConfigs.getByName("release")
             } else {
