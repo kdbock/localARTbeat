@@ -13,7 +13,8 @@ class PaymentMethodsScreen extends StatefulWidget {
 }
 
 class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
-  final core.UnifiedPaymentService _paymentService = core.UnifiedPaymentService();
+  final core.UnifiedPaymentService _paymentService =
+      core.UnifiedPaymentService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -45,10 +46,11 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
 
       // Get customer ID (using the more robust UnifiedPaymentService helper)
       final stripeCustomerId = await _paymentService.getOrCreateCustomerId();
-      
+
       // Get default payment method from Firestore
       final userDoc = await _firestore.collection('users').doc(userId).get();
-      _defaultPaymentMethodId = userDoc.data()?['defaultPaymentMethodId'] as String?;
+      _defaultPaymentMethodId =
+          userDoc.data()?['defaultPaymentMethodId'] as String?;
 
       if (stripeCustomerId.isEmpty) {
         setState(() {
@@ -60,7 +62,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
 
       // Load payment methods
       final methods = await _paymentService.getPaymentMethods(stripeCustomerId);
-      
+
       setState(() {
         _isLoading = false;
         _paymentMethods = methods;

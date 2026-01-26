@@ -56,10 +56,7 @@ class StripeService {
       // Update commission status locally
       await _updateCommissionStatus(commissionId, 'in_progress');
 
-      return {
-        'success': true,
-        'paymentIntentId': result.paymentIntentId,
-      };
+      return {'success': true, 'paymentIntentId': result.paymentIntentId};
     } catch (e) {
       AppLogger.error('Error processing commission deposit: $e');
       rethrow;
@@ -103,10 +100,7 @@ class StripeService {
         throw Exception(result.error ?? 'Failed to process milestone payment');
       }
 
-      return {
-        'success': true,
-        'paymentIntentId': result.paymentIntentId,
-      };
+      return {'success': true, 'paymentIntentId': result.paymentIntentId};
     } catch (e) {
       AppLogger.error('Error processing commission milestone: $e');
       rethrow;
@@ -151,10 +145,7 @@ class StripeService {
       // Update commission status locally
       await _updateCommissionStatus(commissionId, 'completed');
 
-      return {
-        'success': true,
-        'paymentIntentId': result.paymentIntentId,
-      };
+      return {'success': true, 'paymentIntentId': result.paymentIntentId};
     } catch (e) {
       AppLogger.error('Error processing commission final payment: $e');
       rethrow;

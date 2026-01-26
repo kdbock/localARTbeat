@@ -698,7 +698,7 @@ class ArtistBrowseEmptyState extends StatelessWidget {
   final VoidCallback onReset;
 
   const ArtistBrowseEmptyState({Key? key, required this.onReset})
-      : super(key: key);
+    : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -781,14 +781,10 @@ class _ArtistBrowseCard extends StatelessWidget {
   final core.ArtistProfileModel artist;
   final VoidCallback onTap;
 
-  const _ArtistBrowseCard({
-    Key? key,
-    required this.artist,
-    required this.onTap,
-  }) : super(key: key);
+  const _ArtistBrowseCard({Key? key, required this.artist, required this.onTap})
+    : super(key: key);
 
-  bool get _isPremium =>
-      artist.subscriptionTier != core.SubscriptionTier.free;
+  bool get _isPremium => artist.subscriptionTier != core.SubscriptionTier.free;
   bool get _isGallery => artist.userType.name == core.UserType.gallery.name;
 
   @override
@@ -984,16 +980,23 @@ class _ArtistBrowseCard extends StatelessWidget {
                                   if (_isGallery)
                                     _GlassTag(
                                       icon: Icons.storefront_rounded,
-                                      label: tr('artist_artist_browse_text_gallery'),
+                                      label: tr(
+                                        'artist_artist_browse_text_gallery',
+                                      ),
                                     ),
                                   if (_isPremium) ...[
                                     if (_isGallery) const SizedBox(width: 8),
                                     _GlassTag(
                                       icon: Icons.star_rounded,
-                                      label: artist.subscriptionTier ==
+                                      label:
+                                          artist.subscriptionTier ==
                                               core.SubscriptionTier.business
-                                          ? tr('artist_artist_browse_badge_business')
-                                          : tr('artist_artist_browse_badge_premium'),
+                                          ? tr(
+                                              'artist_artist_browse_badge_business',
+                                            )
+                                          : tr(
+                                              'artist_artist_browse_badge_premium',
+                                            ),
                                     ),
                                   ],
                                 ],

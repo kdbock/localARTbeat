@@ -99,17 +99,16 @@ class _ArtworkPurchaseScreenState extends State<ArtworkPurchaseScreen> {
         _isProcessing = true;
       });
 
-      final double totalAmount = (_artwork!.price ?? 0) * 1.15; // Including 15% platform fee
+      final double totalAmount =
+          (_artwork!.price ?? 0) * 1.15; // Including 15% platform fee
 
       // 1. Create payment intent
       final intentData = await _paymentService.createPaymentIntent(
         amount: totalAmount,
         currency: 'USD',
         description: 'Purchase of artwork: ${_artwork!.title}',
-        metadata: {
-          'artworkId': widget.artworkId,
-          'artistId': _artwork!.userId,
-        }, artworkId: '',
+        metadata: {'artworkId': widget.artworkId, 'artistId': _artwork!.userId},
+        artworkId: '',
       );
 
       final String? clientSecret = intentData['clientSecret'] as String?;
@@ -142,7 +141,11 @@ class _ArtworkPurchaseScreenState extends State<ArtworkPurchaseScreen> {
         if (result.success) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('artwork_purchase_success'.tr(namedArgs: {'id': paymentIntentId})),
+              content: Text(
+                'artwork_purchase_success'.tr(
+                  namedArgs: {'id': paymentIntentId},
+                ),
+              ),
               backgroundColor: Colors.green,
             ),
           );

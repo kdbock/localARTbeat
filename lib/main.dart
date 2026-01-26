@@ -19,13 +19,13 @@ import 'config/maps_config.dart';
 import 'src/managers/app_lifecycle_manager.dart';
 import 'src/services/app_permission_service.dart';
 
-	bool _performanceDiagnosticsInstalled = false;
-	bool _tapFrameCallbackScheduled = false;
-	final List<_PendingTapTrace> _pendingTapTraces = [];
-	// Toggle verbose rebuild tracing via --dart-define=VERBOSE_REBUILDS=true
-	const bool _enableVerboseRebuildLogging =
-	    // ignore: do_not_use_environment
-	    bool.fromEnvironment('VERBOSE_REBUILDS');
+bool _performanceDiagnosticsInstalled = false;
+bool _tapFrameCallbackScheduled = false;
+final List<_PendingTapTrace> _pendingTapTraces = [];
+// Toggle verbose rebuild tracing via --dart-define=VERBOSE_REBUILDS=true
+const bool _enableVerboseRebuildLogging =
+    // ignore: do_not_use_environment
+    bool.fromEnvironment('VERBOSE_REBUILDS');
 const Duration _slowFrameThreshold = Duration(milliseconds: 32);
 const Duration _slowTapThreshold = Duration(milliseconds: 120);
 Timer? _imageCacheStatsTimer;
@@ -208,16 +208,15 @@ void _handleFrameTimings(List<FrameTiming> timings) {
 
 void _handlePointerEvent(PointerEvent event) {
   if (event is! PointerDownEvent) return;
-  final task =
-      developer.TimelineTask()
-        ..start(
-          'UI.TapToFrame',
-          arguments: {
-            'kind': event.kind.toString(),
-            'x': event.position.dx.round(),
-            'y': event.position.dy.round(),
-          },
-        );
+  final task = developer.TimelineTask()
+    ..start(
+      'UI.TapToFrame',
+      arguments: {
+        'kind': event.kind.toString(),
+        'x': event.position.dx.round(),
+        'y': event.position.dy.round(),
+      },
+    );
   final trace = _PendingTapTrace(task);
   _pendingTapTraces.add(trace);
 

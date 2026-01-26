@@ -25,7 +25,8 @@ class AuctionWinScreen extends StatefulWidget {
 }
 
 class _AuctionWinScreenState extends State<AuctionWinScreen> {
-  final core.UnifiedPaymentService _paymentService = core.UnifiedPaymentService();
+  final core.UnifiedPaymentService _paymentService =
+      core.UnifiedPaymentService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   bool _isLoading = false;

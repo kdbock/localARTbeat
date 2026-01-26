@@ -126,55 +126,54 @@ class UpcomingEventsRowWidget extends StatelessWidget {
                               borderRadius: const BorderRadius.vertical(
                                 top: Radius.circular(4.0),
                               ),
-                                      child: event.imageUrls.isNotEmpty &&
-                                              event.imageUrls.first.isNotEmpty
-                                          ? OptimizedImage(
-                                              imageUrl: event.imageUrls.first,
-                                              width: double.infinity,
-                                              height: 120,
-                                              fit: BoxFit.cover,
-                                              isThumbnail: true,
-                                              placeholder: Container(
-                                                height: 120,
-                                                width: double.infinity,
-                                                color: Colors.grey[300],
-                                                child: const Center(
-                                                  child: SizedBox(
-                                                    width: 24,
-                                                    height: 24,
-                                                    child:
-                                                        CircularProgressIndicator(
-                                                      strokeWidth: 2,
-                                                      valueColor:
-                                                          AlwaysStoppedAnimation<
-                                                              Color>(
-                                                        Colors.grey,
-                                                      ),
-                                                    ),
+                              child:
+                                  event.imageUrls.isNotEmpty &&
+                                      event.imageUrls.first.isNotEmpty
+                                  ? OptimizedImage(
+                                      imageUrl: event.imageUrls.first,
+                                      width: double.infinity,
+                                      height: 120,
+                                      fit: BoxFit.cover,
+                                      isThumbnail: true,
+                                      placeholder: Container(
+                                        height: 120,
+                                        width: double.infinity,
+                                        color: Colors.grey[300],
+                                        child: const Center(
+                                          child: SizedBox(
+                                            width: 24,
+                                            height: 24,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              valueColor:
+                                                  AlwaysStoppedAnimation<Color>(
+                                                    Colors.grey,
                                                   ),
-                                                ),
-                                              ),
-                                              errorWidget: Container(
-                                                height: 120,
-                                                width: double.infinity,
-                                                color: Colors.grey[300],
-                                                child: const Icon(
-                                                  Icons.event,
-                                                  size: 48,
-                                                  color: Colors.grey,
-                                                ),
-                                              ),
-                                            )
-                                          : Container(
-                                              height: 120,
-                                              width: double.infinity,
-                                              color: Colors.grey[300],
-                                              child: const Icon(
-                                                Icons.event,
-                                                size: 48,
-                                                color: Colors.grey,
-                                              ),
                                             ),
+                                          ),
+                                        ),
+                                      ),
+                                      errorWidget: Container(
+                                        height: 120,
+                                        width: double.infinity,
+                                        color: Colors.grey[300],
+                                        child: const Icon(
+                                          Icons.event,
+                                          size: 48,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    )
+                                  : Container(
+                                      height: 120,
+                                      width: double.infinity,
+                                      color: Colors.grey[300],
+                                      child: const Icon(
+                                        Icons.event,
+                                        size: 48,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
                             ),
                             Padding(
                               padding: const EdgeInsets.all(12.0),

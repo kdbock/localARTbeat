@@ -35,17 +35,19 @@ class _ArtistBoostsScreenState extends State<ArtistBoostsScreen> {
   Future<void> _initializePurchases() async {
     final setup = InAppPurchaseSetup();
     await setup.initialize();
-    
+
     if (kDebugMode) {
       print('📱 ArtistBoostsScreen: Setting up purchase event listener...');
     }
-    
+
     _purchaseSubscription = setup.purchaseManager.purchaseEventStream.listen(
       (event) {
         if (kDebugMode) {
-          print('📱 ArtistBoostsScreen: Received purchase event: ${event.type}');
+          print(
+            '📱 ArtistBoostsScreen: Received purchase event: ${event.type}',
+          );
         }
-        
+
         if (event.type == PurchaseEventType.completed) {
           if (kDebugMode) {
             print('📱 ArtistBoostsScreen: Handling completed purchase');
@@ -69,9 +71,11 @@ class _ArtistBoostsScreenState extends State<ArtistBoostsScreen> {
         }
       },
     );
-    
+
     if (kDebugMode) {
-      print('📱 ArtistBoostsScreen: Purchase event listener set up successfully');
+      print(
+        '📱 ArtistBoostsScreen: Purchase event listener set up successfully',
+      );
     }
   }
 
@@ -937,12 +941,12 @@ class _ArtistBoostsScreenState extends State<ArtistBoostsScreen> {
       print('   - Product: ${purchase.productId}');
       print('   - Mounted: $mounted');
     }
-    
+
     if (purchase.category == PurchaseCategory.boosts && mounted) {
       if (kDebugMode) {
         print('📱 Showing success snackbar...');
       }
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('boosts_success_message'.tr()),

@@ -320,7 +320,7 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
 
         int successCount = 0;
         final unifiedPaymentService = UnifiedPaymentService();
-        
+
         for (final transaction in selectedTransactions) {
           try {
             // Get payment intent ID from transaction metadata

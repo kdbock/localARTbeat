@@ -286,8 +286,10 @@ class ArtCommunityService extends ChangeNotifier {
         tieBreaker: (a, b) {
           final boostCompare = b.boostScore.compareTo(a.boostScore);
           if (boostCompare != 0) return boostCompare;
-          final aBoost = a.lastBoostAt ?? DateTime.fromMillisecondsSinceEpoch(0);
-          final bBoost = b.lastBoostAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+          final aBoost =
+              a.lastBoostAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+          final bBoost =
+              b.lastBoostAt ?? DateTime.fromMillisecondsSinceEpoch(0);
           final boostTimeCompare = bBoost.compareTo(aBoost);
           if (boostTimeCompare != 0) return boostTimeCompare;
           return a.displayName.compareTo(b.displayName);
@@ -329,9 +331,7 @@ class ArtCommunityService extends ChangeNotifier {
     List<ArtistProfile> ordered,
     List<ArtistProfile> latest,
   ) {
-    final byId = {
-      for (final artist in latest) artist.userId: artist,
-    };
+    final byId = {for (final artist in latest) artist.userId: artist};
     final merged = <ArtistProfile>[];
     for (final artist in ordered) {
       final updated = byId.remove(artist.userId);

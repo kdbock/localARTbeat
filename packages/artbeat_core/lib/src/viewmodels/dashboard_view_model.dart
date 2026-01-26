@@ -597,7 +597,7 @@ class DashboardViewModel extends ChangeNotifier {
 
       // Still try to load markers for default location
       try {
-      await _loadNearbyArtMarkers();
+        await _loadNearbyArtMarkers();
       } catch (markerError) {
         debugPrint(
           '❌ Error loading markers for default location: $markerError',
@@ -649,14 +649,15 @@ class DashboardViewModel extends ChangeNotifier {
       );
 
       // Get nearby art pieces from ArtWalk service
-      final List<artWalkLib.PublicArtModel> nearbyArt =
-          await _artWalkService.getPublicArtNearLocation(
-        latitude: location.latitude,
-        longitude: location.longitude,
-        radiusKm: 10, // 10km radius
-      );
-      final List<artWalkLib.PublicArtModel> limitedNearbyArt =
-          nearbyArt.take(300).toList();
+      final List<artWalkLib.PublicArtModel> nearbyArt = await _artWalkService
+          .getPublicArtNearLocation(
+            latitude: location.latitude,
+            longitude: location.longitude,
+            radiusKm: 10, // 10km radius
+          );
+      final List<artWalkLib.PublicArtModel> limitedNearbyArt = nearbyArt
+          .take(300)
+          .toList();
 
       // Cluster markers to reduce load when many nearby items exist
       final Map<String, List<artWalkLib.PublicArtModel>> clusters = {};

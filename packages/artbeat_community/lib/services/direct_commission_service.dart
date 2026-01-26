@@ -228,10 +228,13 @@ class DirectCommissionService {
   Future<void> completeCommission(String commissionId) async {
     try {
       // 1. Update the direct_commissions document status
-      await _firestore.collection('direct_commissions').doc(commissionId).update({
-        'status': CommissionStatus.completed.name,
-        'completedAt': Timestamp.now(),
-      });
+      await _firestore
+          .collection('direct_commissions')
+          .doc(commissionId)
+          .update({
+            'status': CommissionStatus.completed.name,
+            'completedAt': Timestamp.now(),
+          });
 
       // 2. Call the Cloud Function to release funds in the earnings system
       // This transitions funds from pending to available balance

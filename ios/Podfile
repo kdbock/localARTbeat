@@ -68,6 +68,11 @@ post_install do |installer|
       # Fix Firebase Storage file protection issue
       config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= '$(inherited)'
       config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << ' FIREBASE_STORAGE_FILE_PROTECTION=NO'
+      
+      # Ensure dSYM generation for all pods (fixes objective_c.framework dSYM issue)
+      config.build_settings['DEBUG_INFORMATION_FORMAT'] = 'dwarf-with-dsym'
+      config.build_settings['DWARF_DSYM_FOLDER_PATH'] = "#{Dir.pwd}/build/Release-iphoneos"
+      config.build_settings['DWARF_DSYM_FILE_NAME'] = "#{target.product_name}.framework.dSYM"
     end
   end
 end

@@ -546,10 +546,9 @@ class SubscriptionService {
       // Search by display name (requires displayNameLower field + index)
       final searchLower = searchQuery?.trim().toLowerCase();
       if (searchLower != null && searchLower.isNotEmpty) {
-        query = query
-            .orderBy('displayNameLower')
-            .startAt([searchLower])
-            .endAt(['$searchLower\uf8ff']);
+        query = query.orderBy('displayNameLower').startAt([searchLower]).endAt([
+          '$searchLower\uf8ff',
+        ]);
       } else {
         query = query.orderBy('displayNameLower');
       }

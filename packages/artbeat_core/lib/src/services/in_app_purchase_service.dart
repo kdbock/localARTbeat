@@ -585,9 +585,13 @@ class InAppPurchaseService {
         await Future<void>.delayed(const Duration(milliseconds: 500));
 
         // Trigger the purchase completion callback manually in dev mode
-        AppLogger.info('🔧 DEV MODE: About to trigger onPurchaseCompleted callback');
-        AppLogger.info('🔧 DEV MODE: Callback is ${onPurchaseCompleted != null ? "SET" : "NULL"}');
-        
+        AppLogger.info(
+          '🔧 DEV MODE: About to trigger onPurchaseCompleted callback',
+        );
+        AppLogger.info(
+          '🔧 DEV MODE: Callback is ${onPurchaseCompleted != null ? "SET" : "NULL"}',
+        );
+
         if (onPurchaseCompleted != null) {
           final transactionId = 'dev_${DateTime.now().millisecondsSinceEpoch}';
           final mockPurchase = CompletedPurchase(
@@ -607,8 +611,10 @@ class InAppPurchaseService {
             transactionId: transactionId,
             metadata: metadata ?? {},
           );
-          
-          AppLogger.info('🔧 DEV MODE: Calling onPurchaseCompleted with metadata: $metadata');
+
+          AppLogger.info(
+            '🔧 DEV MODE: Calling onPurchaseCompleted with metadata: $metadata',
+          );
           onPurchaseCompleted!(mockPurchase);
           AppLogger.info('🔧 DEV MODE: onPurchaseCompleted callback executed');
         } else {

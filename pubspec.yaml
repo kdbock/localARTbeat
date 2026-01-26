@@ -2,7 +2,7 @@ name: artbeat
 description: "Local ARTbeat - A modular Flutter application for artists, galleries, and art lovers."
 publish_to: "none"
 
-version: 2.5.3+97
+version: 2.5.6+01
 
 environment:
   sdk: ">=3.10.7 <4.0.0"

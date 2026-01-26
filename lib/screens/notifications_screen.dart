@@ -243,16 +243,16 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     final summaryData = summarySnapshot.data?.data();
     final cachedTotal = summaryData?['totalCount'] as int?;
     final cachedUnread = summaryData?['unreadCount'] as int?;
-    final cachedUpdated =
-        (summaryData?['lastUpdated'] as Timestamp?)?.toDate();
+    final cachedUpdated = (summaryData?['lastUpdated'] as Timestamp?)?.toDate();
 
-    final unreadCount = cachedUnread ??
-        docs.where((doc) => doc.data()['read'] != true).length;
+    final unreadCount =
+        cachedUnread ?? docs.where((doc) => doc.data()['read'] != true).length;
     final totalCount = cachedTotal ?? docs.length;
     final lastUpdated = cachedUpdated ?? _extractLatestDate(docs);
 
-    final filteredDocs =
-        docs.where((doc) => _activeFilter.appliesTo(doc.data())).toList();
+    final filteredDocs = docs
+        .where((doc) => _activeFilter.appliesTo(doc.data()))
+        .toList();
 
     final summaryCard = _buildSummaryCard(
       total: totalCount,
@@ -278,9 +278,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       itemCount: filteredDocs.length + 1,
       itemBuilder: (context, index) {
         if (index == 0) {
-          return Column(
-            children: [summaryCard, const SizedBox(height: 12)],
-          );
+          return Column(children: [summaryCard, const SizedBox(height: 12)]);
         }
 
         final doc = filteredDocs[index - 1];

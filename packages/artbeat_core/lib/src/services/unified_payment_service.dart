@@ -404,7 +404,8 @@ class UnifiedPaymentService {
     required SubscriptionTier tier,
     required PaymentMethod method,
     String? paymentIntentId,
-    String? billingCycle, String? paymentMethodId,
+    String? billingCycle,
+    String? paymentMethodId,
   }) async {
     try {
       final userId = _auth.currentUser?.uid;
@@ -878,17 +879,12 @@ class UnifiedPaymentService {
     try {
       final response = await _makeAuthenticatedRequest(
         functionKey: 'completeCommission',
-        body: {
-          'commissionId': commissionId,
-        },
+        body: {'commissionId': commissionId},
       );
 
       if (response.statusCode == 200) {
         AppLogger.info('✅ Commission completed: $commissionId');
-        return PaymentResult(
-          success: true,
-          paymentIntentId: commissionId,
-        );
+        return PaymentResult(success: true, paymentIntentId: commissionId);
       } else {
         final data = json.decode(response.body) as Map<String, dynamic>;
         AppLogger.warning('⚠️ Failed to complete commission: ${data['error']}');
@@ -1000,14 +996,16 @@ class UnifiedPaymentService {
         _logPaymentEvent('ticket_sale', amount, 'success');
         return PaymentResult(
           success: true,
-          paymentIntentId: (data['paymentIntentId'] as String?) ?? paymentIntentId,
+          paymentIntentId:
+              (data['paymentIntentId'] as String?) ?? paymentIntentId,
         );
       } else {
         _logPaymentEvent('ticket_sale', amount, 'failed');
         final data = json.decode(response.body) as Map<String, dynamic>;
         return PaymentResult(
           success: false,
-          error: (data['error'] as String?) ?? 'Failed to process ticket payment',
+          error:
+              (data['error'] as String?) ?? 'Failed to process ticket payment',
         );
       }
     } catch (e) {
@@ -1523,7 +1521,9 @@ class UnifiedPaymentService {
         );
         rethrow;
       } else {
-        AppLogger.error('Error presenting payment sheet during $operationName: $e');
+        AppLogger.error(
+          'Error presenting payment sheet during $operationName: $e',
+        );
         rethrow;
       }
     }

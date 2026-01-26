@@ -611,7 +611,6 @@ class SubscriptionService extends ChangeNotifier {
     }
   }
 
-
   /// Helper method to update user's subscription tier
   Future<void> updateUserSubscriptionTier(SubscriptionTier tier) async {
     try {
@@ -648,8 +647,9 @@ class SubscriptionService extends ChangeNotifier {
         await docRef.set({
           'userId': user.uid,
           'displayName': user.displayName ?? 'Artist',
-          'displayNameLower':
-              (user.displayName ?? 'Artist').trim().toLowerCase(),
+          'displayNameLower': (user.displayName ?? 'Artist')
+              .trim()
+              .toLowerCase(),
           'bio': 'Artist profile created via subscription purchase',
           'userType': 'artist',
           'location': '',

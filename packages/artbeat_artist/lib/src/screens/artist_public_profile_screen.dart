@@ -172,8 +172,9 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
         artistId: artistProfile.userId,
       );
 
-      final artworkFuture =
-          _artworkService.getArtworkByArtistProfileId(artistProfile.id);
+      final artworkFuture = _artworkService.getArtworkByArtistProfileId(
+        artistProfile.id,
+      );
       final followingFuture = _currentUserId != null
           ? _subscriptionService.isFollowingArtist(
               artistProfileId: artistProfile.id,

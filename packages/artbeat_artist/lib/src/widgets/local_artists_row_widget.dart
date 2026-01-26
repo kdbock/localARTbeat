@@ -66,10 +66,8 @@ class _LocalArtistsRowWidgetState extends State<LocalArtistsRowWidget> {
       tieBreaker: (a, b) {
         final scoreCompare = b.boostScore.compareTo(a.boostScore);
         if (scoreCompare != 0) return scoreCompare;
-        final aBoost = a.lastBoostAt ??
-            DateTime.fromMillisecondsSinceEpoch(0);
-        final bBoost = b.lastBoostAt ??
-            DateTime.fromMillisecondsSinceEpoch(0);
+        final aBoost = a.lastBoostAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+        final bBoost = b.lastBoostAt ?? DateTime.fromMillisecondsSinceEpoch(0);
         final boostTimeCompare = bBoost.compareTo(aBoost);
         if (boostTimeCompare != 0) return boostTimeCompare;
         return a.displayName.compareTo(b.displayName);
@@ -127,7 +125,9 @@ class _LocalArtistsRowWidgetState extends State<LocalArtistsRowWidget> {
               }
 
               if (snapshot.hasError) {
-                return _ErrorState(displayText: tr('art_walk_error_loading_artists'));
+                return _ErrorState(
+                  displayText: tr('art_walk_error_loading_artists'),
+                );
               }
 
               final artists = snapshot.data ?? const [];
@@ -171,16 +171,9 @@ class _ErrorState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
-              Icons.error_outline,
-              color: Colors.red,
-              size: 36,
-            ),
+            const Icon(Icons.error_outline, color: Colors.red, size: 36),
             const SizedBox(height: 8),
-            Text(
-              displayText,
-              style: const TextStyle(color: Colors.red),
-            ),
+            Text(displayText, style: const TextStyle(color: Colors.red)),
           ],
         ),
       ),
@@ -207,19 +200,12 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.brush_outlined,
-              size: 40,
-              color: Colors.grey.shade600,
-            ),
+            Icon(Icons.brush_outlined, size: 40, color: Colors.grey.shade600),
             const SizedBox(height: 8),
             Text(
               'No local artists found in $zipCode',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.grey.shade600,
-                fontSize: 15,
-              ),
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 15),
             ),
           ],
         ),
@@ -262,7 +248,8 @@ class _LocalArtistCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasValidImage = artist.profileImageUrl != null &&
+    final hasValidImage =
+        artist.profileImageUrl != null &&
         artist.profileImageUrl!.isNotEmpty &&
         ImageUrlValidator.isValidImageUrl(artist.profileImageUrl);
 
@@ -284,10 +271,7 @@ class _LocalArtistCard extends StatelessWidget {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: const LinearGradient(
-                          colors: [
-                            Color(0xFFF97316),
-                            Color(0xFF22D3EE),
-                          ],
+                          colors: [Color(0xFFF97316), Color(0xFF22D3EE)],
                         ),
                         boxShadow: [
                           BoxShadow(
@@ -316,16 +300,10 @@ class _LocalArtistCard extends StatelessWidget {
                   height: 120,
                   decoration: BoxDecoration(
                     border: artist.isVerified
-                        ? Border.all(
-                            color: Colors.blue,
-                            width: 2,
-                          )
+                        ? Border.all(color: Colors.blue, width: 2)
                         : artist.isFeatured
-                            ? Border.all(
-                                color: Colors.amber,
-                                width: 2,
-                              )
-                            : null,
+                        ? Border.all(color: Colors.amber, width: 2)
+                        : null,
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: artist.hasMapGlow
                         ? [
@@ -355,11 +333,7 @@ class _LocalArtistCard extends StatelessWidget {
                         : null,
                   ),
                   child: !hasValidImage
-                      ? const Icon(
-                          Icons.person,
-                          size: 60,
-                          color: Colors.grey,
-                        )
+                      ? const Icon(Icons.person, size: 60, color: Colors.grey)
                       : null,
                 ),
               ),
@@ -388,10 +362,7 @@ class _LocalArtistCard extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
           ),
         ],
       ),

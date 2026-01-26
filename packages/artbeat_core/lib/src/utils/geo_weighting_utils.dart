@@ -107,17 +107,14 @@ class GeoWeightingUtils {
       }
 
       final sorted = List<T>.from(items);
-      developer.Timeline.timeSync(
-        'GeoWeighting.sortByDistance.sort',
-        () {
-          sorted.sort((a, b) {
-            final distanceA = distances[idOf(a)] ?? double.infinity;
-            final distanceB = distances[idOf(b)] ?? double.infinity;
-            if (distanceA != distanceB) return distanceA.compareTo(distanceB);
-            return tieBreaker(a, b);
-          });
-        },
-      );
+      developer.Timeline.timeSync('GeoWeighting.sortByDistance.sort', () {
+        sorted.sort((a, b) {
+          final distanceA = distances[idOf(a)] ?? double.infinity;
+          final distanceB = distances[idOf(b)] ?? double.infinity;
+          if (distanceA != distanceB) return distanceA.compareTo(distanceB);
+          return tieBreaker(a, b);
+        });
+      });
 
       return sorted;
     } finally {

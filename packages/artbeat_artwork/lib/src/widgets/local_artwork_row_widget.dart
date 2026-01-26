@@ -150,10 +150,9 @@ class LocalArtworkRowWidget extends StatelessWidget {
                                 Stack(
                                   children: [
                                     ClipRRect(
-                                      borderRadius:
-                                          const BorderRadius.vertical(
-                                            top: Radius.circular(12.0),
-                                          ),
+                                      borderRadius: const BorderRadius.vertical(
+                                        top: Radius.circular(12.0),
+                                      ),
                                       child: SecureNetworkImage(
                                         imageUrl: artwork.imageUrl,
                                         width: 170,
@@ -182,8 +181,9 @@ class LocalArtworkRowWidget extends StatelessWidget {
                                           ),
                                           decoration: BoxDecoration(
                                             color: Colors.red,
-                                            borderRadius:
-                                                BorderRadius.circular(12),
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
                                           ),
                                           child: const Text(
                                             'SOLD',

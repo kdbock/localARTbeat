@@ -43,6 +43,8 @@ firebase-debug.*.log
 .pub-cache/
 .pub/
 /build/
+# iOS build artifacts should never be committed
+ios/build/
 
 # Test related
 coverage/

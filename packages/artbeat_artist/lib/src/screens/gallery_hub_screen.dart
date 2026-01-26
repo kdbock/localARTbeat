@@ -87,10 +87,12 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
       List<Map<String, dynamic>> highlights = [];
       List<core.ArtistFeature> activeBoosts = [];
       if (userId != null) {
-        highlights =
-            await _withTimeline('GalleryHub.loadArtistData.highlights', () {
-          return _analyticsService.getDiscoveryBoostHighlights(userId);
-        });
+        highlights = await _withTimeline(
+          'GalleryHub.loadArtistData.highlights',
+          () {
+            return _analyticsService.getDiscoveryBoostHighlights(userId);
+          },
+        );
         activeBoosts = await _withTimeline(
           'GalleryHub.loadArtistData.features',
           () => _featureService.getActiveFeaturesForArtist(userId),
@@ -119,10 +121,7 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
     }
   }
 
-  Future<T> _withTimeline<T>(
-    String name,
-    Future<T> Function() action,
-  ) async {
+  Future<T> _withTimeline<T>(String name, Future<T> Function() action) async {
     final task = developer.TimelineTask();
     task.start(name);
     try {
@@ -1098,76 +1097,77 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
                         color: Colors.white,
                       ),
                     ),
-                  const SizedBox(height: 16),
-                  Builder(
-                    builder: (context) {
-                      developer.Timeline.instantSync(
-                        'GalleryHub.renderRecentActivityList',
-                        arguments: {'count': _recentActivities.length},
-                      );
-                      return ListView.separated(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: _recentActivities.length,
-                        separatorBuilder: (context, index) => const Divider(),
-                        itemBuilder: (context, index) {
-                          final activity = _recentActivities[index];
-                          final activityColor = activity.type.color;
-                          developer.Timeline.instantSync(
-                            'GalleryHub.activityCard',
-                            arguments: {
-                              'type': activity.type.name,
-                              'timestamp': activity.timestamp.toIso8601String(),
-                            },
-                          );
-                          return Container(
-                            margin: const EdgeInsets.only(bottom: 8),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.05),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: const Color(
-                                  0xFF00F5FF,
-                                ).withValues(alpha: 0.1),
-                              ),
-                            ),
-                            child: ListTile(
-                              leading: CircleAvatar(
-                                backgroundColor: activityColor.withValues(
-                                  alpha: 0.2,
-                                ),
-                                child: Icon(
-                                  activity.type.icon,
-                                  color: activityColor,
+                    const SizedBox(height: 16),
+                    Builder(
+                      builder: (context) {
+                        developer.Timeline.instantSync(
+                          'GalleryHub.renderRecentActivityList',
+                          arguments: {'count': _recentActivities.length},
+                        );
+                        return ListView.separated(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: _recentActivities.length,
+                          separatorBuilder: (context, index) => const Divider(),
+                          itemBuilder: (context, index) {
+                            final activity = _recentActivities[index];
+                            final activityColor = activity.type.color;
+                            developer.Timeline.instantSync(
+                              'GalleryHub.activityCard',
+                              arguments: {
+                                'type': activity.type.name,
+                                'timestamp': activity.timestamp
+                                    .toIso8601String(),
+                              },
+                            );
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 8),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.05),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: const Color(
+                                    0xFF00F5FF,
+                                  ).withValues(alpha: 0.1),
                                 ),
                               ),
-                              title: Text(
-                                activity.title,
-                                style: GoogleFonts.poppins(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600,
+                              child: ListTile(
+                                leading: CircleAvatar(
+                                  backgroundColor: activityColor.withValues(
+                                    alpha: 0.2,
+                                  ),
+                                  child: Icon(
+                                    activity.type.icon,
+                                    color: activityColor,
+                                  ),
+                                ),
+                                title: Text(
+                                  activity.title,
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                subtitle: Text(
+                                  activity.description,
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.white70,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                                trailing: Text(
+                                  activity.timeAgo,
+                                  style: GoogleFonts.poppins(
+                                    color: const Color(0xFF00F5FF),
+                                    fontSize: 11,
+                                  ),
                                 ),
                               ),
-                              subtitle: Text(
-                                activity.description,
-                                style: GoogleFonts.poppins(
-                                  color: Colors.white70,
-                                  fontSize: 12,
-                                ),
-                              ),
-                              trailing: Text(
-                                activity.timeAgo,
-                                style: GoogleFonts.poppins(
-                                  color: const Color(0xFF00F5FF),
-                                  fontSize: 11,
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
+                            );
+                          },
+                        );
+                      },
+                    ),
                     const SizedBox(height: 16),
                     Center(
                       child: OutlinedButton(
@@ -1768,7 +1768,7 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
       ),
     );
   }
- 
+
   void _maybeLogGalleryHubImageStats() {
     if (kReleaseMode) return;
     final imageService = core.ImageManagementService();
