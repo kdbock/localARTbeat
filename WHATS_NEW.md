@@ -1,7 +1,9 @@
 # What's New
+# Jan 26 2026  
+    Updates done:
+        - environment variables resolved
+        - payment structure confirmed throughout app
 
-## December 23, 2025
-
-- Added animated dashboard for a more dynamic user experience.
-- Introduced the ability to manage tokens directly within the app.
-- Fixed various translation issues to improve localization and language support.
+    To do:
+        - Revamp Art Battle
+   

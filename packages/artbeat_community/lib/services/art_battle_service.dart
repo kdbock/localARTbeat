@@ -150,17 +150,20 @@ class ArtBattleService {
     final startOfDay = DateTime(today.year, today.month, today.day);
     final endOfDay = startOfDay.add(const Duration(days: 1));
 
-    final battlesToday = await _firestore
+    final countQuery = await _firestore
         .collection('art_battles')
         .where(
           'timestamp',
           isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay),
         )
         .where('timestamp', isLessThan: Timestamp.fromDate(endOfDay))
+        .count()
         .get();
 
+    final battlesCount = countQuery.count ?? 0;
+
     // Inject sponsor every 5th battle
-    return (battlesToday.docs.length + 1) % 5 == 0;
+    return (battlesCount + 1) % 5 == 0;
   }
 
   // Get a random sponsor

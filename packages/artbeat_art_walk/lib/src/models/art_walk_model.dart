@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:artbeat_core/artbeat_core.dart' show FirestoreUtils;
 
 /// Model representing an Art Walk
 class ArtWalkModel {
@@ -50,33 +51,45 @@ class ArtWalkModel {
   });
 
   factory ArtWalkModel.fromFirestore(DocumentSnapshot doc) {
-    final Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+    final data = doc.data() as Map<String, dynamic>? ?? {};
     return ArtWalkModel(
       id: doc.id,
-      title: data['title'] as String? ?? '',
-      description: data['description'] as String? ?? '',
-      userId: data['userId'] as String? ?? '',
-      artworkIds: List<String>.from(data['artworkIds'] as List<dynamic>? ?? []),
-      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      isPublic: data['isPublic'] as bool? ?? false,
-      viewCount: data['viewCount'] as int? ?? 0,
-      imageUrls: List<String>.from(data['imageUrls'] as List<dynamic>? ?? []),
-      zipCode: data['zipCode'] as String?,
-      estimatedDuration: (data['estimatedDuration'] as num?)?.toDouble(),
-      estimatedDistance: (data['estimatedDistance'] as num?)?.toDouble(),
-      coverImageUrl: (data['coverImageUrl'] as String?)?.isEmpty == true
-          ? null
-          : data['coverImageUrl'] as String?,
-      routeData: data['routeData'] as String?,
-      tags: data['tags'] != null
-          ? List<String>.from(data['tags'] as List<dynamic>)
+      title: FirestoreUtils.safeStringDefault(data['title']),
+      description: FirestoreUtils.safeStringDefault(data['description']),
+      userId: FirestoreUtils.safeStringDefault(data['userId']),
+      artworkIds: (data['artworkIds'] as List<dynamic>?)
+              ?.map((e) => FirestoreUtils.safeStringDefault(e))
+              .toList() ??
+          [],
+      createdAt: FirestoreUtils.safeDateTime(data['createdAt']),
+      isPublic: FirestoreUtils.safeBool(data['isPublic'], false),
+      viewCount: FirestoreUtils.safeInt(data['viewCount']),
+      imageUrls: (data['imageUrls'] as List<dynamic>?)
+              ?.map((e) => FirestoreUtils.safeStringDefault(e))
+              .toList() ??
+          [],
+      zipCode: FirestoreUtils.safeString(data['zipCode']),
+      estimatedDuration: data['estimatedDuration'] != null
+          ? FirestoreUtils.safeDouble(data['estimatedDuration'])
           : null,
-      difficulty: data['difficulty'] as String?,
-      isAccessible: data['isAccessible'] as bool?,
+      estimatedDistance: data['estimatedDistance'] != null
+          ? FirestoreUtils.safeDouble(data['estimatedDistance'])
+          : null,
+      coverImageUrl: FirestoreUtils.safeString(data['coverImageUrl']),
+      routeData: FirestoreUtils.safeString(data['routeData']),
+      tags: (data['tags'] as List<dynamic>?)
+          ?.map((e) => FirestoreUtils.safeStringDefault(e))
+          .toList(),
+      difficulty: FirestoreUtils.safeString(data['difficulty']),
+      isAccessible: data['isAccessible'] != null
+          ? FirestoreUtils.safeBool(data['isAccessible'])
+          : null,
       startLocation: data['startLocation'] as GeoPoint?,
-      completionCount: data['completionCount'] as int?,
-      reportCount: data['reportCount'] as int? ?? 0,
-      isFlagged: data['isFlagged'] as bool? ?? false,
+      completionCount: data['completionCount'] != null
+          ? FirestoreUtils.safeInt(data['completionCount'])
+          : null,
+      reportCount: FirestoreUtils.safeInt(data['reportCount']),
+      isFlagged: FirestoreUtils.safeBool(data['isFlagged'], false),
     );
   }
 

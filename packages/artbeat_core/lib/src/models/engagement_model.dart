@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../utils/firestore_utils.dart';
 
 /// Universal engagement model for all ARTbeat content
 /// Replaces the complex mix of likes, applause, follows, etc.
@@ -22,14 +23,16 @@ class EngagementModel {
   });
 
   factory EngagementModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+    final data = doc.data() as Map<String, dynamic>? ?? {};
     return EngagementModel(
       id: doc.id,
-      contentId: data['contentId'] as String,
-      contentType: data['contentType'] as String,
-      userId: data['userId'] as String,
-      type: EngagementType.fromString(data['type'] as String),
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
+      contentId: FirestoreUtils.safeStringDefault(data['contentId']),
+      contentType: FirestoreUtils.safeStringDefault(data['contentType']),
+      userId: FirestoreUtils.safeStringDefault(data['userId']),
+      type: EngagementType.fromString(
+        FirestoreUtils.safeStringDefault(data['type']),
+      ),
+      createdAt: FirestoreUtils.safeDateTime(data['createdAt']),
       metadata: data['metadata'] as Map<String, dynamic>?,
     );
   }
@@ -203,58 +206,53 @@ class EngagementStats {
   factory EngagementStats.fromFirestore(Map<String, dynamic> data) {
     return EngagementStats(
       // New fields with backward compatibility fallbacks
-      likeCount:
-          data['likeCount'] as int? ??
-          data['appreciateCount'] as int? ??
-          data['applauseCount'] as int? ??
-          0,
-      commentCount:
-          data['commentCount'] as int? ?? data['discussCount'] as int? ?? 0,
-      replyCount: data['replyCount'] as int? ?? 0,
-      shareCount:
-          data['shareCount'] as int? ?? data['amplifyCount'] as int? ?? 0,
-      seenCount: data['seenCount'] as int? ?? 0,
-      rateCount: data['rateCount'] as int? ?? 0,
-      reviewCount: data['reviewCount'] as int? ?? 0,
-      followCount:
-          data['followCount'] as int? ?? data['connectCount'] as int? ?? 0,
-      boostCount: data['boostCount'] as int? ?? data['giftCount'] as int? ?? 0,
-      sponsorCount: data['sponsorCount'] as int? ?? 0,
-      messageCount: data['messageCount'] as int? ?? 0,
-      commissionCount: data['commissionCount'] as int? ?? 0,
-      totalBoostValue:
-          (data['totalBoostValue'] as num? ?? data['totalGiftValue'] as num?)
-              ?.toDouble() ??
-          0.0,
-      totalSponsorValue: (data['totalSponsorValue'] as num?)?.toDouble() ?? 0.0,
-      lastUpdated:
-          (data['lastUpdated'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      likeCount: FirestoreUtils.safeInt(
+        data['likeCount'] ?? data['appreciateCount'] ?? data['applauseCount'],
+      ),
+      commentCount: FirestoreUtils.safeInt(
+        data['commentCount'] ?? data['discussCount'],
+      ),
+      replyCount: FirestoreUtils.safeInt(data['replyCount']),
+      shareCount: FirestoreUtils.safeInt(
+        data['shareCount'] ?? data['amplifyCount'],
+      ),
+      seenCount: FirestoreUtils.safeInt(data['seenCount']),
+      rateCount: FirestoreUtils.safeInt(data['rateCount']),
+      reviewCount: FirestoreUtils.safeInt(data['reviewCount']),
+      followCount: FirestoreUtils.safeInt(
+        data['followCount'] ?? data['connectCount'],
+      ),
+      boostCount: FirestoreUtils.safeInt(data['boostCount'] ?? data['giftCount']),
+      sponsorCount: FirestoreUtils.safeInt(data['sponsorCount']),
+      messageCount: FirestoreUtils.safeInt(data['messageCount']),
+      commissionCount: FirestoreUtils.safeInt(data['commissionCount']),
+      totalBoostValue: FirestoreUtils.safeDouble(
+        data['totalBoostValue'] ?? data['totalGiftValue'],
+      ),
+      totalSponsorValue: FirestoreUtils.safeDouble(data['totalSponsorValue']),
+      lastUpdated: FirestoreUtils.safeDateTime(data['lastUpdated']),
     );
   }
 
   factory EngagementStats.fromMap(Map<String, dynamic> data) {
     return EngagementStats(
-      likeCount: data['likeCount'] as int? ?? 0,
-      commentCount: data['commentCount'] as int? ?? 0,
-      replyCount: data['replyCount'] as int? ?? 0,
-      shareCount: data['shareCount'] as int? ?? 0,
-      seenCount: data['seenCount'] as int? ?? 0,
-      rateCount: data['rateCount'] as int? ?? 0,
-      reviewCount: data['reviewCount'] as int? ?? 0,
-      followCount: data['followCount'] as int? ?? 0,
-      boostCount: data['boostCount'] as int? ?? data['giftCount'] as int? ?? 0,
-      sponsorCount: data['sponsorCount'] as int? ?? 0,
-      messageCount: data['messageCount'] as int? ?? 0,
-      commissionCount: data['commissionCount'] as int? ?? 0,
-      totalBoostValue:
-          (data['totalBoostValue'] as num? ?? data['totalGiftValue'] as num?)
-              ?.toDouble() ??
-          0.0,
-      totalSponsorValue: (data['totalSponsorValue'] as num?)?.toDouble() ?? 0.0,
-      lastUpdated: data['lastUpdated'] is Timestamp
-          ? (data['lastUpdated'] as Timestamp).toDate()
-          : DateTime.tryParse(data['lastUpdated'] as String? ?? '') ??
-                DateTime.now(),
+      likeCount: FirestoreUtils.safeInt(data['likeCount']),
+      commentCount: FirestoreUtils.safeInt(data['commentCount']),
+      replyCount: FirestoreUtils.safeInt(data['replyCount']),
+      shareCount: FirestoreUtils.safeInt(data['shareCount']),
+      seenCount: FirestoreUtils.safeInt(data['seenCount']),
+      rateCount: FirestoreUtils.safeInt(data['rateCount']),
+      reviewCount: FirestoreUtils.safeInt(data['reviewCount']),
+      followCount: FirestoreUtils.safeInt(data['followCount']),
+      boostCount: FirestoreUtils.safeInt(data['boostCount'] ?? data['giftCount']),
+      sponsorCount: FirestoreUtils.safeInt(data['sponsorCount']),
+      messageCount: FirestoreUtils.safeInt(data['messageCount']),
+      commissionCount: FirestoreUtils.safeInt(data['commissionCount']),
+      totalBoostValue: FirestoreUtils.safeDouble(
+        data['totalBoostValue'] ?? data['totalGiftValue'],
+      ),
+      totalSponsorValue: FirestoreUtils.safeDouble(data['totalSponsorValue']),
+      lastUpdated: FirestoreUtils.safeDateTime(data['lastUpdated']),
     );
   }
 

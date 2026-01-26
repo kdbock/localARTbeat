@@ -1,3 +1,5 @@
+import 'package:artbeat_core/artbeat_core.dart' show FirestoreUtils;
+
 /// Model representing the refund policy for an event
 /// Supports full refunds up to a specified deadline before the event
 class RefundPolicy {
@@ -20,15 +22,19 @@ class RefundPolicy {
   factory RefundPolicy.fromMap(Map<String, dynamic> map) {
     return RefundPolicy(
       fullRefundDeadline: Duration(
-        hours: map['fullRefundDeadlineHours'] as int? ?? 24,
+        hours: FirestoreUtils.safeInt(map['fullRefundDeadlineHours'], 24),
       ),
-      allowPartialRefunds: map['allowPartialRefunds'] as bool? ?? false,
+      allowPartialRefunds:
+          FirestoreUtils.safeBool(map['allowPartialRefunds']),
       partialRefundPercentage:
-          (map['partialRefundPercentage'] as num?)?.toDouble() ?? 0.0,
-      terms:
-          map['terms']?.toString() ??
-          'Full refund available up to 24 hours before event start time.',
-      exceptions: _parseStringList(map['exceptions']),
+          FirestoreUtils.safeDouble(map['partialRefundPercentage']),
+      terms: FirestoreUtils.safeStringDefault(
+        map['terms'],
+        'Full refund available up to 24 hours before event start time.',
+      ),
+      exceptions: (map['exceptions'] as List? ?? [])
+          .map(FirestoreUtils.safeStringDefault)
+          .toList(),
     );
   }
 
@@ -148,14 +154,6 @@ class RefundPolicy {
     }
 
     return buffer.toString().trim();
-  }
-
-  // Helper method to parse string lists
-  static List<String> _parseStringList(dynamic data) {
-    if (data is List) {
-      return data.map((e) => e.toString()).toList();
-    }
-    return [];
   }
 
   @override

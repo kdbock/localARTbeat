@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:artbeat_core/artbeat_core.dart' show FirestoreUtils;
 
 /// Model representing an event in the ARTbeat app
 class EventModel {
@@ -32,34 +33,27 @@ class EventModel {
 
   /// Create an EventModel from a Firestore document
   factory EventModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+    final data = doc.data() as Map<String, dynamic>? ?? {};
     return EventModel(
       id: doc.id,
-      title: data['title'] != null ? data['title'].toString() : '',
-      description: data['description'] != null
-          ? data['description'].toString()
-          : '',
-      startDate: data['startDate'] is Timestamp
-          ? (data['startDate'] as Timestamp).toDate()
-          : data['dateTime'] is Timestamp
-          ? (data['dateTime'] as Timestamp).toDate()
-          : DateTime.now(),
-      endDate: data['endDate'] is Timestamp
-          ? (data['endDate'] as Timestamp).toDate()
+      title: FirestoreUtils.safeStringDefault(data['title']),
+      description: FirestoreUtils.safeStringDefault(data['description']),
+      startDate: data['startDate'] != null
+          ? FirestoreUtils.safeDateTime(data['startDate'])
+          : FirestoreUtils.safeDateTime(data['dateTime']),
+      endDate: data['endDate'] != null
+          ? FirestoreUtils.safeDateTime(data['endDate'])
           : null,
-      location: data['location'] != null ? data['location'].toString() : '',
-      imageUrl: data['imageUrl'] != null ? data['imageUrl'].toString() : null,
-      artistId: data['artistId'] != null ? data['artistId'].toString() : '',
-      isPublic: data['isPublic'] is bool ? data['isPublic'] as bool : false,
-      attendeeIds: data['attendeeIds'] is List
-          ? (data['attendeeIds'] as List).map((e) => e.toString()).toList()
-          : <String>[],
-      createdAt: data['createdAt'] is Timestamp
-          ? (data['createdAt'] as Timestamp).toDate()
-          : DateTime.now(),
-      updatedAt: data['updatedAt'] is Timestamp
-          ? (data['updatedAt'] as Timestamp).toDate()
-          : DateTime.now(),
+      location: FirestoreUtils.safeStringDefault(data['location']),
+      imageUrl: FirestoreUtils.safeString(data['imageUrl']),
+      artistId: FirestoreUtils.safeStringDefault(data['artistId']),
+      isPublic: FirestoreUtils.safeBool(data['isPublic'], false),
+      attendeeIds: (data['attendeeIds'] as List<dynamic>?)
+              ?.map((e) => FirestoreUtils.safeStringDefault(e))
+              .toList() ??
+          <String>[],
+      createdAt: FirestoreUtils.safeDateTime(data['createdAt']),
+      updatedAt: FirestoreUtils.safeDateTime(data['updatedAt']),
     );
   }
 

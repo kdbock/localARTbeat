@@ -65,15 +65,50 @@ class CaptureService implements CaptureServiceInterface {
           .get();
 
       return querySnapshot.docs
-          .map(
-            (doc) => CaptureModel.fromJson({
-              ...doc.data() as Map<String, dynamic>,
-              'id': doc.id,
-            }),
-          )
+          .map((doc) {
+            try {
+              final data = doc.data() as Map<String, dynamic>;
+              return CaptureModel.fromJson({
+                ...data,
+                'id': doc.id,
+              });
+            } catch (e) {
+              AppLogger.error('Error parsing capture ${doc.id}: $e');
+              return null;
+            }
+          })
+          .whereType<CaptureModel>()
           .toList();
     } catch (e) {
       AppLogger.error('Error fetching captures: $e');
+      
+      if (e.toString().contains('ParseExpectedReferenceValue')) {
+        AppLogger.warning('🔍 Detected ParseExpectedReferenceValue in getCapturesForUser. Field "userId" may contain DocumentReferences.');
+        
+        try {
+          // Fallback: fetch without filter and filter in-memory
+          final fallbackSnapshot = await _capturesRef
+              .orderBy('createdAt', descending: true)
+              .limit(100)
+              .get();
+              
+          return fallbackSnapshot.docs
+              .map((doc) {
+                try {
+                  return CaptureModel.fromJson({
+                    ...doc.data() as Map<String, dynamic>,
+                    'id': doc.id,
+                  });
+                } catch (_) {
+                  return null;
+                }
+              })
+              .whereType<CaptureModel>()
+              .where((capture) => capture.userId == userId)
+              .toList();
+        } catch (_) {}
+      }
+      
       return [];
     }
   }

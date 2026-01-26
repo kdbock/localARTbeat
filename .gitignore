@@ -11,6 +11,8 @@
 .svn/
 .swiftpm/
 migrate_working_dir/
+node_modules/
+.venv*/
 
 # Security - OAuth and API credentials
 **/client_secret_*.json

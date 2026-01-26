@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../utils/firestore_utils.dart';
 import 'engagement_model.dart';
 
 enum CaptureStatus { pending, approved, rejected }
@@ -93,10 +94,9 @@ class CaptureModel {
 
   factory CaptureModel.fromJson(Map<String, dynamic> json) {
     // Validate required fields
-    final id = json['id'] as String?;
-    final userId = json['userId'] as String?;
-    final imageUrl = json['imageUrl'] as String?;
-    final createdAtTimestamp = json['createdAt'];
+    final id = FirestoreUtils.safeString(json['id']);
+    final userId = FirestoreUtils.safeString(json['userId']);
+    final imageUrl = FirestoreUtils.safeString(json['imageUrl']);
 
     if (id == null || id.isEmpty) {
       throw Exception('Capture ID is required but was null or empty');
@@ -108,48 +108,40 @@ class CaptureModel {
       throw Exception('Image URL is required but was null');
     }
 
-    DateTime createdAt;
-    try {
-      if (createdAtTimestamp is Timestamp) {
-        createdAt = createdAtTimestamp.toDate();
-      } else if (createdAtTimestamp is String) {
-        createdAt = DateTime.parse(createdAtTimestamp);
-      } else {
-        throw Exception('Invalid createdAt format');
-      }
-    } catch (e) {
-      throw Exception('Failed to parse createdAt: $e');
-    }
-
     return CaptureModel(
       id: id,
       userId: userId,
       imageUrl: imageUrl,
-      createdAt: createdAt,
-      title: json['title'] as String?,
+      createdAt: FirestoreUtils.safeDateTime(json['createdAt']),
+      title: FirestoreUtils.safeString(json['title']),
       textAnnotations: (json['textAnnotations'] as List<dynamic>?)
-          ?.cast<String>(),
-      thumbnailUrl: json['thumbnailUrl'] as String?,
-      updatedAt: (json['updatedAt'] as Timestamp?)?.toDate(),
+          ?.map((e) => FirestoreUtils.safeStringDefault(e))
+          .toList(),
+      thumbnailUrl: FirestoreUtils.safeString(json['thumbnailUrl']),
+      updatedAt: json['updatedAt'] != null
+          ? FirestoreUtils.safeDateTime(json['updatedAt'])
+          : null,
       location: json['location'] as GeoPoint?,
-      locationName: json['locationName'] as String?,
-      description: json['description'] as String?,
-      isProcessed: json['isProcessed'] as bool? ?? false,
-      tags: (json['tags'] as List<dynamic>?)?.cast<String>(),
-      artistId: json['artistId'] as String?,
-      artistName: json['artistName'] as String?,
-      isPublic: json['isPublic'] as bool? ?? false,
-      artType: json['artType'] as String?,
-      artMedium: json['artMedium'] as String?,
+      locationName: FirestoreUtils.safeString(json['locationName']),
+      description: FirestoreUtils.safeString(json['description']),
+      isProcessed: FirestoreUtils.safeBool(json['isProcessed'], false),
+      tags: (json['tags'] as List<dynamic>?)
+          ?.map((e) => FirestoreUtils.safeStringDefault(e))
+          .toList(),
+      artistId: FirestoreUtils.safeString(json['artistId']),
+      artistName: FirestoreUtils.safeString(json['artistName']),
+      isPublic: FirestoreUtils.safeBool(json['isPublic'], false),
+      artType: FirestoreUtils.safeString(json['artType']),
+      artMedium: FirestoreUtils.safeString(json['artMedium']),
       status: CaptureStatusExtension.fromString(
-        json['status'] as String? ?? 'approved',
+        FirestoreUtils.safeStringDefault(json['status'], 'approved'),
       ),
-      moderationNotes: json['moderationNotes'] as String?,
+      moderationNotes: FirestoreUtils.safeString(json['moderationNotes']),
       engagementStats: EngagementStats.fromFirestore(
         json['engagementStats'] as Map<String, dynamic>? ?? json,
       ),
-      reportCount: json['reportCount'] as int? ?? 0,
-      isFlagged: json['isFlagged'] as bool? ?? false,
+      reportCount: FirestoreUtils.safeInt(json['reportCount']),
+      isFlagged: FirestoreUtils.safeBool(json['isFlagged'], false),
     );
   }
 

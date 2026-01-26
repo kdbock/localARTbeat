@@ -11,7 +11,7 @@ class PaymentDebugScreen extends StatefulWidget {
 }
 
 class _PaymentDebugScreenState extends State<PaymentDebugScreen> {
-  final PaymentService _paymentService = PaymentService();
+  final UnifiedPaymentService _paymentService = UnifiedPaymentService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   String _debugOutput = '';

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
+import 'package:artbeat_core/artbeat_core.dart' show FirestoreUtils;
 
 /// Represents a user's progress through an art walk
 class ArtWalkProgress extends Equatable {
@@ -62,32 +63,32 @@ class ArtWalkProgress extends Equatable {
 
   /// Create from Firestore document
   factory ArtWalkProgress.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+    final data = doc.data() as Map<String, dynamic>? ?? {};
 
     return ArtWalkProgress(
       id: doc.id,
-      userId: data['userId'] as String? ?? '',
-      artWalkId: data['artWalkId'] as String? ?? '',
-      visitedArt:
-          (data['visitedArt'] as List<dynamic>?)
+      userId: FirestoreUtils.safeStringDefault(data['userId']),
+      artWalkId: FirestoreUtils.safeStringDefault(data['artWalkId']),
+      visitedArt: (data['visitedArt'] as List<dynamic>?)
               ?.map((item) => ArtVisit.fromMap(item as Map<String, dynamic>))
               .toList() ??
           [],
-      startedAt: (data['startedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      lastActiveAt:
-          (data['lastActiveAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      completedAt: (data['completedAt'] as Timestamp?)?.toDate(),
+      startedAt: FirestoreUtils.safeDateTime(data['startedAt']),
+      lastActiveAt: FirestoreUtils.safeDateTime(data['lastActiveAt']),
+      completedAt: data['completedAt'] != null
+          ? FirestoreUtils.safeDateTime(data['completedAt'])
+          : null,
       status: WalkStatus.values.firstWhere(
-        (e) => e.name == data['status'],
+        (e) => e.name == FirestoreUtils.safeString(data['status']),
         orElse: () => WalkStatus.notStarted,
       ),
       lastKnownLocation: data['lastKnownLocation'] as GeoPoint?,
-      currentArtIndex: data['currentArtIndex'] as int? ?? 0,
+      currentArtIndex: FirestoreUtils.safeInt(data['currentArtIndex']),
       navigationState: Map<String, dynamic>.from(
         data['navigationState'] as Map? ?? {},
       ),
-      totalArtCount: data['totalArtCount'] as int? ?? 0,
-      totalPointsEarned: data['totalPointsEarned'] as int? ?? 0,
+      totalArtCount: FirestoreUtils.safeInt(data['totalArtCount']),
+      totalPointsEarned: FirestoreUtils.safeInt(data['totalPointsEarned']),
     );
   }
 
@@ -187,15 +188,17 @@ class ArtVisit extends Equatable {
   /// Create from map data
   factory ArtVisit.fromMap(Map<String, dynamic> data) {
     return ArtVisit(
-      artId: data['artId'] as String? ?? '',
-      visitedAt: (data['visitedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      visitLocation: data['visitLocation'] as GeoPoint,
-      pointsAwarded: data['pointsAwarded'] as int? ?? 0,
-      wasNearArt: data['wasNearArt'] as bool? ?? false,
-      photoTaken: data['photoTaken'] as String?,
-      distanceFromArt: (data['distanceFromArt'] as num?)?.toDouble(),
+      artId: FirestoreUtils.safeStringDefault(data['artId']),
+      visitedAt: FirestoreUtils.safeDateTime(data['visitedAt']),
+      visitLocation: data['visitLocation'] as GeoPoint? ?? const GeoPoint(0, 0),
+      pointsAwarded: FirestoreUtils.safeInt(data['pointsAwarded']),
+      wasNearArt: FirestoreUtils.safeBool(data['wasNearArt'], false),
+      photoTaken: FirestoreUtils.safeString(data['photoTaken']),
+      distanceFromArt: data['distanceFromArt'] != null
+          ? FirestoreUtils.safeDouble(data['distanceFromArt'])
+          : null,
       timeSpentViewing: data['timeSpentViewing'] != null
-          ? Duration(seconds: data['timeSpentViewing'] as int)
+          ? Duration(seconds: FirestoreUtils.safeInt(data['timeSpentViewing']))
           : null,
     );
   }

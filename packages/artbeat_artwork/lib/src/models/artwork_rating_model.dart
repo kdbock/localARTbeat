@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:artbeat_core/artbeat_core.dart' show FirestoreUtils;
 
 /// Model representing an artwork rating in the ARTbeat platform
 ///
@@ -32,19 +33,24 @@ class ArtworkRatingModel {
   });
 
   factory ArtworkRatingModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+    final data = doc.data() as Map<String, dynamic>? ?? {};
     return ArtworkRatingModel(
       id: doc.id,
-      artworkId: data['artworkId'] as String? ?? '',
-      userId: data['userId'] as String? ?? '',
-      userName: data['userName'] as String? ?? 'Anonymous',
-      userAvatarUrl: data['userAvatarUrl'] as String? ?? '',
-      rating: data['rating'] as int? ?? 5,
-      reviewText: data['reviewText'] as String?,
-      createdAt: data['createdAt'] as Timestamp? ?? Timestamp.now(),
-      updatedAt: data['updatedAt'] as Timestamp? ?? Timestamp.now(),
-      isVerifiedPurchaser: data['isVerifiedPurchaser'] as bool? ?? false,
-      purchaseId: data['purchaseId'] as String?,
+      artworkId: FirestoreUtils.safeStringDefault(data['artworkId']),
+      userId: FirestoreUtils.safeStringDefault(data['userId']),
+      userName: FirestoreUtils.safeStringDefault(data['userName'], 'Anonymous'),
+      userAvatarUrl: FirestoreUtils.safeStringDefault(data['userAvatarUrl']),
+      rating: FirestoreUtils.safeInt(data['rating'], 5),
+      reviewText: FirestoreUtils.safeString(data['reviewText']),
+      createdAt: data['createdAt'] is Timestamp
+          ? data['createdAt'] as Timestamp
+          : Timestamp.fromDate(FirestoreUtils.safeDateTime(data['createdAt'])),
+      updatedAt: data['updatedAt'] is Timestamp
+          ? data['updatedAt'] as Timestamp
+          : Timestamp.fromDate(FirestoreUtils.safeDateTime(data['updatedAt'])),
+      isVerifiedPurchaser:
+          FirestoreUtils.safeBool(data['isVerifiedPurchaser'], false),
+      purchaseId: FirestoreUtils.safeString(data['purchaseId']),
     );
   }
 

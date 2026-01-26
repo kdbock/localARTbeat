@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:artbeat_core/artbeat_core.dart' show SubscriptionTier;
+import 'package:artbeat_core/artbeat_core.dart' show SubscriptionTier, FirestoreUtils;
 
 /// Model for artist and gallery subscriptions
 class SubscriptionModel {
@@ -54,34 +54,24 @@ class SubscriptionModel {
 
   factory SubscriptionModel.fromMap(Map<String, dynamic> map) {
     return SubscriptionModel(
-      id: map['id'] != null ? map['id'].toString() : '',
-      userId: map['userId'] != null ? map['userId'].toString() : '',
-      tier: SubscriptionTier.fromLegacyName((map['tier'] ?? 'free').toString()),
-      startDate: map['startDate'] is Timestamp
-          ? (map['startDate'] as Timestamp).toDate()
-          : DateTime.now(),
-      endDate: map['endDate'] is Timestamp
-          ? (map['endDate'] as Timestamp).toDate()
+      id: FirestoreUtils.safeStringDefault(map['id']),
+      userId: FirestoreUtils.safeStringDefault(map['userId']),
+      tier: SubscriptionTier.fromLegacyName(
+        FirestoreUtils.safeStringDefault(map['tier'], 'free'),
+      ),
+      startDate: FirestoreUtils.safeDateTime(map['startDate']),
+      endDate: map['endDate'] != null
+          ? FirestoreUtils.safeDateTime(map['endDate'])
           : null,
-      stripeSubscriptionId: map['stripeSubscriptionId'] != null
-          ? map['stripeSubscriptionId'].toString()
+      stripeSubscriptionId: FirestoreUtils.safeString(map['stripeSubscriptionId']),
+      stripePriceId: FirestoreUtils.safeString(map['stripePriceId']),
+      stripeCustomerId: FirestoreUtils.safeString(map['stripeCustomerId']),
+      autoRenew: FirestoreUtils.safeBool(map['autoRenew'], false),
+      canceledAt: map['canceledAt'] != null
+          ? FirestoreUtils.safeDateTime(map['canceledAt'])
           : null,
-      stripePriceId: map['stripePriceId'] != null
-          ? map['stripePriceId'].toString()
-          : null,
-      stripeCustomerId: map['stripeCustomerId'] != null
-          ? map['stripeCustomerId'].toString()
-          : null,
-      autoRenew: map['autoRenew'] is bool ? map['autoRenew'] as bool : false,
-      canceledAt: map['canceledAt'] is Timestamp
-          ? (map['canceledAt'] as Timestamp).toDate()
-          : null,
-      createdAt: map['createdAt'] is Timestamp
-          ? (map['createdAt'] as Timestamp).toDate()
-          : DateTime.now(),
-      updatedAt: map['updatedAt'] is Timestamp
-          ? (map['updatedAt'] as Timestamp).toDate()
-          : DateTime.now(),
+      createdAt: FirestoreUtils.safeDateTime(map['createdAt']),
+      updatedAt: FirestoreUtils.safeDateTime(map['updatedAt']),
     );
   }
 

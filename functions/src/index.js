@@ -4577,7 +4577,10 @@ exports.submitArtBattleVote = onCall(
 
       return {success: true};
     } catch (error) {
+      if (error instanceof HttpsError) {
+        throw error;
+      }
       console.error("Error submitting art battle vote:", error);
-      throw new HttpsError("internal", "Internal server error");
+      throw new HttpsError("internal", error.message || "Internal server error");
     }
   });

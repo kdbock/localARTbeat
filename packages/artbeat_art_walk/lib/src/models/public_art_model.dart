@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:artbeat_core/artbeat_core.dart' show FirestoreUtils;
 
 /// Model representing public art (street art, murals, sculptures, etc.)
 class PublicArtModel {
@@ -16,8 +17,8 @@ class PublicArtModel {
   final int viewCount;
   final int likeCount;
   final List<String> usersFavorited; // UIDs of users who favorited this art
-  final Timestamp createdAt;
-  final Timestamp? updatedAt;
+  final DateTime createdAt;
+  final DateTime? updatedAt;
 
   const PublicArtModel({
     required this.id,
@@ -40,50 +41,62 @@ class PublicArtModel {
 
   /// Create PublicArtModel from Firestore document
   factory PublicArtModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+    final data = doc.data() as Map<String, dynamic>? ?? {};
     return PublicArtModel(
       id: doc.id,
-      userId: data['userId'] as String? ?? '',
-      title: data['title'] as String? ?? '',
-      description: data['description'] as String? ?? '',
-      imageUrl: data['imageUrl'] as String? ?? '',
-      artistName: data['artistName'] as String?,
+      userId: FirestoreUtils.safeStringDefault(data['userId']),
+      title: FirestoreUtils.safeStringDefault(data['title']),
+      description: FirestoreUtils.safeStringDefault(data['description']),
+      imageUrl: FirestoreUtils.safeStringDefault(data['imageUrl']),
+      artistName: FirestoreUtils.safeString(data['artistName']),
       location: data['location'] as GeoPoint? ?? const GeoPoint(0, 0),
-      address: data['address'] as String?,
-      tags: List<String>.from(data['tags'] as List<dynamic>? ?? []),
-      artType: data['artType'] as String?,
-      isVerified: data['isVerified'] as bool? ?? false,
-      viewCount: data['viewCount'] as int? ?? 0,
-      likeCount: data['likeCount'] as int? ?? 0,
-      usersFavorited: List<String>.from(
-        data['usersFavorited'] as List<dynamic>? ?? [],
-      ),
-      createdAt: data['createdAt'] as Timestamp? ?? Timestamp.now(),
-      updatedAt: data['updatedAt'] as Timestamp?,
+      address: FirestoreUtils.safeString(data['address']),
+      tags: (data['tags'] as List<dynamic>?)
+              ?.map((e) => FirestoreUtils.safeStringDefault(e))
+              .toList() ??
+          [],
+      artType: FirestoreUtils.safeString(data['artType']),
+      isVerified: FirestoreUtils.safeBool(data['isVerified'], false),
+      viewCount: FirestoreUtils.safeInt(data['viewCount']),
+      likeCount: FirestoreUtils.safeInt(data['likeCount']),
+      usersFavorited: (data['usersFavorited'] as List<dynamic>?)
+              ?.map((e) => FirestoreUtils.safeStringDefault(e))
+              .toList() ??
+          [],
+      createdAt: FirestoreUtils.safeDateTime(data['createdAt']),
+      updatedAt: data['updatedAt'] != null
+          ? FirestoreUtils.safeDateTime(data['updatedAt'])
+          : null,
     );
   }
 
   /// Create PublicArtModel from json data
   factory PublicArtModel.fromJson(Map<String, dynamic> json) {
     return PublicArtModel(
-      id: json['id'] as String,
-      userId: json['userId'] as String,
-      title: json['title'] as String,
-      description: json['description'] as String,
-      imageUrl: json['imageUrl'] as String,
-      artistName: json['artistName'] as String?,
-      location: json['location'] as GeoPoint,
-      address: json['address'] as String?,
-      tags: List<String>.from(json['tags'] as List<dynamic>? ?? []),
-      artType: json['artType'] as String?,
-      isVerified: json['isVerified'] as bool? ?? false,
-      viewCount: json['viewCount'] as int? ?? 0,
-      likeCount: json['likeCount'] as int? ?? 0,
-      usersFavorited: List<String>.from(
-        json['usersFavorited'] as List<dynamic>? ?? [],
-      ),
-      createdAt: (json['createdAt'] as Timestamp?) ?? Timestamp.now(),
-      updatedAt: json['updatedAt'] as Timestamp?,
+      id: FirestoreUtils.safeStringDefault(json['id']),
+      userId: FirestoreUtils.safeStringDefault(json['userId']),
+      title: FirestoreUtils.safeStringDefault(json['title']),
+      description: FirestoreUtils.safeStringDefault(json['description']),
+      imageUrl: FirestoreUtils.safeStringDefault(json['imageUrl']),
+      artistName: FirestoreUtils.safeString(json['artistName']),
+      location: json['location'] as GeoPoint? ?? const GeoPoint(0, 0),
+      address: FirestoreUtils.safeString(json['address']),
+      tags: (json['tags'] as List<dynamic>?)
+              ?.map((e) => FirestoreUtils.safeStringDefault(e))
+              .toList() ??
+          [],
+      artType: FirestoreUtils.safeString(json['artType']),
+      isVerified: FirestoreUtils.safeBool(json['isVerified'], false),
+      viewCount: FirestoreUtils.safeInt(json['viewCount']),
+      likeCount: FirestoreUtils.safeInt(json['likeCount']),
+      usersFavorited: (json['usersFavorited'] as List<dynamic>?)
+              ?.map((e) => FirestoreUtils.safeStringDefault(e))
+              .toList() ??
+          [],
+      createdAt: FirestoreUtils.safeDateTime(json['createdAt']),
+      updatedAt: json['updatedAt'] != null
+          ? FirestoreUtils.safeDateTime(json['updatedAt'])
+          : null,
     );
   }
 
@@ -92,24 +105,25 @@ class PublicArtModel {
   factory PublicArtModel.fromCapture(dynamic capture) {
     // Handle both CaptureModel and dynamic types
     return PublicArtModel(
-      id: capture.id as String,
-      userId: capture.userId as String,
-      title: capture.title as String? ?? 'Untitled Artwork',
-      description: capture.description as String? ?? '',
-      imageUrl: capture.imageUrl as String,
-      artistName: capture.artistName as String?,
+      id: FirestoreUtils.safeStringDefault(capture.id),
+      userId: FirestoreUtils.safeStringDefault(capture.userId),
+      title: FirestoreUtils.safeStringDefault(capture.title, 'Untitled Artwork'),
+      description: FirestoreUtils.safeStringDefault(capture.description),
+      imageUrl: FirestoreUtils.safeStringDefault(capture.imageUrl),
+      artistName: FirestoreUtils.safeString(capture.artistName),
       location: capture.location as GeoPoint? ?? const GeoPoint(0, 0),
-      address: capture.locationName as String?,
-      tags: (capture.tags as List<dynamic>?)?.cast<String>() ?? [],
-      artType: capture.artType as String?,
+      address: FirestoreUtils.safeString(capture.locationName),
+      tags: (capture.tags as List<dynamic>?)
+              ?.map((e) => FirestoreUtils.safeStringDefault(e))
+              .toList() ??
+          [],
+      artType: FirestoreUtils.safeString(capture.artType),
       isVerified: false, // Captures are not verified by default
       viewCount: 0,
       likeCount: 0,
       usersFavorited: [],
-      createdAt: Timestamp.fromDate(capture.createdAt as DateTime),
-      updatedAt: capture.updatedAt != null
-          ? Timestamp.fromDate(capture.updatedAt as DateTime)
-          : null,
+      createdAt: capture.createdAt as DateTime? ?? DateTime.now(),
+      updatedAt: capture.updatedAt as DateTime?,
     );
   }
 
@@ -129,7 +143,7 @@ class PublicArtModel {
       'viewCount': viewCount,
       'likeCount': likeCount,
       'usersFavorited': usersFavorited,
-      'createdAt': createdAt,
+      'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': FieldValue.serverTimestamp(),
     };
   }
@@ -150,8 +164,8 @@ class PublicArtModel {
     int? viewCount,
     int? likeCount,
     List<String>? usersFavorited,
-    Timestamp? createdAt,
-    Timestamp? updatedAt,
+    DateTime? createdAt,
+    DateTime? updatedAt,
   }) {
     return PublicArtModel(
       id: id ?? this.id,
@@ -182,7 +196,10 @@ class PublicArtModel {
       'description': description,
       'imageUrl': imageUrl,
       'artistName': artistName,
-      'location': location,
+      'location': {
+        'latitude': location.latitude,
+        'longitude': location.longitude,
+      },
       'address': address,
       'tags': tags,
       'artType': artType,
@@ -190,8 +207,8 @@ class PublicArtModel {
       'viewCount': viewCount,
       'likeCount': likeCount,
       'usersFavorited': usersFavorited,
-      'createdAt': createdAt,
-      'updatedAt': updatedAt,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
     };
   }
 }

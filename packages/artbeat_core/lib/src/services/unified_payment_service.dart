@@ -147,6 +147,8 @@ class UnifiedPaymentService {
   static final UnifiedPaymentService _instance =
       UnifiedPaymentService._internal();
 
+  static UnifiedPaymentService get instance => _instance;
+
   factory UnifiedPaymentService() {
     return _instance;
   }

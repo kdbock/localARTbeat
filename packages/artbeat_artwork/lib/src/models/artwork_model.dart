@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:artbeat_core/artbeat_core.dart';
+import 'package:artbeat_core/artbeat_core.dart' show FirestoreUtils, EngagementStats, ArtworkContentType;
 
 /// Moderation status for artwork
 enum ArtworkModerationStatus {
@@ -334,88 +334,90 @@ class ArtworkModel {
     return ArtworkModel(
       id: doc.id,
       // Handle legacy documents that have artistId instead of userId/artistProfileId
-      userId: data['userId'] as String? ?? data['artistId'] as String? ?? '',
+      userId: FirestoreUtils.safeStringDefault(data['userId'] ?? data['artistId']),
       artistProfileId:
-          data['artistProfileId'] as String? ??
-          data['artistId'] as String? ??
-          '',
-      title: data['title'] as String? ?? '',
-      description: data['description'] as String? ?? '',
-      imageUrl: data['imageUrl'] as String? ?? '',
+          FirestoreUtils.safeStringDefault(data['artistProfileId'] ?? data['artistId']),
+      title: FirestoreUtils.safeStringDefault(data['title']),
+      description: FirestoreUtils.safeStringDefault(data['description']),
+      imageUrl: FirestoreUtils.safeStringDefault(data['imageUrl']),
       additionalImageUrls: (data['additionalImageUrls'] as List<dynamic>? ?? [])
-          .cast<String>(),
-      videoUrls: (data['videoUrls'] as List<dynamic>? ?? []).cast<String>(),
-      audioUrls: (data['audioUrls'] as List<dynamic>? ?? []).cast<String>(),
-      medium: data['medium'] as String? ?? '',
-      styles: (data['styles'] as List<dynamic>? ?? []).cast<String>(),
-      dimensions: data['dimensions'] as String?,
-      materials: data['materials'] as String?,
-      location: data['location'] as String?,
+          .map((e) => e.toString())
+          .toList(),
+      videoUrls: (data['videoUrls'] as List<dynamic>? ?? [])
+          .map((e) => e.toString())
+          .toList(),
+      audioUrls: (data['audioUrls'] as List<dynamic>? ?? [])
+          .map((e) => e.toString())
+          .toList(),
+      medium: FirestoreUtils.safeStringDefault(data['medium']),
+      styles: (data['styles'] as List<dynamic>? ?? [])
+          .map((e) => e.toString())
+          .toList(),
+      dimensions: FirestoreUtils.safeString(data['dimensions']),
+      materials: FirestoreUtils.safeString(data['materials']),
+      location: FirestoreUtils.safeString(data['location']),
       tags: data['tags'] != null
-          ? (data['tags'] as List<dynamic>).cast<String>()
+          ? (data['tags'] as List<dynamic>).map((e) => e.toString()).toList()
           : null,
       hashtags: data['hashtags'] != null
-          ? (data['hashtags'] as List<dynamic>).cast<String>()
+          ? (data['hashtags'] as List<dynamic>).map((e) => e.toString()).toList()
           : null,
       keywords: data['keywords'] != null
-          ? (data['keywords'] as List<dynamic>).cast<String>()
+          ? (data['keywords'] as List<dynamic>).map((e) => e.toString()).toList()
           : null,
-      price: data['price'] != null ? (data['price'] as num).toDouble() : null,
-      isForSale: data['isForSale'] as bool? ?? false,
-      isSold: data['isSold'] as bool? ?? false,
-      yearCreated: data['yearCreated'] as int?,
-      commissionRate: data['commissionRate'] != null
-          ? (data['commissionRate'] as num).toDouble()
-          : null,
-      isFeatured: data['isFeatured'] as bool? ?? false,
-      isPublic: data['isPublic'] as bool? ?? true,
-      externalLink: data['externalLink'] as String?,
-      viewCount: data['viewCount'] as int? ?? 0,
+      price: FirestoreUtils.safeDouble(data['price']),
+      isForSale: FirestoreUtils.safeBool(data['isForSale'], false),
+      isSold: FirestoreUtils.safeBool(data['isSold'], false),
+      yearCreated: FirestoreUtils.safeInt(data['yearCreated']),
+      commissionRate: FirestoreUtils.safeDouble(data['commissionRate']),
+      isFeatured: FirestoreUtils.safeBool(data['isFeatured'], false),
+      isPublic: FirestoreUtils.safeBool(data['isPublic'], true),
+      externalLink: FirestoreUtils.safeString(data['externalLink']),
+      viewCount: FirestoreUtils.safeInt(data['viewCount']),
       engagementStats: EngagementStats.fromFirestore(
         data['engagementStats'] as Map<String, dynamic>? ?? data,
       ),
-      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      createdAt: FirestoreUtils.safeDateTime(data['createdAt']),
+      updatedAt: FirestoreUtils.safeDateTime(data['updatedAt']),
       moderationStatus: ArtworkModerationStatus.fromString(
-        data['moderationStatus'] as String? ?? 'approved',
+        FirestoreUtils.safeStringDefault(data['moderationStatus'], 'approved'),
       ),
-      flagged: (data['flagged'] as bool?) ?? false,
-      flaggedAt: (data['flaggedAt'] as Timestamp?)?.toDate(),
-      moderationNotes: data['moderationNotes'] as String?,
+      flagged: FirestoreUtils.safeBool(data['flagged'], false),
+      flaggedAt: data['flaggedAt'] != null
+          ? FirestoreUtils.safeDateTime(data['flaggedAt'])
+          : null,
+      moderationNotes: FirestoreUtils.safeString(data['moderationNotes']),
       contentType: ArtworkContentType.fromString(
-        data['contentType'] as String? ?? 'visual',
+        FirestoreUtils.safeStringDefault(data['contentType'], 'visual'),
       ),
-      isSerializing: data['isSerializing'] as bool? ?? false,
-      totalChapters: data['totalChapters'] as int?,
-      releasedChapters: data['releasedChapters'] as int?,
+      isSerializing: FirestoreUtils.safeBool(data['isSerializing'], false),
+      totalChapters: FirestoreUtils.safeInt(data['totalChapters']),
+      releasedChapters: FirestoreUtils.safeInt(data['releasedChapters']),
       readingMetadata: data['readingMetadata'] as Map<String, dynamic>?,
       serializationConfig: data['serializationConfig'] as Map<String, dynamic>?,
       auctionEnabled:
-          data['auctionEnabled'] as bool? ??
-          data['isAuction'] as bool? ??
-          false,
-      auctionEnd: (data['auctionEnd'] as Timestamp?)?.toDate(),
-      startingPrice: data['startingPrice'] != null
-          ? (data['startingPrice'] as num).toDouble()
+          FirestoreUtils.safeBool(data['auctionEnabled'] ?? data['isAuction'], false),
+      auctionEnd: data['auctionEnd'] != null
+          ? FirestoreUtils.safeDateTime(data['auctionEnd'])
           : null,
-      reservePrice: data['reservePrice'] != null
-          ? (data['reservePrice'] as num).toDouble()
-          : null,
-      auctionStatus: data['auctionStatus'] as String?,
-      currentHighestBid: data['currentHighestBid'] != null
-          ? (data['currentHighestBid'] as num).toDouble()
-          : null,
-      currentHighestBidder: data['currentHighestBidder'] as String?,
-      artBattleEnabled: data['artBattleEnabled'] as bool? ?? false,
+      startingPrice: FirestoreUtils.safeDouble(data['startingPrice']),
+      reservePrice: FirestoreUtils.safeDouble(data['reservePrice']),
+      auctionStatus: FirestoreUtils.safeString(data['auctionStatus']),
+      currentHighestBid: FirestoreUtils.safeDouble(data['currentHighestBid']),
+      currentHighestBidder: FirestoreUtils.safeString(data['currentHighestBidder']),
+      artBattleEnabled: FirestoreUtils.safeBool(data['artBattleEnabled'], false),
       artBattleStatus: ArtBattleStatus.fromString(
-        data['artBattleStatus'] as String? ?? 'eligible',
+        FirestoreUtils.safeStringDefault(data['artBattleStatus'], 'eligible'),
       ),
-      artBattleScore: data['artBattleScore'] as int? ?? 0,
-      artBattleAppearances: data['artBattleAppearances'] as int? ?? 0,
-      artBattleWins: data['artBattleWins'] as int? ?? 0,
-      artBattleLastShownAt: (data['artBattleLastShownAt'] as Timestamp?)
-          ?.toDate(),
-      artBattleLastWinAt: (data['artBattleLastWinAt'] as Timestamp?)?.toDate(),
+      artBattleScore: FirestoreUtils.safeInt(data['artBattleScore']),
+      artBattleAppearances: FirestoreUtils.safeInt(data['artBattleAppearances']),
+      artBattleWins: FirestoreUtils.safeInt(data['artBattleWins']),
+      artBattleLastShownAt: data['artBattleLastShownAt'] != null
+          ? FirestoreUtils.safeDateTime(data['artBattleLastShownAt'])
+          : null,
+      artBattleLastWinAt: data['artBattleLastWinAt'] != null
+          ? FirestoreUtils.safeDateTime(data['artBattleLastWinAt'])
+          : null,
     );
   }
 

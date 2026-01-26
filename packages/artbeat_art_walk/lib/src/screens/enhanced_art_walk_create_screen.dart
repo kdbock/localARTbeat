@@ -277,7 +277,7 @@ class _EnhancedArtWalkCreateScreenState
               tags: capture.tags ?? [],
               userId: capture.userId,
               usersFavorited: const [],
-              createdAt: Timestamp.fromDate(capture.createdAt),
+              createdAt: capture.createdAt,
             );
             artWithDistance.add((publicArt, distance));
           }

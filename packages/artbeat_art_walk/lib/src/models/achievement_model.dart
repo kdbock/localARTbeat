@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:artbeat_core/artbeat_core.dart' show FirestoreUtils;
 
 /// Achievement types for art walks
 enum AchievementType {
@@ -38,25 +39,22 @@ class AchievementModel {
 
   /// Create an AchievementModel from Firestore document
   factory AchievementModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+    final data = doc.data() as Map<String, dynamic>? ?? {};
 
     // Parse the achievement type
-    final achievementTypeStr = data['type'] as String? ?? 'firstWalk';
+    final achievementTypeStr = FirestoreUtils.safeStringDefault(data['type'], 'firstWalk');
     final achievementType = AchievementType.values.firstWhere(
       (type) => type.name == achievementTypeStr,
       orElse: () => AchievementType.firstWalk,
     );
 
-    // Handle server timestamps
-    final earnedAtTimestamp = data['earnedAt'] as Timestamp?;
-
     return AchievementModel(
       id: doc.id,
-      userId: data['userId'] as String? ?? '',
+      userId: FirestoreUtils.safeStringDefault(data['userId']),
       type: achievementType,
-      earnedAt: (earnedAtTimestamp ?? Timestamp.now()).toDate(),
-      isNew: data['isNew'] as bool? ?? true,
-      metadata: data['metadata'] as Map<String, dynamic>? ?? {},
+      earnedAt: FirestoreUtils.safeDateTime(data['earnedAt']),
+      isNew: FirestoreUtils.safeBool(data['isNew'], true),
+      metadata: Map<String, dynamic>.from(data['metadata'] as Map? ?? {}),
     );
   }
 

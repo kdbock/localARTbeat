@@ -180,7 +180,7 @@ class ArtWalkService {
         viewCount: 0,
         likeCount: 0,
         usersFavorited: [userId],
-        createdAt: Timestamp.now(),
+        createdAt: DateTime.now(),
       );
 
       // Find or create cluster for this art location
@@ -1834,10 +1834,8 @@ class ArtWalkService {
       viewCount: 0, // Captures don't track views
       likeCount: 0, // Captures don't track likes
       usersFavorited: [], // Captures don't track favorites
-      createdAt: Timestamp.fromDate(capture.createdAt),
-      updatedAt: capture.updatedAt != null
-          ? Timestamp.fromDate(capture.updatedAt!)
-          : null,
+      createdAt: capture.createdAt,
+      updatedAt: capture.updatedAt,
     );
   }
 

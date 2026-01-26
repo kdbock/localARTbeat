@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:artbeat_core/artbeat_core.dart' show FirestoreUtils;
 
 class CommentModel {
   final String id;
@@ -28,20 +29,23 @@ class CommentModel {
   });
 
   factory CommentModel.fromJson(Map<String, dynamic> json) {
-    final Timestamp? timestamp = json['createdAt'] as Timestamp?;
-    final List<dynamic>? repliesJson = json['replies'] as List<dynamic>?;
     return CommentModel(
-      id: json['id'] as String,
-      userId: json['userId'] as String,
-      content: json['content'] as String,
-      parentCommentId: json['parentCommentId'] as String?,
-      createdAt: (timestamp ?? Timestamp.now()).toDate(),
-      likeCount: json['likeCount'] as int? ?? 0,
-      userLikes: List<String>.from(json['userLikes'] as List<dynamic>? ?? []),
-      userName: json['userName'] as String? ?? 'Anonymous',
-      userPhotoUrl: json['userPhotoUrl'] as String?,
-      rating: (json['rating'] as num?)?.toDouble(),
-      replies: repliesJson
+      id: FirestoreUtils.safeStringDefault(json['id']),
+      userId: FirestoreUtils.safeStringDefault(json['userId']),
+      content: FirestoreUtils.safeStringDefault(json['content']),
+      parentCommentId: FirestoreUtils.safeString(json['parentCommentId']),
+      createdAt: FirestoreUtils.safeDateTime(json['createdAt']),
+      likeCount: FirestoreUtils.safeInt(json['likeCount']),
+      userLikes: (json['userLikes'] as List<dynamic>?)
+              ?.map((e) => FirestoreUtils.safeStringDefault(e))
+              .toList() ??
+          [],
+      userName: FirestoreUtils.safeStringDefault(json['userName'], 'Anonymous'),
+      userPhotoUrl: FirestoreUtils.safeString(json['userPhotoUrl']),
+      rating: json['rating'] != null
+          ? FirestoreUtils.safeDouble(json['rating'])
+          : null,
+      replies: (json['replies'] as List<dynamic>?)
           ?.map((r) => CommentModel.fromJson(r as Map<String, dynamic>))
           .toList(),
     );

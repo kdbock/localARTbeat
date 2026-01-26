@@ -50,8 +50,7 @@ The core package for the ArtBeat application, providing shared functionality, wi
 
 #### Payment & Subscriptions
 
-- **UnifiedPaymentService**: Comprehensive payment processing (replaces legacy services)
-- **StripePaymentService**: Stripe payment integration
+- **UnifiedPaymentService**: Comprehensive payment processing for Artwork, Auctions, Subscriptions, and Events
 - **StripeSafetyService**: Stripe payment safety measures
 - **SubscriptionService**: Subscription management
 - **InAppPurchaseManager**: In-app purchase handling

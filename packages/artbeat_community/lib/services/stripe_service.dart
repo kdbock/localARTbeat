@@ -14,7 +14,7 @@ class StripeService {
 
   /// Initialize Stripe
   void initialize() {
-    // Stripe is already initialized in PaymentService
+    // Stripe is already initialized in UnifiedPaymentService
     AppLogger.info('✅ Stripe service initialized for commissions');
   }
 

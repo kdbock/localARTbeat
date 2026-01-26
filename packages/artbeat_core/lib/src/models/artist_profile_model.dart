@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../utils/firestore_utils.dart';
 import 'subscription_tier.dart';
 
 import 'user_type.dart';
@@ -82,53 +83,58 @@ class ArtistProfileModel {
 
     final String userId = isUserDoc
         ? doc.id
-        : (data['userId'] as String?) ?? '';
+        : FirestoreUtils.safeStringDefault(data['userId']);
     final String displayName = isUserDoc
-        ? (data['fullName'] as String?) ?? 'Unknown Artist'
-        : (data['displayName'] as String?) ?? 'Unknown Artist';
+        ? FirestoreUtils.safeStringDefault(data['fullName'], 'Unknown Artist')
+        : FirestoreUtils.safeStringDefault(data['displayName'], 'Unknown Artist');
 
     return ArtistProfileModel(
       id: doc.id,
       userId: userId,
       displayName: displayName,
-      username: data['username'] as String? ?? '',
-      bio: data['bio'] as String?,
-      profileImageUrl:
-          data['profileImageUrl'] as String? ?? data['avatarUrl'] as String?,
-      coverImageUrl: data['coverImageUrl'] as String?,
-      website: data['website'] as String?,
-      location: data['location'] as String? ?? data['zipCode'] as String?,
-      locationLat: (data['locationLat'] as num?)?.toDouble(),
-      locationLng: (data['locationLng'] as num?)?.toDouble(),
+      username: FirestoreUtils.safeStringDefault(data['username']),
+      bio: FirestoreUtils.safeString(data['bio']),
+      profileImageUrl: FirestoreUtils.safeString(
+        data['profileImageUrl'] ?? data['avatarUrl'],
+      ),
+      coverImageUrl: FirestoreUtils.safeString(data['coverImageUrl']),
+      website: FirestoreUtils.safeString(data['website']),
+      location: FirestoreUtils.safeString(data['location'] ?? data['zipCode']),
+      locationLat: FirestoreUtils.safeDouble(data['locationLat']),
+      locationLng: FirestoreUtils.safeDouble(data['locationLng']),
       userType: _parseUserType(data['userType']),
       subscriptionTier: _parseSubscriptionTier(data['subscriptionTier']),
-      isVerified: data['isVerified'] as bool? ?? false,
-      isFeatured: data['isFeatured'] as bool? ?? false,
-      isPortfolioPublic: data['isPortfolioPublic'] as bool? ?? true,
+      isVerified: FirestoreUtils.safeBool(data['isVerified'], false),
+      isFeatured: FirestoreUtils.safeBool(data['isFeatured'], false),
+      isPortfolioPublic: FirestoreUtils.safeBool(data['isPortfolioPublic'], true),
       mediums: _parseStringList(data['mediums']),
       styles: _parseStringList(data['styles']),
       socialLinks: _parseStringMap(data['socialLinks']),
-      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      isFollowing: data['isFollowing'] as bool? ?? false,
-      likesCount: data['likesCount'] as int? ?? 0,
-      viewsCount: data['viewsCount'] as int? ?? 0,
-      artworksCount: data['artworksCount'] as int? ?? 0,
-      followersCount:
-          data['followersCount'] as int? ?? data['followerCount'] as int? ?? 0,
-      boostScore:
-          (data['boostScore'] as num?)?.toDouble() ??
-          (data['artistMomentum'] as num?)?.toDouble() ??
-          (data['momentum'] as num?)?.toDouble() ??
-          0.0,
-      lastBoostAt:
-          (data['lastBoostAt'] as Timestamp?)?.toDate() ??
-          (data['boostedAt'] as Timestamp?)?.toDate(),
-      boostStreakMonths: (data['boostStreakMonths'] as num?)?.toInt() ?? 0,
-      boostStreakUpdatedAt: (data['boostStreakUpdatedAt'] as Timestamp?)
-          ?.toDate(),
-      mapGlowUntil: (data['mapGlowUntil'] as Timestamp?)?.toDate(),
-      kioskLaneUntil: (data['kioskLaneUntil'] as Timestamp?)?.toDate(),
+      createdAt: FirestoreUtils.safeDateTime(data['createdAt']),
+      updatedAt: FirestoreUtils.safeDateTime(data['updatedAt']),
+      isFollowing: FirestoreUtils.safeBool(data['isFollowing'], false),
+      likesCount: FirestoreUtils.safeInt(data['likesCount']),
+      viewsCount: FirestoreUtils.safeInt(data['viewsCount']),
+      artworksCount: FirestoreUtils.safeInt(data['artworksCount']),
+      followersCount: FirestoreUtils.safeInt(
+        data['followersCount'] ?? data['followerCount'],
+      ),
+      boostScore: FirestoreUtils.safeDouble(
+        data['boostScore'] ?? data['artistMomentum'] ?? data['momentum'],
+      ),
+      lastBoostAt: data['lastBoostAt'] != null || data['boostedAt'] != null
+          ? FirestoreUtils.safeDateTime(data['lastBoostAt'] ?? data['boostedAt'])
+          : null,
+      boostStreakMonths: FirestoreUtils.safeInt(data['boostStreakMonths']),
+      boostStreakUpdatedAt: data['boostStreakUpdatedAt'] != null
+          ? FirestoreUtils.safeDateTime(data['boostStreakUpdatedAt'])
+          : null,
+      mapGlowUntil: data['mapGlowUntil'] != null
+          ? FirestoreUtils.safeDateTime(data['mapGlowUntil'])
+          : null,
+      kioskLaneUntil: data['kioskLaneUntil'] != null
+          ? FirestoreUtils.safeDateTime(data['kioskLaneUntil'])
+          : null,
     );
   }
 

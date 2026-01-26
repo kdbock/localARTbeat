@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:logger/logger.dart';
+import 'package:artbeat_core/artbeat_core.dart' show AppLogger;
 import '../models/artbeat_event.dart';
 import '../models/ticket_purchase.dart';
 import 'recurring_event_service.dart';
@@ -138,7 +139,14 @@ class EventService {
       }
 
       final snapshot = await query.get();
-      return snapshot.docs.map(ArtbeatEvent.fromFirestore).toList();
+      return snapshot.docs.map((doc) {
+        try {
+          return ArtbeatEvent.fromFirestore(doc);
+        } on Exception catch (e) {
+          AppLogger.error('Error parsing event ${doc.id}: $e');
+          return null;
+        }
+      }).whereType<ArtbeatEvent>().toList();
     } catch (e) {
       _logger.e('Error getting upcoming public events: $e');
       rethrow;
@@ -154,7 +162,14 @@ class EventService {
           .orderBy('dateTime', descending: true)
           .get();
 
-      return snapshot.docs.map(ArtbeatEvent.fromFirestore).toList();
+      return snapshot.docs.map((doc) {
+        try {
+          return ArtbeatEvent.fromFirestore(doc);
+        } on Exception catch (e) {
+          AppLogger.error('Error parsing event ${doc.id}: $e');
+          return null;
+        }
+      }).whereType<ArtbeatEvent>().toList();
     } catch (e) {
       _logger.e('Error getting events by artist: $e');
       rethrow;
@@ -172,7 +187,14 @@ class EventService {
           .orderBy('dateTime', descending: false)
           .get();
 
-      return snapshot.docs.map(ArtbeatEvent.fromFirestore).toList();
+      return snapshot.docs.map((doc) {
+        try {
+          return ArtbeatEvent.fromFirestore(doc);
+        } on Exception catch (e) {
+          AppLogger.error('Error parsing event ${doc.id}: $e');
+          return null;
+        }
+      }).whereType<ArtbeatEvent>().toList();
     } catch (e) {
       _logger.e('Error getting events by tags: $e');
       rethrow;
@@ -190,15 +212,19 @@ class EventService {
           .where('dateTime', isGreaterThan: Timestamp.now())
           .get();
 
-      final events = snapshot.docs
-          .map(ArtbeatEvent.fromFirestore)
-          .where(
+      final events = snapshot.docs.map((doc) {
+        try {
+          return ArtbeatEvent.fromFirestore(doc);
+        } on Exception catch (e) {
+          AppLogger.error('Error parsing event ${doc.id}: $e');
+          return null;
+        }
+      }).whereType<ArtbeatEvent>().where(
             (event) =>
                 event.title.toLowerCase().contains(query.toLowerCase()) ||
                 event.description.toLowerCase().contains(query.toLowerCase()) ||
                 event.location.toLowerCase().contains(query.toLowerCase()),
-          )
-          .toList();
+          ).toList();
 
       // Sort by relevance (events with query in title first)
       events.sort((a, b) {
@@ -294,7 +320,14 @@ class EventService {
           .orderBy('purchaseDate', descending: true)
           .get();
 
-      return snapshot.docs.map(TicketPurchase.fromFirestore).toList();
+      return snapshot.docs.map((doc) {
+        try {
+          return TicketPurchase.fromFirestore(doc);
+        } on Exception catch (e) {
+          AppLogger.error('Error parsing ticket purchase ${doc.id}: $e');
+          return null;
+        }
+      }).whereType<TicketPurchase>().toList();
     } catch (e) {
       _logger.e('Error getting user ticket purchases: $e');
       rethrow;
@@ -310,7 +343,14 @@ class EventService {
           .orderBy('purchaseDate', descending: true)
           .get();
 
-      return snapshot.docs.map(TicketPurchase.fromFirestore).toList();
+      return snapshot.docs.map((doc) {
+        try {
+          return TicketPurchase.fromFirestore(doc);
+        } on Exception catch (e) {
+          AppLogger.error('Error parsing ticket purchase ${doc.id}: $e');
+          return null;
+        }
+      }).whereType<TicketPurchase>().toList();
     } catch (e) {
       _logger.e('Error getting event ticket purchases: $e');
       rethrow;

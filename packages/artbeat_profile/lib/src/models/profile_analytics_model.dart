@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:artbeat_core/artbeat_core.dart';
 
 /// Model for user profile analytics (different from artist analytics)
 class ProfileAnalyticsModel {
@@ -39,32 +40,28 @@ class ProfileAnalyticsModel {
   });
 
   factory ProfileAnalyticsModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+    final data = doc.data() as Map<String, dynamic>? ?? {};
     return ProfileAnalyticsModel(
       userId: doc.id,
-      profileViews: (data['profileViews'] as num?)?.toInt() ?? 0,
-      totalFollowers: (data['totalFollowers'] as num?)?.toInt() ?? 0,
-      totalFollowing: (data['totalFollowing'] as num?)?.toInt() ?? 0,
-      totalPosts: (data['totalPosts'] as num?)?.toInt() ?? 0,
-      totalLikes: (data['totalLikes'] as num?)?.toInt() ?? 0,
-      totalComments: (data['totalComments'] as num?)?.toInt() ?? 0,
-      totalShares: (data['totalShares'] as num?)?.toInt() ?? 0,
-      totalMentions: (data['totalMentions'] as num?)?.toInt() ?? 0,
+      profileViews: FirestoreUtils.getInt(data, 'profileViews'),
+      totalFollowers: FirestoreUtils.getInt(data, 'totalFollowers'),
+      totalFollowing: FirestoreUtils.getInt(data, 'totalFollowing'),
+      totalPosts: FirestoreUtils.getInt(data, 'totalPosts'),
+      totalLikes: FirestoreUtils.getInt(data, 'totalLikes'),
+      totalComments: FirestoreUtils.getInt(data, 'totalComments'),
+      totalShares: FirestoreUtils.getInt(data, 'totalShares'),
+      totalMentions: FirestoreUtils.getInt(data, 'totalMentions'),
       dailyViews: Map<String, int>.from(
-        (data['dailyViews'] as Map<String, dynamic>?) ?? {},
+        FirestoreUtils.getOptionalMap(data, 'dailyViews') ?? {},
       ),
       weeklyEngagement: Map<String, int>.from(
-        (data['weeklyEngagement'] as Map<String, dynamic>?) ?? {},
+        FirestoreUtils.getOptionalMap(data, 'weeklyEngagement') ?? {},
       ),
-      topViewers: List<String>.from(
-        (data['topViewers'] as List<dynamic>?) ?? [],
-      ),
-      recentInteractions: List<String>.from(
-        (data['recentInteractions'] as List<dynamic>?) ?? [],
-      ),
-      lastUpdated: (data['lastUpdated'] as Timestamp).toDate(),
-      periodStart: (data['periodStart'] as Timestamp).toDate(),
-      periodEnd: (data['periodEnd'] as Timestamp).toDate(),
+      topViewers: FirestoreUtils.getStringList(data, 'topViewers'),
+      recentInteractions: FirestoreUtils.getStringList(data, 'recentInteractions'),
+      lastUpdated: FirestoreUtils.getDateTime(data, 'lastUpdated'),
+      periodStart: FirestoreUtils.getDateTime(data, 'periodStart'),
+      periodEnd: FirestoreUtils.getDateTime(data, 'periodEnd'),
     );
   }
 

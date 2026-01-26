@@ -4,9 +4,22 @@ echo "========================================="
 echo "ARTbeat Android Production Build Script"
 echo "========================================="
 
-# Clean the build folder to ensure a fresh build
-echo "Cleaning build directory..."
-flutter clean
+# Check if --clean flag is provided
+CLEAN=false
+for arg in "$@"; do
+  if [ "$arg" == "--clean" ]; then
+    CLEAN=true
+    break
+  fi
+done
+
+# Clean the build folder if requested
+if [ "$CLEAN" == true ]; then
+  echo "Cleaning build directory..."
+  flutter clean
+else
+  echo "Skipping clean. Use --clean for a fresh build."
+fi
 
 # Get dependencies
 echo "Getting dependencies..."

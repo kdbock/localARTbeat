@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uuid/uuid.dart';
+import 'package:artbeat_core/artbeat_core.dart' show FirestoreUtils;
 
 /// Enum for ticket purchase status
 enum TicketPurchaseStatus {
@@ -107,27 +108,27 @@ class TicketPurchase {
 
   /// Create TicketPurchase from Firestore document
   factory TicketPurchase.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+    final data = doc.data() as Map<String, dynamic>? ?? {};
 
     return TicketPurchase(
       id: doc.id,
-      eventId: data['eventId']?.toString() ?? '',
-      ticketTypeId: data['ticketTypeId']?.toString() ?? '',
-      userId: data['userId']?.toString() ?? '',
-      userEmail: data['userEmail']?.toString() ?? '',
-      userName: data['userName']?.toString() ?? '',
-      quantity: data['quantity'] as int? ?? 1,
-      totalAmount: (data['totalAmount'] as num?)?.toDouble() ?? 0.0,
+      eventId: FirestoreUtils.safeStringDefault(data['eventId']),
+      ticketTypeId: FirestoreUtils.safeStringDefault(data['ticketTypeId']),
+      userId: FirestoreUtils.safeStringDefault(data['userId']),
+      userEmail: FirestoreUtils.safeStringDefault(data['userEmail']),
+      userName: FirestoreUtils.safeStringDefault(data['userName']),
+      quantity: FirestoreUtils.safeInt(data['quantity'], 1),
+      totalAmount: FirestoreUtils.safeDouble(data['totalAmount']),
       status: TicketPurchaseStatus.fromString(
-        data['status']?.toString() ?? 'pending',
+        FirestoreUtils.safeStringDefault(data['status'], 'pending'),
       ),
-      paymentIntentId: data['paymentIntentId']?.toString(),
-      refundId: data['refundId']?.toString(),
-      paymentId: data['paymentId']?.toString(),
-      amount: (data['amount'] as num?)?.toDouble(),
-      purchaseDate: _parseDateTime(data['purchaseDate']),
+      paymentIntentId: FirestoreUtils.safeString(data['paymentIntentId']),
+      refundId: FirestoreUtils.safeString(data['refundId']),
+      paymentId: FirestoreUtils.safeString(data['paymentId']),
+      amount: FirestoreUtils.safeDouble(data['amount']),
+      purchaseDate: FirestoreUtils.safeDateTime(data['purchaseDate']),
       refundDate: data['refundDate'] != null
-          ? _parseDateTime(data['refundDate'])
+          ? FirestoreUtils.safeDateTime(data['refundDate'])
           : null,
       metadata: data['metadata'] as Map<String, dynamic>?,
     );
@@ -219,14 +220,6 @@ class TicketPurchase {
   /// Generate QR code data for ticket validation
   String get qrCodeData {
     return 'artbeat://ticket/$id/$eventId/$userId';
-  }
-
-  // Helper method to parse DateTime from Firestore
-  static DateTime _parseDateTime(dynamic data) {
-    if (data is Timestamp) {
-      return data.toDate();
-    }
-    return DateTime.now();
   }
 
   @override

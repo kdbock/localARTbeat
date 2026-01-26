@@ -317,11 +317,11 @@ class ArtWalkCacheService {
         usersFavorited: List<String>.from(
           (data['usersFavorited'] as List<dynamic>?) ?? [],
         ),
-        createdAt: Timestamp.fromMillisecondsSinceEpoch(
+        createdAt: DateTime.fromMillisecondsSinceEpoch(
           data['createdAt'] as int,
         ),
         updatedAt: data['updatedAt'] != null
-            ? Timestamp.fromMillisecondsSinceEpoch(data['updatedAt'] as int)
+            ? DateTime.fromMillisecondsSinceEpoch(data['updatedAt'] as int)
             : null,
       );
     } catch (e) {

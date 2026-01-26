@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:artbeat_core/artbeat_core.dart' show FirestoreUtils;
 
 /// Model representing an auction bid
 class AuctionBidModel {
@@ -21,10 +22,10 @@ class AuctionBidModel {
     final data = doc.data() as Map<String, dynamic>? ?? {};
     return AuctionBidModel(
       id: doc.id,
-      userId: data['userId'] as String? ?? '',
-      artworkId: data['artworkId'] as String? ?? '',
-      amount: (data['amount'] as num?)?.toDouble() ?? 0.0,
-      timestamp: (data['timestamp'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      userId: FirestoreUtils.safeStringDefault(data['userId']),
+      artworkId: FirestoreUtils.safeStringDefault(data['artworkId']),
+      amount: FirestoreUtils.safeDouble(data['amount']),
+      timestamp: FirestoreUtils.safeDateTime(data['timestamp']),
     );
   }
 
@@ -62,11 +63,14 @@ class AuctionResultModel {
     final data = doc.data() as Map<String, dynamic>? ?? {};
     return AuctionResultModel(
       artworkId: doc.id,
-      winnerUserId: data['winnerUserId'] as String?,
-      finalPrice: (data['finalPrice'] as num?)?.toDouble(),
-      paymentStatus: data['paymentStatus'] as String? ?? 'pending',
-      paymentDeadline: (data['paymentDeadline'] as Timestamp?)?.toDate(),
-      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      winnerUserId: FirestoreUtils.safeString(data['winnerUserId']),
+      finalPrice: FirestoreUtils.safeDouble(data['finalPrice']),
+      paymentStatus:
+          FirestoreUtils.safeStringDefault(data['paymentStatus'], 'pending'),
+      paymentDeadline: data['paymentDeadline'] != null
+          ? FirestoreUtils.safeDateTime(data['paymentDeadline'])
+          : null,
+      createdAt: FirestoreUtils.safeDateTime(data['createdAt']),
     );
   }
 

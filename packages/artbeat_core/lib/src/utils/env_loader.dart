@@ -15,26 +15,35 @@ class EnvLoader {
   /// Initialize environment variables
   Future<void> init() async {
     try {
-      // Load from .env files if they exist
+      // 1. Try to load baseline .env if it exists
+      try {
+        await dotenv.load(fileName: '.env');
+        _envVars.addAll(dotenv.env);
+        AppLogger.info('📝 Loaded baseline .env file');
+      } catch (_) {
+        // Ignore if .env doesn't exist
+      }
+
+      // 2. Load environment-specific file and merge
       try {
         const primaryEnv = kReleaseMode ? '.env.production' : '.env.example';
         await dotenv.load(fileName: primaryEnv);
-        _envVars.addAll(dotenv.env);
+        
+        // Merge with care: only use real values, never placeholders
+        dotenv.env.forEach((key, value) {
+          if (!value.contains(r'${')) {
+            _envVars[key] = value;
+          }
+        });
+        
+        AppLogger.info('📝 Loaded $primaryEnv and merged configuration');
       } catch (e) {
         AppLogger.warning(
-          '⚠️ Could not load primary .env file, trying fallback: $e',
+          '⚠️ Could not load primary .env file ($e), using baseline only',
         );
-        try {
-          await dotenv.load(fileName: '.env');
-          _envVars.addAll(dotenv.env);
-        } catch (fallbackError) {
-          AppLogger.warning(
-            '⚠️ Could not load fallback .env file, using environment defines: $fallbackError',
-          );
-        }
       }
 
-      // Merge with String.fromEnvironment for build-time overrides
+      // 3. Merge with String.fromEnvironment for build-time overrides
       // This allows both .env files and --dart-define to work together
       final List<String> keysToCheck = [
         'API_BASE_URL',

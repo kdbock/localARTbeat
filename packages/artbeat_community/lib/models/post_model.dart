@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:artbeat_core/artbeat_core.dart';
+import 'package:artbeat_core/artbeat_core.dart' show FirestoreUtils, EngagementStats;
 import 'group_models.dart';
 
 /// Moderation status for posts
@@ -154,36 +154,42 @@ class PostModel {
 
     final result = PostModel(
       id: doc.id,
-      userId: (data['userId'] as String?) ?? '',
-      userName: (data['userName'] as String?) ?? '',
-      userPhotoUrl: (data['userPhotoUrl'] as String?) ?? '',
-      content: (data['content'] as String?) ?? '',
-      imageUrls: List<String>.from(data['imageUrls'] as Iterable? ?? []),
-      videoUrl: data['videoUrl'] as String?,
-      audioUrl: data['audioUrl'] as String?,
-      tags: List<String>.from(data['tags'] as Iterable? ?? []),
-      location: (data['location'] as String?) ?? '',
+      userId: FirestoreUtils.safeStringDefault(data['userId']),
+      userName: FirestoreUtils.safeStringDefault(data['userName']),
+      userPhotoUrl: FirestoreUtils.safeStringDefault(data['userPhotoUrl']),
+      content: FirestoreUtils.safeStringDefault(data['content']),
+      imageUrls: (data['imageUrls'] as Iterable? ?? [])
+          .map((e) => e.toString())
+          .toList(),
+      videoUrl: FirestoreUtils.safeString(data['videoUrl']),
+      audioUrl: FirestoreUtils.safeString(data['audioUrl']),
+      tags: (data['tags'] as Iterable? ?? [])
+          .map((e) => e.toString())
+          .toList(),
+      location: FirestoreUtils.safeStringDefault(data['location']),
       geoPoint: data['geoPoint'] as GeoPoint?,
-      zipCode: data['zipCode'] as String?,
-      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      zipCode: FirestoreUtils.safeString(data['zipCode']),
+      createdAt: FirestoreUtils.safeDateTime(data['createdAt']),
       engagementStats: EngagementStats.fromFirestore(
         data['engagementStats'] as Map<String, dynamic>? ?? data,
       ),
-      isPublic: (data['isPublic'] as bool?) ?? true,
+      isPublic: FirestoreUtils.safeBool(data['isPublic'], true),
       mentionedUsers: data['mentionedUsers'] != null
-          ? List<String>.from(data['mentionedUsers'] as Iterable)
+          ? (data['mentionedUsers'] as Iterable).map((e) => e.toString()).toList()
           : null,
       metadata: data['metadata'] as Map<String, dynamic>?,
-      isUserVerified: (data['isUserVerified'] as bool?) ?? false,
+      isUserVerified: FirestoreUtils.safeBool(data['isUserVerified'], false),
       moderationStatus: PostModerationStatus.fromString(
-        data['moderationStatus'] as String? ?? 'approved',
+        FirestoreUtils.safeStringDefault(data['moderationStatus'], 'approved'),
       ),
-      flagged: (data['flagged'] as bool?) ?? false,
-      flaggedAt: (data['flaggedAt'] as Timestamp?)?.toDate(),
-      moderationNotes: data['moderationNotes'] as String?,
+      flagged: FirestoreUtils.safeBool(data['flagged'], false),
+      flaggedAt: data['flaggedAt'] != null
+          ? FirestoreUtils.safeDateTime(data['flaggedAt'])
+          : null,
+      moderationNotes: FirestoreUtils.safeString(data['moderationNotes']),
       isLikedByCurrentUser:
           false, // This will be set separately when loading posts with user context
-      groupType: data['groupType'] as String?,
+      groupType: FirestoreUtils.safeString(data['groupType']),
     );
 
     return result;

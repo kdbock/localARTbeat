@@ -40,6 +40,7 @@ export 'src/services/subscription_service.dart' show SubscriptionService;
 export 'src/services/artist_service.dart' show ArtistService;
 export 'src/services/artist_boost_service.dart' show ArtistBoostService;
 export 'src/services/artist_feature_service.dart' show ArtistFeatureService;
+// 2025 Enhanced Services (Consolidated into UnifiedPaymentService)
 export 'src/services/unified_payment_service.dart'
     show
         UnifiedPaymentService,
@@ -50,11 +51,7 @@ export 'src/services/unified_payment_service.dart'
         ArtbeatModule,
         RevenueStream;
 export 'src/services/crash_prevention_service.dart' show CrashPreventionService;
-// Legacy compatibility exports (deprecated - use UnifiedPaymentService instead)
-export 'src/services/payment_service.dart' show PaymentService;
-export 'src/services/enhanced_payment_service_working.dart'
-    show EnhancedPaymentService;
-// Deprecated: GiftPurchaseScreen removed (legacy basic screen, use EnhancedGiftPurchaseScreen)
+// In-App Purchase Services
 export 'src/services/in_app_purchase_service.dart' show InAppPurchaseService;
 export 'src/services/in_app_purchase_manager.dart'
     show InAppPurchaseManager, PurchaseEvent, PurchaseEventType;
@@ -72,7 +69,6 @@ export 'src/services/enhanced_storage_service.dart' show EnhancedStorageService;
 export 'src/services/firebase_storage_auth_service.dart'
     show FirebaseStorageAuthService;
 export 'src/services/coupon_service.dart' show CouponService;
-export 'src/services/stripe_payment_service.dart' show StripePaymentService;
 export 'src/services/capture_service_interface.dart'
     show CaptureServiceInterface, DefaultCaptureService;
 // CRITICAL: Crash prevention services (2025 stability fixes)
@@ -207,6 +203,7 @@ export 'src/utils/logger.dart' show AppLogger, LoggerExtension, LoggingMixin;
 export 'src/utils/image_url_validator.dart' show ImageUrlValidator;
 export 'src/utils/distance_utils.dart' show DistanceUtils;
 export 'src/utils/device_utils.dart' show DeviceUtils;
+export 'src/utils/firestore_utils.dart' show FirestoreUtils;
 
 // Export Screens
 export 'src/screens/splash_screen.dart' show SplashScreen;

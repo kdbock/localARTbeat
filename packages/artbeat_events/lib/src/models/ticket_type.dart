@@ -1,3 +1,5 @@
+import 'package:artbeat_core/artbeat_core.dart' show FirestoreUtils;
+
 /// Enum for different ticket categories
 enum TicketCategory {
   free,
@@ -144,23 +146,21 @@ class TicketType {
   /// Create TicketType from Map (for Firestore)
   factory TicketType.fromMap(Map<String, dynamic> map) {
     return TicketType(
-      id: map['id']?.toString() ?? '',
-      name: map['name']?.toString() ?? '',
-      description: map['description']?.toString() ?? '',
+      id: FirestoreUtils.getString(map, 'id'),
+      name: FirestoreUtils.getString(map, 'name'),
+      description: FirestoreUtils.getString(map, 'description'),
       category: TicketCategory.fromString(
-        map['category']?.toString() ?? 'free',
+        FirestoreUtils.getString(map, 'category', 'free'),
       ),
-      price: (map['price'] as num?)?.toDouble() ?? 0.0,
-      quantity: map['quantity'] as int? ?? 0,
-      quantitySold: map['quantitySold'] as int?,
-      saleStartDate: map['saleStartDate'] != null
-          ? DateTime.parse(map['saleStartDate'].toString())
-          : null,
-      saleEndDate: map['saleEndDate'] != null
-          ? DateTime.parse(map['saleEndDate'].toString())
-          : null,
-      benefits: _parseStringList(map['benefits']),
-      metadata: map['metadata'] as Map<String, dynamic>?,
+      price: FirestoreUtils.getDouble(map, 'price'),
+      quantity: FirestoreUtils.getInt(map, 'quantity'),
+      quantitySold: FirestoreUtils.getInt(map, 'quantitySold'),
+      saleStartDate: FirestoreUtils.getOptionalDateTime(map, 'saleStartDate'),
+      saleEndDate: FirestoreUtils.getOptionalDateTime(map, 'saleEndDate'),
+      benefits: (map['benefits'] as List? ?? [])
+          .map(FirestoreUtils.safeStringDefault)
+          .toList(),
+      metadata: FirestoreUtils.getOptionalMap(map, 'metadata'),
     );
   }
 
@@ -236,14 +236,6 @@ class TicketType {
   String get formattedPrice {
     if (isFree) return 'Free';
     return '\$${price.toStringAsFixed(2)}';
-  }
-
-  // Helper method to parse string lists
-  static List<String> _parseStringList(dynamic data) {
-    if (data is List) {
-      return data.map((e) => e.toString()).toList();
-    }
-    return [];
   }
 
   @override

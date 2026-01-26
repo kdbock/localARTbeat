@@ -10,3 +10,4 @@ export 'connectivity_utils.dart';
 export 'permission_utils.dart';
 export 'distance_utils.dart';
 export 'device_utils.dart';
+export 'firestore_utils.dart';

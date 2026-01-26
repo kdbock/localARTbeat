@@ -750,10 +750,8 @@ class InstantDiscoveryService {
       viewCount: 0, // Captures don't track views in the same way
       likeCount: 0, // Captures don't track likes in the same way
       usersFavorited: [], // Captures don't track favorites in the same way
-      createdAt: Timestamp.fromDate(capture.createdAt),
-      updatedAt: capture.updatedAt != null
-          ? Timestamp.fromDate(capture.updatedAt!)
-          : null,
+      createdAt: capture.createdAt,
+      updatedAt: capture.updatedAt,
     );
   }
 

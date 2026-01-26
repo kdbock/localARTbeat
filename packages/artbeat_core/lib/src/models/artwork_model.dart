@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../utils/firestore_utils.dart';
 import 'artwork_content_type.dart';
 
 enum ArtBattleStatus { eligible, active, cooling_down, opted_out }
@@ -66,38 +67,50 @@ class ArtworkModel {
     final data = doc.data() as Map<String, dynamic>? ?? {};
     return ArtworkModel(
       id: doc.id,
-      title: data['title'] as String? ?? '',
-      description: data['description'] as String? ?? '',
-      artistId: data['artistId'] as String? ?? data['userId'] as String? ?? '',
-      imageUrl: data['imageUrl'] as String? ?? '',
-      price: (data['price'] as num?)?.toDouble() ?? 0.0,
-      medium: data['medium'] as String? ?? '',
-      tags: List<String>.from(data['tags'] as List<dynamic>? ?? []),
-      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      isSold: data['isSold'] as bool? ?? false,
-      galleryId: data['galleryId'] as String?,
-      applauseCount: data['applauseCount'] as int? ?? 0,
-      viewsCount: data['viewsCount'] as int? ?? data['viewCount'] as int? ?? 0,
-      artistName: data['artistName'] as String? ?? 'Unknown Artist',
-      contentType: ArtworkContentType.fromString(
-        data['contentType'] as String? ?? 'visual',
+      title: FirestoreUtils.safeStringDefault(data['title']),
+      description: FirestoreUtils.safeStringDefault(data['description']),
+      artistId: FirestoreUtils.safeStringDefault(
+        data['artistId'] ?? data['userId'],
       ),
-      isSerializing: data['isSerializing'] as bool? ?? false,
-      totalChapters: data['totalChapters'] as int?,
-      releasedChapters: data['releasedChapters'] as int?,
+      imageUrl: FirestoreUtils.safeStringDefault(data['imageUrl']),
+      price: FirestoreUtils.safeDouble(data['price']),
+      medium: FirestoreUtils.safeStringDefault(data['medium']),
+      tags: (data['tags'] as List<dynamic>? ?? [])
+          .map((e) => FirestoreUtils.safeStringDefault(e))
+          .toList(),
+      createdAt: FirestoreUtils.safeDateTime(data['createdAt']),
+      isSold: FirestoreUtils.safeBool(data['isSold'], false),
+      galleryId: FirestoreUtils.safeString(data['galleryId']),
+      applauseCount: FirestoreUtils.safeInt(data['applauseCount']),
+      viewsCount: FirestoreUtils.safeInt(data['viewsCount'] ?? data['viewCount']),
+      artistName: FirestoreUtils.safeStringDefault(
+        data['artistName'],
+        'Unknown Artist',
+      ),
+      contentType: ArtworkContentType.fromString(
+        FirestoreUtils.safeStringDefault(data['contentType'], 'visual'),
+      ),
+      isSerializing: FirestoreUtils.safeBool(data['isSerializing'], false),
+      totalChapters: FirestoreUtils.safeInt(data['totalChapters']),
+      releasedChapters: FirestoreUtils.safeInt(data['releasedChapters']),
       readingMetadata: data['readingMetadata'] as Map<String, dynamic>?,
       serializationConfig: data['serializationConfig'] as Map<String, dynamic>?,
-      artBattleEnabled: data['artBattleEnabled'] as bool? ?? false,
+      artBattleEnabled: FirestoreUtils.safeBool(data['artBattleEnabled'], false),
       artBattleStatus: ArtBattleStatus.values.firstWhere(
-        (e) => e.name == (data['artBattleStatus'] as String? ?? 'eligible'),
+        (e) =>
+            e.name ==
+            FirestoreUtils.safeStringDefault(data['artBattleStatus'], 'eligible'),
         orElse: () => ArtBattleStatus.eligible,
       ),
-      artBattleScore: data['artBattleScore'] as int? ?? 0,
-      artBattleAppearances: data['artBattleAppearances'] as int? ?? 0,
-      artBattleWins: data['artBattleWins'] as int? ?? 0,
-      artBattleLastShownAt: (data['artBattleLastShownAt'] as Timestamp?)
-          ?.toDate(),
-      artBattleLastWinAt: (data['artBattleLastWinAt'] as Timestamp?)?.toDate(),
+      artBattleScore: FirestoreUtils.safeInt(data['artBattleScore']),
+      artBattleAppearances: FirestoreUtils.safeInt(data['artBattleAppearances']),
+      artBattleWins: FirestoreUtils.safeInt(data['artBattleWins']),
+      artBattleLastShownAt: data['artBattleLastShownAt'] != null
+          ? FirestoreUtils.safeDateTime(data['artBattleLastShownAt'])
+          : null,
+      artBattleLastWinAt: data['artBattleLastWinAt'] != null
+          ? FirestoreUtils.safeDateTime(data['artBattleLastWinAt'])
+          : null,
     );
   }
 

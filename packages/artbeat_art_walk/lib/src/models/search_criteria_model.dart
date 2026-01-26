@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:artbeat_core/artbeat_core.dart' show FirestoreUtils;
 
 /// Comprehensive search and filter model for Art Walk discovery
 class ArtWalkSearchCriteria {
@@ -122,19 +123,27 @@ class ArtWalkSearchCriteria {
   /// Create from JSON
   factory ArtWalkSearchCriteria.fromJson(Map<String, dynamic> json) {
     return ArtWalkSearchCriteria(
-      searchQuery: json['searchQuery'] as String?,
-      tags: json['tags'] != null
-          ? List<String>.from(json['tags'] as List<dynamic>)
+      searchQuery: FirestoreUtils.safeString(json['searchQuery']),
+      tags: (json['tags'] as List<dynamic>?)
+          ?.map((e) => FirestoreUtils.safeStringDefault(e))
+          .toList(),
+      difficulty: FirestoreUtils.safeString(json['difficulty']),
+      isAccessible: json['isAccessible'] != null
+          ? FirestoreUtils.safeBool(json['isAccessible'])
           : null,
-      difficulty: json['difficulty'] as String?,
-      isAccessible: json['isAccessible'] as bool?,
-      maxDistance: (json['maxDistance'] as num?)?.toDouble(),
-      maxDuration: (json['maxDuration'] as num?)?.toDouble(),
-      zipCode: json['zipCode'] as String?,
-      isPublic: json['isPublic'] as bool?,
-      sortBy: json['sortBy'] as String? ?? 'popular',
-      sortDescending: json['sortDescending'] as bool? ?? true,
-      limit: json['limit'] as int? ?? 20,
+      maxDistance: json['maxDistance'] != null
+          ? FirestoreUtils.safeDouble(json['maxDistance'])
+          : null,
+      maxDuration: json['maxDuration'] != null
+          ? FirestoreUtils.safeDouble(json['maxDuration'])
+          : null,
+      zipCode: FirestoreUtils.safeString(json['zipCode']),
+      isPublic: json['isPublic'] != null
+          ? FirestoreUtils.safeBool(json['isPublic'])
+          : null,
+      sortBy: FirestoreUtils.safeStringDefault(json['sortBy'], 'popular'),
+      sortDescending: FirestoreUtils.safeBool(json['sortDescending'], true),
+      limit: FirestoreUtils.safeInt(json['limit'], 20),
     );
   }
 
@@ -274,21 +283,25 @@ class PublicArtSearchCriteria {
   /// Create from JSON
   factory PublicArtSearchCriteria.fromJson(Map<String, dynamic> json) {
     return PublicArtSearchCriteria(
-      searchQuery: json['searchQuery'] as String?,
-      artistName: json['artistName'] as String?,
-      artTypes: json['artTypes'] != null
-          ? List<String>.from(json['artTypes'] as List<dynamic>)
+      searchQuery: FirestoreUtils.safeString(json['searchQuery']),
+      artistName: FirestoreUtils.safeString(json['artistName']),
+      artTypes: (json['artTypes'] as List<dynamic>?)
+          ?.map((e) => FirestoreUtils.safeStringDefault(e))
+          .toList(),
+      tags: (json['tags'] as List<dynamic>?)
+          ?.map((e) => FirestoreUtils.safeStringDefault(e))
+          .toList(),
+      isVerified: json['isVerified'] != null
+          ? FirestoreUtils.safeBool(json['isVerified'])
           : null,
-      tags: json['tags'] != null
-          ? List<String>.from(json['tags'] as List<dynamic>)
+      minRating: json['minRating'] != null
+          ? FirestoreUtils.safeDouble(json['minRating'])
           : null,
-      isVerified: json['isVerified'] as bool?,
-      minRating: (json['minRating'] as num?)?.toDouble(),
-      maxDistanceKm: (json['maxDistanceKm'] as num?)?.toDouble() ?? 10.0,
-      zipCode: json['zipCode'] as String?,
-      sortBy: json['sortBy'] as String? ?? 'popular',
-      sortDescending: json['sortDescending'] as bool? ?? true,
-      limit: json['limit'] as int? ?? 20,
+      maxDistanceKm: FirestoreUtils.safeDouble(json['maxDistanceKm'], 10.0),
+      zipCode: FirestoreUtils.safeString(json['zipCode']),
+      sortBy: FirestoreUtils.safeStringDefault(json['sortBy'], 'popular'),
+      sortDescending: FirestoreUtils.safeBool(json['sortDescending'], true),
+      limit: FirestoreUtils.safeInt(json['limit'], 20),
     );
   }
 

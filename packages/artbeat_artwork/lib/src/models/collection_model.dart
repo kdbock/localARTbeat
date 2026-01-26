@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:artbeat_core/artbeat_core.dart' show FirestoreUtils;
 
 /// Model representing an artwork collection/portfolio
 /// Allows artists to group related artworks and create curated galleries
@@ -47,27 +48,31 @@ class CollectionModel {
 
     return CollectionModel(
       id: doc.id,
-      userId: (data['userId'] as String?) ?? '',
-      artistProfileId: (data['artistProfileId'] as String?) ?? '',
-      title: (data['title'] as String?) ?? '',
-      description: (data['description'] as String?) ?? '',
-      coverImageUrl: data['coverImageUrl'] as String?,
-      artworkIds: (data['artworkIds'] as List<dynamic>?)?.cast<String>() ?? [],
-      tags: (data['tags'] as List<dynamic>?)?.cast<String>() ?? [],
+      userId: FirestoreUtils.safeStringDefault(data['userId']),
+      artistProfileId: FirestoreUtils.safeStringDefault(data['artistProfileId']),
+      title: FirestoreUtils.safeStringDefault(data['title']),
+      description: FirestoreUtils.safeStringDefault(data['description']),
+      coverImageUrl: FirestoreUtils.safeString(data['coverImageUrl']),
+      artworkIds: (data['artworkIds'] as List<dynamic>? ?? [])
+          .map((e) => FirestoreUtils.safeStringDefault(e))
+          .toList(),
+      tags: (data['tags'] as List<dynamic>? ?? [])
+          .map((e) => FirestoreUtils.safeStringDefault(e))
+          .toList(),
       type: CollectionType.values.firstWhere(
-        (e) => e.name == data['type'],
+        (e) => e.name == FirestoreUtils.safeString(data['type']),
         orElse: () => CollectionType.personal,
       ),
       visibility: CollectionVisibility.values.firstWhere(
-        (e) => e.name == data['visibility'],
+        (e) => e.name == FirestoreUtils.safeString(data['visibility']),
         orElse: () => CollectionVisibility.public,
       ),
-      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      viewCount: (data['viewCount'] as int?) ?? 0,
-      isFeatured: (data['isFeatured'] as bool?) ?? false,
-      isPortfolio: (data['isPortfolio'] as bool?) ?? false,
-      sortOrder: (data['sortOrder'] as int?) ?? 0,
+      createdAt: FirestoreUtils.safeDateTime(data['createdAt']),
+      updatedAt: FirestoreUtils.safeDateTime(data['updatedAt']),
+      viewCount: FirestoreUtils.safeInt(data['viewCount']),
+      isFeatured: FirestoreUtils.safeBool(data['isFeatured'], false),
+      isPortfolio: FirestoreUtils.safeBool(data['isPortfolio'], false),
+      sortOrder: FirestoreUtils.safeInt(data['sortOrder']),
       metadata: (data['metadata'] as Map<String, dynamic>?) ?? {},
     );
   }

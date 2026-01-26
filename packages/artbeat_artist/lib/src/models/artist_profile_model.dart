@@ -1,6 +1,5 @@
 // filepath: /Users/kristybock/artbeat/packages/artbeat_artist/lib/src/models/artist_profile_model.dart
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:artbeat_core/artbeat_core.dart' show UserType, SubscriptionTier;
+import 'package:artbeat_core/artbeat_core.dart' show UserType, SubscriptionTier, FirestoreUtils;
 
 // Using UserType from core module
 
@@ -50,45 +49,37 @@ class ArtistProfileModel {
 
   factory ArtistProfileModel.fromMap(Map<String, dynamic> map) {
     return ArtistProfileModel(
-      id: (map['id'] ?? '').toString(),
-      userId: (map['userId'] ?? '').toString(),
-      displayName: (map['displayName'] ?? '').toString(),
-      bio: (map['bio'] ?? '').toString(),
-      userType: _userTypeFromString((map['userType'] ?? 'artist').toString()),
-      location: map['location'] != null ? map['location'].toString() : null,
-      locationLat: (map['locationLat'] as num?)?.toDouble(),
-      locationLng: (map['locationLng'] as num?)?.toDouble(),
-      mediums: map['mediums'] is List
-          ? (map['mediums'] as List).map((e) => e.toString()).toList()
-          : <String>[],
-      styles: map['styles'] is List
-          ? (map['styles'] as List).map((e) => e.toString()).toList()
-          : <String>[],
-      profileImageUrl: map['profileImageUrl'] != null
-          ? map['profileImageUrl'].toString()
+      id: FirestoreUtils.getString(map, 'id'),
+      userId: FirestoreUtils.getString(map, 'userId'),
+      displayName: FirestoreUtils.getString(map, 'displayName'),
+      bio: FirestoreUtils.getString(map, 'bio'),
+      userType: _userTypeFromString(FirestoreUtils.getString(map, 'userType', 'artist')),
+      location: FirestoreUtils.getOptionalString(map, 'location'),
+      locationLat: map['locationLat'] != null
+          ? FirestoreUtils.getDouble(map, 'locationLat')
           : null,
-      coverImageUrl: map['coverImageUrl'] != null
-          ? map['coverImageUrl'].toString()
+      locationLng: map['locationLng'] != null
+          ? FirestoreUtils.getDouble(map, 'locationLng')
           : null,
-      socialLinks: map['socialLinks'] is Map
-          ? (map['socialLinks'] as Map).map(
-              (key, value) => MapEntry(key.toString(), value.toString()),
-            )
-          : <String, String>{},
-      isVerified: map['isVerified'] is bool ? map['isVerified'] as bool : false,
-      isFeatured: map['isFeatured'] is bool ? map['isFeatured'] as bool : false,
+      mediums: FirestoreUtils.getStringList(map, 'mediums'),
+      styles: FirestoreUtils.getStringList(map, 'styles'),
+      profileImageUrl: FirestoreUtils.getOptionalString(map, 'profileImageUrl'),
+      coverImageUrl: FirestoreUtils.getOptionalString(map, 'coverImageUrl'),
+      socialLinks: (map['socialLinks'] as Map?)?.map(
+            (key, value) => MapEntry(
+              FirestoreUtils.safeStringDefault(key),
+              FirestoreUtils.safeStringDefault(value),
+            ),
+          ) ??
+          <String, String>{},
+      isVerified: FirestoreUtils.getBool(map, 'isVerified'),
+      isFeatured: FirestoreUtils.getBool(map, 'isFeatured'),
       subscriptionTier: _tierFromString(
-        (map['subscriptionTier'] ?? 'starter').toString(),
+        FirestoreUtils.getString(map, 'subscriptionTier', 'starter'),
       ),
-      followerCount: map['followerCount'] is int
-          ? map['followerCount'] as int
-          : 0,
-      createdAt: map['createdAt'] is Timestamp
-          ? (map['createdAt'] as Timestamp).toDate()
-          : DateTime.now(),
-      updatedAt: map['updatedAt'] is Timestamp
-          ? (map['updatedAt'] as Timestamp).toDate()
-          : DateTime.now(),
+      followerCount: FirestoreUtils.getInt(map, 'followerCount'),
+      createdAt: FirestoreUtils.getDateTime(map, 'createdAt'),
+      updatedAt: FirestoreUtils.getDateTime(map, 'updatedAt'),
     );
   }
 

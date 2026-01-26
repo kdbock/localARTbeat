@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../utils/firestore_utils.dart';
 
 class PostModel {
   final String id;
@@ -26,18 +27,22 @@ class PostModel {
   });
 
   factory PostModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+    final data = doc.data() as Map<String, dynamic>? ?? {};
     return PostModel(
       id: doc.id,
-      userId: data['userId'] as String? ?? '',
-      content: data['content'] as String? ?? '',
-      imageUrls: List<String>.from(data['imageUrls'] as List<dynamic>? ?? []),
-      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      tags: List<String>.from(data['tags'] as List<dynamic>? ?? []),
-      likes: data['likes'] as int? ?? 0,
-      comments: data['comments'] as int? ?? 0,
-      artworkId: data['artworkId'] as String?,
-      eventId: data['eventId'] as String?,
+      userId: FirestoreUtils.safeStringDefault(data['userId']),
+      content: FirestoreUtils.safeStringDefault(data['content']),
+      imageUrls: (data['imageUrls'] as List<dynamic>? ?? [])
+          .map((e) => FirestoreUtils.safeStringDefault(e))
+          .toList(),
+      createdAt: FirestoreUtils.safeDateTime(data['createdAt']),
+      tags: (data['tags'] as List<dynamic>? ?? [])
+          .map((e) => FirestoreUtils.safeStringDefault(e))
+          .toList(),
+      likes: FirestoreUtils.safeInt(data['likes']),
+      comments: FirestoreUtils.safeInt(data['comments']),
+      artworkId: FirestoreUtils.safeString(data['artworkId']),
+      eventId: FirestoreUtils.safeString(data['eventId']),
     );
   }
 

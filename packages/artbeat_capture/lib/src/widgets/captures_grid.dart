@@ -21,7 +21,7 @@ class CapturesGrid extends StatefulWidget {
 }
 
 class _CapturesGridState extends State<CapturesGrid> {
-  late Stream<QuerySnapshot<CaptureModel>> _capturesStream;
+  late Stream<QuerySnapshot<Map<String, dynamic>>> _capturesStream;
 
   @override
   void initState() {
@@ -34,30 +34,17 @@ class _CapturesGridState extends State<CapturesGrid> {
       if (widget.userId.isEmpty) {
         AppLogger.warning('Warning: Empty userId provided to CapturesGrid');
         // Create a dummy stream with no results
-        _capturesStream = Stream.value(
-          FirebaseFirestore.instance
-                  .collection('captures')
-                  .withConverter<CaptureModel>(
-                    fromFirestore: (snapshot, _) =>
-                        CaptureModel.fromFirestore(snapshot, null),
-                    toFirestore: (capture, _) => capture.toFirestore(),
-                  )
-                  .snapshots()
-                  .first
-              as QuerySnapshot<CaptureModel>,
-        );
+        _capturesStream = FirebaseFirestore.instance
+            .collection('captures')
+            .limit(0)
+            .snapshots();
         return;
       }
 
       var query = FirebaseFirestore.instance
           .collection('captures')
           .where('userId', isEqualTo: widget.userId)
-          .orderBy('createdAt', descending: true)
-          .withConverter<CaptureModel>(
-            fromFirestore: (snapshot, _) =>
-                CaptureModel.fromFirestore(snapshot, null),
-            toFirestore: (capture, _) => capture.toFirestore(),
-          );
+          .orderBy('createdAt', descending: true);
 
       if (widget.showPublicOnly) {
         query = query.where('isPublic', isEqualTo: true);
@@ -72,11 +59,6 @@ class _CapturesGridState extends State<CapturesGrid> {
       // Fallback to empty stream
       _capturesStream = FirebaseFirestore.instance
           .collection('captures')
-          .withConverter<CaptureModel>(
-            fromFirestore: (snapshot, _) =>
-                CaptureModel.fromFirestore(snapshot, null),
-            toFirestore: (capture, _) => capture.toFirestore(),
-          )
           .limit(0)
           .snapshots();
     }
@@ -84,7 +66,7 @@ class _CapturesGridState extends State<CapturesGrid> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot<CaptureModel>>(
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
       stream: _capturesStream,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
@@ -120,7 +102,21 @@ class _CapturesGridState extends State<CapturesGrid> {
           return const Center(child: CircularProgressIndicator());
         }
 
-        final captures = snapshot.data?.docs.map((doc) => doc.data()).toList();
+        final captures = snapshot.data?.docs.map((doc) {
+          try {
+            final data = doc.data();
+            // Defensive type checking for userId
+            if (data['userId'] is! String) {
+              debugPrint(
+                '⚠️ CapturesGrid: userId for doc ${doc.id} is NOT a string! Type: ${data['userId'].runtimeType}, Value: ${data['userId']}',
+              );
+            }
+            return CaptureModel.fromFirestore(doc, null);
+          } catch (e) {
+            AppLogger.error('Error parsing capture document ${doc.id}: $e');
+            return null;
+          }
+        }).whereType<CaptureModel>().toList();
 
         if (captures == null || captures.isEmpty) {
           return Center(

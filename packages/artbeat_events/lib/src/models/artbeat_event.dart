@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uuid/uuid.dart';
+import 'package:artbeat_core/artbeat_core.dart' show FirestoreUtils;
 import 'ticket_type.dart';
 import 'refund_policy.dart';
 
@@ -153,95 +154,87 @@ class ArtbeatEvent {
 
   /// Create an ArtbeatEvent from a Firestore document
   factory ArtbeatEvent.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+    final data = doc.data() as Map<String, dynamic>? ?? {};
 
     return ArtbeatEvent(
       id: doc.id,
-      title: data['title']?.toString() ?? '',
-      description: data['description']?.toString() ?? '',
-      artistId: data['artistId']?.toString() ?? '',
-      imageUrls: _parseStringList(data['imageUrls']),
-      artistHeadshotUrl: data['artistHeadshotUrl']?.toString() ?? '',
-      eventBannerUrl: data['eventBannerUrl']?.toString() ?? '',
-      artistHeadshotFit: data['artistHeadshotFit']?.toString() ?? 'cover',
-      eventBannerFit: data['eventBannerFit']?.toString() ?? 'cover',
-      imageFit: data['imageFit']?.toString() ?? 'cover',
-      dateTime: _parseDateTime(data['dateTime']),
-      location: data['location']?.toString() ?? '',
+      title: FirestoreUtils.getString(data, 'title'),
+      description: FirestoreUtils.getString(data, 'description'),
+      artistId: FirestoreUtils.getString(data, 'artistId'),
+      imageUrls: FirestoreUtils.getStringList(data, 'imageUrls'),
+      artistHeadshotUrl: FirestoreUtils.getString(data, 'artistHeadshotUrl'),
+      eventBannerUrl: FirestoreUtils.getString(data, 'eventBannerUrl'),
+      artistHeadshotFit: FirestoreUtils.getString(data, 'artistHeadshotFit', 'cover'),
+      eventBannerFit: FirestoreUtils.getString(data, 'eventBannerFit', 'cover'),
+      imageFit: FirestoreUtils.getString(data, 'imageFit', 'cover'),
+      dateTime: FirestoreUtils.getDateTime(data, 'dateTime'),
+      location: FirestoreUtils.getString(data, 'location'),
       ticketTypes: _parseTicketTypes(data['ticketTypes']),
       refundPolicy: RefundPolicy.fromMap(data['refundPolicy'] ?? {}),
-      reminderEnabled: data['reminderEnabled'] as bool? ?? true,
-      isPublic: data['isPublic'] as bool? ?? true,
-      attendeeIds: _parseStringList(data['attendeeIds']),
-      maxAttendees: data['maxAttendees'] as int? ?? 100,
-      tags: _parseStringList(data['tags']),
-      contactEmail: data['contactEmail']?.toString() ?? '',
-      contactPhone: data['contactPhone']?.toString(),
-      metadata: data['metadata'] as Map<String, dynamic>?,
-      createdAt: _parseDateTime(data['createdAt']),
-      updatedAt: _parseDateTime(data['updatedAt']),
-      category: data['category']?.toString() ?? 'Other', // Default category
-      moderationStatus: data['moderationStatus']?.toString() ?? 'pending',
-      lastModerated: data['lastModerated'] != null
-          ? _parseDateTime(data['lastModerated'])
-          : null,
-      isRecurring: data['isRecurring'] as bool? ?? false,
-      recurrencePattern: data['recurrencePattern']?.toString(),
-      recurrenceInterval: data['recurrenceInterval'] as int?,
-      recurrenceEndDate: data['recurrenceEndDate'] != null
-          ? _parseDateTime(data['recurrenceEndDate'])
-          : null,
-      parentEventId: data['parentEventId']?.toString(),
-      viewCount: data['viewCount'] as int? ?? 0,
-      likeCount: data['likeCount'] as int? ?? 0,
-      shareCount: data['shareCount'] as int? ?? 0,
-      saveCount: data['saveCount'] as int? ?? 0,
+      reminderEnabled: FirestoreUtils.getBool(data, 'reminderEnabled', true),
+      isPublic: FirestoreUtils.getBool(data, 'isPublic', true),
+      attendeeIds: FirestoreUtils.getStringList(data, 'attendeeIds'),
+      maxAttendees: FirestoreUtils.getInt(data, 'maxAttendees', 100),
+      tags: FirestoreUtils.getStringList(data, 'tags'),
+      contactEmail: FirestoreUtils.getString(data, 'contactEmail'),
+      contactPhone: FirestoreUtils.getOptionalString(data, 'contactPhone'),
+      metadata: FirestoreUtils.getOptionalMap(data, 'metadata'),
+      createdAt: FirestoreUtils.getDateTime(data, 'createdAt'),
+      updatedAt: FirestoreUtils.getDateTime(data, 'updatedAt'),
+      category: FirestoreUtils.getString(data, 'category', 'Other'),
+      moderationStatus: FirestoreUtils.getString(data, 'moderationStatus', 'pending'),
+      lastModerated: FirestoreUtils.getOptionalDateTime(data, 'lastModerated'),
+      isRecurring: FirestoreUtils.getBool(data, 'isRecurring'),
+      recurrencePattern: FirestoreUtils.getOptionalString(data, 'recurrencePattern'),
+      recurrenceInterval: FirestoreUtils.getInt(data, 'recurrenceInterval'),
+      recurrenceEndDate: FirestoreUtils.getOptionalDateTime(data, 'recurrenceEndDate'),
+      parentEventId: FirestoreUtils.getOptionalString(data, 'parentEventId'),
+      viewCount: FirestoreUtils.getInt(data, 'viewCount'),
+      likeCount: FirestoreUtils.getInt(data, 'likeCount'),
+      shareCount: FirestoreUtils.getInt(data, 'shareCount'),
+      saveCount: FirestoreUtils.getInt(data, 'saveCount'),
     );
   }
 
   /// Create an ArtbeatEvent from a Map (for analytics compatibility)
   factory ArtbeatEvent.fromMap(Map<String, dynamic> data) {
     return ArtbeatEvent(
-      id: data['id']?.toString() ?? '',
-      title: data['title']?.toString() ?? '',
-      description: data['description']?.toString() ?? '',
-      artistId: data['artistId']?.toString() ?? '',
-      imageUrls: _parseStringList(data['imageUrls']),
-      artistHeadshotUrl: data['artistHeadshotUrl']?.toString() ?? '',
-      eventBannerUrl: data['eventBannerUrl']?.toString() ?? '',
-      artistHeadshotFit: data['artistHeadshotFit']?.toString() ?? 'cover',
-      eventBannerFit: data['eventBannerFit']?.toString() ?? 'cover',
-      imageFit: data['imageFit']?.toString() ?? 'cover',
-      dateTime: _parseDateTime(data['dateTime']),
-      location: data['location']?.toString() ?? '',
+      id: FirestoreUtils.getString(data, 'id'),
+      title: FirestoreUtils.getString(data, 'title'),
+      description: FirestoreUtils.getString(data, 'description'),
+      artistId: FirestoreUtils.getString(data, 'artistId'),
+      imageUrls: FirestoreUtils.getStringList(data, 'imageUrls'),
+      artistHeadshotUrl: FirestoreUtils.getString(data, 'artistHeadshotUrl'),
+      eventBannerUrl: FirestoreUtils.getString(data, 'eventBannerUrl'),
+      artistHeadshotFit: FirestoreUtils.getString(data, 'artistHeadshotFit', 'cover'),
+      eventBannerFit: FirestoreUtils.getString(data, 'eventBannerFit', 'cover'),
+      imageFit: FirestoreUtils.getString(data, 'imageFit', 'cover'),
+      dateTime: FirestoreUtils.getDateTime(data, 'dateTime'),
+      location: FirestoreUtils.getString(data, 'location'),
       ticketTypes: _parseTicketTypes(data['ticketTypes']),
       refundPolicy: RefundPolicy.fromMap(data['refundPolicy'] ?? {}),
-      reminderEnabled: data['reminderEnabled'] as bool? ?? true,
-      isPublic: data['isPublic'] as bool? ?? true,
-      attendeeIds: _parseStringList(data['attendeeIds']),
-      maxAttendees: data['maxAttendees'] as int? ?? 100,
-      tags: _parseStringList(data['tags']),
-      contactEmail: data['contactEmail']?.toString() ?? '',
-      contactPhone: data['contactPhone']?.toString(),
-      metadata: data['metadata'] as Map<String, dynamic>?,
-      createdAt: _parseDateTime(data['createdAt']),
-      updatedAt: _parseDateTime(data['updatedAt']),
-      category: data['category']?.toString() ?? 'Other',
-      moderationStatus: data['moderationStatus']?.toString() ?? 'pending',
-      lastModerated: data['lastModerated'] != null
-          ? _parseDateTime(data['lastModerated'])
-          : null,
-      isRecurring: data['isRecurring'] as bool? ?? false,
-      recurrencePattern: data['recurrencePattern']?.toString(),
-      recurrenceInterval: data['recurrenceInterval'] as int?,
-      recurrenceEndDate: data['recurrenceEndDate'] != null
-          ? _parseDateTime(data['recurrenceEndDate'])
-          : null,
-      parentEventId: data['parentEventId']?.toString(),
-      viewCount: data['viewCount'] as int? ?? 0,
-      likeCount: data['likeCount'] as int? ?? 0,
-      shareCount: data['shareCount'] as int? ?? 0,
-      saveCount: data['saveCount'] as int? ?? 0,
+      reminderEnabled: FirestoreUtils.getBool(data, 'reminderEnabled', true),
+      isPublic: FirestoreUtils.getBool(data, 'isPublic', true),
+      attendeeIds: FirestoreUtils.getStringList(data, 'attendeeIds'),
+      maxAttendees: FirestoreUtils.getInt(data, 'maxAttendees', 100),
+      tags: FirestoreUtils.getStringList(data, 'tags'),
+      contactEmail: FirestoreUtils.getString(data, 'contactEmail'),
+      contactPhone: FirestoreUtils.getOptionalString(data, 'contactPhone'),
+      metadata: FirestoreUtils.getOptionalMap(data, 'metadata'),
+      createdAt: FirestoreUtils.getDateTime(data, 'createdAt'),
+      updatedAt: FirestoreUtils.getDateTime(data, 'updatedAt'),
+      category: FirestoreUtils.getString(data, 'category', 'Other'),
+      moderationStatus: FirestoreUtils.getString(data, 'moderationStatus', 'pending'),
+      lastModerated: FirestoreUtils.getOptionalDateTime(data, 'lastModerated'),
+      isRecurring: FirestoreUtils.getBool(data, 'isRecurring'),
+      recurrencePattern: FirestoreUtils.getOptionalString(data, 'recurrencePattern'),
+      recurrenceInterval: FirestoreUtils.getInt(data, 'recurrenceInterval'),
+      recurrenceEndDate: FirestoreUtils.getOptionalDateTime(data, 'recurrenceEndDate'),
+      parentEventId: FirestoreUtils.getOptionalString(data, 'parentEventId'),
+      viewCount: FirestoreUtils.getInt(data, 'viewCount'),
+      likeCount: FirestoreUtils.getInt(data, 'likeCount'),
+      shareCount: FirestoreUtils.getInt(data, 'shareCount'),
+      saveCount: FirestoreUtils.getInt(data, 'saveCount'),
     );
   }
 
@@ -415,20 +408,6 @@ class ArtbeatEvent {
   }
 
   // Helper methods for parsing Firestore data
-  static List<String> _parseStringList(dynamic data) {
-    if (data is List) {
-      return data.map((e) => e.toString()).toList();
-    }
-    return [];
-  }
-
-  static DateTime _parseDateTime(dynamic data) {
-    if (data is Timestamp) {
-      return data.toDate();
-    }
-    return DateTime.now();
-  }
-
   static List<TicketType> _parseTicketTypes(dynamic data) {
     if (data is List) {
       return data

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:artbeat_core/artbeat_core.dart' show FirestoreUtils;
 
 /// Model representing artist earnings from various sources
 class EarningsModel {
@@ -33,35 +34,32 @@ class EarningsModel {
   });
 
   factory EarningsModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+    final data = doc.data() as Map<String, dynamic>? ?? {};
 
     return EarningsModel(
       id: doc.id,
-      artistId: data['artistId'] as String? ?? '',
-      totalEarnings: (data['totalEarnings'] as num?)?.toDouble() ?? 0.0,
-      availableBalance: (data['availableBalance'] as num?)?.toDouble() ?? 0.0,
-      pendingBalance: (data['pendingBalance'] as num?)?.toDouble() ?? 0.0,
-      boostEarnings:
-          (data['boostEarnings'] as num? ??
-                  data['promotionSupportEarnings'] as num? ??
-                  data['giftEarnings'] as num?)
-              ?.toDouble() ??
-          0.0,
-      sponsorshipEarnings:
-          (data['sponsorshipEarnings'] as num?)?.toDouble() ?? 0.0,
-      commissionEarnings:
-          (data['commissionEarnings'] as num?)?.toDouble() ?? 0.0,
-      subscriptionEarnings:
-          (data['subscriptionEarnings'] as num?)?.toDouble() ?? 0.0,
-      artworkSalesEarnings:
-          (data['artworkSalesEarnings'] as num?)?.toDouble() ?? 0.0,
-      lastUpdated:
-          (data['lastUpdated'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      monthlyBreakdown: Map<String, double>.from(
-        data['monthlyBreakdown'] as Map<String, dynamic>? ?? {},
+      artistId: FirestoreUtils.safeStringDefault(data['artistId']),
+      totalEarnings: FirestoreUtils.safeDouble(data['totalEarnings']),
+      availableBalance: FirestoreUtils.safeDouble(data['availableBalance']),
+      pendingBalance: FirestoreUtils.safeDouble(data['pendingBalance']),
+      boostEarnings: FirestoreUtils.safeDouble(
+        data['boostEarnings'] ??
+            data['promotionSupportEarnings'] ??
+            data['giftEarnings'],
       ),
-      recentTransactions:
-          (data['recentTransactions'] as List<dynamic>?)
+      sponsorshipEarnings: FirestoreUtils.safeDouble(data['sponsorshipEarnings']),
+      commissionEarnings: FirestoreUtils.safeDouble(data['commissionEarnings']),
+      subscriptionEarnings: FirestoreUtils.safeDouble(data['subscriptionEarnings']),
+      artworkSalesEarnings: FirestoreUtils.safeDouble(data['artworkSalesEarnings']),
+      lastUpdated: FirestoreUtils.safeDateTime(data['lastUpdated']),
+      monthlyBreakdown: (data['monthlyBreakdown'] as Map?)?.map(
+            (key, value) => MapEntry(
+              FirestoreUtils.safeStringDefault(key),
+              FirestoreUtils.safeDouble(value),
+            ),
+          ) ??
+          {},
+      recentTransactions: (data['recentTransactions'] as List<dynamic>?)
               ?.map(
                 (t) => EarningsTransaction.fromMap(t as Map<String, dynamic>),
               )
@@ -143,36 +141,32 @@ class EarningsTransaction {
 
   factory EarningsTransaction.fromMap(Map<String, dynamic> data) {
     return EarningsTransaction(
-      id: data['id'] as String? ?? '',
-      artistId: data['artistId'] as String? ?? '',
-      type: data['type'] as String? ?? '',
-      amount: (data['amount'] as num?)?.toDouble() ?? 0.0,
-      fromUserId: data['fromUserId'] as String? ?? '',
-      fromUserName: data['fromUserName'] as String? ?? '',
-      timestamp: (data['timestamp'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      status: data['status'] as String? ?? 'pending',
-      description: data['description'] as String? ?? '',
-      metadata: Map<String, dynamic>.from(
-        data['metadata'] as Map<String, dynamic>? ?? {},
-      ),
+      id: FirestoreUtils.safeStringDefault(data['id']),
+      artistId: FirestoreUtils.safeStringDefault(data['artistId']),
+      type: FirestoreUtils.safeStringDefault(data['type']),
+      amount: FirestoreUtils.safeDouble(data['amount']),
+      fromUserId: FirestoreUtils.safeStringDefault(data['fromUserId']),
+      fromUserName: FirestoreUtils.safeStringDefault(data['fromUserName']),
+      timestamp: FirestoreUtils.safeDateTime(data['timestamp']),
+      status: FirestoreUtils.safeStringDefault(data['status'], 'pending'),
+      description: FirestoreUtils.safeStringDefault(data['description']),
+      metadata: Map<String, dynamic>.from(data['metadata'] as Map? ?? {}),
     );
   }
 
   factory EarningsTransaction.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+    final data = doc.data() as Map<String, dynamic>? ?? {};
     return EarningsTransaction(
       id: doc.id,
-      artistId: data['artistId'] as String? ?? '',
-      type: data['type'] as String? ?? '',
-      amount: (data['amount'] as num?)?.toDouble() ?? 0.0,
-      fromUserId: data['fromUserId'] as String? ?? '',
-      fromUserName: data['fromUserName'] as String? ?? '',
-      timestamp: (data['timestamp'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      status: data['status'] as String? ?? 'pending',
-      description: data['description'] as String? ?? '',
-      metadata: Map<String, dynamic>.from(
-        data['metadata'] as Map<String, dynamic>? ?? {},
-      ),
+      artistId: FirestoreUtils.safeStringDefault(data['artistId']),
+      type: FirestoreUtils.safeStringDefault(data['type']),
+      amount: FirestoreUtils.safeDouble(data['amount']),
+      fromUserId: FirestoreUtils.safeStringDefault(data['fromUserId']),
+      fromUserName: FirestoreUtils.safeStringDefault(data['fromUserName']),
+      timestamp: FirestoreUtils.safeDateTime(data['timestamp']),
+      status: FirestoreUtils.safeStringDefault(data['status'], 'pending'),
+      description: FirestoreUtils.safeStringDefault(data['description']),
+      metadata: Map<String, dynamic>.from(data['metadata'] as Map? ?? {}),
     );
   }
 

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 import 'dart:math' as math;
+import 'package:artbeat_core/artbeat_core.dart' show FirestoreUtils;
 
 /// Represents a cluster of art pieces at similar locations
 class ArtLocationCluster extends Equatable {
@@ -83,20 +84,29 @@ class ArtLocationCluster extends Equatable {
 
   /// Create from Firestore document
   factory ArtLocationCluster.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+    final data = doc.data() as Map<String, dynamic>? ?? {};
 
     return ArtLocationCluster(
       id: doc.id,
-      location: data['location'] as GeoPoint,
-      artPieceIds: List<String>.from(data['artPieceIds'] as List? ?? []),
-      primaryArtId: data['primaryArtId'] as String? ?? '',
-      radius: (data['radius'] as num? ?? 50.0).toDouble(),
-      contributorCount: data['contributorCount'] as int? ?? 0,
-      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      artPieceVotes: Map<String, int>.from(data['artPieceVotes'] as Map? ?? {}),
+      location: data['location'] as GeoPoint? ?? const GeoPoint(0, 0),
+      artPieceIds: (data['artPieceIds'] as List<dynamic>?)
+              ?.map((e) => FirestoreUtils.safeStringDefault(e))
+              .toList() ??
+          [],
+      primaryArtId: FirestoreUtils.safeStringDefault(data['primaryArtId']),
+      radius: FirestoreUtils.safeDouble(data['radius'], 50.0),
+      contributorCount: FirestoreUtils.safeInt(data['contributorCount']),
+      createdAt: FirestoreUtils.safeDateTime(data['createdAt']),
+      updatedAt: FirestoreUtils.safeDateTime(data['updatedAt']),
+      artPieceVotes: (data['artPieceVotes'] as Map?)?.map(
+            (key, value) => MapEntry(
+              FirestoreUtils.safeStringDefault(key),
+              FirestoreUtils.safeInt(value),
+            ),
+          ) ??
+          {},
       status: ClusterStatus.values.firstWhere(
-        (e) => e.name == data['status'],
+        (e) => e.name == FirestoreUtils.safeString(data['status']),
         orElse: () => ClusterStatus.active,
       ),
     );

@@ -213,7 +213,16 @@ class _ArtBattleScreenState extends State<ArtBattleScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(
+            'Art Battle',
+            style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w900),
+          ),
+          backgroundColor: const Color(0xFF07060F),
+        ),
+        body: const Center(child: CircularProgressIndicator()),
+      );
     }
 
     if (_currentMatch == null || _artworkA == null || _artworkB == null) {
@@ -229,8 +238,31 @@ class _ArtBattleScreenState extends State<ArtBattleScreen> {
         children: [
           const _WorldBackground(),
           SafeArea(
-            child: Column(
-              children: [
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onHorizontalDragEnd: (details) {
+                if (details.primaryVelocity == null) return;
+
+                // Threshold for swipe sensitivity
+                const threshold = 400.0;
+                if (details.primaryVelocity!.abs() < threshold) return;
+
+                if (details.primaryVelocity! < 0) {
+                  // Swipe Left -> Choose Left Artwork
+                  if (_artworkA != null) {
+                    debugPrint('[ArtBattle] Swipe Left detected - Choosing Artwork A');
+                    _submitVote(_artworkA!.id);
+                  }
+                } else {
+                  // Swipe Right -> Choose Right Artwork
+                  if (_artworkB != null) {
+                    debugPrint('[ArtBattle] Swipe Right detected - Choosing Artwork B');
+                    _submitVote(_artworkB!.id);
+                  }
+                }
+              },
+              child: Column(
+                children: [
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -314,7 +346,7 @@ class _ArtBattleScreenState extends State<ArtBattleScreen> {
               ],
             ),
           ),
-        ],
+      )],
       ),
     );
   }
@@ -344,25 +376,14 @@ class _ArtworkCard extends StatelessWidget {
             Container(color: const Color(0xFF07060F)),
             SecureNetworkImage(
               imageUrl: artwork.imageUrl,
-              fit: BoxFit.cover,
+              fit: BoxFit.contain,
               enableThumbnailFallback: true,
               placeholder: const Center(child: CircularProgressIndicator()),
               errorWidget: const Center(
                 child: Icon(Icons.error, color: Colors.white),
               ),
             ),
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.topCenter,
-                  colors: [
-                    Colors.black.withValues(alpha: 0.55),
-                    Colors.black.withValues(alpha: 0.1),
-                  ],
-                ),
-              ),
-            ),
+            // Removed shade as per user feedback
             Positioned(top: 12, left: 12, child: _LabelChip(text: label)),
             Positioned(
               left: 16,
@@ -381,7 +402,7 @@ class _ArtworkCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        'Tap to choose',
+                        'Tap or Swipe to choose',
                         style: GoogleFonts.spaceGrotesk(
                           color: Colors.white.withValues(alpha: 0.92),
                           fontWeight: FontWeight.w800,

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:artbeat_core/artbeat_core.dart' show FirestoreUtils;
 
 class CommentModel {
   final String id;
@@ -24,17 +25,19 @@ class CommentModel {
   });
 
   factory CommentModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+    final data = doc.data() as Map<String, dynamic>? ?? {};
     return CommentModel(
       id: doc.id,
-      postId: data['postId'] as String? ?? '',
-      userId: data['userId'] as String? ?? '',
-      content: data['content'] as String? ?? '',
-      parentCommentId: data['parentCommentId'] as String? ?? '',
-      type: data['type'] as String? ?? 'Appreciation',
-      createdAt: data['createdAt'] as Timestamp? ?? Timestamp.now(),
-      userName: data['userName'] as String? ?? '',
-      userAvatarUrl: data['userAvatarUrl'] as String? ?? '',
+      postId: FirestoreUtils.safeStringDefault(data['postId']),
+      userId: FirestoreUtils.safeStringDefault(data['userId']),
+      content: FirestoreUtils.safeStringDefault(data['content']),
+      parentCommentId: FirestoreUtils.safeStringDefault(data['parentCommentId']),
+      type: FirestoreUtils.safeStringDefault(data['type'], 'Appreciation'),
+      createdAt: data['createdAt'] is Timestamp
+          ? data['createdAt'] as Timestamp
+          : Timestamp.fromDate(FirestoreUtils.safeDateTime(data['createdAt'])),
+      userName: FirestoreUtils.safeStringDefault(data['userName']),
+      userAvatarUrl: FirestoreUtils.safeStringDefault(data['userAvatarUrl']),
     );
   }
 }

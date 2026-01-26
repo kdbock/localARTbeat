@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:artbeat_core/artbeat_core.dart';
 
 /// Model for profile connections (mutual friends, suggestions, etc.)
 class ProfileConnectionModel {
@@ -38,27 +39,22 @@ class ProfileConnectionModel {
   });
 
   factory ProfileConnectionModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+    final data = doc.data() as Map<String, dynamic>? ?? {};
     return ProfileConnectionModel(
       id: doc.id,
-      userId: data['userId'] as String,
-      connectedUserId: data['connectedUserId'] as String,
-      connectedUserName: data['connectedUserName'] as String,
-      connectedUserAvatar: data['connectedUserAvatar'] as String?,
-      connectionType: data['connectionType'] as String,
-      mutualFollowersCount:
-          (data['mutualFollowersCount'] as num?)?.toInt() ?? 0,
-      mutualFollowerIds: List<String>.from(
-        (data['mutualFollowerIds'] as List<dynamic>?) ?? [],
-      ),
-      connectionScore: (data['connectionScore'] as num?)?.toDouble() ?? 0.0,
-      connectionReason: data['connectionReason'] as Map<String, dynamic>?,
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
-      lastInteraction: data['lastInteraction'] != null
-          ? (data['lastInteraction'] as Timestamp).toDate()
-          : null,
-      isBlocked: (data['isBlocked'] as bool?) ?? false,
-      isDismissed: (data['isDismissed'] as bool?) ?? false,
+      userId: FirestoreUtils.getString(data, 'userId'),
+      connectedUserId: FirestoreUtils.getString(data, 'connectedUserId'),
+      connectedUserName: FirestoreUtils.getString(data, 'connectedUserName'),
+      connectedUserAvatar: FirestoreUtils.getOptionalString(data, 'connectedUserAvatar'),
+      connectionType: FirestoreUtils.getString(data, 'connectionType'),
+      mutualFollowersCount: FirestoreUtils.getInt(data, 'mutualFollowersCount'),
+      mutualFollowerIds: FirestoreUtils.getStringList(data, 'mutualFollowerIds'),
+      connectionScore: FirestoreUtils.getDouble(data, 'connectionScore'),
+      connectionReason: FirestoreUtils.getOptionalMap(data, 'connectionReason'),
+      createdAt: FirestoreUtils.getDateTime(data, 'createdAt'),
+      lastInteraction: FirestoreUtils.getOptionalDateTime(data, 'lastInteraction'),
+      isBlocked: FirestoreUtils.getBool(data, 'isBlocked'),
+      isDismissed: FirestoreUtils.getBool(data, 'isDismissed'),
     );
   }
 

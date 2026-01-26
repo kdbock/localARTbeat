@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:artbeat_core/artbeat_core.dart' show FirestoreUtils;
 
 /// Enum representing different categories of weekly goals
 enum WeeklyGoalCategory {
@@ -53,30 +54,32 @@ class WeeklyGoalModel {
   /// Create WeeklyGoalModel from Firestore document
   factory WeeklyGoalModel.fromMap(Map<String, dynamic> map) {
     return WeeklyGoalModel(
-      id: map['id'] as String? ?? '',
-      userId: map['userId'] as String? ?? '',
-      title: map['title'] as String? ?? '',
-      description: map['description'] as String? ?? '',
+      id: FirestoreUtils.safeStringDefault(map['id']),
+      userId: FirestoreUtils.safeStringDefault(map['userId']),
+      title: FirestoreUtils.safeStringDefault(map['title']),
+      description: FirestoreUtils.safeStringDefault(map['description']),
       category: WeeklyGoalCategory.values.firstWhere(
-        (e) => e.toString() == 'WeeklyGoalCategory.${map['category']}',
+        (e) => e.toString() == 'WeeklyGoalCategory.${FirestoreUtils.safeString(map['category'])}',
         orElse: () => WeeklyGoalCategory.exploration,
       ),
-      targetCount: map['targetCount'] as int? ?? 0,
-      currentCount: map['currentCount'] as int? ?? 0,
-      rewardXP: map['rewardXP'] as int? ?? 0,
-      rewardDescription: map['rewardDescription'] as String? ?? '',
-      isCompleted: map['isCompleted'] as bool? ?? false,
-      createdAt: (map['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      expiresAt:
-          (map['expiresAt'] as Timestamp?)?.toDate() ??
-          DateTime.now().add(const Duration(days: 7)),
-      completedAt: (map['completedAt'] as Timestamp?)?.toDate(),
-      weekNumber: map['weekNumber'] as int? ?? 1,
-      year: map['year'] as int? ?? DateTime.now().year,
-      iconEmoji: map['iconEmoji'] as String?,
-      milestones:
-          (map['milestones'] as List<dynamic>?)
-              ?.map((e) => e.toString())
+      targetCount: FirestoreUtils.safeInt(map['targetCount']),
+      currentCount: FirestoreUtils.safeInt(map['currentCount']),
+      rewardXP: FirestoreUtils.safeInt(map['rewardXP']),
+      rewardDescription: FirestoreUtils.safeStringDefault(map['rewardDescription']),
+      isCompleted: FirestoreUtils.safeBool(map['isCompleted'], false),
+      createdAt: FirestoreUtils.safeDateTime(map['createdAt']),
+      expiresAt: FirestoreUtils.safeDateTime(
+        map['expiresAt'],
+        DateTime.now().add(const Duration(days: 7)),
+      ),
+      completedAt: map['completedAt'] != null
+          ? FirestoreUtils.safeDateTime(map['completedAt'])
+          : null,
+      weekNumber: FirestoreUtils.safeInt(map['weekNumber'], 1),
+      year: FirestoreUtils.safeInt(map['year'], DateTime.now().year),
+      iconEmoji: FirestoreUtils.safeString(map['iconEmoji']),
+      milestones: (map['milestones'] as List<dynamic>?)
+              ?.map((e) => FirestoreUtils.safeStringDefault(e))
               .toList() ??
           [],
     );

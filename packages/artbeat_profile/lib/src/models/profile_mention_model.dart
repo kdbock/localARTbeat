@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:artbeat_core/artbeat_core.dart';
 
 /// Model for tracking where a user has been mentioned
 class ProfileMentionModel {
@@ -33,21 +34,21 @@ class ProfileMentionModel {
   });
 
   factory ProfileMentionModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+    final data = doc.data() as Map<String, dynamic>? ?? {};
     return ProfileMentionModel(
       id: doc.id,
-      userId: data['userId'] as String,
-      mentionedByUserId: data['mentionedByUserId'] as String,
-      mentionedByUserName: data['mentionedByUserName'] as String,
-      mentionedByUserAvatar: data['mentionedByUserAvatar'] as String?,
-      mentionType: data['mentionType'] as String,
-      contextId: data['contextId'] as String,
-      contextTitle: data['contextTitle'] as String?,
-      contextPreview: data['contextPreview'] as String?,
-      contextImageUrl: data['contextImageUrl'] as String?,
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
-      isRead: (data['isRead'] as bool?) ?? false,
-      isDeleted: (data['isDeleted'] as bool?) ?? false,
+      userId: FirestoreUtils.getString(data, 'userId'),
+      mentionedByUserId: FirestoreUtils.getString(data, 'mentionedByUserId'),
+      mentionedByUserName: FirestoreUtils.getString(data, 'mentionedByUserName'),
+      mentionedByUserAvatar: FirestoreUtils.getOptionalString(data, 'mentionedByUserAvatar'),
+      mentionType: FirestoreUtils.getString(data, 'mentionType'),
+      contextId: FirestoreUtils.getString(data, 'contextId'),
+      contextTitle: FirestoreUtils.getOptionalString(data, 'contextTitle'),
+      contextPreview: FirestoreUtils.getOptionalString(data, 'contextPreview'),
+      contextImageUrl: FirestoreUtils.getOptionalString(data, 'contextImageUrl'),
+      createdAt: FirestoreUtils.getDateTime(data, 'createdAt'),
+      isRead: FirestoreUtils.getBool(data, 'isRead'),
+      isDeleted: FirestoreUtils.getBool(data, 'isDeleted'),
     );
   }
 

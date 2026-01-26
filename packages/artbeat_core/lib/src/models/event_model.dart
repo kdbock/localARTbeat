@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../utils/firestore_utils.dart';
 
 /// Model representing an event in the ARTbeat app
 class EventModel {
@@ -43,9 +44,10 @@ class EventModel {
   factory EventModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>? ?? {};
 
-    String? _firstNonEmpty(List<String?> values) {
+    String? _firstNonEmpty(List<dynamic> values) {
       for (final value in values) {
-        final trimmed = value?.trim();
+        final stringValue = FirestoreUtils.safeString(value);
+        final trimmed = stringValue?.trim();
         if (trimmed != null && trimmed.isNotEmpty) {
           return trimmed;
         }
@@ -53,46 +55,41 @@ class EventModel {
       return null;
     }
 
-    final galleryImages =
-        (data['imageUrls'] as List?)
-            ?.whereType<String>()
-            .map((url) => url.trim())
-            .where((url) => url.isNotEmpty)
-            .toList() ??
-        [];
+    final galleryImages = (data['imageUrls'] as List?) ?? [];
 
     final resolvedImageUrl = _firstNonEmpty([
-      data['imageUrl'] as String?,
-      data['eventBannerUrl'] as String?,
-      data['eventCoverUrl'] as String?,
+      data['imageUrl'],
+      data['eventBannerUrl'],
+      data['eventCoverUrl'],
       galleryImages.isNotEmpty ? galleryImages.first : null,
     ]);
 
     final resolvedArtistImageUrl = _firstNonEmpty([
-      data['artistProfileImageUrl'] as String?,
-      data['artistHeadshotUrl'] as String?,
-      data['artistAvatarUrl'] as String?,
+      data['artistProfileImageUrl'],
+      data['artistHeadshotUrl'],
+      data['artistAvatarUrl'],
     ]);
 
     return EventModel(
       id: doc.id,
-      title: data['title'] as String? ?? '',
-      description: data['description'] as String? ?? '',
-      startDate:
-          (data['startDate'] as Timestamp?)?.toDate() ??
-          (data['dateTime'] as Timestamp?)?.toDate() ??
-          DateTime.now(),
-      endDate: (data['endDate'] as Timestamp?)?.toDate(),
-      location: data['location'] as String? ?? '',
+      title: FirestoreUtils.safeStringDefault(data['title']),
+      description: FirestoreUtils.safeStringDefault(data['description']),
+      startDate: FirestoreUtils.safeDateTime(data['startDate'] ?? data['dateTime']),
+      endDate: data['endDate'] != null
+          ? FirestoreUtils.safeDateTime(data['endDate'])
+          : null,
+      location: FirestoreUtils.safeStringDefault(data['location']),
       imageUrl: resolvedImageUrl,
       artistProfileImageUrl: resolvedArtistImageUrl,
-      artistId: data['artistId'] as String? ?? '',
-      isPublic: data['isPublic'] as bool? ?? true,
-      attendeeIds: List<String>.from(data['attendeeIds'] as List? ?? []),
-      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      contactEmail: data['contactEmail'] as String?,
-      price: (data['price'] as num?)?.toDouble(),
+      artistId: FirestoreUtils.safeStringDefault(data['artistId']),
+      isPublic: FirestoreUtils.safeBool(data['isPublic'], true),
+      attendeeIds: (data['attendeeIds'] as List? ?? [])
+          .map((e) => FirestoreUtils.safeStringDefault(e))
+          .toList(),
+      createdAt: FirestoreUtils.safeDateTime(data['createdAt']),
+      updatedAt: FirestoreUtils.safeDateTime(data['updatedAt']),
+      contactEmail: FirestoreUtils.safeString(data['contactEmail']),
+      price: FirestoreUtils.safeDouble(data['price']),
     );
   }
 

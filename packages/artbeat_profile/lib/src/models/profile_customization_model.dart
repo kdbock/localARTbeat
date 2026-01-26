@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:artbeat_core/artbeat_core.dart';
 
 /// Model for profile customization settings
 class ProfileCustomizationModel {
@@ -33,23 +34,23 @@ class ProfileCustomizationModel {
   });
 
   factory ProfileCustomizationModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+    final data = doc.data() as Map<String, dynamic>? ?? {};
     return ProfileCustomizationModel(
       userId: doc.id,
-      selectedTheme: data['selectedTheme'] as String?,
-      primaryColor: data['primaryColor'] as String?,
-      secondaryColor: data['secondaryColor'] as String?,
-      coverPhotoUrl: data['coverPhotoUrl'] as String?,
-      showBio: (data['showBio'] as bool?) ?? true,
-      showLocation: (data['showLocation'] as bool?) ?? true,
-      showAchievements: (data['showAchievements'] as bool?) ?? true,
-      showActivity: (data['showActivity'] as bool?) ?? true,
-      layoutStyle: data['layoutStyle'] as String?,
+      selectedTheme: FirestoreUtils.getOptionalString(data, 'selectedTheme'),
+      primaryColor: FirestoreUtils.getOptionalString(data, 'primaryColor'),
+      secondaryColor: FirestoreUtils.getOptionalString(data, 'secondaryColor'),
+      coverPhotoUrl: FirestoreUtils.getOptionalString(data, 'coverPhotoUrl'),
+      showBio: FirestoreUtils.getBool(data, 'showBio', true),
+      showLocation: FirestoreUtils.getBool(data, 'showLocation', true),
+      showAchievements: FirestoreUtils.getBool(data, 'showAchievements', true),
+      showActivity: FirestoreUtils.getBool(data, 'showActivity', true),
+      layoutStyle: FirestoreUtils.getOptionalString(data, 'layoutStyle'),
       visibilitySettings: Map<String, bool>.from(
-        (data['visibilitySettings'] as Map<String, dynamic>?) ?? {},
+        FirestoreUtils.getOptionalMap(data, 'visibilitySettings') ?? {},
       ),
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
-      updatedAt: (data['updatedAt'] as Timestamp).toDate(),
+      createdAt: FirestoreUtils.getDateTime(data, 'createdAt'),
+      updatedAt: FirestoreUtils.getDateTime(data, 'updatedAt'),
     );
   }
 

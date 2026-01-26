@@ -39,9 +39,18 @@ class SocialActivity {
 
   factory SocialActivity.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
+    
+    // Helper to safely get String from potentially DocumentReference
+    String? safeId(dynamic val) {
+      if (val == null) return null;
+      if (val is String) return val;
+      if (val is DocumentReference) return val.id;
+      return val.toString();
+    }
+
     return SocialActivity(
       id: doc.id,
-      userId: data['userId'] as String? ?? '',
+      userId: safeId(data['userId']) ?? '',
       userName: data['userName'] as String? ?? 'Anonymous',
       userAvatar: data['userAvatar'] as String?,
       type: SocialActivityType.values.firstWhere(
@@ -123,18 +132,24 @@ class SocialService {
       final lat = userPosition.latitude;
       final latDelta = radiusKm / 111.0; // ~111km per degree latitude
 
+      // To avoid Firestore's inequality filter constraints and potential crashes,
+      // we pull the most recent activities and filter by location in-memory.
       final query = _activities
-          .where('location.latitude', isGreaterThanOrEqualTo: lat - latDelta)
-          .where('location.latitude', isLessThanOrEqualTo: lat + latDelta)
           .orderBy('timestamp', descending: true)
-          .limit(limit);
+          .limit(limit * 10); // Pull more to increase chances of finding nearby ones
 
       final snapshot = await query.get();
       final activities = snapshot.docs
           .map((doc) => SocialActivity.fromFirestore(doc))
           .where((activity) {
-            // Additional filtering for longitude and exact distance
+            // Filter by bounding box in-memory
             if (activity.location == null) return false;
+            final activityLat = activity.location!.latitude;
+            if (activityLat < lat - latDelta || activityLat > lat + latDelta) {
+              return false;
+            }
+
+            // Additional filtering for exact distance
             final distance = Geolocator.distanceBetween(
               userPosition.latitude,
               userPosition.longitude,
@@ -153,31 +168,67 @@ class SocialService {
     }
   }
 
-  /// Get activities from friends
   Future<List<SocialActivity>> getFriendsActivities({
     required List<String> friendIds,
     int limit = 10,
   }) async {
     if (friendIds.isEmpty) return [];
 
+    final truncatedIds = friendIds.take(10).toList();
+
     try {
+      debugPrint('🔍 SocialService: getFriendsActivities for IDs: $truncatedIds');
+      
       final query = _activities
           .where(
             'userId',
-            whereIn: friendIds.take(10).toList(),
-          ) // Firestore limit
+            whereIn: truncatedIds,
+          )
           .orderBy('timestamp', descending: true)
           .limit(limit);
 
       final snapshot = await query.get();
-      final activities = snapshot.docs
-          .map((doc) => SocialActivity.fromFirestore(doc))
-          .toList();
+      
+      final activities = snapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        // Log if we see a Reference in userId
+        if (data['userId'] is! String && data['userId'] != null) {
+          debugPrint('⚠️ SocialService: Found non-string userId in socialActivities doc ${doc.id}: ${data['userId'].runtimeType}');
+        }
+        return SocialActivity.fromFirestore(doc);
+      }).toList();
 
-      AppLogger.error('Loaded ${activities.length} friends activities');
+      AppLogger.debug('Loaded ${activities.length} friends activities');
       return activities;
     } catch (e) {
       AppLogger.error('Error loading friends activities: $e');
+      
+      // If it's the ParseExpectedReferenceValue error, try to diagnose or fallback
+      if (e.toString().contains('ParseExpectedReferenceValue')) {
+        AppLogger.warning('🔍 Detected ParseExpectedReferenceValue in getFriendsActivities. Field "userId" may contain DocumentReferences.');
+        
+        // Fallback: get recent activities and filter in-memory if query fails
+        try {
+          final fallbackQuery = _activities
+              .orderBy('timestamp', descending: true)
+              .limit(limit * 5);
+          
+          final snapshot = await fallbackQuery.get();
+          final friendsSet = truncatedIds.toSet();
+          
+          final activities = snapshot.docs
+              .map((doc) => SocialActivity.fromFirestore(doc))
+              .where((activity) => friendsSet.contains(activity.userId))
+              .take(limit)
+              .toList();
+              
+          AppLogger.info('✅ Fallback loaded ${activities.length} friends activities via in-memory filter');
+          return activities;
+        } catch (fallbackError) {
+          AppLogger.error('❌ Fallback also failed: $fallbackError');
+        }
+      }
+      
       return [];
     }
   }
@@ -202,9 +253,14 @@ class SocialService {
         '🔍 SocialService: Query returned ${snapshot.docs.length} documents',
       );
 
-      final activities = snapshot.docs
-          .map((doc) => SocialActivity.fromFirestore(doc))
-          .toList();
+      final activities = snapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        // Defensive type check
+        if (data['userId'] is! String && data['userId'] != null) {
+          debugPrint('⚠️ SocialService: Found non-string userId in socialActivities doc ${doc.id}: ${data['userId'].runtimeType}');
+        }
+        return SocialActivity.fromFirestore(doc);
+      }).toList();
 
       debugPrint(
         '🔍 SocialService: Converted to ${activities.length} activities',
@@ -222,6 +278,25 @@ class SocialService {
     } catch (e) {
       debugPrint('🔍 SocialService: Error loading user activities: $e');
       AppLogger.error('Error loading user activities: $e');
+      
+      // Fallback for ParseExpectedReferenceValue
+      if (e.toString().contains('ParseExpectedReferenceValue')) {
+         AppLogger.warning('🔍 Detected ParseExpectedReferenceValue in getUserActivities. Field "userId" may contain DocumentReferences.');
+         
+         // Fallback: search by recent and filter
+         try {
+           final fallbackQuery = _activities
+              .orderBy('timestamp', descending: true)
+              .limit(limit * 5);
+           final snapshot = await fallbackQuery.get();
+           final activities = snapshot.docs
+              .map((doc) => SocialActivity.fromFirestore(doc))
+              .where((activity) => activity.userId == userId)
+              .take(limit)
+              .toList();
+           return activities;
+         } catch (_) {}
+      }
       return [];
     }
   }
@@ -242,9 +317,14 @@ class SocialService {
         '🔍 SocialService: Query returned ${snapshot.docs.length} documents',
       );
 
-      final activities = snapshot.docs
-          .map((doc) => SocialActivity.fromFirestore(doc))
-          .toList();
+      final activities = snapshot.docs.map((doc) {
+        try {
+          return SocialActivity.fromFirestore(doc);
+        } catch (e) {
+          AppLogger.error('Error parsing social activity ${doc.id}: $e');
+          return null;
+        }
+      }).whereType<SocialActivity>().toList();
 
       debugPrint(
         '🔍 SocialService: Converted to ${activities.length} recent activities',
@@ -337,13 +417,11 @@ class SocialService {
       );
 
       final lat = userPosition.latitude;
-      final latDelta = radiusKm / 111.0;
-
+      // To avoid multiple inequality filters (lastSeen and location.latitude),
+      // we filter by activity in Firestore and by location in-memory.
       final query = _userPresence
           .where('isActive', isEqualTo: true)
-          .where('lastSeen', isGreaterThan: thirtyMinutesAgo)
-          .where('location.latitude', isGreaterThanOrEqualTo: lat - latDelta)
-          .where('location.latitude', isLessThanOrEqualTo: lat + latDelta);
+          .where('lastSeen', isGreaterThan: thirtyMinutesAgo);
 
       final snapshot = await query.get();
 

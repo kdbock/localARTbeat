@@ -233,9 +233,14 @@ class ArtCommunityService extends ChangeNotifier {
         .limit(50)
         .snapshots()
         .listen((snapshot) {
-          _feedCache = snapshot.docs
-              .map((doc) => ArtPost.fromFirestore(doc))
-              .toList();
+          _feedCache = snapshot.docs.map((doc) {
+            try {
+              return ArtPost.fromFirestore(doc);
+            } catch (e) {
+              AppLogger.error('Error parsing feed post ${doc.id}: $e');
+              return null;
+            }
+          }).whereType<ArtPost>().toList();
           _feedController.add(_feedCache);
         });
 
@@ -245,9 +250,14 @@ class ArtCommunityService extends ChangeNotifier {
         .where('userType', isEqualTo: 'artist')
         .snapshots()
         .listen((snapshot) async {
-          final artists = snapshot.docs
-              .map((doc) => ArtistProfile.fromFirestore(doc))
-              .toList();
+          final artists = snapshot.docs.map((doc) {
+            try {
+              return ArtistProfile.fromFirestore(doc);
+            } catch (e) {
+              AppLogger.error('Error parsing artist profile ${doc.id}: $e');
+              return null;
+            }
+          }).whereType<ArtistProfile>().toList();
           _artistsRawCache = artists;
 
           _artistSortDebounce?.cancel();
@@ -405,10 +415,15 @@ class ArtCommunityService extends ChangeNotifier {
       final postIds = snapshot.docs.map((doc) => doc.id).toList();
       final likedPostIds = await _getLikedPostIds(postIds);
       final posts = snapshot.docs.map((doc) {
-        final post = PostModel.fromFirestore(doc);
-        final isLiked = likedPostIds.contains(post.id);
-        return post.copyWith(isLikedByCurrentUser: isLiked);
-      }).toList();
+        try {
+          final post = PostModel.fromFirestore(doc);
+          final isLiked = likedPostIds.contains(post.id);
+          return post.copyWith(isLikedByCurrentUser: isLiked);
+        } catch (e) {
+          AppLogger.error('Error parsing feed post ${doc.id}: $e');
+          return null;
+        }
+      }).whereType<PostModel>().toList();
 
       // Debug: Log the retrieved posts
       if (kDebugMode) {

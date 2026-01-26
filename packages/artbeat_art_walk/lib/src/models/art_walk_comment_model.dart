@@ -37,29 +37,27 @@ class ArtWalkCommentModel {
     DocumentSnapshot doc, {
     String? artWalkId,
   }) {
-    final data = doc.data() as Map<String, dynamic>;
-
-    // Handle server timestamps that might be null for new comments
-    final createdAt =
-        (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now();
+    final data = doc.data() as Map<String, dynamic>? ?? {};
 
     return ArtWalkCommentModel(
       id: doc.id,
-      artWalkId: artWalkId ?? data['artWalkId'] as String? ?? '',
-      userId: data['userId'] as String? ?? '',
-      userName: data['userName'] as String? ?? '',
-      userPhotoUrl: data['userPhotoUrl'] as String? ?? '',
-      content: data['content'] as String? ?? '',
-      createdAt: createdAt,
+      artWalkId: artWalkId ?? FirestoreUtils.safeStringDefault(data['artWalkId']),
+      userId: FirestoreUtils.safeStringDefault(data['userId']),
+      userName: FirestoreUtils.safeStringDefault(data['userName']),
+      userPhotoUrl: FirestoreUtils.safeStringDefault(data['userPhotoUrl']),
+      content: FirestoreUtils.safeStringDefault(data['content']),
+      createdAt: FirestoreUtils.safeDateTime(data['createdAt']),
       engagementStats: EngagementStats.fromMap(
         data['engagementStats'] as Map<String, dynamic>? ?? {},
       ),
-      parentCommentId: data['parentCommentId'] as String?,
-      isEdited: data['isEdited'] as bool? ?? false,
-      rating: (data['rating'] as num?)?.toDouble(),
-      mentionedUsers: data['mentionedUsers'] != null
-          ? List<String>.from(data['mentionedUsers'] as List<dynamic>)
+      parentCommentId: FirestoreUtils.safeString(data['parentCommentId']),
+      isEdited: FirestoreUtils.safeBool(data['isEdited'], false),
+      rating: data['rating'] != null
+          ? FirestoreUtils.safeDouble(data['rating'])
           : null,
+      mentionedUsers: (data['mentionedUsers'] as List<dynamic>?)
+          ?.map((e) => FirestoreUtils.safeStringDefault(e))
+          .toList(),
     );
   }
 

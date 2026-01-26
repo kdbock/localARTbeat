@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:artbeat_core/artbeat_core.dart' show FirestoreUtils;
 
 /// Simplified post model focused on art sharing
 class ArtPost {
@@ -40,19 +41,23 @@ class ArtPost {
 
     return ArtPost(
       id: doc.id,
-      userId: data['userId'] as String? ?? '',
-      userName: data['userName'] as String? ?? '',
-      userAvatarUrl: data['userAvatarUrl'] as String? ?? '',
-      content: data['content'] as String? ?? '',
-      imageUrls: List<String>.from(data['imageUrls'] as Iterable? ?? []),
-      tags: List<String>.from(data['tags'] as Iterable? ?? []),
-      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      likesCount: data['likesCount'] as int? ?? 0,
-      commentsCount: data['commentsCount'] as int? ?? 0,
-      reportCount: data['reportCount'] as int? ?? 0,
-      isArtistPost: data['isArtistPost'] as bool? ?? false,
-      isUserVerified: data['isUserVerified'] as bool? ?? false,
-      isLikedByCurrentUser: data['isLikedByCurrentUser'] as bool?,
+      userId: FirestoreUtils.safeStringDefault(data['userId']),
+      userName: FirestoreUtils.safeStringDefault(data['userName']),
+      userAvatarUrl: FirestoreUtils.safeStringDefault(data['userAvatarUrl']),
+      content: FirestoreUtils.safeStringDefault(data['content']),
+      imageUrls: (data['imageUrls'] as Iterable? ?? [])
+          .map((e) => e.toString())
+          .toList(),
+      tags: (data['tags'] as Iterable? ?? [])
+          .map((e) => e.toString())
+          .toList(),
+      createdAt: FirestoreUtils.safeDateTime(data['createdAt']),
+      likesCount: FirestoreUtils.safeInt(data['likesCount']),
+      commentsCount: FirestoreUtils.safeInt(data['commentsCount']),
+      reportCount: FirestoreUtils.safeInt(data['reportCount']),
+      isArtistPost: FirestoreUtils.safeBool(data['isArtistPost'], false),
+      isUserVerified: FirestoreUtils.safeBool(data['isUserVerified'], false),
+      isLikedByCurrentUser: FirestoreUtils.safeBool(data['isLikedByCurrentUser']),
     );
   }
 
@@ -154,61 +159,57 @@ class ArtistProfile {
 
     // Try both 'avatarUrl' and 'profileImageUrl' for avatar
     final String avatarUrl =
-        (data['avatarUrl'] as String?) ??
-        (data['profileImageUrl'] as String?) ??
-        (data['photoURL'] as String?) ??
-        '';
+        FirestoreUtils.safeStringDefault(data['avatarUrl'] ?? data['profileImageUrl'] ?? data['photoURL']);
 
     // Try multiple field names for portfolio images
     // First check for portfolioImages array
-    List<String> portfolioImages = List<String>.from(
-      data['portfolioImages'] as Iterable? ?? [],
-    );
+    List<String> portfolioImages = (data['portfolioImages'] as Iterable? ?? [])
+        .map((e) => e.toString())
+        .toList();
 
     // If empty, check for artworkImages array
     if (portfolioImages.isEmpty) {
-      portfolioImages = List<String>.from(
-        data['artworkImages'] as Iterable? ?? [],
-      );
+      portfolioImages = (data['artworkImages'] as Iterable? ?? [])
+          .map((e) => e.toString())
+          .toList();
     }
 
     // If still empty, check for coverImageUrl (single image)
     if (portfolioImages.isEmpty) {
-      final coverImageUrl = data['coverImageUrl'] as String?;
+      final coverImageUrl = FirestoreUtils.safeString(data['coverImageUrl']);
       if (coverImageUrl != null && coverImageUrl.isNotEmpty) {
         portfolioImages = [coverImageUrl];
       }
     }
 
     // Try multiple field names for specialties
-    final List<String> specialties =
-        List<String>.from(data['specialties'] as Iterable? ?? []).isNotEmpty
-        ? List<String>.from(data['specialties'] as Iterable? ?? [])
-        : List<String>.from(data['mediums'] as Iterable? ?? []);
+    List<String> specialties =
+        (data['specialties'] as Iterable? ?? []).map((e) => e.toString()).toList();
+    if (specialties.isEmpty) {
+      specialties = (data['mediums'] as Iterable? ?? []).map((e) => e.toString()).toList();
+    }
 
     return ArtistProfile(
-      userId: data['userId'] as String? ?? doc.id,
-      displayName:
-          data['displayName'] as String? ?? data['fullName'] as String? ?? '',
-      bio: data['bio'] as String? ?? '',
+      userId: FirestoreUtils.safeStringDefault(data['userId'], doc.id),
+      displayName: FirestoreUtils.safeStringDefault(data['displayName'] ?? data['fullName']),
+      bio: FirestoreUtils.safeStringDefault(data['bio']),
       avatarUrl: avatarUrl,
       specialties: specialties,
       portfolioImages: portfolioImages,
-      isVerified: data['isVerified'] as bool? ?? false,
-      followersCount: data['followersCount'] as int? ?? 0,
-      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      boostScore:
-          (data['boostScore'] as num?)?.toDouble() ??
-          (data['artistMomentum'] as num?)?.toDouble() ??
-          (data['momentum'] as num?)?.toDouble() ??
-          0.0,
-      lastBoostAt:
-          (data['lastBoostAt'] as Timestamp?)?.toDate() ??
-          (data['boostedAt'] as Timestamp?)?.toDate(),
-      boostStreakMonths: (data['boostStreakMonths'] as num?)?.toInt() ?? 0,
-      boostStreakUpdatedAt: (data['boostStreakUpdatedAt'] as Timestamp?)
-          ?.toDate(),
-      location: data['location'] as String? ?? data['zipCode'] as String?,
+      isVerified: FirestoreUtils.safeBool(data['isVerified'], false),
+      followersCount: FirestoreUtils.safeInt(data['followersCount']),
+      createdAt: FirestoreUtils.safeDateTime(data['createdAt']),
+      boostScore: FirestoreUtils.safeDouble(
+        data['boostScore'] ?? data['artistMomentum'] ?? data['momentum'],
+      ),
+      lastBoostAt: data['lastBoostAt'] != null || data['boostedAt'] != null
+          ? FirestoreUtils.safeDateTime(data['lastBoostAt'] ?? data['boostedAt'])
+          : null,
+      boostStreakMonths: FirestoreUtils.safeInt(data['boostStreakMonths']),
+      boostStreakUpdatedAt: data['boostStreakUpdatedAt'] != null
+          ? FirestoreUtils.safeDateTime(data['boostStreakUpdatedAt'])
+          : null,
+      location: FirestoreUtils.safeString(data['location'] ?? data['zipCode']),
     );
   }
 

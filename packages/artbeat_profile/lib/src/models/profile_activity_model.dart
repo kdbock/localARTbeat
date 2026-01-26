@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:artbeat_core/artbeat_core.dart';
 
 /// Model for profile activity tracking
 class ProfileActivityModel {
@@ -28,18 +29,18 @@ class ProfileActivityModel {
   });
 
   factory ProfileActivityModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+    final data = doc.data() as Map<String, dynamic>? ?? {};
     return ProfileActivityModel(
       id: doc.id,
-      userId: data['userId'] as String,
-      activityType: data['activityType'] as String,
-      targetUserId: data['targetUserId'] as String?,
-      targetUserName: data['targetUserName'] as String?,
-      targetUserAvatar: data['targetUserAvatar'] as String?,
-      description: data['description'] as String?,
-      metadata: data['metadata'] as Map<String, dynamic>?,
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
-      isRead: (data['isRead'] as bool?) ?? false,
+      userId: FirestoreUtils.getString(data, 'userId'),
+      activityType: FirestoreUtils.getString(data, 'activityType'),
+      targetUserId: FirestoreUtils.getOptionalString(data, 'targetUserId'),
+      targetUserName: FirestoreUtils.getOptionalString(data, 'targetUserName'),
+      targetUserAvatar: FirestoreUtils.getOptionalString(data, 'targetUserAvatar'),
+      description: FirestoreUtils.getOptionalString(data, 'description'),
+      metadata: FirestoreUtils.getOptionalMap(data, 'metadata'),
+      createdAt: FirestoreUtils.getDateTime(data, 'createdAt'),
+      isRead: FirestoreUtils.getBool(data, 'isRead'),
     );
   }
 

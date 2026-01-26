@@ -884,8 +884,8 @@ class _MyTicketsScreenState extends State<MyTicketsScreen>
       if (ticket.paymentId == null || ticket.amount == null) {
         throw Exception('Missing payment information for refund.');
       }
-      // This should be implemented in artbeat_core/services/payment_service.dart
-      await PaymentService.refundPayment(
+      // Request refund using the consolidated UnifiedPaymentService
+      await UnifiedPaymentService.instance.requestRefund(
         paymentId: ticket.paymentId!,
         amount: ticket.amount!,
         reason: 'User requested refund',

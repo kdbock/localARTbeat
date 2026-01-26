@@ -113,7 +113,7 @@ class ArtistLogger {
     Object? error,
   }) {
     final message =
-        'PaymentService: $operation${transactionId != null ? ' (ID: ${_sanitizeTransactionId(transactionId)})' : ''}';
+        'UnifiedPaymentService: $operation${transactionId != null ? ' (ID: ${_sanitizeTransactionId(transactionId)})' : ''}';
     if (error != null) {
       _logger.e(message, error: _sanitizeError(error));
     } else {

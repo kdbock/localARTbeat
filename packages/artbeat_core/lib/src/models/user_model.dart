@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'user_type.dart';
 import 'capture_model.dart';
 import 'engagement_model.dart';
+import '../utils/firestore_utils.dart';
 import '../utils/logger.dart';
 
 class UserModel {
@@ -64,35 +65,39 @@ class UserModel {
 
   // Factory constructor from Firestore document
   factory UserModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+    final data = doc.data() as Map<String, dynamic>? ?? {};
     return UserModel(
       id: doc.id,
-      email: data['email'] as String,
-      username: data['username'] as String? ?? '',
-      fullName:
-          data['fullName'] as String? ?? data['displayName'] as String? ?? '',
-      bio: data['bio'] as String? ?? '',
-      location: data['location'] as String? ?? '',
-      profileImageUrl: data['profileImageUrl'] as String? ?? '',
+      email: FirestoreUtils.safeStringDefault(data['email']),
+      username: FirestoreUtils.safeStringDefault(data['username']),
+      fullName: FirestoreUtils.safeStringDefault(
+        data['fullName'] ?? data['displayName'],
+      ),
+      bio: FirestoreUtils.safeStringDefault(data['bio']),
+      location: FirestoreUtils.safeStringDefault(data['location']),
+      profileImageUrl: FirestoreUtils.safeStringDefault(data['profileImageUrl']),
       engagementStats: EngagementStats.fromFirestore(
         data['engagementStats'] as Map<String, dynamic>? ?? {},
       ),
-      captures:
-          (data['captures'] as List<dynamic>?)
+      captures: (data['captures'] as List<dynamic>?)
               ?.map((e) => CaptureModel.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
-      posts:
-          (data['posts'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+      posts: (data['posts'] as List<dynamic>?)
+              ?.map((e) => FirestoreUtils.safeStringDefault(e))
+              .toList() ??
           [],
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
-      lastActive: (data['lastActive'] as Timestamp?)?.toDate(),
-      userType: data['userType'] as String?,
+      createdAt: FirestoreUtils.safeDateTime(data['createdAt']),
+      lastActive: data['lastActive'] != null
+          ? FirestoreUtils.safeDateTime(data['lastActive'])
+          : null,
+      userType: FirestoreUtils.safeString(data['userType']),
       preferences: data['preferences'] as Map<String, dynamic>?,
-      experiencePoints: data['experiencePoints'] as int? ?? 0,
-      level: data['level'] as int? ?? 1,
-      zipCode: data['zipCode'] as String?,
-      onboardingCompleted: data['onboardingCompleted'] as bool? ?? false,
+      experiencePoints: FirestoreUtils.safeInt(data['experiencePoints']),
+      level: FirestoreUtils.safeInt(data['level'], 1),
+      zipCode: FirestoreUtils.safeString(data['zipCode']),
+      onboardingCompleted:
+          FirestoreUtils.safeBool(data['onboardingCompleted'], false),
     );
   }
 
@@ -114,8 +119,8 @@ class UserModel {
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     // Debug logging for profile image URL resolution
-    final profileImageUrl = json['profileImageUrl'] as String?;
-    final photoUrl = json['photoUrl'] as String?;
+    final profileImageUrl = FirestoreUtils.safeString(json['profileImageUrl']);
+    final photoUrl = FirestoreUtils.safeString(json['photoUrl']);
     final finalImageUrl = profileImageUrl ?? photoUrl ?? '';
 
     // Only log in debug mode and when there are issues
@@ -124,12 +129,14 @@ class UserModel {
     }
 
     return UserModel(
-      id: json['id'] as String? ?? '',
-      email: json['email'] as String? ?? '',
-      username: json['username'] as String? ?? '',
-      fullName: json['fullName'] as String? ?? '',
-      bio: json['bio'] as String? ?? '',
-      location: json['location'] as String? ?? '',
+      id: FirestoreUtils.safeStringDefault(json['id']),
+      email: FirestoreUtils.safeStringDefault(json['email']),
+      username: FirestoreUtils.safeStringDefault(json['username']),
+      fullName: FirestoreUtils.safeStringDefault(
+        json['fullName'] ?? json['displayName'],
+      ),
+      bio: FirestoreUtils.safeStringDefault(json['bio']),
+      location: FirestoreUtils.safeStringDefault(json['location']),
       profileImageUrl: finalImageUrl,
       engagementStats: EngagementStats.fromFirestore(json),
       captures: (json['captures'] as List<dynamic>? ?? [])
@@ -137,16 +144,21 @@ class UserModel {
             (capture) => CaptureModel.fromJson(capture as Map<String, dynamic>),
           )
           .toList(),
-      posts: List<String>.from(json['posts'] as List<dynamic>? ?? []),
-      createdAt: (json['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      lastActive: (json['lastActive'] as Timestamp?)?.toDate(),
-      userType: json['userType'] as String?,
+      posts: (json['posts'] as List<dynamic>? ?? [])
+          .map((e) => FirestoreUtils.safeStringDefault(e))
+          .toList(),
+      createdAt: FirestoreUtils.safeDateTime(json['createdAt']),
+      lastActive: json['lastActive'] != null
+          ? FirestoreUtils.safeDateTime(json['lastActive'])
+          : null,
+      userType: FirestoreUtils.safeString(json['userType']),
       preferences: json['preferences'] as Map<String, dynamic>?,
-      experiencePoints: json['experiencePoints'] as int? ?? 0,
-      level: json['level'] as int? ?? 1,
-      zipCode: json['zipCode'] as String?,
-      onboardingCompleted: json['onboardingCompleted'] as bool? ?? false,
-      isVerified: json['isVerified'] as bool? ?? false,
+      experiencePoints: FirestoreUtils.safeInt(json['experiencePoints']),
+      level: FirestoreUtils.safeInt(json['level'], 1),
+      zipCode: FirestoreUtils.safeString(json['zipCode']),
+      onboardingCompleted:
+          FirestoreUtils.safeBool(json['onboardingCompleted'], false),
+      isVerified: FirestoreUtils.safeBool(json['isVerified'], false),
     );
   }
 
