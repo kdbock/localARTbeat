@@ -31,7 +31,9 @@ class CommentModel {
       postId: FirestoreUtils.safeStringDefault(data['postId']),
       userId: FirestoreUtils.safeStringDefault(data['userId']),
       content: FirestoreUtils.safeStringDefault(data['content']),
-      parentCommentId: FirestoreUtils.safeStringDefault(data['parentCommentId']),
+      parentCommentId: FirestoreUtils.safeStringDefault(
+        data['parentCommentId'],
+      ),
       type: FirestoreUtils.safeStringDefault(data['type'], 'Appreciation'),
       createdAt: data['createdAt'] is Timestamp
           ? data['createdAt'] as Timestamp

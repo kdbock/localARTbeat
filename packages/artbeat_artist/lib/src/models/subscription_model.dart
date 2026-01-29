@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:artbeat_core/artbeat_core.dart' show SubscriptionTier, FirestoreUtils;
+import 'package:artbeat_core/artbeat_core.dart'
+    show SubscriptionTier, FirestoreUtils;
 
 /// Model for artist and gallery subscriptions
 class SubscriptionModel {
@@ -63,7 +64,9 @@ class SubscriptionModel {
       endDate: map['endDate'] != null
           ? FirestoreUtils.safeDateTime(map['endDate'])
           : null,
-      stripeSubscriptionId: FirestoreUtils.safeString(map['stripeSubscriptionId']),
+      stripeSubscriptionId: FirestoreUtils.safeString(
+        map['stripeSubscriptionId'],
+      ),
       stripePriceId: FirestoreUtils.safeString(map['stripePriceId']),
       stripeCustomerId: FirestoreUtils.safeString(map['stripeCustomerId']),
       autoRenew: FirestoreUtils.safeBool(map['autoRenew'], false),

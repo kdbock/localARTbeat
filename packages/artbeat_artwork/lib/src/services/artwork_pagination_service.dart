@@ -52,8 +52,7 @@ class ArtworkPaginationService {
   }) async {
     try {
       Query query = _firestore
-          .collection('artworks')
-          .where('isPublic', isEqualTo: true)
+          .collection('artwork')
           .orderBy('createdAt', descending: true)
           .limit(_pageSize + 1); // Load one extra to check if more exists
 
@@ -103,8 +102,7 @@ class ArtworkPaginationService {
   }) async {
     try {
       Query query = _firestore
-          .collection('artworks')
-          .where('isPublic', isEqualTo: true)
+          .collection('artwork')
           .orderBy('engagementScore', descending: true)
           .orderBy('createdAt', descending: true)
           .limit(_pageSize + 1);
@@ -153,8 +151,7 @@ class ArtworkPaginationService {
   }) async {
     try {
       Query query = _firestore
-          .collection('artworks')
-          .where('isPublic', isEqualTo: true)
+          .collection('artwork')
           .where('isFeatured', isEqualTo: true)
           .orderBy('featuredDate', descending: true)
           .orderBy('createdAt', descending: true)
@@ -204,8 +201,7 @@ class ArtworkPaginationService {
   }) async {
     try {
       Query query = _firestore
-          .collection('artworks')
-          .where('isPublic', isEqualTo: true)
+          .collection('artwork')
           .orderBy('createdAt', descending: true)
           .limit(_pageSize + 1);
 
@@ -249,9 +245,8 @@ class ArtworkPaginationService {
   }) async {
     try {
       Query query = _firestore
-          .collection('artworks')
+          .collection('artwork')
           .where('userId', isEqualTo: artistId)
-          .where('isPublic', isEqualTo: true)
           .orderBy('createdAt', descending: true)
           .limit(_pageSize + 1);
 

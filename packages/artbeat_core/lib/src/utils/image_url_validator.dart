@@ -23,8 +23,18 @@ class ImageUrlValidator {
     }
 
     // Basic URL validation - should start with http:// or https://
-    return trimmedUrl.startsWith('http://') ||
-        trimmedUrl.startsWith('https://');
+    if (trimmedUrl.startsWith('http://') || trimmedUrl.startsWith('https://')) {
+      return true;
+    }
+
+    // Allow Firebase Storage and Google API URLs even if they don't look like standard URLs
+    if (trimmedUrl.contains('firebasestorage.googleapis.com') ||
+        trimmedUrl.contains('googleusercontent.com') ||
+        trimmedUrl.contains('lh3.googleusercontent.com')) {
+      return true;
+    }
+
+    return false;
   }
 
   /// Creates a safe NetworkImage with error handling

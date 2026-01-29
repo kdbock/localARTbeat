@@ -24,10 +24,10 @@ class RefundPolicy {
       fullRefundDeadline: Duration(
         hours: FirestoreUtils.safeInt(map['fullRefundDeadlineHours'], 24),
       ),
-      allowPartialRefunds:
-          FirestoreUtils.safeBool(map['allowPartialRefunds']),
-      partialRefundPercentage:
-          FirestoreUtils.safeDouble(map['partialRefundPercentage']),
+      allowPartialRefunds: FirestoreUtils.safeBool(map['allowPartialRefunds']),
+      partialRefundPercentage: FirestoreUtils.safeDouble(
+        map['partialRefundPercentage'],
+      ),
       terms: FirestoreUtils.safeStringDefault(
         map['terms'],
         'Full refund available up to 24 hours before event start time.',

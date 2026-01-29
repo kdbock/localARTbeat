@@ -69,7 +69,8 @@ class ArtWalkProgress extends Equatable {
       id: doc.id,
       userId: FirestoreUtils.safeStringDefault(data['userId']),
       artWalkId: FirestoreUtils.safeStringDefault(data['artWalkId']),
-      visitedArt: (data['visitedArt'] as List<dynamic>?)
+      visitedArt:
+          (data['visitedArt'] as List<dynamic>?)
               ?.map((item) => ArtVisit.fromMap(item as Map<String, dynamic>))
               .toList() ??
           [],

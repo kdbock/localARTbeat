@@ -222,7 +222,9 @@ class EngagementStats {
       followCount: FirestoreUtils.safeInt(
         data['followCount'] ?? data['connectCount'],
       ),
-      boostCount: FirestoreUtils.safeInt(data['boostCount'] ?? data['giftCount']),
+      boostCount: FirestoreUtils.safeInt(
+        data['boostCount'] ?? data['giftCount'],
+      ),
       sponsorCount: FirestoreUtils.safeInt(data['sponsorCount']),
       messageCount: FirestoreUtils.safeInt(data['messageCount']),
       commissionCount: FirestoreUtils.safeInt(data['commissionCount']),
@@ -244,7 +246,9 @@ class EngagementStats {
       rateCount: FirestoreUtils.safeInt(data['rateCount']),
       reviewCount: FirestoreUtils.safeInt(data['reviewCount']),
       followCount: FirestoreUtils.safeInt(data['followCount']),
-      boostCount: FirestoreUtils.safeInt(data['boostCount'] ?? data['giftCount']),
+      boostCount: FirestoreUtils.safeInt(
+        data['boostCount'] ?? data['giftCount'],
+      ),
       sponsorCount: FirestoreUtils.safeInt(data['sponsorCount']),
       messageCount: FirestoreUtils.safeInt(data['messageCount']),
       commissionCount: FirestoreUtils.safeInt(data['commissionCount']),

@@ -48,8 +48,10 @@ class ArtworkRatingModel {
       updatedAt: data['updatedAt'] is Timestamp
           ? data['updatedAt'] as Timestamp
           : Timestamp.fromDate(FirestoreUtils.safeDateTime(data['updatedAt'])),
-      isVerifiedPurchaser:
-          FirestoreUtils.safeBool(data['isVerifiedPurchaser'], false),
+      isVerifiedPurchaser: FirestoreUtils.safeBool(
+        data['isVerifiedPurchaser'],
+        false,
+      ),
       purchaseId: FirestoreUtils.safeString(data['purchaseId']),
     );
   }

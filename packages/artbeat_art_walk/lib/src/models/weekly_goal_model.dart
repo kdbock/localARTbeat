@@ -59,13 +59,17 @@ class WeeklyGoalModel {
       title: FirestoreUtils.safeStringDefault(map['title']),
       description: FirestoreUtils.safeStringDefault(map['description']),
       category: WeeklyGoalCategory.values.firstWhere(
-        (e) => e.toString() == 'WeeklyGoalCategory.${FirestoreUtils.safeString(map['category'])}',
+        (e) =>
+            e.toString() ==
+            'WeeklyGoalCategory.${FirestoreUtils.safeString(map['category'])}',
         orElse: () => WeeklyGoalCategory.exploration,
       ),
       targetCount: FirestoreUtils.safeInt(map['targetCount']),
       currentCount: FirestoreUtils.safeInt(map['currentCount']),
       rewardXP: FirestoreUtils.safeInt(map['rewardXP']),
-      rewardDescription: FirestoreUtils.safeStringDefault(map['rewardDescription']),
+      rewardDescription: FirestoreUtils.safeStringDefault(
+        map['rewardDescription'],
+      ),
       isCompleted: FirestoreUtils.safeBool(map['isCompleted'], false),
       createdAt: FirestoreUtils.safeDateTime(map['createdAt']),
       expiresAt: FirestoreUtils.safeDateTime(
@@ -78,7 +82,8 @@ class WeeklyGoalModel {
       weekNumber: FirestoreUtils.safeInt(map['weekNumber'], 1),
       year: FirestoreUtils.safeInt(map['year'], DateTime.now().year),
       iconEmoji: FirestoreUtils.safeString(map['iconEmoji']),
-      milestones: (map['milestones'] as List<dynamic>?)
+      milestones:
+          (map['milestones'] as List<dynamic>?)
               ?.map((e) => FirestoreUtils.safeStringDefault(e))
               .toList() ??
           [],

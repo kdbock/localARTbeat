@@ -74,7 +74,9 @@ class EventModel {
       id: doc.id,
       title: FirestoreUtils.safeStringDefault(data['title']),
       description: FirestoreUtils.safeStringDefault(data['description']),
-      startDate: FirestoreUtils.safeDateTime(data['startDate'] ?? data['dateTime']),
+      startDate: FirestoreUtils.safeDateTime(
+        data['startDate'] ?? data['dateTime'],
+      ),
       endDate: data['endDate'] != null
           ? FirestoreUtils.safeDateTime(data['endDate'])
           : null,

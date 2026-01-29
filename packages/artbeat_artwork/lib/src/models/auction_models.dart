@@ -65,8 +65,10 @@ class AuctionResultModel {
       artworkId: doc.id,
       winnerUserId: FirestoreUtils.safeString(data['winnerUserId']),
       finalPrice: FirestoreUtils.safeDouble(data['finalPrice']),
-      paymentStatus:
-          FirestoreUtils.safeStringDefault(data['paymentStatus'], 'pending'),
+      paymentStatus: FirestoreUtils.safeStringDefault(
+        data['paymentStatus'],
+        'pending',
+      ),
       paymentDeadline: data['paymentDeadline'] != null
           ? FirestoreUtils.safeDateTime(data['paymentDeadline'])
           : null,

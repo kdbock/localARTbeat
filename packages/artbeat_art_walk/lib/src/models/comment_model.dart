@@ -36,7 +36,8 @@ class CommentModel {
       parentCommentId: FirestoreUtils.safeString(json['parentCommentId']),
       createdAt: FirestoreUtils.safeDateTime(json['createdAt']),
       likeCount: FirestoreUtils.safeInt(json['likeCount']),
-      userLikes: (json['userLikes'] as List<dynamic>?)
+      userLikes:
+          (json['userLikes'] as List<dynamic>?)
               ?.map((e) => FirestoreUtils.safeStringDefault(e))
               .toList() ??
           [],

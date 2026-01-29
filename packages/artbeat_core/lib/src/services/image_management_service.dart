@@ -4,8 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'dart:collection';
-import 'dart:async' show Zone;
+import 'dart:async';
 import '../widgets/secure_network_image.dart';
 import '../utils/logger.dart';
 
@@ -19,8 +18,8 @@ class ImageManagementService {
 
   // Configuration constants
   static const int maxConcurrentLoads =
-      2; // Reduced from 3 to prevent buffer overflow
-  static const int maxCacheSize = 100; // MB
+      10; // Increased from 2 to prevent queue blocking
+  static const int maxCacheSize = 250; // MB
   static const int thumbnailSize = 300;
   static const int profileImageSize = 200;
   static const Duration cacheDuration = Duration(days: 7);
@@ -29,7 +28,7 @@ class ImageManagementService {
 
   // Active loading tracking
   int _activeLoads = 0;
-  final Queue<VoidCallback> _loadQueue = Queue<VoidCallback>();
+  final List<Completer<void>> _queue = [];
   final Set<String> _loadingUrls = <String>{};
   final Set<String> _loggedLargeImages = <String>{};
 
@@ -69,13 +68,18 @@ class ImageManagementService {
     }
 
     AppLogger.info('🖼️ ImageManagementService initializing cache manager...');
+
+    // Configure global image cache limits
+    final imageCache = PaintingBinding.instance.imageCache;
+    imageCache.maximumSizeBytes = maxCacheSize * 1024 * 1024;
+    imageCache.maximumSize = 500; // Match maxNrOfCacheObjects
+
     _cacheManager = CacheManager(
       Config(
         'artbeat_optimized_cache',
         stalePeriod: cacheDuration,
-        maxNrOfCacheObjects: 200,
-        repo: JsonCacheInfoRepository(databaseName: 'artbeat_cache'),
-        fileSystem: IOFileSystem('artbeat_cache'),
+        maxNrOfCacheObjects:
+            500, // Increased from 200 for better global caching
       ),
     );
 
@@ -196,32 +200,51 @@ class ImageManagementService {
     );
   }
 
+  /// Acquire a slot for image loading to prevent head-of-line blocking
+  Future<void> acquireLoadSlot() async {
+    if (_activeLoads < maxConcurrentLoads) {
+      _activeLoads++;
+      return;
+    }
+
+    final completer = Completer<void>();
+    _queue.add(completer);
+    return completer.future;
+  }
+
+  /// Release a load slot and process next in queue
+  void releaseLoadSlot() {
+    _activeLoads--;
+    if (_queue.isNotEmpty && _activeLoads < maxConcurrentLoads) {
+      _activeLoads++;
+      final completer = _queue.removeAt(0);
+      completer.complete();
+    }
+  }
+
   /// Load image with queue management to prevent buffer overflow
+  /// DEPRECATED: Use acquireLoadSlot and releaseLoadSlot instead
   Future<void> loadImageWithQueue(
     String imageUrl,
     VoidCallback onComplete,
   ) async {
+    await acquireLoadSlot();
+
     // Check if already loading
     if (_loadingUrls.contains(imageUrl)) {
       AppLogger.info('🔄 Image already loading: $imageUrl');
+      releaseLoadSlot();
+      onComplete();
       return;
     }
 
     // Add to loading set
     _loadingUrls.add(imageUrl);
-
-    if (_activeLoads < maxConcurrentLoads) {
-      _executeLoad(imageUrl, onComplete);
-    } else {
-      // Add to queue
-      _loadQueue.add(() => _executeLoad(imageUrl, onComplete));
-      AppLogger.info('📥 Image queued for loading: $imageUrl');
-    }
+    _executeLoad(imageUrl, onComplete);
   }
 
   /// Execute image load with proper resource management
   void _executeLoad(String imageUrl, VoidCallback onComplete) {
-    _activeLoads++;
     debugPrint(
       '🔄 Loading image ($_activeLoads/$maxConcurrentLoads): $imageUrl',
     );
@@ -248,15 +271,9 @@ class ImageManagementService {
 
   /// Complete image load and process queue
   void _completeLoad(String imageUrl, VoidCallback onComplete) {
-    _activeLoads--;
     _loadingUrls.remove(imageUrl);
+    releaseLoadSlot();
     onComplete();
-
-    // Process next in queue
-    if (_loadQueue.isNotEmpty && _activeLoads < maxConcurrentLoads) {
-      final nextLoad = _loadQueue.removeFirst();
-      nextLoad();
-    }
   }
 
   /// Generate cache key for image with dimensions
@@ -332,14 +349,14 @@ class ImageManagementService {
         'totalSize': 0,
         'totalSizeMB': '0.00',
         'activeLoads': _activeLoads,
-        'queuedLoads': _loadQueue.length,
+        'queuedLoads': _queue.length,
       };
     } catch (e) {
       AppLogger.error('❌ Error getting cache stats: $e');
       return {
         'error': e.toString(),
         'activeLoads': _activeLoads,
-        'queuedLoads': _loadQueue.length,
+        'queuedLoads': _queue.length,
       };
     }
   }
@@ -355,13 +372,13 @@ class ImageManagementService {
       'maxEntries': cache.maximumSize,
       'maxBytes': cache.maximumSizeBytes,
       'activeLoads': _activeLoads,
-      'queuedLoads': _loadQueue.length,
+      'queuedLoads': _queue.length,
     };
     developer.Timeline.instantSync('Image.CacheStats', arguments: stats);
     AppLogger.info(
       '🖼️ Cache stats [$label] entries=${cache.currentSize}/${cache.maximumSize} '
       'bytes=${cache.currentSizeBytes}/${cache.maximumSizeBytes} '
-      'active=${_activeLoads} queued=${_loadQueue.length}',
+      'active=${_activeLoads} queued=${_queue.length}',
     );
   }
 
@@ -441,7 +458,7 @@ class ImageManagementService {
 
   /// Dispose of resources
   void dispose() {
-    _loadQueue.clear();
+    _queue.clear();
     _loadingUrls.clear();
     _activeLoads = 0;
   }

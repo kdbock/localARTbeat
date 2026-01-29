@@ -75,15 +75,19 @@ class UserModel {
       ),
       bio: FirestoreUtils.safeStringDefault(data['bio']),
       location: FirestoreUtils.safeStringDefault(data['location']),
-      profileImageUrl: FirestoreUtils.safeStringDefault(data['profileImageUrl']),
+      profileImageUrl: FirestoreUtils.safeStringDefault(
+        data['profileImageUrl'],
+      ),
       engagementStats: EngagementStats.fromFirestore(
         data['engagementStats'] as Map<String, dynamic>? ?? {},
       ),
-      captures: (data['captures'] as List<dynamic>?)
+      captures:
+          (data['captures'] as List<dynamic>?)
               ?.map((e) => CaptureModel.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
-      posts: (data['posts'] as List<dynamic>?)
+      posts:
+          (data['posts'] as List<dynamic>?)
               ?.map((e) => FirestoreUtils.safeStringDefault(e))
               .toList() ??
           [],
@@ -96,8 +100,10 @@ class UserModel {
       experiencePoints: FirestoreUtils.safeInt(data['experiencePoints']),
       level: FirestoreUtils.safeInt(data['level'], 1),
       zipCode: FirestoreUtils.safeString(data['zipCode']),
-      onboardingCompleted:
-          FirestoreUtils.safeBool(data['onboardingCompleted'], false),
+      onboardingCompleted: FirestoreUtils.safeBool(
+        data['onboardingCompleted'],
+        false,
+      ),
     );
   }
 
@@ -156,8 +162,10 @@ class UserModel {
       experiencePoints: FirestoreUtils.safeInt(json['experiencePoints']),
       level: FirestoreUtils.safeInt(json['level'], 1),
       zipCode: FirestoreUtils.safeString(json['zipCode']),
-      onboardingCompleted:
-          FirestoreUtils.safeBool(json['onboardingCompleted'], false),
+      onboardingCompleted: FirestoreUtils.safeBool(
+        json['onboardingCompleted'],
+        false,
+      ),
       isVerified: FirestoreUtils.safeBool(json['isVerified'], false),
     );
   }

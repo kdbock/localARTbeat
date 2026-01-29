@@ -93,7 +93,7 @@ class ArtCommunityService extends ChangeNotifier {
           if (portfolioImages.isEmpty) {
             try {
               final artworksSnapshot = await _firestore
-                  .collection('artworks')
+                  .collection('artwork')
                   .where('artistId', isEqualTo: artist.userId)
                   .orderBy('createdAt', descending: true)
                   .limit(3)
@@ -233,14 +233,17 @@ class ArtCommunityService extends ChangeNotifier {
         .limit(50)
         .snapshots()
         .listen((snapshot) {
-          _feedCache = snapshot.docs.map((doc) {
-            try {
-              return ArtPost.fromFirestore(doc);
-            } catch (e) {
-              AppLogger.error('Error parsing feed post ${doc.id}: $e');
-              return null;
-            }
-          }).whereType<ArtPost>().toList();
+          _feedCache = snapshot.docs
+              .map((doc) {
+                try {
+                  return ArtPost.fromFirestore(doc);
+                } catch (e) {
+                  AppLogger.error('Error parsing feed post ${doc.id}: $e');
+                  return null;
+                }
+              })
+              .whereType<ArtPost>()
+              .toList();
           _feedController.add(_feedCache);
         });
 
@@ -250,14 +253,17 @@ class ArtCommunityService extends ChangeNotifier {
         .where('userType', isEqualTo: 'artist')
         .snapshots()
         .listen((snapshot) async {
-          final artists = snapshot.docs.map((doc) {
-            try {
-              return ArtistProfile.fromFirestore(doc);
-            } catch (e) {
-              AppLogger.error('Error parsing artist profile ${doc.id}: $e');
-              return null;
-            }
-          }).whereType<ArtistProfile>().toList();
+          final artists = snapshot.docs
+              .map((doc) {
+                try {
+                  return ArtistProfile.fromFirestore(doc);
+                } catch (e) {
+                  AppLogger.error('Error parsing artist profile ${doc.id}: $e');
+                  return null;
+                }
+              })
+              .whereType<ArtistProfile>()
+              .toList();
           _artistsRawCache = artists;
 
           _artistSortDebounce?.cancel();
@@ -414,16 +420,19 @@ class ArtCommunityService extends ChangeNotifier {
       // Load posts and add like status for current user (batched)
       final postIds = snapshot.docs.map((doc) => doc.id).toList();
       final likedPostIds = await _getLikedPostIds(postIds);
-      final posts = snapshot.docs.map((doc) {
-        try {
-          final post = PostModel.fromFirestore(doc);
-          final isLiked = likedPostIds.contains(post.id);
-          return post.copyWith(isLikedByCurrentUser: isLiked);
-        } catch (e) {
-          AppLogger.error('Error parsing feed post ${doc.id}: $e');
-          return null;
-        }
-      }).whereType<PostModel>().toList();
+      final posts = snapshot.docs
+          .map((doc) {
+            try {
+              final post = PostModel.fromFirestore(doc);
+              final isLiked = likedPostIds.contains(post.id);
+              return post.copyWith(isLikedByCurrentUser: isLiked);
+            } catch (e) {
+              AppLogger.error('Error parsing feed post ${doc.id}: $e');
+              return null;
+            }
+          })
+          .whereType<PostModel>()
+          .toList();
 
       // Debug: Log the retrieved posts
       if (kDebugMode) {

@@ -44,13 +44,17 @@ class ChallengeModel {
       title: FirestoreUtils.safeStringDefault(map['title']),
       description: FirestoreUtils.safeStringDefault(map['description']),
       type: ChallengeType.values.firstWhere(
-        (e) => e.toString() == 'ChallengeType.${FirestoreUtils.safeString(map['type'])}',
+        (e) =>
+            e.toString() ==
+            'ChallengeType.${FirestoreUtils.safeString(map['type'])}',
         orElse: () => ChallengeType.daily,
       ),
       targetCount: FirestoreUtils.safeInt(map['targetCount']),
       currentCount: FirestoreUtils.safeInt(map['currentCount']),
       rewardXP: FirestoreUtils.safeInt(map['rewardXP']),
-      rewardDescription: FirestoreUtils.safeStringDefault(map['rewardDescription']),
+      rewardDescription: FirestoreUtils.safeStringDefault(
+        map['rewardDescription'],
+      ),
       isCompleted: FirestoreUtils.safeBool(map['isCompleted'], false),
       createdAt: FirestoreUtils.safeDateTime(map['createdAt']),
       expiresAt: FirestoreUtils.safeDateTime(

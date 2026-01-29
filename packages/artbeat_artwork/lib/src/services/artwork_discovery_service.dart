@@ -37,7 +37,6 @@ class ArtworkDiscoveryService {
         // Same medium
         _artworkCollection
             .where('medium', isEqualTo: sourceArtwork.medium)
-            .where('isPublic', isEqualTo: true)
             .limit(limit * 2)
             .get(),
         // Same styles
@@ -46,7 +45,6 @@ class ArtworkDiscoveryService {
               'styles',
               arrayContainsAny: sourceArtwork.styles.take(3).toList(),
             )
-            .where('isPublic', isEqualTo: true)
             .limit(limit * 2)
             .get(),
         // Same tags
@@ -56,7 +54,6 @@ class ArtworkDiscoveryService {
                 'tags',
                 arrayContainsAny: sourceArtwork.tags!.take(3).toList(),
               )
-              .where('isPublic', isEqualTo: true)
               .limit(limit * 2)
               .get()
         else
@@ -111,7 +108,6 @@ class ArtworkDiscoveryService {
 
       // Get artworks with recent activity
       final query = await _artworkCollection
-          .where('isPublic', isEqualTo: true)
           .where('createdAt', isGreaterThan: Timestamp.fromDate(cutoffDate))
           .orderBy('createdAt', descending: true)
           .limit(limit * 3) // Get more to filter
@@ -191,7 +187,6 @@ class ArtworkDiscoveryService {
       for (final medium in preferredMediums.keys.take(3)) {
         final query = await _artworkCollection
             .where('medium', isEqualTo: medium)
-            .where('isPublic', isEqualTo: true)
             .limit(10)
             .get();
 

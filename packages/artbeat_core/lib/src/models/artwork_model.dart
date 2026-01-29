@@ -66,7 +66,9 @@ class ArtworkModel {
       isSold: FirestoreUtils.safeBool(data['isSold'], false),
       galleryId: FirestoreUtils.safeString(data['galleryId']),
       applauseCount: FirestoreUtils.safeInt(data['applauseCount']),
-      viewsCount: FirestoreUtils.safeInt(data['viewsCount'] ?? data['viewCount']),
+      viewsCount: FirestoreUtils.safeInt(
+        data['viewsCount'] ?? data['viewCount'],
+      ),
       artistName: FirestoreUtils.safeStringDefault(
         data['artistName'],
         'Unknown Artist',

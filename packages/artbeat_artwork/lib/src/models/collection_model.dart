@@ -49,7 +49,9 @@ class CollectionModel {
     return CollectionModel(
       id: doc.id,
       userId: FirestoreUtils.safeStringDefault(data['userId']),
-      artistProfileId: FirestoreUtils.safeStringDefault(data['artistProfileId']),
+      artistProfileId: FirestoreUtils.safeStringDefault(
+        data['artistProfileId'],
+      ),
       title: FirestoreUtils.safeStringDefault(data['title']),
       description: FirestoreUtils.safeStringDefault(data['description']),
       coverImageUrl: FirestoreUtils.safeString(data['coverImageUrl']),

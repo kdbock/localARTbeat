@@ -267,6 +267,10 @@ Future<void> _initializeCoreServices() async {
 
   await Future.wait([
     _guardedInit(ConfigService.instance.initialize, 'ConfigService'),
+    _guardedInit(
+      () => ImageManagementService().initialize(),
+      'ImageManagementService',
+    ),
     _guardedInit(MapsConfig.initialize, 'MapsConfig'),
     _guardedInit(
       () async {
@@ -360,11 +364,6 @@ Future<void> _guardedInit(
 /// Background services
 void _initializeNonCriticalServices() {
   Future.delayed(const Duration(milliseconds: 100), () async {
-    try {
-      await ImageManagementService().initialize();
-      AppLogger.info('✅ Image management ready');
-    } on Object catch (_) {}
-
     try {
       await messaging.NotificationService(
         onNavigateToRoute: (route) {

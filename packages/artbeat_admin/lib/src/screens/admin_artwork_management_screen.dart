@@ -830,4 +830,3 @@ class _AdminArtworkManagementScreenState
     }
   }
 }
-

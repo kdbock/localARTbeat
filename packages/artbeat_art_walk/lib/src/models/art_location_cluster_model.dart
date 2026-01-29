@@ -89,7 +89,8 @@ class ArtLocationCluster extends Equatable {
     return ArtLocationCluster(
       id: doc.id,
       location: data['location'] as GeoPoint? ?? const GeoPoint(0, 0),
-      artPieceIds: (data['artPieceIds'] as List<dynamic>?)
+      artPieceIds:
+          (data['artPieceIds'] as List<dynamic>?)
               ?.map((e) => FirestoreUtils.safeStringDefault(e))
               .toList() ??
           [],
@@ -98,7 +99,8 @@ class ArtLocationCluster extends Equatable {
       contributorCount: FirestoreUtils.safeInt(data['contributorCount']),
       createdAt: FirestoreUtils.safeDateTime(data['createdAt']),
       updatedAt: FirestoreUtils.safeDateTime(data['updatedAt']),
-      artPieceVotes: (data['artPieceVotes'] as Map?)?.map(
+      artPieceVotes:
+          (data['artPieceVotes'] as Map?)?.map(
             (key, value) => MapEntry(
               FirestoreUtils.safeStringDefault(key),
               FirestoreUtils.safeInt(value),

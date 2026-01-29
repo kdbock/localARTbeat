@@ -39,25 +39,37 @@ class ArtPost {
   factory ArtPost.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>? ?? {};
 
+    final List<String> imageUrls = (data['imageUrls'] as Iterable? ?? [])
+        .map((e) => e.toString())
+        .toList();
+
+    // Fallback for single image fields
+    if (imageUrls.isEmpty) {
+      final String? singleImage = FirestoreUtils.safeString(
+        data['imageUrl'] ?? data['coverImage'],
+      );
+      if (singleImage != null && singleImage.isNotEmpty) {
+        imageUrls.add(singleImage);
+      }
+    }
+
     return ArtPost(
       id: doc.id,
       userId: FirestoreUtils.safeStringDefault(data['userId']),
       userName: FirestoreUtils.safeStringDefault(data['userName']),
       userAvatarUrl: FirestoreUtils.safeStringDefault(data['userAvatarUrl']),
       content: FirestoreUtils.safeStringDefault(data['content']),
-      imageUrls: (data['imageUrls'] as Iterable? ?? [])
-          .map((e) => e.toString())
-          .toList(),
-      tags: (data['tags'] as Iterable? ?? [])
-          .map((e) => e.toString())
-          .toList(),
+      imageUrls: imageUrls,
+      tags: (data['tags'] as Iterable? ?? []).map((e) => e.toString()).toList(),
       createdAt: FirestoreUtils.safeDateTime(data['createdAt']),
       likesCount: FirestoreUtils.safeInt(data['likesCount']),
       commentsCount: FirestoreUtils.safeInt(data['commentsCount']),
       reportCount: FirestoreUtils.safeInt(data['reportCount']),
       isArtistPost: FirestoreUtils.safeBool(data['isArtistPost'], false),
       isUserVerified: FirestoreUtils.safeBool(data['isUserVerified'], false),
-      isLikedByCurrentUser: FirestoreUtils.safeBool(data['isLikedByCurrentUser']),
+      isLikedByCurrentUser: FirestoreUtils.safeBool(
+        data['isLikedByCurrentUser'],
+      ),
     );
   }
 
@@ -158,8 +170,9 @@ class ArtistProfile {
     final data = doc.data() as Map<String, dynamic>? ?? {};
 
     // Try both 'avatarUrl' and 'profileImageUrl' for avatar
-    final String avatarUrl =
-        FirestoreUtils.safeStringDefault(data['avatarUrl'] ?? data['profileImageUrl'] ?? data['photoURL']);
+    final String avatarUrl = FirestoreUtils.safeStringDefault(
+      data['avatarUrl'] ?? data['profileImageUrl'] ?? data['photoURL'],
+    );
 
     // Try multiple field names for portfolio images
     // First check for portfolioImages array
@@ -183,15 +196,20 @@ class ArtistProfile {
     }
 
     // Try multiple field names for specialties
-    List<String> specialties =
-        (data['specialties'] as Iterable? ?? []).map((e) => e.toString()).toList();
+    List<String> specialties = (data['specialties'] as Iterable? ?? [])
+        .map((e) => e.toString())
+        .toList();
     if (specialties.isEmpty) {
-      specialties = (data['mediums'] as Iterable? ?? []).map((e) => e.toString()).toList();
+      specialties = (data['mediums'] as Iterable? ?? [])
+          .map((e) => e.toString())
+          .toList();
     }
 
     return ArtistProfile(
       userId: FirestoreUtils.safeStringDefault(data['userId'], doc.id),
-      displayName: FirestoreUtils.safeStringDefault(data['displayName'] ?? data['fullName']),
+      displayName: FirestoreUtils.safeStringDefault(
+        data['displayName'] ?? data['fullName'],
+      ),
       bio: FirestoreUtils.safeStringDefault(data['bio']),
       avatarUrl: avatarUrl,
       specialties: specialties,
@@ -203,7 +221,9 @@ class ArtistProfile {
         data['boostScore'] ?? data['artistMomentum'] ?? data['momentum'],
       ),
       lastBoostAt: data['lastBoostAt'] != null || data['boostedAt'] != null
-          ? FirestoreUtils.safeDateTime(data['lastBoostAt'] ?? data['boostedAt'])
+          ? FirestoreUtils.safeDateTime(
+              data['lastBoostAt'] ?? data['boostedAt'],
+            )
           : null,
       boostStreakMonths: FirestoreUtils.safeInt(data['boostStreakMonths']),
       boostStreakUpdatedAt: data['boostStreakUpdatedAt'] != null

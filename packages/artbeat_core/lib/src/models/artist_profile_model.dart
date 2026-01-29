@@ -86,7 +86,10 @@ class ArtistProfileModel {
         : FirestoreUtils.safeStringDefault(data['userId']);
     final String displayName = isUserDoc
         ? FirestoreUtils.safeStringDefault(data['fullName'], 'Unknown Artist')
-        : FirestoreUtils.safeStringDefault(data['displayName'], 'Unknown Artist');
+        : FirestoreUtils.safeStringDefault(
+            data['displayName'],
+            'Unknown Artist',
+          );
 
     return ArtistProfileModel(
       id: doc.id,
@@ -106,7 +109,10 @@ class ArtistProfileModel {
       subscriptionTier: _parseSubscriptionTier(data['subscriptionTier']),
       isVerified: FirestoreUtils.safeBool(data['isVerified'], false),
       isFeatured: FirestoreUtils.safeBool(data['isFeatured'], false),
-      isPortfolioPublic: FirestoreUtils.safeBool(data['isPortfolioPublic'], true),
+      isPortfolioPublic: FirestoreUtils.safeBool(
+        data['isPortfolioPublic'],
+        true,
+      ),
       mediums: _parseStringList(data['mediums']),
       styles: _parseStringList(data['styles']),
       socialLinks: _parseStringMap(data['socialLinks']),
@@ -123,7 +129,9 @@ class ArtistProfileModel {
         data['boostScore'] ?? data['artistMomentum'] ?? data['momentum'],
       ),
       lastBoostAt: data['lastBoostAt'] != null || data['boostedAt'] != null
-          ? FirestoreUtils.safeDateTime(data['lastBoostAt'] ?? data['boostedAt'])
+          ? FirestoreUtils.safeDateTime(
+              data['lastBoostAt'] ?? data['boostedAt'],
+            )
           : null,
       boostStreakMonths: FirestoreUtils.safeInt(data['boostStreakMonths']),
       boostStreakUpdatedAt: data['boostStreakUpdatedAt'] != null

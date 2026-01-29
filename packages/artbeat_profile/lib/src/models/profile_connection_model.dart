@@ -45,14 +45,23 @@ class ProfileConnectionModel {
       userId: FirestoreUtils.getString(data, 'userId'),
       connectedUserId: FirestoreUtils.getString(data, 'connectedUserId'),
       connectedUserName: FirestoreUtils.getString(data, 'connectedUserName'),
-      connectedUserAvatar: FirestoreUtils.getOptionalString(data, 'connectedUserAvatar'),
+      connectedUserAvatar: FirestoreUtils.getOptionalString(
+        data,
+        'connectedUserAvatar',
+      ),
       connectionType: FirestoreUtils.getString(data, 'connectionType'),
       mutualFollowersCount: FirestoreUtils.getInt(data, 'mutualFollowersCount'),
-      mutualFollowerIds: FirestoreUtils.getStringList(data, 'mutualFollowerIds'),
+      mutualFollowerIds: FirestoreUtils.getStringList(
+        data,
+        'mutualFollowerIds',
+      ),
       connectionScore: FirestoreUtils.getDouble(data, 'connectionScore'),
       connectionReason: FirestoreUtils.getOptionalMap(data, 'connectionReason'),
       createdAt: FirestoreUtils.getDateTime(data, 'createdAt'),
-      lastInteraction: FirestoreUtils.getOptionalDateTime(data, 'lastInteraction'),
+      lastInteraction: FirestoreUtils.getOptionalDateTime(
+        data,
+        'lastInteraction',
+      ),
       isBlocked: FirestoreUtils.getBool(data, 'isBlocked'),
       isDismissed: FirestoreUtils.getBool(data, 'isDismissed'),
     );

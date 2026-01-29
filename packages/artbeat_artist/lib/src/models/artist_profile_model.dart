@@ -1,5 +1,6 @@
 // filepath: /Users/kristybock/artbeat/packages/artbeat_artist/lib/src/models/artist_profile_model.dart
-import 'package:artbeat_core/artbeat_core.dart' show UserType, SubscriptionTier, FirestoreUtils;
+import 'package:artbeat_core/artbeat_core.dart'
+    show UserType, SubscriptionTier, FirestoreUtils;
 
 // Using UserType from core module
 
@@ -53,7 +54,9 @@ class ArtistProfileModel {
       userId: FirestoreUtils.getString(map, 'userId'),
       displayName: FirestoreUtils.getString(map, 'displayName'),
       bio: FirestoreUtils.getString(map, 'bio'),
-      userType: _userTypeFromString(FirestoreUtils.getString(map, 'userType', 'artist')),
+      userType: _userTypeFromString(
+        FirestoreUtils.getString(map, 'userType', 'artist'),
+      ),
       location: FirestoreUtils.getOptionalString(map, 'location'),
       locationLat: map['locationLat'] != null
           ? FirestoreUtils.getDouble(map, 'locationLat')
@@ -65,7 +68,8 @@ class ArtistProfileModel {
       styles: FirestoreUtils.getStringList(map, 'styles'),
       profileImageUrl: FirestoreUtils.getOptionalString(map, 'profileImageUrl'),
       coverImageUrl: FirestoreUtils.getOptionalString(map, 'coverImageUrl'),
-      socialLinks: (map['socialLinks'] as Map?)?.map(
+      socialLinks:
+          (map['socialLinks'] as Map?)?.map(
             (key, value) => MapEntry(
               FirestoreUtils.safeStringDefault(key),
               FirestoreUtils.safeStringDefault(value),

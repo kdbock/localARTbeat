@@ -36,7 +36,10 @@ class ProfileActivityModel {
       activityType: FirestoreUtils.getString(data, 'activityType'),
       targetUserId: FirestoreUtils.getOptionalString(data, 'targetUserId'),
       targetUserName: FirestoreUtils.getOptionalString(data, 'targetUserName'),
-      targetUserAvatar: FirestoreUtils.getOptionalString(data, 'targetUserAvatar'),
+      targetUserAvatar: FirestoreUtils.getOptionalString(
+        data,
+        'targetUserAvatar',
+      ),
       description: FirestoreUtils.getOptionalString(data, 'description'),
       metadata: FirestoreUtils.getOptionalMap(data, 'metadata'),
       createdAt: FirestoreUtils.getDateTime(data, 'createdAt'),

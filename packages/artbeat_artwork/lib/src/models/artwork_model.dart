@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:artbeat_core/artbeat_core.dart' show FirestoreUtils, EngagementStats, ArtworkContentType;
+import 'package:artbeat_core/artbeat_core.dart'
+    show FirestoreUtils, EngagementStats, ArtworkContentType;
 
 /// Moderation status for artwork
 enum ArtworkModerationStatus {
@@ -264,12 +265,17 @@ class ArtworkModel {
     return ArtworkModel(
       id: doc.id,
       // Handle legacy documents that have artistId instead of userId/artistProfileId
-      userId: FirestoreUtils.safeStringDefault(data['userId'] ?? data['artistId']),
-      artistProfileId:
-          FirestoreUtils.safeStringDefault(data['artistProfileId'] ?? data['artistId']),
+      userId: FirestoreUtils.safeStringDefault(
+        data['userId'] ?? data['artistId'],
+      ),
+      artistProfileId: FirestoreUtils.safeStringDefault(
+        data['artistProfileId'] ?? data['artistId'],
+      ),
       title: FirestoreUtils.safeStringDefault(data['title']),
       description: FirestoreUtils.safeStringDefault(data['description']),
-      imageUrl: FirestoreUtils.safeStringDefault(data['imageUrl']),
+      imageUrl: FirestoreUtils.safeStringDefault(
+        data['imageUrl'] ?? data['coverImage'],
+      ),
       additionalImageUrls: (data['additionalImageUrls'] as List<dynamic>? ?? [])
           .map((e) => e.toString())
           .toList(),
@@ -290,10 +296,14 @@ class ArtworkModel {
           ? (data['tags'] as List<dynamic>).map((e) => e.toString()).toList()
           : null,
       hashtags: data['hashtags'] != null
-          ? (data['hashtags'] as List<dynamic>).map((e) => e.toString()).toList()
+          ? (data['hashtags'] as List<dynamic>)
+                .map((e) => e.toString())
+                .toList()
           : null,
       keywords: data['keywords'] != null
-          ? (data['keywords'] as List<dynamic>).map((e) => e.toString()).toList()
+          ? (data['keywords'] as List<dynamic>)
+                .map((e) => e.toString())
+                .toList()
           : null,
       price: FirestoreUtils.safeDouble(data['price']),
       isForSale: FirestoreUtils.safeBool(data['isForSale'], false),
@@ -329,8 +339,10 @@ class ArtworkModel {
       releasedChapters: FirestoreUtils.safeInt(data['releasedChapters']),
       readingMetadata: data['readingMetadata'] as Map<String, dynamic>?,
       serializationConfig: data['serializationConfig'] as Map<String, dynamic>?,
-      auctionEnabled:
-          FirestoreUtils.safeBool(data['auctionEnabled'] ?? data['isAuction'], false),
+      auctionEnabled: FirestoreUtils.safeBool(
+        data['auctionEnabled'] ?? data['isAuction'],
+        false,
+      ),
       auctionEnd: data['auctionEnd'] != null
           ? FirestoreUtils.safeDateTime(data['auctionEnd'])
           : null,
@@ -338,7 +350,9 @@ class ArtworkModel {
       reservePrice: FirestoreUtils.safeDouble(data['reservePrice']),
       auctionStatus: FirestoreUtils.safeString(data['auctionStatus']),
       currentHighestBid: FirestoreUtils.safeDouble(data['currentHighestBid']),
-      currentHighestBidder: FirestoreUtils.safeString(data['currentHighestBidder']),
+      currentHighestBidder: FirestoreUtils.safeString(
+        data['currentHighestBidder'],
+      ),
     );
   }
 

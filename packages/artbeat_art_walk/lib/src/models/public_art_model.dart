@@ -51,7 +51,8 @@ class PublicArtModel {
       artistName: FirestoreUtils.safeString(data['artistName']),
       location: data['location'] as GeoPoint? ?? const GeoPoint(0, 0),
       address: FirestoreUtils.safeString(data['address']),
-      tags: (data['tags'] as List<dynamic>?)
+      tags:
+          (data['tags'] as List<dynamic>?)
               ?.map((e) => FirestoreUtils.safeStringDefault(e))
               .toList() ??
           [],
@@ -59,7 +60,8 @@ class PublicArtModel {
       isVerified: FirestoreUtils.safeBool(data['isVerified'], false),
       viewCount: FirestoreUtils.safeInt(data['viewCount']),
       likeCount: FirestoreUtils.safeInt(data['likeCount']),
-      usersFavorited: (data['usersFavorited'] as List<dynamic>?)
+      usersFavorited:
+          (data['usersFavorited'] as List<dynamic>?)
               ?.map((e) => FirestoreUtils.safeStringDefault(e))
               .toList() ??
           [],
@@ -81,7 +83,8 @@ class PublicArtModel {
       artistName: FirestoreUtils.safeString(json['artistName']),
       location: json['location'] as GeoPoint? ?? const GeoPoint(0, 0),
       address: FirestoreUtils.safeString(json['address']),
-      tags: (json['tags'] as List<dynamic>?)
+      tags:
+          (json['tags'] as List<dynamic>?)
               ?.map((e) => FirestoreUtils.safeStringDefault(e))
               .toList() ??
           [],
@@ -89,7 +92,8 @@ class PublicArtModel {
       isVerified: FirestoreUtils.safeBool(json['isVerified'], false),
       viewCount: FirestoreUtils.safeInt(json['viewCount']),
       likeCount: FirestoreUtils.safeInt(json['likeCount']),
-      usersFavorited: (json['usersFavorited'] as List<dynamic>?)
+      usersFavorited:
+          (json['usersFavorited'] as List<dynamic>?)
               ?.map((e) => FirestoreUtils.safeStringDefault(e))
               .toList() ??
           [],
@@ -107,13 +111,17 @@ class PublicArtModel {
     return PublicArtModel(
       id: FirestoreUtils.safeStringDefault(capture.id),
       userId: FirestoreUtils.safeStringDefault(capture.userId),
-      title: FirestoreUtils.safeStringDefault(capture.title, 'Untitled Artwork'),
+      title: FirestoreUtils.safeStringDefault(
+        capture.title,
+        'Untitled Artwork',
+      ),
       description: FirestoreUtils.safeStringDefault(capture.description),
       imageUrl: FirestoreUtils.safeStringDefault(capture.imageUrl),
       artistName: FirestoreUtils.safeString(capture.artistName),
       location: capture.location as GeoPoint? ?? const GeoPoint(0, 0),
       address: FirestoreUtils.safeString(capture.locationName),
-      tags: (capture.tags as List<dynamic>?)
+      tags:
+          (capture.tags as List<dynamic>?)
               ?.map((e) => FirestoreUtils.safeStringDefault(e))
               .toList() ??
           [],

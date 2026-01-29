@@ -58,7 +58,10 @@ class ProfileAnalyticsModel {
         FirestoreUtils.getOptionalMap(data, 'weeklyEngagement') ?? {},
       ),
       topViewers: FirestoreUtils.getStringList(data, 'topViewers'),
-      recentInteractions: FirestoreUtils.getStringList(data, 'recentInteractions'),
+      recentInteractions: FirestoreUtils.getStringList(
+        data,
+        'recentInteractions',
+      ),
       lastUpdated: FirestoreUtils.getDateTime(data, 'lastUpdated'),
       periodStart: FirestoreUtils.getDateTime(data, 'periodStart'),
       periodEnd: FirestoreUtils.getDateTime(data, 'periodEnd'),

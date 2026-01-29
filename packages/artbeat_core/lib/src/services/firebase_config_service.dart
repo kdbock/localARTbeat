@@ -15,7 +15,8 @@ class FirebaseConfigService {
       // and proper caching for offline support
       FirebaseFirestore.instance.settings = const Settings(
         persistenceEnabled: true, // This replaces enablePersistence
-        cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
+        cacheSizeBytes:
+            104857600, // 100MB cache - more reasonable than unlimited
         sslEnabled: true,
       );
 

@@ -48,7 +48,8 @@ class EventModel {
       imageUrl: FirestoreUtils.safeString(data['imageUrl']),
       artistId: FirestoreUtils.safeStringDefault(data['artistId']),
       isPublic: FirestoreUtils.safeBool(data['isPublic'], false),
-      attendeeIds: (data['attendeeIds'] as List<dynamic>?)
+      attendeeIds:
+          (data['attendeeIds'] as List<dynamic>?)
               ?.map((e) => FirestoreUtils.safeStringDefault(e))
               .toList() ??
           <String>[],

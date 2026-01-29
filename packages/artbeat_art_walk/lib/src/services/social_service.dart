@@ -39,7 +39,7 @@ class SocialActivity {
 
   factory SocialActivity.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
-    
+
     // Helper to safely get String from potentially DocumentReference
     String? safeId(dynamic val) {
       if (val == null) return null;
@@ -136,7 +136,9 @@ class SocialService {
       // we pull the most recent activities and filter by location in-memory.
       final query = _activities
           .orderBy('timestamp', descending: true)
-          .limit(limit * 10); // Pull more to increase chances of finding nearby ones
+          .limit(
+            limit * 10,
+          ); // Pull more to increase chances of finding nearby ones
 
       final snapshot = await query.get();
       final activities = snapshot.docs
@@ -177,23 +179,24 @@ class SocialService {
     final truncatedIds = friendIds.take(10).toList();
 
     try {
-      debugPrint('🔍 SocialService: getFriendsActivities for IDs: $truncatedIds');
-      
+      debugPrint(
+        '🔍 SocialService: getFriendsActivities for IDs: $truncatedIds',
+      );
+
       final query = _activities
-          .where(
-            'userId',
-            whereIn: truncatedIds,
-          )
+          .where('userId', whereIn: truncatedIds)
           .orderBy('timestamp', descending: true)
           .limit(limit);
 
       final snapshot = await query.get();
-      
+
       final activities = snapshot.docs.map((doc) {
         final data = doc.data() as Map<String, dynamic>;
         // Log if we see a Reference in userId
         if (data['userId'] is! String && data['userId'] != null) {
-          debugPrint('⚠️ SocialService: Found non-string userId in socialActivities doc ${doc.id}: ${data['userId'].runtimeType}');
+          debugPrint(
+            '⚠️ SocialService: Found non-string userId in socialActivities doc ${doc.id}: ${data['userId'].runtimeType}',
+          );
         }
         return SocialActivity.fromFirestore(doc);
       }).toList();
@@ -202,33 +205,37 @@ class SocialService {
       return activities;
     } catch (e) {
       AppLogger.error('Error loading friends activities: $e');
-      
+
       // If it's the ParseExpectedReferenceValue error, try to diagnose or fallback
       if (e.toString().contains('ParseExpectedReferenceValue')) {
-        AppLogger.warning('🔍 Detected ParseExpectedReferenceValue in getFriendsActivities. Field "userId" may contain DocumentReferences.');
-        
+        AppLogger.warning(
+          '🔍 Detected ParseExpectedReferenceValue in getFriendsActivities. Field "userId" may contain DocumentReferences.',
+        );
+
         // Fallback: get recent activities and filter in-memory if query fails
         try {
           final fallbackQuery = _activities
               .orderBy('timestamp', descending: true)
               .limit(limit * 5);
-          
+
           final snapshot = await fallbackQuery.get();
           final friendsSet = truncatedIds.toSet();
-          
+
           final activities = snapshot.docs
               .map((doc) => SocialActivity.fromFirestore(doc))
               .where((activity) => friendsSet.contains(activity.userId))
               .take(limit)
               .toList();
-              
-          AppLogger.info('✅ Fallback loaded ${activities.length} friends activities via in-memory filter');
+
+          AppLogger.info(
+            '✅ Fallback loaded ${activities.length} friends activities via in-memory filter',
+          );
           return activities;
         } catch (fallbackError) {
           AppLogger.error('❌ Fallback also failed: $fallbackError');
         }
       }
-      
+
       return [];
     }
   }
@@ -257,7 +264,9 @@ class SocialService {
         final data = doc.data() as Map<String, dynamic>;
         // Defensive type check
         if (data['userId'] is! String && data['userId'] != null) {
-          debugPrint('⚠️ SocialService: Found non-string userId in socialActivities doc ${doc.id}: ${data['userId'].runtimeType}');
+          debugPrint(
+            '⚠️ SocialService: Found non-string userId in socialActivities doc ${doc.id}: ${data['userId'].runtimeType}',
+          );
         }
         return SocialActivity.fromFirestore(doc);
       }).toList();
@@ -278,24 +287,26 @@ class SocialService {
     } catch (e) {
       debugPrint('🔍 SocialService: Error loading user activities: $e');
       AppLogger.error('Error loading user activities: $e');
-      
+
       // Fallback for ParseExpectedReferenceValue
       if (e.toString().contains('ParseExpectedReferenceValue')) {
-         AppLogger.warning('🔍 Detected ParseExpectedReferenceValue in getUserActivities. Field "userId" may contain DocumentReferences.');
-         
-         // Fallback: search by recent and filter
-         try {
-           final fallbackQuery = _activities
+        AppLogger.warning(
+          '🔍 Detected ParseExpectedReferenceValue in getUserActivities. Field "userId" may contain DocumentReferences.',
+        );
+
+        // Fallback: search by recent and filter
+        try {
+          final fallbackQuery = _activities
               .orderBy('timestamp', descending: true)
               .limit(limit * 5);
-           final snapshot = await fallbackQuery.get();
-           final activities = snapshot.docs
+          final snapshot = await fallbackQuery.get();
+          final activities = snapshot.docs
               .map((doc) => SocialActivity.fromFirestore(doc))
               .where((activity) => activity.userId == userId)
               .take(limit)
               .toList();
-           return activities;
-         } catch (_) {}
+          return activities;
+        } catch (_) {}
       }
       return [];
     }
@@ -317,14 +328,17 @@ class SocialService {
         '🔍 SocialService: Query returned ${snapshot.docs.length} documents',
       );
 
-      final activities = snapshot.docs.map((doc) {
-        try {
-          return SocialActivity.fromFirestore(doc);
-        } catch (e) {
-          AppLogger.error('Error parsing social activity ${doc.id}: $e');
-          return null;
-        }
-      }).whereType<SocialActivity>().toList();
+      final activities = snapshot.docs
+          .map((doc) {
+            try {
+              return SocialActivity.fromFirestore(doc);
+            } catch (e) {
+              AppLogger.error('Error parsing social activity ${doc.id}: $e');
+              return null;
+            }
+          })
+          .whereType<SocialActivity>()
+          .toList();
 
       debugPrint(
         '🔍 SocialService: Converted to ${activities.length} recent activities',

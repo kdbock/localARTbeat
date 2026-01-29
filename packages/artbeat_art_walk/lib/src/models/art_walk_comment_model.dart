@@ -41,7 +41,8 @@ class ArtWalkCommentModel {
 
     return ArtWalkCommentModel(
       id: doc.id,
-      artWalkId: artWalkId ?? FirestoreUtils.safeStringDefault(data['artWalkId']),
+      artWalkId:
+          artWalkId ?? FirestoreUtils.safeStringDefault(data['artWalkId']),
       userId: FirestoreUtils.safeStringDefault(data['userId']),
       userName: FirestoreUtils.safeStringDefault(data['userName']),
       userPhotoUrl: FirestoreUtils.safeStringDefault(data['userPhotoUrl']),

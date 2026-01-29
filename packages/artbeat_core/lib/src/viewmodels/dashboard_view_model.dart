@@ -25,7 +25,8 @@ class DashboardViewModel extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   UserModel? _currentUser;
-  bool _isInitializing = true;
+  bool _isInitializing = false;
+  bool _isInitialized = false;
   bool _isLoadingEvents = true;
   bool _isLoadingUpcomingEvents = true;
   bool _isLoadingArtwork = true;
@@ -99,12 +100,15 @@ class DashboardViewModel extends ChangeNotifier {
   /// Initializes dashboard data and state
   Future<void> initialize() async {
     debugPrint(
-      '🔍 DashboardViewModel: initialize() called, _isInitializing=$_isInitializing',
+      '🔍 DashboardViewModel: initialize() called, _isInitializing=$_isInitializing, _isInitialized=$_isInitialized',
     );
-    if (!_isInitializing) {
-      debugPrint('🔍 DashboardViewModel: Already initialized, skipping...');
+    if (_isInitializing || _isInitialized) {
+      debugPrint(
+        '🔍 DashboardViewModel: Already initialized or initializing, skipping...',
+      );
       return; // Prevent multiple initializations
     }
+    _isInitializing = true;
 
     try {
       debugPrint('🔍 DashboardViewModel: Starting initialization...');
@@ -120,6 +124,7 @@ class DashboardViewModel extends ChangeNotifier {
       ]);
 
       // Mark as initialized early so UI can show basic info
+      _isInitialized = true;
       _isInitializing = false;
       _safeNotifyListeners();
       debugPrint('🔍 DashboardViewModel: Initialized with critical data');

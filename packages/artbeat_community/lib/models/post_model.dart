@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:artbeat_core/artbeat_core.dart' show FirestoreUtils, EngagementStats;
+import 'package:artbeat_core/artbeat_core.dart'
+    show FirestoreUtils, EngagementStats;
 import 'group_models.dart';
 
 /// Moderation status for posts
@@ -163,9 +164,7 @@ class PostModel {
           .toList(),
       videoUrl: FirestoreUtils.safeString(data['videoUrl']),
       audioUrl: FirestoreUtils.safeString(data['audioUrl']),
-      tags: (data['tags'] as Iterable? ?? [])
-          .map((e) => e.toString())
-          .toList(),
+      tags: (data['tags'] as Iterable? ?? []).map((e) => e.toString()).toList(),
       location: FirestoreUtils.safeStringDefault(data['location']),
       geoPoint: data['geoPoint'] as GeoPoint?,
       zipCode: FirestoreUtils.safeString(data['zipCode']),
@@ -175,7 +174,9 @@ class PostModel {
       ),
       isPublic: FirestoreUtils.safeBool(data['isPublic'], true),
       mentionedUsers: data['mentionedUsers'] != null
-          ? (data['mentionedUsers'] as Iterable).map((e) => e.toString()).toList()
+          ? (data['mentionedUsers'] as Iterable)
+                .map((e) => e.toString())
+                .toList()
           : null,
       metadata: data['metadata'] as Map<String, dynamic>?,
       isUserVerified: FirestoreUtils.safeBool(data['isUserVerified'], false),

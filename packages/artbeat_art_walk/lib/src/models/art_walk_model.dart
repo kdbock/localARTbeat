@@ -57,14 +57,16 @@ class ArtWalkModel {
       title: FirestoreUtils.safeStringDefault(data['title']),
       description: FirestoreUtils.safeStringDefault(data['description']),
       userId: FirestoreUtils.safeStringDefault(data['userId']),
-      artworkIds: (data['artworkIds'] as List<dynamic>?)
+      artworkIds:
+          (data['artworkIds'] as List<dynamic>?)
               ?.map((e) => FirestoreUtils.safeStringDefault(e))
               .toList() ??
           [],
       createdAt: FirestoreUtils.safeDateTime(data['createdAt']),
       isPublic: FirestoreUtils.safeBool(data['isPublic'], false),
       viewCount: FirestoreUtils.safeInt(data['viewCount']),
-      imageUrls: (data['imageUrls'] as List<dynamic>?)
+      imageUrls:
+          (data['imageUrls'] as List<dynamic>?)
               ?.map((e) => FirestoreUtils.safeStringDefault(e))
               .toList() ??
           [],

@@ -1,10 +1,3 @@
-flutter: [🌎 Easy Localization] [WARNING] Localization key [drawer_local_brand] not found
-flutter: [🌎 Easy Localization] [WARNING] Localization key [store_empty_sale] not found
-flutter: [🌎 Easy Localization] [WARNING] Localization key [art_walk_no_comments_yet] not found
-flutter: [🌎 Easy Localization] [WARNING] Localization key [art_walk_no_comments_yet] not found
-flutter: \^[[34m[🌎 Easy Localization] [WARNING] Localization key [drawer_mode_admin] not found\^[[0m
-flutter: \^[[34m[🌎 Easy Localization] [WARNING] Localization key [drawer_mode_admin] not found\^[[0m
-flutter: \^[[34m[🌎 Easy Localization] [WARNING] Localization key [boost_badge_tooltip] not found\^[[0m
-flutter: \^[[34m[🌎 Easy Localization] [WARNING] Localization key [boost_badge_tooltip] not found\^[[0m
-flutter: \^[[34m[🌎 Easy Localization] [WARNING] Localization key [boost_badge_tooltip] not found\^[[0m
-flutter: \^[[34m[🌎 Easy Localization] [WARNING] Localization key [boost_badge_tooltip] not found\^[[0m
+flutter: \^[[34m[🌎 Easy Localization] [WARNING] Localization key [artist_cta_title] not found\^[[0m
+flutter: \^[[34m[🌎 Easy Localization] [WARNING] Localization key [artist_cta_compact_subtitle] not found\^[[0m
+flutter: \^[[34m[🌎 Easy Localization] [WARNING] Localization key [artist_cta_compact_button] not found\^[[0m

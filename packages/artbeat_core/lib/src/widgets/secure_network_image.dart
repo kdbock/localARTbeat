@@ -428,8 +428,6 @@ class _SecureNetworkImageState extends State<SecureNetworkImage> {
           );
         }
       },
-      // Add headers for Firebase Storage
-      httpHeaders: const {'Cache-Control': 'no-cache'},
       errorListener: (error) {
         // Only log significant errors in debug mode, suppress 404s to reduce noise
         final is404Error =

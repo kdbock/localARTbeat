@@ -102,21 +102,24 @@ class _CapturesGridState extends State<CapturesGrid> {
           return const Center(child: CircularProgressIndicator());
         }
 
-        final captures = snapshot.data?.docs.map((doc) {
-          try {
-            final data = doc.data();
-            // Defensive type checking for userId
-            if (data['userId'] is! String) {
-              debugPrint(
-                '⚠️ CapturesGrid: userId for doc ${doc.id} is NOT a string! Type: ${data['userId'].runtimeType}, Value: ${data['userId']}',
-              );
-            }
-            return CaptureModel.fromFirestore(doc, null);
-          } catch (e) {
-            AppLogger.error('Error parsing capture document ${doc.id}: $e');
-            return null;
-          }
-        }).whereType<CaptureModel>().toList();
+        final captures = snapshot.data?.docs
+            .map((doc) {
+              try {
+                final data = doc.data();
+                // Defensive type checking for userId
+                if (data['userId'] is! String) {
+                  debugPrint(
+                    '⚠️ CapturesGrid: userId for doc ${doc.id} is NOT a string! Type: ${data['userId'].runtimeType}, Value: ${data['userId']}',
+                  );
+                }
+                return CaptureModel.fromFirestore(doc, null);
+              } catch (e) {
+                AppLogger.error('Error parsing capture document ${doc.id}: $e');
+                return null;
+              }
+            })
+            .whereType<CaptureModel>()
+            .toList();
 
         if (captures == null || captures.isEmpty) {
           return Center(

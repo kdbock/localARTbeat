@@ -55,33 +55,43 @@ class FirestoreUtils {
   // --- Map-based getter helpers ---
 
   /// Gets a String from a map with a default value
-  static String getString(Map<String, dynamic> data, String key,
-          [String defaultValue = '']) =>
-      safeStringDefault(data[key], defaultValue);
+  static String getString(
+    Map<String, dynamic> data,
+    String key, [
+    String defaultValue = '',
+  ]) => safeStringDefault(data[key], defaultValue);
 
   /// Gets an optional String from a map
   static String? getOptionalString(Map<String, dynamic> data, String key) =>
       safeString(data[key]);
 
   /// Gets an int from a map with a default value
-  static int getInt(Map<String, dynamic> data, String key,
-          [int defaultValue = 0]) =>
-      safeInt(data[key], defaultValue);
+  static int getInt(
+    Map<String, dynamic> data,
+    String key, [
+    int defaultValue = 0,
+  ]) => safeInt(data[key], defaultValue);
 
   /// Gets a double from a map with a default value
-  static double getDouble(Map<String, dynamic> data, String key,
-          [double defaultValue = 0.0]) =>
-      safeDouble(data[key], defaultValue);
+  static double getDouble(
+    Map<String, dynamic> data,
+    String key, [
+    double defaultValue = 0.0,
+  ]) => safeDouble(data[key], defaultValue);
 
   /// Gets a bool from a map with a default value
-  static bool getBool(Map<String, dynamic> data, String key,
-          [bool defaultValue = false]) =>
-      safeBool(data[key], defaultValue);
+  static bool getBool(
+    Map<String, dynamic> data,
+    String key, [
+    bool defaultValue = false,
+  ]) => safeBool(data[key], defaultValue);
 
   /// Gets a DateTime from a map with a default value
-  static DateTime getDateTime(Map<String, dynamic> data, String key,
-          [DateTime? defaultValue]) =>
-      safeDateTime(data[key], defaultValue);
+  static DateTime getDateTime(
+    Map<String, dynamic> data,
+    String key, [
+    DateTime? defaultValue,
+  ]) => safeDateTime(data[key], defaultValue);
 
   /// Gets an optional DateTime from a map
   static DateTime? getOptionalDateTime(Map<String, dynamic> data, String key) {
@@ -91,8 +101,11 @@ class FirestoreUtils {
 
   /// Gets an optional Map from a map
   static Map<String, dynamic>? getOptionalMap(
-          Map<String, dynamic> data, String key) =>
-      data[key] is Map<String, dynamic> ? data[key] as Map<String, dynamic> : null;
+    Map<String, dynamic> data,
+    String key,
+  ) => data[key] is Map<String, dynamic>
+      ? data[key] as Map<String, dynamic>
+      : null;
 
   /// Gets a List of Strings from a map
   static List<String> getStringList(Map<String, dynamic> data, String key) {

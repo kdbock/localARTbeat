@@ -28,14 +28,14 @@ class EnvLoader {
       try {
         const primaryEnv = kReleaseMode ? '.env.production' : '.env.example';
         await dotenv.load(fileName: primaryEnv);
-        
+
         // Merge with care: only use real values, never placeholders
         dotenv.env.forEach((key, value) {
           if (!value.contains(r'${')) {
             _envVars[key] = value;
           }
         });
-        
+
         AppLogger.info('📝 Loaded $primaryEnv and merged configuration');
       } catch (e) {
         AppLogger.warning(
@@ -66,19 +66,41 @@ class EnvLoader {
         _envVars['GOOGLE_MAPS_API_KEY'] = googleMapsKeyDefine;
       }
 
-      final List<String> otherKeys = [
-        'FIREBASE_API_KEY',
-        'FIREBASE_APP_ID',
-        'FIREBASE_MESSAGING_SENDER_ID',
-        'FIREBASE_PROJECT_ID',
-        'FIREBASE_STORAGE_BUCKET',
-      ];
+      const firebaseApiKeyDefine = String.fromEnvironment('FIREBASE_API_KEY');
+      if (firebaseApiKeyDefine.isNotEmpty) {
+        _envVars['FIREBASE_API_KEY'] = firebaseApiKeyDefine;
+      }
 
-      for (final key in otherKeys) {
-        final envValue = String.fromEnvironment(key);
-        if (envValue.isNotEmpty) {
-          _envVars[key] = envValue;
-        }
+      const firebaseAppIdDefine = String.fromEnvironment('FIREBASE_APP_ID');
+      if (firebaseAppIdDefine.isNotEmpty) {
+        _envVars['FIREBASE_APP_ID'] = firebaseAppIdDefine;
+      }
+
+      const firebaseMessagingSenderIdDefine = String.fromEnvironment(
+        'FIREBASE_MESSAGING_SENDER_ID',
+      );
+      if (firebaseMessagingSenderIdDefine.isNotEmpty) {
+        _envVars['FIREBASE_MESSAGING_SENDER_ID'] =
+            firebaseMessagingSenderIdDefine;
+      }
+
+      const firebaseProjectIdDefine = String.fromEnvironment(
+        'FIREBASE_PROJECT_ID',
+      );
+      if (firebaseProjectIdDefine.isNotEmpty) {
+        _envVars['FIREBASE_PROJECT_ID'] = firebaseProjectIdDefine;
+      }
+
+      const firebaseStorageBucketDefine = String.fromEnvironment(
+        'FIREBASE_STORAGE_BUCKET',
+      );
+      if (firebaseStorageBucketDefine.isNotEmpty) {
+        _envVars['FIREBASE_STORAGE_BUCKET'] = firebaseStorageBucketDefine;
+      }
+
+      const appleTeamIdDefine = String.fromEnvironment('APPLE_TEAM_ID');
+      if (appleTeamIdDefine.isNotEmpty) {
+        _envVars['APPLE_TEAM_ID'] = appleTeamIdDefine;
       }
 
       // Set defaults for critical values if still empty
@@ -86,7 +108,8 @@ class EnvLoader {
       _envVars.putIfAbsent('FIREBASE_REGION', () => 'us-central1');
       _envVars.putIfAbsent(
         'STRIPE_PUBLISHABLE_KEY',
-        () => 'pk_live_51QpJ6iAO5ulTKoALD0MCyfwOCP2ivyVgKNK457uvrjJ0N9uj9Y7uSAtWfYq7nyuFZFqMjF4BHaDOYuMpwxd0PdbK00Ooktqk6z',
+        () =>
+            'pk_live_51QpJ6iAO5ulTKoALD0MCyfwOCP2ivyVgKNK457uvrjJ0N9uj9Y7uSAtWfYq7nyuFZFqMjF4BHaDOYuMpwxd0PdbK00Ooktqk6z',
       );
 
       AppLogger.info(

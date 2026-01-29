@@ -228,14 +228,17 @@ class ArtworkService {
         '📊 ArtworkService: Found ${snapshot.docs.length} artwork documents by artistProfileId',
       );
 
-      final List<ArtworkModel> artworks = snapshot.docs.map((doc) {
-        try {
-          return ArtworkModel.fromFirestore(doc);
-        } catch (e) {
-          AppLogger.error('Error parsing artwork ${doc.id}: $e');
-          return null;
-        }
-      }).whereType<ArtworkModel>().toList();
+      final List<ArtworkModel> artworks = snapshot.docs
+          .map((doc) {
+            try {
+              return ArtworkModel.fromFirestore(doc);
+            } catch (e) {
+              AppLogger.error('Error parsing artwork ${doc.id}: $e');
+              return null;
+            }
+          })
+          .whereType<ArtworkModel>()
+          .toList();
 
       // Also query by artistId (for legacy artwork that might use this field)
       final legacySnapshot = await _artworkCollection
@@ -247,14 +250,17 @@ class ArtworkService {
       );
 
       if (legacySnapshot.docs.isNotEmpty) {
-        final legacyArtworks = legacySnapshot.docs.map((doc) {
-          try {
-            return ArtworkModel.fromFirestore(doc);
-          } catch (e) {
-            AppLogger.error('Error parsing legacy artwork ${doc.id}: $e');
-            return null;
-          }
-        }).whereType<ArtworkModel>().toList();
+        final legacyArtworks = legacySnapshot.docs
+            .map((doc) {
+              try {
+                return ArtworkModel.fromFirestore(doc);
+              } catch (e) {
+                AppLogger.error('Error parsing legacy artwork ${doc.id}: $e');
+                return null;
+              }
+            })
+            .whereType<ArtworkModel>()
+            .toList();
         artworks.addAll(legacyArtworks);
       }
 
@@ -268,14 +274,17 @@ class ArtworkService {
       );
 
       if (userSnapshot.docs.isNotEmpty) {
-        final userArtworks = userSnapshot.docs.map((doc) {
-          try {
-            return ArtworkModel.fromFirestore(doc);
-          } catch (e) {
-            AppLogger.error('Error parsing user artwork ${doc.id}: $e');
-            return null;
-          }
-        }).whereType<ArtworkModel>().toList();
+        final userArtworks = userSnapshot.docs
+            .map((doc) {
+              try {
+                return ArtworkModel.fromFirestore(doc);
+              } catch (e) {
+                AppLogger.error('Error parsing user artwork ${doc.id}: $e');
+                return null;
+              }
+            })
+            .whereType<ArtworkModel>()
+            .toList();
 
         // Add only artworks that aren't already in the list (avoid duplicates)
         for (final artwork in userArtworks) {
@@ -326,14 +335,17 @@ class ArtworkService {
         );
       }
 
-      final artworks = snapshot.docs.map((doc) {
-        try {
-          return ArtworkModel.fromFirestore(doc);
-        } catch (e) {
-          AppLogger.error('Error parsing artwork ${doc.id}: $e');
-          return null;
-        }
-      }).whereType<ArtworkModel>().toList();
+      final artworks = snapshot.docs
+          .map((doc) {
+            try {
+              return ArtworkModel.fromFirestore(doc);
+            } catch (e) {
+              AppLogger.error('Error parsing artwork ${doc.id}: $e');
+              return null;
+            }
+          })
+          .whereType<ArtworkModel>()
+          .toList();
 
       // Debug log artwork details
       for (var artwork in artworks) {

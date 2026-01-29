@@ -637,8 +637,9 @@ class _DiscoveryTabState extends State<DiscoveryTab>
   }
 
   Widget _buildArtworkGrid(String type) {
-    Query query =
-        _firestore.collection('artwork').where('isPublic', isEqualTo: true);
+    Query query = _firestore
+        .collection('artwork')
+        .where('isPublic', isEqualTo: true);
 
     if (type == 'sale') {
       query = query.where('isForSale', isEqualTo: true);
@@ -649,8 +650,10 @@ class _DiscoveryTabState extends State<DiscoveryTab>
     }
 
     return StreamBuilder<QuerySnapshot>(
-      stream:
-          query.orderBy('createdAt', descending: true).limit(50).snapshots(),
+      stream: query
+          .orderBy('createdAt', descending: true)
+          .limit(50)
+          .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
@@ -723,7 +726,8 @@ class _DiscoveryTabState extends State<DiscoveryTab>
     final price = (data['price'] as num?)?.toDouble() ?? 0.0;
     final isAuction =
         data['auctionEnabled'] == true || data['isAuction'] == true;
-    final currentBid = (data['currentHighestBid'] as num?)?.toDouble() ??
+    final currentBid =
+        (data['currentHighestBid'] as num?)?.toDouble() ??
         (data['startingPrice'] as num?)?.toDouble() ??
         0.0;
 
@@ -731,7 +735,7 @@ class _DiscoveryTabState extends State<DiscoveryTab>
       onTap: () => Navigator.pushNamed(
         context,
         '/artwork/detail',
-        arguments: {'id': id},
+        arguments: {'artworkId': id},
       ),
       child: _Glass(
         padding: EdgeInsets.zero,
@@ -741,8 +745,9 @@ class _DiscoveryTabState extends State<DiscoveryTab>
           children: [
             Expanded(
               child: ClipRRect(
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(20)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(20),
+                ),
                 child: SecureNetworkImage(
                   imageUrl: imageUrl,
                   fit: BoxFit.cover,
@@ -1204,9 +1209,7 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
                 communityService: _communityService,
                 searchQuery: _searchQuery,
               ),
-              DiscoveryTab(
-                searchQuery: _searchQuery,
-              ),
+              DiscoveryTab(searchQuery: _searchQuery),
               const CommissionsTab(),
             ],
           ),

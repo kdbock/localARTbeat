@@ -187,12 +187,24 @@ class PresenceService {
         final onlineUsersQuery = await _firestore
             .collection('users')
             .where('isOnline', isEqualTo: true)
-            .get();
+            .get()
+            .timeout(
+              const Duration(seconds: 5),
+              onTimeout: () {
+                throw TimeoutException('Online users query timed out');
+              },
+            );
 
         final onlineArtistsQuery = await _firestore
             .collection('artistProfiles')
             .where('isOnline', isEqualTo: true)
-            .get();
+            .get()
+            .timeout(
+              const Duration(seconds: 5),
+              onTimeout: () {
+                throw TimeoutException('Online artists query timed out');
+              },
+            );
 
         debugPrint(
           'PresenceService Debug: Total online users: ${onlineUsersQuery.docs.length}',
@@ -255,6 +267,13 @@ class PresenceService {
         .orderBy('lastSeen', descending: true)
         .limit(20)
         .snapshots()
+        .timeout(
+          const Duration(seconds: 10),
+          onTimeout: (sink) {
+            AppLogger.warning('⚠️ getOnlineUsersStream timed out');
+            sink.close();
+          },
+        )
         .map((snapshot) {
           final currentUserId = _auth.currentUser?.uid;
           final now = DateTime.now();

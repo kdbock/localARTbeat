@@ -80,7 +80,7 @@ class AuctionService {
     try {
       // Get all artworks that have bids from this user
       final artworksSnapshot = await _firestore
-          .collection('artworks')
+          .collection('artwork')
           .where('currentHighestBidder', isEqualTo: userId)
           .get();
 
@@ -91,7 +91,7 @@ class AuctionService {
 
         // Get bid details from subcollection
         final bidsSnapshot = await _firestore
-            .collection('artworks')
+            .collection('artwork')
             .doc(artwork.id)
             .collection('bids')
             .where('userId', isEqualTo: userId)
@@ -123,7 +123,7 @@ class AuctionService {
   Future<List<AuctionBidModel>> getBidHistory(String artworkId) async {
     try {
       final snapshot = await _firestore
-          .collection('artworks')
+          .collection('artwork')
           .doc(artworkId)
           .collection('bids')
           .orderBy('timestamp', descending: true)
@@ -146,7 +146,7 @@ class AuctionService {
   ) async {
     try {
       final artworkDoc = await _firestore
-          .collection('artworks')
+          .collection('artwork')
           .doc(artworkId)
           .get();
       if (!artworkDoc.exists) {

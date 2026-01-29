@@ -47,19 +47,27 @@ class EarningsModel {
             data['promotionSupportEarnings'] ??
             data['giftEarnings'],
       ),
-      sponsorshipEarnings: FirestoreUtils.safeDouble(data['sponsorshipEarnings']),
+      sponsorshipEarnings: FirestoreUtils.safeDouble(
+        data['sponsorshipEarnings'],
+      ),
       commissionEarnings: FirestoreUtils.safeDouble(data['commissionEarnings']),
-      subscriptionEarnings: FirestoreUtils.safeDouble(data['subscriptionEarnings']),
-      artworkSalesEarnings: FirestoreUtils.safeDouble(data['artworkSalesEarnings']),
+      subscriptionEarnings: FirestoreUtils.safeDouble(
+        data['subscriptionEarnings'],
+      ),
+      artworkSalesEarnings: FirestoreUtils.safeDouble(
+        data['artworkSalesEarnings'],
+      ),
       lastUpdated: FirestoreUtils.safeDateTime(data['lastUpdated']),
-      monthlyBreakdown: (data['monthlyBreakdown'] as Map?)?.map(
+      monthlyBreakdown:
+          (data['monthlyBreakdown'] as Map?)?.map(
             (key, value) => MapEntry(
               FirestoreUtils.safeStringDefault(key),
               FirestoreUtils.safeDouble(value),
             ),
           ) ??
           {},
-      recentTransactions: (data['recentTransactions'] as List<dynamic>?)
+      recentTransactions:
+          (data['recentTransactions'] as List<dynamic>?)
               ?.map(
                 (t) => EarningsTransaction.fromMap(t as Map<String, dynamic>),
               )
