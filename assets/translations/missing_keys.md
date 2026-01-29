@@ -4,3 +4,7 @@ flutter: [🌎 Easy Localization] [WARNING] Localization key [art_walk_no_commen
 flutter: [🌎 Easy Localization] [WARNING] Localization key [art_walk_no_comments_yet] not found
 flutter: \^[[34m[🌎 Easy Localization] [WARNING] Localization key [drawer_mode_admin] not found\^[[0m
 flutter: \^[[34m[🌎 Easy Localization] [WARNING] Localization key [drawer_mode_admin] not found\^[[0m
+flutter: \^[[34m[🌎 Easy Localization] [WARNING] Localization key [boost_badge_tooltip] not found\^[[0m
+flutter: \^[[34m[🌎 Easy Localization] [WARNING] Localization key [boost_badge_tooltip] not found\^[[0m
+flutter: \^[[34m[🌎 Easy Localization] [WARNING] Localization key [boost_badge_tooltip] not found\^[[0m
+flutter: \^[[34m[🌎 Easy Localization] [WARNING] Localization key [boost_badge_tooltip] not found\^[[0m

@@ -15,7 +15,6 @@ import '../services/admin_service.dart';
 import '../services/content_review_service.dart';
 import '../services/unified_admin_service.dart';
 import '../services/financial_service.dart';
-import '../services/admin_artwork_management_service.dart';
 import '../widgets/admin_drawer.dart';
 import '../widgets/admin_search_modal.dart';
 import '../screens/admin_user_detail_screen.dart';
@@ -52,8 +51,6 @@ class _ModernUnifiedAdminDashboardState
   final ContentReviewService _contentService = ContentReviewService();
   final UnifiedAdminService _unifiedAdminService = UnifiedAdminService();
   final FinancialService _financialService = FinancialService();
-  final AdminArtworkManagementService _artworkService =
-      AdminArtworkManagementService();
 
   // Data
   AnalyticsModel? _analytics;
@@ -63,7 +60,6 @@ class _ModernUnifiedAdminDashboardState
   List<ContentModel> _allContent = [];
   List<TransactionModel> _recentTransactions = [];
   Map<String, double> _revenueBreakdown = {};
-  int _artBattleEligibleCount = 0;
 
   // State
   bool _isLoading = true;
@@ -165,17 +161,9 @@ class _ModernUnifiedAdminDashboardState
     final pendingReviews = await _contentService.getPendingReviews();
     final allContent = await _unifiedAdminService.getAllContent();
 
-    // Get art battle eligible count
-    final artBattleEligibleSnapshot = await FirebaseFirestore.instance
-        .collection('artwork')
-        .where('artBattleEnabled', isEqualTo: true)
-        .where('artBattleStatus', isEqualTo: 'eligible')
-        .get();
-
     setState(() {
       _pendingReviews = pendingReviews;
       _allContent = allContent;
-      _artBattleEligibleCount = artBattleEligibleSnapshot.docs.length;
     });
   }
 
@@ -1592,12 +1580,6 @@ class _ModernUnifiedAdminDashboardState
                             Icons.flag_rounded,
                             const Color(0xFFFF5722),
                           ),
-                          _buildContentStatCard(
-                            'Art Battle Eligible',
-                            _artBattleEligibleCount.toString(),
-                            Icons.sports_kabaddi_rounded,
-                            const Color(0xFF9C27B0),
-                          ),
                         ],
                       );
                     },
@@ -2142,19 +2124,6 @@ class _ModernUnifiedAdminDashboardState
                 child:
                     Text('Edit Content', style: TextStyle(color: Colors.white)),
               ),
-              if (content.type == 'artwork') ...[
-                const PopupMenuDivider(),
-                const PopupMenuItem(
-                  value: 'enroll_art_battle',
-                  child: Text('Enroll in Art Battles',
-                      style: TextStyle(color: Colors.white)),
-                ),
-                const PopupMenuItem(
-                  value: 'remove_art_battle',
-                  child: Text('Remove from Art Battles',
-                      style: TextStyle(color: Colors.white)),
-                ),
-              ],
               const PopupMenuDivider(),
               const PopupMenuItem(
                 value: 'delete',
@@ -2310,12 +2279,6 @@ class _ModernUnifiedAdminDashboardState
         break;
       case 'edit':
         _showEditContentDialog(content);
-        break;
-      case 'enroll_art_battle':
-        _enrollArtworkInArtBattles(content);
-        break;
-      case 'remove_art_battle':
-        _removeArtworkFromArtBattles(content);
         break;
       case 'delete':
         _showDeleteConfirmation(content);
@@ -2981,54 +2944,6 @@ class _ModernUnifiedAdminDashboardState
         ),
       ),
     );
-  }
-
-  Future<void> _enrollArtworkInArtBattles(ContentModel content) async {
-    try {
-      await _artworkService.enrollArtworkInArtBattles(content.id);
-      await _loadContentData(); // Refresh data
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Artwork enrolled in Art Battles'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to enroll artwork: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _removeArtworkFromArtBattles(ContentModel content) async {
-    try {
-      await _artworkService.removeArtworkFromArtBattles(content.id);
-      await _loadContentData(); // Refresh data
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Artwork removed from Art Battles'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to remove artwork: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
   }
 
   void _showDeleteConfirmation(ContentModel content) {

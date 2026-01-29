@@ -19,7 +19,7 @@ dependencies:
   firebase_crashlytics: ^5.0.1
 
   # Stripe integration for artist payouts
-  flutter_stripe: ^12.1.0
+  flutter_stripe: ^12.2.0  # Latest with enhanced ProGuard rules
 
   # Charts and analytics
   fl_chart: ^0.69.0

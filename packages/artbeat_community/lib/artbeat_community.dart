@@ -12,7 +12,6 @@ export 'models/artwork_model.dart';
 export 'models/studio_model.dart';
 export 'models/gift_model_export.dart'; // Use export file to avoid conflicts
 export 'models/direct_commission_model.dart';
-export 'models/art_battle_match.dart';
 
 export 'models/group_models.dart' show GroupType;
 
@@ -23,7 +22,6 @@ export 'services/firebase_storage_service.dart';
 export 'widgets/art_gallery_widgets.dart';
 export 'screens/art_community_hub.dart';
 export 'screens/create_art_post_screen.dart';
-export 'screens/art_battle_screen.dart';
 
 // Services
 export 'services/services.dart';
@@ -32,7 +30,6 @@ export 'services/storage_service.dart';
 export 'services/direct_commission_service.dart';
 export 'services/stripe_service.dart';
 export 'services/moderation_service.dart';
-export 'services/art_battle_service.dart';
 
 // Widgets
 export 'widgets/widgets.dart';

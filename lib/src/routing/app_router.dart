@@ -91,9 +91,14 @@ class AppRouter {
           child: const core.AnimatedDashboardScreen(),
         );
 
-      case core.AppRoutes.artBattle:
+      case core.AppRoutes.artDiscovery:
         return RouteUtils.createMainLayoutRoute(
-          child: const community.ArtBattleScreen(),
+          child: const artwork.ArtworkDiscoveryScreen(),
+        );
+
+      case '/community/discovery':
+        return RouteUtils.createMainLayoutRoute(
+          child: const artwork.ArtworkDiscoveryScreen(),
         );
 
       case '/old-dashboard':

@@ -56,52 +56,6 @@ enum ArtworkModerationStatus {
   }
 }
 
-/// Status for Art Battle participation
-enum ArtBattleStatus {
-  eligible,
-  active,
-  coolingDown,
-  optedOut,
-  removed,
-  frozen;
-
-  String get value {
-    switch (this) {
-      case ArtBattleStatus.eligible:
-        return 'eligible';
-      case ArtBattleStatus.active:
-        return 'active';
-      case ArtBattleStatus.coolingDown:
-        return 'cooling_down';
-      case ArtBattleStatus.optedOut:
-        return 'opted_out';
-      case ArtBattleStatus.removed:
-        return 'removed';
-      case ArtBattleStatus.frozen:
-        return 'frozen';
-    }
-  }
-
-  static ArtBattleStatus fromString(String status) {
-    switch (status) {
-      case 'eligible':
-        return ArtBattleStatus.eligible;
-      case 'active':
-        return ArtBattleStatus.active;
-      case 'cooling_down':
-        return ArtBattleStatus.coolingDown;
-      case 'opted_out':
-        return ArtBattleStatus.optedOut;
-      case 'removed':
-        return ArtBattleStatus.removed;
-      case 'frozen':
-        return ArtBattleStatus.frozen;
-      default:
-        return ArtBattleStatus.eligible;
-    }
-  }
-}
-
 /// Model representing an artwork item in the ARTbeat platform
 class ArtworkModel {
   /// Unique identifier for the artwork
@@ -185,6 +139,9 @@ class ArtworkModel {
   /// Universal engagement statistics
   final EngagementStats engagementStats;
 
+  /// Display name of the artist
+  final String artistName;
+
   /// Timestamp when the artwork was created
   final DateTime createdAt;
 
@@ -242,27 +199,6 @@ class ArtworkModel {
   /// User ID of the current highest bidder
   final String? currentHighestBidder;
 
-  /// Whether this artwork is enabled for Art Battles
-  final bool artBattleEnabled;
-
-  /// Current status in Art Battle system
-  final ArtBattleStatus artBattleStatus;
-
-  /// Score in Art Battle system (wins - losses)
-  final int artBattleScore;
-
-  /// Number of appearances in Art Battles
-  final int artBattleAppearances;
-
-  /// Number of wins in Art Battles
-  final int artBattleWins;
-
-  /// Last time this artwork was shown in a battle
-  final DateTime? artBattleLastShownAt;
-
-  /// Last time this artwork won a battle
-  final DateTime? artBattleLastWinAt;
-
   ArtworkModel({
     required this.id,
     required this.userId,
@@ -290,6 +226,7 @@ class ArtworkModel {
     this.isPublic = true,
     this.externalLink,
     this.viewCount = 0,
+    this.artistName = 'Unknown Artist',
     EngagementStats? engagementStats,
     required this.createdAt,
     required this.updatedAt,
@@ -310,13 +247,6 @@ class ArtworkModel {
     this.auctionStatus,
     this.currentHighestBid,
     this.currentHighestBidder,
-    this.artBattleEnabled = false,
-    this.artBattleStatus = ArtBattleStatus.eligible,
-    this.artBattleScore = 0,
-    this.artBattleAppearances = 0,
-    this.artBattleWins = 0,
-    this.artBattleLastShownAt,
-    this.artBattleLastWinAt,
   }) : // Create defensive copies of all lists to prevent external modification
        additionalImageUrls = List.unmodifiable(additionalImageUrls),
        videoUrls = List.unmodifiable(videoUrls),
@@ -374,6 +304,10 @@ class ArtworkModel {
       isPublic: FirestoreUtils.safeBool(data['isPublic'], true),
       externalLink: FirestoreUtils.safeString(data['externalLink']),
       viewCount: FirestoreUtils.safeInt(data['viewCount']),
+      artistName: FirestoreUtils.safeStringDefault(
+        data['artistName'],
+        'Unknown Artist',
+      ),
       engagementStats: EngagementStats.fromFirestore(
         data['engagementStats'] as Map<String, dynamic>? ?? data,
       ),
@@ -405,23 +339,10 @@ class ArtworkModel {
       auctionStatus: FirestoreUtils.safeString(data['auctionStatus']),
       currentHighestBid: FirestoreUtils.safeDouble(data['currentHighestBid']),
       currentHighestBidder: FirestoreUtils.safeString(data['currentHighestBidder']),
-      artBattleEnabled: FirestoreUtils.safeBool(data['artBattleEnabled'], false),
-      artBattleStatus: ArtBattleStatus.fromString(
-        FirestoreUtils.safeStringDefault(data['artBattleStatus'], 'eligible'),
-      ),
-      artBattleScore: FirestoreUtils.safeInt(data['artBattleScore']),
-      artBattleAppearances: FirestoreUtils.safeInt(data['artBattleAppearances']),
-      artBattleWins: FirestoreUtils.safeInt(data['artBattleWins']),
-      artBattleLastShownAt: data['artBattleLastShownAt'] != null
-          ? FirestoreUtils.safeDateTime(data['artBattleLastShownAt'])
-          : null,
-      artBattleLastWinAt: data['artBattleLastWinAt'] != null
-          ? FirestoreUtils.safeDateTime(data['artBattleLastWinAt'])
-          : null,
     );
   }
 
-  /// Convert ArtworkModel to Firestore data
+  /// Convert ArtworkModel to Map for Firestore
   Map<String, dynamic> toFirestore() {
     return {
       'userId': userId,
@@ -434,28 +355,29 @@ class ArtworkModel {
       'audioUrls': audioUrls,
       'medium': medium,
       'styles': styles,
-      'dimensions': dimensions,
-      'materials': materials,
-      'location': location,
-      'tags': tags,
-      'hashtags': hashtags,
-      'keywords': keywords,
-      'price': price,
+      if (dimensions != null) 'dimensions': dimensions,
+      if (materials != null) 'materials': materials,
+      if (location != null) 'location': location,
+      if (tags != null) 'tags': tags,
+      if (hashtags != null) 'hashtags': hashtags,
+      if (keywords != null) 'keywords': keywords,
+      if (price != null) 'price': price,
       'isForSale': isForSale,
       'isSold': isSold,
-      'yearCreated': yearCreated,
-      'commissionRate': commissionRate,
+      if (yearCreated != null) 'yearCreated': yearCreated,
+      if (commissionRate != null) 'commissionRate': commissionRate,
       'isFeatured': isFeatured,
       'isPublic': isPublic,
-      'externalLink': externalLink,
+      if (externalLink != null) 'externalLink': externalLink,
       'viewCount': viewCount,
+      'artistName': artistName,
       'engagementStats': engagementStats.toFirestore(),
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
       'moderationStatus': moderationStatus.value,
       'flagged': flagged,
-      'flaggedAt': flaggedAt != null ? Timestamp.fromDate(flaggedAt!) : null,
-      'moderationNotes': moderationNotes,
+      if (flaggedAt != null) 'flaggedAt': Timestamp.fromDate(flaggedAt!),
+      if (moderationNotes != null) 'moderationNotes': moderationNotes,
       'contentType': contentType.value,
       'isSerializing': isSerializing,
       if (totalChapters != null) 'totalChapters': totalChapters,
@@ -464,7 +386,6 @@ class ArtworkModel {
       if (serializationConfig != null)
         'serializationConfig': serializationConfig,
       'auctionEnabled': auctionEnabled,
-      'isAuction': auctionEnabled,
       if (auctionEnd != null) 'auctionEnd': Timestamp.fromDate(auctionEnd!),
       if (startingPrice != null) 'startingPrice': startingPrice,
       if (reservePrice != null) 'reservePrice': reservePrice,
@@ -472,23 +393,16 @@ class ArtworkModel {
       if (currentHighestBid != null) 'currentHighestBid': currentHighestBid,
       if (currentHighestBidder != null)
         'currentHighestBidder': currentHighestBidder,
-      'artBattleEnabled': artBattleEnabled,
-      'artBattleStatus': artBattleStatus.value,
-      'artBattleScore': artBattleScore,
-      'artBattleAppearances': artBattleAppearances,
-      'artBattleWins': artBattleWins,
-      if (artBattleLastShownAt != null)
-        'artBattleLastShownAt': Timestamp.fromDate(artBattleLastShownAt!),
-      if (artBattleLastWinAt != null)
-        'artBattleLastWinAt': Timestamp.fromDate(artBattleLastWinAt!),
     };
   }
 
-  /// Create a copy of the artwork model with updated fields
+  /// Getters for compatibility and convenience
+  int get likeCount => engagementStats.likeCount;
+  int get commentCount => engagementStats.commentCount;
+  int get likesCount => engagementStats.likeCount;
+
+  /// Create a copy of this ArtworkModel with updated fields
   ArtworkModel copyWith({
-    String? id,
-    String? userId,
-    String? artistProfileId,
     String? title,
     String? description,
     String? imageUrl,
@@ -512,8 +426,8 @@ class ArtworkModel {
     bool? isPublic,
     String? externalLink,
     int? viewCount,
+    String? artistName,
     EngagementStats? engagementStats,
-    DateTime? createdAt,
     DateTime? updatedAt,
     ArtworkModerationStatus? moderationStatus,
     bool? flagged,
@@ -534,9 +448,9 @@ class ArtworkModel {
     String? currentHighestBidder,
   }) {
     return ArtworkModel(
-      id: id ?? this.id,
-      userId: userId ?? this.userId,
-      artistProfileId: artistProfileId ?? this.artistProfileId,
+      id: id,
+      userId: userId,
+      artistProfileId: artistProfileId,
       title: title ?? this.title,
       description: description ?? this.description,
       imageUrl: imageUrl ?? this.imageUrl,
@@ -560,8 +474,9 @@ class ArtworkModel {
       isPublic: isPublic ?? this.isPublic,
       externalLink: externalLink ?? this.externalLink,
       viewCount: viewCount ?? this.viewCount,
+      artistName: artistName ?? this.artistName,
       engagementStats: engagementStats ?? this.engagementStats,
-      createdAt: createdAt ?? this.createdAt,
+      createdAt: createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       moderationStatus: moderationStatus ?? this.moderationStatus,
       flagged: flagged ?? this.flagged,
@@ -582,17 +497,4 @@ class ArtworkModel {
       currentHighestBidder: currentHighestBidder ?? this.currentHighestBidder,
     );
   }
-
-  // Backward compatibility getters for migration period
-  int get likeCount => engagementStats.likeCount;
-  int get commentCount => engagementStats.commentCount;
-  int get applauseCount => engagementStats.likeCount;
-
-  // Dashboard compatibility getters
-  int get likesCount => engagementStats.likeCount;
-  int get viewsCount => viewCount;
-
-  // Artist name getter - this would need to be populated from artist profile data
-  // For now, return a placeholder that can be overridden when artist data is available
-  String get artistName => 'Unknown Artist';
 }

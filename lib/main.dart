@@ -255,7 +255,11 @@ class _PendingTapTrace {
 }
 
 Future<void> _initializeCoreServices() async {
-  await _guardedInit(EnvLoader().init, 'EnvLoader');
+  await _guardedInit(
+    EnvLoader().init,
+    'EnvLoader',
+    timeout: const Duration(seconds: 10),
+  );
   final envValid = EnvValidator().validateAll();
   if (!envValid && kReleaseMode) {
     throw Exception('Missing required environment variables');

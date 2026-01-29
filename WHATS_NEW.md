@@ -1,9 +1,6 @@
 # What's New
-# Jan 26 2026  
-    Updates done:
-        - environment variables resolved
-        - payment structure confirmed throughout app
+# Jan 28 2026
 
-    To do:
-        - Revamp Art Battle
-   
+
+art_community_hub
+    user taps Artwork (tab) - User taps Auctions (tab) User taps Art for auction, - says art not available ERROR

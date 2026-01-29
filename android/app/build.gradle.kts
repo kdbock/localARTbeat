@@ -63,7 +63,7 @@ android {
         applicationId = "com.wordnerd.artbeat"
         minSdk = 24  // Android 7.0 (2016) - Explicit minimum for Firebase compatibility
         targetSdk = 36  // Updated to match compileSdk
-        versionCode = 2
+        versionCode = 100
         versionName = "2.6.0"
         
         // Enable multidex for large app
@@ -101,12 +101,15 @@ android {
                 signingConfigs.getByName("debug")
             }
             
-            // Disable R8/ProGuard minification due to XML parsing issues in dependencies
+            // Enable R8/ProGuard with proper Stripe 3D Secure rules
+            // UPDATED: Re-enabled minification with comprehensive Stripe ProGuard rules
+            // to fix 3D Secure challenge crashes (PassiveChallengeViewModel, AttestationViewModel, etc.)
+            // TEMPORARY: Disabled due to R8 XML parsing error
             isMinifyEnabled = false
             isShrinkResources = false
             
-            // ProGuard rules with Stripe SDK compatibility (disabled for now)
-            // proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            // ProGuard rules with Stripe SDK compatibility
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
         
         debug {

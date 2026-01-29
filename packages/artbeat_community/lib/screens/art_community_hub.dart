@@ -34,7 +34,6 @@ import 'package:artbeat_artwork/artbeat_artwork.dart';
 import 'package:artbeat_artist/artbeat_artist.dart' show ArtistOnboardScreen;
 import 'package:google_fonts/google_fonts.dart';
 
-import 'art_battle_screen.dart';
 import 'artist_feed_screen.dart';
 import 'feed/comments_screen.dart';
 import 'feed/create_post_screen.dart';
@@ -557,6 +556,279 @@ class _CommissionsTabState extends State<CommissionsTab>
 }
 
 /// ------------------------------------------------------------
+/// DiscoveryTab – Art Marketplace (Sale, Auction, Commissions)
+/// ------------------------------------------------------------
+class DiscoveryTab extends StatefulWidget {
+  final String searchQuery;
+
+  const DiscoveryTab({super.key, this.searchQuery = ''});
+
+  @override
+  State<DiscoveryTab> createState() => _DiscoveryTabState();
+}
+
+class _DiscoveryTabState extends State<DiscoveryTab>
+    with SingleTickerProviderStateMixin {
+  late TabController _subTabController;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    _subTabController = TabController(length: 3, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _subTabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        const SizedBox(height: 12),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: _Glass(
+            radius: 18,
+            blur: 14,
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: TabBar(
+              controller: _subTabController,
+              indicator: BoxDecoration(
+                color: _LAB.glassFill(0.18),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: _LAB.glassBorder(0.22)),
+              ),
+              labelColor: _LAB.textPrimary,
+              unselectedLabelColor: _LAB.textSecondary,
+              dividerColor: Colors.transparent,
+              labelStyle: const TextStyle(
+                fontWeight: FontWeight.w900,
+                fontSize: 12,
+              ),
+              unselectedLabelStyle: const TextStyle(
+                fontWeight: FontWeight.w800,
+                fontSize: 12,
+              ),
+              tabs: [
+                Tab(text: 'artwork_for_sale'.tr()),
+                Tab(text: 'store_tab_auctions'.tr()),
+                Tab(text: 'artwork_filter_featured'.tr()),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Expanded(
+          child: TabBarView(
+            controller: _subTabController,
+            children: [
+              _buildArtworkGrid('sale'),
+              _buildArtworkGrid('auction'),
+              _buildArtworkGrid('featured'),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildArtworkGrid(String type) {
+    Query query =
+        _firestore.collection('artwork').where('isPublic', isEqualTo: true);
+
+    if (type == 'sale') {
+      query = query.where('isForSale', isEqualTo: true);
+    } else if (type == 'auction') {
+      query = query.where('auctionEnabled', isEqualTo: true);
+    } else if (type == 'featured') {
+      query = query.where('isFeatured', isEqualTo: true);
+    }
+
+    return StreamBuilder<QuerySnapshot>(
+      stream:
+          query.orderBy('createdAt', descending: true).limit(50).snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(_LAB.teal),
+            ),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return Center(
+            child: Text(
+              'Error: ${snapshot.error}',
+              style: const TextStyle(color: _LAB.textPrimary),
+            ),
+          );
+        }
+
+        final docs = snapshot.data?.docs ?? [];
+        if (docs.isEmpty) {
+          return const Center(
+            child: Text(
+              'No artwork found',
+              style: TextStyle(color: _LAB.textSecondary),
+            ),
+          );
+        }
+
+        // Apply search filter if any
+        final filteredDocs = docs.where((doc) {
+          if (widget.searchQuery.isEmpty) return true;
+          final data = doc.data() as Map<String, dynamic>;
+          final title = (data['title'] as String? ?? '').toLowerCase();
+          final artist = (data['artistName'] as String? ?? '').toLowerCase();
+          final q = widget.searchQuery.toLowerCase();
+          return title.contains(q) || artist.contains(q);
+        }).toList();
+
+        if (filteredDocs.isEmpty) {
+          return Center(
+            child: Text(
+              'No results for "${widget.searchQuery}"',
+              style: const TextStyle(color: _LAB.textSecondary),
+            ),
+          );
+        }
+
+        return GridView.builder(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 120),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            childAspectRatio: 0.75,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+          ),
+          itemCount: filteredDocs.length,
+          itemBuilder: (context, index) {
+            final data = filteredDocs[index].data() as Map<String, dynamic>;
+            return _buildArtworkCard(filteredDocs[index].id, data);
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildArtworkCard(String id, Map<String, dynamic> data) {
+    final title = (data['title'] as String?) ?? 'Untitled';
+    final artistName = (data['artistName'] as String?) ?? 'Unknown Artist';
+    final imageUrl = (data['imageUrl'] as String?) ?? '';
+    final price = (data['price'] as num?)?.toDouble() ?? 0.0;
+    final isAuction =
+        data['auctionEnabled'] == true || data['isAuction'] == true;
+    final currentBid = (data['currentHighestBid'] as num?)?.toDouble() ??
+        (data['startingPrice'] as num?)?.toDouble() ??
+        0.0;
+
+    return GestureDetector(
+      onTap: () => Navigator.pushNamed(
+        context,
+        '/artwork/detail',
+        arguments: {'id': id},
+      ),
+      child: _Glass(
+        padding: EdgeInsets.zero,
+        radius: 20,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: ClipRRect(
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(20)),
+                child: SecureNetworkImage(
+                  imageUrl: imageUrl,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w900,
+                      color: _LAB.textPrimary,
+                    ),
+                  ),
+                  Text(
+                    artistName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: _LAB.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      if (isAuction) ...[
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: const Text(
+                            'AUCTION',
+                            style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.orange,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          '\$${currentBid.toStringAsFixed(0)}',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w900,
+                            color: _LAB.teal,
+                          ),
+                        ),
+                      ] else ...[
+                        Text(
+                          '\$${price.toStringAsFixed(0)}',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w900,
+                            color: _LAB.teal,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// ------------------------------------------------------------
 /// ArtCommunityHub – themed scaffold + drawer + HUD + tabs
 /// ------------------------------------------------------------
 class ArtCommunityHub extends StatefulWidget {
@@ -602,8 +874,8 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
     final currentTab = _tabController.index;
     final tabLabels = [
       'community_hub_tab_feed'.tr(),
-      'community_hub_tab_art_battle'.tr(),
       'community_hub_tab_artists'.tr(),
+      'community_hub_tab_artwork'.tr(),
       'community_hub_tab_commissions'.tr(),
     ];
     final tabName = tabLabels[currentTab];
@@ -716,15 +988,17 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
   }
 
   void _handleHudNavigation(CommunityHudDestination destination) {
-    final navigator = Navigator.of(context);
+    if (destination == CommunityHudDestination.artDiscovery) {
+      _tabController.animateTo(2);
+      return;
+    }
 
+    final navigator = Navigator.of(context);
     late final Widget screen;
+
     switch (destination) {
       case CommunityHudDestination.trending:
         screen = const TrendingContentScreen();
-        break;
-      case CommunityHudDestination.artBattle:
-        screen = const ArtBattleScreen();
         break;
       case CommunityHudDestination.createPost:
         screen = const CreatePostScreen();
@@ -741,6 +1015,9 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
       case CommunityHudDestination.userPosts:
         screen = const UserPostsScreen();
         break;
+      case CommunityHudDestination.artDiscovery:
+        // Handled above
+        return;
     }
 
     navigator.push<Widget>(
@@ -843,12 +1120,12 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
                           icon: const Icon(Icons.feed, size: 16),
                         ),
                         Tab(
-                          text: 'community_hub_tab_art_battle'.tr(),
-                          icon: const Icon(Icons.sports_kabaddi, size: 16),
-                        ),
-                        Tab(
                           text: 'community_hub_tab_artists'.tr(),
                           icon: const Icon(Icons.palette, size: 16),
+                        ),
+                        Tab(
+                          text: 'community_hub_tab_artwork'.tr(),
+                          icon: const Icon(Icons.explore, size: 16),
                         ),
                         Tab(
                           text: 'community_hub_tab_commissions'.tr(),
@@ -923,9 +1200,11 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
                 communityService: _communityService,
                 searchQuery: _searchQuery,
               ),
-              const ArtBattleTab(),
               ArtistsGalleryTab(
                 communityService: _communityService,
+                searchQuery: _searchQuery,
+              ),
+              DiscoveryTab(
                 searchQuery: _searchQuery,
               ),
               const CommissionsTab(),
@@ -2522,98 +2801,6 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
           ],
         ),
       ),
-    );
-  }
-}
-
-/// ------------------------------------------------------------
-/// Art Battle tab – dedicated space for artwork battles
-/// ------------------------------------------------------------
-class ArtBattleTab extends StatefulWidget {
-  const ArtBattleTab({super.key});
-
-  @override
-  State<ArtBattleTab> createState() => _ArtBattleTabState();
-}
-
-class _ArtBattleTabState extends State<ArtBattleTab> {
-  @override
-  Widget build(BuildContext context) {
-    return CustomScrollView(
-      slivers: [
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: _Glass(
-              radius: 18,
-              blur: 14,
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const _GradientIconChip(
-                        icon: Icons.sports_kabaddi,
-                        size: 40,
-                      ),
-                      const SizedBox(width: 12),
-                      const Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Art Battle',
-                              style: TextStyle(
-                                color: _LAB.textPrimary,
-                                fontWeight: FontWeight.w900,
-                                fontSize: 18,
-                              ),
-                            ),
-                            Text(
-                              'Vote on head-to-head artwork battles',
-                              style: TextStyle(
-                                color: _LAB.textSecondary,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      ElevatedButton(
-                        onPressed: () =>
-                            Navigator.pushNamed(context, '/art-battle'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: _LAB.teal,
-                          foregroundColor: Colors.white,
-                        ),
-                        child: const Text('Start Battle'),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        // Add current battles list here
-        const SliverPadding(
-          padding: EdgeInsets.symmetric(horizontal: 16),
-          sliver: SliverToBoxAdapter(
-            child: _Glass(
-              radius: 18,
-              blur: 14,
-              padding: EdgeInsets.all(16),
-              child: Center(
-                child: Text(
-                  'Current battles will be displayed here',
-                  style: TextStyle(color: _LAB.textSecondary),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

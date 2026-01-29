@@ -27,7 +27,7 @@ export GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
 
 # Stripe Publishable Key (Rotated October 3, 2025)
 # Current key expires in 8 days
-export STRIPE_PUBLISHABLE_KEY=pk_live_51QpJ6iAO5ulTKoALLtQFut6aQIyhLvrcUWRgA8RINvB6xwa37NeKymcV5lM96Yg6oOXvMQuwjPzP5LbE6I5ktHWG00Xk24gmn2
+export STRIPE_PUBLISHABLE_KEY=pk_live_51QpJ6iAO5ulTKoALD0MCyfwOCP2ivyVgKNK457uvrjJ0N9uj9Y7uSAtWfYq7nyuFZFqMjF4BHaDOYuMpwxd0PdbK00Ooktqk6z
 
 # Firebase Region
 export FIREBASE_REGION=us-central1

@@ -14,7 +14,6 @@ import '../screens/portfolios/portfolios_screen.dart';
 import '../screens/studios/studios_screen.dart';
 import '../screens/commissions/commission_hub_screen.dart';
 import '../screens/boosts/boosts_screen.dart';
-import '../screens/art_battle_screen.dart';
 
 import '../src/screens/community_artists_screen.dart';
 import '../screens/settings/quiet_mode_screen.dart';
@@ -83,9 +82,9 @@ class _CommunityDrawerState extends State<CommunityDrawer> {
         screenBuilder: () => const TrendingContentScreen(),
       ),
       _DrawerEntry(
-        icon: Icons.local_fire_department,
-        titleBuilder: (_) => 'Art Battle',
-        screenBuilder: () => const ArtBattleScreen(),
+        icon: Icons.explore,
+        titleBuilder: (_) => 'community_drawer_art_discovery'.tr(),
+        screenBuilder: () => const artwork.ArtworkDiscoveryScreen(),
       ),
       _DrawerEntry(
         icon: Icons.museum,

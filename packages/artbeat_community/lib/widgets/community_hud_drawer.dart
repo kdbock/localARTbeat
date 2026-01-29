@@ -9,7 +9,7 @@ import 'drawer_section.dart' as lab_drawer;
 /// Targets that the HUD drawer can navigate to beyond switching tabs.
 enum CommunityHudDestination {
   trending,
-  artBattle,
+  artDiscovery,
   createPost,
   artworkBrowse,
   artistOnboarding,
@@ -89,11 +89,40 @@ class CommunityHudDrawer extends StatelessWidget {
                     ),
                     HudPillTile(
                       icon: Icons.feed,
-                      title: 'community_hub_drawer_item_feed_title'.tr(),
+                      title: 'community_hub_tab_feed'.tr(),
                       subtitle: 'community_hub_drawer_item_feed_subtitle'.tr(),
                       selected: selectedTabIndex == 0,
                       accent: HudPalette.teal,
                       onTap: () => closeDrawerAnd(() => onTabSelected(0)),
+                    ),
+                    HudPillTile(
+                      icon: Icons.palette,
+                      title: 'community_hub_tab_artists'.tr(),
+                      subtitle:
+                          'community_hub_drawer_item_artists_gallery_subtitle'
+                              .tr(),
+                      selected: selectedTabIndex == 1,
+                      accent: HudPalette.purple,
+                      onTap: () => closeDrawerAnd(() => onTabSelected(1)),
+                    ),
+                    HudPillTile(
+                      icon: Icons.explore,
+                      title: 'community_hub_tab_artwork'.tr(),
+                      subtitle: 'Discover new art, auctions and commissions',
+                      selected: selectedTabIndex == 2,
+                      accent: HudPalette.pink,
+                      onTap: () => closeDrawerAnd(() => onTabSelected(2)),
+                    ),
+                    HudPillTile(
+                      icon: Icons.work,
+                      title: 'community_hub_tab_commissions'.tr(),
+                      subtitle: 'Manage your active and pending commissions',
+                      selected: selectedTabIndex == 3,
+                      accent: HudPalette.yellow,
+                      onTap: () => closeDrawerAnd(() => onTabSelected(3)),
+                    ),
+                    lab_drawer.DrawerSection(
+                      title: 'community_hub_drawer_section_discover'.tr(),
                     ),
                     HudPillTile(
                       icon: Icons.trending_up,
@@ -106,13 +135,12 @@ class CommunityHudDrawer extends StatelessWidget {
                       ),
                     ),
                     HudPillTile(
-                      icon: Icons.sports_martial_arts,
-                      title: 'community_hub_drawer_item_art_battle_title'.tr(),
-                      subtitle: 'community_hub_drawer_item_art_battle_subtitle'
-                          .tr(),
-                      accent: HudPalette.pink,
+                      icon: Icons.radar,
+                      title: 'community_drawer_art_discovery'.tr(),
+                      subtitle: 'Find art around you in real-time',
+                      accent: HudPalette.teal,
                       onTap: () => closeDrawerAnd(
-                        () => onNavigate(CommunityHudDestination.artBattle),
+                        () => onNavigate(CommunityHudDestination.artDiscovery),
                       ),
                     ),
                     lab_drawer.DrawerSection(
@@ -126,22 +154,6 @@ class CommunityHudDrawer extends StatelessWidget {
                       accent: HudPalette.pink,
                       onTap: () => closeDrawerAnd(
                         () => onNavigate(CommunityHudDestination.createPost),
-                      ),
-                    ),
-                    lab_drawer.DrawerSection(
-                      title: 'community_hub_drawer_section_artists'.tr(),
-                    ),
-                    HudPillTile(
-                      icon: Icons.palette,
-                      title: 'community_hub_drawer_item_artists_gallery_title'
-                          .tr(),
-                      subtitle:
-                          'community_hub_drawer_item_artists_gallery_subtitle'
-                              .tr(),
-                      selected: selectedTabIndex == 1,
-                      accent: HudPalette.purple,
-                      onTap: () => closeDrawerAnd(
-                        () => onNavigate(CommunityHudDestination.artworkBrowse),
                       ),
                     ),
                     HudPillTile(
@@ -162,13 +174,23 @@ class CommunityHudDrawer extends StatelessWidget {
                       title: 'community_hub_drawer_section_discover'.tr(),
                     ),
                     HudPillTile(
-                      icon: Icons.topic,
-                      title: 'community_hub_drawer_item_topics_title'.tr(),
-                      subtitle: 'community_hub_drawer_item_topics_subtitle'
+                      icon: Icons.trending_up,
+                      title: 'community_hub_drawer_item_trending_title'.tr(),
+                      subtitle: 'community_hub_drawer_item_trending_subtitle'
                           .tr(),
-                      selected: selectedTabIndex == 2,
-                      accent: HudPalette.green,
-                      onTap: () => closeDrawerAnd(() => onTabSelected(2)),
+                      accent: HudPalette.yellow,
+                      onTap: () => closeDrawerAnd(
+                        () => onNavigate(CommunityHudDestination.trending),
+                      ),
+                    ),
+                    HudPillTile(
+                      icon: Icons.radar,
+                      title: 'community_drawer_art_discovery'.tr(),
+                      subtitle: 'Find art around you in real-time',
+                      accent: HudPalette.teal,
+                      onTap: () => closeDrawerAnd(
+                        () => onNavigate(CommunityHudDestination.artDiscovery),
+                      ),
                     ),
                     HudPillTile(
                       icon: Icons.leaderboard,

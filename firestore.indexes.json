@@ -174,23 +174,7 @@
         { "fieldPath": "period", "order": "DESCENDING" }
       ]
     },
-    {
-      "collectionGroup": "artwork",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "artBattleEnabled", "order": "ASCENDING" },
-        { "fieldPath": "artBattleStatus", "order": "ASCENDING" },
-        { "fieldPath": "artBattleScore", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "art_battle_votes",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "userId", "order": "ASCENDING" },
-        { "fieldPath": "timestamp", "order": "DESCENDING" }
-      ]
-    },
+
     {
       "collectionGroup": "artwork",
       "queryScope": "COLLECTION",
@@ -455,15 +439,7 @@
         { "fieldPath": "createdAt", "order": "DESCENDING" }
       ]
     },
-    {
-      "collectionGroup": "artworks",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "artBattleEnabled", "order": "ASCENDING" },
-        { "fieldPath": "artBattleStatus", "order": "ASCENDING" },
-        { "fieldPath": "artBattleScore", "order": "DESCENDING" }
-      ]
-    },
+
     {
       "collectionGroup": "comments",
       "queryScope": "COLLECTION",
@@ -907,14 +883,7 @@
         { "fieldPath": "createdAt", "order": "DESCENDING" }
       ]
     },
-    {
-      "collectionGroup": "artwork",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "artBattleEnabled", "order": "ASCENDING" },
-        { "fieldPath": "artBattleStatus", "order": "ASCENDING" }
-      ]
-    },
+
     {
       "collectionGroup": "subscriptions",
       "queryScope": "COLLECTION",
@@ -1364,15 +1333,7 @@
         { "fieldPath": "timestamp", "order": "DESCENDING" }
       ]
     },
-    {
-      "collectionGroup": "artwork",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "artBattleEnabled", "order": "ASCENDING" },
-        { "fieldPath": "artBattleStatus", "order": "ASCENDING" },
-        { "fieldPath": "artBattleScore", "order": "DESCENDING" }
-      ]
-    },
+
     {
       "collectionGroup": "commission_requests",
       "queryScope": "COLLECTION",

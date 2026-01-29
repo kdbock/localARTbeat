@@ -139,15 +139,22 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
       // Get artwork count and other analytics
       final artworkCount = await _getArtworkCount(userId);
       final profileViews = await _getProfileViews(userId);
-      final artBattleStats = await _getArtBattleStats(userId);
 
-      // Get Artist XP from user document
+      // Get Artist XP and follower count from user document and profile
       final userDoc = await FirebaseFirestore.instance
           .collection('users')
           .doc(userId)
           .get();
       final artistXP = userDoc.exists
           ? (userDoc.data()?['artistXP'] as int? ?? 0)
+          : 0;
+
+      final profileDoc = await FirebaseFirestore.instance
+          .collection('artistProfiles')
+          .doc(userId)
+          .get();
+      final followerCount = profileDoc.exists
+          ? (profileDoc.data()?['followerCount'] as int? ?? 0)
           : 0;
 
       final momentumDoc = await FirebaseFirestore.instance
@@ -171,9 +178,7 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
         'artworkCount': artworkCount,
         'profileViews': profileViews,
         'totalSales': _earnings?.totalEarnings ?? 0.0,
-        'artBattleVotes': artBattleStats['totalVotes'] ?? 0,
-        'artBattleAppearances': artBattleStats['totalAppearances'] ?? 0,
-        'artBattleWins': artBattleStats['totalWins'] ?? 0,
+        'followerCount': followerCount,
         'artistXP': artistXP,
         'momentum': decayedMomentum,
         'weeklyMomentum': weeklyMomentum,
@@ -223,34 +228,6 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
       return snapshot.docs.length;
     } catch (e) {
       return 0;
-    }
-  }
-
-  Future<Map<String, int>> _getArtBattleStats(String userId) async {
-    try {
-      final snapshot = await FirebaseFirestore.instance
-          .collection('artworks')
-          .where('artistId', isEqualTo: userId)
-          .get();
-
-      int totalVotes = 0;
-      int totalAppearances = 0;
-      int totalWins = 0;
-
-      for (final doc in snapshot.docs) {
-        final data = doc.data();
-        totalVotes += (data['artBattleScore'] as int?) ?? 0;
-        totalAppearances += (data['artBattleAppearances'] as int?) ?? 0;
-        totalWins += (data['artBattleWins'] as int?) ?? 0;
-      }
-
-      return {
-        'totalVotes': totalVotes,
-        'totalAppearances': totalAppearances,
-        'totalWins': totalWins,
-      };
-    } catch (e) {
-      return {'totalVotes': 0, 'totalAppearances': 0, 'totalWins': 0};
     }
   }
 
@@ -605,9 +582,9 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
                   ),
                   Expanded(
                     child: _buildCompactStat(
-                      _analytics['artBattleWins']?.toString() ?? '0',
-                      'Battle Wins',
-                      Icons.emoji_events,
+                      _analytics['followerCount']?.toString() ?? '0',
+                      'Followers',
+                      Icons.people,
                       Colors.amber,
                     ),
                   ),

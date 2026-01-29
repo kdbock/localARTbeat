@@ -238,7 +238,16 @@ class UnifiedPaymentService {
       final publishableKey = EnvLoader().get('STRIPE_PUBLISHABLE_KEY');
       if (publishableKey.isNotEmpty) {
         Stripe.publishableKey = publishableKey;
-        AppLogger.info('✅ Stripe initialized');
+
+        // Configure Stripe for better 3D Secure / SCA handling
+        if (Platform.isAndroid) {
+          // Enable merchant-side confirmation for 3D Secure challenges
+          // This prevents NoArgsException crashes in PassiveChallengeViewModel
+          Stripe.merchantIdentifier = 'com.wordnerd.artbeat';
+          AppLogger.info('✅ Stripe initialized with Android 3DS configuration');
+        } else {
+          AppLogger.info('✅ Stripe initialized');
+        }
       } else {
         AppLogger.warning('⚠️ Stripe publishable key not found');
       }

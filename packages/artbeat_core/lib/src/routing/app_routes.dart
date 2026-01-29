@@ -172,7 +172,7 @@ class AppRoutes {
   static const String communityFeatured = '/community/featured';
   static const String community = '/community';
   static const String artCommunityHub = '/community/hub';
-  static const String artBattle = '/art-battle';
+  static const String artDiscovery = '/art-discovery';
 
   // Events routes
   static const String events = '/events';

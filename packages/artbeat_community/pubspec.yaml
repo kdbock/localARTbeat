@@ -41,7 +41,7 @@ dependencies:
   flutter_svg: ^2.0.10+1
   profanity_filter: ^2.0.0
   url_launcher: ^6.2.5
-  flutter_stripe: ^12.1.0
+  flutter_stripe: ^12.2.0  # Latest with enhanced ProGuard rules
   uuid: ^4.2.1
   geolocator: ^14.0.1
   http: ^1.2.0
@@ -52,7 +52,7 @@ dependencies:
   audioplayers: ^6.0.0
   google_fonts: ^7.1.0
   image_editor_plus: ^1.0.4
-  file_picker: ^10.3.8
+  file_picker: ^8.1.6
   easy_localization: ^3.0.7
 
 flutter:

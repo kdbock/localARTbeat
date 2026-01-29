@@ -42,7 +42,7 @@ dependencies:
   in_app_purchase: ^3.2.3
   in_app_purchase_android: ^0.4.0+6
   in_app_purchase_storekit: ^0.4.6
-  flutter_stripe: ^12.1.0
+  flutter_stripe: ^12.2.0  # Latest with enhanced ProGuard rules
   http: ^1.1.0
 
   # JWT for service account authentication

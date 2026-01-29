@@ -22,6 +22,9 @@ subprojects {
                 }
             }
         }
+        
+        // Exclude unavailable play-services-tapandpay from Stripe
+        exclude(group = "com.google.android.gms", module = "play-services-tapandpay")
     }
 }
 
