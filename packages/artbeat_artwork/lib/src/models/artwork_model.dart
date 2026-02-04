@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:artbeat_core/artbeat_core.dart'
-    show FirestoreUtils, EngagementStats, ArtworkContentType;
+    show FirestoreUtils, EngagementStats, ArtworkContentType, WritingMetadata;
 
 /// Moderation status for artwork
 enum ArtworkModerationStatus {
@@ -164,6 +164,9 @@ class ArtworkModel {
   /// Content type: visual, written, audio, or comic
   final ArtworkContentType contentType;
 
+  /// Optional metadata for written works (books, stories, poetry, etc.)
+  final WritingMetadata? writingMetadata;
+
   /// Whether this artwork is serialized (has chapters)
   final bool isSerializing;
 
@@ -236,6 +239,7 @@ class ArtworkModel {
     this.flaggedAt,
     this.moderationNotes,
     this.contentType = ArtworkContentType.visual,
+    this.writingMetadata,
     this.isSerializing = false,
     this.totalChapters,
     this.releasedChapters,
@@ -334,6 +338,11 @@ class ArtworkModel {
       contentType: ArtworkContentType.fromString(
         FirestoreUtils.safeStringDefault(data['contentType'], 'visual'),
       ),
+      writingMetadata: data['writingMetadata'] != null
+          ? WritingMetadata.fromJson(
+              data['writingMetadata'] as Map<String, dynamic>,
+            )
+          : null,
       isSerializing: FirestoreUtils.safeBool(data['isSerializing'], false),
       totalChapters: FirestoreUtils.safeInt(data['totalChapters']),
       releasedChapters: FirestoreUtils.safeInt(data['releasedChapters']),
@@ -393,6 +402,7 @@ class ArtworkModel {
       if (flaggedAt != null) 'flaggedAt': Timestamp.fromDate(flaggedAt!),
       if (moderationNotes != null) 'moderationNotes': moderationNotes,
       'contentType': contentType.value,
+      if (writingMetadata != null) 'writingMetadata': writingMetadata!.toJson(),
       'isSerializing': isSerializing,
       if (totalChapters != null) 'totalChapters': totalChapters,
       if (releasedChapters != null) 'releasedChapters': releasedChapters,
@@ -448,6 +458,7 @@ class ArtworkModel {
     DateTime? flaggedAt,
     String? moderationNotes,
     ArtworkContentType? contentType,
+    WritingMetadata? writingMetadata,
     bool? isSerializing,
     int? totalChapters,
     int? releasedChapters,
@@ -497,6 +508,7 @@ class ArtworkModel {
       flaggedAt: flaggedAt ?? this.flaggedAt,
       moderationNotes: moderationNotes ?? this.moderationNotes,
       contentType: contentType ?? this.contentType,
+      writingMetadata: writingMetadata ?? this.writingMetadata,
       isSerializing: isSerializing ?? this.isSerializing,
       totalChapters: totalChapters ?? this.totalChapters,
       releasedChapters: releasedChapters ?? this.releasedChapters,

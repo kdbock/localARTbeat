@@ -8,6 +8,7 @@ export 'notification_model.dart';
 export 'favorite_model.dart';
 export 'payment_method_model.dart';
 export 'user_type.dart'; // Add UserType export
+export 'writing_metadata.dart';
 
 // Universal engagement system
 export 'engagement_model.dart';
