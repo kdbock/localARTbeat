@@ -41,6 +41,7 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
   bool _isLoading = true;
   ArtistProfileModel? _artistProfile;
   List<artwork.ArtworkModel> _artwork = [];
+  List<artwork.ArtworkModel> _writtenWorks = [];
   String? _currentUserId;
   String? _artistProfileId; // Store the artist profile document ID
   bool _isFollowing = false;
@@ -195,11 +196,20 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
       final ArtistCommissionSettings? commissionSettings =
           results[2] as ArtistCommissionSettings?;
 
+      // Separate visual artwork from written works
+      final visualArtwork = artworks
+          .where((a) => a.contentType != ArtworkContentType.written)
+          .toList();
+      final writtenWorks = artworks
+          .where((a) => a.contentType == ArtworkContentType.written)
+          .toList();
+
       if (mounted) {
         setState(() {
           _artistProfile = artistProfile;
           _artistProfileId = artistProfile.id; // Store the document ID
-          _artwork = artworks;
+          _artwork = visualArtwork;
+          _writtenWorks = writtenWorks;
           _isFollowing = isFollowing;
           if (commissionSettings != null) {
             _commissionSettings = commissionSettings;
@@ -574,6 +584,45 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
                       }, childCount: _artwork.length),
                     )),
             ),
+            // Written works section
+            if (_writtenWorks.isNotEmpty) ...[
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(14, 24, 14, 0),
+                sliver: SliverToBoxAdapter(
+                  child: GlassCard(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const SectionHeader(
+                          title: '📚 Written Works',
+                          accentColor: Color(0xFF9D4EDD),
+                        ),
+                        Text(
+                          '${_writtenWorks.length} ${_writtenWorks.length == 1 ? 'work' : 'works'}',
+                          style: GoogleFonts.spaceGrotesk(
+                            color: Colors.white.withValues(alpha: 0.65),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(14, 14, 14, 20),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final work = _writtenWorks[index];
+                      return _buildWrittenWorkItem(work);
+                    },
+                    childCount: _writtenWorks.length,
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),
@@ -1365,4 +1414,125 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
       },
     );
   }
+
+  Widget _buildWrittenWorkItem(artwork.ArtworkModel work) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12.0),
+      child: InkWell(
+        onTap: () {
+          Navigator.pushNamed(
+            context,
+            '/artist/artwork-detail',
+            arguments: {'artworkId': work.id},
+          );
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: GlassCard(
+          radius: 12,
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Book cover/image
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  width: 60,
+                  height: 80,
+                  color: Colors.white.withValues(alpha: 0.05),
+                  child: work.imageUrl.isNotEmpty
+                      ? Image.network(
+                          work.imageUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Center(
+                              child: Icon(
+                                Icons.book,
+                                color: Colors.white.withValues(alpha: 0.5),
+                                size: 32,
+                              ),
+                            );
+                          },
+                        )
+                      : Center(
+                          child: Icon(
+                            Icons.book,
+                            color: Colors.white.withValues(alpha: 0.5),
+                            size: 32,
+                          ),
+                        ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              // Work info
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Title
+                    Text(
+                      work.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.spaceGrotesk(
+                        color: Colors.white.withValues(alpha: 0.95),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    // Genre and word count
+                    if (work.writingMetadata != null) ...[
+                      Wrap(
+                        spacing: 8,
+                        children: [
+                          if (work.writingMetadata!.genre != null)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF9D4EDD)
+                                    .withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                work.writingMetadata!.genre!,
+                                style: GoogleFonts.spaceGrotesk(
+                                  color: Colors.white.withValues(alpha: 0.8),
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          if (work.writingMetadata!.wordCount != null)
+                            Text(
+                              '${work.writingMetadata!.wordCount} words',
+                              style: GoogleFonts.spaceGrotesk(
+                                color: Colors.white.withValues(alpha: 0.65),
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ]
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              // Chevron
+              Icon(
+                Icons.chevron_right,
+                color: Colors.white.withValues(alpha: 0.5),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
+
