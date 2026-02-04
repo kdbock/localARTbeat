@@ -1105,10 +1105,7 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
                     color: Colors.white.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: const Text(
-                    '📚',
-                    style: TextStyle(fontSize: 14),
-                  ),
+                  child: const Text('📚', style: TextStyle(fontSize: 14)),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -1151,10 +1148,7 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
                     color: Colors.white.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: const Text(
-                    '📄',
-                    style: TextStyle(fontSize: 14),
-                  ),
+                  child: const Text('📄', style: TextStyle(fontSize: 14)),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -1197,10 +1191,7 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
                     color: Colors.white.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: const Text(
-                    '⏱️',
-                    style: TextStyle(fontSize: 14),
-                  ),
+                  child: const Text('⏱️', style: TextStyle(fontSize: 14)),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -1239,9 +1230,7 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.1),
-              ),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1273,4 +1262,3 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
     );
   }
 }
-

@@ -613,13 +613,10 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(14, 14, 14, 20),
                 sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final work = _writtenWorks[index];
-                      return _buildWrittenWorkItem(work);
-                    },
-                    childCount: _writtenWorks.length,
-                  ),
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    final work = _writtenWorks[index];
+                    return _buildWrittenWorkItem(work);
+                  }, childCount: _writtenWorks.length),
                 ),
               ),
             ],
@@ -1494,8 +1491,9 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF9D4EDD)
-                                    .withValues(alpha: 0.2),
+                                color: const Color(
+                                  0xFF9D4EDD,
+                                ).withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
@@ -1518,7 +1516,7 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
                             ),
                         ],
                       ),
-                    ]
+                    ],
                   ],
                 ),
               ),
@@ -1535,4 +1533,3 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
     );
   }
 }
-

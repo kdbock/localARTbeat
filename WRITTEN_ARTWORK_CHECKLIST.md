@@ -56,70 +56,74 @@
 ---
 
 ### Task 1.4: Update Upload UI ⏱️ 2 hours
-- [ ] Find artwork upload screens (likely in `/lib/screens/` or `/packages/artbeat_artist/lib/src/screens/`)
-- [ ] Add contentType selection widget (if not exists)
-- [ ] Add conditional UI that shows when contentType == literature:
-  - [ ] Genre text field
-  - [ ] Word count number field
-  - [ ] Serialized work checkbox
-  - [ ] Excerpt preview textarea
-- [ ] Capture these fields into WritingMetadata object
-- [ ] Pass writingMetadata to artwork creation call
-- [ ] Test manual upload
-- [ ] Commit: "feat: Add writing metadata UI to upload screen"
+- [x] Find artwork upload screens (likely in `/lib/screens/` or `/packages/artbeat_artist/lib/src/screens/`)
+- [x] Add contentType selection widget (if not exists)
+- [x] Add conditional UI that shows when contentType == literature:
+  - [x] Genre text field
+  - [x] Word count number field
+  - [x] Serialized work checkbox
+  - [x] Excerpt preview textarea
+- [x] Capture these fields into WritingMetadata object
+- [x] Pass writingMetadata to artwork creation call
+- [x] Test manual upload
+- [x] Commit: "feat: Integrate WritingMetadata into written content upload screen"
 
-**Files**: 1-3  
+**Files**: 1  
 **Lines of code**: ~50-80
+**Status**: ✅ COMPLETE
 
 ---
 
 ### Task 1.5: Update Artwork Display ⏱️ 2 hours
-- [ ] Find artwork detail screens
-- [ ] Add conditional check: `if (artwork.contentType == ArtworkContentType.literature)`
-- [ ] When true, show WritingMetadata section:
-  - [ ] Genre with icon (📖)
-  - [ ] Word count with icon (📄)
-  - [ ] Estimated read time with icon (⏱️)
-  - [ ] Excerpt preview (selectable text)
-- [ ] When false, keep existing visual art UI
-- [ ] Test manual view of uploaded book
-- [ ] Commit: "feat: Add literature display UI to artwork detail"
+- [x] Find artwork detail screens
+- [x] Add conditional check: `if (artwork.contentType == ArtworkContentType.literature)`
+- [x] When true, show WritingMetadata section:
+  - [x] Genre with icon (📖)
+  - [x] Word count with icon (📄)
+  - [x] Estimated read time with icon (⏱️)
+  - [x] Excerpt preview (selectable text)
+- [x] When false, keep existing visual art UI
+- [x] Test manual view of uploaded book
+- [x] Commit: "feat: Add literature display UI to artwork detail screens"
 
-**Files**: 2-3  
-**Lines of code**: ~60-100
+**Files**: 2  
+**Lines of code**: ~224
+**Status**: ✅ COMPLETE - Updated both artwork_detail_screen and written_content_detail_screen
 
 ---
 
 ### Task 1.6: Update Artist Profile ⏱️ 1.5 hours
-- [ ] Open artist profile screen
-- [ ] Add new section after visual artworks:
-  - [ ] Title: "📚 Written Works" (only show if has books)
-  - [ ] List all artwork with contentType == literature
-  - [ ] Show as book list (title, genre, word count)
-  - [ ] Link to full work details
-- [ ] Test on writer's profile
-- [ ] Commit: "feat: Add written works section to artist profile"
+- [x] Open artist profile screen
+- [x] Add new section after visual artworks:
+  - [x] Title: "📚 Written Works" (only show if has books)
+  - [x] List all artwork with contentType == literature
+  - [x] Show as book list (title, genre, word count)
+  - [x] Link to full work details
+- [x] Test on writer's profile
+- [x] Commit: "feat: Add written works section to artist profile"
 
-**Files**: 1-2  
-**Lines of code**: ~40-60
+**Files**: 1  
+**Lines of code**: ~171
+**Status**: ✅ COMPLETE - Added _writtenWorks state, separation logic, section UI, and _buildWrittenWorkItem method
 
 ---
 
 ### Task 1.7: Update Search/Discovery ⏱️ 1 hour
 - [ ] Open artwork service (`/packages/artbeat_artwork/lib/src/services/artwork_service.dart`)
 - [ ] Add method: `getPublishedWrittenWorks()`
-  - [ ] Query: where contentType == 'literature' AND isPublic == true
+  - [ ] Query: where contentType == 'written' AND isPublic == true
   - [ ] Order by createdAt descending
   - [ ] Support pagination (limit, startAfter)
 - [ ] Add method: `getWrittenWorksByGenre(String genre)`
-  - [ ] Query: where contentType == 'literature' AND genre == genre AND isPublic == true
+  - [ ] Query: where contentType == 'written' AND writingMetadata.genre == genre AND isPublic == true
 - [ ] Add method: `getWrittenWorksByArtist(String artistId)`
-  - [ ] Query: where contentType == 'literature' AND artistProfileId == artistId
+  - [ ] Query: where contentType == 'written' AND artistProfileId == artistId
 - [ ] Test queries return correct results
 - [ ] Commit: "feat: Add literature search queries"
 
-**Files**: 1-2  
+**Files**: 1  
 **Lines of code**: ~40-60
+**Status**: ⏳ IN PROGRESS
 
 ---
 
@@ -130,28 +134,28 @@
 | 1.1 Enum | 30 min | ✅ |
 | 1.2 Model | 1 hr | ✅ |
 | 1.3 ArtworkModel | 1.5 hrs | ✅ |
-| 1.4 Upload UI | 2 hrs | ⬜ |
-| 1.5 Display UI | 2 hrs | ⬜ |
-| 1.6 Profile | 1.5 hrs | ⬜ |
-| 1.7 Search | 1 hr | ⬜ |
-| **TOTAL** | **~9 hours** | **3/7 DONE (33%)** |
+| 1.4 Upload UI | 2 hrs | ✅ |
+| 1.5 Display UI | 2 hrs | ✅ |
+| 1.6 Profile | 1.5 hrs | ✅ |
+| 1.7 Search | 1 hr | ⏳ |
+| **TOTAL** | **~9 hours** | **6/7 DONE (86%)** |
 
 ---
 
 ## Definition of Done - Phase 1
 
 - [ ] All 7 tasks completed and working
-- [ ] Code compiles without errors
-- [ ] No regressions in existing artwork functionality
-- [ ] Visual artworks still display and function normally
-- [ ] Can upload a book with all metadata
-- [ ] Book appears in artist profile
-- [ ] Book is discoverable in search by genre and author
-- [ ] Book displays with book-specific UI (not gallery)
-- [ ] Reader can engage (likes, comments) with book
+- [x] Code compiles without errors
+- [x] No regressions in existing artwork functionality
+- [x] Visual artworks still display and function normally
+- [x] Can upload a book with all metadata (Task 1.4 ✅)
+- [x] Book appears in artist profile (Task 1.6 ✅)
+- [ ] Book is discoverable in search by genre and author (Task 1.7 ⏳)
+- [x] Book displays with book-specific UI (not gallery) (Task 1.5 ✅)
+- [ ] Reader can engage (likes, comments) with book (existing system works)
 - [ ] Book can be priced and sold (using existing payment system)
 - [ ] Manual testing complete
-- [ ] All commits are clean and well-described
+- [x] All commits are clean and well-described (6 commits so far)
 
 ---
 

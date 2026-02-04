@@ -801,6 +801,165 @@ class ArtworkService {
     }
   }
 
+  /// Get all published written works (books)
+  /// Returns written content ordered by creation date (newest first)
+  Future<List<ArtworkModel>> getPublishedWrittenWorks({
+    int limit = 50,
+    ArtworkModel? startAfter,
+  }) async {
+    try {
+      Query queryRef = _artworkCollection
+          .where('isPublic', isEqualTo: true)
+          .where('contentType', isEqualTo: ArtworkContentType.written.value);
+
+      // Apply pagination if startAfter is provided
+      if (startAfter != null) {
+        queryRef = queryRef.startAfter([startAfter.createdAt, startAfter.id]);
+      }
+
+      final snapshot = await queryRef
+          .orderBy('createdAt', descending: true)
+          .limit(limit)
+          .get();
+
+      return snapshot.docs
+          .map((doc) => ArtworkModel.fromFirestore(doc))
+          .toList();
+    } catch (e) {
+      AppLogger.error('Error getting published written works: $e');
+
+      // Fallback: Get written works without ordering
+      try {
+        final fallbackSnapshot = await _artworkCollection
+            .where('isPublic', isEqualTo: true)
+            .where('contentType', isEqualTo: ArtworkContentType.written.value)
+            .limit(limit)
+            .get();
+
+        final artworks = fallbackSnapshot.docs
+            .map((doc) => ArtworkModel.fromFirestore(doc))
+            .toList();
+
+        // Sort in memory by createdAt
+        artworks.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+        return artworks;
+      } catch (fallbackError) {
+        AppLogger.error(
+          'Fallback query for written works failed: $fallbackError',
+        );
+        return [];
+      }
+    }
+  }
+
+  /// Get written works by genre
+  /// Note: This uses client-side filtering for genre since Firestore doesn't support
+  /// querying nested object fields (writingMetadata.genre) in simple where clauses
+  Future<List<ArtworkModel>> getWrittenWorksByGenre(
+    String genre, {
+    int limit = 50,
+  }) async {
+    try {
+      // First get all public written works
+      final snapshot = await _artworkCollection
+          .where('isPublic', isEqualTo: true)
+          .where('contentType', isEqualTo: ArtworkContentType.written.value)
+          .orderBy('createdAt', descending: true)
+          .limit(limit * 2) // Fetch more to account for client-side filtering
+          .get();
+
+      // Filter by genre on the client side
+      final artworks = snapshot.docs
+          .map((doc) => ArtworkModel.fromFirestore(doc))
+          .where(
+            (artwork) =>
+                artwork.writingMetadata?.genre?.toLowerCase() ==
+                genre.toLowerCase(),
+          )
+          .take(limit)
+          .toList();
+
+      return artworks;
+    } catch (e) {
+      AppLogger.error('Error getting written works by genre "$genre": $e');
+
+      // Fallback: Get written works without ordering
+      try {
+        final fallbackSnapshot = await _artworkCollection
+            .where('isPublic', isEqualTo: true)
+            .where('contentType', isEqualTo: ArtworkContentType.written.value)
+            .limit(limit * 2)
+            .get();
+
+        final artworks = fallbackSnapshot.docs
+            .map((doc) => ArtworkModel.fromFirestore(doc))
+            .where(
+              (artwork) =>
+                  artwork.writingMetadata?.genre?.toLowerCase() ==
+                  genre.toLowerCase(),
+            )
+            .toList();
+
+        // Sort in memory by createdAt
+        artworks.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+        return artworks.take(limit).toList();
+      } catch (fallbackError) {
+        AppLogger.error(
+          'Fallback query for written works by genre failed: $fallbackError',
+        );
+        return [];
+      }
+    }
+  }
+
+  /// Get written works by artist
+  Future<List<ArtworkModel>> getWrittenWorksByArtist(
+    String artistProfileId, {
+    int limit = 50,
+  }) async {
+    try {
+      final snapshot = await _artworkCollection
+          .where('contentType', isEqualTo: ArtworkContentType.written.value)
+          .where('artistProfileId', isEqualTo: artistProfileId)
+          .orderBy('createdAt', descending: true)
+          .limit(limit)
+          .get();
+
+      return snapshot.docs
+          .map((doc) => ArtworkModel.fromFirestore(doc))
+          .toList();
+    } catch (e) {
+      AppLogger.error(
+        'Error getting written works for artist "$artistProfileId": $e',
+      );
+
+      // Fallback: Get written works without ordering
+      try {
+        final fallbackSnapshot = await _artworkCollection
+            .where('contentType', isEqualTo: ArtworkContentType.written.value)
+            .where('artistProfileId', isEqualTo: artistProfileId)
+            .limit(limit)
+            .get();
+
+        final artworks = fallbackSnapshot.docs
+            .map((doc) => ArtworkModel.fromFirestore(doc))
+            .toList();
+
+        // Sort in memory by createdAt
+        artworks.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+        return artworks;
+      } catch (fallbackError) {
+        AppLogger.error(
+          'Fallback query for artist written works failed: $fallbackError',
+        );
+        return [];
+      }
+    }
+  }
+
   /// Track search analytics
   Future<void> _trackSearchAnalytics(String query, int resultCount) async {
     try {
