@@ -11,7 +11,8 @@ import 'package:artbeat_core/artbeat_core.dart'
         ArtbeatColors,
         EnhancedUniversalHeader,
         MainLayout,
-        AppLogger;
+        AppLogger,
+        WritingMetadata;
 import 'package:artbeat_artwork/artbeat_artwork.dart'
     show ArtworkService, ChapterService;
 
@@ -63,6 +64,7 @@ class _WrittenContentUploadScreenState
   final List<String> _genres = [];
   final List<String> _tags = [];
   String _contentType = 'Book';
+  String? _selectedGenre; // Store the primary genre
   int _totalChaptersPlanned = 1;
   String _releaseSchedule = 'immediate';
 
@@ -417,11 +419,27 @@ class _WrittenContentUploadScreenState
         isForSale: _isForSale,
       );
 
+      // Create WritingMetadata for this work
+      final writingMetadata = WritingMetadata(
+        genre: _selectedGenre,
+        wordCount: _wordCount,
+        estimatedReadMinutes: _estimatedReadingTime,
+        language: 'English',
+        themes: _genres,
+        isSerializing: _isSerialized,
+        excerpt: _contentText.length > 500
+            ? _contentText.substring(0, 500)
+            : _contentText,
+        firstPublishedDate: DateTime.now(),
+        hasMultipleChapters: _isSerialized && _totalChaptersPlanned > 1,
+      );
+
       // Update artwork metadata for written content
       final artwork = await _artworkService.getArtworkById(artworkId);
       if (artwork != null) {
         final updatedData = {
           'contentType': 'written',
+          'writingMetadata': writingMetadata.toJson(),
           'isSerializing': _isSerialized,
           'totalChapters': _isSerialized ? _totalChaptersPlanned : 1,
           'releasedChapters': 0,
@@ -451,7 +469,7 @@ class _WrittenContentUploadScreenState
         };
 
         await _firestore
-            .collection('artwork')
+            .collection('artworks')
             .doc(artworkId)
             .update(updatedData);
       }
@@ -1103,7 +1121,38 @@ class _WrittenContentUploadScreenState
         ),
         const SizedBox(height: 24),
 
-        // Genres
+        // Primary Genre Selection
+        Text('Primary Genre', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<String>(
+          initialValue: _selectedGenre,
+          decoration: InputDecoration(
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+            labelText: 'Select Primary Genre',
+            hintText: 'Choose the main genre for this work',
+          ),
+          items: _availableGenres.map((genre) {
+            return DropdownMenuItem(value: genre, child: Text(genre));
+          }).toList(),
+          onChanged: (value) {
+            setState(() {
+              _selectedGenre = value;
+              // Automatically add primary genre to themes if not already there
+              if (value != null && !_genres.contains(value)) {
+                _genres.add(value);
+              }
+            });
+          },
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please select a primary genre';
+            }
+            return null;
+          },
+        ),
+        const SizedBox(height: 24),
+
+        // Additional Themes
         Text(
           'written_content_upload_genres_label'.tr(),
           style: Theme.of(context).textTheme.titleMedium,
