@@ -265,9 +265,9 @@ class _WrittenContentDetailScreenState
             ],
 
             // Reading metadata
-            if (_artwork?.readingMetadata != null) ...[
+            if (_artwork?.writingMetadata != null) ...[
               const SizedBox(height: 16),
-              _buildReadingMetadata(),
+              _buildReadingMetadata(_artwork!.writingMetadata!),
             ],
 
             // Chapter selector for serialized content
@@ -281,26 +281,30 @@ class _WrittenContentDetailScreenState
     );
   }
 
-  Widget _buildReadingMetadata() {
-    final metadata = _artwork!.readingMetadata!;
+  Widget _buildReadingMetadata(WritingMetadata metadata) {
     return Wrap(
       spacing: 16,
       runSpacing: 8,
       children: [
-        if (metadata['wordCount'] != null)
+        if (metadata.wordCount != null)
           Chip(
-            label: Text('${metadata['wordCount']} words'),
+            label: Text('${metadata.wordCount} words'),
             avatar: const Icon(Icons.text_fields, size: 16),
           ),
-        if (metadata['estimatedReadingTime'] != null)
+        if (metadata.estimatedReadMinutes != null)
           Chip(
-            label: Text('${metadata['estimatedReadingTime']} min read'),
+            label: Text('${metadata.estimatedReadMinutes} min read'),
             avatar: const Icon(Icons.schedule, size: 16),
           ),
-        if (metadata['language'] != null)
+        if (metadata.language != null)
           Chip(
-            label: Text(metadata['language'].toString().toUpperCase()),
+            label: Text(metadata.language!.toUpperCase()),
             avatar: const Icon(Icons.language, size: 16),
+          ),
+        if (metadata.genre != null)
+          Chip(
+            label: Text(metadata.genre!),
+            avatar: const Icon(Icons.category, size: 16),
           ),
       ],
     );
