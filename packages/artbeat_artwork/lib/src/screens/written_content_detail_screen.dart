@@ -39,6 +39,7 @@ class _WrittenContentDetailScreenState
   String? _fallbackArtistName;
   bool _isOwner = false;
   bool _hasAccess = false;
+  bool _isAdmin = false;
 
   // Reading progress
   final ScrollController _scrollController = ScrollController();
@@ -91,6 +92,28 @@ class _WrittenContentDetailScreenState
       final currentUser = _auth.currentUser;
       _isOwner = currentUser?.uid == artwork.artistProfileId;
 
+      // Check if user is admin - more robust check
+      try {
+        final uid = currentUser?.uid ?? '';
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(uid)
+            .get();
+        final userData = userDoc.data();
+        
+        // Check multiple possible admin field names and values
+        final userType = userData?['userType']?.toString().toLowerCase() ?? '';
+        final role = userData?['role']?.toString().toLowerCase() ?? '';
+        final isAdmin = userData?['isAdmin'] as bool? ?? false;
+        
+        _isAdmin = userType == 'admin' || role == 'admin' || isAdmin;
+        AppLogger.info('🔑 Admin check for UID $uid: userType=$userType, role=$role, isAdmin=$isAdmin, result=$_isAdmin');
+        AppLogger.info('📋 Full user data: $userData');
+      } catch (e) {
+        AppLogger.error('❌ Error checking admin status: $e');
+        _isAdmin = false;
+      }
+
       // Load artist info
       try {
         final artistProfile = await _subscriptionService.getArtistProfileById(
@@ -125,11 +148,19 @@ class _WrittenContentDetailScreenState
       }
 
       // Check access (free content or purchased/paid)
-      _hasAccess =
-          _isOwner ||
-          !artwork.isForSale ||
-          artwork.price == null ||
-          artwork.price == 0;
+      // Admins and owners ALWAYS bypass paywall for testing/viewing
+      if (_isAdmin || _isOwner) {
+        _hasAccess = true;
+        AppLogger.info('✅ Access granted: admin=$_isAdmin, owner=$_isOwner');
+      } else {
+        // Regular users only access free content
+        _hasAccess = !artwork.isForSale ||
+            artwork.price == null ||
+            artwork.price == 0;
+        AppLogger.info('📖 Free content check: isForSale=${artwork.isForSale}, price=${artwork.price}, hasAccess=$_hasAccess');
+      }
+      
+      AppLogger.info('Final access: _isAdmin=$_isAdmin, _isOwner=$_isOwner, isForSale=${artwork.isForSale}, price=${artwork.price}, _hasAccess=$_hasAccess');
 
       // Track view analytics
       await _visibilityService.trackArtworkView(
@@ -384,10 +415,112 @@ class _WrittenContentDetailScreenState
     );
   }
 
+  Widget _buildChaptersPreview() {
+    if (_chapters.isEmpty) {
+      return SliverToBoxAdapter(child: const SizedBox.shrink());
+    }
+
+    return SliverToBoxAdapter(
+      child: Container(
+        margin: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.grey[50],
+          border: Border.all(color: Colors.grey[200]!),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Chapters',
+              style: Theme.of(context)
+                  .textTheme
+                  .titleLarge
+                  ?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _chapters.length,
+              separatorBuilder: (context, index) =>
+                  const Divider(height: 12),
+              itemBuilder: (context, index) {
+                final chapter = _chapters[index];
+                return Row(
+                  children: [
+                    if (!_hasAccess)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 12),
+                        child: Icon(
+                          Icons.lock,
+                          size: 20,
+                          color: Colors.grey[400],
+                        ),
+                      ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Chapter ${chapter.chapterNumber}: ${chapter.title}',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyLarge
+                                ?.copyWith(fontWeight: FontWeight.w600),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Icon(Icons.schedule,
+                                  size: 14, color: Colors.grey[600]),
+                              const SizedBox(width: 4),
+                              Text(
+                                '${chapter.estimatedReadingTime}min',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(color: Colors.grey[600]),
+                              ),
+                              const SizedBox(width: 12),
+                              Icon(Icons.description,
+                                  size: 14, color: Colors.grey[600]),
+                              const SizedBox(width: 4),
+                              Text(
+                                '${chapter.wordCount} words',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(color: Colors.grey[600]),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (_hasAccess)
+                      Icon(Icons.check_circle,
+                          size: 20, color: Colors.green[600]),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildContent() {
-    if (!_hasAccess) {
-      return SliverFillRemaining(
-        child: Center(
+    // Only called when !_hasAccess - show purchase/chapter preview
+    return SliverList(
+      delegate: SliverChildListDelegate([
+        _buildChaptersPreview(),
+        Padding(
+          padding: const EdgeInsets.all(16),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -397,64 +530,92 @@ class _WrittenContentDetailScreenState
                 'Premium Content',
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
-              const SizedBox(height: 8),
-              Text(
-                'This content requires purchase to read',
-                style: Theme.of(context).textTheme.bodyMedium,
-                textAlign: TextAlign.center,
+              const SizedBox(height: 24),
+              // Purchase details card
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.grey[50],
+                  border: Border.all(color: Colors.grey[300]!),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'What you\'ll get:',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    _buildPurchaseDetail(
+                      Icons.book,
+                      _artwork?.title ?? 'Book Title',
+                      'Complete work',
+                    ),
+                    const SizedBox(height: 8),
+                    if (_chapters.isNotEmpty) ...[
+                      _buildPurchaseDetail(
+                        Icons.layers,
+                        '${_chapters.length} Chapter${_chapters.length != 1 ? 's' : ''}',
+                        '${_chapters.fold<int>(0, (sum, ch) => sum + ch.wordCount)} words total',
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+                    _buildPurchaseDetail(
+                      Icons.schedule,
+                      'Full Access',
+                      'Read anytime, offline available',
+                    ),
+                    const SizedBox(height: 16),
+                    const Divider(),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Price',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        Text(
+                          '\$${_artwork?.price?.toStringAsFixed(2) ?? '0.00'}',
+                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            color: Colors.green[600],
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: _purchaseContent,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 16,
+                  ),
+                ),
                 child: Text(
                   'Purchase for \$${_artwork?.price?.toStringAsFixed(2) ?? '0.00'}',
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Secure payment via Stripe',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 12,
                 ),
               ),
             ],
           ),
         ),
-      );
-    }
-
-    final content = _currentChapter?.content ?? _artwork?.description ?? '';
-
-    return SliverToBoxAdapter(
-      child: Container(
-        constraints: const BoxConstraints(minHeight: 400),
-        child: Markdown(
-          data: content,
-          controller: _scrollController,
-          styleSheet: MarkdownStyleSheet(
-            p: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.6),
-            h1: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              height: 1.4,
-            ),
-            h2: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              height: 1.4,
-            ),
-            h3: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              height: 1.4,
-            ),
-            blockquote: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              fontStyle: FontStyle.italic,
-              color: Colors.grey[600],
-            ),
-            code: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontFamily: 'monospace',
-              backgroundColor: Colors.grey[100],
-            ),
-          ),
-          onTapLink: (text, href, title) {
-            // Handle link taps
-            if (href != null) {
-              // Open URL or handle internal links
-            }
-          },
-        ),
-      ),
+      ]),
     );
   }
 
@@ -524,6 +685,33 @@ class _WrittenContentDetailScreenState
 
     // ignore: deprecated_member_use
     await Share.share('$title\n\n$url');
+  }
+
+  Widget _buildPurchaseDetail(IconData icon, String title, String subtitle) {
+    return Row(
+      children: [
+        Icon(icon, size: 20, color: Colors.blue[600]),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+              Text(
+                subtitle,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 
   Future<void> _purchaseContent() async {
@@ -606,6 +794,8 @@ class _WrittenContentDetailScreenState
 
   @override
   Widget build(BuildContext context) {
+    AppLogger.info('🎬 WrittenContentDetailScreen BUILD called: _isLoading=$_isLoading, _hasAccess=$_hasAccess, _isAdmin=$_isAdmin');
+    
     if (_isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
@@ -625,10 +815,80 @@ class _WrittenContentDetailScreenState
             slivers: [
               _buildAppBar(),
               _buildContentHeader(),
-              SliverPadding(
-                padding: const EdgeInsets.all(16.0),
-                sliver: _buildContent(),
-              ),
+              if (_isAdmin && _artwork?.isForSale == true)
+                SliverToBoxAdapter(
+                  child: Container(
+                    margin: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.blue[50],
+                      border: Border.all(color: Colors.blue[300]!),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.admin_panel_settings, 
+                          size: 18, 
+                          color: Colors.blue[700],
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Admin Preview: This is premium content (\$${_artwork?.price?.toStringAsFixed(2)}). Users will see a purchase screen.',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.blue[700],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              if (!_hasAccess) _buildContent(),
+              if (_hasAccess) ...[
+                SliverToBoxAdapter(child: const SizedBox(height: 32)),
+                _buildChaptersPreview(),
+                SliverPadding(
+                  padding: const EdgeInsets.all(16.0),
+                  sliver: SliverToBoxAdapter(
+                    child: Container(
+                      constraints: const BoxConstraints(minHeight: 400),
+                      child: MarkdownBody(
+                        data: _currentChapter?.content ?? _artwork?.description ?? '',
+                        styleSheet: MarkdownStyleSheet(
+                          p: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.6),
+                          h1: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            height: 1.4,
+                          ),
+                          h2: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            height: 1.4,
+                          ),
+                          h3: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            height: 1.4,
+                          ),
+                          blockquote: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            fontStyle: FontStyle.italic,
+                            color: Colors.grey[600],
+                          ),
+                          code: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontFamily: 'monospace',
+                            backgroundColor: Colors.grey[100],
+                          ),
+                        ),
+                        onTapLink: (text, href, title) {
+                          if (href != null) {
+                            // Handle link taps
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
           _buildReadingProgress(),

@@ -738,6 +738,7 @@ class _AudioContentUploadScreenState extends State<AudioContentUploadScreen> {
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
+          isExpanded: true,
           initialValue: _contentType,
           decoration: InputDecoration(
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),

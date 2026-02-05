@@ -30,6 +30,7 @@ class DashboardViewModel extends ChangeNotifier {
   bool _isLoadingEvents = true;
   bool _isLoadingUpcomingEvents = true;
   bool _isLoadingArtwork = true;
+  bool _isLoadingBooks = true;
   bool _isLoadingArtists = true;
   bool _isLoadingLocation = true;
   bool _isMapPreviewReady = false;
@@ -43,6 +44,7 @@ class DashboardViewModel extends ChangeNotifier {
   String? _eventsError;
   String? _upcomingEventsError;
   String? _artworkError;
+  String? _booksError;
   String? _achievementsError;
   String? _artistsError;
   String? _locationError;
@@ -52,6 +54,7 @@ class DashboardViewModel extends ChangeNotifier {
   List<EventModel> _events = [];
   final List<EventModel> _upcomingEvents = [];
   List<ArtworkModel> _artwork = [];
+  List<ArtworkModel> _books = [];
   List<ArtistProfileModel> _artists = [];
   Set<Marker> _markers = {};
   Position? _currentLocation;
@@ -134,6 +137,7 @@ class DashboardViewModel extends ChangeNotifier {
         Future.wait<void>([
           _loadEvents(notify: true),
           _loadArtwork(notify: true),
+          _loadBooks(notify: true),
           _loadArtists(notify: true),
           _loadAchievements(notify: true),
           _loadLocalCaptures(notify: true),
@@ -159,6 +163,7 @@ class DashboardViewModel extends ChangeNotifier {
     _isLoadingEvents = true;
     _isLoadingUpcomingEvents = true;
     _isLoadingArtwork = true;
+    _isLoadingBooks = true;
     _isLoadingArtists = true;
     _isLoadingLocation = true;
     _isLoadingAchievements = true;
@@ -206,6 +211,7 @@ class DashboardViewModel extends ChangeNotifier {
   bool get isLoadingEvents => _isLoadingEvents;
   bool get isLoadingUpcomingEvents => _isLoadingUpcomingEvents;
   bool get isLoadingArtwork => _isLoadingArtwork;
+  bool get isLoadingBooks => _isLoadingBooks;
   bool get isLoadingArtists => _isLoadingArtists;
   bool get isLoadingLocation => _isLoadingLocation;
   bool get isMapPreviewReady => _isMapPreviewReady;
@@ -217,6 +223,7 @@ class DashboardViewModel extends ChangeNotifier {
   String? get eventsError => _eventsError;
   String? get upcomingEventsError => _upcomingEventsError;
   String? get artworkError => _artworkError;
+  String? get booksError => _booksError;
   String? get achievementsError => _achievementsError;
   String? get artistsError => _artistsError;
   String? get locationError => _locationError;
@@ -226,6 +233,7 @@ class DashboardViewModel extends ChangeNotifier {
   List<EventModel> get events => List.unmodifiable(_events);
   List<EventModel> get upcomingEvents => List.unmodifiable(_upcomingEvents);
   List<ArtworkModel> get artwork => List.unmodifiable(_artwork);
+  List<ArtworkModel> get books => List.unmodifiable(_books);
   List<ArtistProfileModel> get artists => List.unmodifiable(_artists);
   Set<Marker> get markers => Set.unmodifiable(_markers);
   Position? get currentLocation => _currentLocation;
@@ -270,6 +278,7 @@ class DashboardViewModel extends ChangeNotifier {
         locationLoad,
         _loadEvents(notify: true),
         _loadArtwork(notify: true),
+        _loadBooks(notify: true),
         _loadArtists(notify: true),
         _loadAchievements(notify: true),
         _loadLocalCaptures(notify: true),
@@ -389,6 +398,55 @@ class DashboardViewModel extends ChangeNotifier {
       _artwork = [];
     } finally {
       _isLoadingArtwork = false;
+      if (notify) _safeNotifyListeners();
+    }
+  }
+
+  Future<void> _loadBooks({bool notify = true}) async {
+    try {
+      _isLoadingBooks = true;
+      if (notify) _safeNotifyListeners();
+
+      final booksServiceModels = await _artworkService.getWrittenContent(
+        limit: 10,
+        includeSerialized: true,
+        includeCompleted: true,
+      );
+
+      _books = booksServiceModels
+          .map(
+            (a) => ArtworkModel(
+              id: a.id,
+              title: a.title,
+              description: a.description,
+              artistId: a.userId,
+              imageUrl: a.imageUrl,
+              price: a.price ?? 0.0,
+              medium: a.medium,
+              tags: a.tags ?? [],
+              createdAt: a.createdAt,
+              isSold: a.isSold,
+              applauseCount: a.likesCount,
+              viewsCount: a.viewCount,
+              artistName: a.artistName,
+              contentType: a.contentType,
+              isSerializing: a.isSerializing,
+              totalChapters: a.totalChapters,
+              releasedChapters: a.releasedChapters,
+              readingMetadata: a.readingMetadata,
+              serializationConfig: a.serializationConfig,
+            ),
+          )
+          .toList();
+
+      _booksError = null;
+      AppLogger.info('✅ Loaded ${_books.length} books successfully');
+    } catch (e) {
+      AppLogger.error('Error loading books: $e');
+      _booksError = e.toString();
+      _books = [];
+    } finally {
+      _isLoadingBooks = false;
       if (notify) _safeNotifyListeners();
     }
   }

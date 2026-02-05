@@ -10,6 +10,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_sponsorships/artbeat_sponsorships.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_art_walk/artbeat_art_walk.dart';
+import 'package:artbeat_artwork/artbeat_artwork.dart' as artwork;
 
 import '../../widgets/dashboard/dashboard_browse_section.dart';
 import '../../widgets/dashboard/dashboard_section_button.dart';
@@ -287,7 +288,7 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
     return SliverAppBar(
       pinned: false,
       floating: false,
-      expandedHeight: 520,
+      expandedHeight: 760,
       toolbarHeight: 80.0,
       backgroundColor: Colors.transparent,
       elevation: 0,
@@ -304,11 +305,14 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
                 final showSearchInput = constraints.maxHeight > 220;
                 final showLocationPill = constraints.maxHeight > 340;
                 final showQuickStats = constraints.maxHeight > 400;
+                final showBooks = constraints.maxHeight > 640;
 
-                return Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
+                return SingleChildScrollView(
+                  physics: const NeverScrollableScrollPhysics(),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
                     Row(
                       children: [
                         _glassIconButton(icon: Icons.menu, onTap: _openDrawer),
@@ -490,13 +494,109 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
                         },
                       ),
                     ],
+                    if (showBooks) ...[
+                      const SizedBox(height: 16),
+                      _buildBooksSection(context, vm),
+                    ],
                   ],
-                );
-              },
+                ),
+              );
+            },
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildBooksSection(BuildContext context, DashboardViewModel vm) {
+    if (vm.isLoadingBooks) {
+      return const SizedBox(
+        height: 180,
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (vm.books.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Books & Stories',
+                style: GoogleFonts.spaceGrotesk(
+                  color: Colors.white.withValues(alpha: 0.9),
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  // Navigate to written content discovery
+                  Navigator.pushNamed(context, '/artwork/discovery');
+                },
+                child: Text(
+                  'View All',
+                  style: GoogleFonts.spaceGrotesk(
+                    color: const Color(0xFF22D3EE),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          height: 200,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: vm.books.length,
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            itemBuilder: (context, index) {
+              final coreArtwork = vm.books[index];
+
+              // Map core ArtworkModel to artwork package ArtworkModel for BookCard
+              // This is necessary due to package boundary and duplicate class names
+              final artworkModel = artwork.ArtworkModel(
+                id: coreArtwork.id,
+                userId: coreArtwork.artistId,
+                artistProfileId: '', // Not strictly needed for the card
+                title: coreArtwork.title,
+                description: coreArtwork.description,
+                imageUrl: coreArtwork.imageUrl,
+                medium: coreArtwork.medium,
+                styles: [],
+                isForSale: false,
+                createdAt: coreArtwork.createdAt,
+                updatedAt: coreArtwork.createdAt,
+                artistName: coreArtwork.artistName,
+                isSerializing: coreArtwork.isSerializing,
+              );
+
+              return artwork.BookCard(
+                artwork: artworkModel,
+                onTap: () {
+                  // Navigate to written content detail screen for books
+                  Navigator.pushNamed(
+                    context,
+                    '/artwork/written-content',
+                    arguments: coreArtwork.id,
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 

@@ -49,6 +49,14 @@ class ArtworkService {
     }
 
     try {
+      // Check if user is admin - admins bypass all limits
+      final userDoc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+      final userType = userDoc.data()?['userType'];
+      if (userType == 'admin') {
+        AppLogger.info('Admin detected, bypassing upload limit check');
+        return;
+      }
+
       // Get user's subscription tier
       final tier = await _getCurrentUserTier();
 
@@ -123,6 +131,7 @@ class ArtworkService {
       final artworkData = {
         'userId': userId,
         'artistProfileId': artistProfile.id,
+        'artistName': artistProfile.displayName,
         'title': title,
         'description': description,
         'imageUrl': imageUrl,

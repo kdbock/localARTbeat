@@ -86,6 +86,7 @@ class AppRoutes {
   static const String artworkTrending = '/artwork/trending';
   static const String artworkEdit = '/artwork/edit';
   static const String artworkDetail = '/artwork/detail';
+  static const String artworkPurchase = '/artwork/purchase';
 
   // Gallery routes
   static const String galleryArtistsManagement = '/gallery/artists-management';

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:pedometer/pedometer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:logging/logging.dart';
@@ -22,6 +23,7 @@ class StepTrackingService {
   String _lastResetDate = '';
   bool _isInitialized = false;
   bool _isTracking = false;
+  bool _isSupported = true;
 
   // Stream controller for broadcasting step updates
   final _stepController = StreamController<int>.broadcast();
@@ -34,6 +36,14 @@ class StepTrackingService {
   Future<void> initialize({ChallengeService? challengeService}) async {
     if (_isInitialized) {
       _logger.info('Step tracking already initialized');
+      return;
+    }
+
+    // Step tracking is only supported on mobile platforms
+    if (!Platform.isAndroid && !Platform.isIOS) {
+      _isSupported = false;
+      _isInitialized = true;
+      _logger.info('Step tracking is not supported on this platform (${Platform.operatingSystem})');
       return;
     }
 
@@ -63,6 +73,11 @@ class StepTrackingService {
       throw StateError(
         'StepTrackingService must be initialized before starting tracking',
       );
+    }
+
+    if (!_isSupported) {
+      _logger.info('Step tracking skip: platform not supported');
+      return;
     }
 
     if (_isTracking) {

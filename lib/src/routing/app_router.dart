@@ -591,6 +591,24 @@ class AppRouter {
           child: artwork.ArtworkDetailScreen(artworkId: artworkId),
         );
 
+      case '/artwork/written-content':
+        final writtenContentId = settings.arguments as String?;
+        if (writtenContentId == null) {
+          return RouteUtils.createErrorRoute('Written content not found');
+        }
+        return RouteUtils.createSimpleRoute(
+          child: artwork.WrittenContentDetailScreen(artworkId: writtenContentId),
+        );
+
+      case core.AppRoutes.artworkPurchase:
+        final artworkId = RouteUtils.getArgument<String>(settings, 'artworkId');
+        if (artworkId == null) {
+          return RouteUtils.createErrorRoute('Artwork ID required for purchase');
+        }
+        return RouteUtils.createSimpleRoute(
+          child: artwork.ArtworkPurchaseScreen(artworkId: artworkId),
+        );
+
       case core.AppRoutes.artworkFeatured:
         return RouteUtils.createSimpleRoute(
           child: const artwork.ArtworkFeaturedScreen(),

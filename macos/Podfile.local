@@ -1,0 +1,12 @@
+# Add this to the Podfile post_install block to handle flutter_sound
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    flutter_additional_macos_build_settings(target)
+    # flutter_sound uses taudio - ensure it's properly linked
+    if target.name == 'Pods-Runner'
+      target.build_configurations.each do |config|
+        config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
+      end
+    end
+  end
+end

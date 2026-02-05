@@ -17,6 +17,7 @@ class _AdminArtworkManagementScreenState
       AdminArtworkManagementService();
 
   String _selectedFilter = 'reported';
+  String? _selectedContentType; // Add content type filter
   artwork_pkg.ArtworkModel? _selectedArtwork;
   List<artwork_pkg.ArtworkModel> _artworks = [];
   bool _isLoading = false;
@@ -44,6 +45,7 @@ class _AdminArtworkManagementScreenState
     try {
       final artworkList = await _service.getArtworkList(
         filterType: _selectedFilter,
+        contentType: _selectedContentType,
         limit: 100,
       );
       setState(() => _artworks = artworkList);
@@ -227,6 +229,20 @@ class _AdminArtworkManagementScreenState
                   ],
                 ),
               ),
+              const SizedBox(height: 12),
+              // Content type filters
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    _buildContentTypeChip('All Content', null),
+                    _buildContentTypeChip('Visual', 'visual'),
+                    _buildContentTypeChip('Written', 'written'),
+                    _buildContentTypeChip('Audio', 'audio'),
+                    _buildContentTypeChip('Video', 'video'),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
@@ -280,6 +296,21 @@ class _AdminArtworkManagementScreenState
         selected: isSelected,
         onSelected: (selected) {
           setState(() => _selectedFilter = value);
+          _loadArtwork();
+        },
+      ),
+    );
+  }
+
+  Widget _buildContentTypeChip(String label, String? contentType) {
+    final isSelected = _selectedContentType == contentType;
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: FilterChip(
+        label: Text(label),
+        selected: isSelected,
+        onSelected: (selected) {
+          setState(() => _selectedContentType = contentType);
           _loadArtwork();
         },
       ),

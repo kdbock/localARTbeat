@@ -8,10 +8,16 @@ class AdminArtworkManagementService {
   /// Fetch all artwork with optional filtering
   Future<List<ArtworkModel>> getArtworkList({
     String filterType = 'all',
+    String? contentType, // 'visual', 'written', 'audio', 'video', or null for all
     int limit = 50,
   }) async {
     try {
       Query query = _firestore.collection('artwork');
+
+      // Filter by content type if specified
+      if (contentType != null && contentType.isNotEmpty) {
+        query = query.where('contentType', isEqualTo: contentType);
+      }
 
       switch (filterType) {
         case 'reported':
@@ -281,6 +287,137 @@ class AdminArtworkManagementService {
           .toList();
     } catch (e) {
       return [];
+    }
+  }
+
+  /// Fetch all written content (books, stories, etc.) with chapter information
+  Future<List<Map<String, dynamic>>> getWrittenContentWithChapters({
+    String filterType = 'all',
+    int limit = 50,
+  }) async {
+    try {
+      Query query = _firestore.collection('artwork').where('contentType', isEqualTo: 'written');
+
+      switch (filterType) {
+        case 'reported':
+          query = query.where('reports', isNotEqualTo: null);
+          break;
+        case 'flagged':
+          query = query.where('moderationStatus', isEqualTo: 'flagged');
+          break;
+        case 'pending':
+          query = query.where('moderationStatus', isEqualTo: 'pending');
+          break;
+        case 'approved':
+          query = query.where('moderationStatus', isEqualTo: 'approved');
+          break;
+        case 'rejected':
+          query = query.where('moderationStatus', isEqualTo: 'rejected');
+          break;
+      }
+
+      query = query.orderBy('createdAt', descending: true).limit(limit);
+      final snapshot = await query.get();
+
+      final List<Map<String, dynamic>> writtenContent = [];
+
+      for (final doc in snapshot.docs) {
+        final artwork = ArtworkModel.fromFirestore(doc);
+        
+        // Fetch chapters for this written content
+        final chaptersSnapshot = await _firestore
+            .collection('artwork')
+            .doc(artwork.id)
+            .collection('chapters')
+            .orderBy('number', descending: false)
+            .get();
+
+        final chapters = chaptersSnapshot.docs
+            .map((chapterDoc) => {
+              'id': chapterDoc.id,
+              'number': chapterDoc.data()['number'] ?? 0,
+              'title': chapterDoc.data()['title'] ?? 'Unknown',
+              'wordCount': chapterDoc.data()['wordCount'] ?? 0,
+              'readingTime': chapterDoc.data()['readingTime'] ?? 0,
+              'viewCount': chapterDoc.data()['viewCount'] ?? 0,
+              'readCount': chapterDoc.data()['readCount'] ?? 0,
+            })
+            .toList();
+
+        writtenContent.add({
+          'artwork': artwork,
+          'chapters': chapters,
+          'totalChapters': chapters.length,
+          'totalWordCount': chapters.fold<int>(
+            0,
+            (sum, chapter) => sum + (chapter['wordCount'] as int),
+          ),
+        });
+      }
+
+      return writtenContent;
+    } catch (e) {
+      throw Exception('Error fetching written content: $e');
+    }
+  }
+
+  /// Get detailed information about a specific written content including all chapters
+  Future<Map<String, dynamic>> getWrittenContentDetails(String artworkId) async {
+    try {
+      final doc = await _firestore.collection('artwork').doc(artworkId).get();
+      if (!doc.exists) {
+        throw Exception('Written content not found');
+      }
+
+      final artwork = ArtworkModel.fromFirestore(doc);
+      
+      // Verify it's actually written content
+      if (artwork.contentType != 'written') {
+        throw Exception('This artwork is not written content');
+      }
+
+      // Fetch all chapters
+      final chaptersSnapshot = await _firestore
+          .collection('artwork')
+          .doc(artworkId)
+          .collection('chapters')
+          .orderBy('number', descending: false)
+          .get();
+
+      final chapters = chaptersSnapshot.docs
+          .map((chapterDoc) => {
+            'id': chapterDoc.id,
+            'number': chapterDoc.data()['number'] ?? 0,
+            'title': chapterDoc.data()['title'] ?? 'Unknown',
+            'wordCount': chapterDoc.data()['wordCount'] ?? 0,
+            'readingTime': chapterDoc.data()['readingTime'] ?? 0,
+            'viewCount': chapterDoc.data()['viewCount'] ?? 0,
+            'readCount': chapterDoc.data()['readCount'] ?? 0,
+            'content': chapterDoc.data()['content'] ?? '',
+            'createdAt': chapterDoc.data()['createdAt'],
+            'updatedAt': chapterDoc.data()['updatedAt'],
+          })
+          .toList();
+
+      return {
+        'artwork': artwork,
+        'chapters': chapters,
+        'totalChapters': chapters.length,
+        'totalWordCount': chapters.fold<int>(
+          0,
+          (sum, chapter) => sum + (chapter['wordCount'] as int),
+        ),
+        'totalViews': chapters.fold<int>(
+          0,
+          (sum, chapter) => sum + (chapter['viewCount'] as int),
+        ),
+        'totalReads': chapters.fold<int>(
+          0,
+          (sum, chapter) => sum + (chapter['readCount'] as int),
+        ),
+      };
+    } catch (e) {
+      throw Exception('Error fetching written content details: $e');
     }
   }
 }

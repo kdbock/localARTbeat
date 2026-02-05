@@ -1140,9 +1140,10 @@ class _XPBar extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Flexible(
+            Expanded(
               child: Text(
                 'animated_dashboard_xp_label'.tr(),
                 style: GoogleFonts.spaceGrotesk(
@@ -1155,17 +1156,26 @@ class _XPBar extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            const SizedBox(width: 2),
-            Flexible(
-              child: Text(
-                '$xp XP',
-                style: GoogleFonts.spaceGrotesk(
-                  color: Colors.white.withValues(alpha: 0.85),
-                  fontSize: 10.5,
-                  fontWeight: FontWeight.w900,
+          ],
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Expanded(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerRight,
+                child: Text(
+                  '$xp XP',
+                  style: GoogleFonts.spaceGrotesk(
+                    color: Colors.white.withValues(alpha: 0.85),
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w900,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],

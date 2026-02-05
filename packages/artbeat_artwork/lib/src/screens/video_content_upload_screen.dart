@@ -799,6 +799,7 @@ class _VideoContentUploadScreenState extends State<VideoContentUploadScreen> {
           ),
           const SizedBox(height: 16),
           DropdownButtonFormField<String>(
+            isExpanded: true,
             initialValue: _contentType,
             decoration: InputDecoration(
               labelText: 'video_content_upload_content_type'.tr(),

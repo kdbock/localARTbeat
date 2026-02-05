@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -12,14 +13,17 @@ import 'package:artbeat_core/artbeat_core.dart'
         EnhancedUniversalHeader,
         MainLayout,
         AppLogger,
+        FirestoreUtils,
         WritingMetadata;
 import 'package:artbeat_artwork/artbeat_artwork.dart'
     show ArtworkService, ChapterService;
+import '../widgets/upload_limit_upsell_dialog.dart';
 
 // Rich text editing imports
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
+import 'package:syncfusion_flutter_pdf/pdf.dart';
 
-enum WrittenContentUploadStep { content, basicInfo, details, review }
+enum WrittenContentUploadStep { content, chapters, basicInfo, details, review }
 
 class WrittenContentUploadScreen extends StatefulWidget {
   final String? contentId;
@@ -48,6 +52,9 @@ class _WrittenContentUploadScreenState
   late final TextEditingController _volumeController;
   late final TextEditingController _chapterController;
   late final TextEditingController _seriesController;
+  late final TextEditingController _isbnController;
+  late final TextEditingController _publisherController;
+  late final TextEditingController _editionController;
 
   final _firestore = FirebaseFirestore.instance;
   final _auth = FirebaseAuth.instance;
@@ -59,8 +66,11 @@ class _WrittenContentUploadScreenState
   File? _coverImageFile;
   bool _isForSale = false;
   bool _isSerialized = false;
+  bool _isLoading = false;
+  bool _isExtractingChapters = false;
   int _artworkCount = 0;
   SubscriptionTier? _tierLevel;
+  String? _userType;
   final List<String> _genres = [];
   final List<String> _tags = [];
   String _contentType = 'Book';
@@ -126,6 +136,9 @@ class _WrittenContentUploadScreenState
     _volumeController = TextEditingController();
     _chapterController = TextEditingController();
     _seriesController = TextEditingController();
+    _isbnController = TextEditingController();
+    _publisherController = TextEditingController();
+    _editionController = TextEditingController();
 
     // Initialize rich text controller
     _richTextController.addListener(_onRichTextChanged);
@@ -142,6 +155,7 @@ class _WrittenContentUploadScreenState
       if (!mounted) return;
 
       setState(() {
+        _userType = FirestoreUtils.safeString(userDoc.get('userType'));
         _tierLevel = SubscriptionTier.values.firstWhere(
           (tier) => tier.name == userDoc.get('subscriptionTier'),
           orElse: () => SubscriptionTier.free,
@@ -165,6 +179,9 @@ class _WrittenContentUploadScreenState
   }
 
   bool get _canUpload {
+    // Admins have unlimited uploads
+    if (_userType == 'admin') return true;
+
     int limit = 3;
     switch (_tierLevel) {
       case SubscriptionTier.free:
@@ -219,20 +236,264 @@ class _WrittenContentUploadScreenState
   Future<void> _processContentFile() async {
     if (_contentFile == null) return;
 
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Processing file...'),
+          duration: Duration(seconds: 1),
+        ),
+      );
+    }
+
+    setState(() => _isExtractingChapters = true);
+
     try {
-      final String content = await _contentFile!.readAsString();
+      String content = '';
+
+      if (_contentFile!.path.toLowerCase().endsWith('.pdf')) {
+        // PDF Processing
+        final PdfDocument document = PdfDocument(
+          inputBytes: await _contentFile!.readAsBytes(),
+        );
+
+        final int pageCount = document.pages.count;
+
+        // Try high-level extraction first (faster)
+        final extractor = PdfTextExtractor(document);
+        String extractedText = '';
+        
+        try {
+          extractedText = extractor.extractText();
+        } catch (e) {
+          AppLogger.error('High-level extraction failed: $e');
+        }
+
+        // If high-level extraction is poor, fallback to optimized page-by-page
+        final initialWordCount = extractedText.trim().split(RegExp(r'\s+')).length;
+        if ((extractedText.trim().length < 2000 || initialWordCount < pageCount * 5) && pageCount > 0) {
+          final buffer = StringBuffer();
+          for (int i = 0; i < pageCount; i++) {
+            try {
+              final pageText = extractor.extractText(startPageIndex: i, endPageIndex: i);
+              buffer.write(pageText);
+              buffer.write('\n\n'); // Ensure page breaks and help regex matching
+            } catch (e) {
+              AppLogger.error('Error extracting page $i: $e');
+            }
+            // Yield to UI thread frequently to keep UI responsive
+            if (i % 5 == 0) await Future<void>.delayed(const Duration(milliseconds: 10));
+          }
+          extractedText = buffer.toString();
+        }
+
+        content = extractedText;
+        document.dispose();
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Read $pageCount pages from PDF.'),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      } else {
+        // Plain text/markdown - handle encoding issues for professional manuscripts
+        try {
+          // Try UTF-8 first
+          content = await _contentFile!.readAsString(encoding: utf8);
+        } catch (e) {
+          try {
+            // Fallback to Latin-1/ISO-8859-1 which is common for legacy text files
+            content = await _contentFile!.readAsString(encoding: latin1);
+          } catch (e2) {
+            // Last resort: read as bytes and convert lossily
+            final bytes = await _contentFile!.readAsBytes();
+            content = String.fromCharCodes(bytes);
+          }
+        }
+      }
+
       await _validateAndProcessContent(content);
+
+      if (mounted) {
+        final wordCount = content.trim().split(RegExp(r'\s+')).length;
+        if (wordCount > 0) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Successfully extracted $wordCount words.'),
+              backgroundColor: ArtbeatColors.primaryGreen,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Warning: No text could be extracted from this PDF.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+
+      // Attempt automatic chapter extraction if it's a novel/long work
+      _extractChaptersFromText(content);
+
+      // Force move to Review Chapters step if content was uploaded
+      if (mounted) {
+        setState(() {
+          _currentStepIndex = 1;
+          _currentStep = WrittenContentUploadStep.chapters;
+        });
+        
+        // If extraction was very poor, warn the user
+        final wordCount = content.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length;
+        if (wordCount < 200 && _contentFile != null && _contentFile!.path.toLowerCase().endsWith('.pdf')) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Warning: Very little text found in PDF. It might be an image-based scan.'),
+              backgroundColor: Colors.orange,
+              duration: Duration(seconds: 5),
+            ),
+          );
+        }
+      }
     } catch (e) {
       AppLogger.error('Error processing content file: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              'written_content_upload_process_error'.tr(args: [e.toString()]),
-            ),
+            content: Text('Error processing file: ${e.toString()}'),
+            backgroundColor: Colors.red,
           ),
         );
       }
+    } finally {
+      if (mounted) {
+        setState(() => _isExtractingChapters = false);
+      }
+    }
+  }
+
+  void _extractChaptersFromText(String content) {
+    AppLogger.info('Starting chapter extraction from ${content.length} characters');
+    
+    // Broadened Regex to find chapter markers more reliably in various PDF formats
+    final chapterRegex = RegExp(
+      r'(?:^|\n)\s*((?:CHAPTER|PART|BOOK|PROLOGUE|EPILOGUE|SECTION|VOLUME)\b.*)',
+      multiLine: true,
+      caseSensitive: false,
+    );
+
+    // Secondary regex for cases where it's just a number or Roman numeral on its own line
+    final secondaryRegex = RegExp(
+      r'(?:^|\n)\s*(\b(?:\d+|[IVXLCDM]+)\b)\s*$',
+      multiLine: true,
+      caseSensitive: false,
+    );
+
+    var matches = chapterRegex.allMatches(content).toList();
+    AppLogger.info('Primary matches found: ${matches.length}');
+
+    // If no standard markers found, try the secondary numeric-only markers
+    if (matches.isEmpty) {
+      matches = secondaryRegex.allMatches(content).toList();
+      AppLogger.info('Secondary matches found: ${matches.length}');
+    }
+
+    if (matches.isEmpty) {
+      AppLogger.info('No chapter markers found, falling back to single chapter');
+      // Diagnostic fallback: if text is long but no chapters found, notify user
+      if (content.length > 5000 && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'No chapter markers detected. Try adding "Chapter" before your titles.',
+            ),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      } else if (content.trim().length < 500 && mounted) {
+        // Warning for likely image-only PDFs
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Very little text found. If this is a novel, your PDF might be an image scan. Try uploading a .txt or .md file.',
+            ),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 5),
+          ),
+        );
+      }
+
+      // Fallback: Just one big chapter if nothing found
+      final singleChapter = {
+        'number': 1,
+        'title': _titleController.text.isNotEmpty
+            ? _titleController.text
+            : 'Chapter 1',
+        'content': content,
+        'wordCount': content.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length,
+        'readingTime': (content.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length / 200).ceil(),
+      };
+
+      if (mounted) {
+        setState(() {
+          _chapters.clear();
+          _chapters.add(singleChapter);
+          _isSerialized = false;
+          _totalChaptersPlanned = 1;
+        });
+      }
+      return;
+    }
+
+    final List<Map<String, dynamic>> extractedChapters = [];
+
+    for (int i = 0; i < matches.length; i++) {
+      final start = matches[i].start;
+      final end = (i + 1 < matches.length) ? matches[i + 1].start : content.length;
+
+      // Use group(1) to get the title without leading newlines/whitespace
+      String chapterTitle = matches[i].group(1)?.trim() ?? 'Chapter ${i + 1}';
+
+      // If the title is just a number or Roman numeral, prepend "Chapter " for better display
+      if (RegExp(r'^\s*(?:\d+|[IVXLCDM]+)\s*$').hasMatch(chapterTitle)) {
+        chapterTitle = 'Chapter $chapterTitle';
+      }
+
+      final chapterContent = content.substring(start, end).trim();
+      final words = chapterContent.split(RegExp(r'\s+')).where((w) => w.isNotEmpty);
+
+      extractedChapters.add({
+        'number': i + 1,
+        'title': chapterTitle,
+        'content': chapterContent,
+        'wordCount': words.length,
+        'readingTime': (words.length / 200).ceil(),
+      });
+    }
+
+    if (mounted) {
+      setState(() {
+        _chapters.clear();
+        _chapters.addAll(extractedChapters);
+        _isSerialized = extractedChapters.length > 1;
+        _totalChaptersPlanned = extractedChapters.length;
+        _chaptersController.text = _totalChaptersPlanned.toString();
+      });
+    }
+
+    AppLogger.info('Successfully extracted ${extractedChapters.length} chapters');
+    if (mounted && extractedChapters.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Extracted ${extractedChapters.length} chapters automatically.',
+          ),
+          backgroundColor: ArtbeatColors.primaryGreen,
+        ),
+      );
     }
   }
 
@@ -380,7 +641,16 @@ class _WrittenContentUploadScreenState
   }
 
   Future<void> _uploadContent() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (_isLoading) return;
+    if (!_formKey.currentState!.validate()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('written_content_upload_validation_error'.tr()),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
 
     if (_coverImageFile == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -397,17 +667,26 @@ class _WrittenContentUploadScreenState
     }
 
     if (!_canUpload) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('written_content_upload_limit'.tr())),
+      showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => UploadLimitUpsellDialog(
+          userId: _auth.currentUser?.uid ?? '',
+          currentTier: _tierLevel ?? SubscriptionTier.free,
+        ),
       );
       return;
     }
+
+    setState(() => _isLoading = true);
+    AppLogger.info('Starting content upload process...');
 
     try {
       final userId = _auth.currentUser?.uid;
       if (userId == null) throw Exception('Not authenticated');
 
       // Create artwork using ArtworkService
+      AppLogger.info('Step 1: Uploading basic artwork data and cover image...');
       final artworkId = await _artworkService.uploadArtwork(
         imageFile: _coverImageFile!,
         title: _titleController.text,
@@ -418,8 +697,10 @@ class _WrittenContentUploadScreenState
         price: _isForSale ? double.tryParse(_priceController.text) ?? 0.0 : 0.0,
         isForSale: _isForSale,
       );
+      AppLogger.info('Artwork created with ID: $artworkId');
 
       // Create WritingMetadata for this work
+      AppLogger.info('Step 2: Preparing writing metadata...');
       final writingMetadata = WritingMetadata(
         genre: _selectedGenre,
         wordCount: _wordCount,
@@ -431,53 +712,58 @@ class _WrittenContentUploadScreenState
             ? _contentText.substring(0, 500)
             : _contentText,
         firstPublishedDate: DateTime.now(),
-        hasMultipleChapters: _isSerialized && _totalChaptersPlanned > 1,
+        hasMultipleChapters: _isSerialized || _chapters.length > 1,
+        isbn: _isbnController.text.isNotEmpty ? _isbnController.text : null,
+        seriesName:
+            _seriesController.text.isNotEmpty ? _seriesController.text : null,
+        volumeNumber: _volumeController.text.isNotEmpty
+            ? int.tryParse(_volumeController.text)
+            : null,
+        publisher:
+            _publisherController.text.isNotEmpty
+                ? _publisherController.text
+                : null,
+        edition:
+            _editionController.text.isNotEmpty ? _editionController.text : null,
       );
 
       // Update artwork metadata for written content
-      final artwork = await _artworkService.getArtworkById(artworkId);
-      if (artwork != null) {
-        final updatedData = {
-          'contentType': 'written',
-          'writingMetadata': writingMetadata.toJson(),
-          'isSerializing': _isSerialized,
-          'totalChapters': _isSerialized ? _totalChaptersPlanned : 1,
-          'releasedChapters': 0,
-          'readingMetadata': {
-            'wordCount': _wordCount,
-            'estimatedReadingTime': _estimatedReadingTime,
-            'language': 'en',
-            'contentFormat': _useFileUpload ? 'file' : 'text',
-          },
-          'serializationConfig': _isSerialized
-              ? {
-                  'releaseSchedule': _releaseSchedule,
-                  'startDate': DateTime.now().toIso8601String(),
-                }
-              : null,
-          'contentHash': _generateContentHash(_contentText),
-          'authorNote': _authorNoteController.text,
-          'volumeNumber': _volumeController.text.isNotEmpty
-              ? int.tryParse(_volumeController.text)
-              : null,
-          'chapterNumber': _chapterController.text.isNotEmpty
-              ? int.tryParse(_chapterController.text)
-              : null,
-          'seriesNumber': _seriesController.text.isNotEmpty
-              ? int.tryParse(_seriesController.text)
-              : null,
-        };
+      AppLogger.info('Step 3: Updating artwork with writing metadata...');
+      final updatedData = {
+        'contentType': 'written',
+        'writingMetadata': writingMetadata.toJson(),
+        'isSerializing': _isSerialized,
+        'totalChapters': _isSerialized ? _chapters.length : 1,
+        'releasedChapters': 0,
+        'readingMetadata': {
+          'wordCount': _wordCount,
+          'estimatedReadingTime': _estimatedReadingTime,
+          'language': 'en',
+          'contentFormat': _useFileUpload ? 'file' : 'text',
+        },
+        'serializationConfig': _isSerialized
+            ? {
+                'releaseSchedule': _releaseSchedule,
+                'startDate': DateTime.now().toIso8601String(),
+              }
+            : null,
+        'contentHash': _generateContentHash(_contentText),
+        'authorNote': _authorNoteController.text,
+        'updatedAt': FieldValue.serverTimestamp(),
+      };
 
-        await _firestore
-            .collection('artworks')
-            .doc(artworkId)
-            .update(updatedData);
-      }
+      await _firestore
+          .collection('artwork')
+          .doc(artworkId)
+          .update(updatedData);
+      AppLogger.info('Artwork metadata updated successfully');
 
       // Create chapters
-      if (_isSerialized && _chapters.isNotEmpty) {
+      AppLogger.info('Step 4: Creating chapters (${_chapters.length})...');
+      if (_chapters.isNotEmpty) {
         await _createChaptersForArtwork(artworkId);
       } else if (!_isSerialized) {
+        AppLogger.info('No chapters found, creating single chapter for complete work...');
         // Create single chapter for complete work
         await _chapterService.createChapter(
           artworkId: artworkId,
@@ -492,25 +778,73 @@ class _WrittenContentUploadScreenState
         );
       }
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('written_content_upload_success'.tr())),
-        );
-        Navigator.of(context).pop(artworkId);
-      }
-    } catch (e) {
-      AppLogger.error('Error uploading content: $e');
+      AppLogger.info('Upload process completed successfully!');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
+            content: Text('written_content_upload_success'.tr()),
+            backgroundColor: ArtbeatColors.primaryGreen,
+          ),
+        );
+        Navigator.of(context).pop(artworkId);
+      }
+    } catch (e, stackTrace) {
+      AppLogger.error('Error uploading content: $e');
+      AppLogger.error('Stack trace: $stackTrace');
+      if (mounted) {
+        final errorStr = e.toString();
+
+        // Check for upload limit error to show upsell dialog
+        if (errorStr.contains('maximum number of artworks') ||
+            errorStr.contains('upload limit')) {
+          showDialog<void>(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => UploadLimitUpsellDialog(
+              userId: _auth.currentUser?.uid ?? '',
+              currentTier: _tierLevel ?? SubscriptionTier.free,
+            ),
+          );
+          return;
+        }
+
+        // Robust error message display for other errors
+        final String errorMsg = errorStr.replaceFirst('Exception: ', '');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
             content: Text(
-              'written_content_upload_error'.tr(args: [e.toString()]),
+              'written_content_upload_error'.tr(args: [errorMsg]),
+            ),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+            action: SnackBarAction(
+              label: 'Details',
+              textColor: Colors.white,
+              onPressed: () {
+                showDialog<void>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Upload Error'),
+                    content: SingleChildScrollView(
+                      child: Text('$e\n\n$stackTrace'),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('Close'),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
           ),
         );
       }
     } finally {
-      if (mounted) {}
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -564,50 +898,60 @@ class _WrittenContentUploadScreenState
                 ),
               ),
             Expanded(
-              child: Stepper(
-                currentStep: _currentStepIndex,
-                onStepContinue: _onStepContinue,
-                onStepCancel: _onStepCancel,
-                onStepTapped: _onStepTapped,
-                controlsBuilder: _buildStepperControls,
-                steps: [
-                  Step(
-                    title: Text('written_content_upload_step_content'.tr()),
-                    subtitle: Text(
-                      'written_content_upload_step_content_desc'.tr(),
+              child: Form(
+                key: _formKey,
+                child: Stepper(
+                  currentStep: _currentStepIndex,
+                  onStepContinue: _onStepContinue,
+                  onStepCancel: _onStepCancel,
+                  onStepTapped: _onStepTapped,
+                  controlsBuilder: _buildStepperControls,
+                  steps: [
+                    Step(
+                      title: Text('written_content_upload_step_content'.tr()),
+                      subtitle: Text(
+                        'written_content_upload_step_content_desc'.tr(),
+                      ),
+                      content: _buildContentStep(),
+                      isActive: _currentStepIndex >= 0,
+                      state: _getStepState(0),
                     ),
-                    content: _buildContentStep(),
-                    isActive: _currentStepIndex >= 0,
-                    state: _getStepState(0),
-                  ),
-                  Step(
-                    title: Text('written_content_upload_step_basic_info'.tr()),
-                    subtitle: Text(
-                      'written_content_upload_step_basic_info_desc'.tr(),
+                    Step(
+                      title: const Text('Review Chapters'),
+                      subtitle: const Text('Manage extracted sections for your novel'),
+                      content: _buildChaptersStep(),
+                      isActive: _currentStepIndex >= 1,
+                      state: _getStepState(1),
                     ),
-                    content: _buildBasicInfoStep(),
-                    isActive: _currentStepIndex >= 1,
-                    state: _getStepState(1),
-                  ),
-                  Step(
-                    title: Text('written_content_upload_step_details'.tr()),
-                    subtitle: Text(
-                      'written_content_upload_step_details_desc'.tr(),
+                    Step(
+                      title: Text('written_content_upload_step_basic_info'.tr()),
+                      subtitle: Text(
+                        'written_content_upload_step_basic_info_desc'.tr(),
+                      ),
+                      content: _buildBasicInfoStep(),
+                      isActive: _currentStepIndex >= 2,
+                      state: _getStepState(2),
                     ),
-                    content: _buildDetailsStep(),
-                    isActive: _currentStepIndex >= 2,
-                    state: _getStepState(2),
-                  ),
-                  Step(
-                    title: Text('written_content_upload_step_review'.tr()),
-                    subtitle: Text(
-                      'written_content_upload_step_review_desc'.tr(),
+                    Step(
+                      title: Text('written_content_upload_step_details'.tr()),
+                      subtitle: Text(
+                        'written_content_upload_step_details_desc'.tr(),
+                      ),
+                      content: _buildDetailsStep(),
+                      isActive: _currentStepIndex >= 3,
+                      state: _getStepState(3),
                     ),
-                    content: _buildReviewStep(),
-                    isActive: _currentStepIndex >= 3,
-                    state: _getStepState(3),
-                  ),
-                ],
+                    Step(
+                      title: Text('written_content_upload_step_review'.tr()),
+                      subtitle: Text(
+                        'written_content_upload_step_review_desc'.tr(),
+                      ),
+                      content: _buildReviewStep(),
+                      isActive: _currentStepIndex >= 4,
+                      state: _getStepState(4),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -629,27 +973,41 @@ class _WrittenContentUploadScreenState
   Widget _buildStepperControls(BuildContext context, ControlsDetails details) {
     return Padding(
       padding: const EdgeInsets.only(top: 16.0),
-      child: Row(
+      child: Wrap(
+        spacing: 12,
+        runSpacing: 12,
         children: [
           if (_currentStepIndex > 0)
-            Expanded(
+            SizedBox(
+              width: 100,
               child: OutlinedButton(
                 onPressed: details.onStepCancel,
                 child: Text('written_content_upload_back'.tr()),
               ),
             ),
-          if (_currentStepIndex > 0) const SizedBox(width: 12),
-          Expanded(
-            flex: 2,
+          SizedBox(
+            width: 160,
             child: ElevatedButton(
-              onPressed: _currentStepIndex == 3
-                  ? _uploadContent
-                  : details.onStepContinue,
-              child: Text(
-                _currentStepIndex == 3
-                    ? 'written_content_upload_button'.tr()
-                    : 'written_content_upload_continue'.tr(),
-              ),
+              onPressed: (_isLoading || _isExtractingChapters)
+                  ? null
+                  : (_currentStepIndex == 4
+                      ? _uploadContent
+                      : details.onStepContinue),
+              child: (_isLoading || _isExtractingChapters)
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Text(
+                      _currentStepIndex == 4
+                          ? 'written_content_upload_button'.tr()
+                          : 'written_content_upload_continue'.tr(),
+                      textAlign: TextAlign.center,
+                    ),
             ),
           ),
         ],
@@ -671,14 +1029,73 @@ class _WrittenContentUploadScreenState
   }
 
   void _onStepContinue() {
-    if (_currentStepIndex < 3) {
-      if (_validateCurrentStep()) {
+    if (_currentStepIndex < 4) {
+      // Validate step-specific logic
+      final bool isStepValid = _validateCurrentStep();
+
+      // For form validation, only validate if we're on step 3+ and only validate
+      // fields that are on step 3 (basicInfo). Don't validate future steps yet.
+      final bool isFormValid = _currentStepIndex == 2
+          ? (_titleController.text.isNotEmpty &&
+              _descriptionController.text.isNotEmpty &&
+              _coverImageFile != null)
+          : (_currentStepIndex >= 3
+              ? (_formKey.currentState?.validate() ?? true)
+              : true);
+
+      if (isFormValid && isStepValid) {
         setState(() {
           _currentStepIndex += 1;
           _currentStep = WrittenContentUploadStep.values[_currentStepIndex];
         });
+      } else {
+        // Show specific feedback if step validation failed but form might be valid
+        if (!isStepValid) {
+          _showStepValidationError();
+        }
       }
     }
+  }
+
+  void _showStepValidationError() {
+    String message = 'Please complete all required fields';
+    
+    switch (_currentStep) {
+      case WrittenContentUploadStep.content:
+        message = _useFileUpload 
+            ? 'Please select a content file' 
+            : 'Please enter your content text';
+        break;
+      case WrittenContentUploadStep.chapters:
+        message = 'Please ensure at least one chapter is defined';
+        break;
+      case WrittenContentUploadStep.basicInfo:
+        if (_coverImageFile == null) {
+          message = 'Please upload a cover image';
+        } else if (_titleController.text.isEmpty) {
+          message = 'Please enter a title';
+        } else if (_descriptionController.text.isEmpty) {
+          message = 'Please enter a description';
+        }
+        break;
+      case WrittenContentUploadStep.details:
+        if (_selectedGenre == null || _selectedGenre!.isEmpty) {
+          message = 'Please select a primary genre';
+        } else if (_genres.isEmpty) {
+          message = 'Please select at least one genre/theme';
+        }
+        break;
+      default:
+        break;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.orange,
+        duration: const Duration(seconds: 3),
+      ),
+    );
   }
 
   void _onStepCancel() {
@@ -706,15 +1123,181 @@ class _WrittenContentUploadScreenState
             (!_useFileUpload &&
                 (_contentText.isNotEmpty ||
                     _richTextController.text.isNotEmpty));
+      case WrittenContentUploadStep.chapters:
+        return _chapters.isNotEmpty;
       case WrittenContentUploadStep.basicInfo:
         return _titleController.text.isNotEmpty &&
             _descriptionController.text.isNotEmpty &&
             _coverImageFile != null;
       case WrittenContentUploadStep.details:
-        return _genres.isNotEmpty;
+        return _genres.isNotEmpty && (_selectedGenre?.isNotEmpty ?? false);
       case WrittenContentUploadStep.review:
         return true;
     }
+  }
+
+  Widget _buildChaptersStep() {
+    if (_isExtractingChapters) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(32.0),
+          child: Column(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('Analyzing document and extracting chapters...'),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (_chapters.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32.0),
+          child: Column(
+            children: [
+              const Icon(Icons.auto_stories, size: 48, color: Colors.grey),
+              const SizedBox(height: 16),
+              const Text(
+                'No chapters extracted yet. Upload a PDF or add content to begin.',
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    _chapters.add({
+                      'number': 1,
+                      'title': 'Chapter 1',
+                      'content': _contentText,
+                      'wordCount': _wordCount,
+                      'readingTime': _estimatedReadingTime,
+                    });
+                  });
+                },
+                child: const Text('Add Single Chapter Manually'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          alignment: WrapAlignment.spaceBetween,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 8,
+          children: [
+            Text(
+              'Extracted Chapters (${_chapters.length})',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            TextButton.icon(
+              onPressed: () {
+                setState(() {
+                  _chapters.add({
+                    'number': _chapters.length + 1,
+                    'title': 'Chapter ${_chapters.length + 1}',
+                    'content': '',
+                    'wordCount': 0,
+                    'readingTime': 0,
+                  });
+                });
+              },
+              icon: const Icon(Icons.add, size: 20),
+              label: const Text('Add Chapter', style: TextStyle(fontSize: 13)),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'Review and edit the chapter titles and order before uploading.',
+          style: TextStyle(fontSize: 12, color: Colors.grey),
+        ),
+        const SizedBox(height: 16),
+        ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: _chapters.length,
+          separatorBuilder: (context, index) => const Divider(),
+          itemBuilder: (context, index) {
+            final chapter = _chapters[index];
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CircleAvatar(
+                    radius: 16,
+                    backgroundColor: ArtbeatColors.primaryGreen.withValues(
+                      alpha: 0.1,
+                    ),
+                    child: Text(
+                      '${chapter['number']}',
+                      style: const TextStyle(
+                        color: ArtbeatColors.primaryGreen,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        TextFormField(
+                          initialValue: chapter['title'] as String?,
+                          decoration: const InputDecoration(
+                            labelText: 'Chapter Title',
+                            isDense: true,
+                            contentPadding: EdgeInsets.symmetric(vertical: 8),
+                          ),
+                          onChanged: (value) {
+                            _chapters[index]['title'] = value;
+                          },
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Words: ${chapter['wordCount']} | Est. Read: ${chapter['readingTime']}m',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline, color: Colors.red),
+                    onPressed: () {
+                      setState(() {
+                        _chapters.removeAt(index);
+                        // Re-number
+                        for (int i = 0; i < _chapters.length; i++) {
+                          _chapters[i]['number'] = i + 1;
+                        }
+                      });
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ],
+    );
   }
 
   Widget _buildContentStep() {
@@ -739,6 +1322,7 @@ class _WrittenContentUploadScreenState
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
+          isExpanded: true,
           initialValue: _contentType,
           decoration: InputDecoration(
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
@@ -880,31 +1464,34 @@ class _WrittenContentUploadScreenState
                         topRight: Radius.circular(8),
                       ),
                     ),
-                    child: Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.format_bold),
-                          onPressed: () =>
-                              _insertMarkdownFormatting('**', '**'),
-                          tooltip: 'Bold',
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.format_italic),
-                          onPressed: () => _insertMarkdownFormatting('*', '*'),
-                          tooltip: 'Italic',
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.title),
-                          onPressed: () => _insertMarkdownFormatting('# ', ''),
-                          tooltip: 'Header',
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.link),
-                          onPressed: () =>
-                              _insertMarkdownFormatting('[', '](url)'),
-                          tooltip: 'Link',
-                        ),
-                      ],
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.format_bold),
+                            onPressed: () =>
+                                _insertMarkdownFormatting('**', '**'),
+                            tooltip: 'Bold',
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.format_italic),
+                            onPressed: () => _insertMarkdownFormatting('*', '*'),
+                            tooltip: 'Italic',
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.title),
+                            onPressed: () => _insertMarkdownFormatting('# ', ''),
+                            tooltip: 'Header',
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.link),
+                            onPressed: () =>
+                                _insertMarkdownFormatting('[', '](url)'),
+                            tooltip: 'Link',
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   // Editor area
@@ -1057,48 +1644,78 @@ class _WrittenContentUploadScreenState
         ),
         const SizedBox(height: 24),
 
-        // Volume/Chapter/Series identifiers
+        // Novel identifiers
         Text(
-          'written_content_upload_identifiers_label'.tr(),
+          'Novel Identifiers',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: _isbnController,
+          decoration: InputDecoration(
+            labelText: 'ISBN',
+            hintText: 'Enter 13-digit ISBN if available',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          ),
+          keyboardType: TextInputType.number,
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: TextFormField(
+                controller: _publisherController,
+                decoration: InputDecoration(
+                  labelText: 'Publisher',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: TextFormField(
+                controller: _editionController,
+                decoration: InputDecoration(
+                  labelText: 'Edition',
+                  hintText: 'e.g. First Edition',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+
+        // Series info
+        Text(
+          'Series Information',
           style: Theme.of(context).textTheme.titleMedium,
         ),
         const SizedBox(height: 8),
         Row(
           children: [
             Expanded(
-              child: TextFormField(
-                controller: _volumeController,
-                decoration: InputDecoration(
-                  labelText: 'written_content_upload_volume_label'.tr(),
-                  hintText: 'written_content_upload_volume_hint'.tr(),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                keyboardType: TextInputType.number,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: TextFormField(
-                controller: _chapterController,
-                decoration: InputDecoration(
-                  labelText: 'written_content_upload_chapter_label'.tr(),
-                  hintText: 'written_content_upload_chapter_hint'.tr(),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                keyboardType: TextInputType.number,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
+              flex: 2,
               child: TextFormField(
                 controller: _seriesController,
                 decoration: InputDecoration(
-                  labelText: 'written_content_upload_series_label'.tr(),
-                  hintText: 'written_content_upload_series_hint'.tr(),
+                  labelText: 'Series Name',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: TextFormField(
+                controller: _volumeController,
+                decoration: InputDecoration(
+                  labelText: 'Volume #',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -1125,6 +1742,7 @@ class _WrittenContentUploadScreenState
         Text('Primary Genre', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
+          isExpanded: true,
           initialValue: _selectedGenre,
           decoration: InputDecoration(
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
@@ -1214,6 +1832,7 @@ class _WrittenContentUploadScreenState
           ),
           const SizedBox(height: 8),
           DropdownButtonFormField<String>(
+            isExpanded: true,
             initialValue: _releaseSchedule,
             decoration: InputDecoration(
               border: OutlineInputBorder(
@@ -1372,8 +1991,14 @@ class _WrittenContentUploadScreenState
                   ),
                   const SizedBox(height: 8),
                 ],
-                Text('Title: ${_titleController.text}'),
-                Text('Description: ${_descriptionController.text}'),
+                Text(
+                  'Title: ${_titleController.text}',
+                  softWrap: true,
+                ),
+                Text(
+                  'Description: ${_descriptionController.text}',
+                  softWrap: true,
+                ),
                 Text('Type: $_contentType'),
               ],
             ),
@@ -1393,25 +2018,34 @@ class _WrittenContentUploadScreenState
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 8),
-                if (_volumeController.text.isNotEmpty ||
-                    _chapterController.text.isNotEmpty ||
-                    _seriesController.text.isNotEmpty) ...[
+                if (_isbnController.text.isNotEmpty)
+                  Text('ISBN: ${_isbnController.text}'),
+                if (_publisherController.text.isNotEmpty)
                   Text(
-                    'Volume: ${_volumeController.text}, Chapter: ${_chapterController.text}, Series: ${_seriesController.text}',
+                    'Publisher: ${_publisherController.text}',
+                    softWrap: true,
                   ),
-                  const SizedBox(height: 8),
-                ],
+                if (_editionController.text.isNotEmpty)
+                  Text('Edition: ${_editionController.text}', softWrap: true),
+                if (_seriesController.text.isNotEmpty)
+                  Text(
+                    'Series: ${_seriesController.text} ${_volumeController.text.isNotEmpty ? "Vol. ${_volumeController.text}" : ""}',
+                    softWrap: true,
+                  ),
                 if (_authorNoteController.text.isNotEmpty) ...[
-                  Text('Author Note: ${_authorNoteController.text}'),
                   const SizedBox(height: 8),
+                  Text(
+                    'Author Note: ${_authorNoteController.text}',
+                    softWrap: true,
+                  ),
                 ],
-                Text('Genres: ${_genres.join(", ")}'),
-                if (_isSerialized) ...[
-                  Text('Chapters: ${_chaptersController.text}'),
+                const SizedBox(height: 8),
+                Text('Genres: ${_genres.join(", ")}', softWrap: true),
+                Text('Total Chapters: ${_chapters.length}'),
+                if (_isSerialized)
                   Text(
                     'Schedule: ${_releaseSchedule.replaceAll('_', ' ').toUpperCase()}',
                   ),
-                ],
                 if (_isForSale) ...[Text('Price: \$${_priceController.text}')],
               ],
             ),
@@ -1432,6 +2066,9 @@ class _WrittenContentUploadScreenState
     _volumeController.dispose();
     _chapterController.dispose();
     _seriesController.dispose();
+    _isbnController.dispose();
+    _publisherController.dispose();
+    _editionController.dispose();
     super.dispose();
   }
 }

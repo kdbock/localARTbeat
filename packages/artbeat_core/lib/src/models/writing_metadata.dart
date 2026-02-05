@@ -30,6 +30,21 @@ class WritingMetadata {
   /// Whether the work has multiple chapters
   final bool hasMultipleChapters;
 
+  /// International Standard Book Number
+  final String? isbn;
+
+  /// Series name if this is part of a series
+  final String? seriesName;
+
+  /// Volume number in the series
+  final int? volumeNumber;
+
+  /// Publisher of the work
+  final String? publisher;
+
+  /// Edition of the work (e.g., First Edition, Revised)
+  final String? edition;
+
   const WritingMetadata({
     this.genre,
     this.wordCount,
@@ -40,6 +55,11 @@ class WritingMetadata {
     this.excerpt,
     this.firstPublishedDate,
     this.hasMultipleChapters = false,
+    this.isbn,
+    this.seriesName,
+    this.volumeNumber,
+    this.publisher,
+    this.edition,
   });
 
   /// Create WritingMetadata from JSON
@@ -65,6 +85,11 @@ class WritingMetadata {
         json['hasMultipleChapters'],
         false,
       ),
+      isbn: FirestoreUtils.safeString(json['isbn']),
+      seriesName: FirestoreUtils.safeString(json['seriesName']),
+      volumeNumber: FirestoreUtils.safeInt(json['volumeNumber']),
+      publisher: FirestoreUtils.safeString(json['publisher']),
+      edition: FirestoreUtils.safeString(json['edition']),
     );
   }
 
@@ -81,6 +106,11 @@ class WritingMetadata {
     if (firstPublishedDate != null)
       'firstPublishedDate': Timestamp.fromDate(firstPublishedDate!),
     'hasMultipleChapters': hasMultipleChapters,
+    if (isbn != null) 'isbn': isbn,
+    if (seriesName != null) 'seriesName': seriesName,
+    if (volumeNumber != null) 'volumeNumber': volumeNumber,
+    if (publisher != null) 'publisher': publisher,
+    if (edition != null) 'edition': edition,
   };
 
   /// Create a copy with updated fields
@@ -94,6 +124,11 @@ class WritingMetadata {
     String? excerpt,
     DateTime? firstPublishedDate,
     bool? hasMultipleChapters,
+    String? isbn,
+    String? seriesName,
+    int? volumeNumber,
+    String? publisher,
+    String? edition,
   }) {
     return WritingMetadata(
       genre: genre ?? this.genre,
@@ -105,6 +140,11 @@ class WritingMetadata {
       excerpt: excerpt ?? this.excerpt,
       firstPublishedDate: firstPublishedDate ?? this.firstPublishedDate,
       hasMultipleChapters: hasMultipleChapters ?? this.hasMultipleChapters,
+      isbn: isbn ?? this.isbn,
+      seriesName: seriesName ?? this.seriesName,
+      volumeNumber: volumeNumber ?? this.volumeNumber,
+      publisher: publisher ?? this.publisher,
+      edition: edition ?? this.edition,
     );
   }
 

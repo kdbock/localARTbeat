@@ -11,6 +11,7 @@ analyzer:
     deprecated_member_use: warning
     override_on_non_overriding_member: ignore
   exclude:
+    - "local_packages/**"
     - "build/**"
     - "node_modules/**"
     - ".venv*/**"

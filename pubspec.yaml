@@ -61,7 +61,7 @@ dependencies:
   flutter_image_compress: ^2.3.0
   flutter_local_notifications: ^19.5.0
   flutter_markdown_plus: ^1.0.5
-  flutter_sound: ^9.2.13
+  flutter_sound: ^9.30.0
   flutter_svg: ^2.1.0
   geocoding: ^4.0.0
   geolocator: ^14.0.1
@@ -137,4 +137,6 @@ dev_dependencies:
 
 dependency_overrides:
   archive: ^4.0.0
+  flutter_sound:
+    path: local_packages/flutter_sound
   screenshot: ^3.0.0
