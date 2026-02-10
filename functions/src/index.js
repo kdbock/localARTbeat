@@ -12,6 +12,8 @@ const {onSchedule} = require("firebase-functions/v2/scheduler");
 const {setGlobalOptions} = require("firebase-functions/v2");
 const admin = require("firebase-admin");
 const {defineSecret} = require("firebase-functions/params");
+const {BetaAnalyticsDataClient} = require("@google-analytics/data");
+const nodemailer = require("nodemailer");
 const https = require("https");
 const crypto = require("crypto");
 
@@ -22,8 +24,13 @@ setGlobalOptions({
   memory: "256MiB",
 });
 
-// Define secret for Stripe
+// Define secrets
 const stripeSecretKey = defineSecret("STRIPE_SECRET_KEY");
+const smtpHostSecret = defineSecret("SMTP_HOST");
+const smtpPortSecret = defineSecret("SMTP_PORT");
+const smtpUserSecret = defineSecret("SMTP_USER");
+const smtpPassSecret = defineSecret("SMTP_PASS");
+const ga4PropertyIdSecret = defineSecret("GA4_PROPERTY_ID");
 
 admin.initializeApp();
 
@@ -1199,6 +1206,559 @@ exports.rotateKioskLane = onSchedule(
     await performKioskLaneRotation("schedule");
   }
 );
+
+exports.sendDailyAnalyticsReport = onSchedule(
+  {
+    schedule: "every day 08:00",
+    timeZone: "UTC",
+    cpu: 0.25,
+    memory: "256MiB",
+    maxInstances: 1,
+    secrets: [
+      smtpHostSecret,
+      smtpPortSecret,
+      smtpUserSecret,
+      smtpPassSecret,
+      stripeSecretKey,
+      ga4PropertyIdSecret,
+    ],
+  },
+  async () => {
+    await sendDailyAnalyticsReportInternal();
+  }
+);
+
+exports.sendDailyAnalyticsReportNow = onRequest(
+  {
+    cpu: 0.25,
+    memory: "256MiB",
+    maxInstances: 1,
+    secrets: [
+      smtpHostSecret,
+      smtpPortSecret,
+      smtpUserSecret,
+      smtpPassSecret,
+      stripeSecretKey,
+      ga4PropertyIdSecret,
+    ],
+  },
+  async (request, response) => {
+    try {
+      const result = await sendDailyAnalyticsReportInternal();
+      return response.status(200).json({ok: true, ...result});
+    } catch (error) {
+      logger.error("Failed manual analytics report", {error});
+      if (response.headersSent) {
+        return;
+      }
+      return response.status(500).json({ok: false, error: String(error)});
+    }
+  }
+);
+
+async function sendDailyAnalyticsReportInternal() {
+  const reportDate = new Date();
+  const endUtc = new Date(
+    Date.UTC(
+      reportDate.getUTCFullYear(),
+      reportDate.getUTCMonth(),
+      reportDate.getUTCDate(),
+      0,
+      0,
+      0
+    )
+  );
+  const startUtc = new Date(
+    Date.UTC(
+      reportDate.getUTCFullYear(),
+      reportDate.getUTCMonth(),
+      reportDate.getUTCDate() - 1,
+      0,
+      0,
+      0
+    )
+  );
+
+  const startTimestamp = admin.firestore.Timestamp.fromDate(startUtc);
+  const endTimestamp = admin.firestore.Timestamp.fromDate(endUtc);
+
+  const ga4PropertyId = ga4PropertyIdSecret.value();
+  let dau = null;
+  let wau = null;
+  let mau = null;
+  let newUsers = null;
+
+  if (ga4PropertyId) {
+    try {
+      const analyticsClient = new BetaAnalyticsDataClient();
+      const runMetricReport = async (metricName, startDate, endDate) => {
+        const [response] = await analyticsClient.runReport({
+          property: `properties/${ga4PropertyId}`,
+          dateRanges: [{startDate, endDate}],
+          metrics: [{name: metricName}],
+        });
+        const value = response.rows?.[0]?.metricValues?.[0]?.value;
+        return Number(value || 0);
+      };
+
+      dau = await runMetricReport("activeUsers", "yesterday", "yesterday");
+      wau = await runMetricReport("activeUsers", "7daysAgo", "yesterday");
+      mau = await runMetricReport("activeUsers", "30daysAgo", "yesterday");
+      newUsers = await runMetricReport("newUsers", "yesterday", "yesterday");
+    } catch (error) {
+      logger.error("Failed to fetch GA4 active users", {error});
+    }
+  } else {
+    logger.warn("GA4_PROPERTY_ID not configured. Skipping GA4 metrics.");
+  }
+
+  const countCollectionInRange = async (collectionName) => {
+    try {
+      const snapshot = await admin
+        .firestore()
+        .collection(collectionName)
+        .where("createdAt", ">=", startTimestamp)
+        .where("createdAt", "<", endTimestamp)
+        .count()
+        .get();
+      return Number(snapshot.data().count || 0);
+    } catch (error) {
+      logger.error("Failed counting collection", {collectionName, error});
+      return null;
+    }
+  };
+
+  const [capturesAdded, artworkAdded] = await Promise.all([
+    countCollectionInRange("captures"),
+    countCollectionInRange("artwork"),
+  ]);
+
+  const stripeMetrics = await getStripeMetrics(startUtc, endUtc);
+  const iapMetrics = await getIapMetrics(startTimestamp, endTimestamp);
+  const subscriptionMetrics = await getSubscriptionMetrics(
+    startTimestamp,
+    endTimestamp
+  );
+
+  const currency =
+    process.env.REPORT_CURRENCY ||
+    stripeMetrics.currency ||
+    iapMetrics.currency ||
+    "USD";
+
+  const totalGross = stripeMetrics.gross + iapMetrics.gross;
+  const totalNet = stripeMetrics.net + iapMetrics.net;
+  const totalRefunds = stripeMetrics.refunds + iapMetrics.refunds;
+
+  const reportLines = [
+    `ARTbeat Daily Analytics Report (UTC)`,
+    `Date: ${startUtc.toISOString().slice(0, 10)}`,
+    "",
+    "USERS",
+    `DAU: ${dau ?? "N/A"}`,
+    `WAU: ${wau ?? "N/A"}`,
+    `MAU: ${mau ?? "N/A"}`,
+    `New Users: ${newUsers ?? "N/A"}`,
+    "",
+    "REVENUE",
+    `Total Gross: ${formatCurrency(totalGross, currency)}`,
+    `Total Net: ${formatCurrency(totalNet, currency)}`,
+    `Total Refunds: ${formatCurrency(totalRefunds, currency)}`,
+    "",
+    `Stripe Gross: ${formatCurrency(stripeMetrics.gross, currency)}`,
+    `Stripe Net: ${formatCurrency(stripeMetrics.net, currency)}`,
+    `Stripe Fees: ${formatCurrency(stripeMetrics.fees, currency)}`,
+    `Stripe Refunds: ${formatCurrency(stripeMetrics.refunds, currency)}`,
+    "",
+    `IAP Gross: ${formatCurrency(iapMetrics.gross, currency)}`,
+    `IAP Net (rate ${iapMetrics.netRate}): ${formatCurrency(
+      iapMetrics.net,
+      currency
+    )}`,
+    `IAP Refunds: ${formatCurrency(iapMetrics.refunds, currency)}`,
+    "",
+    "SUBSCRIPTIONS",
+    `Active Subscriptions: ${subscriptionMetrics.active}`,
+    `New Subscriptions: ${subscriptionMetrics.new}`,
+    `Churn (approx): ${formatPercent(subscriptionMetrics.churnRate)}`,
+    "",
+    "CONTENT",
+    `Captures added: ${capturesAdded ?? "N/A"}`,
+    `Artwork added: ${artworkAdded ?? "N/A"}`,
+  ];
+
+  const smtpHost = smtpHostSecret.value();
+  const smtpPort = Number(smtpPortSecret.value() || 465);
+  const smtpUser = smtpUserSecret.value();
+  const smtpPass = smtpPassSecret.value();
+
+  const toEmail = process.env.REPORT_EMAIL_TO || "info@localartbeat.com";
+  const fromEmail = process.env.REPORT_EMAIL_FROM || smtpUser;
+
+  const transporter = nodemailer.createTransport({
+    host: smtpHost,
+    port: smtpPort,
+    secure: smtpPort === 465,
+    auth: {
+      user: smtpUser,
+      pass: smtpPass,
+    },
+  });
+
+  const html = buildDailyReportHtml({
+    date: startUtc.toISOString().slice(0, 10),
+    dau,
+    wau,
+    mau,
+    newUsers,
+    capturesAdded,
+    artworkAdded,
+    currency,
+    stripeMetrics,
+    iapMetrics,
+    totalGross,
+    totalNet,
+    totalRefunds,
+    subscriptionMetrics,
+  });
+
+  await transporter.sendMail({
+    to: toEmail,
+    from: fromEmail,
+    subject: `ARTbeat Daily Report — ${startUtc.toISOString().slice(0, 10)}`,
+    text: reportLines.join("\n"),
+    html,
+  });
+
+  return {
+    date: startUtc.toISOString().slice(0, 10),
+    dau,
+    wau,
+    mau,
+    newUsers,
+    capturesAdded,
+    artworkAdded,
+    stripeMetrics,
+    iapMetrics,
+    subscriptionMetrics,
+    totalGross,
+    totalNet,
+    totalRefunds,
+  };
+}
+
+function formatCurrency(amount, currency) {
+  const safeAmount = Number(amount || 0);
+  try {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: currency || "USD",
+      maximumFractionDigits: 2,
+    }).format(safeAmount);
+  } catch (_) {
+    return `${(safeAmount || 0).toFixed(2)} ${currency || "USD"}`;
+  }
+}
+
+function formatPercent(value) {
+  if (value == null || Number.isNaN(value)) return "N/A";
+  return `${(Number(value) * 100).toFixed(1)}%`;
+}
+
+async function getStripeMetrics(startUtc, endUtc) {
+  try {
+    const stripe = require("stripe")(stripeSecretKey.value());
+    const created = {
+      gte: Math.floor(startUtc.getTime() / 1000),
+      lt: Math.floor(endUtc.getTime() / 1000),
+    };
+
+    let gross = 0;
+    let net = 0;
+    let fees = 0;
+    let refunds = 0;
+    let currency = null;
+
+    const list = stripe.balanceTransactions.list({
+      created,
+      limit: 100,
+    });
+
+    for await (const tx of list.autoPagingIterable()) {
+      if (!currency && tx.currency) currency = tx.currency.toUpperCase();
+      if (tx.type === "charge" || tx.type === "payment") {
+        gross += tx.amount || 0;
+      }
+      if (tx.type === "refund") {
+        refunds += Math.abs(tx.amount || 0);
+      }
+      net += tx.net || 0;
+      fees += tx.fee || 0;
+    }
+
+    return {
+      gross: gross / 100,
+      net: net / 100,
+      fees: fees / 100,
+      refunds: refunds / 100,
+      currency,
+    };
+  } catch (error) {
+    logger.error("Failed to fetch Stripe metrics", {error});
+    return {gross: 0, net: 0, fees: 0, refunds: 0, currency: null};
+  }
+}
+
+async function getIapMetrics(startTimestamp, endTimestamp) {
+  const netRate = Number(process.env.IAP_NET_RATE || "0.70");
+  try {
+    const snapshot = await admin
+      .firestore()
+      .collection("purchases")
+      .where("purchaseDate", ">=", startTimestamp)
+      .where("purchaseDate", "<", endTimestamp)
+      .get();
+
+    let gross = 0;
+    let refunds = 0;
+    let currency = null;
+
+    snapshot.docs.forEach((doc) => {
+      const data = doc.data() || {};
+      const amount = Number(data.amount || 0);
+      const status = String(data.status || "completed").toLowerCase();
+      if (!currency && data.currency) currency = String(data.currency).toUpperCase();
+
+      if (status === "refunded" || status === "refund") {
+        refunds += amount;
+      } else {
+        gross += amount;
+      }
+    });
+
+    const net = (gross - refunds) * netRate;
+
+    return {
+      gross,
+      net,
+      refunds,
+      netRate,
+      currency,
+    };
+  } catch (error) {
+    logger.error("Failed to fetch IAP metrics", {error});
+    return {gross: 0, net: 0, refunds: 0, netRate, currency: null};
+  }
+}
+
+async function getSubscriptionMetrics(startTimestamp, endTimestamp) {
+  const subscriptionsRef = admin.firestore().collection("subscriptions");
+  const nowTimestamp = admin.firestore.Timestamp.now();
+
+  const countQuery = async (query) => {
+    try {
+      const snapshot = await query.count().get();
+      return Number(snapshot.data().count || 0);
+    } catch (error) {
+      logger.warn("Count query failed, falling back to get()", {error});
+      const snapshot = await query.get();
+      return snapshot.size;
+    }
+  };
+
+  let activeStripe = 0;
+  let activeIap = 0;
+  let newStripe = 0;
+  let newIap = 0;
+  let churnedStripe = 0;
+  let churnedIap = 0;
+  let activeAtStart = 0;
+
+  try {
+    activeStripe = await countQuery(
+      subscriptionsRef.where("isActive", "==", true)
+    );
+  } catch (error) {
+    logger.warn("Active Stripe subscriptions query failed", {error});
+  }
+
+  try {
+    const activeIapQuery = subscriptionsRef
+      .where("status", "==", "active")
+      .where("endDate", ">=", nowTimestamp);
+    activeIap = await countQuery(activeIapQuery);
+  } catch (error) {
+    logger.warn("Active IAP subscriptions query failed", {error});
+  }
+
+  try {
+    newStripe = await countQuery(
+      subscriptionsRef
+        .where("createdAt", ">=", startTimestamp)
+        .where("createdAt", "<", endTimestamp)
+    );
+  } catch (error) {
+    logger.warn("New Stripe subscriptions query failed", {error});
+  }
+
+  try {
+    newIap = await countQuery(
+      subscriptionsRef
+        .where("startDate", ">=", startTimestamp)
+        .where("startDate", "<", endTimestamp)
+    );
+  } catch (error) {
+    logger.warn("New IAP subscriptions query failed", {error});
+  }
+
+  try {
+    churnedStripe = await countQuery(
+      subscriptionsRef
+        .where("isActive", "==", false)
+        .where("updatedAt", ">=", startTimestamp)
+        .where("updatedAt", "<", endTimestamp)
+    );
+  } catch (error) {
+    logger.warn("Churned Stripe subscriptions query failed", {error});
+  }
+
+  try {
+    churnedIap = await countQuery(
+      subscriptionsRef
+        .where("status", "==", "cancelled")
+        .where("updatedAt", ">=", startTimestamp)
+        .where("updatedAt", "<", endTimestamp)
+    );
+  } catch (error) {
+    logger.warn("Churned IAP subscriptions query failed", {error});
+  }
+
+  try {
+    const activeAtStartStripe = await countQuery(
+      subscriptionsRef.where("isActive", "==", true)
+    );
+    const activeAtStartIap = await countQuery(
+      subscriptionsRef
+        .where("status", "==", "active")
+        .where("startDate", "<", startTimestamp)
+    );
+    activeAtStart = activeAtStartStripe + activeAtStartIap;
+  } catch (error) {
+    logger.warn("Active-at-start subscriptions query failed", {error});
+  }
+
+  const active = activeStripe + activeIap;
+  const newSubs = newStripe + newIap;
+  const churned = churnedStripe + churnedIap;
+  const churnRate = activeAtStart > 0 ? churned / activeAtStart : null;
+
+  return {
+    active,
+    new: newSubs,
+    churned,
+    churnRate,
+  };
+}
+
+function buildDailyReportHtml(payload) {
+  const {
+    date,
+    dau,
+    wau,
+    mau,
+    newUsers,
+    capturesAdded,
+    artworkAdded,
+    currency,
+    stripeMetrics,
+    iapMetrics,
+    totalGross,
+    totalNet,
+    totalRefunds,
+    subscriptionMetrics,
+  } = payload;
+
+  return `
+  <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; background: #f6f7fb; padding: 24px;">
+    <div style="max-width: 720px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 6px 16px rgba(0,0,0,0.08);">
+      <div style="background: linear-gradient(135deg, #7c3aed, #2563eb); color: #fff; padding: 24px;">
+        <div style="font-size: 20px; font-weight: 700;">ARTbeat Daily Analytics</div>
+        <div style="opacity: 0.9; margin-top: 6px;">UTC Date: ${date}</div>
+      </div>
+
+      <div style="padding: 24px;">
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px;">
+          ${buildMetricCard("DAU", dau ?? "N/A")}
+          ${buildMetricCard("WAU", wau ?? "N/A")}
+          ${buildMetricCard("MAU", mau ?? "N/A")}
+          ${buildMetricCard("New Users", newUsers ?? "N/A")}
+        </div>
+
+        <h3 style="margin: 28px 0 12px; color: #111827;">Revenue</h3>
+        ${buildTable([
+          ["Total Gross", formatCurrency(totalGross, currency)],
+          ["Total Net", formatCurrency(totalNet, currency)],
+          ["Total Refunds", formatCurrency(totalRefunds, currency)],
+          ["Stripe Gross", formatCurrency(stripeMetrics.gross, currency)],
+          ["Stripe Net", formatCurrency(stripeMetrics.net, currency)],
+          ["Stripe Fees", formatCurrency(stripeMetrics.fees, currency)],
+          ["Stripe Refunds", formatCurrency(stripeMetrics.refunds, currency)],
+          ["IAP Gross", formatCurrency(iapMetrics.gross, currency)],
+          ["IAP Net (rate ${iapMetrics.netRate})", formatCurrency(iapMetrics.net, currency)],
+          ["IAP Refunds", formatCurrency(iapMetrics.refunds, currency)],
+        ])}
+
+        <h3 style="margin: 28px 0 12px; color: #111827;">Subscriptions</h3>
+        ${buildTable([
+          ["Active", subscriptionMetrics.active],
+          ["New", subscriptionMetrics.new],
+          ["Churn (approx)", formatPercent(subscriptionMetrics.churnRate)],
+        ])}
+
+        <h3 style="margin: 28px 0 12px; color: #111827;">Content</h3>
+        ${buildTable([
+          ["Captures added", capturesAdded ?? "N/A"],
+          ["Artwork added", artworkAdded ?? "N/A"],
+        ])}
+
+        <div style="margin-top: 24px; font-size: 12px; color: #6b7280;">
+          Net revenue includes Stripe net plus IAP net based on rate ${iapMetrics.netRate}. Adjust via IAP_NET_RATE env.
+        </div>
+      </div>
+    </div>
+  </div>
+  `;
+}
+
+function buildMetricCard(label, value) {
+  return `
+    <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 16px;">
+      <div style="font-size: 12px; color: #6b7280;">${label}</div>
+      <div style="font-size: 20px; font-weight: 700; color: #111827;">${value}</div>
+    </div>
+  `;
+}
+
+function buildTable(rows) {
+  const rowHtml = rows
+    .map(
+      ([label, value]) => `
+      <tr>
+        <td style="padding: 10px 12px; border-bottom: 1px solid #e5e7eb; color: #374151;">${label}</td>
+        <td style="padding: 10px 12px; border-bottom: 1px solid #e5e7eb; color: #111827; text-align: right; font-weight: 600;">${value}</td>
+      </tr>
+    `
+    )
+    .join("");
+
+  return `
+    <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+      <tbody>
+        ${rowHtml}
+      </tbody>
+    </table>
+  `;
+}
 
 exports.rotateKioskLaneNow = onRequest(
   {
@@ -2924,7 +3484,16 @@ exports.processArtworkSalePayment = onRequest(
           return response.status(405).send({error: "Method Not Allowed"});
         }
 
-        const {paymentIntentId, artworkId, artistId, amount, isAuction} = request.body;
+        const {
+          paymentIntentId,
+          artworkId,
+          artistId,
+          amount,
+          isAuction,
+          purchaseType,
+          chapterId,
+          chapterNumber,
+        } = request.body;
 
         if (!paymentIntentId || !artworkId || !artistId || !amount) {
           return response.status(400).send({
@@ -2941,7 +3510,7 @@ exports.processArtworkSalePayment = onRequest(
           });
         }
 
-        console.log(`✅ Artwork sale verified: ${paymentIntentId} for $${amount}${isAuction ? " (Auction)" : ""}`);
+        console.log(`✅ Artwork sale verified: ${paymentIntentId} for $${amount}${isAuction ? " (Auction)" : ""}${purchaseType === "chapter" ? ` (Chapter ${chapterNumber})` : ""}`);
 
         // Create sale record
         const saleData = {
@@ -2952,42 +3521,53 @@ exports.processArtworkSalePayment = onRequest(
           paymentIntentId: paymentIntentId,
           status: "completed",
           isAuction: isAuction || false,
+          purchaseType: purchaseType || "full_book",
+          isFullBook: purchaseType === "full_book",
           createdAt: admin.firestore.FieldValue.serverTimestamp(),
         };
+
+        // Add chapter-specific fields if applicable
+        if (purchaseType === "chapter") {
+          saleData.chapterId = chapterId || null;
+          saleData.chapterNumber = chapterNumber || null;
+        }
 
         const saleRef = await admin
           .firestore()
           .collection("artwork_sales")
           .add(saleData);
 
-        // Update artwork status
-        const artworkUpdate = {
-          status: "sold",
-          buyerId: authUserId,
-          soldAt: admin.firestore.FieldValue.serverTimestamp(),
-          soldPrice: amount,
-        };
-
-        if (isAuction) {
-          artworkUpdate.auctionStatus = "paid";
-          artworkUpdate.ownerId = authUserId; // Legacy compatibility
-          artworkUpdate.purchasedAt = admin.firestore.FieldValue.serverTimestamp(); // Legacy compatibility
-          artworkUpdate.purchasePrice = amount; // Legacy compatibility
-        }
-
-        await admin.firestore().collection("artworks").doc(artworkId).update(artworkUpdate);
-
-        // Update auction result if applicable
-        if (isAuction) {
-          await admin.firestore().collection("auction_results").doc(artworkId).set({
-            paymentStatus: "paid",
-            paidAt: admin.firestore.FieldValue.serverTimestamp(),
+        // Update artwork status only for full book purchases (not chapter purchases)
+        if (purchaseType !== "chapter") {
+          // Update artwork status
+          const artworkUpdate = {
+            status: "sold",
             buyerId: authUserId,
-            amount: amount,
-          }, {merge: true});
+            soldAt: admin.firestore.FieldValue.serverTimestamp(),
+            soldPrice: amount,
+          };
+
+          if (isAuction) {
+            artworkUpdate.auctionStatus = "paid";
+            artworkUpdate.ownerId = authUserId; // Legacy compatibility
+            artworkUpdate.purchasedAt = admin.firestore.FieldValue.serverTimestamp(); // Legacy compatibility
+            artworkUpdate.purchasePrice = amount; // Legacy compatibility
+          }
+
+          await admin.firestore().collection("artworks").doc(artworkId).update(artworkUpdate);
+
+          // Update auction result if applicable
+          if (isAuction) {
+            await admin.firestore().collection("auction_results").doc(artworkId).set({
+              paymentStatus: "paid",
+              paidAt: admin.firestore.FieldValue.serverTimestamp(),
+              buyerId: authUserId,
+              amount: amount,
+            }, {merge: true});
+          }
         }
 
-        // Update artist's balance (they get 85% of artwork sales)
+        // Update artist's balance (85% for artwork, same for chapters)
         const artistShare = amount * 0.85;
         const artistRef = admin.firestore().collection("users").doc(artistId);
 
@@ -3003,26 +3583,38 @@ exports.processArtworkSalePayment = onRequest(
         });
 
         // Record earnings for the artist
+        const earningDescription =
+          purchaseType === "chapter"
+            ? `Sale of chapter ${chapterNumber} for artwork ${artworkId}`
+            : `Sale of artwork ${artworkId}`;
+
         await recordArtistEarnings(
           artistId,
-          "artwork_sale",
+          purchaseType === "chapter" ? "chapter_sale" : "artwork_sale",
           artistShare,
           authUserId,
           decodedToken.name || "A Buyer",
-          `Sale of artwork ${artworkId}`,
-          {saleId: saleRef.id, artworkId: artworkId}
+          earningDescription,
+          {saleId: saleRef.id, artworkId: artworkId, chapterId: chapterId || null}
         );
 
         // Create notification for artist
+        const notificationMessage =
+          purchaseType === "chapter"
+            ? `Chapter ${chapterNumber} purchased for $${amount}! Your share: $${artistShare.toFixed(2)}`
+            : `Your artwork has been sold for $${amount}! Your share: $${artistShare.toFixed(2)}`;
+
         await admin.firestore().collection("notifications").add({
           userId: artistId,
-          type: "artwork_sold",
-          title: "Artwork Sold!",
-          message: `Your artwork has been sold for $${amount}! Your share: $${artistShare.toFixed(2)}`,
+          type: purchaseType === "chapter" ? "chapter_purchased" : "artwork_sold",
+          title: purchaseType === "chapter" ? "Chapter Purchased!" : "Artwork Sold!",
+          message: notificationMessage,
           data: {
             artworkId: artworkId,
             saleId: saleRef.id,
             buyerId: authUserId,
+            chapterId: chapterId || null,
+            chapterNumber: chapterNumber || null,
           },
           read: false,
           createdAt: admin.firestore.FieldValue.serverTimestamp(),

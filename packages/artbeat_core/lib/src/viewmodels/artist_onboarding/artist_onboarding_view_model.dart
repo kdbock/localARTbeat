@@ -355,8 +355,15 @@ class ArtistOnboardingViewModel extends ChangeNotifier {
   }) async {
     final firestore = FirebaseFirestore.instance;
 
+    // Ensure user is marked as artist for artwork creation rules
+    await firestore.collection('users').doc(userId).set({
+      'userType': 'artist',
+      'updatedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
+
     // Prepare artist profile data
     final profileData = {
+      'userId': userId,
       'displayName': _data.artistIntroduction ?? 'Artist',
       'bio': _data.storyMessage ?? '',
       'artistType': _data.artistType,
@@ -384,6 +391,7 @@ class ArtistOnboardingViewModel extends ChangeNotifier {
         final artworkData = {
           'artistId': userId,
           'title': artwork.title ?? 'Untitled',
+          'contentType': 'visual',
           'yearCreated': artwork.yearCreated,
           'medium': artwork.medium ?? 'Mixed Media',
           'isForSale': artwork.isForSale,
@@ -399,7 +407,7 @@ class ArtistOnboardingViewModel extends ChangeNotifier {
           'updatedAt': FieldValue.serverTimestamp(),
         };
 
-        final docRef = firestore.collection('artworks').doc();
+        final docRef = firestore.collection('artwork').doc();
         batch.set(docRef, artworkData);
       }
     }

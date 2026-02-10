@@ -334,15 +334,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               label: _trWithFallback('notifications_stat_unread', 'Unread'),
             ),
             const SizedBox(width: 12),
-            Expanded(
-              child: _buildSummaryMetric(
-                value: lastUpdated != null
-                    ? _formatNotificationDate(lastUpdated)
-                    : '—',
-                label: _trWithFallback(
-                  'notifications_stat_recent',
-                  'Last update',
-                ),
+            _buildSummaryMetric(
+              value: lastUpdated != null
+                  ? _formatNotificationDate(lastUpdated)
+                  : '—',
+              label: _trWithFallback(
+                'notifications_stat_recent',
+                'Last update',
               ),
             ),
           ],

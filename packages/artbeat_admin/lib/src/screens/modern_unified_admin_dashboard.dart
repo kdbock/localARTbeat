@@ -60,6 +60,7 @@ class _ModernUnifiedAdminDashboardState
   List<ContentModel> _allContent = [];
   List<TransactionModel> _recentTransactions = [];
   Map<String, double> _revenueBreakdown = {};
+  Map<String, dynamic>? _contentStats;
 
   // State
   bool _isLoading = true;
@@ -160,10 +161,12 @@ class _ModernUnifiedAdminDashboardState
   Future<void> _loadContentData() async {
     final pendingReviews = await _contentService.getPendingReviews();
     final allContent = await _unifiedAdminService.getAllContent();
+    final contentStats = await _unifiedAdminService.getContentStatistics();
 
     setState(() {
       _pendingReviews = pendingReviews;
       _allContent = allContent;
+      _contentStats = contentStats;
     });
   }
 
@@ -1014,24 +1017,21 @@ class _ModernUnifiedAdminDashboardState
               ),
             ),
           ),
-          SizedBox(
-            width: 70,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Text(
+              isHealthy ? 'Healthy' : 'Error',
+              style: TextStyle(
+                color: color,
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
               ),
-              child: Text(
-                isHealthy ? 'Healthy' : 'Error',
-                style: TextStyle(
-                  color: color,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                ),
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-              ),
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
             ),
           ),
         ],
@@ -1531,8 +1531,8 @@ class _ModernUnifiedAdminDashboardState
                   LayoutBuilder(
                     builder: (context, constraints) {
                       final crossAxisCount = constraints.maxWidth > 800
-                          ? 5
-                          : (constraints.maxWidth > 600 ? 4 : 2);
+                          ? 6
+                          : (constraints.maxWidth > 600 ? 3 : 2);
                       return GridView.count(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
@@ -1543,15 +1543,27 @@ class _ModernUnifiedAdminDashboardState
                         children: [
                           _buildContentStatCard(
                             'Total Content',
-                            _allContent.length.toString(),
+                            (_contentStats?['total'] ?? _allContent.length)
+                                .toString(),
                             Icons.content_copy_rounded,
                             const Color(0xFF4FC3F7),
                           ),
                           _buildContentStatCard(
                             'Pending Reviews',
-                            _pendingReviews.length.toString(),
+                            (_contentStats?['pending'] ??
+                                    _pendingReviews.length)
+                                .toString(),
                             Icons.rate_review_rounded,
                             const Color(0xFFFFB74D),
+                          ),
+                          _buildContentStatCard(
+                            'Pending Chapters',
+                            (_contentStats?['breakdown']?['chapters']
+                                        ?['pending'] ??
+                                    0)
+                                .toString(),
+                            Icons.auto_stories_rounded,
+                            const Color(0xFFCE93D8),
                           ),
                           _buildContentStatCard(
                             'Approved',
@@ -1573,9 +1585,10 @@ class _ModernUnifiedAdminDashboardState
                           ),
                           _buildContentStatCard(
                             'Reported',
-                            _allContent
-                                .where((c) => c.status == 'flagged')
-                                .length
+                            (_contentStats?['flagged'] ??
+                                    _allContent
+                                        .where((c) => c.status == 'flagged')
+                                        .length)
                                 .toString(),
                             Icons.flag_rounded,
                             const Color(0xFFFF5722),
@@ -1670,6 +1683,8 @@ class _ModernUnifiedAdminDashboardState
                         _buildContentTypeFilterChip(AdminContentType.event),
                         const SizedBox(width: 8),
                         _buildContentTypeFilterChip(AdminContentType.capture),
+                        const SizedBox(width: 8),
+                        _buildContentTypeFilterChip(AdminContentType.chapter),
                         const SizedBox(width: 8),
                         _buildContentTypeFilterChip(AdminContentType.ad),
                         const SizedBox(width: 8),
@@ -2163,10 +2178,12 @@ class _ModernUnifiedAdminDashboardState
       );
 
       // Approve the content using the unified admin service
-      await _unifiedAdminService.approveContent(review.contentId);
+      final artworkId = review.metadata?['artworkId'] as String?;
+      await _unifiedAdminService.approveContent(review.contentId,
+          artworkId: artworkId);
 
       // Trigger rewards if it's a capture
-      if (review.contentType == 'capture') {
+      if (review.contentType == ContentType.captures) {
         await _triggerCaptureApprovalRewards(review);
       }
 
@@ -2242,8 +2259,9 @@ class _ModernUnifiedAdminDashboardState
       );
 
       // Reject the content using the unified admin service
+      final artworkId = review.metadata?['artworkId'] as String?;
       await _unifiedAdminService.rejectContent(review.contentId,
-          reason: 'Rejected by admin');
+          reason: 'Rejected by admin', artworkId: artworkId);
 
       // Refresh the content data
       await _loadContentData();

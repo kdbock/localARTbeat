@@ -241,6 +241,42 @@ class ContentModel {
     );
   }
 
+  factory ContentModel.fromChapter(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+
+    return ContentModel(
+      id: doc.id,
+      title: data['title'] as String? ?? 'Untitled Chapter',
+      description: data['description'] as String? ?? '',
+      type: 'chapter',
+      authorId: data['authorId'] as String? ?? '',
+      authorName: data['authorName'] as String? ?? 'Unknown Author',
+      status: () {
+        final moderationStatus = data['moderationStatus'] as String?;
+        if (moderationStatus == 'approved') return 'approved';
+        if (moderationStatus == 'rejected') return 'rejected';
+        if (moderationStatus == 'underReview') return 'flagged';
+        return 'pending';
+      }(),
+      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      updatedAt: (data['updatedAt'] as Timestamp?)?.toDate(),
+      isFlagged: (data['moderationStatus'] as String?) == 'underReview',
+      isPublic: data['isReleased'] as bool? ?? false,
+      tags: List<String>.from(data['tags'] as List? ?? []),
+      metadata: {
+        'artworkId': data['artworkId'] as String? ?? '',
+        'chapterNumber': data['chapterNumber'] as int? ?? 0,
+        'wordCount': data['wordCount'] as int? ?? 0,
+        'isPaid': data['isPaid'] as bool? ?? false,
+      },
+      imageUrl: data['thumbnailUrl'] as String?,
+      thumbnailUrl: data['thumbnailUrl'] as String?,
+      viewCount: 0,
+      likeCount: 0,
+      reportCount: 0,
+    );
+  }
+
   /// Convert to Firestore document
   Map<String, dynamic> toFirestore() {
     return {
@@ -373,6 +409,8 @@ class ContentModel {
         return AdminContentType.event;
       case 'capture':
         return AdminContentType.capture;
+      case 'chapter':
+        return AdminContentType.chapter;
       case 'ad':
         return AdminContentType.ad;
       case 'commission':
@@ -410,6 +448,7 @@ enum AdminContentType {
   post,
   event,
   capture,
+  chapter,
   ad,
   commission;
 
@@ -425,6 +464,8 @@ enum AdminContentType {
         return 'Events';
       case AdminContentType.capture:
         return 'Captures';
+      case AdminContentType.chapter:
+        return 'Chapters';
       case AdminContentType.ad:
         return 'Advertisements';
       case AdminContentType.commission:
@@ -444,6 +485,8 @@ enum AdminContentType {
         return 'event';
       case AdminContentType.capture:
         return 'capture';
+      case AdminContentType.chapter:
+        return 'chapter';
       case AdminContentType.ad:
         return 'ad';
       case AdminContentType.commission:

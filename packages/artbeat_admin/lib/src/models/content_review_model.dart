@@ -7,6 +7,7 @@ enum ContentType {
   posts,
   comments,
   artwork,
+  chapters,
   all;
 
   String get displayName {
@@ -21,6 +22,8 @@ enum ContentType {
         return 'Comments';
       case ContentType.artwork:
         return 'Artwork';
+      case ContentType.chapters:
+        return 'Chapters';
       case ContentType.all:
         return 'All Content';
     }

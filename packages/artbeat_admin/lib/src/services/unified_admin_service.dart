@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:artbeat_artwork/artbeat_artwork.dart' show ChapterService;
 import '../models/content_model.dart';
 
 /// Unified Admin Service
@@ -9,6 +10,7 @@ import '../models/content_model.dart';
 class UnifiedAdminService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final ChapterService _chapterService = ChapterService();
 
   /// Get all content for admin dashboard
   Future<List<ContentModel>> getAllContent({
@@ -106,6 +108,28 @@ class UnifiedAdminService {
           }
         }
       }
+      
+      // Get chapters (using collectionGroup to get all chapters from all artwork)
+      if (contentType == null ||
+          contentType == AdminContentType.all ||
+          contentType == AdminContentType.chapter) {
+        final chaptersQuery = _firestore
+            .collectionGroup('chapters')
+            .orderBy('createdAt', descending: true);
+
+        final chaptersSnapshot = await (limit != null
+            ? chaptersQuery.limit(limit).get()
+            : chaptersQuery.get());
+
+        for (final doc in chaptersSnapshot.docs) {
+          final content = ContentModel.fromChapter(doc);
+          if (status == null ||
+              status == AdminContentStatus.all ||
+              content.status == status.value) {
+            allContent.add(content);
+          }
+        }
+      }
 
       // Sort by creation date (most recent first)
       allContent.sort((a, b) => b.createdAt.compareTo(a.createdAt));
@@ -122,11 +146,37 @@ class UnifiedAdminService {
   }
 
   /// Approve content by ID
-  Future<void> approveContent(String contentId) async {
+  Future<void> approveContent(String contentId, {String? artworkId}) async {
     try {
       final user = _auth.currentUser;
       if (user == null) {
         throw Exception('User not authenticated');
+      }
+
+      // If artworkId is provided, it's definitely a chapter
+      if (artworkId != null) {
+        final docRef = _firestore
+            .collection('artwork')
+            .doc(artworkId)
+            .collection('chapters')
+            .doc(contentId);
+
+        await docRef.update({
+          'moderationStatus': 'approved',
+          'moderatedBy': user.uid,
+          'moderatedAt': FieldValue.serverTimestamp(),
+          'isFlagged': false,
+        });
+
+        await _chapterService.updateArtworkCountsForAdmin(artworkId);
+
+        await _logModerationAction(
+          contentId: contentId,
+          action: 'approved',
+          moderatorId: user.uid,
+          contentType: 'chapter',
+        );
+        return;
       }
 
       // Try to find and update the content in different collections
@@ -163,6 +213,37 @@ class UnifiedAdminService {
         }
       }
 
+      // Check for chapters if not found in top-level collections
+      final chapterQuery = await _firestore
+          .collectionGroup('chapters')
+          .where(FieldPath.documentId, isEqualTo: contentId)
+          .get();
+
+      if (chapterQuery.docs.isNotEmpty) {
+        final chapterDoc = chapterQuery.docs.first;
+        final docRef = chapterDoc.reference;
+        final artworkId = chapterDoc.data()['artworkId'] as String?;
+
+        await docRef.update({
+          'moderationStatus': 'approved',
+          'moderatedBy': user.uid,
+          'moderatedAt': FieldValue.serverTimestamp(),
+          'isFlagged': false,
+        });
+
+        if (artworkId != null) {
+          await _chapterService.updateArtworkCountsForAdmin(artworkId);
+        }
+
+        await _logModerationAction(
+          contentId: contentId,
+          action: 'approved',
+          moderatorId: user.uid,
+          contentType: 'chapter',
+        );
+        return;
+      }
+
       throw Exception('Content not found');
     } catch (e) {
       throw Exception('Failed to approve content: $e');
@@ -170,11 +251,41 @@ class UnifiedAdminService {
   }
 
   /// Reject content by ID
-  Future<void> rejectContent(String contentId, {String? reason}) async {
+  Future<void> rejectContent(String contentId,
+      {String? reason, String? artworkId}) async {
     try {
       final user = _auth.currentUser;
       if (user == null) {
         throw Exception('User not authenticated');
+      }
+
+      // If artworkId is provided, it's definitely a chapter
+      if (artworkId != null) {
+        final docRef = _firestore
+            .collection('artwork')
+            .doc(artworkId)
+            .collection('chapters')
+            .doc(contentId);
+
+        await docRef.update({
+          'moderationStatus': 'rejected',
+          'moderatedBy': user.uid,
+          'moderatedAt': FieldValue.serverTimestamp(),
+          'rejectionReason':
+              reason ?? 'Content does not meet community guidelines',
+          'isFlagged': false,
+        });
+
+        await _chapterService.updateArtworkCountsForAdmin(artworkId);
+
+        await _logModerationAction(
+          contentId: contentId,
+          action: 'rejected',
+          moderatorId: user.uid,
+          contentType: 'chapter',
+          reason: reason,
+        );
+        return;
       }
 
       // Try to find and update the content in different collections
@@ -212,6 +323,40 @@ class UnifiedAdminService {
 
           return;
         }
+      }
+
+      // Check for chapters if not found in top-level collections
+      final chapterQuery = await _firestore
+          .collectionGroup('chapters')
+          .where(FieldPath.documentId, isEqualTo: contentId)
+          .get();
+
+      if (chapterQuery.docs.isNotEmpty) {
+        final chapterDoc = chapterQuery.docs.first;
+        final docRef = chapterDoc.reference;
+        final artworkId = chapterDoc.data()['artworkId'] as String?;
+
+        await docRef.update({
+          'moderationStatus': 'rejected',
+          'moderatedBy': user.uid,
+          'moderatedAt': FieldValue.serverTimestamp(),
+          'rejectionReason':
+              reason ?? 'Content does not meet community guidelines',
+          'isFlagged': false,
+        });
+
+        if (artworkId != null) {
+          await _chapterService.updateArtworkCountsForAdmin(artworkId);
+        }
+
+        await _logModerationAction(
+          contentId: contentId,
+          action: 'rejected',
+          moderatorId: user.uid,
+          contentType: 'chapter',
+          reason: reason,
+        );
+        return;
       }
 
       throw Exception('Content not found');
@@ -264,9 +409,10 @@ class UnifiedAdminService {
         _firestore.collection('posts').get(),
         _firestore.collection('events').get(),
         _firestore.collection('captures').get(),
+        _firestore.collectionGroup('chapters').get(),
         _firestore
             .collection('artwork')
-            .where('status', isEqualTo: 'pending')
+            .where('moderationStatus', isEqualTo: 'pending')
             .get(),
         _firestore
             .collection('posts')
@@ -281,6 +427,10 @@ class UnifiedAdminService {
             .where('status', isEqualTo: 'pending')
             .get(),
         _firestore
+            .collectionGroup('chapters')
+            .where('moderationStatus', isEqualTo: 'pending')
+            .get(),
+        _firestore
             .collection('artwork')
             .where('isFlagged', isEqualTo: true)
             .get(),
@@ -295,6 +445,10 @@ class UnifiedAdminService {
         _firestore
             .collection('captures')
             .where('isFlagged', isEqualTo: true)
+            .get(),
+        _firestore
+            .collectionGroup('chapters')
+            .where('moderationStatus', isEqualTo: 'underReview')
             .get(),
       ]);
 
@@ -302,25 +456,39 @@ class UnifiedAdminService {
       final totalPosts = results[1].docs.length;
       final totalEvents = results[2].docs.length;
       final totalCaptures = results[3].docs.length;
-      final pendingArtworks = results[4].docs.length;
-      final pendingPosts = results[5].docs.length;
-      final pendingEvents = results[6].docs.length;
-      final pendingCaptures = results[7].docs.length;
-      final flaggedArtworks = results[8].docs.length;
-      final flaggedPosts = results[9].docs.length;
-      final flaggedEvents = results[10].docs.length;
-      final flaggedCaptures = results[11].docs.length;
+      final totalChapters = results[4].docs.length;
+      final pendingArtworks = results[5].docs.length;
+      final pendingPosts = results[6].docs.length;
+      final pendingEvents = results[7].docs.length;
+      final pendingCaptures = results[8].docs.length;
+      final pendingChapters = results[9].docs.length;
+      final flaggedArtworks = results[10].docs.length;
+      final flaggedPosts = results[11].docs.length;
+      final flaggedEvents = results[12].docs.length;
+      final flaggedCaptures = results[13].docs.length;
+      final flaggedChapters = results[14].docs.length;
 
       return {
-        'total': totalArtworks + totalPosts + totalEvents + totalCaptures,
+        'total': totalArtworks +
+            totalPosts +
+            totalEvents +
+            totalCaptures +
+            totalChapters,
         'artworks': totalArtworks,
         'posts': totalPosts,
         'events': totalEvents,
         'captures': totalCaptures,
-        'pending':
-            pendingArtworks + pendingPosts + pendingEvents + pendingCaptures,
-        'flagged':
-            flaggedArtworks + flaggedPosts + flaggedEvents + flaggedCaptures,
+        'chapters': totalChapters,
+        'pending': pendingArtworks +
+            pendingPosts +
+            pendingEvents +
+            pendingCaptures +
+            pendingChapters,
+        'flagged': flaggedArtworks +
+            flaggedPosts +
+            flaggedEvents +
+            flaggedCaptures +
+            flaggedChapters,
         'breakdown': {
           'artworks': {
             'total': totalArtworks,
@@ -341,6 +509,11 @@ class UnifiedAdminService {
             'total': totalCaptures,
             'pending': pendingCaptures,
             'flagged': flaggedCaptures,
+          },
+          'chapters': {
+            'total': totalChapters,
+            'pending': pendingChapters,
+            'flagged': flaggedChapters,
           },
         },
       };

@@ -17,6 +17,7 @@ class ArtworkModel {
   final int applauseCount;
   final int viewsCount;
   final String artistName;
+  final String? artistProfileId;
   final ArtworkContentType contentType;
   final bool isSerializing;
   final int? totalChapters;
@@ -39,6 +40,7 @@ class ArtworkModel {
     required this.applauseCount,
     this.viewsCount = 0,
     this.artistName = 'Unknown Artist',
+    this.artistProfileId,
     this.contentType = ArtworkContentType.visual,
     this.isSerializing = false,
     this.totalChapters,
@@ -73,6 +75,9 @@ class ArtworkModel {
         data['artistName'],
         'Unknown Artist',
       ),
+      artistProfileId: FirestoreUtils.safeString(
+        data['artistProfileId'],
+      ),
       contentType: ArtworkContentType.fromString(
         FirestoreUtils.safeStringDefault(data['contentType'], 'visual'),
       ),
@@ -99,6 +104,7 @@ class ArtworkModel {
       'applauseCount': applauseCount,
       'viewsCount': viewsCount,
       'artistName': artistName,
+      if (artistProfileId != null) 'artistProfileId': artistProfileId,
       'contentType': contentType.value,
       'isSerializing': isSerializing,
       if (totalChapters != null) 'totalChapters': totalChapters,

@@ -170,10 +170,10 @@ class ArtworkModel {
   /// Whether this artwork is serialized (has chapters)
   final bool isSerializing;
 
-  /// Total number of chapters/episodes (for serialized works)
+  /// Total number of chapters (for serialized works)
   final int? totalChapters;
 
-  /// Number of released chapters/episodes
+  /// Number of released chapters
   final int? releasedChapters;
 
   /// Reading metadata for written/audio content

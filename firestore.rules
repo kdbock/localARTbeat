@@ -377,6 +377,45 @@ service cloud.firestore {
       allow delete: if isAdmin(request.auth.uid);
     }
 
+    // Artist Momentum - weekly and lifetime momentum tracking
+    match /artist_momentum/{artistId} {
+      allow read: if isAuthenticated() && (
+        request.auth.uid == artistId ||
+        isAdmin(request.auth.uid)
+      );
+      allow list: if isAuthenticated();
+      allow create, update, delete: if isAdmin(request.auth.uid);
+    }
+
+    // Artist Features - active boosts and feature grants
+    match /artist_features/{featureId} {
+      allow read: if isAuthenticated() && (
+        resource.data.artistId == request.auth.uid ||
+        resource.data.purchaserId == request.auth.uid ||
+        resource.data.userId == request.auth.uid ||
+        isAdmin(request.auth.uid)
+      );
+      allow list: if isAuthenticated();
+      allow create: if isAuthenticated() &&
+        request.resource.data.purchaserId == request.auth.uid;
+      allow update, delete: if isAdmin(request.auth.uid);
+    }
+
+    // Boosts - boost purchase records
+    match /boosts/{boostId} {
+      allow read: if isAuthenticated() && (
+        resource.data.recipientId == request.auth.uid ||
+        resource.data.senderId == request.auth.uid ||
+        resource.data.artistId == request.auth.uid ||
+        resource.data.userId == request.auth.uid ||
+        isAdmin(request.auth.uid)
+      );
+      allow list: if isAuthenticated();
+      allow create: if isAuthenticated() &&
+        request.resource.data.senderId == request.auth.uid;
+      allow update, delete: if isAdmin(request.auth.uid);
+    }
+
     // Artist Commission Settings - artist-specific commission configuration
     match /artist_commission_settings/{artistId} {
       allow read: if isAuthenticated() && (
@@ -411,23 +450,35 @@ service cloud.firestore {
     match /artwork_sales/{document=**} {
       allow read: if isAuthenticated() && (
         resource.data.artistId == request.auth.uid ||
+        resource.data.artistID == request.auth.uid ||
         resource.data.buyerId == request.auth.uid ||
+        resource.data.buyerID == request.auth.uid ||
+        resource.data.sellerId == request.auth.uid ||
         isAdmin(request.auth.uid)
       );
       allow list: if isAuthenticated() && (
         resource.data.artistId == request.auth.uid ||
+        resource.data.artistID == request.auth.uid ||
         resource.data.buyerId == request.auth.uid ||
+        resource.data.buyerID == request.auth.uid ||
+        resource.data.sellerId == request.auth.uid ||
         isAdmin(request.auth.uid)
       );
       allow create: if isAuthenticated();
       allow update: if isAuthenticated() && (
         resource.data.artistId == request.auth.uid ||
+        resource.data.artistID == request.auth.uid ||
         resource.data.buyerId == request.auth.uid ||
+        resource.data.buyerID == request.auth.uid ||
+        resource.data.sellerId == request.auth.uid ||
         isAdmin(request.auth.uid)
       );
       allow delete: if isAuthenticated() && (
         resource.data.artistId == request.auth.uid ||
+        resource.data.artistID == request.auth.uid ||
         resource.data.buyerId == request.auth.uid ||
+        resource.data.buyerID == request.auth.uid ||
+        resource.data.sellerId == request.auth.uid ||
         isAdmin(request.auth.uid)
       );
     }
@@ -639,6 +690,13 @@ service cloud.firestore {
           isAdmin(request.auth.uid)
         );
       }
+    }
+
+    // Collection group rule for chapters to support global moderation and search
+    match /{path=**}/chapters/{chapterId} {
+      allow read, list: if isAdmin(request.auth.uid) || 
+        (resource.data.isReleased == true && resource.data.moderationStatus == 'approved') ||
+        (isAuthenticated() && resource.data.authorId == request.auth.uid);
     }
 
     // Subscriptions

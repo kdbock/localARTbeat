@@ -45,6 +45,12 @@ class WritingMetadata {
   /// Edition of the work (e.g., First Edition, Revised)
   final String? edition;
 
+  /// Short hook or teaser for the work
+  final String? shortHook;
+
+  /// Story status (e.g., Ongoing, Completed)
+  final String? storyStatus;
+
   const WritingMetadata({
     this.genre,
     this.wordCount,
@@ -60,6 +66,8 @@ class WritingMetadata {
     this.volumeNumber,
     this.publisher,
     this.edition,
+    this.shortHook,
+    this.storyStatus,
   });
 
   /// Create WritingMetadata from JSON
@@ -90,6 +98,8 @@ class WritingMetadata {
       volumeNumber: FirestoreUtils.safeInt(json['volumeNumber']),
       publisher: FirestoreUtils.safeString(json['publisher']),
       edition: FirestoreUtils.safeString(json['edition']),
+      shortHook: FirestoreUtils.safeString(json['shortHook']),
+      storyStatus: FirestoreUtils.safeString(json['storyStatus']),
     );
   }
 
@@ -111,6 +121,8 @@ class WritingMetadata {
     if (volumeNumber != null) 'volumeNumber': volumeNumber,
     if (publisher != null) 'publisher': publisher,
     if (edition != null) 'edition': edition,
+    if (shortHook != null) 'shortHook': shortHook,
+    if (storyStatus != null) 'storyStatus': storyStatus,
   };
 
   /// Create a copy with updated fields
@@ -129,6 +141,8 @@ class WritingMetadata {
     int? volumeNumber,
     String? publisher,
     String? edition,
+    String? shortHook,
+    String? storyStatus,
   }) {
     return WritingMetadata(
       genre: genre ?? this.genre,
@@ -145,6 +159,8 @@ class WritingMetadata {
       volumeNumber: volumeNumber ?? this.volumeNumber,
       publisher: publisher ?? this.publisher,
       edition: edition ?? this.edition,
+      shortHook: shortHook ?? this.shortHook,
+      storyStatus: storyStatus ?? this.storyStatus,
     );
   }
 

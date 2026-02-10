@@ -327,6 +327,7 @@ class _ArtworkBrowseScreenState extends State<ArtworkBrowseScreen> {
         : (options.isNotEmpty ? options.first : 'common_all'.tr());
     return DropdownButtonFormField<String>(
       initialValue: resolvedValue,
+      isExpanded: true,
       dropdownColor: const Color(0xFF07060F),
       iconEnabledColor: Colors.white,
       style: GoogleFonts.spaceGrotesk(
@@ -344,10 +345,28 @@ class _ArtworkBrowseScreenState extends State<ArtworkBrowseScreen> {
         }
         onChanged(newValue);
       },
+      selectedItemBuilder: (context) => options
+          .map(
+            (option) => Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                option,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          )
+          .toList(),
       items: options
           .map(
-            (option) =>
-                DropdownMenuItem<String>(value: option, child: Text(option)),
+            (option) => DropdownMenuItem<String>(
+              value: option,
+              child: Text(
+                option,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
           )
           .toList(),
     );
@@ -500,97 +519,99 @@ class _ArtworkBrowseScreenState extends State<ArtworkBrowseScreen> {
               child: _buildArtworkImage(artwork),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    artwork.title,
-                    style: GoogleFonts.spaceGrotesk(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  if (artwork.medium.isNotEmpty) ...[
-                    const SizedBox(height: 6),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     Text(
-                      artwork.medium,
+                      artwork.title,
                       style: GoogleFonts.spaceGrotesk(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white.withValues(alpha: 0.7),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                  ],
-                  if ((artwork.location ?? '').isNotEmpty) ...[
-                    const SizedBox(height: 6),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.place_outlined,
-                          size: 14,
-                          color: Colors.white54,
-                        ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            artwork.location!,
-                            style: GoogleFonts.spaceGrotesk(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white.withValues(alpha: 0.8),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
+                    if (artwork.medium.isNotEmpty) ...[
+                      const SizedBox(height: 6),
                       Text(
-                        artwork.price != null
-                            ? '\$${artwork.price!.toStringAsFixed(0)}'
-                            : 'art_walk_not_for_sale'.tr(),
+                        artwork.medium,
                         style: GoogleFonts.spaceGrotesk(
                           fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: artwork.price != null
-                              ? const Color(0xFF34D399)
-                              : Colors.white.withValues(alpha: 0.7),
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white.withValues(alpha: 0.7),
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
+                    ],
+                    if ((artwork.location ?? '').isNotEmpty) ...[
+                      const SizedBox(height: 6),
                       Row(
                         children: [
                           const Icon(
-                            Icons.visibility,
+                            Icons.place_outlined,
                             size: 14,
                             color: Colors.white54,
                           ),
                           const SizedBox(width: 4),
-                          Text(
-                            '${artwork.viewCount}',
-                            style: GoogleFonts.spaceGrotesk(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white.withValues(alpha: 0.75),
+                          Expanded(
+                            child: Text(
+                              artwork.location!,
+                              style: GoogleFonts.spaceGrotesk(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white.withValues(alpha: 0.8),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
                       ),
                     ],
-                  ),
-                ],
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          artwork.price != null
+                              ? '\$${artwork.price!.toStringAsFixed(0)}'
+                              : 'art_walk_not_for_sale'.tr(),
+                          style: GoogleFonts.spaceGrotesk(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: artwork.price != null
+                                ? const Color(0xFF34D399)
+                                : Colors.white.withValues(alpha: 0.7),
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.visibility,
+                              size: 14,
+                              color: Colors.white54,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${artwork.viewCount}',
+                              style: GoogleFonts.spaceGrotesk(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white.withValues(alpha: 0.75),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

@@ -64,38 +64,34 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
       });
 
       final userId = _analyticsService.getCurrentUserId();
-      final futures = <Future<Object?>>[
-        _withTimeline<Object?>(
-          'GalleryHub.loadArtistData.earnings',
-          () => _earningsService.getArtistEarnings(),
-        ),
-        _withTimeline<Object?>(
-          'GalleryHub.loadArtistData.visibility',
-          _loadVisibilityData,
-        ),
-        _withTimeline<Object?>(
-          'GalleryHub.loadArtistData.activities',
-          _loadRecentActivities,
-        ),
-      ];
-
-      final results = await Future.wait(futures);
-      final earnings = results[0] as EarningsModel?;
-      final analytics = results[1] as Map<String, dynamic>;
-      final activities = results[2] as List<ActivityModel>;
+      final earnings = await _safeLoad<EarningsModel?>(
+        'GalleryHub.loadArtistData.earnings',
+        () => _earningsService.getArtistEarnings(),
+        null,
+      );
+      final analytics = await _safeLoad<Map<String, dynamic>>(
+        'GalleryHub.loadArtistData.visibility',
+        _loadVisibilityData,
+        <String, dynamic>{},
+      );
+      final activities = await _safeLoad<List<ActivityModel>>(
+        'GalleryHub.loadArtistData.activities',
+        _loadRecentActivities,
+        <ActivityModel>[],
+      );
 
       List<Map<String, dynamic>> highlights = [];
       List<core.ArtistFeature> activeBoosts = [];
       if (userId != null) {
-        highlights = await _withTimeline(
+        highlights = await _safeLoad<List<Map<String, dynamic>>>(
           'GalleryHub.loadArtistData.highlights',
-          () {
-            return _analyticsService.getDiscoveryBoostHighlights(userId);
-          },
+          () => _analyticsService.getDiscoveryBoostHighlights(userId),
+          <Map<String, dynamic>>[],
         );
-        activeBoosts = await _withTimeline(
+        activeBoosts = await _safeLoad<List<core.ArtistFeature>>(
           'GalleryHub.loadArtistData.features',
           () => _featureService.getActiveFeaturesForArtist(userId),
+          <core.ArtistFeature>[],
         );
       }
 
@@ -118,6 +114,19 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
           _isLoading = false;
         });
       }
+    }
+  }
+
+  Future<T> _safeLoad<T>(
+    String name,
+    Future<T> Function() action,
+    T fallback,
+  ) async {
+    try {
+      return await _withTimeline<T>(name, action);
+    } catch (e) {
+      debugPrint('⚠️ DEBUG: $name failed: $e');
+      return fallback;
     }
   }
 

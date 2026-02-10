@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:artbeat_core/artbeat_core.dart' show ChapterModel, AppLogger;
+import 'package:artbeat_core/artbeat_core.dart'
+    show ChapterModel, AppLogger, ChapterModerationStatus;
 
 class ChapterService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -24,6 +25,12 @@ class ChapterService {
     List<String> tags = const [],
   }) async {
     try {
+      // Get parent artwork to copy metadata
+      final artworkDoc =
+          await _firestore.collection('artwork').doc(artworkId).get();
+      if (!artworkDoc.exists) throw Exception('Parent artwork not found');
+      final artworkData = artworkDoc.data()!;
+
       final chapterId = _firestore.collection('artwork').doc().id;
       final now = DateTime.now();
 
@@ -41,10 +48,18 @@ class ChapterService {
         isReleased: releaseDate.isBefore(now),
         isPaid: isPaid,
         price: price,
+        thumbnailUrl: artworkData['thumbnailUrl'] as String?,
+        authorId: (artworkData['artistProfileId'] as String?) ??
+            (artworkData['userId'] as String?) ??
+            '',
+        authorName: (artworkData['artistName'] as String?) ??
+            (artworkData['authorName'] as String?) ??
+            'Unknown Author',
         createdAt: now,
         updatedAt: now,
         contentWarnings: contentWarnings.isNotEmpty ? contentWarnings : null,
         tags: tags.isNotEmpty ? tags : null,
+        moderationStatus: ChapterModerationStatus.pending,
       );
 
       await _firestore
@@ -84,7 +99,11 @@ class ChapterService {
     }
   }
 
-  Future<List<ChapterModel>> getChaptersForArtwork(String artworkId) async {
+  Future<List<ChapterModel>> getChaptersForArtwork(
+    String artworkId, {
+    String? currentUserId,
+    bool isModerator = false,
+  }) async {
     try {
       final snapshot = await _firestore
           .collection('artwork')
@@ -93,32 +112,48 @@ class ChapterService {
           .orderBy('chapterNumber', descending: false)
           .get();
 
-      return snapshot.docs
+      final chapters = snapshot.docs
           .map((doc) => ChapterModel.fromFirestore(doc))
           .toList();
+
+      // If moderator, return all chapters
+      if (isModerator) return chapters;
+
+      // If current user is author, return all chapters
+      if (currentUserId != null) {
+        final artworkDoc =
+            await _firestore.collection('artwork').doc(artworkId).get();
+        if (artworkDoc.exists) {
+          final authorId = (artworkDoc.data()?['artistProfileId'] as String?) ??
+              (artworkDoc.data()?['userId'] as String?);
+          if (authorId == currentUserId) {
+            return chapters;
+          }
+        }
+      }
+
+      // Default: Return only released and approved for public
+      return chapters.where((c) {
+        return c.isReleased &&
+            c.moderationStatus == ChapterModerationStatus.approved;
+      }).toList();
     } catch (e) {
       AppLogger.error('Error fetching chapters: $e');
       return [];
     }
   }
 
-  Future<List<ChapterModel>> getReleasedChapters(String artworkId) async {
-    try {
-      final snapshot = await _firestore
-          .collection('artwork')
-          .doc(artworkId)
-          .collection('chapters')
-          .where('isReleased', isEqualTo: true)
-          .orderBy('chapterNumber', descending: false)
-          .get();
-
-      return snapshot.docs
-          .map((doc) => ChapterModel.fromFirestore(doc))
-          .toList();
-    } catch (e) {
-      AppLogger.error('Error fetching released chapters: $e');
-      return [];
-    }
+  Future<List<ChapterModel>> getReleasedChapters(
+    String artworkId, {
+    String? authorId,
+    String? currentUserId,
+    bool isModerator = false,
+  }) async {
+    return getChaptersForArtwork(
+      artworkId,
+      currentUserId: currentUserId,
+      isModerator: isModerator,
+    );
   }
 
   Future<void> updateChapter(String artworkId, ChapterModel chapter) async {
@@ -144,6 +179,7 @@ class ChapterService {
 
       final updatedChapter = chapter.copyWith(
         isReleased: true,
+        moderationStatus: ChapterModerationStatus.pending,
         updatedAt: DateTime.now(),
       );
 
@@ -172,16 +208,36 @@ class ChapterService {
     }
   }
 
+  Future<void> updateArtworkCountsForAdmin(String artworkId) async {
+    await _updateArtworkChapterCount(artworkId);
+  }
+
   Future<void> _updateArtworkChapterCount(String artworkId) async {
     try {
-      final chapters = await getChaptersForArtwork(artworkId);
-      final releasedChapters = chapters.where((c) => c.isReleased).length;
+      final snapshot = await _firestore
+          .collection('artwork')
+          .doc(artworkId)
+          .collection('chapters')
+          .get();
+      
+      final chapters = snapshot.docs
+          .map((doc) => ChapterModel.fromFirestore(doc))
+          .toList();
+
+      final totalChapters = chapters.length;
+      final releasedApprovedChapters = chapters
+          .where((c) =>
+              c.isReleased &&
+              c.moderationStatus == ChapterModerationStatus.approved)
+          .length;
 
       await _firestore.collection('artwork').doc(artworkId).update({
-        'totalChapters': chapters.length,
-        'releasedChapters': releasedChapters,
+        'totalChapters': totalChapters,
+        'releasedChapters': releasedApprovedChapters,
         'updatedAt': Timestamp.now(),
       });
+      
+      AppLogger.info('Updated artwork $artworkId: total=$totalChapters, released=$releasedApprovedChapters');
     } catch (e) {
       AppLogger.error('Error updating artwork chapter count: $e');
     }
@@ -189,11 +245,28 @@ class ChapterService {
 
   Future<void> _updateArtworkReleasedChapterCount(String artworkId) async {
     try {
-      final releasedChapters = await getReleasedChapters(artworkId);
+      final snapshot = await _firestore
+          .collection('artwork')
+          .doc(artworkId)
+          .collection('chapters')
+          .get();
+      
+      final chapters = snapshot.docs
+          .map((doc) => ChapterModel.fromFirestore(doc))
+          .toList();
+
+      final releasedApprovedChapters = chapters
+          .where((c) =>
+              c.isReleased &&
+              c.moderationStatus == ChapterModerationStatus.approved)
+          .length;
+
       await _firestore.collection('artwork').doc(artworkId).update({
-        'releasedChapters': releasedChapters.length,
+        'releasedChapters': releasedApprovedChapters,
         'updatedAt': Timestamp.now(),
       });
+      
+      AppLogger.info('Updated artwork $artworkId: released=$releasedApprovedChapters');
     } catch (e) {
       AppLogger.error('Error updating released chapter count: $e');
     }

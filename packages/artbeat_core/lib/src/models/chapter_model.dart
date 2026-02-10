@@ -47,6 +47,8 @@ class ChapterModel {
   final List<String> panelImages;
   final List<int> panelOrder;
   final String? thumbnailUrl;
+  final String authorId;
+  final String authorName;
   final DateTime createdAt;
   final DateTime updatedAt;
   final ChapterModerationStatus moderationStatus;
@@ -71,6 +73,8 @@ class ChapterModel {
     List<String> panelImages = const [],
     List<int> panelOrder = const [],
     this.thumbnailUrl,
+    required this.authorId,
+    required this.authorName,
     required this.createdAt,
     required this.updatedAt,
     this.moderationStatus = ChapterModerationStatus.pending,
@@ -104,6 +108,8 @@ class ChapterModel {
       panelImages: (data['panelImages'] as List<dynamic>? ?? []).cast<String>(),
       panelOrder: (data['panelOrder'] as List<dynamic>? ?? []).cast<int>(),
       thumbnailUrl: data['thumbnailUrl'] as String?,
+      authorId: data['authorId'] as String? ?? '',
+      authorName: data['authorName'] as String? ?? 'Unknown Author',
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       moderationStatus: ChapterModerationStatus.fromString(
@@ -136,6 +142,8 @@ class ChapterModel {
       'panelImages': panelImages,
       'panelOrder': panelOrder,
       if (thumbnailUrl != null) 'thumbnailUrl': thumbnailUrl,
+      'authorId': authorId,
+      'authorName': authorName,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
       'moderationStatus': moderationStatus.value,
@@ -162,6 +170,8 @@ class ChapterModel {
     List<String>? panelImages,
     List<int>? panelOrder,
     String? thumbnailUrl,
+    String? authorId,
+    String? authorName,
     DateTime? createdAt,
     DateTime? updatedAt,
     ChapterModerationStatus? moderationStatus,
@@ -186,6 +196,8 @@ class ChapterModel {
       panelImages: panelImages ?? this.panelImages,
       panelOrder: panelOrder ?? this.panelOrder,
       thumbnailUrl: thumbnailUrl ?? this.thumbnailUrl,
+      authorId: authorId ?? this.authorId,
+      authorName: authorName ?? this.authorName,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       moderationStatus: moderationStatus ?? this.moderationStatus,

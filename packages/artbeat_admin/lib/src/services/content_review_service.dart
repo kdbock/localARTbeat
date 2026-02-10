@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:artbeat_artwork/artbeat_artwork.dart' show ChapterService;
 import '../models/content_review_model.dart';
 import '../models/content_model.dart';
 import 'content_analysis_service.dart';
@@ -9,6 +10,7 @@ class ContentReviewService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final ContentAnalysisService _analysisService = ContentAnalysisService();
+  final ChapterService _chapterService = ChapterService();
 
   /// Get pending content reviews with advanced filtering
   Future<List<ContentReviewModel>> getPendingReviews({
@@ -322,6 +324,46 @@ class ContentReviewService {
         }
       }
 
+      // Get pending chapters if contentType is chapters or all
+      if (contentType == null ||
+          contentType == ContentType.all ||
+          contentType == ContentType.chapters) {
+        try {
+          final chaptersQuery = _firestore
+              .collectionGroup('chapters')
+              .where('moderationStatus', isEqualTo: 'pending')
+              .orderBy('createdAt', descending: true);
+
+          final chaptersSnapshot = await chaptersQuery.get();
+
+          for (final doc in chaptersSnapshot.docs) {
+            final data = doc.data();
+
+            allReviews.add(ContentReviewModel(
+              id: doc.id,
+              contentId: doc.id,
+              contentType: ContentType.chapters,
+              title: (data['title'] as String?) ?? 'Untitled Chapter',
+              description:
+                  (data['description'] as String?) ?? 'No description provided',
+              authorId: (data['authorId'] as String?) ?? '',
+              authorName: (data['authorName'] as String?) ?? 'Unknown Author',
+              status: ReviewStatus.pending,
+              createdAt: (data['createdAt'] as Timestamp).toDate(),
+              metadata: {
+                'thumbnailUrl': data['thumbnailUrl'],
+                'artworkId': data['artworkId'],
+                'chapterNumber': data['chapterNumber'],
+                'wordCount': data['wordCount'],
+                'isPaid': data['isPaid'],
+              },
+            ));
+          }
+        } catch (e) {
+          // Note: Could not fetch chapters - collection may not exist: $e
+        }
+      }
+
       // Sort all reviews by creation date
       allReviews.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
@@ -386,7 +428,11 @@ class ContentReviewService {
   }
 
   /// Approve content
-  Future<void> approveContent(String contentId, ContentType contentType) async {
+  Future<void> approveContent(
+    String contentId,
+    ContentType contentType, {
+    String? artworkId,
+  }) async {
     try {
       final user = _auth.currentUser;
       if (user == null) {
@@ -394,7 +440,8 @@ class ContentReviewService {
       }
 
       // Update the actual content record based on type
-      await _updateContentStatus(contentId, contentType, true);
+      await _updateContentStatus(contentId, contentType, true,
+          artworkId: artworkId);
 
       // Log the approval action
       await _logReviewAction(contentId, contentType, 'approved', user.uid);
@@ -407,8 +454,9 @@ class ContentReviewService {
   Future<void> rejectContent(
     String contentId,
     ContentType contentType,
-    String reason,
-  ) async {
+    String reason, {
+    String? artworkId,
+  }) async {
     try {
       final user = _auth.currentUser;
       if (user == null) {
@@ -416,7 +464,8 @@ class ContentReviewService {
       }
 
       // Update the actual content record based on type
-      await _updateContentStatus(contentId, contentType, false, reason: reason);
+      await _updateContentStatus(contentId, contentType, false,
+          reason: reason, artworkId: artworkId);
 
       // Log the rejection action
       await _logReviewAction(contentId, contentType, 'rejected', user.uid,
@@ -465,8 +514,9 @@ class ContentReviewService {
     ContentType contentType,
     bool isApproved, {
     String? reason,
+    String? artworkId,
   }) async {
-    String collectionName;
+    String collectionName = '';
     Map<String, dynamic> updateData;
 
     switch (contentType) {
@@ -513,6 +563,27 @@ class ContentReviewService {
           'reviewedAt': FieldValue.serverTimestamp(),
         };
         break;
+      case ContentType.chapters:
+        if (artworkId == null) {
+          throw Exception('Artwork ID is required for chapter moderation');
+        }
+
+        await _firestore
+            .collection('artwork')
+            .doc(artworkId)
+            .collection('chapters')
+            .doc(contentId)
+            .update({
+          'moderationStatus': isApproved ? 'approved' : 'rejected',
+          'moderatedAt': FieldValue.serverTimestamp(),
+          if (!isApproved && reason != null) 'moderationNotes': reason,
+        });
+
+        // Always update chapter counts on the parent artwork
+        // This ensures the public 'releasedChapters' count is accurate
+        await _chapterService.updateArtworkCountsForAdmin(artworkId);
+        return;
+
       case ContentType.all:
         return; // Cannot update all content types
     }
@@ -521,10 +592,12 @@ class ContentReviewService {
       updateData['moderationNotes'] = reason;
     }
 
-    await _firestore
-        .collection(collectionName)
-        .doc(contentId)
-        .update(updateData);
+    if (collectionName.isNotEmpty) {
+      await _firestore
+          .collection(collectionName)
+          .doc(contentId)
+          .update(updateData);
+    }
   }
 
   /// Log review action for audit trail
@@ -639,7 +712,9 @@ class ContentReviewService {
 
         for (final review in reviews) {
           // Update the actual content
-          await approveContent(review.contentId, contentType);
+          final artworkId = review.metadata?['artworkId'] as String?;
+          await approveContent(review.contentId, contentType,
+              artworkId: artworkId);
 
           // Update the review record
           final reviewDocRef =
@@ -684,7 +759,9 @@ class ContentReviewService {
 
         for (final review in reviews) {
           // Update the actual content
-          await rejectContent(review.contentId, contentType, reason);
+          final artworkId = review.metadata?['artworkId'] as String?;
+          await rejectContent(review.contentId, contentType, reason,
+              artworkId: artworkId);
 
           // Update the review record
           final reviewDocRef =
@@ -746,13 +823,27 @@ class ContentReviewService {
             case ContentType.artwork:
               collectionName = 'artwork';
               break;
+            case ContentType.chapters:
+              // For chapters, we need special handling as they are subcollections
+              // Using collectionGroup to find the specific document
+              final chaptersQuery = await _firestore
+                  .collectionGroup('chapters')
+                  .where(FieldPath.documentId, isEqualTo: review.contentId)
+                  .get();
+              if (chaptersQuery.docs.isNotEmpty) {
+                batch.delete(chaptersQuery.docs.first.reference);
+              }
+              collectionName = ''; // Handled separately
+              break;
             case ContentType.all:
               continue; // Skip 'all' type
           }
 
-          final contentDocRef =
-              _firestore.collection(collectionName).doc(review.contentId);
-          batch.delete(contentDocRef);
+          if (collectionName.isNotEmpty) {
+            final contentDocRef =
+                _firestore.collection(collectionName).doc(review.contentId);
+            batch.delete(contentDocRef);
+          }
 
           // Delete the review record
           final reviewDocRef =
