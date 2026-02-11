@@ -14,6 +14,8 @@ dependencies:
     path: ../artbeat_core
   artbeat_ads:
     path: ../artbeat_ads
+  artbeat_admin:
+    path: ../artbeat_admin
   artbeat_art_walk:
     path: ../artbeat_art_walk
   firebase_core: ^4.4.0

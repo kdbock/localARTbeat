@@ -3,6 +3,42 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 
+/// Model for audit log entry
+class AuditLog {
+  final String id;
+  final String userId;
+  final String action;
+  final String category;
+  final String severity;
+  final String ipAddress;
+  final DateTime timestamp;
+  final Map<String, dynamic> metadata;
+
+  AuditLog({
+    required this.id,
+    required this.userId,
+    required this.action,
+    required this.category,
+    required this.severity,
+    required this.ipAddress,
+    required this.timestamp,
+    required this.metadata,
+  });
+
+  factory AuditLog.fromMap(Map<String, dynamic> map, String id) {
+    return AuditLog(
+      id: id,
+      userId: (map['adminId'] ?? map['userId'] ?? 'unknown') as String,
+      action: (map['action'] ?? map['activity'] ?? map['event'] ?? 'unknown') as String,
+      category: (map['category'] ?? 'unknown') as String,
+      severity: (map['severity'] ?? 'info') as String,
+      ipAddress: (map['ipAddress'] ?? 'unknown') as String,
+      timestamp: (map['timestamp'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      metadata: (map['metadata'] as Map<String, dynamic>?) ?? {},
+    );
+  }
+}
+
 /// Comprehensive audit trail service for compliance and logging
 /// Tracks all admin actions, user activities, and system events
 class AuditTrailService extends ChangeNotifier {
@@ -148,6 +184,18 @@ class AuditTrailService extends ChangeNotifier {
       AppLogger.error('Error getting audit trail: $e');
       return [];
     }
+  }
+
+  /// Get audit trail stream
+  Stream<List<AuditLog>> getAuditLogs({int limit = 100}) {
+    return _firestore
+        .collection('auditTrail')
+        .orderBy('timestamp', descending: true)
+        .limit(limit)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => AuditLog.fromMap(doc.data(), doc.id))
+            .toList());
   }
 
   /// Get user activity logs

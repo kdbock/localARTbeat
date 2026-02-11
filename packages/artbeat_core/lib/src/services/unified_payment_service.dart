@@ -217,6 +217,8 @@ class UnifiedPaymentService {
         'https://us-central1-wordnerd-artbeat.cloudfunctions.net/validatePaymentRisk',
     'reportFraudAttempt':
         'https://us-central1-wordnerd-artbeat.cloudfunctions.net/reportFraudAttempt',
+    'processPayout':
+        'https://us-central1-wordnerd-artbeat.cloudfunctions.net/processPayout',
   };
 
   // ========================================================================

@@ -19,6 +19,8 @@ import '../widgets/admin_drawer.dart';
 import '../widgets/admin_search_modal.dart';
 import '../screens/admin_user_detail_screen.dart';
 
+import '../routes/admin_routes.dart';
+
 /// Modern Unified Admin Dashboard - Beautiful, intuitive interface for all admin functionality
 ///
 /// Features:
@@ -65,6 +67,7 @@ class _ModernUnifiedAdminDashboardState
   // State
   bool _isLoading = true;
   String? _error;
+  Map<String, int> _pendingModerationSummary = {};
 
   // Search controllers for future use
   final TextEditingController _userSearchController = TextEditingController();
@@ -110,15 +113,19 @@ class _ModernUnifiedAdminDashboardState
         _loadUserData(),
         _loadContentData(),
       ]);
+      if (!mounted) return;
       _animationController.forward();
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = 'Failed to load admin data: $e';
       });
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -135,6 +142,7 @@ class _ModernUnifiedAdminDashboardState
           await _financialService.getRecentTransactions(limit: 10);
       final revenueBreakdown = await _financialService.getRevenueBreakdown();
 
+      if (!mounted) return;
       setState(() {
         _analytics = analytics;
         _recentActivities = activities;
@@ -144,6 +152,7 @@ class _ModernUnifiedAdminDashboardState
         _error = null;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = 'Failed to load dashboard data: $e';
         _isLoading = false;
@@ -153,6 +162,7 @@ class _ModernUnifiedAdminDashboardState
 
   Future<void> _loadUserData() async {
     final users = await _adminService.getAllUsers();
+    if (!mounted) return;
     setState(() {
       _users = users;
     });
@@ -162,11 +172,14 @@ class _ModernUnifiedAdminDashboardState
     final pendingReviews = await _contentService.getPendingReviews();
     final allContent = await _unifiedAdminService.getAllContent();
     final contentStats = await _unifiedAdminService.getContentStatistics();
+    final moderationSummary = await _consolidatedService.getPendingModerationSummary();
 
+    if (!mounted) return;
     setState(() {
       _pendingReviews = pendingReviews;
       _allContent = allContent;
       _contentStats = contentStats;
+      _pendingModerationSummary = moderationSummary;
     });
   }
 
@@ -1542,28 +1555,35 @@ class _ModernUnifiedAdminDashboardState
                         childAspectRatio: 1.2,
                         children: [
                           _buildContentStatCard(
-                            'Total Content',
-                            (_contentStats?['total'] ?? _allContent.length)
-                                .toString(),
-                            Icons.content_copy_rounded,
-                            const Color(0xFF4FC3F7),
-                          ),
-                          _buildContentStatCard(
-                            'Pending Reviews',
-                            (_contentStats?['pending'] ??
-                                    _pendingReviews.length)
-                                .toString(),
+                            'General Reviews',
+                            _pendingModerationSummary['generalReviews']?.toString() ?? '0',
                             Icons.rate_review_rounded,
                             const Color(0xFFFFB74D),
                           ),
                           _buildContentStatCard(
-                            'Pending Chapters',
-                            (_contentStats?['breakdown']?['chapters']
-                                        ?['pending'] ??
-                                    0)
-                                .toString(),
-                            Icons.auto_stories_rounded,
+                            'Pending Events',
+                            _pendingModerationSummary['pendingEvents']?.toString() ?? '0',
+                            Icons.event_note_rounded,
                             const Color(0xFFCE93D8),
+                          ),
+                          _buildContentStatCard(
+                            'Reported Walks',
+                            _pendingModerationSummary['reportedArtWalks']?.toString() ?? '0',
+                            Icons.flag_rounded,
+                            const Color(0xFFFF5722),
+                          ),
+                          _buildContentStatCard(
+                            'Pending Captures',
+                            _pendingModerationSummary['pendingCaptures']?.toString() ?? '0',
+                            Icons.camera_rounded,
+                            const Color(0xFF4FC3F7),
+                          ),
+                          _buildContentStatCard(
+                            'Total Content',
+                            (_contentStats?['total'] ?? _allContent.length)
+                                .toString(),
+                            Icons.content_copy_rounded,
+                            Colors.white70,
                           ),
                           _buildContentStatCard(
                             'Approved',
@@ -1574,28 +1594,110 @@ class _ModernUnifiedAdminDashboardState
                             Icons.check_circle_rounded,
                             const Color(0xFF81C784),
                           ),
-                          _buildContentStatCard(
-                            'Rejected',
-                            _allContent
-                                .where((c) => c.status == 'rejected')
-                                .length
-                                .toString(),
-                            Icons.cancel_rounded,
-                            const Color(0xFFEF5350),
-                          ),
-                          _buildContentStatCard(
-                            'Reported',
-                            (_contentStats?['flagged'] ??
-                                    _allContent
-                                        .where((c) => c.status == 'flagged')
-                                        .length)
-                                .toString(),
-                            Icons.flag_rounded,
-                            const Color(0xFFFF5722),
-                          ),
                         ],
                       );
                     },
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Dedicated Moderation Suites
+            Container(
+              decoration: _buildGlassDecoration(),
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Moderation Management Suites',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Deep-dive into specific content categories for comprehensive moderation.',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.7),
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Wrap(
+                    spacing: 16,
+                    runSpacing: 16,
+                    children: [
+                      SizedBox(
+                        width: (MediaQuery.of(context).size.width - 64) / 3,
+                        child: _buildModerationSuiteTile(
+                          'Events',
+                          'Approve and manage community events',
+                          Icons.event_rounded,
+                          Colors.purpleAccent,
+                          () => Navigator.pushNamed(context, AdminRoutes.eventModeration),
+                          badgeCount: _pendingModerationSummary['pendingEvents'] ?? 0,
+                        ),
+                      ),
+                      SizedBox(
+                        width: (MediaQuery.of(context).size.width - 64) / 3,
+                        child: _buildModerationSuiteTile(
+                          'Art Walks',
+                          'Review and moderate user-created walks',
+                          Icons.route_rounded,
+                          Colors.tealAccent,
+                          () => Navigator.pushNamed(context, AdminRoutes.artWalkModeration),
+                          badgeCount: _pendingModerationSummary['reportedArtWalks'] ?? 0,
+                        ),
+                      ),
+                      SizedBox(
+                        width: (MediaQuery.of(context).size.width - 64) / 3,
+                        child: _buildModerationSuiteTile(
+                          'Captures',
+                          'Moderate artwork captures and reports',
+                          Icons.camera_rounded,
+                          Colors.orangeAccent,
+                          () => Navigator.pushNamed(context, AdminRoutes.contentModeration),
+                          badgeCount: _pendingModerationSummary['pendingCaptures'] ?? 0,
+                        ),
+                      ),
+                      SizedBox(
+                        width: (MediaQuery.of(context).size.width - 64) / 3,
+                        child: _buildModerationSuiteTile(
+                          'Artworks',
+                          'Moderate community-uploaded artworks',
+                          Icons.brush_rounded,
+                          Colors.pinkAccent,
+                          () => Navigator.pushNamed(context, AdminRoutes.artworkModeration),
+                          badgeCount: _pendingModerationSummary['pendingArtworks'] ?? 0,
+                        ),
+                      ),
+                      SizedBox(
+                        width: (MediaQuery.of(context).size.width - 64) / 3,
+                        child: _buildModerationSuiteTile(
+                          'Community',
+                          'Moderate flagged posts and comments',
+                          Icons.forum_rounded,
+                          Colors.blueAccent,
+                          () => Navigator.pushNamed(context, AdminRoutes.communityModeration),
+                          badgeCount: (_pendingModerationSummary['flaggedPosts'] ?? 0) +
+                                     (_pendingModerationSummary['flaggedComments'] ?? 0),
+                        ),
+                      ),
+                      SizedBox(
+                        width: (MediaQuery.of(context).size.width - 64) / 3,
+                        child: _buildModerationSuiteTile(
+                          'Upload Tools',
+                          'Administrative data upload utilities',
+                          Icons.upload_file_rounded,
+                          Colors.indigoAccent,
+                          () => Navigator.pushNamed(context, AdminRoutes.dataUpload),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -1812,6 +1914,87 @@ class _ModernUnifiedAdminDashboardState
               maxLines: 2,
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModerationSuiteTile(String title, String subtitle, IconData icon,
+      Color color, VoidCallback onTap, {int badgeCount = 0}) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Stack(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+            ),
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.2),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: color.withValues(alpha: 0.3)),
+                  ),
+                  child: Icon(icon, color: color, size: 28),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.6),
+                    fontSize: 11,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          if (badgeCount > 0)
+            Positioned(
+              top: 8,
+              right: 8,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.red,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.2),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Text(
+                  badgeCount > 99 ? '99+' : badgeCount.toString(),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );

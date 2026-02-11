@@ -6,6 +6,7 @@ class UserAdminModel extends UserModel {
   final DateTime? lastLoginAt;
   final DateTime? lastActiveAt;
   final bool isSuspended;
+  final bool isShadowBanned;
   final bool isDeleted;
   final String? suspensionReason;
   final DateTime? suspendedAt;
@@ -44,6 +45,7 @@ class UserAdminModel extends UserModel {
     this.lastLoginAt,
     this.lastActiveAt,
     this.isSuspended = false,
+    this.isShadowBanned = false,
     this.isDeleted = false,
     this.suspensionReason,
     this.suspendedAt,
@@ -119,6 +121,7 @@ class UserAdminModel extends UserModel {
       lastLoginAt: (data['lastLoginAt'] as Timestamp?)?.toDate(),
       lastActiveAt: (data['lastActiveAt'] as Timestamp?)?.toDate(),
       isSuspended: data['isSuspended'] as bool? ?? false,
+      isShadowBanned: data['isShadowBanned'] as bool? ?? false,
       isDeleted: data['isDeleted'] as bool? ?? false,
       suspensionReason: data['suspensionReason'] as String?,
       suspendedAt: (data['suspendedAt'] as Timestamp?)?.toDate(),
@@ -155,6 +158,7 @@ class UserAdminModel extends UserModel {
       'lastActiveAt':
           lastActiveAt != null ? Timestamp.fromDate(lastActiveAt!) : null,
       'isSuspended': isSuspended,
+      'isShadowBanned': isShadowBanned,
       'isDeleted': isDeleted,
       'suspensionReason': suspensionReason,
       'suspendedAt':
@@ -202,6 +206,7 @@ class UserAdminModel extends UserModel {
     DateTime? lastLoginAt,
     DateTime? lastActiveAt,
     bool? isSuspended,
+    bool? isShadowBanned,
     bool? isDeleted,
     String? suspensionReason,
     DateTime? suspendedAt,
@@ -241,6 +246,7 @@ class UserAdminModel extends UserModel {
       lastLoginAt: lastLoginAt ?? this.lastLoginAt,
       lastActiveAt: lastActiveAt ?? this.lastActiveAt,
       isSuspended: isSuspended ?? this.isSuspended,
+      isShadowBanned: isShadowBanned ?? this.isShadowBanned,
       isDeleted: isDeleted ?? this.isDeleted,
       suspensionReason: suspensionReason ?? this.suspensionReason,
       suspendedAt: suspendedAt ?? this.suspendedAt,

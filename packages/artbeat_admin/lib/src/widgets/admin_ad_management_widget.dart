@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_ads/artbeat_ads.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -569,10 +570,10 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
 
   Future<void> _approveAd(LocalAd ad) async {
     try {
-      // TODO: Get current admin ID
+      final adminId = FirebaseAuth.instance.currentUser?.uid ?? 'system';
       await _reportService.approveAd(
         adId: ad.id,
-        adminId: 'admin', // This should be the current admin's ID
+        adminId: adminId,
         adminNotes: 'Approved via admin dashboard',
       );
 
@@ -606,9 +607,10 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
 
     if (result != null && result.isNotEmpty) {
       try {
+        final adminId = FirebaseAuth.instance.currentUser?.uid ?? 'system';
         await _reportService.rejectAd(
           adId: ad.id,
-          adminId: 'admin', // This should be the current admin's ID
+          adminId: adminId,
           reason: result,
         );
 
@@ -638,10 +640,11 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
   Future<void> _reviewReport(
       AdReportModel report, AdReportStatus status) async {
     try {
+      final adminId = FirebaseAuth.instance.currentUser?.uid ?? 'system';
       await _reportService.reviewReport(
         reportId: report.id,
         newStatus: status,
-        adminId: 'admin', // This should be the current admin's ID
+        adminId: adminId,
         adminNotes: status == AdReportStatus.actionTaken
             ? 'admin_ad_report_action_taken'.tr()
             : 'admin_ad_report_dismissed'.tr(),

@@ -302,6 +302,18 @@ class AdminService {
     }
   }
 
+  /// Toggle shadow ban for a user
+  Future<void> toggleShadowBan(String userId, bool isShadowBanned) async {
+    try {
+      await _firestore.collection('users').doc(userId).update({
+        'isShadowBanned': isShadowBanned,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      throw Exception('Failed to update shadow ban status: $e');
+    }
+  }
+
   /// Add admin note to user
   Future<void> addAdminNote(String userId, String note, String addedBy) async {
     try {

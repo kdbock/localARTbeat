@@ -1,4 +1,16 @@
 {
+  "drawer_guest_user": "Guest User",
+  "drawer_not_signed_in": "Not Signed In",
+  "drawer_platform_curation": "Platform Curation",
+  "drawer_security_center": "Security Center",
+  "drawer_system_health": "System Health",
+  "drawer_payment_management": "Payment Management",
+  "Pink": "Pink",
+  "Hill": "Hill",
+  "Local": "Local",
+  "ARTbeat": "ARTbeat",
+  "Farmville": "Farmville",
+  "Kristy": "Kristy",
   "Art Exhibition": "Art Exhibition",
   "Artist Talk": "Artist Talk",
   "Community Event": "Community Event",
@@ -6221,5 +6233,11 @@
   "upload_limit_feature_2": "Priority placement in discovery",
   "upload_limit_feature_3": "Advanced analytics and insights",
   "upload_limit_upgrade_button": "Upgrade Now",
-  "common_maybe_later": "Maybe Later"
+  "common_maybe_later": "Maybe Later",
+  "drawer_guest_user": "Guest User",
+  "drawer_not_signed_in": "Not signed in",
+  "drawer_platform_curation": "Platform Curation",
+  "drawer_security_center": "Security Center",
+  "drawer_system_health": "System Health",
+  "drawer_payment_management": "Payment Management"
 }

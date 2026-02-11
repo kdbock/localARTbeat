@@ -16,6 +16,8 @@ import '../utils/logger.dart';
 class UserService extends ChangeNotifier {
   static final UserService _instance = UserService._internal();
 
+  static const bool _isFlutterTest = bool.fromEnvironment('FLUTTER_TEST');
+
   factory UserService() {
     return _instance;
   }
@@ -68,7 +70,7 @@ class UserService extends ChangeNotifier {
     if (_firebaseInitialized) return;
 
     // In test environment, don't try to access Firebase instances
-    if (Platform.environment.containsKey('FLUTTER_TEST')) {
+    if (_isFlutterTest) {
       _auth = null;
       _firestore = null;
       _storage = null;
@@ -86,7 +88,7 @@ class UserService extends ChangeNotifier {
     } catch (e, s) {
       _logError('Error initializing Firebase', e, s);
       // For test environment, set to null to prevent LateInitializationError
-      if (kDebugMode || Platform.environment.containsKey('FLUTTER_TEST')) {
+      if (kDebugMode || _isFlutterTest) {
         _auth = null;
         _firestore = null;
         _storage = null;

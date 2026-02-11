@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/user_admin_model.dart';
 import '../widgets/admin_drawer.dart';
 import '../services/admin_service.dart';
+import '../services/recent_activity_service.dart';
+import '../services/audit_trail_service.dart';
+import '../models/recent_activity_model.dart';
 
 /// Detailed view of a user for admin management
 class AdminUserDetailScreen extends StatefulWidget {
@@ -21,9 +25,12 @@ class AdminUserDetailScreen extends StatefulWidget {
 
 class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
     with SingleTickerProviderStateMixin {
+  final RecentActivityService _activityService = RecentActivityService();
   late TabController _tabController;
   late UserAdminModel _currentUser;
+  List<RecentActivityModel> _userActivities = [];
   bool _isLoading = false;
+  bool _isActivitiesLoading = false;
   bool _isEditing = false;
   late TextEditingController _fullNameController;
   late TextEditingController _usernameController;
@@ -45,6 +52,23 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
     _bioController = TextEditingController(text: _currentUser.bio);
     _locationController = TextEditingController(text: _currentUser.location);
     _zipCodeController = TextEditingController(text: _currentUser.zipCode);
+
+    _loadUserActivities();
+  }
+
+  Future<void> _loadUserActivities() async {
+    setState(() => _isActivitiesLoading = true);
+    try {
+      final activities =
+          await _activityService.getActivitiesByUser(_currentUser.id);
+      setState(() {
+        _userActivities = activities;
+      });
+    } catch (e) {
+      debugPrint('Error loading user activities: $e');
+    } finally {
+      setState(() => _isActivitiesLoading = false);
+    }
   }
 
   @override
@@ -311,72 +335,153 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
   }
 
   Widget _buildActivityTab() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Recent Activity',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
+    return RefreshIndicator(
+      onRefresh: _loadUserActivities,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Activity History',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: 16),
+            if (_isActivitiesLoading)
+              const Center(child: CircularProgressIndicator())
+            else if (_userActivities.isEmpty)
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Center(
+                    child: Column(
+                      children: [
+                        Icon(Icons.history, size: 48, color: Colors.grey.shade400),
+                        const SizedBox(height: 16),
+                        Text('No recent activity found for this user',
+                            style: TextStyle(color: Colors.grey.shade600)),
+                      ],
+                    ),
+                  ),
                 ),
-          ),
-          const SizedBox(height: 16),
-
-          // Activity timeline would go here
-          // For now, show basic activity info
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Activity Summary',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
-                  const SizedBox(height: 12),
-                  if (_currentUser.lastActiveAt != null)
-                    _buildActivityItem(
-                      'Last Active',
-                      _formatDateTime(_currentUser.lastActiveAt!),
-                      Icons.access_time,
-                      Colors.green,
+              )
+            else
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: _userActivities.length,
+                itemBuilder: (context, index) {
+                  final activity = _userActivities[index];
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    child: ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: _getActivityColor(activity.type).withValues(alpha: 0.1),
+                        child: Icon(_getActivityIcon(activity.type), 
+                            color: _getActivityColor(activity.type), size: 20),
+                      ),
+                      title: Text(activity.title),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(activity.description),
+                          const SizedBox(height: 4),
+                          Text(
+                            _formatDateTime(activity.timestamp),
+                            style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                          ),
+                        ],
+                      ),
+                      isThreeLine: true,
                     ),
-                  if (_currentUser.lastLoginAt != null)
-                    _buildActivityItem(
-                      'Last Login',
-                      _formatDateTime(_currentUser.lastLoginAt!),
-                      Icons.login,
-                      Colors.blue,
-                    ),
-                  _buildActivityItem(
-                    'Account Created',
-                    _formatDateTime(_currentUser.createdAt),
-                    Icons.person_add,
-                    Colors.purple,
+                  );
+                },
+              ),
+            const SizedBox(height: 24),
+            Text(
+              'Activity Summary',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
                   ),
-                  if (_currentUser.updatedAt != null)
+            ),
+            const SizedBox(height: 12),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (_currentUser.lastActiveAt != null)
+                      _buildActivityItem(
+                        'Last Active',
+                        _formatDateTime(_currentUser.lastActiveAt!),
+                        Icons.access_time,
+                        Colors.green,
+                      ),
+                    if (_currentUser.lastLoginAt != null)
+                      _buildActivityItem(
+                        'Last Login',
+                        _formatDateTime(_currentUser.lastLoginAt!),
+                        Icons.login,
+                        Colors.blue,
+                      ),
                     _buildActivityItem(
-                      'Profile Updated',
-                      _formatDateTime(_currentUser.updatedAt!),
-                      Icons.edit,
-                      Colors.orange,
+                      'Account Created',
+                      _formatDateTime(_currentUser.createdAt),
+                      Icons.person_add,
+                      Colors.purple,
                     ),
-                  _buildActivityItem(
-                    'Active User',
-                    _currentUser.isActiveUser ? 'Yes' : 'No',
-                    Icons.check_circle,
-                    _currentUser.isActiveUser ? Colors.green : Colors.red,
-                  ),
-                ],
+                    _buildActivityItem(
+                      'Active User',
+                      _currentUser.isActiveUser ? 'Yes' : 'No',
+                      Icons.check_circle,
+                      _currentUser.isActiveUser ? Colors.green : Colors.red,
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
+  }
+
+  IconData _getActivityIcon(ActivityType type) {
+    switch (type) {
+      case ActivityType.userRegistered: return Icons.person_add;
+      case ActivityType.userLogin: return Icons.login;
+      case ActivityType.artworkUploaded: return Icons.image;
+      case ActivityType.artworkApproved: return Icons.check_circle;
+      case ActivityType.artworkRejected: return Icons.cancel;
+      case ActivityType.postCreated: return Icons.post_add;
+      case ActivityType.commentAdded: return Icons.comment;
+      case ActivityType.eventCreated: return Icons.event;
+      case ActivityType.userSuspended: return Icons.block;
+      case ActivityType.userVerified: return Icons.verified;
+      case ActivityType.contentReported: return Icons.report;
+      case ActivityType.adminAction: return Icons.admin_panel_settings;
+      default: return Icons.history;
+    }
+  }
+
+  Color _getActivityColor(ActivityType type) {
+    switch (type) {
+      case ActivityType.userRegistered: return Colors.blue;
+      case ActivityType.userLogin: return Colors.green;
+      case ActivityType.artworkUploaded: return Colors.purple;
+      case ActivityType.artworkApproved: return Colors.green;
+      case ActivityType.artworkRejected: return Colors.red;
+      case ActivityType.userSuspended: return Colors.red;
+      case ActivityType.userVerified: return Colors.orange;
+      case ActivityType.contentReported: return Colors.orange;
+      case ActivityType.adminAction: return Colors.deepPurple;
+      case ActivityType.systemError: return Colors.red;
+      default: return Colors.grey;
+    }
   }
 
   Widget _buildAdminTab() {
@@ -478,20 +583,40 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
               ),
             ),
           ),
-          if (_currentUser.adminNotes.isNotEmpty) ...[
-            const SizedBox(height: 16),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Admin Notes',
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                    const SizedBox(height: 12),
+          const SizedBox(height: 16),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Admin Notes',
+                        style:
+                            TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
+                      IconButton(
+                        onPressed: _addAdminNote,
+                        icon: const Icon(Icons.add_comment, size: 20),
+                        tooltip: 'Add Note',
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  if (_currentUser.adminNotes.isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: Center(
+                        child: Text(
+                          'No admin notes yet',
+                          style: TextStyle(color: Colors.grey, fontSize: 14),
+                        ),
+                      ),
+                    )
+                  else
                     ..._currentUser.adminNotes.entries.map((entry) {
                       final noteData = entry.value as Map<String, dynamic>;
                       return Container(
@@ -516,11 +641,10 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
                         ),
                       );
                     }).toList(),
-                  ],
-                ),
+                ],
               ),
             ),
-          ],
+          ),
           if (_currentUser.adminFlags.isNotEmpty) ...[
             const SizedBox(height: 16),
             Card(
@@ -696,6 +820,61 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
                     title: Text('admin_admin_user_detail_text_featured'.tr()),
                     value: _currentUser.isFeatured,
                     onChanged: (_) => _toggleFeaturedStatus(),
+                  ),
+                  SwitchListTile(
+                    title: const Text('Shadow Banned'),
+                    subtitle: const Text('User can post, but content is hidden from others'),
+                    value: _currentUser.isShadowBanned,
+                    onChanged: (_) => _toggleShadowBanStatus(),
+                  ),
+                  const SizedBox(height: 16),
+                  // Critical Account Actions
+                  const Text('Critical Actions',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red,
+                          fontSize: 16)),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      if (!_currentUser.isSuspended)
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: _suspendUser,
+                            icon: const Icon(Icons.block),
+                            label: const Text('Suspend'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.orange,
+                              foregroundColor: Colors.white,
+                            ),
+                          ),
+                        )
+                      else
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: _unsuspendUser,
+                            icon: const Icon(Icons.check_circle_outline),
+                            label: const Text('Unsuspend'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green,
+                              foregroundColor: Colors.white,
+                            ),
+                          ),
+                        ),
+                      const SizedBox(width: 8),
+                      if (!_currentUser.isDeleted)
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: _deleteUser,
+                            icon: const Icon(Icons.delete_forever),
+                            label: const Text('Delete'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                              foregroundColor: Colors.white,
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 ],
               ),
@@ -1119,6 +1298,335 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
       }
     } finally {
       setState(() => _isLoading = false);
+    }
+  }
+
+  /// Toggle shadow ban status
+  Future<void> _toggleShadowBanStatus() async {
+    setState(() => _isLoading = true);
+    try {
+      final adminService = AdminService();
+      final newStatus = !_currentUser.isShadowBanned;
+      await adminService.toggleShadowBan(_currentUser.id, newStatus);
+
+      // Audit Trail
+      await AuditTrailService().logAdminAction(
+        action: newStatus ? 'shadow_ban_user' : 'unshadow_ban_user',
+        category: 'user',
+        targetUserId: _currentUser.id,
+        description: '${newStatus ? 'Shadow banned' : 'Unshadow banned'} user: ${_currentUser.fullName}',
+      );
+
+      setState(() {
+        _currentUser = _currentUser.copyWithAdmin(isShadowBanned: newStatus);
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(
+                  'User ${newStatus ? 'shadow banned' : 'unshadow banned'} successfully')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  /// Suspend user
+  Future<void> _suspendUser() async {
+    final reasonController = TextEditingController();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Suspend User'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Are you sure you want to suspend this user?'),
+            const SizedBox(height: 16),
+            TextField(
+              controller: reasonController,
+              decoration: const InputDecoration(
+                labelText: 'Reason for suspension',
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 3,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text('admin_admin_payment_text_cancel'.tr()),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Suspend', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && reasonController.text.isNotEmpty) {
+      setState(() => _isLoading = true);
+      try {
+        final adminService = AdminService();
+        final currentAdminId = FirebaseAuth.instance.currentUser?.uid ?? 'unknown_admin';
+        
+        await adminService.suspendUser(
+          _currentUser.id, 
+          reasonController.text.trim(),
+          currentAdminId
+        );
+
+        // Log the action
+        await _activityService.logUserSuspension(
+          _currentUser.id,
+          _currentUser.fullName,
+          currentAdminId,
+          reasonController.text.trim()
+        );
+
+        // Audit Trail
+        await AuditTrailService().logAdminAction(
+          action: 'suspend_user',
+          category: 'user',
+          targetUserId: _currentUser.id,
+          description: 'Suspended user: ${_currentUser.fullName}. Reason: ${reasonController.text.trim()}',
+          metadata: {'reason': reasonController.text.trim()},
+        );
+
+        setState(() {
+          _currentUser = _currentUser.copyWithAdmin(
+            isSuspended: true,
+            suspensionReason: reasonController.text.trim(),
+            suspendedAt: DateTime.now(),
+            suspendedBy: currentAdminId,
+          );
+        });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('User suspended successfully')),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: $e')),
+          );
+        }
+      } finally {
+        setState(() => _isLoading = false);
+      }
+    } else if (confirmed == true && reasonController.text.isEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please provide a reason for suspension')),
+      );
+    }
+  }
+
+  /// Unsuspend user
+  Future<void> _unsuspendUser() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Unsuspend User'),
+        content: const Text('Are you sure you want to unsuspend this user?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text('admin_admin_payment_text_cancel'.tr()),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Unsuspend'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      setState(() => _isLoading = true);
+      try {
+        final adminService = AdminService();
+        await adminService.unsuspendUser(_currentUser.id);
+
+        // Audit Trail
+        await AuditTrailService().logAdminAction(
+          action: 'unsuspend_user',
+          category: 'user',
+          targetUserId: _currentUser.id,
+          description: 'Unsuspended user: ${_currentUser.fullName}',
+        );
+
+        setState(() {
+          _currentUser = _currentUser.copyWithAdmin(
+            isSuspended: false,
+            suspensionReason: null,
+            suspendedAt: null,
+            suspendedBy: null,
+          );
+        });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('User unsuspended successfully')),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: $e')),
+          );
+        }
+      } finally {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  /// Delete user (soft delete)
+  Future<void> _deleteUser() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete User'),
+        content: const Text(
+            'Are you sure you want to delete this user? This is a soft delete and the user will no longer be able to access the platform.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text('admin_admin_payment_text_cancel'.tr()),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      setState(() => _isLoading = true);
+      try {
+        final adminService = AdminService();
+        await adminService.deleteUser(_currentUser.id);
+
+        // Audit Trail
+        await AuditTrailService().logAdminAction(
+          action: 'delete_user',
+          category: 'user',
+          targetUserId: _currentUser.id,
+          description: 'Soft-deleted user: ${_currentUser.fullName}',
+        );
+
+        setState(() {
+          _currentUser = _currentUser.copyWithAdmin(isDeleted: true);
+        });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('User soft-deleted successfully')),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: $e')),
+          );
+        }
+      } finally {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  /// Add admin note
+  Future<void> _addAdminNote() async {
+    final noteController = TextEditingController();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Add Admin Note'),
+        content: TextField(
+          controller: noteController,
+          decoration: const InputDecoration(
+            labelText: 'Note',
+            border: OutlineInputBorder(),
+          ),
+          maxLines: 5,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text('admin_admin_payment_text_cancel'.tr()),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Add Note'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && noteController.text.isNotEmpty) {
+      setState(() => _isLoading = true);
+      try {
+        final adminService = AdminService();
+        final currentAdminId = FirebaseAuth.instance.currentUser?.uid ?? 'unknown_admin';
+        final noteText = noteController.text.trim();
+
+        await adminService.addAdminNote(
+          _currentUser.id,
+          noteText,
+          currentAdminId,
+        );
+
+        // Audit Trail
+        await AuditTrailService().logAdminAction(
+          action: 'add_user_note',
+          category: 'user',
+          targetUserId: _currentUser.id,
+          description: 'Added admin note for user: ${_currentUser.fullName}',
+          metadata: {'note_preview': noteText.length > 50 ? '${noteText.substring(0, 50)}...' : noteText},
+        );
+
+        // Update local state
+        final noteId = DateTime.now().millisecondsSinceEpoch.toString();
+        final newNotes = Map<String, dynamic>.from(_currentUser.adminNotes);
+        newNotes[noteId] = {
+          'note': noteText,
+          'addedBy': currentAdminId,
+          'addedAt': Timestamp.now(),
+        };
+
+        setState(() {
+          _currentUser = _currentUser.copyWithAdmin(adminNotes: newNotes);
+        });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Note added successfully')),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: $e')),
+          );
+        }
+      } finally {
+        setState(() => _isLoading = false);
+      }
     }
   }
 }

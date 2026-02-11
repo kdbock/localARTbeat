@@ -713,8 +713,11 @@ class AppRouter {
         );
 
       case core.AppRoutes.communityModeration:
-        return RouteUtils.createMainLayoutRoute(
-          child: const community.ModerationQueueScreen(),
+        return _handleAdminRoutes(
+          RouteSettings(
+            name: admin.AdminRoutes.communityModeration,
+            arguments: settings.arguments,
+          ),
         );
 
       case core.AppRoutes.communitySponsorships:
@@ -952,20 +955,12 @@ class AppRouter {
         );
 
       case core.AppRoutes.artWalkAdminModeration:
-        core.AppLogger.info(
-          '🔍 AppRouter: Handling artWalkAdminModeration route',
+        return _handleAdminRoutes(
+          RouteSettings(
+            name: admin.AdminRoutes.artWalkModeration,
+            arguments: settings.arguments,
+          ),
         );
-        try {
-          final route = RouteUtils.createMainLayoutRoute<dynamic>(
-            child: const art_walk.AdminArtWalkModerationScreen(),
-          );
-          core.AppLogger.info('✅ AppRouter: Route created successfully');
-          return route;
-        } catch (e, stackTrace) {
-          core.AppLogger.error('❌ AppRouter: Error creating route: $e');
-          core.AppLogger.error('Stack trace: $stackTrace');
-          rethrow;
-        }
 
       case '/art-walk/review':
         final args = settings.arguments as Map<String, dynamic>?;
@@ -1254,18 +1249,25 @@ class AppRouter {
           child: const core.CouponManagementScreen(),
         );
 
-      case '/admin/artwork':
-        return RouteUtils.createMainLayoutRoute(
-          child: const admin.AdminArtworkManagementScreen(),
-        );
-
       case core.AppRoutes.adminCouponManagement:
       case core.AppRoutes.adminUsers:
       case core.AppRoutes.adminModeration:
+      case core.AppRoutes.artworkModeration:
+      case core.AppRoutes.adminAdManagement:
+      case core.AppRoutes.adminAdReview:
+      case core.AppRoutes.adminAdTest:
+      case core.AppRoutes.adminMessaging:
+      case '/admin/artwork':
       case '/admin/enhanced-dashboard':
       case '/admin/financial-analytics':
       case '/admin/content-management-suite':
       case '/admin/advanced-content-management':
+      case '/admin/moderation/events':
+      case '/admin/moderation/art-walks':
+      case '/admin/moderation/content':
+      case '/admin/moderation/artworks':
+      case '/admin/moderation/community':
+      case '/admin/upload-tools':
         // All admin routes now redirect to the modern unified dashboard
         return RouteUtils.createSimpleRoute(
           child: const admin.ModernUnifiedAdminDashboard(),
@@ -1761,8 +1763,11 @@ class AppRouter {
         );
 
       case core.AppRoutes.captureAdminModeration:
-        return RouteUtils.createMainLayoutRoute(
-          child: const capture.AdminContentModerationScreen(),
+        return _handleAdminRoutes(
+          RouteSettings(
+            name: admin.AdminRoutes.contentModeration,
+            arguments: settings.arguments,
+          ),
         );
 
       case core.AppRoutes.captureCreate:
@@ -2028,7 +2033,7 @@ class AppRouter {
 
       case core.AppRoutes.developerFeedbackAdmin:
         return RouteUtils.createMainLayoutRoute(
-          child: const core.DeveloperFeedbackAdminScreen(),
+          child: const admin.ModernUnifiedAdminDashboard(),
         );
 
       case core.AppRoutes.systemInfo:

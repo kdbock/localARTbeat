@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:intl/intl.dart' as intl;
 import '../widgets/admin_drawer.dart';
+import '../services/audit_trail_service.dart';
+import '../services/security_service.dart';
+import '../models/security_model.dart';
 
 /// Admin Security Center Screen
 /// Handles security monitoring, threat detection, and system security
@@ -13,12 +17,25 @@ class AdminSecurityCenterScreen extends StatefulWidget {
 }
 
 class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
+  final SecurityService _securityService = SecurityService();
+  final AuditTrailService _auditService = AuditTrailService();
+  final TextEditingController _logSearchController = TextEditingController();
+
   final List<String> _tabs = [
     'admin_security_tab_overview'.tr(),
     'admin_security_tab_threat_detection'.tr(),
     'admin_security_tab_access_control'.tr(),
     'admin_security_tab_audit_logs'.tr()
   ];
+
+  String _selectedLogFilter = 'All';
+  String _logSearchQuery = '';
+
+  @override
+  void dispose() {
+    _logSearchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,68 +71,143 @@ class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
   }
 
   Widget _buildSecurityOverviewTab() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Security Status Cards
-          Row(
-            children: [
-              Expanded(
-                child: _buildStatusCard(
-                  'admin_security_metric_score'.tr(),
-                  '94/100',
-                  Icons.security,
-                  Colors.green,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildStatusCard(
-                  'admin_security_metric_active_threats'.tr(),
-                  '2',
-                  Icons.warning,
-                  Colors.orange,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: _buildStatusCard(
-                  'admin_security_metric_failed_logins'.tr(),
-                  '15',
-                  Icons.login,
-                  Colors.red,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildStatusCard(
-                  'admin_security_metric_blocked_ips'.tr(),
-                  '8',
-                  Icons.block,
-                  Colors.blue,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
+    return StreamBuilder<SecurityMetrics>(
+      stream: _securityService.getSecurityMetrics(),
+      builder: (context, snapshot) {
+        final metrics = snapshot.data ?? SecurityMetrics.initial();
 
-          // Recent Security Events
-          Text(
-            'admin_security_section_recent_events'.tr(),
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF8C52FF),
-            ),
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Security Status Cards
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildStatusCard(
+                      'admin_security_metric_score'.tr(),
+                      '${metrics.securityScore}/100',
+                      Icons.security,
+                      _getScoreColor(metrics.securityScore),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildStatusCard(
+                      'admin_security_metric_active_threats'.tr(),
+                      metrics.activeThreats.toString(),
+                      Icons.warning,
+                      metrics.activeThreats > 0 ? Colors.orange : Colors.green,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildStatusCard(
+                      'admin_security_metric_failed_logins'.tr(),
+                      metrics.failedLogins.toString(),
+                      Icons.login,
+                      metrics.failedLogins > 10 ? Colors.red : Colors.orange,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildStatusCard(
+                      'admin_security_metric_blocked_ips'.tr(),
+                      metrics.blockedIps.toString(),
+                      Icons.block,
+                      Colors.blue,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+
+              // Recent Security Events
+              Text(
+                'admin_security_section_recent_events'.tr(),
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF8C52FF),
+                ),
+              ),
+              const SizedBox(height: 16),
+              StreamBuilder<List<SecurityEvent>>(
+                stream: _securityService.getRecentSecurityEvents(),
+                builder: (context, eventSnapshot) {
+                  final events = eventSnapshot.data ?? [];
+                  if (events.isEmpty) {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Text('admin_security_no_recent_events'.tr()),
+                      ),
+                    );
+                  }
+                  return Column(
+                    children: events
+                        .map((event) => _buildSecurityEventItem(event))
+                        .toList(),
+                  );
+                },
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
-          ...List.generate(5, (index) => _buildSecurityEventCard(index)),
+        );
+      },
+    );
+  }
+
+  Color _getScoreColor(int score) {
+    if (score >= 90) return Colors.green;
+    if (score >= 70) return Colors.orange;
+    return Colors.red;
+  }
+
+  Widget _buildSecurityEventItem(SecurityEvent event) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: ListTile(
+        leading: Icon(
+          Icons.security,
+          color: _getLogColor(event.severity),
+        ),
+        title: Text(event.title),
+        subtitle: Text(
+          intl.DateFormat('yyyy-MM-dd HH:mm').format(event.timestamp),
+        ),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => _showEventDetails(event),
+      ),
+    );
+  }
+
+  void _showEventDetails(SecurityEvent event) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(event.title),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Severity: ${event.severity}'),
+            const SizedBox(height: 8),
+            Text(event.description),
+            const SizedBox(height: 16),
+            Text('Timestamp: ${intl.DateFormat('yyyy-MM-dd HH:mm:ss').format(event.timestamp)}'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('admin_admin_payment_text_close'.tr()),
+          ),
         ],
       ),
     );
@@ -218,13 +310,18 @@ class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
           ),
         ),
         const SizedBox(height: 16),
-        ...List.generate(3, (index) => _buildAdminUserCard(index)),
+        Center(
+          child: Text(
+            'Admin user management is handled in the User Management section.',
+            style: TextStyle(color: Colors.grey[600]),
+          ),
+        ),
 
         const SizedBox(height: 24),
 
-        // IP Whitelist
+        // Blocked IPs
         const Text(
-          'IP Whitelist',
+          'Blocked IP Addresses',
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -232,35 +329,35 @@ class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
           ),
         ),
         const SizedBox(height: 16),
-        Card(
-          child: Column(
-            children: [
-              ListTile(
-                title: Text('admin_admin_security_center_text_1921681024'.tr()),
-                subtitle: Text(
-                    'admin_admin_security_center_text_office_network'.tr()),
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.red),
-                  onPressed: () {},
-                ),
+        StreamBuilder<List<BlockedIP>>(
+          stream: _securityService.getBlockedIPs(),
+          builder: (context, snapshot) {
+            final blockedIPs = snapshot.data ?? [];
+            return Card(
+              child: Column(
+                children: [
+                  if (blockedIPs.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text('admin_security_no_blocked_ips'.tr()),
+                    ),
+                  ...blockedIPs.map((ip) => ListTile(
+                        title: Text(ip.ipAddress),
+                        subtitle: Text(ip.reason),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () => _unblockIP(ip.id, ip.ipAddress),
+                        ),
+                      )),
+                  ListTile(
+                    leading: const Icon(Icons.add, color: Color(0xFF8C52FF)),
+                    title: Text('admin_security_block_new_ip'.tr()),
+                    onTap: () => _showAddIPDialog(),
+                  ),
+                ],
               ),
-              ListTile(
-                title: Text('admin_admin_security_center_text_100008'.tr()),
-                subtitle:
-                    Text('admin_admin_security_center_text_vpn_network'.tr()),
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.red),
-                  onPressed: () {},
-                ),
-              ),
-              ListTile(
-                leading: const Icon(Icons.add, color: Color(0xFF8C52FF)),
-                title:
-                    Text('admin_admin_security_center_text_add_ip_range'.tr()),
-                onTap: () => _showAddIPDialog(),
-              ),
-            ],
-          ),
+            );
+          },
         ),
       ],
     );
@@ -276,21 +373,43 @@ class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
             children: [
               Expanded(
                 child: TextField(
-                  decoration: const InputDecoration(
+                  controller: _logSearchController,
+                  decoration: InputDecoration(
                     hintText: 'Search logs...',
-                    prefixIcon: Icon(Icons.search),
-                    border: OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.search),
+                    suffixIcon: _logSearchQuery.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              _logSearchController.clear();
+                              setState(() {
+                                _logSearchQuery = '';
+                              });
+                            },
+                          )
+                        : null,
+                    border: const OutlineInputBorder(),
                   ),
-                  onChanged: (value) {},
+                  onChanged: (value) {
+                    setState(() {
+                      _logSearchQuery = value.toLowerCase();
+                    });
+                  },
                 ),
               ),
               const SizedBox(width: 16),
               DropdownButton<String>(
-                value: 'All',
-                items: ['All', 'Login', 'Data Access', 'Settings Change']
+                value: _selectedLogFilter,
+                items: ['All', 'Login', 'Data Access', 'Settings Change', 'User Action']
                     .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                     .toList(),
-                onChanged: (value) {},
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() {
+                      _selectedLogFilter = value;
+                    });
+                  }
+                },
               ),
             ],
           ),
@@ -298,9 +417,42 @@ class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
 
         // Audit Log Entries
         Expanded(
-          child: ListView.builder(
-            itemCount: 20,
-            itemBuilder: (context, index) => _buildAuditLogEntry(index),
+          child: StreamBuilder<List<AuditLog>>(
+            stream: _auditService.getAuditLogs(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              
+              if (snapshot.hasError) {
+                return Center(child: Text('Error: ${snapshot.error}'));
+              }
+              
+              var logs = snapshot.data ?? [];
+
+              // Apply filtering
+              if (_selectedLogFilter != 'All') {
+                logs = logs.where((log) => log.category == _selectedLogFilter).toList();
+              }
+
+              if (_logSearchQuery.isNotEmpty) {
+                logs = logs.where((log) => 
+                  log.action.toLowerCase().contains(_logSearchQuery) ||
+                  log.userId.toLowerCase().contains(_logSearchQuery) ||
+                  log.ipAddress.toLowerCase().contains(_logSearchQuery) ||
+                  log.metadata.toString().toLowerCase().contains(_logSearchQuery)
+                ).toList();
+              }
+              
+              if (logs.isEmpty) {
+                return const Center(child: Text('No audit logs found matching criteria.'));
+              }
+
+              return ListView.builder(
+                itemCount: logs.length,
+                itemBuilder: (context, index) => _buildAuditLogEntry(logs[index]),
+              );
+            },
           ),
         ),
       ],
@@ -337,28 +489,6 @@ class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
     );
   }
 
-  Widget _buildSecurityEventCard(int index) {
-    final events = [
-      'admin_security_event_failed_login'.tr(),
-      'admin_security_event_new_admin'.tr(),
-      'admin_security_event_suspicious_access'.tr(),
-      'admin_security_event_password_policy'.tr(),
-      'admin_security_event_security_scan'.tr(),
-    ];
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        leading: const Icon(Icons.security, color: Color(0xFF8C52FF)),
-        title: Text(events[index % events.length]),
-        subtitle: Text(
-            '2024-12-${(index + 1).toString().padLeft(2, '0')} 10:${(index * 5).toString().padLeft(2, '0')} AM'),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: () {},
-      ),
-    );
-  }
-
   Widget _buildThreatCard(
       String title, String description, String severity, Color color) {
     return Card(
@@ -373,69 +503,6 @@ class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
           labelStyle: TextStyle(color: color),
         ),
         onTap: () => _showThreatDetails(title, description, severity),
-      ),
-    );
-  }
-
-  Widget _buildAdminUserCard(int index) {
-    final users = ['John Admin', 'Sarah Security', 'Mike Manager'];
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: const Color(0xFF8C52FF),
-          child: Text(users[index][0]),
-        ),
-        title: Text(users[index]),
-        subtitle: Text('admin_admin_security_center_text_role_rolesindex'.tr()),
-        trailing: PopupMenuButton(
-          itemBuilder: (context) => [
-            PopupMenuItem(
-                value: 'edit',
-                child: Text(
-                    'admin_admin_security_center_text_edit_permissions'.tr())),
-            PopupMenuItem(
-                value: 'disable',
-                child: Text(
-                    'admin_admin_security_center_text_disable_account'.tr())),
-            PopupMenuItem(
-                value: 'remove',
-                child:
-                    Text('admin_admin_security_center_text_remove_admin'.tr())),
-          ],
-          onSelected: (value) => _handleAdminAction(value, users[index]),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAuditLogEntry(int index) {
-    final actions = [
-      'User Login',
-      'Data Export',
-      'Settings Change',
-      'User Created',
-      'Content Deleted'
-    ];
-    final users = [
-      'john.admin',
-      'sarah.security',
-      'mike.manager',
-      'system',
-      'auto.moderator'
-    ];
-
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: ListTile(
-        dense: true,
-        title: Text(actions[index % actions.length]),
-        subtitle: Text(
-            'User: ${users[index % users.length]} | IP: 192.168.1.${100 + index}'),
-        trailing:
-            Text('${10 + index}:${(index * 3).toString().padLeft(2, '0')}'),
-        onTap: () => _showLogDetails(index),
       ),
     );
   }
@@ -465,14 +532,24 @@ class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
             child: Text('admin_admin_payment_text_close'.tr()),
           ),
           ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                    content: Text(
-                        'admin_admin_security_center_text_threat_marked_as'
-                            .tr())),
+            onPressed: () async {
+              // Audit Trail
+              await _auditService.logAdminAction(
+                action: 'resolve_threat',
+                category: 'security',
+                description: 'Resolved security threat: $title',
+                metadata: {'threat_title': title, 'severity': severity},
               );
+
+              if (mounted) {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                      content: Text(
+                          'admin_admin_security_center_text_threat_marked_as'
+                              .tr())),
+                );
+              }
             },
             child: Text('admin_admin_security_center_text_resolve'.tr()),
           ),
@@ -481,24 +558,55 @@ class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
     );
   }
 
+  void _unblockIP(String id, String ipAddress) async {
+    try {
+      await _securityService.unblockIP(id);
+      
+      // Audit Trail
+      await _auditService.logAdminAction(
+        action: 'unblock_ip',
+        category: 'security',
+        description: 'Unblocked IP: $ipAddress',
+        metadata: {'ip': ipAddress},
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('IP $ipAddress unblocked successfully')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+    }
+  }
+
   void _showAddIPDialog() {
+    final ipController = TextEditingController();
+    final reasonController = TextEditingController();
+
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('admin_admin_security_center_text_add_ip_range'.tr()),
-        content: const Column(
+        title: Text('admin_security_block_new_ip'.tr()),
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
-              decoration: InputDecoration(
-                labelText: 'IP Address/Range',
-                hintText: '192.168.1.0/24',
+              controller: ipController,
+              decoration: const InputDecoration(
+                labelText: 'IP Address',
+                hintText: '192.168.1.1',
               ),
             ),
             TextField(
-              decoration: InputDecoration(
-                labelText: 'Description',
-                hintText: 'Office Network',
+              controller: reasonController,
+              decoration: const InputDecoration(
+                labelText: 'Reason',
+                hintText: 'Suspicious activity',
               ),
             ),
           ],
@@ -509,62 +617,107 @@ class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
             child: Text('admin_admin_payment_text_cancel'.tr()),
           ),
           ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                    content: Text(
-                        'admin_admin_security_center_text_ip_range_added'
-                            .tr())),
-              );
+            onPressed: () async {
+              final ip = ipController.text.trim();
+              final reason = reasonController.text.trim();
+              if (ip.isNotEmpty && reason.isNotEmpty) {
+                try {
+                  await _securityService.blockIP(ip, reason);
+                  
+                  // Audit Trail
+                  await _auditService.logAdminAction(
+                    action: 'block_ip',
+                    category: 'security',
+                    description: 'Blocked IP: $ip. Reason: $reason',
+                    metadata: {'ip': ip, 'reason': reason},
+                  );
+
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('IP $ip blocked successfully')),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error: $e')),
+                    );
+                  }
+                }
+              }
             },
-            child: Text('admin_admin_security_center_text_add'.tr()),
+            child: Text('admin_admin_security_center_text_block'.tr()),
           ),
         ],
       ),
     );
   }
 
-  void _handleAdminAction(Object? value, String user) {
-    String message;
-    switch (value) {
-      case 'edit':
-        message = 'Edit permissions for $user';
-        break;
-      case 'disable':
-        message = 'Disabled account for $user';
-        break;
-      case 'remove':
-        message = 'Removed admin privileges for $user';
-        break;
-      default:
-        message = 'Unknown action';
-    }
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
+  Widget _buildAuditLogEntry(AuditLog log) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: ListTile(
+        dense: true,
+        leading: Icon(
+          _getLogIcon(log.action),
+          color: _getLogColor(log.severity),
+        ),
+        title: Text(log.action),
+        subtitle: Text(
+          'User: ${log.userId} | IP: ${log.ipAddress}',
+          style: const TextStyle(fontSize: 12),
+        ),
+        trailing: Text(
+          intl.DateFormat('HH:mm').format(log.timestamp),
+          style: const TextStyle(color: Colors.grey),
+        ),
+        onTap: () => _showLogDetails(log),
+      ),
     );
   }
 
-  void _showLogDetails(int index) {
+  IconData _getLogIcon(String action) {
+    if (action.contains('Login')) return Icons.login;
+    if (action.contains('Delete')) return Icons.delete_forever;
+    if (action.contains('Suspend')) return Icons.block;
+    if (action.contains('Role')) return Icons.admin_panel_settings;
+    return Icons.info_outline;
+  }
+
+  Color _getLogColor(String severity) {
+    switch (severity.toLowerCase()) {
+      case 'high':
+      case 'critical':
+        return Colors.red;
+      case 'medium':
+      case 'warning':
+        return Colors.orange;
+      default:
+        return Colors.blue;
+    }
+  }
+
+  void _showLogDetails(AuditLog log) {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text('admin_admin_security_center_text_audit_log_details'.tr()),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('admin_admin_security_center_text_log_id_log1000'.tr()),
-            Text(
-                'Timestamp: 2024-12-24 ${10 + index}:${(index * 3).toString().padLeft(2, '0')}:00'),
-            Text('admin_admin_security_center_text_user_userindex_1'.tr()),
-            Text('admin_admin_security_center_text_ip_address_1921681100'.tr()),
-            Text('admin_admin_security_center_text_user_agent_mozilla50'.tr()),
-            Text(
-                'admin_admin_security_center_success_additional_details_success'
-                    .tr()),
-          ],
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _detailRow('Action', log.action),
+              _detailRow('User ID', log.userId),
+              _detailRow('Timestamp', intl.DateFormat('yyyy-MM-dd HH:mm:ss').format(log.timestamp)),
+              _detailRow('IP Address', log.ipAddress),
+              _detailRow('Severity', log.severity),
+              const SizedBox(height: 8),
+              const Text('Metadata:', style: TextStyle(fontWeight: FontWeight.bold)),
+              Text(log.metadata.toString()),
+            ],
+          ),
         ),
         actions: [
           TextButton(
@@ -572,6 +725,21 @@ class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
             child: Text('admin_admin_payment_text_close'.tr()),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _detailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: RichText(
+        text: TextSpan(
+          style: const TextStyle(color: Colors.black, fontSize: 14),
+          children: [
+            TextSpan(text: '$label: ', style: const TextStyle(fontWeight: FontWeight.bold)),
+            TextSpan(text: value),
+          ],
+        ),
       ),
     );
   }

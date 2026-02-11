@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io' show Platform;
 import 'dart:math' as math;
 import 'dart:ui';
 
@@ -36,6 +35,7 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
+  static const bool _isFlutterTest = bool.fromEnvironment('FLUTTER_TEST');
   late final AnimationController _heartbeatController;
   late final AnimationController _loopController;
   late final Animation<double> _scaleAnimation;
@@ -82,8 +82,7 @@ class _SplashScreenState extends State<SplashScreen>
       _loopController.repeat();
     }
 
-    if (widget.autoNavigate &&
-        !Platform.environment.containsKey('FLUTTER_TEST')) {
+    if (widget.autoNavigate && !_isFlutterTest) {
       _checkAuthAndNavigate();
     }
   }

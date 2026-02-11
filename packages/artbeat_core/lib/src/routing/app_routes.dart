@@ -80,6 +80,7 @@ class AppRoutes {
   static const String artworkUploadVisual = '/artwork/upload/visual';
   static const String artworkUploadWritten = '/artwork/upload/written';
   static const String artworkBrowse = '/artwork/browse';
+  static const String artworkModeration = '/artwork/moderation';
   static const String artworkSearch = '/artwork/search';
   static const String artworkFeatured = '/artwork/featured';
   static const String artworkRecent = '/artwork/recent';

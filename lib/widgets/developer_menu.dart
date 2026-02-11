@@ -33,7 +33,7 @@ class DeveloperMenu extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          _buildDatabaseSection(context),
+          _buildAdminSection(context),
           const SizedBox(height: 8),
           _buildDebugSection(context),
           const SizedBox(height: 8),
@@ -45,46 +45,25 @@ class DeveloperMenu extends StatelessWidget {
     ),
   );
 
-  Widget _buildDatabaseSection(BuildContext context) => ExpansionTile(
-    title: const Text('Database Management'),
+  Widget _buildAdminSection(BuildContext context) => ExpansionTile(
+    title: const Text('Admin Command Center'),
+    initiallyExpanded: true,
     children: [
       ListTile(
-        title: const Text('View Records'),
+        leading: const Icon(Icons.dashboard_rounded, color: Colors.blue),
+        title: const Text('Unified Admin Dashboard'),
+        subtitle: const Text('Central hub for all administration'),
         onTap: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Database viewer coming soon')),
-          );
+          Navigator.pop(context);
+          Navigator.pushNamed(context, '/admin/dashboard');
         },
       ),
       ListTile(
-        title: const Text('User Management'),
-        onTap: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('User management coming soon')),
-          );
-        },
-      ),
-      ListTile(
-        title: const Text('Analytics'),
-        onTap: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Analytics dashboard coming soon')),
-          );
-        },
-      ),
-      ListTile(
+        leading: const Icon(Icons.settings_rounded, color: Colors.grey),
         title: const Text('System Settings'),
         onTap: () {
           Navigator.pop(context);
           Navigator.pushNamed(context, '/admin/settings');
-        },
-      ),
-      ListTile(
-        title: const Text('View Logs'),
-        onTap: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Log viewer coming soon')),
-          );
         },
       ),
     ],
@@ -102,20 +81,6 @@ class DeveloperMenu extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute<void>(builder: (context) => const FeedbackForm()),
-          );
-        },
-      ),
-      ListTile(
-        leading: const Icon(Icons.admin_panel_settings),
-        title: const Text('Admin Panel'),
-        subtitle: const Text('View and manage feedback'),
-        onTap: () {
-          Navigator.pop(context);
-          Navigator.push(
-            context,
-            MaterialPageRoute<void>(
-              builder: (context) => const DeveloperFeedbackAdminScreen(),
-            ),
           );
         },
       ),
@@ -174,13 +139,6 @@ class DeveloperMenu extends StatelessWidget {
         subtitle: const Text('Update profile image URL'),
         onTap: () {
           Navigator.pushNamed(context, '/debug/profile-fix');
-        },
-      ),
-      ListTile(
-        title: const Text('Ad System Test'),
-        subtitle: const Text('Test and fix ad display issues'),
-        onTap: () {
-          Navigator.pushNamed(context, '/admin/ad-test');
         },
       ),
     ],

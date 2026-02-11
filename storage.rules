@@ -277,7 +277,7 @@ service firebase.storage {
     
     // Profile images
     match /profile_images/{userId}/{fileName} {
-      allow read: if isAuthenticated();
+      allow read: if true; // Public read for profile images
       allow write: if isAuthenticated() && (isDebugMode() || request.auth.uid == userId);
       allow delete: if isAuthenticated() && (isDebugMode() || request.auth.uid == userId);
     }

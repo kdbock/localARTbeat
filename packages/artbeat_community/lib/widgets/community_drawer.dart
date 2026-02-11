@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_artist/artbeat_artist.dart' as artist;
 import 'package:artbeat_artwork/artbeat_artwork.dart' as artwork;
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:artbeat_admin/artbeat_admin.dart';
 import '../screens/art_community_hub.dart';
 import '../screens/feed/enhanced_community_feed_screen.dart';
 import '../screens/feed/trending_content_screen.dart';
@@ -17,7 +18,6 @@ import '../screens/boosts/boosts_screen.dart';
 
 import '../src/screens/community_artists_screen.dart';
 import '../screens/settings/quiet_mode_screen.dart';
-import '../screens/moderation/moderation_queue_screen.dart';
 
 /// Community navigation drawer with user profile and navigation options
 class CommunityDrawer extends StatefulWidget {
@@ -146,7 +146,7 @@ class _CommunityDrawerState extends State<CommunityDrawer> {
       _DrawerEntry(
         icon: Icons.admin_panel_settings,
         titleBuilder: (_) => 'community_drawer_moderation'.tr(),
-        screenBuilder: () => const ModerationQueueScreen(),
+        screenBuilder: () => const AdminCommunityModerationScreen(),
       ),
     ];
 

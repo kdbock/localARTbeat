@@ -15,6 +15,8 @@ import '../models/transaction_model.dart';
 import '../models/admin_permissions.dart';
 import '../services/financial_service.dart';
 import '../services/payment_audit_service.dart';
+import '../services/admin_payout_service.dart';
+import '../services/audit_trail_service.dart';
 import '../widgets/admin_header.dart';
 import '../widgets/admin_metrics_card.dart';
 import '../widgets/admin_drawer.dart';
@@ -46,6 +48,7 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
   // Services
   final FinancialService _financialService = FinancialService();
   final PaymentAuditService _auditService = PaymentAuditService();
+  final AdminPayoutService _payoutService = AdminPayoutService();
   final AdminRoleService _roleService = AdminRoleService();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -77,7 +80,7 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 600),
       vsync: this,
@@ -251,6 +254,30 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
           'refundedAt': FieldValue.serverTimestamp(),
           'refundedBy': adminUserId,
         });
+
+        // Log audit
+        await _auditService.logRefundAction(
+          adminId: adminUserId,
+          adminEmail: adminEmail,
+          transactionId: transaction.id,
+          refundAmount: transaction.amount,
+          reason: 'Admin processed refund',
+          userId: transaction.userId,
+          notes: 'Processed via transaction details',
+        );
+
+        // General Audit Trail
+        await AuditTrailService().logAdminAction(
+          action: 'process_refund',
+          category: 'financial',
+          targetUserId: transaction.userId,
+          description: 'Processed refund for transaction ${transaction.id} (\$${transaction.amount})',
+          metadata: {
+            'transaction_id': transaction.id,
+            'amount': transaction.amount,
+            'user_name': transaction.userName,
+          },
+        );
 
         _showSuccessSnackBar('Refund processed successfully');
         _loadData(); // Refresh data
@@ -647,6 +674,7 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
                       Tab(text: 'Transactions', icon: Icon(Icons.receipt)),
                       Tab(text: 'Analytics', icon: Icon(Icons.analytics)),
                       Tab(text: 'Refunds', icon: Icon(Icons.undo)),
+                      Tab(text: 'Payouts', icon: Icon(Icons.payment)),
                       Tab(text: 'Search', icon: Icon(Icons.search)),
                     ],
                     labelColor: Theme.of(context).primaryColor,
@@ -662,6 +690,7 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
                         _buildTransactionsTab(),
                         _buildAnalyticsTab(),
                         _buildRefundsTab(),
+                        _buildPayoutsTab(),
                         _buildSearchTab(),
                       ],
                     ),
@@ -1424,6 +1453,121 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
     } catch (e) {
       debugPrint('Error downloading CSV file: $e');
       throw Exception('Failed to download CSV file');
+    }
+  }
+
+  Widget _buildPayoutsTab() {
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: _payoutService.getPendingPayouts(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return Center(
+            child: Text('Error loading payouts: ${snapshot.error}'),
+          );
+        }
+
+        final payouts = snapshot.data ?? [];
+
+        if (payouts.isEmpty) {
+          return const Center(
+            child: Text('No pending payouts'),
+          );
+        }
+
+        return ListView.builder(
+          itemCount: payouts.length,
+          itemBuilder: (context, index) {
+            final payout = payouts[index];
+            return Card(
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: ListTile(
+                title: Text('Payout Request - \$${payout['amount']}'),
+                subtitle: Text('Artist ID: ${payout['artistId']}'),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () => _processPayout(payout['id'] as String),
+                      child: const Text('Process'),
+                    ),
+                    const SizedBox(width: 8),
+                    OutlinedButton(
+                      onPressed: () => _rejectPayout(payout['id'] as String),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.red,
+                      ),
+                      child: const Text('Reject'),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _processPayout(String payoutId) async {
+    try {
+      final success = await _payoutService.processPayout(payoutId);
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Payout processed successfully')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to process payout')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error processing payout: $e')),
+      );
+    }
+  }
+
+  Future<void> _rejectPayout(String payoutId) async {
+    final reasonController = TextEditingController();
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Reject Payout'),
+        content: TextField(
+          controller: reasonController,
+          decoration: const InputDecoration(
+            hintText: 'Reason for rejection',
+          ),
+          maxLines: 3,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, reasonController.text),
+            child: const Text('Reject'),
+          ),
+        ],
+      ),
+    );
+
+    if (result != null && result.isNotEmpty) {
+      try {
+        await _payoutService.rejectPayout(payoutId, result);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Payout rejected')),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error rejecting payout: $e')),
+        );
+      }
     }
   }
 }

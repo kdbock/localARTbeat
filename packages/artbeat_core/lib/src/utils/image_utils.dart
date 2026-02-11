@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../widgets/secure_network_image.dart';
+
 /// Utility class for handling image loading with proper URL validation
 class ImageUtils {
   /// Checks if a URL is valid for NetworkImage
@@ -57,30 +59,40 @@ class ImageUtils {
   }) {
     Widget avatar;
 
+    final initials = _getInitials(displayName);
+    final fallbackText = Text(
+      initials,
+      style: TextStyle(
+        color: textColor ?? Colors.white,
+        fontSize: radius * 0.7,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+
     final trimmedUrl = imageUrl?.trim();
     if (trimmedUrl != null &&
         trimmedUrl.isNotEmpty &&
         isValidNetworkImageUrl(trimmedUrl)) {
       avatar = CircleAvatar(
         radius: radius,
-        backgroundColor: backgroundColor,
-        backgroundImage: NetworkImage(trimmedUrl),
-        child: null,
+        backgroundColor: backgroundColor ?? Colors.grey[400],
+        child: ClipOval(
+          child: SecureNetworkImage(
+            imageUrl: trimmedUrl,
+            width: radius * 2,
+            height: radius * 2,
+            fit: BoxFit.cover,
+            placeholder: Center(child: fallbackText),
+            errorWidget: Center(child: fallbackText),
+          ),
+        ),
       );
     } else {
       // Create fallback avatar with initials
-      final initials = _getInitials(displayName);
       avatar = CircleAvatar(
         radius: radius,
         backgroundColor: backgroundColor ?? Colors.grey[400],
-        child: Text(
-          initials,
-          style: TextStyle(
-            color: textColor ?? Colors.white,
-            fontSize: radius * 0.7,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        child: fallbackText,
       );
     }
 

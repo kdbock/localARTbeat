@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:provider/provider.dart';
+import 'package:artbeat_core/artbeat_core.dart' show SecureNetworkImage;
 import '../models/user_model.dart';
 import '../services/chat_service.dart';
 
@@ -13,6 +14,29 @@ class UserProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final chatService = Provider.of<ChatService>(context);
+
+    final fallbackProfile = Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            user.displayName[0].toUpperCase(),
+            style: const TextStyle(
+              fontSize: 72,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            user.displayName,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
@@ -31,30 +55,13 @@ class UserProfileScreen extends StatelessWidget {
               child: user.photoUrl != null
                   ? ClipRRect(
                       borderRadius: BorderRadius.circular(8),
-                      child: Image.network(user.photoUrl!, fit: BoxFit.cover),
-                    )
-                  : Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            user.displayName[0].toUpperCase(),
-                            style: const TextStyle(
-                              fontSize: 72,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            user.displayName,
-                            style: theme.textTheme.headlineSmall?.copyWith(
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
+                      child: SecureNetworkImage(
+                        imageUrl: user.photoUrl!,
+                        fit: BoxFit.cover,
+                        errorWidget: fallbackProfile,
                       ),
-                    ),
+                    )
+                  : fallbackProfile,
             ),
           ),
           const SizedBox(height: 16),

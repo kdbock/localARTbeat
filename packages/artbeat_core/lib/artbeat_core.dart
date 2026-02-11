@@ -180,7 +180,6 @@ export 'src/widgets/user_avatar.dart';
 export 'src/widgets/boost_pulse_ring.dart';
 export 'src/widgets/optimized_image.dart';
 export 'src/widgets/feedback_form.dart';
-export 'src/widgets/developer_feedback_admin_screen.dart';
 export 'src/widgets/feedback_system_info_screen.dart';
 export 'src/widgets/developer_menu.dart';
 

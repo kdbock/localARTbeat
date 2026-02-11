@@ -5007,3 +5007,86 @@ exports.closeAuction = onSchedule(
       console.error("❌ Error closing auctions:", error);
     }
   });
+
+/**
+ * Get financial analytics data for admin dashboard
+ * Requires admin authentication
+ */
+exports.getAdminFinancialAnalytics = functions.https.onRequest((request, response) => {
+  cors(request, response, async () => {
+    try {
+      if (request.method !== "POST") {
+        return response.status(405).send({error: "Method Not Allowed"});
+      }
+
+      // Verify admin authentication
+      const authHeader = request.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return response.status(401).send({error: "Unauthorized: Missing token"});
+      }
+
+      const idToken = authHeader.split('Bearer ')[1];
+      let decodedToken;
+
+      try {
+        decodedToken = await admin.auth().verifyIdToken(idToken);
+      } catch (error) {
+        return response.status(401).send({error: "Unauthorized: Invalid token"});
+      }
+
+      // Check if user is admin (you may want to check custom claims or a Firestore document)
+      const userDoc = await admin.firestore().collection('users').doc(decodedToken.uid).get();
+      const userData = userDoc.data();
+      if (!userData || userData.role !== 'admin') {
+        return response.status(403).send({error: "Forbidden: Admin access required"});
+      }
+
+      const { startDate, endDate } = request.body;
+
+      if (!startDate || !endDate) {
+        return response.status(400).send({
+          error: "Missing required fields: startDate, endDate",
+        });
+      }
+
+      const startUtc = new Date(startDate);
+      const endUtc = new Date(endDate);
+      const startTimestamp = admin.firestore.Timestamp.fromDate(startUtc);
+      const endTimestamp = admin.firestore.Timestamp.fromDate(endUtc);
+
+      // Fetch all financial metrics in parallel
+      const [stripeMetrics, iapMetrics, subscriptionMetrics] = await Promise.all([
+        getStripeMetrics(startUtc, endUtc),
+        getIapMetrics(startTimestamp, endTimestamp),
+        getSubscriptionMetrics(startTimestamp, endTimestamp)
+      ]);
+
+      // Calculate totals
+      const totalGross = stripeMetrics.gross + iapMetrics.gross;
+      const totalNet = stripeMetrics.net + iapMetrics.net;
+      const totalRefunds = stripeMetrics.refunds + iapMetrics.refunds;
+      const totalFees = stripeMetrics.fees;
+
+      const currency = stripeMetrics.currency || iapMetrics.currency || "USD";
+
+      response.status(200).send({
+        success: true,
+        data: {
+          currency,
+          stripe: stripeMetrics,
+          iap: iapMetrics,
+          subscriptions: subscriptionMetrics,
+          totals: {
+            gross: totalGross,
+            net: totalNet,
+            refunds: totalRefunds,
+            fees: totalFees
+          }
+        }
+      });
+    } catch (error) {
+      console.error("Error getting admin financial analytics:", error);
+      response.status(500).send({error: error.message});
+    }
+  });
+});

@@ -453,6 +453,38 @@ class ArtbeatDrawerItems {
     requiresAuth: false,
   );
 
+  static const platformCuration = ArtbeatDrawerItem(
+    title: 'drawer_platform_curation',
+    icon: Icons.auto_awesome,
+    route: '/admin/curation',
+    requiredRoles: ['admin'],
+    color: ArtbeatColors.primaryPurple,
+  );
+
+  static const securityCenter = ArtbeatDrawerItem(
+    title: 'drawer_security_center',
+    icon: Icons.security,
+    route: '/admin/security',
+    requiredRoles: ['admin'],
+    color: ArtbeatColors.primaryPurple,
+  );
+
+  static const systemHealth = ArtbeatDrawerItem(
+    title: 'drawer_system_health',
+    icon: Icons.health_and_safety,
+    route: '/admin/monitoring',
+    requiredRoles: ['admin'],
+    color: ArtbeatColors.primaryPurple,
+  );
+
+  static const paymentManagement = ArtbeatDrawerItem(
+    title: 'drawer_payment_management',
+    icon: Icons.payments_outlined,
+    route: '/admin/payments',
+    requiredRoles: ['admin'],
+    color: ArtbeatColors.primaryPurple,
+  );
+
   // Grouped items for different user types
   static const artbeatStore = ArtbeatDrawerItem(
     title: 'drawer_artbeat_store',
@@ -541,11 +573,12 @@ class ArtbeatDrawerItems {
 
   static List<ArtbeatDrawerItem> get adminItems => [
     unifiedAdminDashboard,
+    platformCuration,
+    securityCenter,
+    systemHealth,
+    paymentManagement,
     adminSettings,
-    captureModeration,
-    artWalkModeration,
     manageAds,
-    adStatistics,
   ];
 
   static List<ArtbeatDrawerItem> get moderatorItems => [moderatorDashboard];

@@ -28,8 +28,6 @@ export 'src/screens/events_list_screen.dart';
 export 'src/screens/event_search_screen.dart';
 export 'src/screens/my_tickets_screen.dart';
 export 'src/screens/user_events_dashboard_screen.dart';
-export 'src/screens/advanced_analytics_dashboard_screen.dart';
-export 'src/screens/event_moderation_dashboard_screen.dart';
 export 'src/screens/event_bulk_management_screen.dart';
 export 'src/screens/calendar_screen.dart';
 

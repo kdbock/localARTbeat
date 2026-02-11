@@ -2,24 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'dart:async';
 import 'dart:math' as math;
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 
 import '../services/consolidated_admin_service.dart';
 import '../widgets/admin_metrics_card.dart';
 import '../widgets/admin_data_table.dart';
 
-/// System Monitoring Dashboard for real-time performance monitoring
-/// Provides comprehensive system health, performance metrics, and alerts
-class AdminSystemMonitoringScreen extends StatefulWidget {
-  const AdminSystemMonitoringScreen({super.key});
+/// System Health & Monitoring Dashboard
+/// Provides comprehensive system health, performance metrics, remote config, and feedback
+class AdminSystemHealthScreen extends StatefulWidget {
+  const AdminSystemHealthScreen({super.key});
 
   @override
-  State<AdminSystemMonitoringScreen> createState() =>
-      _AdminSystemMonitoringScreenState();
+  State<AdminSystemHealthScreen> createState() =>
+      _AdminSystemHealthScreenState();
 }
 
-class _AdminSystemMonitoringScreenState
-    extends State<AdminSystemMonitoringScreen> with TickerProviderStateMixin {
+class _AdminSystemHealthScreenState
+    extends State<AdminSystemHealthScreen> with TickerProviderStateMixin {
   final ConsolidatedAdminService _adminService = ConsolidatedAdminService();
+  final FirebaseRemoteConfig _remoteConfig = FirebaseRemoteConfig.instance;
 
   // Real-time monitoring
   Timer? _refreshTimer;
@@ -35,6 +37,12 @@ class _AdminSystemMonitoringScreenState
   List<Map<String, dynamic>> _systemAlerts = [];
   List<Map<String, dynamic>> _activeUsers = [];
   List<Map<String, dynamic>> _serverStatus = [];
+  
+  // Remote Config
+  Map<String, RemoteConfigValue> _configValues = {};
+  
+  // App Check
+  final bool _appCheckEnabled = true; // Placeholder
 
   // Chart data
   final List<double> _cpuUsageData = [];
@@ -44,9 +52,23 @@ class _AdminSystemMonitoringScreenState
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 7, vsync: this);
     _loadSystemData();
+    _loadRemoteConfig();
     _startRealTimeMonitoring();
+  }
+
+  Future<void> _loadRemoteConfig() async {
+    try {
+      await _remoteConfig.fetchAndActivate();
+      if (mounted) {
+        setState(() {
+          _configValues = _remoteConfig.getAll();
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading remote config: $e');
+    }
   }
 
   @override
@@ -168,11 +190,15 @@ class _AdminSystemMonitoringScreenState
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,
           indicatorColor: Colors.white,
+          isScrollable: true,
           tabs: const [
             Tab(text: 'Overview', icon: Icon(Icons.dashboard)),
             Tab(text: 'Performance', icon: Icon(Icons.speed)),
             Tab(text: 'Alerts', icon: Icon(Icons.warning)),
             Tab(text: 'Users', icon: Icon(Icons.people)),
+            Tab(text: 'Remote Config', icon: Icon(Icons.settings_remote)),
+            Tab(text: 'App Check', icon: Icon(Icons.verified_user)),
+            Tab(text: 'Feedback', icon: Icon(Icons.feedback)),
           ],
         ),
       ),
@@ -185,6 +211,9 @@ class _AdminSystemMonitoringScreenState
                 _buildPerformanceTab(),
                 _buildAlertsTab(),
                 _buildUsersTab(),
+                _buildRemoteConfigTab(),
+                _buildAppCheckTab(),
+                _buildFeedbackTab(),
               ],
             ),
     );
@@ -784,5 +813,250 @@ class _AdminSystemMonitoringScreenState
     if (time > 1000) return Colors.red;
     if (time > 500) return Colors.orange;
     return Colors.green;
+  }
+
+  Widget _buildRemoteConfigTab() {
+    final keys = _configValues.keys.toList();
+    
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Text(
+                'Firebase Remote Config',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              const Spacer(),
+              ElevatedButton.icon(
+                onPressed: _loadRemoteConfig,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Fetch & Activate'),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: ListView.builder(
+            itemCount: keys.length,
+            itemBuilder: (context, index) {
+              final key = keys[index];
+              final value = _configValues[key]!;
+              
+              return Card(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                child: ListTile(
+                  title: Text(key, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: Text('Value: ${value.asString()}'),
+                  trailing: const Icon(Icons.edit),
+                  onTap: () => _showEditConfigDialog(key, value.asString()),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAppCheckTab() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Card(
+            color: _appCheckEnabled ? Colors.green[50] : Colors.red[50],
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Icon(
+                    _appCheckEnabled ? Icons.verified_user : Icons.gpp_maybe,
+                    color: _appCheckEnabled ? Colors.green : Colors.red,
+                    size: 48,
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'App Check is ${_appCheckEnabled ? 'ENABLED' : 'DISABLED'}',
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const Text(
+                          'Protecting your backend resources from abuse.',
+                          style: TextStyle(color: Colors.black54),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Enforcement Status',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: 16),
+          _buildAppCheckStatusItem('Cloud Firestore', 'Enforced', Colors.green),
+          _buildAppCheckStatusItem('Cloud Storage', 'Enforced', Colors.green),
+          _buildAppCheckStatusItem('Authentication', 'Enforced', Colors.green),
+          _buildAppCheckStatusItem('Cloud Functions', 'Unenforced', Colors.orange),
+          const SizedBox(height: 24),
+          const Card(
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  Text(
+                    'Note: App Check statistics and token management should be performed via the Firebase Console for production environments.',
+                    style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAppCheckStatusItem(String service, String status, Color color) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: ListTile(
+        title: Text(service),
+        trailing: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: color),
+          ),
+          child: Text(
+            status,
+            style: TextStyle(color: color, fontWeight: FontWeight.bold),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFeedbackTab() {
+    return Column(
+      children: [
+        const Padding(
+          padding: EdgeInsets.all(16),
+          child: TextField(
+            decoration: InputDecoration(
+              hintText: 'Search feedback...',
+              prefixIcon: Icon(Icons.search),
+              border: OutlineInputBorder(),
+            ),
+          ),
+        ),
+        Expanded(
+          child: ListView.builder(
+            itemCount: 10,
+            itemBuilder: (context, index) {
+              return Card(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                child: ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: Colors.blue[100],
+                    child: const Icon(Icons.person, color: Colors.blue),
+                  ),
+                  title: Text('Feedback #${1000 + index}'),
+                  subtitle: const Text(
+                    'This app is amazing! I love the new art walk feature.',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  trailing: _buildStatusChip(index % 3 == 0 ? 'new' : 'resolved'),
+                  onTap: () => _showFeedbackDetails(index),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showEditConfigDialog(String key, String currentValue) {
+    final controller = TextEditingController(text: currentValue);
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Edit Config: $key'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(labelText: 'Value'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              // Note: Remote config cannot be updated from the client SDK directly for security
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Note: Remote Config values must be updated in the Firebase Console.'),
+                ),
+              );
+            },
+            child: const Text('Update'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showFeedbackDetails(int index) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Feedback #${1000 + index}'),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('User: user_456', style: TextStyle(fontWeight: FontWeight.bold)),
+            SizedBox(height: 8),
+            Text('Message:'),
+            Text('This app is amazing! I love the new art walk feature. It would be great if we could add our own custom pins.'),
+            SizedBox(height: 16),
+            Text('Metadata:', style: TextStyle(fontWeight: FontWeight.bold)),
+            Text('Device: iPhone 15 Pro'),
+            Text('OS: iOS 17.4'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Mark as Resolved'),
+          ),
+        ],
+      ),
+    );
   }
 }

@@ -1250,7 +1250,7 @@ PODS:
   - Firebase/Storage (12.8.0):
     - Firebase/CoreOnly
     - FirebaseStorage (~> 12.8.0)
-  - firebase_analytics (12.1.1):
+  - firebase_analytics (12.1.2):
     - firebase_core
     - FirebaseAnalytics (= 12.8.0)
     - FlutterMacOS
@@ -1757,7 +1757,7 @@ SPEC CHECKSUMS:
   file_picker: 7584aae6fa07a041af2b36a2655122d42f578c1a
   file_selector_macos: 9e9e068e90ebee155097d00e89ae91edb2374db7
   Firebase: 9a58fdbc9d8655ed7b79a19cf9690bb007d3d46d
-  firebase_analytics: a5e02c7d878b16431358e4b65808c171db05ae5a
+  firebase_analytics: baaf472ae2221d731cf1ec69b3e360bd1bbf40c5
   firebase_app_check: daf97f2d7044e28b68d23bc90e16751acee09732
   firebase_auth: 2c2438e41f061c03bd67dcb045dfd7bc843b5f52
   firebase_core: b1697fb64ff2b9ca16baaa821205f8b0c058e5d2

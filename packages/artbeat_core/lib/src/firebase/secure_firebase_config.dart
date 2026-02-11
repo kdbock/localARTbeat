@@ -9,10 +9,16 @@ class SecureFirebaseConfig {
   static bool _appCheckInitialized = false;
   static String? _teamId;
 
-  /// Configure App Check with optional business verification
+  /// Configure App Check with optional debug override.
+  ///
+  /// Notes (current FlutterFire API):
+  /// - `appleProvider` / `androidProvider` enums are deprecated.
+  /// - Use `providerApple` / `providerAndroid` with provider classes instead.
+  /// - Optionally pass a fixed debug token via [debugToken] to keep it stable.
   static Future<void> configureAppCheck({
     required String teamId,
     bool forceDebug = false,
+    String? debugToken, // optional: set a stable debug token if you want
   }) async {
     _teamId = teamId;
 
@@ -23,23 +29,24 @@ class SecureFirebaseConfig {
     }
 
     try {
-      // If forceDebug is true, use debug provider even in release mode
-      // This is helpful for developers without business registration
       final bool useDebugProvider = kDebugMode || forceDebug;
 
       if (useDebugProvider) {
         debugPrint('🛡️ ============================================');
         debugPrint('🛡️ ACTIVATING APP CHECK IN DEBUG MODE');
         debugPrint('🛡️ ============================================');
+
         await FirebaseAppCheck.instance.activate(
-          // ignore: deprecated_member_use
-          androidProvider: AndroidProvider.debug,
-          // ignore: deprecated_member_use
-          appleProvider: AppleProvider.debug,
+          providerApple: AppleDebugProvider(debugToken: debugToken),
+          providerAndroid: AndroidDebugProvider(debugToken: debugToken),
+          // For web: use ReCAPTCHA v3 in debug mode
+          providerWeb: ReCaptchaV3Provider(
+            '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI', // Test key
+          ),
         );
+
         await FirebaseAppCheck.instance.setTokenAutoRefreshEnabled(true);
 
-        // Add token change listener to monitor App Check token generation
         FirebaseAppCheck.instance.onTokenChange.listen(
           (token) {
             debugPrint('🛡️ ============================================');
@@ -56,77 +63,71 @@ class SecureFirebaseConfig {
 
         debugPrint('🛡️ AppCheck activated with DEBUG provider');
 
-        // Wait a moment for the provider to initialize
+        // Small delay helps on some devices/simulators
         await Future<void>.delayed(const Duration(milliseconds: 500));
 
         try {
-          debugPrint('🛡️ Fetching debug token...');
+          debugPrint('🛡️ Fetching App Check token (debug provider)...');
           debugPrint('🛡️ ============================================');
-          debugPrint('🛡️ IMPORTANT: Check Xcode console for debug token!');
-          debugPrint('🛡️ Look for: "Firebase App Check debug token:"');
+          debugPrint('🛡️ NOTE: The *debug token* (the one you paste into');
+          debugPrint('🛡️ Firebase Console > App Check > Debug tokens)');
+          debugPrint('🛡️ is printed by the native SDK logs unless you');
+          debugPrint('🛡️ pass a fixed debugToken into the provider.');
           debugPrint('🛡️ ============================================');
 
           final token = await FirebaseAppCheck.instance.getToken(true);
           debugPrint('🛡️ ============================================');
-          debugPrint('🛡️ APP CHECK DEBUG TOKEN:');
+          debugPrint('🛡️ APP CHECK TOKEN (DEBUG PROVIDER):');
           debugPrint('🛡️ $token');
-          debugPrint('🛡️ ============================================');
-          debugPrint('🛡️ Add this token to Firebase Console:');
-          debugPrint('🛡️ 1. Go to Firebase Console > App Check');
-          debugPrint('🛡️ 2. Select your iOS app');
-          debugPrint('🛡️ 3. Add this token to Debug Tokens');
           debugPrint('🛡️ ============================================');
 
           if (token == null || token.isEmpty) {
             debugPrint('⚠️ Token is null/empty, retrying...');
             Future<void>.delayed(const Duration(seconds: 2), () async {
               try {
-                final retryToken = await FirebaseAppCheck.instance.getToken(
-                  true,
-                );
+                final retryToken = await FirebaseAppCheck.instance.getToken(true);
                 debugPrint('🛡️ ============================================');
-                debugPrint('🛡️ APP CHECK DEBUG TOKEN (RETRY):');
+                debugPrint('🛡️ APP CHECK TOKEN (RETRY):');
                 debugPrint('🛡️ $retryToken');
                 debugPrint('🛡️ ============================================');
               } catch (e) {
-                debugPrint('⚠️ AppCheck DEBUG token retry failed: $e');
+                debugPrint('⚠️ AppCheck token retry failed: $e');
               }
             });
           }
         } catch (e) {
           debugPrint('⚠️ ============================================');
-          debugPrint('⚠️ AppCheck DEBUG token fetch failed: $e');
+          debugPrint('⚠️ AppCheck token fetch failed: $e');
           debugPrint('⚠️ ============================================');
         }
       } else {
         debugPrint('🛡️ ============================================');
         debugPrint('🛡️ ACTIVATING APP CHECK IN PRODUCTION MODE');
-        debugPrint('🛡️ Using: AppAttest with DeviceCheck fallback');
+        debugPrint('🛡️ Android: Play Integrity');
+        debugPrint('🛡️ iOS: App Attest with DeviceCheck fallback');
         debugPrint('🛡️ ============================================');
+
         await FirebaseAppCheck.instance.activate(
-          // ignore: deprecated_member_use
-          androidProvider: AndroidProvider.playIntegrity,
-          // ignore: deprecated_member_use
-          appleProvider: AppleProvider.appAttestWithDeviceCheckFallback,
+          providerApple: const AppleAppAttestWithDeviceCheckFallbackProvider(),
+          providerAndroid: const AndroidPlayIntegrityProvider(),
+          providerWeb: ReCaptchaV3Provider(
+            '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI', // Test key
+          ),
         );
+
         await FirebaseAppCheck.instance.setTokenAutoRefreshEnabled(true);
 
-        // Add token change listener to monitor production tokens
         FirebaseAppCheck.instance.onTokenChange.listen(
           (token) {
             debugPrint('🛡️ ============================================');
             debugPrint('🛡️ PRODUCTION APP CHECK TOKEN RECEIVED');
             debugPrint('🛡️ Token length: ${token?.length ?? 0}');
             if (token != null && token.isNotEmpty) {
-              debugPrint('🛡️ ✅ AppAttest/DeviceCheck is working!');
-              // Decode JWT to see provider
+              debugPrint('🛡️ ✅ Production provider is working!');
               try {
                 final parts = token.split('.');
                 if (parts.length >= 2) {
                   debugPrint('🛡️ Token payload length: ${parts[1].length}');
-                  debugPrint(
-                    '🛡️ Token type: Production (AppAttest or DeviceCheck)',
-                  );
                 }
               } catch (_) {}
             }
@@ -140,10 +141,7 @@ class SecureFirebaseConfig {
         );
 
         debugPrint('🛡️ ✅ AppCheck activated with PRODUCTION providers');
-        debugPrint('🛡️ iOS: AppAttest with DeviceCheck fallback');
-        debugPrint('🛡️ Android: Play Integrity');
 
-        // Test token fetch
         try {
           debugPrint('🛡️ Testing production token fetch...');
           final token = await FirebaseAppCheck.instance.getToken(true);
@@ -166,10 +164,10 @@ class SecureFirebaseConfig {
 
   /// Debug helpers (safe)
   static Map<String, dynamic> getStatus() => {
-    'appCheckInitialized': _appCheckInitialized,
-    'appsCount': 0, // intentionally not reading Firebase.apps here
-    'teamId': _teamId,
-  };
+        'appCheckInitialized': _appCheckInitialized,
+        'appsCount': 0, // intentionally not reading Firebase.apps here
+        'teamId': _teamId,
+      };
 
   static Future<bool> testStorageAccess() async {
     try {

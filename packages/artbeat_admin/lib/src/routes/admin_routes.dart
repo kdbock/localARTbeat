@@ -1,14 +1,21 @@
+import 'package:artbeat_admin/src/screens/moderation/admin_flagging_queue_screen.dart';
 import 'package:flutter/material.dart';
 import '../screens/admin_login_screen.dart';
 import '../screens/modern_unified_admin_dashboard.dart';
 import '../screens/admin_user_detail_screen.dart';
+import '../screens/admin_audit_logs_screen.dart';
 import '../screens/admin_settings_screen.dart';
 import '../screens/admin_security_center_screen.dart';
-import '../screens/admin_system_monitoring_screen.dart';
+import '../screens/admin_system_health_screen.dart';
 import '../screens/admin_payment_screen.dart';
-import '../screens/migration_screen.dart';
+import '../screens/modern_unified_admin_upload_tools_screen.dart';
 import '../screens/events_coming_soon_screen.dart';
-import 'package:artbeat_events/src/screens/event_moderation_dashboard_screen.dart';
+import '../screens/moderation/event_moderation_dashboard_screen.dart';
+import '../screens/moderation/admin_artwork_moderation_screen.dart';
+import '../screens/moderation/admin_community_moderation_screen.dart';
+import '../screens/moderation/admin_art_walk_moderation_screen.dart';
+import '../screens/moderation/admin_content_moderation_screen.dart';
+import '../screens/admin_platform_curation_screen.dart';
 import '../models/user_admin_model.dart';
 import 'package:easy_localization/easy_localization.dart';
 
@@ -42,10 +49,21 @@ class AdminRoutes {
   static const String adsManagement = '/admin/dashboard'; // Redirect to unified
   static const String eventsManagement =
       '/admin/dashboard'; // Redirect to unified
-  static const String communityModeration =
+  static const String legacyCommunityModeration =
+      '/admin/dashboard'; // Redirect to unified
+  static const String communityModerationRedir =
       '/admin/dashboard'; // Redirect to unified
   static const String couponManagement =
       '/admin/dashboard'; // Redirect to unified
+
+  // Moderation routes (Specific deep-dives)
+  static const String eventModeration = '/admin/moderation/events';
+  static const String artworkModeration = '/admin/moderation/artworks';
+  static const String communityModeration = '/admin/moderation/community';
+  static const String artWalkModeration = '/admin/moderation/art-walks';
+  static const String contentModeration = '/admin/moderation/content';
+  static const String flaggingQueue = '/admin/moderation/flagging-queue';
+  static const String platformCuration = '/admin/curation';
 
   // User detail screen (modal/overlay)
   static const String userDetail = '/admin/user-detail';
@@ -54,16 +72,48 @@ class AdminRoutes {
   static const String adminSettings = '/admin/settings';
   static const String securityCenter = '/admin/security';
   static const String systemMonitoring = '/admin/monitoring';
+  static const String auditLogs = '/admin/audit-logs';
   static const String paymentManagement = '/admin/payments';
-  static const String migration = '/admin/migration';
+  static const String dataUpload = '/admin/upload-tools';
   static const String login = '/admin/login';
 
   /// Generate routes for the admin system
   static Route<dynamic>? generateRoute(RouteSettings settings) {
     switch (settings.name) {
+      case eventModeration:
       case '/admin/event-moderation-dashboard':
         return MaterialPageRoute<void>(
           builder: (_) => const EventModerationDashboardScreen(),
+          settings: settings,
+        );
+      case artworkModeration:
+        return MaterialPageRoute<void>(
+          builder: (_) => const AdminArtworkModerationScreen(),
+          settings: settings,
+        );
+      case communityModeration:
+        return MaterialPageRoute<void>(
+          builder: (_) => const AdminCommunityModerationScreen(),
+          settings: settings,
+        );
+      case artWalkModeration:
+        return MaterialPageRoute<void>(
+          builder: (_) => const AdminArtWalkModerationScreen(),
+          settings: settings,
+        );
+      case contentModeration:
+        return MaterialPageRoute<void>(
+          builder: (_) => const AdminContentModerationScreen(),
+          settings: settings,
+        );
+      case flaggingQueue:
+        return MaterialPageRoute<void>(
+          builder: (_) => const AdminFlaggingQueueScreen(),
+          settings: settings,
+        );
+      case platformCuration:
+        return MaterialPageRoute<void>(
+          builder: (_) => const AdminPlatformCurationScreen(),
           settings: settings,
         );
       case '/admin/events-coming-soon':
@@ -102,7 +152,12 @@ class AdminRoutes {
 
       case systemMonitoring:
         return MaterialPageRoute<void>(
-          builder: (_) => const AdminSystemMonitoringScreen(),
+          builder: (_) => const AdminSystemHealthScreen(),
+          settings: settings,
+        );
+      case auditLogs:
+        return MaterialPageRoute<void>(
+          builder: (_) => const AdminAuditLogsScreen(),
           settings: settings,
         );
 
@@ -111,10 +166,10 @@ class AdminRoutes {
           builder: (_) => const AdminPaymentScreen(),
           settings: settings,
         );
-
-      case migration:
+      case dataUpload:
+      case '/dev': // Redirect old dev routes to new upload tools
         return MaterialPageRoute<void>(
-          builder: (_) => const MigrationScreen(),
+          builder: (_) => const ModernUnifiedAdminUploadToolsScreen(),
           settings: settings,
         );
 
@@ -267,6 +322,48 @@ class AdminRoutes {
         description: 'Real-time system monitoring and performance metrics',
         category: AdminRouteCategory.system,
       ),
+      const AdminRoute(
+        name: 'Audit Logs',
+        route: auditLogs,
+        icon: Icons.history_edu_rounded,
+        description: 'Detailed log of all administrative actions',
+        category: AdminRouteCategory.system,
+      ),
+      const AdminRoute(
+        name: 'Event Moderation',
+        route: eventModeration,
+        icon: Icons.event_note_rounded,
+        description: 'Review and manage community events',
+        category: AdminRouteCategory.content,
+      ),
+      const AdminRoute(
+        name: 'Art Walk Moderation',
+        route: artWalkModeration,
+        icon: Icons.route_rounded,
+        description: 'Moderate user-created art walks',
+        category: AdminRouteCategory.content,
+      ),
+      const AdminRoute(
+        name: 'Content Moderation',
+        route: contentModeration,
+        icon: Icons.camera_rounded,
+        description: 'Review artwork captures and content reports',
+        category: AdminRouteCategory.content,
+      ),
+      const AdminRoute(
+        name: 'Flagging Queue',
+        route: flaggingQueue,
+        icon: Icons.report_problem_rounded,
+        description: 'Triage user reports and flagged content',
+        category: AdminRouteCategory.content,
+      ),
+      const AdminRoute(
+        name: 'Data Upload Tools',
+        route: dataUpload,
+        icon: Icons.upload_file_rounded,
+        description: 'Administrative tools for bulk data uploads',
+        category: AdminRouteCategory.system,
+      ),
     ];
   }
 
@@ -304,6 +401,41 @@ class AdminRoutes {
         route: advancedContentManagement,
         icon: Icons.content_copy,
         description: 'AI-powered content management and analytics',
+        category: AdminRouteCategory.content,
+      ),
+      const AdminRoute(
+        name: 'Event Moderation',
+        route: eventModeration,
+        icon: Icons.event_note_rounded,
+        description: 'Review and manage community events',
+        category: AdminRouteCategory.content,
+      ),
+      const AdminRoute(
+        name: 'Artwork Moderation',
+        route: artworkModeration,
+        icon: Icons.brush_rounded,
+        description: 'Moderate community-uploaded artworks',
+        category: AdminRouteCategory.content,
+      ),
+      const AdminRoute(
+        name: 'Community Moderation',
+        route: communityModeration,
+        icon: Icons.forum_rounded,
+        description: 'Moderate flagged posts and comments',
+        category: AdminRouteCategory.content,
+      ),
+      const AdminRoute(
+        name: 'Art Walk Moderation',
+        route: artWalkModeration,
+        icon: Icons.route_rounded,
+        description: 'Moderate user-created art walks',
+        category: AdminRouteCategory.content,
+      ),
+      const AdminRoute(
+        name: 'Content Moderation',
+        route: contentModeration,
+        icon: Icons.camera_rounded,
+        description: 'Review artwork captures and content reports',
         category: AdminRouteCategory.content,
       ),
     ];

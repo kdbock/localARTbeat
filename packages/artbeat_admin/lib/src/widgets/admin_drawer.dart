@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:artbeat_core/src/services/auth_service.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../routes/admin_routes.dart';
 
 /// Admin Package Specific Drawer
 ///
@@ -146,44 +147,59 @@ class AdminDrawer extends StatelessWidget {
                     _buildSectionHeader('admin_drawer_section_content'.tr()),
                     _buildDrawerItem(
                       context,
-                      icon: Icons.content_paste,
-                      title: 'admin_drawer_menu_content_moderation'.tr(),
-                      route:
-                          '/admin/dashboard', // Unified dashboard handles content moderation
-                      subtitle:
-                          'admin_drawer_menu_content_moderation_subtitle'.tr(),
+                      icon: Icons.event,
+                      title: 'Event Moderation',
+                      route: AdminRoutes.eventModeration,
+                      subtitle: 'Review and manage community events',
                     ),
                     _buildDrawerItem(
                       context,
-                      icon: Icons.event,
-                      title: 'Event Moderation Dashboard',
-                      route: '/admin/event-moderation-dashboard',
-                      subtitle: 'Review and moderate events',
+                      icon: Icons.brush,
+                      title: 'Artwork Moderation',
+                      route: AdminRoutes.artworkModeration,
+                      subtitle: 'Moderate community artworks',
                     ),
                     _buildDrawerItem(
                       context,
                       icon: Icons.photo_library,
-                      title: 'admin_drawer_menu_capture_moderation'.tr(),
-                      route: '/capture/admin/moderation',
-                      subtitle:
-                          'admin_drawer_menu_capture_moderation_subtitle'.tr(),
+                      title: 'Capture Moderation',
+                      route: AdminRoutes.contentModeration,
+                      subtitle: 'Moderate artwork captures',
                     ),
                     _buildDrawerItem(
                       context,
                       icon: Icons.route,
-                      title: 'admin_drawer_menu_artwalk_moderation'.tr(),
-                      route: '/artwalk/admin/moderation',
-                      subtitle:
-                          'admin_drawer_menu_artwalk_moderation_subtitle'.tr(),
+                      title: 'Art Walk Moderation',
+                      route: AdminRoutes.artWalkModeration,
+                      subtitle: 'Moderate user-created walks',
+                    ),
+                    _buildDrawerItem(
+                      context,
+                      icon: Icons.forum,
+                      title: 'Community Moderation',
+                      route: AdminRoutes.communityModeration,
+                      subtitle: 'Moderate posts and comments',
+                    ),
+                    _buildDrawerItem(
+                      context,
+                      icon: Icons.report_problem,
+                      title: 'Flagging Queue',
+                      route: AdminRoutes.flaggingQueue,
+                      subtitle: 'Triage user reports',
                     ),
                     _buildDrawerItem(
                       context,
                       icon: Icons.people,
-                      title: 'admin_drawer_menu_user_management'.tr(),
-                      route:
-                          '/admin/dashboard', // Unified dashboard handles user management
-                      subtitle:
-                          'admin_drawer_menu_user_management_subtitle'.tr(),
+                      title: 'User Management',
+                      route: AdminRoutes.userManagement,
+                      subtitle: 'Manage platform users',
+                    ),
+                    _buildDrawerItem(
+                      context,
+                      icon: Icons.auto_awesome,
+                      title: 'Platform Curation',
+                      route: AdminRoutes.platformCuration,
+                      subtitle: 'Manage featured content and announcements',
                     ),
 
                     const Divider(height: 16),
@@ -216,6 +232,13 @@ class AdminDrawer extends StatelessWidget {
                     ),
                     _buildDrawerItem(
                       context,
+                      icon: Icons.history_edu,
+                      title: 'Audit Logs',
+                      route: AdminRoutes.auditLogs,
+                      subtitle: 'Track administrative actions',
+                    ),
+                    _buildDrawerItem(
+                      context,
                       icon: Icons.sync_alt,
                       title: 'admin_drawer_menu_data_migration'.tr(),
                       route: '/admin/migration',
@@ -230,26 +253,16 @@ class AdminDrawer extends StatelessWidget {
                     _buildDrawerItem(
                       context,
                       icon: Icons.upload_file,
-                      title: 'admin_drawer_menu_data_upload_tools'.tr(),
-                      route: '/dev',
-                      subtitle:
-                          'admin_drawer_menu_data_upload_tools_subtitle'.tr(),
+                      title: 'Data Upload Tools',
+                      route: AdminRoutes.dataUpload,
+                      subtitle: 'Bulk data management tools',
                     ),
                     _buildDrawerItem(
                       context,
                       icon: Icons.feedback,
-                      title: 'admin_drawer_menu_developer_feedback'.tr(),
-                      route: '/developer-feedback-admin',
-                      subtitle:
-                          'admin_drawer_menu_developer_feedback_subtitle'.tr(),
-                    ),
-                    _buildDrawerItem(
-                      context,
-                      icon: Icons.admin_panel_settings,
-                      title: 'admin_drawer_menu_admin_upload_tools'.tr(),
-                      route: '/dev', // Developer menu has admin upload tools
-                      subtitle:
-                          'admin_drawer_menu_admin_upload_tools_subtitle'.tr(),
+                      title: 'Developer Feedback',
+                      route: AdminRoutes.dataUpload, // Redirected to unified tools
+                      subtitle: 'Review developer feedback',
                     ),
 
                     const Divider(height: 16),

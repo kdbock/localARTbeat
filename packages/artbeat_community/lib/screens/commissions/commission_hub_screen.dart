@@ -10,8 +10,8 @@ import 'package:artbeat_artist/artbeat_artist.dart'
 import '../../models/direct_commission_model.dart';
 import '../../services/direct_commission_service.dart';
 import '../../widgets/widgets.dart';
+import 'package:artbeat_admin/artbeat_admin.dart';
 import 'artist_commission_settings_screen.dart';
-import 'commission_analytics_dashboard.dart';
 import 'commission_detail_screen.dart';
 import 'commission_dispute_screen.dart';
 import 'commission_gallery_screen.dart';
@@ -1002,7 +1002,7 @@ class _CommissionHubScreenState extends State<CommissionHubScreen> {
     Navigator.push(
       context,
       MaterialPageRoute<void>(
-        builder: (context) => CommissionAnalyticsDashboard(artistId: user.uid),
+        builder: (context) => const ModernUnifiedAdminDashboard(),
       ),
     );
   }

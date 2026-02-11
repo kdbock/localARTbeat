@@ -4,7 +4,6 @@ export 'capture_detail_screen.dart';
 export 'capture_detail_viewer_screen.dart';
 export 'capture_edit_screen.dart';
 export 'capture_view_screen.dart';
-export 'admin_content_moderation_screen.dart';
 export 'enhanced_capture_dashboard_screen.dart';
 export 'captures_list_screen.dart';
 export 'my_captures_screen.dart';
