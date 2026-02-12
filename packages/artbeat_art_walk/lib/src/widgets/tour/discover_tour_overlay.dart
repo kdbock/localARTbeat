@@ -188,10 +188,10 @@ class _DiscoverTourOverlayState extends State<DiscoverTourOverlay>
   void _ensureStepVisible() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      
+
       final screenHeight = MediaQuery.of(context).size.height;
       final targetContext = _steps[_currentStepIndex].targetKey.currentContext;
-      
+
       if (targetContext != null) {
         final renderBox = targetContext.findRenderObject() as RenderBox?;
         if (renderBox != null) {
