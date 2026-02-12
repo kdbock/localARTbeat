@@ -35,7 +35,8 @@ class FinancialAnalyticsService {
       final financialData = data['data'] as Map<String, dynamic>;
       final stripe = financialData['stripe'] as Map<String, dynamic>;
       final iap = financialData['iap'] as Map<String, dynamic>;
-      final subscriptions = financialData['subscriptions'] as Map<String, dynamic>;
+      final subscriptions =
+          financialData['subscriptions'] as Map<String, dynamic>;
       final totals = financialData['totals'] as Map<String, dynamic>;
 
       // Get previous period for comparison
@@ -50,7 +51,8 @@ class FinancialAnalyticsService {
 
       final previousData = previousResult.data;
       final previousTotals = previousData['success'] == true
-          ? (previousData['data'] as Map<String, dynamic>)['totals'] as Map<String, dynamic>
+          ? (previousData['data'] as Map<String, dynamic>)['totals']
+              as Map<String, dynamic>
           : {'gross': 0.0, 'net': 0.0, 'refunds': 0.0};
 
       // Get revenue time series (simplified - could be enhanced)
@@ -71,12 +73,16 @@ class FinancialAnalyticsService {
         eventRevenue: iap['gross'] as double? ?? 0.0, // Approximate
         commissionRevenue: 0.0, // Could be calculated from artwork sales
         averageRevenuePerUser: 0.0, // Would need user count
-        monthlyRecurringRevenue: ((subscriptions['active'] as int? ?? 0) * 9.99).toDouble(), // Approximate
+        monthlyRecurringRevenue: ((subscriptions['active'] as int? ?? 0) * 9.99)
+            .toDouble(), // Approximate
         churnRate: churnRate,
         lifetimeValue: lifetimeValue,
-        totalTransactions: (subscriptions['active'] as int? ?? 0) + (iap['transactions'] as int? ?? 0),
-        revenueGrowth: _calculateGrowth(totals['gross'] as double? ?? 0.0, previousTotals['gross'] as double? ?? 0.0),
-        subscriptionGrowth: _calculateGrowth(stripe['gross'] as double? ?? 0.0, previousTotals['gross'] as double? ?? 0.0),
+        totalTransactions: (subscriptions['active'] as int? ?? 0) +
+            (iap['transactions'] as int? ?? 0),
+        revenueGrowth: _calculateGrowth(totals['gross'] as double? ?? 0.0,
+            previousTotals['gross'] as double? ?? 0.0),
+        subscriptionGrowth: _calculateGrowth(stripe['gross'] as double? ?? 0.0,
+            previousTotals['gross'] as double? ?? 0.0),
         commissionGrowth: 0.0, // Not implemented yet
         revenueByCategory: revenueByCategory,
         revenueTimeSeries: revenueTimeSeries,
@@ -97,8 +103,7 @@ class FinancialAnalyticsService {
     // Fetch financial data in parallel
     final results = await Future.wait<dynamic>([
       _getSubscriptionRevenue(startDate, endDate),
-      _getSubscriptionRevenue(
-          previousStartDate, startDate), // Previous period
+      _getSubscriptionRevenue(previousStartDate, startDate), // Previous period
       _getEventRevenue(startDate, endDate),
       _getEventRevenue(previousStartDate, startDate), // Previous period
       _getCommissionRevenue(startDate, endDate),
@@ -151,8 +156,8 @@ class FinancialAnalyticsService {
       revenueGrowth: _calculateGrowth(totalRevenue, previousTotalRevenue),
       subscriptionGrowth: _calculateGrowth(
           currentSubscriptionRevenue, previousSubscriptionRevenue),
-      commissionGrowth: _calculateGrowth(
-          currentCommissionRevenue, previousCommissionRevenue),
+      commissionGrowth:
+          _calculateGrowth(currentCommissionRevenue, previousCommissionRevenue),
       revenueByCategory: revenueByCategory,
       revenueTimeSeries: revenueTimeSeries,
     );

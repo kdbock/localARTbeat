@@ -25,9 +25,10 @@ class AdminPayoutService {
   Future<bool> processPayout(String payoutId) async {
     try {
       // 1. Get payout details
-      final payoutDoc = await _firestore.collection('payouts').doc(payoutId).get();
+      final payoutDoc =
+          await _firestore.collection('payouts').doc(payoutId).get();
       if (!payoutDoc.exists) throw Exception('Payout not found');
-      
+
       final payoutData = payoutDoc.data()!;
       final artistId = payoutData['artistId'] as String;
       final amount = (payoutData['amount'] as num).toDouble();
@@ -41,7 +42,8 @@ class AdminPayoutService {
 
       // 3. Trigger the Cloud Function
       final response = await _paymentService.makeAuthenticatedRequest(
-        functionKey: 'processPayout', // This should be registered in UnifiedPaymentService
+        functionKey:
+            'processPayout', // This should be registered in UnifiedPaymentService
         body: {
           'payoutId': payoutId,
           'artistId': artistId,
@@ -52,11 +54,12 @@ class AdminPayoutService {
 
       if (response.statusCode == 200) {
         final result = json.decode(response.body);
-        
+
         // 4. Update payout as completed
         await _firestore.collection('payouts').doc(payoutId).update({
           'status': 'completed',
-          'transactionId': result['stripeTransferId'] ?? result['transactionId'],
+          'transactionId':
+              result['stripeTransferId'] ?? result['transactionId'],
           'processedAt': FieldValue.serverTimestamp(),
         });
 
@@ -78,16 +81,17 @@ class AdminPayoutService {
         'failureReason': e.toString(),
         'processedAt': FieldValue.serverTimestamp(),
       });
-      
+
       rethrow;
     }
   }
 
   /// Reject a payout request
   Future<void> rejectPayout(String payoutId, String reason) async {
-    final payoutDoc = await _firestore.collection('payouts').doc(payoutId).get();
+    final payoutDoc =
+        await _firestore.collection('payouts').doc(payoutId).get();
     if (!payoutDoc.exists) throw Exception('Payout not found');
-    
+
     final payoutData = payoutDoc.data()!;
     final artistId = payoutData['artistId'] as String;
     final amount = (payoutData['amount'] as num).toDouble();

@@ -114,7 +114,8 @@ class _EventModerationDashboardScreenState
         children: [
           const Icon(Icons.error, color: Colors.red, size: 48),
           const SizedBox(height: 12),
-          Text(_errorMessage ?? 'Error loading events', style: const TextStyle(color: Colors.white)),
+          Text(_errorMessage ?? 'Error loading events',
+              style: const TextStyle(color: Colors.white)),
           ElevatedButton(onPressed: _loadData, child: const Text('Retry')),
         ],
       ),
@@ -122,11 +123,15 @@ class _EventModerationDashboardScreenState
   }
 
   Widget _buildFlaggedEventsTab() {
-    if (_flaggedEvents.isEmpty) return const Center(child: Text('No flagged events', style: TextStyle(color: Colors.white)));
+    if (_flaggedEvents.isEmpty)
+      return const Center(
+          child:
+              Text('No flagged events', style: TextStyle(color: Colors.white)));
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: _flaggedEvents.length,
-      itemBuilder: (context, index) => _buildFlaggedEventCard(_flaggedEvents[index]),
+      itemBuilder: (context, index) =>
+          _buildFlaggedEventCard(_flaggedEvents[index]),
     );
   }
 
@@ -145,16 +150,22 @@ class _EventModerationDashboardScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(event.title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+          Text(event.title,
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18)),
           const SizedBox(height: 8),
-          Text('Reason: ${flag['reason']}', style: const TextStyle(color: Colors.white70)),
+          Text('Reason: ${flag['reason']}',
+              style: const TextStyle(color: Colors.white70)),
           const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               TextButton(
                 onPressed: () => _dismissFlag(flagId, event.id),
-                child: const Text('Dismiss Flag', style: TextStyle(color: Colors.white)),
+                child: const Text('Dismiss Flag',
+                    style: TextStyle(color: Colors.white)),
               ),
               const SizedBox(width: 8),
               ElevatedButton(
@@ -170,11 +181,15 @@ class _EventModerationDashboardScreenState
   }
 
   Widget _buildPendingEventsTab() {
-    if (_pendingEvents.isEmpty) return const Center(child: Text('No pending events', style: TextStyle(color: Colors.white)));
+    if (_pendingEvents.isEmpty)
+      return const Center(
+          child:
+              Text('No pending events', style: TextStyle(color: Colors.white)));
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: _pendingEvents.length,
-      itemBuilder: (context, index) => _buildPendingEventCard(_pendingEvents[index]),
+      itemBuilder: (context, index) =>
+          _buildPendingEventCard(_pendingEvents[index]),
     );
   }
 
@@ -189,16 +204,24 @@ class _EventModerationDashboardScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(event.title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+          Text(event.title,
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18)),
           const SizedBox(height: 8),
-          Text(event.description, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white70)),
+          Text(event.description,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(color: Colors.white70)),
           const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               TextButton(
                 onPressed: () => _reviewEvent(event.id, false),
-                child: const Text('Reject', style: TextStyle(color: Colors.redAccent)),
+                child: const Text('Reject',
+                    style: TextStyle(color: Colors.redAccent)),
               ),
               const SizedBox(width: 8),
               ElevatedButton(
@@ -214,18 +237,23 @@ class _EventModerationDashboardScreenState
   }
 
   Widget _buildApprovedEventsTab() {
-    if (_approvedEvents.isEmpty) return const Center(child: Text('No approved events', style: TextStyle(color: Colors.white)));
+    if (_approvedEvents.isEmpty)
+      return const Center(
+          child: Text('No approved events',
+              style: TextStyle(color: Colors.white)));
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: _approvedEvents.length,
-      itemBuilder: (context, index) => _buildApprovedEventCard(_approvedEvents[index]),
+      itemBuilder: (context, index) =>
+          _buildApprovedEventCard(_approvedEvents[index]),
     );
   }
 
   Widget _buildApprovedEventCard(ArtbeatEvent event) {
     return ListTile(
       title: Text(event.title, style: const TextStyle(color: Colors.white)),
-      subtitle: Text(event.location, style: const TextStyle(color: Colors.white70)),
+      subtitle:
+          Text(event.location, style: const TextStyle(color: Colors.white70)),
       trailing: IconButton(
         icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
         onPressed: () => _deleteEvent(event.id),
@@ -234,14 +262,19 @@ class _EventModerationDashboardScreenState
   }
 
   Widget _buildAnalyticsTab() {
-    if (_analytics == null) return const Center(child: Text('No analytics data', style: TextStyle(color: Colors.white)));
+    if (_analytics == null)
+      return const Center(
+          child:
+              Text('No analytics data', style: TextStyle(color: Colors.white)));
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          _buildStatCard('Total Reviews', _analytics!['totalReviews']?.toString() ?? '0'),
+          _buildStatCard(
+              'Total Reviews', _analytics!['totalReviews']?.toString() ?? '0'),
           const SizedBox(height: 12),
-          _buildStatCard('Approval Rate', '${((_analytics!['approvalRate'] ?? 0) * 100).toStringAsFixed(1)}%'),
+          _buildStatCard('Approval Rate',
+              '${((_analytics!['approvalRate'] ?? 0) * 100).toStringAsFixed(1)}%'),
         ],
       ),
     );
@@ -257,9 +290,14 @@ class _EventModerationDashboardScreenState
       ),
       child: Column(
         children: [
-          Text(label, style: const TextStyle(color: Colors.white70, fontSize: 14)),
+          Text(label,
+              style: const TextStyle(color: Colors.white70, fontSize: 14)),
           const SizedBox(height: 8),
-          Text(value, style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+          Text(value,
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold)),
         ],
       ),
     );
@@ -271,7 +309,8 @@ class _EventModerationDashboardScreenState
       _loadData();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error reviewing event: $e')));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Error reviewing event: $e')));
       }
     }
   }
@@ -282,7 +321,8 @@ class _EventModerationDashboardScreenState
       _loadData();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error dismissing flag: $e')));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Error dismissing flag: $e')));
       }
     }
   }
@@ -294,8 +334,12 @@ class _EventModerationDashboardScreenState
         title: const Text('Delete Event'),
         content: const Text('Are you sure you want to delete this event?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Delete', style: TextStyle(color: Colors.red))),
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Delete', style: TextStyle(color: Colors.red))),
         ],
       ),
     );
@@ -306,7 +350,8 @@ class _EventModerationDashboardScreenState
         _loadData();
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error deleting event: $e')));
+          ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error deleting event: $e')));
         }
       }
     }

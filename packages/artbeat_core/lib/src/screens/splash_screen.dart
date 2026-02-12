@@ -127,7 +127,7 @@ class _SplashScreenState extends State<SplashScreen>
       FocusScope.of(context).unfocus();
 
       const route = AppRoutes.dashboard;
-      
+
       PerformanceMonitor.startTimer('navigation_from_splash');
 
       if (!mounted || _hasNavigated) return;

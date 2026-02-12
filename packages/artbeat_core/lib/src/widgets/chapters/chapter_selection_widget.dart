@@ -26,12 +26,18 @@ class ChapterSelectionWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      currentChapter == null ? 'REGIONAL VIEW' : currentChapter.name.toUpperCase(),
+                      currentChapter == null
+                          ? 'REGIONAL VIEW'
+                          : currentChapter.name.toUpperCase(),
                       style: ArtbeatTypography.badge,
                     ),
                     Text(
-                      currentChapter == null ? 'Select your ARTbeat' : 'Viewing Chapter',
-                      style: ArtbeatTypography.helper.copyWith(color: Colors.white70),
+                      currentChapter == null
+                          ? 'Select your ARTbeat'
+                          : 'Viewing Chapter',
+                      style: ArtbeatTypography.helper.copyWith(
+                        color: Colors.white70,
+                      ),
                     ),
                   ],
                 ),
@@ -88,7 +94,7 @@ class ChapterSelectionSheet extends StatelessWidget {
             style: ArtbeatTypography.body.copyWith(color: Colors.white70),
           ),
           const SizedBox(height: 24),
-          
+
           // Regional Option
           _buildOption(
             context,
@@ -99,15 +105,18 @@ class ChapterSelectionSheet extends StatelessWidget {
               Navigator.pop(context);
             },
           ),
-          
+
           const Divider(color: Colors.white12, height: 32),
-          
+
           if (chapterProvider.isLoading)
             const Center(child: CircularProgressIndicator())
           else if (chapters.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 20),
-              child: Text('No active chapters found nearby.', style: ArtbeatTypography.helper),
+              child: Text(
+                'No active chapters found nearby.',
+                style: ArtbeatTypography.helper,
+              ),
             )
           else
             Flexible(
@@ -125,7 +134,7 @@ class ChapterSelectionSheet extends StatelessWidget {
                       Navigator.pop(context);
                       // Navigate to chapter landing page
                       Navigator.pushNamed(
-                        context, 
+                        context,
                         AppRoutes.chapterLanding,
                         arguments: {'chapterId': chapter.id},
                       );
@@ -134,7 +143,7 @@ class ChapterSelectionSheet extends StatelessWidget {
                 },
               ),
             ),
-          
+
           const SizedBox(height: 24),
           SizedBox(
             width: double.infinity,
@@ -149,7 +158,12 @@ class ChapterSelectionSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildOption(BuildContext context, ChapterPartner? chapter, bool isSelected, VoidCallback onTap) {
+  Widget _buildOption(
+    BuildContext context,
+    ChapterPartner? chapter,
+    bool isSelected,
+    VoidCallback onTap,
+  ) {
     return ListTile(
       onTap: onTap,
       contentPadding: EdgeInsets.zero,
@@ -175,7 +189,9 @@ class ChapterSelectionSheet extends StatelessWidget {
         chapter?.partnerType.value.toUpperCase() ?? 'All surrounding areas',
         style: ArtbeatTypography.badge.copyWith(fontSize: 10),
       ),
-      trailing: isSelected ? const Icon(Icons.check_circle, color: ArtbeatColors.accentYellow) : null,
+      trailing: isSelected
+          ? const Icon(Icons.check_circle, color: ArtbeatColors.accentYellow)
+          : null,
     );
   }
 }

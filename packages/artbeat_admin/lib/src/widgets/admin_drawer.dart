@@ -261,7 +261,8 @@ class AdminDrawer extends StatelessWidget {
                       context,
                       icon: Icons.feedback,
                       title: 'Developer Feedback',
-                      route: AdminRoutes.dataUpload, // Redirected to unified tools
+                      route:
+                          AdminRoutes.dataUpload, // Redirected to unified tools
                       subtitle: 'Review developer feedback',
                     ),
 

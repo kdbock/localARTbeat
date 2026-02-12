@@ -85,7 +85,9 @@ class SecureFirebaseConfig {
             debugPrint('⚠️ Token is null/empty, retrying...');
             Future<void>.delayed(const Duration(seconds: 2), () async {
               try {
-                final retryToken = await FirebaseAppCheck.instance.getToken(true);
+                final retryToken = await FirebaseAppCheck.instance.getToken(
+                  true,
+                );
                 debugPrint('🛡️ ============================================');
                 debugPrint('🛡️ APP CHECK TOKEN (RETRY):');
                 debugPrint('🛡️ $retryToken');
@@ -164,10 +166,10 @@ class SecureFirebaseConfig {
 
   /// Debug helpers (safe)
   static Map<String, dynamic> getStatus() => {
-        'appCheckInitialized': _appCheckInitialized,
-        'appsCount': 0, // intentionally not reading Firebase.apps here
-        'teamId': _teamId,
-      };
+    'appCheckInitialized': _appCheckInitialized,
+    'appsCount': 0, // intentionally not reading Firebase.apps here
+    'teamId': _teamId,
+  };
 
   static Future<bool> testStorageAccess() async {
     try {

@@ -39,7 +39,7 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
   late final AnimationController _intro; // entrance
   final artWalkLib.RewardsService _rewardsService = artWalkLib.RewardsService();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  
+
   // Tour GlobalKeys
   final GlobalKey _menuKey = GlobalKey();
   final GlobalKey _xpKey = GlobalKey();
@@ -80,7 +80,7 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
       );
       dashboardViewModel.initialize();
       _hasRequestedData = true;
-      
+
       _checkOnboarding();
     });
     // No need to listen to locale changes here; rebuilds will be triggered by context.locale changes.
@@ -112,10 +112,6 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
 
   void _openDrawer() {
     _scaffoldKey.currentState?.openDrawer();
-  }
-
-  void _openDeveloperMenu() {
-    _scaffoldKey.currentState?.openEndDrawer();
   }
 
   @override
@@ -219,7 +215,6 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
 
                     const SizedBox(height: 14),
                     */
-
                     _StampFadeIn(
                       intro: _intro,
 
@@ -281,7 +276,9 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                                 onTap: () {
                                   if (!CrashPreventionService.shouldAllowNavigation())
                                     return;
-                                  NavigationOverlay.of(context)?.startNavigation();
+                                  NavigationOverlay.of(
+                                    context,
+                                  )?.startNavigation();
                                   Navigator.of(context).push(
                                     MaterialPageRoute<Widget>(
                                       builder: (context) =>
@@ -327,7 +324,9 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                                 onTap: () {
                                   if (!CrashPreventionService.shouldAllowNavigation())
                                     return;
-                                  NavigationOverlay.of(context)?.startNavigation();
+                                  NavigationOverlay.of(
+                                    context,
+                                  )?.startNavigation();
                                   Navigator.pushNamed(
                                     context,
                                     '/art-walk/dashboard',
@@ -371,8 +370,13 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                                 onTap: () {
                                   if (!CrashPreventionService.shouldAllowNavigation())
                                     return;
-                                  NavigationOverlay.of(context)?.startNavigation();
-                                  Navigator.pushNamed(context, '/old-dashboard');
+                                  NavigationOverlay.of(
+                                    context,
+                                  )?.startNavigation();
+                                  Navigator.pushNamed(
+                                    context,
+                                    '/old-dashboard',
+                                  );
                                 },
                               ),
                             ),
@@ -412,8 +416,13 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                                 onTap: () {
                                   if (!CrashPreventionService.shouldAllowNavigation())
                                     return;
-                                  NavigationOverlay.of(context)?.startNavigation();
-                                  Navigator.pushNamed(context, '/community/hub');
+                                  NavigationOverlay.of(
+                                    context,
+                                  )?.startNavigation();
+                                  Navigator.pushNamed(
+                                    context,
+                                    '/community/hub',
+                                  );
                                 },
                               ),
                             ),
@@ -454,11 +463,10 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                           showPlaceholder: true,
                         ),
                         */
-
                         _LeaderboardSection(intro: _intro, index: 5),
 
                         const SizedBox(height: 16),
-                        
+
                         // Added bottom spacing that was in the ListView padding
                         const SizedBox(height: 50),
                       ],
@@ -543,7 +551,7 @@ class _GameHUD extends StatelessWidget {
               // Responsive hiding based on available width
               final bool showStreak = constraints.maxWidth > 120;
               final bool showLanguage = constraints.maxWidth > 170;
-              
+
               return Row(
                 children: [
                   _LevelBadge(level: level),
@@ -565,9 +573,17 @@ class _GameHUD extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        _IconPill(key: profileKey, icon: Icons.person_rounded, onTap: onProfile),
+        _IconPill(
+          key: profileKey,
+          icon: Icons.person_rounded,
+          onTap: onProfile,
+        ),
         const SizedBox(width: 8),
-        _IconPill(key: settingsKey, icon: Icons.settings_rounded, onTap: onSettings),
+        _IconPill(
+          key: settingsKey,
+          icon: Icons.settings_rounded,
+          onTap: onSettings,
+        ),
       ],
     );
   }

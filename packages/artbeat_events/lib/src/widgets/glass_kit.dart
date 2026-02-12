@@ -34,7 +34,7 @@ class WorldBackdrop extends StatelessWidget {
             right: -10,
             child: _GlowCircle(color: Color(0x4022D3EE)),
           ),
-          if (child != null) child!,
+          ?child,
         ],
       ),
     );

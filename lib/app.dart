@@ -226,10 +226,14 @@ class MyApp extends StatelessWidget {
                     captureService: captureService,
                   ),
         ),
-        ChangeNotifierProxyProvider<core.ChapterPartnerProvider, core.DashboardViewModel>(
+        ChangeNotifierProxyProvider<
+          core.ChapterPartnerProvider,
+          core.DashboardViewModel
+        >(
           create: (context) => context.read<core.DashboardViewModel>(),
           update: (context, chapterProvider, dashboardViewModel) =>
-              dashboardViewModel!..updateChapter(chapterProvider.activeChapterId),
+              dashboardViewModel!
+                ..updateChapter(chapterProvider.activeChapterId),
         ),
       ],
       child: NavigationOverlay(

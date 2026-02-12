@@ -46,7 +46,7 @@ class FlaggingQueueService {
           .where('flagged', isEqualTo: true)
           .limit(limit)
           .get();
-      
+
       for (var doc in postsSnapshot.docs) {
         final data = doc.data();
         items.add(FlaggedItem(
@@ -55,7 +55,9 @@ class FlaggingQueueService {
           content: data['content'] as String? ?? '',
           authorId: data['authorId'] as String? ?? '',
           authorName: data['authorName'] as String? ?? 'Unknown',
-          flaggedAt: (data['flaggedAt'] as Timestamp?)?.toDate() ?? (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+          flaggedAt: (data['flaggedAt'] as Timestamp?)?.toDate() ??
+              (data['createdAt'] as Timestamp?)?.toDate() ??
+              DateTime.now(),
           reason: data['moderationReason'] as String?,
           rawData: data,
         ));
@@ -67,7 +69,7 @@ class FlaggingQueueService {
           .where('flagged', isEqualTo: true)
           .limit(limit)
           .get();
-      
+
       for (var doc in commentsSnapshot.docs) {
         final data = doc.data();
         items.add(FlaggedItem(
@@ -76,7 +78,9 @@ class FlaggingQueueService {
           content: data['content'] as String? ?? '',
           authorId: data['authorId'] as String? ?? '',
           authorName: data['authorName'] as String? ?? 'Unknown',
-          flaggedAt: (data['flaggedAt'] as Timestamp?)?.toDate() ?? (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+          flaggedAt: (data['flaggedAt'] as Timestamp?)?.toDate() ??
+              (data['createdAt'] as Timestamp?)?.toDate() ??
+              DateTime.now(),
           reason: data['moderationReason'] as String?,
           rawData: data,
         ));
@@ -88,16 +92,19 @@ class FlaggingQueueService {
           .where('flagged', isEqualTo: true)
           .limit(limit)
           .get();
-      
+
       for (var doc in artworksSnapshot.docs) {
         final data = doc.data();
         items.add(FlaggedItem(
           id: doc.id,
           type: FlaggedItemType.artwork,
-          content: data['title'] as String? ?? data['description'] as String? ?? '',
+          content:
+              data['title'] as String? ?? data['description'] as String? ?? '',
           authorId: data['artistId'] as String? ?? '',
           authorName: data['artistName'] as String? ?? 'Unknown Artist',
-          flaggedAt: (data['flaggedAt'] as Timestamp?)?.toDate() ?? (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+          flaggedAt: (data['flaggedAt'] as Timestamp?)?.toDate() ??
+              (data['createdAt'] as Timestamp?)?.toDate() ??
+              DateTime.now(),
           reason: data['moderationReason'] as String?,
           rawData: data,
         ));
@@ -109,16 +116,19 @@ class FlaggingQueueService {
           .where('status', isEqualTo: 'pending')
           .limit(limit)
           .get();
-      
+
       for (var doc in reportsSnapshot.docs) {
         final data = doc.data();
         items.add(FlaggedItem(
           id: doc.id,
           type: FlaggedItemType.report,
-          content: data['description'] as String? ?? data['reasonDisplay'] as String? ?? '',
+          content: data['description'] as String? ??
+              data['reasonDisplay'] as String? ??
+              '',
           authorId: data['reportedUserId'] as String? ?? '',
           authorName: 'User Report',
-          flaggedAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+          flaggedAt:
+              (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
           reason: data['reasonDisplay'] as String?,
           rawData: data,
         ));
@@ -135,7 +145,8 @@ class FlaggingQueueService {
   }
 
   /// Resolve a flagged item
-  Future<void> resolveItem(FlaggedItem item, bool approve, {String? notes}) async {
+  Future<void> resolveItem(FlaggedItem item, bool approve,
+      {String? notes}) async {
     final batch = _firestore.batch();
     final now = FieldValue.serverTimestamp();
 

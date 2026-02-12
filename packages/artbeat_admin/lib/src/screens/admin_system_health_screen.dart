@@ -18,8 +18,8 @@ class AdminSystemHealthScreen extends StatefulWidget {
       _AdminSystemHealthScreenState();
 }
 
-class _AdminSystemHealthScreenState
-    extends State<AdminSystemHealthScreen> with TickerProviderStateMixin {
+class _AdminSystemHealthScreenState extends State<AdminSystemHealthScreen>
+    with TickerProviderStateMixin {
   final ConsolidatedAdminService _adminService = ConsolidatedAdminService();
   final FirebaseRemoteConfig _remoteConfig = FirebaseRemoteConfig.instance;
 
@@ -37,10 +37,10 @@ class _AdminSystemHealthScreenState
   List<Map<String, dynamic>> _systemAlerts = [];
   List<Map<String, dynamic>> _activeUsers = [];
   List<Map<String, dynamic>> _serverStatus = [];
-  
+
   // Remote Config
   Map<String, RemoteConfigValue> _configValues = {};
-  
+
   // App Check
   final bool _appCheckEnabled = true; // Placeholder
 
@@ -817,7 +817,7 @@ class _AdminSystemHealthScreenState
 
   Widget _buildRemoteConfigTab() {
     final keys = _configValues.keys.toList();
-    
+
     return Column(
       children: [
         Padding(
@@ -845,11 +845,12 @@ class _AdminSystemHealthScreenState
             itemBuilder: (context, index) {
               final key = keys[index];
               final value = _configValues[key]!;
-              
+
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                 child: ListTile(
-                  title: Text(key, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  title: Text(key,
+                      style: const TextStyle(fontWeight: FontWeight.bold)),
                   subtitle: Text('Value: ${value.asString()}'),
                   trailing: const Icon(Icons.edit),
                   onTap: () => _showEditConfigDialog(key, value.asString()),
@@ -913,7 +914,8 @@ class _AdminSystemHealthScreenState
           _buildAppCheckStatusItem('Cloud Firestore', 'Enforced', Colors.green),
           _buildAppCheckStatusItem('Cloud Storage', 'Enforced', Colors.green),
           _buildAppCheckStatusItem('Authentication', 'Enforced', Colors.green),
-          _buildAppCheckStatusItem('Cloud Functions', 'Unenforced', Colors.orange),
+          _buildAppCheckStatusItem(
+              'Cloud Functions', 'Unenforced', Colors.orange),
           const SizedBox(height: 24),
           const Card(
             child: Padding(
@@ -922,7 +924,8 @@ class _AdminSystemHealthScreenState
                 children: [
                   Text(
                     'Note: App Check statistics and token management should be performed via the Firebase Console for production environments.',
-                    style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey),
+                    style: TextStyle(
+                        fontStyle: FontStyle.italic, color: Colors.grey),
                   ),
                 ],
               ),
@@ -984,7 +987,8 @@ class _AdminSystemHealthScreenState
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  trailing: _buildStatusChip(index % 3 == 0 ? 'new' : 'resolved'),
+                  trailing:
+                      _buildStatusChip(index % 3 == 0 ? 'new' : 'resolved'),
                   onTap: () => _showFeedbackDetails(index),
                 ),
               );
@@ -1016,7 +1020,8 @@ class _AdminSystemHealthScreenState
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Note: Remote Config values must be updated in the Firebase Console.'),
+                  content: Text(
+                      'Note: Remote Config values must be updated in the Firebase Console.'),
                 ),
               );
             },
@@ -1036,10 +1041,12 @@ class _AdminSystemHealthScreenState
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('User: user_456', style: TextStyle(fontWeight: FontWeight.bold)),
+            Text('User: user_456',
+                style: TextStyle(fontWeight: FontWeight.bold)),
             SizedBox(height: 8),
             Text('Message:'),
-            Text('This app is amazing! I love the new art walk feature. It would be great if we could add our own custom pins.'),
+            Text(
+                'This app is amazing! I love the new art walk feature. It would be great if we could add our own custom pins.'),
             SizedBox(height: 16),
             Text('Metadata:', style: TextStyle(fontWeight: FontWeight.bold)),
             Text('Device: iPhone 15 Pro'),

@@ -740,7 +740,8 @@ class EnhancedAnalyticsService {
   }
 
   /// Get storage metrics for the specified date range
-  Future<Map<String, int>> _getStorageMetrics(DateTime startDate, DateTime endDate) async {
+  Future<Map<String, int>> _getStorageMetrics(
+      DateTime startDate, DateTime endDate) async {
     try {
       // Query storage usage logs
       final storageSnapshot = await _firestore
@@ -758,7 +759,8 @@ class EnhancedAnalyticsService {
 
       // If no logs exist, estimate from uploaded content
       if (totalStorageUsed == 0) {
-        totalStorageUsed = await _estimateStorageFromUploads(startDate, endDate);
+        totalStorageUsed =
+            await _estimateStorageFromUploads(startDate, endDate);
       }
 
       return {'storageUsed': totalStorageUsed};
@@ -770,7 +772,8 @@ class EnhancedAnalyticsService {
   }
 
   /// Get bandwidth metrics for the specified date range
-  Future<Map<String, int>> _getBandwidthMetrics(DateTime startDate, DateTime endDate) async {
+  Future<Map<String, int>> _getBandwidthMetrics(
+      DateTime startDate, DateTime endDate) async {
     try {
       // Query bandwidth usage logs
       final bandwidthSnapshot = await _firestore
@@ -788,19 +791,22 @@ class EnhancedAnalyticsService {
 
       // If no logs exist, estimate from downloads
       if (totalBandwidthUsed == 0) {
-        totalBandwidthUsed = await _estimateBandwidthFromDownloads(startDate, endDate);
+        totalBandwidthUsed =
+            await _estimateBandwidthFromDownloads(startDate, endDate);
       }
 
       return {'bandwidthUsed': totalBandwidthUsed};
     } catch (e) {
       // Fallback to estimation
-      final estimated = await _estimateBandwidthFromDownloads(startDate, endDate);
+      final estimated =
+          await _estimateBandwidthFromDownloads(startDate, endDate);
       return {'bandwidthUsed': estimated};
     }
   }
 
   /// Estimate storage used from uploaded content
-  Future<int> _estimateStorageFromUploads(DateTime startDate, DateTime endDate) async {
+  Future<int> _estimateStorageFromUploads(
+      DateTime startDate, DateTime endDate) async {
     try {
       // Estimate from artworks
       final artworksSnapshot = await _firestore
@@ -816,8 +822,10 @@ class EnhancedAnalyticsService {
           .get();
 
       // Rough estimate: 500KB per artwork, 200KB per profile image
-      final artworksStorage = artworksSnapshot.docs.length * 500 * 1024; // 500KB each
-      final profilesStorage = profilesSnapshot.docs.length * 200 * 1024; // 200KB each
+      final artworksStorage =
+          artworksSnapshot.docs.length * 500 * 1024; // 500KB each
+      final profilesStorage =
+          profilesSnapshot.docs.length * 200 * 1024; // 200KB each
 
       return artworksStorage + profilesStorage;
     } catch (e) {
@@ -826,7 +834,8 @@ class EnhancedAnalyticsService {
   }
 
   /// Estimate bandwidth used from downloads/views
-  Future<int> _estimateBandwidthFromDownloads(DateTime startDate, DateTime endDate) async {
+  Future<int> _estimateBandwidthFromDownloads(
+      DateTime startDate, DateTime endDate) async {
     try {
       // Estimate from artwork views
       final viewsSnapshot = await _firestore

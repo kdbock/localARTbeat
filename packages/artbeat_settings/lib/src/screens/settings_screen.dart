@@ -154,7 +154,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   if (!context.mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Onboarding reset! Refresh dashboard to see the tour.'),
+                      content: Text(
+                        'Onboarding reset! Refresh dashboard to see the tour.',
+                      ),
                       backgroundColor: Colors.green,
                     ),
                   );

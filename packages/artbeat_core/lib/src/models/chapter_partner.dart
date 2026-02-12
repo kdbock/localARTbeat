@@ -40,13 +40,28 @@ class BrandingConfig {
 
   factory BrandingConfig.fromMap(Map<String, dynamic> data) {
     return BrandingConfig(
-      primaryColor: FirestoreUtils.safeStringDefault(data['primary_color'], '#000000'),
-      secondaryColor: FirestoreUtils.safeStringDefault(data['secondary_color'], '#FFFFFF'),
-      bannerImageUrl: FirestoreUtils.safeStringDefault(data['banner_image_url']),
+      primaryColor: FirestoreUtils.safeStringDefault(
+        data['primary_color'],
+        '#000000',
+      ),
+      secondaryColor: FirestoreUtils.safeStringDefault(
+        data['secondary_color'],
+        '#FFFFFF',
+      ),
+      bannerImageUrl: FirestoreUtils.safeStringDefault(
+        data['banner_image_url'],
+      ),
       heroHeadline: FirestoreUtils.safeStringDefault(data['hero_headline']),
-      shortDescription: FirestoreUtils.safeStringDefault(data['short_description']),
-      partnerLogoUrl: FirestoreUtils.safeStringDefault(data['partner_logo_url']),
-      sponsorBadgeEnabled: FirestoreUtils.safeBool(data['sponsor_badge_enabled'], false),
+      shortDescription: FirestoreUtils.safeStringDefault(
+        data['short_description'],
+      ),
+      partnerLogoUrl: FirestoreUtils.safeStringDefault(
+        data['partner_logo_url'],
+      ),
+      sponsorBadgeEnabled: FirestoreUtils.safeBool(
+        data['sponsor_badge_enabled'],
+        false,
+      ),
     );
   }
 
@@ -101,10 +116,16 @@ class ChapterPartner {
         data['branding_config'] as Map<String, dynamic>? ?? {},
       ),
       isActive: FirestoreUtils.safeBool(data['active_status'], true),
-      subscriptionTier: FirestoreUtils.safeStringDefault(data['subscription_tier'], 'basic'),
+      subscriptionTier: FirestoreUtils.safeStringDefault(
+        data['subscription_tier'],
+        'basic',
+      ),
       startDate: FirestoreUtils.safeDateTime(data['start_date']),
       renewalDate: FirestoreUtils.getOptionalDateTime(data, 'renewal_date'),
-      analyticsEnabled: FirestoreUtils.safeBool(data['analytics_enabled'], false),
+      analyticsEnabled: FirestoreUtils.safeBool(
+        data['analytics_enabled'],
+        false,
+      ),
     );
   }
 

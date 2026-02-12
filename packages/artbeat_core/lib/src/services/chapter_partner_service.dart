@@ -13,7 +13,7 @@ class ChapterPartnerService {
           .collection('chapters')
           .where('active_status', isEqualTo: true)
           .get();
-      
+
       return snapshot.docs
           .map((doc) => ChapterPartner.fromFirestore(doc))
           .toList();
@@ -31,7 +31,7 @@ class ChapterPartnerService {
           .where('slug', isEqualTo: slug)
           .limit(1)
           .get();
-      
+
       if (snapshot.docs.isEmpty) return null;
       return ChapterPartner.fromFirestore(snapshot.docs.first);
     } catch (e) {
@@ -59,7 +59,7 @@ class ChapterPartnerService {
           .collection('quests')
           .where('chapter_id', isEqualTo: chapterId)
           .get();
-      
+
       return snapshot.docs
           .map((doc) => ChapterQuest.fromFirestore(doc))
           .toList();
@@ -76,7 +76,7 @@ class ChapterPartnerService {
           .collection('quests')
           .where('chapter_id', isNull: true)
           .get();
-      
+
       return snapshot.docs
           .map((doc) => ChapterQuest.fromFirestore(doc))
           .toList();
@@ -91,13 +91,13 @@ class ChapterPartnerService {
     try {
       final now = DateTime.now();
       final monthKey = '${now.year}-${now.month.toString().padLeft(2, '0')}';
-      
+
       final docRef = _firestore
           .collection('chapter_analytics')
           .doc(chapterId)
           .collection('monthly_stats')
           .doc(monthKey);
-      
+
       await _firestore.runTransaction((transaction) async {
         final doc = await transaction.get(docRef);
         if (!doc.exists) {
@@ -108,18 +108,20 @@ class ChapterPartnerService {
           });
         } else {
           final data = doc.data()!;
-          final uniqueUsers = List<String>.from(data['unique_users'] as List? ?? []);
-          
+          final uniqueUsers = List<String>.from(
+            data['unique_users'] as List? ?? [],
+          );
+
           final updateData = <String, dynamic>{
             'view_count': FieldValue.increment(1),
             'last_updated': FieldValue.serverTimestamp(),
           };
-          
+
           if (!uniqueUsers.contains(userId)) {
             uniqueUsers.add(userId);
             updateData['unique_users'] = uniqueUsers;
           }
-          
+
           transaction.update(docRef, updateData);
         }
       });

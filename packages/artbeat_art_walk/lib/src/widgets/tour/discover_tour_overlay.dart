@@ -59,7 +59,8 @@ class DiscoverTourOverlay extends StatefulWidget {
   State<DiscoverTourOverlay> createState() => _DiscoverTourOverlayState();
 }
 
-class _DiscoverTourOverlayState extends State<DiscoverTourOverlay> with SingleTickerProviderStateMixin {
+class _DiscoverTourOverlayState extends State<DiscoverTourOverlay>
+    with SingleTickerProviderStateMixin {
   int _currentStepIndex = 0;
   late List<TourStep> _steps;
   late AnimationController _animationController;
@@ -78,25 +79,29 @@ class _DiscoverTourOverlayState extends State<DiscoverTourOverlay> with SingleTi
       TourStep(
         targetKey: widget.searchKey,
         title: 'ART SCANNER',
-        description: 'Search for specific art walks, artists, or locations across the global network.',
+        description:
+            'Search for specific art walks, artists, or locations across the global network.',
         accentColor: ArtbeatColors.primaryGreen,
       ),
       TourStep(
         targetKey: widget.chatKey,
         title: 'COMMS CHANNEL',
-        description: 'Message other explorers to coordinate art walks or share intel.',
+        description:
+            'Message other explorers to coordinate art walks or share intel.',
         accentColor: ArtbeatColors.primaryBlue,
       ),
       TourStep(
         targetKey: widget.notificationsKey,
         title: 'INTEL FEED',
-        description: 'Stay updated on new engagement, nearby art walks, and achievement updates.',
+        description:
+            'Stay updated on new engagement, nearby art walks, and achievement updates.',
         accentColor: ArtbeatColors.primaryPurple,
       ),
       TourStep(
         targetKey: widget.heroKey,
         title: 'EXPLORER COMMAND',
-        description: 'Your central status hub showing your current level, XP progress, and daily mission.',
+        description:
+            'Your central status hub showing your current level, XP progress, and daily mission.',
         details: [
           'Track Level and XP progress',
           'Monitor your daily missions',
@@ -107,7 +112,8 @@ class _DiscoverTourOverlayState extends State<DiscoverTourOverlay> with SingleTi
       TourStep(
         targetKey: widget.radarTitleKey,
         title: 'DISCOVERY RADAR',
-        description: 'Real-time map scanning for nearby art. Tap the radar to begin an instant discovery mission.',
+        description:
+            'Real-time map scanning for nearby art. Tap the radar to begin an instant discovery mission.',
         details: [
           'See nearby art count',
           'Access instant discovery',
@@ -118,43 +124,50 @@ class _DiscoverTourOverlayState extends State<DiscoverTourOverlay> with SingleTi
       TourStep(
         targetKey: widget.kioskKey,
         title: 'ARTIST SPOTLIGHT',
-        description: 'Discover featured artists currently showcasing their work in the Kiosk Lane.',
+        description:
+            'Discover featured artists currently showcasing their work in the Kiosk Lane.',
         accentColor: const Color(0xFFFF3D8D),
       ),
       TourStep(
         targetKey: widget.statsKey,
         title: 'EXPLORER STATS',
-        description: 'Your performance metrics at a glance. Keep your streak alive and level up!',
+        description:
+            'Your performance metrics at a glance. Keep your streak alive and level up!',
         accentColor: const Color(0xFFFFC857),
       ),
       TourStep(
         targetKey: widget.goalsKey,
         title: 'SEASONAL OBJECTIVES',
-        description: 'Complete long-term goals to earn massive rewards and exclusive badges.',
+        description:
+            'Complete long-term goals to earn massive rewards and exclusive badges.',
         accentColor: const Color(0xFF34D399),
       ),
       TourStep(
         targetKey: widget.socialKey,
         title: 'ACTIVITY STREAM',
-        description: 'See what other explorers are discovering in real-time. Join the global conversation.',
+        description:
+            'See what other explorers are discovering in real-time. Join the global conversation.',
         accentColor: const Color(0xFF2947FF),
       ),
       TourStep(
         targetKey: widget.quickActionsKey,
         title: 'RAPID DEPLOYMENT',
-        description: 'Quick access to essential tools and actions for efficient art exploration.',
+        description:
+            'Quick access to essential tools and actions for efficient art exploration.',
         accentColor: const Color(0xFFFF6B35),
       ),
       TourStep(
         targetKey: widget.achievementsKey,
         title: 'GLORY VAULT',
-        description: 'Showcase your exploration achievements and unlock exclusive rewards.',
+        description:
+            'Showcase your exploration achievements and unlock exclusive rewards.',
         accentColor: const Color(0xFF9D4EDD),
       ),
       TourStep(
         targetKey: widget.hotspotsKey,
         title: 'HOT ZONE NAVIGATOR',
-        description: 'Discover high-activity art locations and trending discovery spots in your area.',
+        description:
+            'Discover high-activity art locations and trending discovery spots in your area.',
         accentColor: const Color(0xFF06FFA5),
       ),
     ];
@@ -168,34 +181,36 @@ class _DiscoverTourOverlayState extends State<DiscoverTourOverlay> with SingleTi
       curve: Curves.easeIn,
     );
     _animationController.forward();
-    
+
     _ensureStepVisible();
   }
 
   void _ensureStepVisible() {
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await Future<void>.delayed(const Duration(milliseconds: 100));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       
-      final context = _steps[_currentStepIndex].targetKey.currentContext;
-      if (context != null) {
-        final renderBox = context.findRenderObject() as RenderBox?;
+      final screenHeight = MediaQuery.of(context).size.height;
+      final targetContext = _steps[_currentStepIndex].targetKey.currentContext;
+      
+      if (targetContext != null) {
+        final renderBox = targetContext.findRenderObject() as RenderBox?;
         if (renderBox != null) {
           final position = renderBox.localToGlobal(Offset.zero);
           final size = renderBox.size;
-          final screenHeight = MediaQuery.of(this.context).size.height;
-          
-          final bool isInView = position.dy > 100 && (position.dy + size.height) < (screenHeight - 150);
-          
-          if (!isInView) {
-            await Scrollable.ensureVisible(
-              context,
+
+          final bool isInView =
+              position.dy > 100 &&
+              (position.dy + size.height) < (screenHeight - 150);
+
+          if (!isInView && mounted) {
+            Scrollable.ensureVisible(
+              targetContext,
               duration: const Duration(milliseconds: 400),
               curve: Curves.easeInOut,
               alignment: 0.5,
             );
           }
-          
+
           if (mounted) setState(() {});
         }
       }
@@ -229,11 +244,12 @@ class _DiscoverTourOverlayState extends State<DiscoverTourOverlay> with SingleTi
   @override
   Widget build(BuildContext context) {
     final step = _steps[_currentStepIndex];
-    final RenderBox? renderBox = step.targetKey.currentContext?.findRenderObject() as RenderBox?;
-    
+    final RenderBox? renderBox =
+        step.targetKey.currentContext?.findRenderObject() as RenderBox?;
+
     Offset position = Offset.zero;
     Size size = Size.zero;
-    
+
     if (renderBox != null) {
       final Offset globalPos = renderBox.localToGlobal(Offset.zero);
       final RenderBox? overlayBox = context.findRenderObject() as RenderBox?;
@@ -247,15 +263,15 @@ class _DiscoverTourOverlayState extends State<DiscoverTourOverlay> with SingleTi
 
     final double screenHeight = MediaQuery.of(context).size.height;
     final double screenWidth = MediaQuery.of(context).size.width;
-    
+
     final double targetCenterX = position.dx + size.width / 2;
     final double topSafetyMargin = MediaQuery.of(context).padding.top + 20;
-    
+
     double? top;
     double? bottom;
-    
+
     final double spaceBelow = screenHeight - (position.dy + size.height);
-    
+
     if (position.dy < screenHeight * 0.4) {
       top = position.dy + size.height + 15;
     } else if (spaceBelow > 300) {
@@ -294,13 +310,18 @@ class _DiscoverTourOverlayState extends State<DiscoverTourOverlay> with SingleTi
               opacity: _fadeAnimation,
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  maxHeight: math.max(0.0, bottom != null ? (screenHeight - bottom - topSafetyMargin) : (screenHeight - (top ?? 0) - 40)),
+                  maxHeight: math.max(
+                    0.0,
+                    bottom != null
+                        ? (screenHeight - bottom - topSafetyMargin)
+                        : (screenHeight - (top ?? 0) - 40),
+                  ),
                 ),
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
                   child: _buildCalloutContent(
-                    step, 
-                    top != null, 
+                    step,
+                    top != null,
                     bottom != null,
                     targetCenterX: targetCenterX,
                     screenWidth: screenWidth,
@@ -315,23 +336,27 @@ class _DiscoverTourOverlayState extends State<DiscoverTourOverlay> with SingleTi
   }
 
   Widget _buildCalloutContent(
-    TourStep step, 
-    bool isBelowTarget, 
-    bool isAboveTarget,
-    {required double targetCenterX, required double screenWidth}
-  ) {
-    final double arrowHorizontalPos = (targetCenterX - 20).clamp(20.0, screenWidth - 60);
+    TourStep step,
+    bool isBelowTarget,
+    bool isAboveTarget, {
+    required double targetCenterX,
+    required double screenWidth,
+  }) {
+    final double arrowHorizontalPos = (targetCenterX - 20).clamp(
+      20.0,
+      screenWidth - 60,
+    );
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (isBelowTarget) 
+        if (isBelowTarget)
           Padding(
             padding: EdgeInsets.only(left: arrowHorizontalPos - 20),
             child: _buildArrow(true, step.accentColor),
           ),
-        
+
         GlassCard(
           padding: const EdgeInsets.all(24),
           borderColor: step.accentColor.withValues(alpha: 0.3),
@@ -379,24 +404,30 @@ class _DiscoverTourOverlayState extends State<DiscoverTourOverlay> with SingleTi
               ),
               if (step.details.isNotEmpty) ...[
                 const SizedBox(height: 20),
-                ...step.details.map((detail) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Row(
-                    children: [
-                      Icon(Icons.auto_awesome, size: 14, color: step.accentColor),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          detail,
-                          style: GoogleFonts.spaceGrotesk(
-                            fontSize: 14,
-                            color: Colors.white.withValues(alpha: 0.7),
+                ...step.details.map(
+                  (detail) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.auto_awesome,
+                          size: 14,
+                          color: step.accentColor,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            detail,
+                            style: GoogleFonts.spaceGrotesk(
+                              fontSize: 14,
+                              color: Colors.white.withValues(alpha: 0.7),
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                )),
+                ),
               ],
               const SizedBox(height: 24),
               Row(
@@ -419,10 +450,15 @@ class _DiscoverTourOverlayState extends State<DiscoverTourOverlay> with SingleTi
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
                     ),
                     child: Text(
-                      _currentStepIndex == _steps.length - 1 ? 'GOT IT!' : 'NEXT',
+                      _currentStepIndex == _steps.length - 1
+                          ? 'GOT IT!'
+                          : 'NEXT',
                       style: GoogleFonts.spaceGrotesk(
                         fontWeight: FontWeight.w900,
                         letterSpacing: 1,
@@ -434,7 +470,7 @@ class _DiscoverTourOverlayState extends State<DiscoverTourOverlay> with SingleTi
             ],
           ),
         ),
-        
+
         if (isAboveTarget)
           Padding(
             padding: EdgeInsets.only(left: arrowHorizontalPos - 20),
@@ -497,20 +533,22 @@ class _SpotlightPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3
       ..maskFilter = const MaskFilter.blur(BlurStyle.outer, 4);
-    
+
     canvas.drawRRect(hole, borderPaint);
-    
+
     final solidBorderPaint = Paint()
       ..color = accentColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
-    
+
     canvas.drawRRect(hole, solidBorderPaint);
   }
 
   @override
-  bool shouldRepaint(_SpotlightPainter oldDelegate) => 
-    position != oldDelegate.position || size != oldDelegate.size || accentColor != oldDelegate.accentColor;
+  bool shouldRepaint(_SpotlightPainter oldDelegate) =>
+      position != oldDelegate.position ||
+      size != oldDelegate.size ||
+      accentColor != oldDelegate.accentColor;
 }
 
 class _ArrowPainter extends CustomPainter {

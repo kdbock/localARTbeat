@@ -200,7 +200,8 @@ class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
             const SizedBox(height: 8),
             Text(event.description),
             const SizedBox(height: 16),
-            Text('Timestamp: ${intl.DateFormat('yyyy-MM-dd HH:mm:ss').format(event.timestamp)}'),
+            Text(
+                'Timestamp: ${intl.DateFormat('yyyy-MM-dd HH:mm:ss').format(event.timestamp)}'),
           ],
         ),
         actions: [
@@ -400,7 +401,13 @@ class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
               const SizedBox(width: 16),
               DropdownButton<String>(
                 value: _selectedLogFilter,
-                items: ['All', 'Login', 'Data Access', 'Settings Change', 'User Action']
+                items: [
+                  'All',
+                  'Login',
+                  'Data Access',
+                  'Settings Change',
+                  'User Action'
+                ]
                     .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                     .toList(),
                 onChanged: (value) {
@@ -423,34 +430,42 @@ class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
               }
-              
+
               if (snapshot.hasError) {
                 return Center(child: Text('Error: ${snapshot.error}'));
               }
-              
+
               var logs = snapshot.data ?? [];
 
               // Apply filtering
               if (_selectedLogFilter != 'All') {
-                logs = logs.where((log) => log.category == _selectedLogFilter).toList();
+                logs = logs
+                    .where((log) => log.category == _selectedLogFilter)
+                    .toList();
               }
 
               if (_logSearchQuery.isNotEmpty) {
-                logs = logs.where((log) => 
-                  log.action.toLowerCase().contains(_logSearchQuery) ||
-                  log.userId.toLowerCase().contains(_logSearchQuery) ||
-                  log.ipAddress.toLowerCase().contains(_logSearchQuery) ||
-                  log.metadata.toString().toLowerCase().contains(_logSearchQuery)
-                ).toList();
+                logs = logs
+                    .where((log) =>
+                        log.action.toLowerCase().contains(_logSearchQuery) ||
+                        log.userId.toLowerCase().contains(_logSearchQuery) ||
+                        log.ipAddress.toLowerCase().contains(_logSearchQuery) ||
+                        log.metadata
+                            .toString()
+                            .toLowerCase()
+                            .contains(_logSearchQuery))
+                    .toList();
               }
-              
+
               if (logs.isEmpty) {
-                return const Center(child: Text('No audit logs found matching criteria.'));
+                return const Center(
+                    child: Text('No audit logs found matching criteria.'));
               }
 
               return ListView.builder(
                 itemCount: logs.length,
-                itemBuilder: (context, index) => _buildAuditLogEntry(logs[index]),
+                itemBuilder: (context, index) =>
+                    _buildAuditLogEntry(logs[index]),
               );
             },
           ),
@@ -535,7 +550,7 @@ class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
             onPressed: () async {
               final scaffoldMessenger = ScaffoldMessenger.of(context);
               final navigator = Navigator.of(context);
-              
+
               // Audit Trail
               await _auditService.logAdminAction(
                 action: 'resolve_threat',
@@ -564,7 +579,7 @@ class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
   void _unblockIP(String id, String ipAddress) async {
     try {
       await _securityService.unblockIP(id);
-      
+
       // Audit Trail
       await _auditService.logAdminAction(
         action: 'unblock_ip',
@@ -626,7 +641,7 @@ class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
               if (ip.isNotEmpty && reason.isNotEmpty) {
                 try {
                   await _securityService.blockIP(ip, reason);
-                  
+
                   // Audit Trail
                   await _auditService.logAdminAction(
                     action: 'block_ip',
@@ -713,11 +728,13 @@ class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
             children: [
               _detailRow('Action', log.action),
               _detailRow('User ID', log.userId),
-              _detailRow('Timestamp', intl.DateFormat('yyyy-MM-dd HH:mm:ss').format(log.timestamp)),
+              _detailRow('Timestamp',
+                  intl.DateFormat('yyyy-MM-dd HH:mm:ss').format(log.timestamp)),
               _detailRow('IP Address', log.ipAddress),
               _detailRow('Severity', log.severity),
               const SizedBox(height: 8),
-              const Text('Metadata:', style: TextStyle(fontWeight: FontWeight.bold)),
+              const Text('Metadata:',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
               Text(log.metadata.toString()),
             ],
           ),
@@ -739,7 +756,9 @@ class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
         text: TextSpan(
           style: const TextStyle(color: Colors.black, fontSize: 14),
           children: [
-            TextSpan(text: '$label: ', style: const TextStyle(fontWeight: FontWeight.bold)),
+            TextSpan(
+                text: '$label: ',
+                style: const TextStyle(fontWeight: FontWeight.bold)),
             TextSpan(text: value),
           ],
         ),

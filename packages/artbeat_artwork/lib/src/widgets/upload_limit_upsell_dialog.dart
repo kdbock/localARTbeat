@@ -60,7 +60,9 @@ class UploadLimitUpsellDialog extends StatelessWidget {
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: ArtbeatColors.primaryGreen.withValues(alpha: 0.5),
+                            color: ArtbeatColors.primaryGreen.withValues(
+                              alpha: 0.5,
+                            ),
                             blurRadius: 20,
                             spreadRadius: 5,
                           ),
@@ -91,9 +93,9 @@ class UploadLimitUpsellDialog extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      'upload_limit_reached_subtitle'.tr(args: [
-                        currentTier.name.toUpperCase(),
-                      ]),
+                      'upload_limit_reached_subtitle'.tr(
+                        args: [currentTier.name.toUpperCase()],
+                      ),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.8),
@@ -130,7 +132,8 @@ class UploadLimitUpsellDialog extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute<void>(
-                              builder: (context) => const SubscriptionPlansScreen(),
+                              builder: (context) =>
+                                  const SubscriptionPlansScreen(),
                             ),
                           );
                         },

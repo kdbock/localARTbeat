@@ -29,7 +29,8 @@ class AuditLog {
     return AuditLog(
       id: id,
       userId: (map['adminId'] ?? map['userId'] ?? 'unknown') as String,
-      action: (map['action'] ?? map['activity'] ?? map['event'] ?? 'unknown') as String,
+      action: (map['action'] ?? map['activity'] ?? map['event'] ?? 'unknown')
+          as String,
       category: (map['category'] ?? 'unknown') as String,
       severity: (map['severity'] ?? 'info') as String,
       ipAddress: (map['ipAddress'] ?? 'unknown') as String,

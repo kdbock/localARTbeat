@@ -284,7 +284,8 @@ class _AdminArtWalkModerationScreenState
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: Text('art_walk_admin_art_walk_moderation_text_art_walk_moderation'.tr()),
+        title: Text(
+            'art_walk_admin_art_walk_moderation_text_art_walk_moderation'.tr()),
         backgroundColor: Colors.white.withValues(alpha: 0.1),
         elevation: 0,
       ),
@@ -350,7 +351,9 @@ class _AdminArtWalkModerationScreenState
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.white.withValues(alpha: 0.2) : Colors.transparent,
+          color: isSelected
+              ? Colors.white.withValues(alpha: 0.2)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
@@ -379,14 +382,17 @@ class _AdminArtWalkModerationScreenState
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            _selectedTab == 'reported' ? Icons.flag_outlined : Icons.route_outlined,
+            _selectedTab == 'reported'
+                ? Icons.flag_outlined
+                : Icons.route_outlined,
             size: 64,
             color: Colors.white.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
             'No art walks found',
-            style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 18),
+            style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.7), fontSize: 18),
           ),
         ],
       ),
@@ -412,29 +418,38 @@ class _AdminArtWalkModerationScreenState
                   children: [
                     Text(
                       walk.title,
-                      style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       _formatDate(walk.createdAt),
-                      style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12),
+                      style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.6),
+                          fontSize: 12),
                     ),
                   ],
                 ),
               ),
               if (walk.reportCount > 0)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: Colors.red.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.red.withValues(alpha: 0.5)),
+                    border:
+                        Border.all(color: Colors.red.withValues(alpha: 0.5)),
                   ),
                   child: Row(
                     children: [
                       const Icon(Icons.flag, size: 14, color: Colors.red),
                       const SizedBox(width: 4),
-                      Text(walk.reportCount.toString(), style: const TextStyle(color: Colors.red, fontSize: 12)),
+                      Text(walk.reportCount.toString(),
+                          style:
+                              const TextStyle(color: Colors.red, fontSize: 12)),
                     ],
                   ),
                 ),
@@ -460,7 +475,8 @@ class _AdminArtWalkModerationScreenState
               if (walk.reportCount > 0)
                 IconButton(
                   onPressed: () => _clearReports(walk),
-                  icon: const Icon(Icons.check_circle_outline, color: Colors.green),
+                  icon: const Icon(Icons.check_circle_outline,
+                      color: Colors.green),
                   tooltip: 'Clear Reports',
                 ),
               IconButton(

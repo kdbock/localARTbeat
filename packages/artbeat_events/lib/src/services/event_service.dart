@@ -126,13 +126,16 @@ class EventService {
   }
 
   /// Get upcoming public events for community feed
-  Future<List<ArtbeatEvent>> getUpcomingPublicEvents({int? limit, String? chapterId}) async {
+  Future<List<ArtbeatEvent>> getUpcomingPublicEvents({
+    int? limit,
+    String? chapterId,
+  }) async {
     try {
       Query query = _firestore
           .collection(_eventsCollection)
           .where('isPublic', isEqualTo: true)
           .where('dateTime', isGreaterThan: Timestamp.now());
-      
+
       if (chapterId != null) {
         query = query.where('chapterId', isEqualTo: chapterId);
       }

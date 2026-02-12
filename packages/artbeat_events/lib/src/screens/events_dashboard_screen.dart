@@ -939,13 +939,16 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
                       if (u != null) {
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (context) => MyTicketsScreen(userId: u.uid),
+                            builder: (context) =>
+                                MyTicketsScreen(userId: u.uid),
                           ),
                         );
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('events_sign_in_to_view_tickets'.tr()),
+                            content: Text(
+                              'events_sign_in_to_view_tickets'.tr(),
+                            ),
                           ),
                         );
                       }

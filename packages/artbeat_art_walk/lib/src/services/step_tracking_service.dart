@@ -43,7 +43,9 @@ class StepTrackingService {
     if (!Platform.isAndroid && !Platform.isIOS) {
       _isSupported = false;
       _isInitialized = true;
-      _logger.info('Step tracking is not supported on this platform (${Platform.operatingSystem})');
+      _logger.info(
+        'Step tracking is not supported on this platform (${Platform.operatingSystem})',
+      );
       return;
     }
 

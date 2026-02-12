@@ -129,7 +129,8 @@ class _EnhancedCaptureDashboardScreenState
   }
 
   Future<void> _checkOnboarding() async {
-    final isCompleted = await OnboardingService().isCaptureOnboardingCompleted();
+    final isCompleted = await OnboardingService()
+        .isCaptureOnboardingCompleted();
     if (!isCompleted && mounted) {
       // Small delay to ensure data is loaded and layout is stable
       await Future<void>.delayed(const Duration(milliseconds: 1500));
@@ -492,7 +493,8 @@ class _EnhancedCaptureDashboardScreenState
                                   profileKey: _profileKey,
                                   title: 'capture_dashboard_title'.tr(),
                                   subtitle: 'capture_dashboard_subtitle'.tr(),
-                                  onMenu: () => Scaffold.of(context).openDrawer(),
+                                  onMenu: () =>
+                                      Scaffold.of(context).openDrawer(),
                                   onSearch: () => _showSearchModal(context),
                                   onChat: () => Navigator.pushNamed(
                                     context,
@@ -509,8 +511,12 @@ class _EnhancedCaptureDashboardScreenState
                             // Quest tracker section
                             SliverToBoxAdapter(
                               child: Padding(
-                                padding:
-                                    const EdgeInsets.fromLTRB(14, 18, 14, 10),
+                                padding: const EdgeInsets.fromLTRB(
+                                  14,
+                                  18,
+                                  14,
+                                  10,
+                                ),
                                 child: _StampFadeIn(
                                   intro: _intro,
                                   delay: 0.2,
@@ -540,8 +546,12 @@ class _EnhancedCaptureDashboardScreenState
                             if (_communityCaptures.isNotEmpty)
                               SliverToBoxAdapter(
                                 child: Padding(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(14, 10, 14, 0),
+                                  padding: const EdgeInsets.fromLTRB(
+                                    14,
+                                    10,
+                                    14,
+                                    0,
+                                  ),
                                   child: _StampFadeIn(
                                     intro: _intro,
                                     delay: 0.22,
@@ -584,16 +594,17 @@ class _EnhancedCaptureDashboardScreenState
                               ),
                             if (_recentCaptures.isNotEmpty)
                               SliverPadding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 14),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                ),
                                 sliver: SliverGrid(
                                   gridDelegate:
                                       const SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 2,
-                                    crossAxisSpacing: 12,
-                                    mainAxisSpacing: 12,
-                                    childAspectRatio: 1,
-                                  ),
+                                        crossAxisCount: 2,
+                                        crossAxisSpacing: 12,
+                                        mainAxisSpacing: 12,
+                                        childAspectRatio: 1,
+                                      ),
                                   delegate: SliverChildBuilderDelegate((
                                     context,
                                     index,
@@ -601,9 +612,8 @@ class _EnhancedCaptureDashboardScreenState
                                     final capture = _recentCaptures[index];
                                     return _QuestCaptureTile(
                                       capture: capture,
-                                      onTap: () => _navigateToCaptureDetail(
-                                        capture.id,
-                                      ),
+                                      onTap: () =>
+                                          _navigateToCaptureDetail(capture.id),
                                     );
                                   }, childCount: _recentCaptures.length),
                                 ),

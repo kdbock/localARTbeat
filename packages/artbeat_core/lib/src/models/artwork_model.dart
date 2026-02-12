@@ -77,9 +77,7 @@ class ArtworkModel {
         data['artistName'],
         'Unknown Artist',
       ),
-      artistProfileId: FirestoreUtils.safeString(
-        data['artistProfileId'],
-      ),
+      artistProfileId: FirestoreUtils.safeString(data['artistProfileId']),
       contentType: ArtworkContentType.fromString(
         FirestoreUtils.safeStringDefault(data['contentType'], 'visual'),
       ),

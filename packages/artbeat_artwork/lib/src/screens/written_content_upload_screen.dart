@@ -261,7 +261,7 @@ class _WrittenContentUploadScreenState
         // Try high-level extraction first (faster)
         final extractor = PdfTextExtractor(document);
         String extractedText = '';
-        
+
         try {
           extractedText = extractor.extractText();
         } catch (e) {
@@ -269,19 +269,30 @@ class _WrittenContentUploadScreenState
         }
 
         // If high-level extraction is poor, fallback to optimized page-by-page
-        final initialWordCount = extractedText.trim().split(RegExp(r'\s+')).length;
-        if ((extractedText.trim().length < 2000 || initialWordCount < pageCount * 5) && pageCount > 0) {
+        final initialWordCount = extractedText
+            .trim()
+            .split(RegExp(r'\s+'))
+            .length;
+        if ((extractedText.trim().length < 2000 ||
+                initialWordCount < pageCount * 5) &&
+            pageCount > 0) {
           final buffer = StringBuffer();
           for (int i = 0; i < pageCount; i++) {
             try {
-              final pageText = extractor.extractText(startPageIndex: i, endPageIndex: i);
+              final pageText = extractor.extractText(
+                startPageIndex: i,
+                endPageIndex: i,
+              );
               buffer.write(pageText);
-              buffer.write('\n\n'); // Ensure page breaks and help regex matching
+              buffer.write(
+                '\n\n',
+              ); // Ensure page breaks and help regex matching
             } catch (e) {
               AppLogger.error('Error extracting page $i: $e');
             }
             // Yield to UI thread frequently to keep UI responsive
-            if (i % 5 == 0) await Future<void>.delayed(const Duration(milliseconds: 10));
+            if (i % 5 == 0)
+              await Future<void>.delayed(const Duration(milliseconds: 10));
           }
           extractedText = buffer.toString();
         }
@@ -329,7 +340,9 @@ class _WrittenContentUploadScreenState
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Warning: No text could be extracted from this PDF.'),
+              content: Text(
+                'Warning: No text could be extracted from this PDF.',
+              ),
               backgroundColor: Colors.red,
             ),
           );
@@ -345,13 +358,21 @@ class _WrittenContentUploadScreenState
           _currentStepIndex = 1;
           _currentStep = WrittenContentUploadStep.chapters;
         });
-        
+
         // If extraction was very poor, warn the user
-        final wordCount = content.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length;
-        if (wordCount < 200 && _contentFile != null && _contentFile!.path.toLowerCase().endsWith('.pdf')) {
+        final wordCount = content
+            .trim()
+            .split(RegExp(r'\s+'))
+            .where((w) => w.isNotEmpty)
+            .length;
+        if (wordCount < 200 &&
+            _contentFile != null &&
+            _contentFile!.path.toLowerCase().endsWith('.pdf')) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Warning: Very little text found in PDF. It might be an image-based scan.'),
+              content: Text(
+                'Warning: Very little text found in PDF. It might be an image-based scan.',
+              ),
               backgroundColor: Colors.orange,
               duration: Duration(seconds: 5),
             ),
@@ -376,8 +397,10 @@ class _WrittenContentUploadScreenState
   }
 
   void _extractChaptersFromText(String content) {
-    AppLogger.info('Starting chapter extraction from ${content.length} characters');
-    
+    AppLogger.info(
+      'Starting chapter extraction from ${content.length} characters',
+    );
+
     // Broadened Regex to find chapter markers more reliably in various PDF formats
     final chapterRegex = RegExp(
       r'(?:^|\n)\s*((?:CHAPTER|PART|BOOK|PROLOGUE|EPILOGUE|SECTION|VOLUME)\b.*)',
@@ -402,7 +425,9 @@ class _WrittenContentUploadScreenState
     }
 
     if (matches.isEmpty) {
-      AppLogger.info('No chapter markers found, falling back to single chapter');
+      AppLogger.info(
+        'No chapter markers found, falling back to single chapter',
+      );
       // Diagnostic fallback: if text is long but no chapters found, notify user
       if (content.length > 5000 && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -433,8 +458,14 @@ class _WrittenContentUploadScreenState
             ? _titleController.text
             : 'Chapter 1',
         'content': content,
-        'wordCount': content.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length,
-        'readingTime': (content.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length / 200).ceil(),
+        'wordCount': content
+            .split(RegExp(r'\s+'))
+            .where((w) => w.isNotEmpty)
+            .length,
+        'readingTime':
+            (content.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length /
+                    200)
+                .ceil(),
       };
 
       if (mounted) {
@@ -452,7 +483,9 @@ class _WrittenContentUploadScreenState
 
     for (int i = 0; i < matches.length; i++) {
       final start = matches[i].start;
-      final end = (i + 1 < matches.length) ? matches[i + 1].start : content.length;
+      final end = (i + 1 < matches.length)
+          ? matches[i + 1].start
+          : content.length;
 
       // Use group(1) to get the title without leading newlines/whitespace
       String chapterTitle = matches[i].group(1)?.trim() ?? 'Chapter ${i + 1}';
@@ -463,7 +496,9 @@ class _WrittenContentUploadScreenState
       }
 
       final chapterContent = content.substring(start, end).trim();
-      final words = chapterContent.split(RegExp(r'\s+')).where((w) => w.isNotEmpty);
+      final words = chapterContent
+          .split(RegExp(r'\s+'))
+          .where((w) => w.isNotEmpty);
 
       extractedChapters.add({
         'number': i + 1,
@@ -484,7 +519,9 @@ class _WrittenContentUploadScreenState
       });
     }
 
-    AppLogger.info('Successfully extracted ${extractedChapters.length} chapters');
+    AppLogger.info(
+      'Successfully extracted ${extractedChapters.length} chapters',
+    );
     if (mounted && extractedChapters.isNotEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -714,17 +751,18 @@ class _WrittenContentUploadScreenState
         firstPublishedDate: DateTime.now(),
         hasMultipleChapters: _isSerialized || _chapters.length > 1,
         isbn: _isbnController.text.isNotEmpty ? _isbnController.text : null,
-        seriesName:
-            _seriesController.text.isNotEmpty ? _seriesController.text : null,
+        seriesName: _seriesController.text.isNotEmpty
+            ? _seriesController.text
+            : null,
         volumeNumber: _volumeController.text.isNotEmpty
             ? int.tryParse(_volumeController.text)
             : null,
-        publisher:
-            _publisherController.text.isNotEmpty
-                ? _publisherController.text
-                : null,
-        edition:
-            _editionController.text.isNotEmpty ? _editionController.text : null,
+        publisher: _publisherController.text.isNotEmpty
+            ? _publisherController.text
+            : null,
+        edition: _editionController.text.isNotEmpty
+            ? _editionController.text
+            : null,
       );
 
       // Update artwork metadata for written content
@@ -752,10 +790,7 @@ class _WrittenContentUploadScreenState
         'updatedAt': FieldValue.serverTimestamp(),
       };
 
-      await _firestore
-          .collection('artwork')
-          .doc(artworkId)
-          .update(updatedData);
+      await _firestore.collection('artwork').doc(artworkId).update(updatedData);
       AppLogger.info('Artwork metadata updated successfully');
 
       // Create chapters
@@ -763,7 +798,9 @@ class _WrittenContentUploadScreenState
       if (_chapters.isNotEmpty) {
         await _createChaptersForArtwork(artworkId);
       } else if (!_isSerialized) {
-        AppLogger.info('No chapters found, creating single chapter for complete work...');
+        AppLogger.info(
+          'No chapters found, creating single chapter for complete work...',
+        );
         // Create single chapter for complete work
         await _chapterService.createChapter(
           artworkId: artworkId,
@@ -812,9 +849,7 @@ class _WrittenContentUploadScreenState
         final String errorMsg = errorStr.replaceFirst('Exception: ', '');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              'written_content_upload_error'.tr(args: [errorMsg]),
-            ),
+            content: Text('written_content_upload_error'.tr(args: [errorMsg])),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 5),
             action: SnackBarAction(
@@ -918,13 +953,17 @@ class _WrittenContentUploadScreenState
                     ),
                     Step(
                       title: const Text('Review Chapters'),
-                      subtitle: const Text('Manage extracted sections for your novel'),
+                      subtitle: const Text(
+                        'Manage extracted sections for your novel',
+                      ),
                       content: _buildChaptersStep(),
                       isActive: _currentStepIndex >= 1,
                       state: _getStepState(1),
                     ),
                     Step(
-                      title: Text('written_content_upload_step_basic_info'.tr()),
+                      title: Text(
+                        'written_content_upload_step_basic_info'.tr(),
+                      ),
                       subtitle: Text(
                         'written_content_upload_step_basic_info_desc'.tr(),
                       ),
@@ -991,8 +1030,8 @@ class _WrittenContentUploadScreenState
               onPressed: (_isLoading || _isExtractingChapters)
                   ? null
                   : (_currentStepIndex == 4
-                      ? _uploadContent
-                      : details.onStepContinue),
+                        ? _uploadContent
+                        : details.onStepContinue),
               child: (_isLoading || _isExtractingChapters)
                   ? const SizedBox(
                       height: 20,
@@ -1037,11 +1076,11 @@ class _WrittenContentUploadScreenState
       // fields that are on step 3 (basicInfo). Don't validate future steps yet.
       final bool isFormValid = _currentStepIndex == 2
           ? (_titleController.text.isNotEmpty &&
-              _descriptionController.text.isNotEmpty &&
-              _coverImageFile != null)
+                _descriptionController.text.isNotEmpty &&
+                _coverImageFile != null)
           : (_currentStepIndex >= 3
-              ? (_formKey.currentState?.validate() ?? true)
-              : true);
+                ? (_formKey.currentState?.validate() ?? true)
+                : true);
 
       if (isFormValid && isStepValid) {
         setState(() {
@@ -1059,11 +1098,11 @@ class _WrittenContentUploadScreenState
 
   void _showStepValidationError() {
     String message = 'Please complete all required fields';
-    
+
     switch (_currentStep) {
       case WrittenContentUploadStep.content:
-        message = _useFileUpload 
-            ? 'Please select a content file' 
+        message = _useFileUpload
+            ? 'Please select a content file'
             : 'Please enter your content text';
         break;
       case WrittenContentUploadStep.chapters:
@@ -1195,10 +1234,7 @@ class _WrittenContentUploadScreenState
           children: [
             Text(
               'Extracted Chapters (${_chapters.length})',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             TextButton.icon(
               onPressed: () {
@@ -1476,12 +1512,14 @@ class _WrittenContentUploadScreenState
                           ),
                           IconButton(
                             icon: const Icon(Icons.format_italic),
-                            onPressed: () => _insertMarkdownFormatting('*', '*'),
+                            onPressed: () =>
+                                _insertMarkdownFormatting('*', '*'),
                             tooltip: 'Italic',
                           ),
                           IconButton(
                             icon: const Icon(Icons.title),
-                            onPressed: () => _insertMarkdownFormatting('# ', ''),
+                            onPressed: () =>
+                                _insertMarkdownFormatting('# ', ''),
                             tooltip: 'Header',
                           ),
                           IconButton(
@@ -1991,10 +2029,7 @@ class _WrittenContentUploadScreenState
                   ),
                   const SizedBox(height: 8),
                 ],
-                Text(
-                  'Title: ${_titleController.text}',
-                  softWrap: true,
-                ),
+                Text('Title: ${_titleController.text}', softWrap: true),
                 Text(
                   'Description: ${_descriptionController.text}',
                   softWrap: true,

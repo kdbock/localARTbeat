@@ -108,7 +108,7 @@ class UnifiedAdminService {
           }
         }
       }
-      
+
       // Get chapters (using collectionGroup to get all chapters from all artwork)
       if (contentType == null ||
           contentType == AdminContentType.all ||

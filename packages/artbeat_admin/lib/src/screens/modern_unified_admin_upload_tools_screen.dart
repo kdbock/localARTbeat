@@ -7,10 +7,12 @@ class ModernUnifiedAdminUploadToolsScreen extends StatefulWidget {
   const ModernUnifiedAdminUploadToolsScreen({super.key});
 
   @override
-  State<ModernUnifiedAdminUploadToolsScreen> createState() => _ModernUnifiedAdminUploadToolsScreenState();
+  State<ModernUnifiedAdminUploadToolsScreen> createState() =>
+      _ModernUnifiedAdminUploadToolsScreenState();
 }
 
-class _ModernUnifiedAdminUploadToolsScreenState extends State<ModernUnifiedAdminUploadToolsScreen> {
+class _ModernUnifiedAdminUploadToolsScreenState
+    extends State<ModernUnifiedAdminUploadToolsScreen> {
   final Map<String, String> _uploadTypes = {
     'Artist Profiles': 'artistProfiles',
     'Gallery': 'business',
@@ -59,7 +61,8 @@ class _ModernUnifiedAdminUploadToolsScreenState extends State<ModernUnifiedAdmin
                 Expanded(
                   child: Card(
                     elevation: 8,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
                     child: ModernAdminUploadForm(
                       label: 'Upload $_selectedLabel',
                       hint: 'Enter $_selectedLabel data (JSON, ID, etc)',
@@ -85,11 +88,13 @@ class _ModernUnifiedAdminUploadToolsScreenState extends State<ModernUnifiedAdmin
           child: DropdownButton<String>(
             value: _selectedLabel,
             isExpanded: true,
-            icon: const Icon(Icons.arrow_drop_down_circle, color: Color(0xFF8C52FF)),
+            icon: const Icon(Icons.arrow_drop_down_circle,
+                color: Color(0xFF8C52FF)),
             items: _uploadTypes.keys.map((String label) {
               return DropdownMenuItem<String>(
                 value: label,
-                child: Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
+                child: Text(label,
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
               );
             }).toList(),
             onChanged: (String? newValue) {
@@ -178,7 +183,8 @@ class _ModernAdminUploadFormState extends State<ModernAdminUploadForm> {
             child: TextField(
               controller: _controller,
               decoration: InputDecoration(
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 labelText: widget.hint,
                 alignLabelWithHint: true,
                 filled: true,
@@ -195,15 +201,19 @@ class _ModernAdminUploadFormState extends State<ModernAdminUploadForm> {
               backgroundColor: const Color(0xFF8C52FF),
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
             ),
             child: _loading
                 ? const SizedBox(
                     width: 24,
                     height: 24,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                    child: CircularProgressIndicator(
+                        strokeWidth: 2, color: Colors.white),
                   )
-                : const Text('Execute Upload', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                : const Text('Execute Upload',
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           ),
           if (_result != null) ...[
             const SizedBox(height: 16),
@@ -221,7 +231,8 @@ class _ModernAdminUploadFormState extends State<ModernAdminUploadForm> {
                   Expanded(
                     child: Text(
                       _result!,
-                      style: const TextStyle(color: Colors.green, fontWeight: FontWeight.w500),
+                      style: const TextStyle(
+                          color: Colors.green, fontWeight: FontWeight.w500),
                     ),
                   ),
                 ],

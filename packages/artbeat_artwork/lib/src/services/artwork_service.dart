@@ -50,7 +50,10 @@ class ArtworkService {
 
     try {
       // Check if user is admin - admins bypass all limits
-      final userDoc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .get();
       final userType = userDoc.data()?['userType'];
       if (userType == 'admin') {
         AppLogger.info('Admin detected, bypassing upload limit check');
@@ -607,12 +610,15 @@ class ArtworkService {
   }
 
   /// Get featured artwork
-  Future<List<ArtworkModel>> getFeaturedArtwork({int limit = 10, String? chapterId}) async {
+  Future<List<ArtworkModel>> getFeaturedArtwork({
+    int limit = 10,
+    String? chapterId,
+  }) async {
     try {
       Query query = _artworkCollection
           .where('isFeatured', isEqualTo: true)
           .where('isPublic', isEqualTo: true);
-      
+
       if (chapterId != null) {
         query = query.where('chapterId', isEqualTo: chapterId);
       } else {
@@ -635,10 +641,13 @@ class ArtworkService {
   }
 
   /// Get all public artwork
-  Future<List<ArtworkModel>> getAllPublicArtwork({int limit = 50, String? chapterId}) async {
+  Future<List<ArtworkModel>> getAllPublicArtwork({
+    int limit = 50,
+    String? chapterId,
+  }) async {
     try {
       Query query = _artworkCollection.where('isPublic', isEqualTo: true);
-      
+
       if (chapterId != null) {
         query = query.where('chapterId', isEqualTo: chapterId);
       } else {

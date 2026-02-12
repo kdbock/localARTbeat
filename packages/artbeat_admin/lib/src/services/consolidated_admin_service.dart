@@ -122,7 +122,13 @@ class ConsolidatedAdminService {
       int flaggedContent = 0;
 
       // Combine all content for comprehensive stats
-      final allContent = [...artworks, ...posts, ...events, ...artWalks, ...captures];
+      final allContent = [
+        ...artworks,
+        ...posts,
+        ...events,
+        ...artWalks,
+        ...captures
+      ];
 
       // Count new content this week
       for (final doc in allContent) {
@@ -606,7 +612,8 @@ class ConsolidatedAdminService {
 
   String _getLastBackupTime() {
     final now = DateTime.now();
-    final lastBackup = DateTime(now.year, now.month, now.day, 3, 0); // 3 AM today
+    final lastBackup =
+        DateTime(now.year, now.month, now.day, 3, 0); // 3 AM today
     return '${lastBackup.day}/${lastBackup.month}/${lastBackup.year} ${lastBackup.hour}:${lastBackup.minute.toString().padLeft(2, '0')}';
   }
 
@@ -649,8 +656,10 @@ class ConsolidatedAdminService {
           'memoryUsage': (data['memoryUsage'] as num?)?.toDouble() ?? 0.0,
           'diskUsage': (data['diskUsage'] as num?)?.toDouble() ?? 0.0,
           'networkLatency': (data['networkLatency'] as num?)?.toInt() ?? 0,
-          'activeConnections': (data['activeConnections'] as num?)?.toInt() ?? 0,
-          'requestsPerSecond': (data['requestsPerSecond'] as num?)?.toInt() ?? 0,
+          'activeConnections':
+              (data['activeConnections'] as num?)?.toInt() ?? 0,
+          'requestsPerSecond':
+              (data['requestsPerSecond'] as num?)?.toInt() ?? 0,
         };
       }
 
@@ -691,8 +700,9 @@ class ConsolidatedAdminService {
           'throughput': (data['throughput'] as num?)?.toInt() ?? 0,
           'errorRate': (data['errorRate'] as num?)?.toDouble() ?? 0.0,
           'uptime': data['uptime']?.toString() ?? _calculateUptime(),
-          'lastUpdated': (data['timestamp'] as Timestamp?)?.toDate().toIso8601String() ?? 
-              DateTime.now().toIso8601String(),
+          'lastUpdated':
+              (data['timestamp'] as Timestamp?)?.toDate().toIso8601String() ??
+                  DateTime.now().toIso8601String(),
         };
       }
 

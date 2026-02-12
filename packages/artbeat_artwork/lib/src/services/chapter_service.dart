@@ -26,8 +26,10 @@ class ChapterService {
   }) async {
     try {
       // Get parent artwork to copy metadata
-      final artworkDoc =
-          await _firestore.collection('artwork').doc(artworkId).get();
+      final artworkDoc = await _firestore
+          .collection('artwork')
+          .doc(artworkId)
+          .get();
       if (!artworkDoc.exists) throw Exception('Parent artwork not found');
       final artworkData = artworkDoc.data()!;
 
@@ -49,10 +51,12 @@ class ChapterService {
         isPaid: isPaid,
         price: price,
         thumbnailUrl: artworkData['thumbnailUrl'] as String?,
-        authorId: (artworkData['artistProfileId'] as String?) ??
+        authorId:
+            (artworkData['artistProfileId'] as String?) ??
             (artworkData['userId'] as String?) ??
             '',
-        authorName: (artworkData['artistName'] as String?) ??
+        authorName:
+            (artworkData['artistName'] as String?) ??
             (artworkData['authorName'] as String?) ??
             'Unknown Author',
         createdAt: now,
@@ -121,10 +125,13 @@ class ChapterService {
 
       // If current user is author, return all chapters
       if (currentUserId != null) {
-        final artworkDoc =
-            await _firestore.collection('artwork').doc(artworkId).get();
+        final artworkDoc = await _firestore
+            .collection('artwork')
+            .doc(artworkId)
+            .get();
         if (artworkDoc.exists) {
-          final authorId = (artworkDoc.data()?['artistProfileId'] as String?) ??
+          final authorId =
+              (artworkDoc.data()?['artistProfileId'] as String?) ??
               (artworkDoc.data()?['userId'] as String?);
           if (authorId == currentUserId) {
             return chapters;
@@ -219,16 +226,18 @@ class ChapterService {
           .doc(artworkId)
           .collection('chapters')
           .get();
-      
+
       final chapters = snapshot.docs
           .map((doc) => ChapterModel.fromFirestore(doc))
           .toList();
 
       final totalChapters = chapters.length;
       final releasedApprovedChapters = chapters
-          .where((c) =>
-              c.isReleased &&
-              c.moderationStatus == ChapterModerationStatus.approved)
+          .where(
+            (c) =>
+                c.isReleased &&
+                c.moderationStatus == ChapterModerationStatus.approved,
+          )
           .length;
 
       await _firestore.collection('artwork').doc(artworkId).update({
@@ -236,8 +245,10 @@ class ChapterService {
         'releasedChapters': releasedApprovedChapters,
         'updatedAt': Timestamp.now(),
       });
-      
-      AppLogger.info('Updated artwork $artworkId: total=$totalChapters, released=$releasedApprovedChapters');
+
+      AppLogger.info(
+        'Updated artwork $artworkId: total=$totalChapters, released=$releasedApprovedChapters',
+      );
     } catch (e) {
       AppLogger.error('Error updating artwork chapter count: $e');
     }
@@ -250,23 +261,27 @@ class ChapterService {
           .doc(artworkId)
           .collection('chapters')
           .get();
-      
+
       final chapters = snapshot.docs
           .map((doc) => ChapterModel.fromFirestore(doc))
           .toList();
 
       final releasedApprovedChapters = chapters
-          .where((c) =>
-              c.isReleased &&
-              c.moderationStatus == ChapterModerationStatus.approved)
+          .where(
+            (c) =>
+                c.isReleased &&
+                c.moderationStatus == ChapterModerationStatus.approved,
+          )
           .length;
 
       await _firestore.collection('artwork').doc(artworkId).update({
         'releasedChapters': releasedApprovedChapters,
         'updatedAt': Timestamp.now(),
       });
-      
-      AppLogger.info('Updated artwork $artworkId: released=$releasedApprovedChapters');
+
+      AppLogger.info(
+        'Updated artwork $artworkId: released=$releasedApprovedChapters',
+      );
     } catch (e) {
       AppLogger.error('Error updating released chapter count: $e');
     }

@@ -88,11 +88,11 @@ class AppRouter {
       case core.AppRoutes.chapterLanding:
         final args = settings.arguments as Map<String, dynamic>?;
         final chapterId = args?['chapterId'] as String?;
-        
+
         if (chapterId == null) {
           return RouteUtils.createNotFoundRoute('Chapter ID required');
         }
-        
+
         return RouteUtils.createMainNavRoute(
           currentIndex: 0,
           child: core.ChapterLandingScreen(chapterId: chapterId),
@@ -618,13 +618,17 @@ class AppRouter {
           return RouteUtils.createErrorRoute('Written content not found');
         }
         return RouteUtils.createSimpleRoute(
-          child: artwork.WrittenContentDetailScreen(artworkId: writtenContentId),
+          child: artwork.WrittenContentDetailScreen(
+            artworkId: writtenContentId,
+          ),
         );
 
       case core.AppRoutes.artworkPurchase:
         final artworkId = RouteUtils.getArgument<String>(settings, 'artworkId');
         if (artworkId == null) {
-          return RouteUtils.createErrorRoute('Artwork ID required for purchase');
+          return RouteUtils.createErrorRoute(
+            'Artwork ID required for purchase',
+          );
         }
         return RouteUtils.createSimpleRoute(
           child: artwork.ArtworkPurchaseScreen(artworkId: artworkId),

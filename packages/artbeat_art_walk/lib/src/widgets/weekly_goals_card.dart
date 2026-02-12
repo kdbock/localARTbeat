@@ -9,7 +9,12 @@ class WeeklyGoalsCard extends StatefulWidget {
   final VoidCallback? onTap;
   final Key? titleKey;
 
-  const WeeklyGoalsCard({required this.goals, this.onTap, this.titleKey, super.key});
+  const WeeklyGoalsCard({
+    required this.goals,
+    this.onTap,
+    this.titleKey,
+    super.key,
+  });
 
   @override
   State<WeeklyGoalsCard> createState() => _WeeklyGoalsCardState();

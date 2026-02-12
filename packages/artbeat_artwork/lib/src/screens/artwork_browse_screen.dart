@@ -349,11 +349,7 @@ class _ArtworkBrowseScreenState extends State<ArtworkBrowseScreen> {
           .map(
             (option) => Align(
               alignment: Alignment.centerLeft,
-              child: Text(
-                option,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
+              child: Text(option, maxLines: 1, overflow: TextOverflow.ellipsis),
             ),
           )
           .toList(),
@@ -361,11 +357,7 @@ class _ArtworkBrowseScreenState extends State<ArtworkBrowseScreen> {
           .map(
             (option) => DropdownMenuItem<String>(
               value: option,
-              child: Text(
-                option,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
+              child: Text(option, maxLines: 1, overflow: TextOverflow.ellipsis),
             ),
           )
           .toList(),

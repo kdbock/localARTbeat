@@ -12,15 +12,18 @@ class AdminPlatformCurationScreen extends StatefulWidget {
   const AdminPlatformCurationScreen({super.key});
 
   @override
-  State<AdminPlatformCurationScreen> createState() => _AdminPlatformCurationScreenState();
+  State<AdminPlatformCurationScreen> createState() =>
+      _AdminPlatformCurationScreenState();
 }
 
-class _AdminPlatformCurationScreenState extends State<AdminPlatformCurationScreen> with SingleTickerProviderStateMixin {
+class _AdminPlatformCurationScreenState
+    extends State<AdminPlatformCurationScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final AdminService _adminService = AdminService();
   final artwork.ArtworkService _artworkService = artwork.ArtworkService();
   final AdminMessagingService _messagingService = AdminMessagingService();
-  
+
   bool _isLoading = false;
   List<core.UserModel> _featuredArtists = [];
   List<artwork.ArtworkModel> _featuredArtworks = [];
@@ -49,7 +52,6 @@ class _AdminPlatformCurationScreenState extends State<AdminPlatformCurationScree
 
       // Load featured artworks
       _featuredArtworks = await _artworkService.getFeaturedArtwork(limit: 50);
-      
     } catch (e) {
       debugPrint('Error loading curation data: $e');
     } finally {
@@ -117,10 +119,14 @@ class _AdminPlatformCurationScreenState extends State<AdminPlatformCurationScree
                 final artist = _featuredArtists[index];
                 return ListTile(
                   leading: CircleAvatar(
-                    backgroundImage: artist.profileImageUrl.isNotEmpty 
-                        ? NetworkImage(artist.profileImageUrl) 
+                    backgroundImage: artist.profileImageUrl.isNotEmpty
+                        ? NetworkImage(artist.profileImageUrl)
                         : null,
-                    child: artist.profileImageUrl.isEmpty ? Text(artist.fullName.isNotEmpty ? artist.fullName[0] : '?') : null,
+                    child: artist.profileImageUrl.isEmpty
+                        ? Text(artist.fullName.isNotEmpty
+                            ? artist.fullName[0]
+                            : '?')
+                        : null,
                   ),
                   title: Text(artist.fullName),
                   subtitle: Text(artist.email),
@@ -153,7 +159,10 @@ class _AdminPlatformCurationScreenState extends State<AdminPlatformCurationScree
                   clipBehavior: Clip.antiAlias,
                   child: Stack(
                     children: [
-                      Image.network(art.imageUrl, fit: BoxFit.cover, width: double.infinity, height: double.infinity),
+                      Image.network(art.imageUrl,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: double.infinity),
                       Positioned(
                         bottom: 0,
                         left: 0,
@@ -163,7 +172,8 @@ class _AdminPlatformCurationScreenState extends State<AdminPlatformCurationScree
                           padding: const EdgeInsets.all(8),
                           child: Text(
                             art.title,
-                            style: const TextStyle(color: Colors.white, fontSize: 12),
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 12),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -177,7 +187,8 @@ class _AdminPlatformCurationScreenState extends State<AdminPlatformCurationScree
                           radius: 15,
                           child: IconButton(
                             padding: EdgeInsets.zero,
-                            icon: const Icon(Icons.star, color: Colors.amber, size: 20),
+                            icon: const Icon(Icons.star,
+                                color: Colors.amber, size: 20),
                             onPressed: () => _toggleArtworkFeatured(art),
                           ),
                         ),
@@ -227,11 +238,17 @@ class _AdminPlatformCurationScreenState extends State<AdminPlatformCurationScree
           const SizedBox(height: 8),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance.collection('broadcasts').orderBy('timestamp', descending: true).limit(10).snapshots(),
+              stream: FirebaseFirestore.instance
+                  .collection('broadcasts')
+                  .orderBy('timestamp', descending: true)
+                  .limit(10)
+                  .snapshots(),
               builder: (context, snapshot) {
-                if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+                if (!snapshot.hasData)
+                  return const Center(child: CircularProgressIndicator());
                 final docs = snapshot.data!.docs;
-                if (docs.isEmpty) return const Center(child: Text('No recent broadcasts'));
+                if (docs.isEmpty)
+                  return const Center(child: Text('No recent broadcasts'));
                 return ListView.builder(
                   itemCount: docs.length,
                   itemBuilder: (context, index) {
@@ -239,7 +256,8 @@ class _AdminPlatformCurationScreenState extends State<AdminPlatformCurationScree
                     return Card(
                       child: ListTile(
                         title: Text(data['message'] as String? ?? ''),
-                        subtitle: Text('Sent on: ${_formatTimestamp(data['timestamp'] as Timestamp)}'),
+                        subtitle: Text(
+                            'Sent on: ${_formatTimestamp(data['timestamp'] as Timestamp)}'),
                       ),
                     );
                   },
@@ -259,7 +277,10 @@ class _AdminPlatformCurationScreenState extends State<AdminPlatformCurationScree
         const SizedBox(width: 8),
         Text(
           title,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF8C52FF)),
+          style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF8C52FF)),
         ),
       ],
     );
@@ -272,11 +293,15 @@ class _AdminPlatformCurationScreenState extends State<AdminPlatformCurationScree
       await _loadCurationData();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${artist.fullName} removed from featured artists')),
+          SnackBar(
+              content:
+                  Text('${artist.fullName} removed from featured artists')),
         );
       }
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+      if (mounted)
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Error: $e')));
     } finally {
       setState(() => _isLoading = false);
     }
@@ -285,18 +310,24 @@ class _AdminPlatformCurationScreenState extends State<AdminPlatformCurationScree
   Future<void> _toggleArtworkFeatured(artwork.ArtworkModel art) async {
     setState(() => _isLoading = true);
     try {
-      await FirebaseFirestore.instance.collection('artwork').doc(art.id).update({
+      await FirebaseFirestore.instance
+          .collection('artwork')
+          .doc(art.id)
+          .update({
         'isFeatured': false,
         'updatedAt': FieldValue.serverTimestamp(),
       });
       await _loadCurationData();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('"${art.title}" removed from featured artworks')),
+          SnackBar(
+              content: Text('"${art.title}" removed from featured artworks')),
         );
       }
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+      if (mounted)
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Error: $e')));
     } finally {
       setState(() => _isLoading = false);
     }
@@ -304,7 +335,8 @@ class _AdminPlatformCurationScreenState extends State<AdminPlatformCurationScree
 
   Future<void> _sendAnnouncement() async {
     if (_announcementController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a message')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please enter a message')));
       return;
     }
 
@@ -312,10 +344,15 @@ class _AdminPlatformCurationScreenState extends State<AdminPlatformCurationScree
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Confirm Broadcast'),
-        content: const Text('This will send a notification to ALL active users. Are you sure?'),
+        content: const Text(
+            'This will send a notification to ALL active users. Are you sure?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Send')),
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Send')),
         ],
       ),
     );
@@ -323,13 +360,17 @@ class _AdminPlatformCurationScreenState extends State<AdminPlatformCurationScree
     if (confirmed == true) {
       setState(() => _isLoading = true);
       try {
-        await _messagingService.sendBroadcastMessage(_announcementController.text.trim());
+        await _messagingService
+            .sendBroadcastMessage(_announcementController.text.trim());
         _announcementController.clear();
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Announcement broadcasted successfully')));
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text('Announcement broadcasted successfully')));
         }
       } catch (e) {
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+        if (mounted)
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text('Error: $e')));
       } finally {
         setState(() => _isLoading = false);
       }

@@ -242,9 +242,11 @@ class _EnhancedBottomNavState extends State<EnhancedBottomNav>
                         children: items.asMap().entries.map((entry) {
                           final index = entry.key;
                           final item = entry.value;
-                          final key = (widget.itemKeys != null && widget.itemKeys!.length > index) 
-                            ? widget.itemKeys![index] 
-                            : null;
+                          final key =
+                              (widget.itemKeys != null &&
+                                  widget.itemKeys!.length > index)
+                              ? widget.itemKeys![index]
+                              : null;
                           return Expanded(
                             child: _buildNavItem(
                               context,

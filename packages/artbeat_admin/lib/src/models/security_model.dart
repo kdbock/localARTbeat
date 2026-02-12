@@ -22,7 +22,8 @@ class SecurityMetrics {
       activeThreats: map['activeThreats'] as int? ?? 0,
       failedLogins: map['failedLogins'] as int? ?? 0,
       blockedIps: map['blockedIps'] as int? ?? 0,
-      lastUpdated: (map['lastUpdated'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      lastUpdated:
+          (map['lastUpdated'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
   }
 

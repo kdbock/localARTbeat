@@ -359,7 +359,8 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
                   child: Center(
                     child: Column(
                       children: [
-                        Icon(Icons.history, size: 48, color: Colors.grey.shade400),
+                        Icon(Icons.history,
+                            size: 48, color: Colors.grey.shade400),
                         const SizedBox(height: 16),
                         Text('No recent activity found for this user',
                             style: TextStyle(color: Colors.grey.shade600)),
@@ -379,8 +380,9 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
                     margin: const EdgeInsets.only(bottom: 8),
                     child: ListTile(
                       leading: CircleAvatar(
-                        backgroundColor: _getActivityColor(activity.type).withValues(alpha: 0.1),
-                        child: Icon(_getActivityIcon(activity.type), 
+                        backgroundColor: _getActivityColor(activity.type)
+                            .withValues(alpha: 0.1),
+                        child: Icon(_getActivityIcon(activity.type),
                             color: _getActivityColor(activity.type), size: 20),
                       ),
                       title: Text(activity.title),
@@ -391,7 +393,8 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
                           const SizedBox(height: 4),
                           Text(
                             _formatDateTime(activity.timestamp),
-                            style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                            style: TextStyle(
+                                fontSize: 12, color: Colors.grey.shade500),
                           ),
                         ],
                       ),
@@ -452,35 +455,59 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
 
   IconData _getActivityIcon(ActivityType type) {
     switch (type) {
-      case ActivityType.userRegistered: return Icons.person_add;
-      case ActivityType.userLogin: return Icons.login;
-      case ActivityType.artworkUploaded: return Icons.image;
-      case ActivityType.artworkApproved: return Icons.check_circle;
-      case ActivityType.artworkRejected: return Icons.cancel;
-      case ActivityType.postCreated: return Icons.post_add;
-      case ActivityType.commentAdded: return Icons.comment;
-      case ActivityType.eventCreated: return Icons.event;
-      case ActivityType.userSuspended: return Icons.block;
-      case ActivityType.userVerified: return Icons.verified;
-      case ActivityType.contentReported: return Icons.report;
-      case ActivityType.adminAction: return Icons.admin_panel_settings;
-      default: return Icons.history;
+      case ActivityType.userRegistered:
+        return Icons.person_add;
+      case ActivityType.userLogin:
+        return Icons.login;
+      case ActivityType.artworkUploaded:
+        return Icons.image;
+      case ActivityType.artworkApproved:
+        return Icons.check_circle;
+      case ActivityType.artworkRejected:
+        return Icons.cancel;
+      case ActivityType.postCreated:
+        return Icons.post_add;
+      case ActivityType.commentAdded:
+        return Icons.comment;
+      case ActivityType.eventCreated:
+        return Icons.event;
+      case ActivityType.userSuspended:
+        return Icons.block;
+      case ActivityType.userVerified:
+        return Icons.verified;
+      case ActivityType.contentReported:
+        return Icons.report;
+      case ActivityType.adminAction:
+        return Icons.admin_panel_settings;
+      default:
+        return Icons.history;
     }
   }
 
   Color _getActivityColor(ActivityType type) {
     switch (type) {
-      case ActivityType.userRegistered: return Colors.blue;
-      case ActivityType.userLogin: return Colors.green;
-      case ActivityType.artworkUploaded: return Colors.purple;
-      case ActivityType.artworkApproved: return Colors.green;
-      case ActivityType.artworkRejected: return Colors.red;
-      case ActivityType.userSuspended: return Colors.red;
-      case ActivityType.userVerified: return Colors.orange;
-      case ActivityType.contentReported: return Colors.orange;
-      case ActivityType.adminAction: return Colors.deepPurple;
-      case ActivityType.systemError: return Colors.red;
-      default: return Colors.grey;
+      case ActivityType.userRegistered:
+        return Colors.blue;
+      case ActivityType.userLogin:
+        return Colors.green;
+      case ActivityType.artworkUploaded:
+        return Colors.purple;
+      case ActivityType.artworkApproved:
+        return Colors.green;
+      case ActivityType.artworkRejected:
+        return Colors.red;
+      case ActivityType.userSuspended:
+        return Colors.red;
+      case ActivityType.userVerified:
+        return Colors.orange;
+      case ActivityType.contentReported:
+        return Colors.orange;
+      case ActivityType.adminAction:
+        return Colors.deepPurple;
+      case ActivityType.systemError:
+        return Colors.red;
+      default:
+        return Colors.grey;
     }
   }
 
@@ -595,8 +622,8 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
                     children: [
                       const Text(
                         'Admin Notes',
-                        style:
-                            TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16),
                       ),
                       IconButton(
                         onPressed: _addAdminNote,
@@ -823,7 +850,8 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
                   ),
                   SwitchListTile(
                     title: const Text('Shadow Banned'),
-                    subtitle: const Text('User can post, but content is hidden from others'),
+                    subtitle: const Text(
+                        'User can post, but content is hidden from others'),
                     value: _currentUser.isShadowBanned,
                     onChanged: (_) => _toggleShadowBanStatus(),
                   ),
@@ -1314,7 +1342,8 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
         action: newStatus ? 'shadow_ban_user' : 'unshadow_ban_user',
         category: 'user',
         targetUserId: _currentUser.id,
-        description: '${newStatus ? 'Shadow banned' : 'Unshadow banned'} user: ${_currentUser.fullName}',
+        description:
+            '${newStatus ? 'Shadow banned' : 'Unshadow banned'} user: ${_currentUser.fullName}',
       );
 
       setState(() {
@@ -1378,28 +1407,26 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
       setState(() => _isLoading = true);
       try {
         final adminService = AdminService();
-        final currentAdminId = FirebaseAuth.instance.currentUser?.uid ?? 'unknown_admin';
-        
+        final currentAdminId =
+            FirebaseAuth.instance.currentUser?.uid ?? 'unknown_admin';
+
         await adminService.suspendUser(
-          _currentUser.id, 
-          reasonController.text.trim(),
-          currentAdminId
-        );
+            _currentUser.id, reasonController.text.trim(), currentAdminId);
 
         // Log the action
         await _activityService.logUserSuspension(
-          _currentUser.id,
-          _currentUser.fullName,
-          currentAdminId,
-          reasonController.text.trim()
-        );
+            _currentUser.id,
+            _currentUser.fullName,
+            currentAdminId,
+            reasonController.text.trim());
 
         // Audit Trail
         await AuditTrailService().logAdminAction(
           action: 'suspend_user',
           category: 'user',
           targetUserId: _currentUser.id,
-          description: 'Suspended user: ${_currentUser.fullName}. Reason: ${reasonController.text.trim()}',
+          description:
+              'Suspended user: ${_currentUser.fullName}. Reason: ${reasonController.text.trim()}',
           metadata: {'reason': reasonController.text.trim()},
         );
 
@@ -1582,7 +1609,8 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
       setState(() => _isLoading = true);
       try {
         final adminService = AdminService();
-        final currentAdminId = FirebaseAuth.instance.currentUser?.uid ?? 'unknown_admin';
+        final currentAdminId =
+            FirebaseAuth.instance.currentUser?.uid ?? 'unknown_admin';
         final noteText = noteController.text.trim();
 
         await adminService.addAdminNote(
@@ -1597,7 +1625,11 @@ class _AdminUserDetailScreenState extends State<AdminUserDetailScreen>
           category: 'user',
           targetUserId: _currentUser.id,
           description: 'Added admin note for user: ${_currentUser.fullName}',
-          metadata: {'note_preview': noteText.length > 50 ? '${noteText.substring(0, 50)}...' : noteText},
+          metadata: {
+            'note_preview': noteText.length > 50
+                ? '${noteText.substring(0, 50)}...'
+                : noteText
+          },
         );
 
         // Update local state

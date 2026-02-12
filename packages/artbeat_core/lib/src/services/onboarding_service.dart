@@ -3,11 +3,16 @@ import '../utils/logger.dart';
 
 class OnboardingService {
   static const String _kOnboardingCompletedKey = 'onboarding_completed';
-  static const String _kCaptureOnboardingCompletedKey = 'capture_onboarding_completed';
-  static const String _kDiscoverOnboardingCompletedKey = 'discover_onboarding_completed';
-  static const String _kExploreOnboardingCompletedKey = 'explore_onboarding_completed';
-  static const String _kArtCommunityOnboardingCompletedKey = 'art_community_onboarding_completed';
-  static const String _kEventsOnboardingCompletedKey = 'events_onboarding_completed';
+  static const String _kCaptureOnboardingCompletedKey =
+      'capture_onboarding_completed';
+  static const String _kDiscoverOnboardingCompletedKey =
+      'discover_onboarding_completed';
+  static const String _kExploreOnboardingCompletedKey =
+      'explore_onboarding_completed';
+  static const String _kArtCommunityOnboardingCompletedKey =
+      'art_community_onboarding_completed';
+  static const String _kEventsOnboardingCompletedKey =
+      'events_onboarding_completed';
 
   static final OnboardingService _instance = OnboardingService._internal();
   factory OnboardingService() => _instance;

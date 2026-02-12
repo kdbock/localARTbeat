@@ -89,7 +89,9 @@ class DeveloperMenu extends StatelessWidget {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Onboarding reset! Refresh dashboard to see the tour.'),
+                      content: Text(
+                        'Onboarding reset! Refresh dashboard to see the tour.',
+                      ),
                       backgroundColor: Colors.green,
                     ),
                   );

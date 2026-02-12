@@ -7,7 +7,7 @@ import '../utils/logger.dart';
 
 class ChapterPartnerProvider with ChangeNotifier {
   final ChapterPartnerService _service = ChapterPartnerService();
-  
+
   ChapterPartner? _currentChapter;
   List<ChapterPartner> _availableChapters = [];
   bool _isLoading = false;
@@ -39,7 +39,7 @@ class ChapterPartnerProvider with ChangeNotifier {
   Future<void> selectChapter(ChapterPartner? chapter) async {
     _currentChapter = chapter;
     notifyListeners();
-    
+
     final prefs = await SharedPreferences.getInstance();
     if (chapter == null) {
       await prefs.remove('selected_chapter_id');
@@ -57,11 +57,13 @@ class ChapterPartnerProvider with ChangeNotifier {
   Future<void> _loadSavedChapter() async {
     final prefs = await SharedPreferences.getInstance();
     final savedId = prefs.getString('selected_chapter_id');
-    
+
     if (savedId != null) {
       _currentChapter = _availableChapters.firstWhere(
         (c) => c.id == savedId,
-        orElse: () => _availableChapters.isNotEmpty ? _availableChapters.first : _availableChapters[0], // fallback or null handling needed if list empty
+        orElse: () => _availableChapters.isNotEmpty
+            ? _availableChapters.first
+            : _availableChapters[0], // fallback or null handling needed if list empty
       );
       // Re-validate if savedId exists in current available chapters
       final exists = _availableChapters.any((c) => c.id == savedId);
@@ -77,7 +79,7 @@ class ChapterPartnerProvider with ChangeNotifier {
   /// Auto-detect nearby chapter based on GPS
   Future<void> autoDetectChapter() async {
     if (_isAutoDetecting) return;
-    
+
     _isAutoDetecting = true;
     notifyListeners();
 
@@ -87,16 +89,18 @@ class ChapterPartnerProvider with ChangeNotifier {
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
       }
-      
-      if (permission == LocationPermission.whileInUse || 
+
+      if (permission == LocationPermission.whileInUse ||
           permission == LocationPermission.always) {
         final position = await Geolocator.getCurrentPosition();
-        
+
         // This is a placeholder logic for auto-detection.
         // In a real implementation, we would query chapters by coordinates or use GeoFirestore.
         // For now, we'll just log and maybe suggest the first available one if any.
-        AppLogger.info('Auto-detecting chapter at: ${position.latitude}, ${position.longitude}');
-        
+        AppLogger.info(
+          'Auto-detecting chapter at: ${position.latitude}, ${position.longitude}',
+        );
+
         // TODO: Implement actual proximity check once chapter locations are added to the model
       }
     } catch (e) {

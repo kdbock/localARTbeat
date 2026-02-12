@@ -896,7 +896,8 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
   }
 
   Future<void> _checkOnboarding() async {
-    final isCompleted = await OnboardingService().isArtCommunityOnboardingCompleted();
+    final isCompleted = await OnboardingService()
+        .isArtCommunityOnboardingCompleted();
     if (!isCompleted && mounted) {
       setState(() {
         _showOnboarding = true;
@@ -1087,7 +1088,10 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
                           height: 46,
                           child: IconButton(
                             onPressed: () => Scaffold.of(context).openDrawer(),
-                            icon: const Icon(Icons.menu, color: _LAB.textPrimary),
+                            icon: const Icon(
+                              Icons.menu,
+                              color: _LAB.textPrimary,
+                            ),
                           ),
                         ),
                       ),

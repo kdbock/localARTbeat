@@ -271,7 +271,8 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
           action: 'process_refund',
           category: 'financial',
           targetUserId: transaction.userId,
-          description: 'Processed refund for transaction ${transaction.id} (\$${transaction.amount})',
+          description:
+              'Processed refund for transaction ${transaction.id} (\$${transaction.amount})',
           metadata: {
             'transaction_id': transaction.id,
             'amount': transaction.amount,

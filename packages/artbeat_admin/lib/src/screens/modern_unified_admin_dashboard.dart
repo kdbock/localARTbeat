@@ -172,7 +172,8 @@ class _ModernUnifiedAdminDashboardState
     final pendingReviews = await _contentService.getPendingReviews();
     final allContent = await _unifiedAdminService.getAllContent();
     final contentStats = await _unifiedAdminService.getContentStatistics();
-    final moderationSummary = await _consolidatedService.getPendingModerationSummary();
+    final moderationSummary =
+        await _consolidatedService.getPendingModerationSummary();
 
     if (!mounted) return;
     setState(() {
@@ -1556,25 +1557,33 @@ class _ModernUnifiedAdminDashboardState
                         children: [
                           _buildContentStatCard(
                             'General Reviews',
-                            _pendingModerationSummary['generalReviews']?.toString() ?? '0',
+                            _pendingModerationSummary['generalReviews']
+                                    ?.toString() ??
+                                '0',
                             Icons.rate_review_rounded,
                             const Color(0xFFFFB74D),
                           ),
                           _buildContentStatCard(
                             'Pending Events',
-                            _pendingModerationSummary['pendingEvents']?.toString() ?? '0',
+                            _pendingModerationSummary['pendingEvents']
+                                    ?.toString() ??
+                                '0',
                             Icons.event_note_rounded,
                             const Color(0xFFCE93D8),
                           ),
                           _buildContentStatCard(
                             'Reported Walks',
-                            _pendingModerationSummary['reportedArtWalks']?.toString() ?? '0',
+                            _pendingModerationSummary['reportedArtWalks']
+                                    ?.toString() ??
+                                '0',
                             Icons.flag_rounded,
                             const Color(0xFFFF5722),
                           ),
                           _buildContentStatCard(
                             'Pending Captures',
-                            _pendingModerationSummary['pendingCaptures']?.toString() ?? '0',
+                            _pendingModerationSummary['pendingCaptures']
+                                    ?.toString() ??
+                                '0',
                             Icons.camera_rounded,
                             const Color(0xFF4FC3F7),
                           ),
@@ -1638,8 +1647,10 @@ class _ModernUnifiedAdminDashboardState
                           'Approve and manage community events',
                           Icons.event_rounded,
                           Colors.purpleAccent,
-                          () => Navigator.pushNamed(context, AdminRoutes.eventModeration),
-                          badgeCount: _pendingModerationSummary['pendingEvents'] ?? 0,
+                          () => Navigator.pushNamed(
+                              context, AdminRoutes.eventModeration),
+                          badgeCount:
+                              _pendingModerationSummary['pendingEvents'] ?? 0,
                         ),
                       ),
                       SizedBox(
@@ -1649,8 +1660,11 @@ class _ModernUnifiedAdminDashboardState
                           'Review and moderate user-created walks',
                           Icons.route_rounded,
                           Colors.tealAccent,
-                          () => Navigator.pushNamed(context, AdminRoutes.artWalkModeration),
-                          badgeCount: _pendingModerationSummary['reportedArtWalks'] ?? 0,
+                          () => Navigator.pushNamed(
+                              context, AdminRoutes.artWalkModeration),
+                          badgeCount:
+                              _pendingModerationSummary['reportedArtWalks'] ??
+                                  0,
                         ),
                       ),
                       SizedBox(
@@ -1660,8 +1674,10 @@ class _ModernUnifiedAdminDashboardState
                           'Moderate artwork captures and reports',
                           Icons.camera_rounded,
                           Colors.orangeAccent,
-                          () => Navigator.pushNamed(context, AdminRoutes.contentModeration),
-                          badgeCount: _pendingModerationSummary['pendingCaptures'] ?? 0,
+                          () => Navigator.pushNamed(
+                              context, AdminRoutes.contentModeration),
+                          badgeCount:
+                              _pendingModerationSummary['pendingCaptures'] ?? 0,
                         ),
                       ),
                       SizedBox(
@@ -1671,8 +1687,10 @@ class _ModernUnifiedAdminDashboardState
                           'Moderate community-uploaded artworks',
                           Icons.brush_rounded,
                           Colors.pinkAccent,
-                          () => Navigator.pushNamed(context, AdminRoutes.artworkModeration),
-                          badgeCount: _pendingModerationSummary['pendingArtworks'] ?? 0,
+                          () => Navigator.pushNamed(
+                              context, AdminRoutes.artworkModeration),
+                          badgeCount:
+                              _pendingModerationSummary['pendingArtworks'] ?? 0,
                         ),
                       ),
                       SizedBox(
@@ -1682,9 +1700,13 @@ class _ModernUnifiedAdminDashboardState
                           'Moderate flagged posts and comments',
                           Icons.forum_rounded,
                           Colors.blueAccent,
-                          () => Navigator.pushNamed(context, AdminRoutes.communityModeration),
-                          badgeCount: (_pendingModerationSummary['flaggedPosts'] ?? 0) +
-                                     (_pendingModerationSummary['flaggedComments'] ?? 0),
+                          () => Navigator.pushNamed(
+                              context, AdminRoutes.communityModeration),
+                          badgeCount:
+                              (_pendingModerationSummary['flaggedPosts'] ?? 0) +
+                                  (_pendingModerationSummary[
+                                          'flaggedComments'] ??
+                                      0),
                         ),
                       ),
                       SizedBox(
@@ -1694,7 +1716,8 @@ class _ModernUnifiedAdminDashboardState
                           'Administrative data upload utilities',
                           Icons.upload_file_rounded,
                           Colors.indigoAccent,
-                          () => Navigator.pushNamed(context, AdminRoutes.dataUpload),
+                          () => Navigator.pushNamed(
+                              context, AdminRoutes.dataUpload),
                         ),
                       ),
                     ],
@@ -1920,7 +1943,8 @@ class _ModernUnifiedAdminDashboardState
   }
 
   Widget _buildModerationSuiteTile(String title, String subtitle, IconData icon,
-      Color color, VoidCallback onTap, {int badgeCount = 0}) {
+      Color color, VoidCallback onTap,
+      {int badgeCount = 0}) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),

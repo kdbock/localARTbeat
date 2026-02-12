@@ -13,7 +13,14 @@ class AdminAuditLogsScreen extends StatefulWidget {
 class _AdminAuditLogsScreenState extends State<AdminAuditLogsScreen> {
   final AuditTrailService _auditService = AuditTrailService();
   String? _selectedCategory;
-  final List<String> _categories = ['all', 'user', 'security', 'content', 'system', 'payment'];
+  final List<String> _categories = [
+    'all',
+    'user',
+    'security',
+    'content',
+    'system',
+    'payment'
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -50,10 +57,12 @@ class _AdminAuditLogsScreenState extends State<AdminAuditLogsScreen> {
                 if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 }
-                
+
                 var logs = snapshot.data ?? [];
                 if (_selectedCategory != null && _selectedCategory != 'all') {
-                  logs = logs.where((log) => log.category == _selectedCategory).toList();
+                  logs = logs
+                      .where((log) => log.category == _selectedCategory)
+                      .toList();
                 }
 
                 if (logs.isEmpty) {
@@ -63,7 +72,8 @@ class _AdminAuditLogsScreenState extends State<AdminAuditLogsScreen> {
                 return ListView.builder(
                   padding: const EdgeInsets.all(16),
                   itemCount: logs.length,
-                  itemBuilder: (context, index) => _buildAuditLogCard(logs[index]),
+                  itemBuilder: (context, index) =>
+                      _buildAuditLogCard(logs[index]),
                 );
               },
             ),
@@ -79,24 +89,27 @@ class _AdminAuditLogsScreenState extends State<AdminAuditLogsScreen> {
       color: Colors.grey[100],
       child: Row(
         children: [
-          const Text('Category:', style: TextStyle(fontWeight: FontWeight.bold)),
+          const Text('Category:',
+              style: TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(width: 12),
           Expanded(
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
-                children: _categories.map((cat) => Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: ChoiceChip(
-                    label: Text(cat.toUpperCase()),
-                    selected: (_selectedCategory ?? 'all') == cat,
-                    onSelected: (selected) {
-                      setState(() {
-                        _selectedCategory = selected ? cat : 'all';
-                      });
-                    },
-                  ),
-                )).toList(),
+                children: _categories
+                    .map((cat) => Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: ChoiceChip(
+                            label: Text(cat.toUpperCase()),
+                            selected: (_selectedCategory ?? 'all') == cat,
+                            onSelected: (selected) {
+                              setState(() {
+                                _selectedCategory = selected ? cat : 'all';
+                              });
+                            },
+                          ),
+                        ))
+                    .toList(),
               ),
             ),
           ),
@@ -110,7 +123,8 @@ class _AdminAuditLogsScreenState extends State<AdminAuditLogsScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
         leading: _getSeverityIcon(log.severity),
-        title: Text(log.action, style: const TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(log.action,
+            style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -119,7 +133,8 @@ class _AdminAuditLogsScreenState extends State<AdminAuditLogsScreen> {
             Text('Time: ${_formatDate(log.timestamp)}'),
             if (log.metadata.isNotEmpty) ...[
               const SizedBox(height: 4),
-              Text('Metadata: ${log.metadata.toString()}', 
+              Text(
+                'Metadata: ${log.metadata.toString()}',
                 style: TextStyle(fontSize: 11, color: Colors.grey[600]),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -137,10 +152,19 @@ class _AdminAuditLogsScreenState extends State<AdminAuditLogsScreen> {
     IconData icon;
     Color color;
     switch (severity.toLowerCase()) {
-      case 'critical': icon = Icons.error; color = Colors.red; break;
-      case 'warning': icon = Icons.warning; color = Colors.orange; break;
-      case 'info': 
-      default: icon = Icons.info; color = Colors.blue; break;
+      case 'critical':
+        icon = Icons.error;
+        color = Colors.red;
+        break;
+      case 'warning':
+        icon = Icons.warning;
+        color = Colors.orange;
+        break;
+      case 'info':
+      default:
+        icon = Icons.info;
+        color = Colors.blue;
+        break;
     }
     return Icon(icon, color: color);
   }

@@ -51,10 +51,12 @@ class ArtCommunityTourOverlay extends StatefulWidget {
   });
 
   @override
-  State<ArtCommunityTourOverlay> createState() => _ArtCommunityTourOverlayState();
+  State<ArtCommunityTourOverlay> createState() =>
+      _ArtCommunityTourOverlayState();
 }
 
-class _ArtCommunityTourOverlayState extends State<ArtCommunityTourOverlay> with SingleTickerProviderStateMixin {
+class _ArtCommunityTourOverlayState extends State<ArtCommunityTourOverlay>
+    with SingleTickerProviderStateMixin {
   int _currentStepIndex = 0;
   late List<ArtCommunityTourStep> _steps;
   late AnimationController _animationController;
@@ -80,7 +82,8 @@ class _ArtCommunityTourOverlayState extends State<ArtCommunityTourOverlay> with 
       ArtCommunityTourStep(
         targetKey: widget.titleKey,
         title: 'ART COMMUNITY HUB',
-        description: 'Your central hub for connecting with artists and art enthusiasts.',
+        description:
+            'Your central hub for connecting with artists and art enthusiasts.',
         accentColor: ArtbeatColors.primaryGreen,
         details: [
           'Share your art journey',
@@ -92,7 +95,8 @@ class _ArtCommunityTourOverlayState extends State<ArtCommunityTourOverlay> with 
       ArtCommunityTourStep(
         targetKey: widget.searchKey,
         title: 'COMMUNITY SEARCH',
-        description: 'Find specific posts, artists, or artwork within the community.',
+        description:
+            'Find specific posts, artists, or artwork within the community.',
         accentColor: ArtbeatColors.primaryBlue,
         details: [
           'Search community posts',
@@ -105,7 +109,8 @@ class _ArtCommunityTourOverlayState extends State<ArtCommunityTourOverlay> with 
       ArtCommunityTourStep(
         targetKey: widget.feedTabKey,
         title: 'COMMUNITY FEED',
-        description: 'Stay updated with the latest posts and community activity.',
+        description:
+            'Stay updated with the latest posts and community activity.',
         accentColor: const Color(0xFF7C4DFF),
         details: [
           'View recent posts',
@@ -203,7 +208,8 @@ class _ArtCommunityTourOverlayState extends State<ArtCommunityTourOverlay> with 
       ArtCommunityTourStep(
         targetKey: widget.commissionArtistsKey,
         title: 'COMMISSION ARTISTS',
-        description: 'Connect with artists who offer custom commission services.',
+        description:
+            'Connect with artists who offer custom commission services.',
         accentColor: const Color(0xFF06FFA5),
         details: [
           'Artist specialties',
@@ -235,28 +241,28 @@ class _ArtCommunityTourOverlayState extends State<ArtCommunityTourOverlay> with 
   }
 
   void _ensureStepVisible() {
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      // Shorter delay to allow layout to settle
-      await Future<void>.delayed(const Duration(milliseconds: 100));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
 
       final targetContext = _steps[_currentStepIndex].targetKey.currentContext;
       if (targetContext == null) return;
 
-      final renderBox = targetContext.findRenderObject() as RenderBox?; // ignore: use_build_context_synchronously
+      final renderBox = targetContext.findRenderObject() as RenderBox?;
       if (renderBox == null) return;
 
-      final position = renderBox.localToGlobal(Offset.zero); // ignore: use_build_context_synchronously
+      final position = renderBox.localToGlobal(Offset.zero);
       final size = renderBox.size;
-      final screenHeight = MediaQuery.of(targetContext).size.height; // ignore: use_build_context_synchronously
+      final screenHeight = MediaQuery.of(targetContext).size.height;
 
       // Only scroll if the item is not comfortably in view
       // (allowing some margin for the callout box)
-      final bool isInView = position.dy > 100 && (position.dy + size.height) < (screenHeight - 150);
+      final bool isInView =
+          position.dy > 100 &&
+          (position.dy + size.height) < (screenHeight - 150);
 
-      if (!isInView) {
-        await Scrollable.ensureVisible(
-          targetContext, // ignore: use_build_context_synchronously
+      if (!isInView && mounted) {
+        Scrollable.ensureVisible(
+          targetContext,
           duration: const Duration(milliseconds: 400),
           curve: Curves.easeInOut,
           alignment: 0.5,
@@ -357,7 +363,9 @@ class _ArtCommunityTourOverlayState extends State<ArtCommunityTourOverlay> with 
               opacity: _fadeAnimation,
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  maxHeight: bottom != null ? (screenHeight - bottom - topSafetyMargin) : (screenHeight - (top ?? 0) - 40),
+                  maxHeight: bottom != null
+                      ? (screenHeight - bottom - topSafetyMargin)
+                      : (screenHeight - (top ?? 0) - 40),
                 ),
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
@@ -385,7 +393,10 @@ class _ArtCommunityTourOverlayState extends State<ArtCommunityTourOverlay> with 
     required double screenWidth,
   }) {
     // Determine which arrow to show and its alignment
-    final double arrowHorizontalPos = (targetCenterX - 20).clamp(20.0, screenWidth - 60);
+    final double arrowHorizontalPos = (targetCenterX - 20).clamp(
+      20.0,
+      screenWidth - 60,
+    );
 
     return Stack(
       children: [
@@ -464,24 +475,30 @@ class _ArtCommunityTourOverlayState extends State<ArtCommunityTourOverlay> with 
               ),
               const SizedBox(height: 20),
               const SizedBox(height: 20),
-              ...step.details.map((detail) => Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Row(
-                  children: [
-                    Icon(Icons.auto_awesome, size: 14, color: step.accentColor),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        detail,
-                        style: GoogleFonts.spaceGrotesk(
-                          fontSize: 14,
-                          color: Colors.white.withValues(alpha: 0.7),
+              ...step.details.map(
+                (detail) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.auto_awesome,
+                        size: 14,
+                        color: step.accentColor,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          detail,
+                          style: GoogleFonts.spaceGrotesk(
+                            fontSize: 14,
+                            color: Colors.white.withValues(alpha: 0.7),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              )),
+              ),
               const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -503,10 +520,15 @@ class _ArtCommunityTourOverlayState extends State<ArtCommunityTourOverlay> with 
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
                     ),
                     child: Text(
-                      _currentStepIndex == _steps.length - 1 ? 'GOT IT!' : 'NEXT',
+                      _currentStepIndex == _steps.length - 1
+                          ? 'GOT IT!'
+                          : 'NEXT',
                       style: GoogleFonts.spaceGrotesk(
                         fontWeight: FontWeight.w800,
                         letterSpacing: 0,
@@ -546,16 +568,24 @@ class _SpotlightPainter extends CustomPainter {
 
     // Add padding around the target for better visibility
     const double padding = 8.0;
-    final expandedPosition = Offset(position.dx - padding, position.dy - padding);
-    final expandedSize = Size(size.width + 2 * padding, size.height + 2 * padding);
+    final expandedPosition = Offset(
+      position.dx - padding,
+      position.dy - padding,
+    );
+    final expandedSize = Size(
+      size.width + 2 * padding,
+      size.height + 2 * padding,
+    );
 
     // Create a path for the spotlight (inverse of the rectangle)
     final path = Path()
       ..addRect(Offset.zero & canvasSize)
-      ..addRRect(RRect.fromRectAndRadius(
-        expandedPosition & expandedSize,
-        const Radius.circular(12),
-      ))
+      ..addRRect(
+        RRect.fromRectAndRadius(
+          expandedPosition & expandedSize,
+          const Radius.circular(12),
+        ),
+      )
       ..fillType = PathFillType.evenOdd;
 
     canvas.drawPath(path, paint);
@@ -571,9 +601,9 @@ class _SpotlightPainter extends CustomPainter {
   @override
   bool shouldRepaint(_SpotlightPainter oldDelegate) {
     return oldDelegate.position != position ||
-           oldDelegate.size != size ||
-           oldDelegate.color != color ||
-           oldDelegate.accentColor != accentColor;
+        oldDelegate.size != size ||
+        oldDelegate.color != color ||
+        oldDelegate.accentColor != accentColor;
   }
 }
 
@@ -583,10 +613,7 @@ class _ArrowPainter extends CustomPainter {
   final Color color;
   final ArrowDirection direction;
 
-  _ArrowPainter({
-    required this.color,
-    required this.direction,
-  });
+  _ArrowPainter({required this.color, required this.direction});
 
   @override
   void paint(Canvas canvas, Size size) {

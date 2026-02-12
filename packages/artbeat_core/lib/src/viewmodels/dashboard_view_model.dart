@@ -240,9 +240,9 @@ class DashboardViewModel extends ChangeNotifier {
   /// Update active chapter and reload data
   void updateChapter(String? newChapterId) {
     if (chapterId == newChapterId) return;
-    
+
     chapterId = newChapterId;
-    
+
     // If already initialized, trigger a refresh
     if (_isInitialized) {
       refresh();
@@ -251,9 +251,11 @@ class DashboardViewModel extends ChangeNotifier {
 
   List<EventModel> get events => _isDisposed ? [] : List.unmodifiable(_events);
   List<EventModel> get upcomingEvents => List.unmodifiable(_upcomingEvents);
-  List<ArtworkModel> get artwork => _isDisposed ? [] : List.unmodifiable(_artwork);
+  List<ArtworkModel> get artwork =>
+      _isDisposed ? [] : List.unmodifiable(_artwork);
   List<ArtworkModel> get books => _isDisposed ? [] : List.unmodifiable(_books);
-  List<ArtistProfileModel> get artists => _isDisposed ? [] : List.unmodifiable(_artists);
+  List<ArtistProfileModel> get artists =>
+      _isDisposed ? [] : List.unmodifiable(_artists);
   Set<Marker> get markers => Set.unmodifiable(_markers);
   Position? get currentLocation => _currentLocation;
   List<artWalkLib.AchievementModel> get achievements =>
@@ -343,7 +345,9 @@ class DashboardViewModel extends ChangeNotifier {
       _isLoadingEvents = true;
       if (notify) _safeNotifyListeners();
 
-      final events = await _eventService.getUpcomingPublicEvents(chapterId: chapterId);
+      final events = await _eventService.getUpcomingPublicEvents(
+        chapterId: chapterId,
+      );
       _events = events.map((e) {
         final coverImage = _selectBestEventImage(e);
         final artistImage = _normalizeImageUrl(e.artistHeadshotUrl);
@@ -381,7 +385,9 @@ class DashboardViewModel extends ChangeNotifier {
       if (notify) _safeNotifyListeners();
 
       // Try featured artwork first, fallback to public artwork
-      var artworkServiceModels = await _artworkService.getFeaturedArtwork(chapterId: chapterId);
+      var artworkServiceModels = await _artworkService.getFeaturedArtwork(
+        chapterId: chapterId,
+      );
       if (artworkServiceModels.isEmpty) {
         AppLogger.info('No featured artwork found, loading public artwork...');
         artworkServiceModels = await _artworkService.getAllPublicArtwork(

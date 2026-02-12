@@ -24,17 +24,22 @@ class _ChapterLandingScreenState extends State<ChapterLandingScreen> {
   Future<void> _loadChapterData() async {
     setState(() => _isLoadingQuests = true);
     try {
-      final quests = await _chapterService.getQuestsForChapter(widget.chapterId);
+      final quests = await _chapterService.getQuestsForChapter(
+        widget.chapterId,
+      );
       setState(() {
         _quests = quests;
         _isLoadingQuests = false;
       });
-      
+
       // Track view
       if (!mounted) return;
       final userProvider = context.read<UserService>();
       if (userProvider.currentUser != null) {
-        await _chapterService.trackChapterView(widget.chapterId, userProvider.currentUser!.uid);
+        await _chapterService.trackChapterView(
+          widget.chapterId,
+          userProvider.currentUser!.uid,
+        );
       }
     } catch (e) {
       AppLogger.error('Error loading chapter data: $e');
@@ -48,14 +53,15 @@ class _ChapterLandingScreenState extends State<ChapterLandingScreen> {
     final chapter = chapterProvider.currentChapter;
 
     if (chapter == null) {
-      return const Scaffold(
-        body: Center(child: Text('No Chapter Selected')),
-      );
+      return const Scaffold(body: Center(child: Text('No Chapter Selected')));
     }
 
     final branding = chapter.brandingConfig;
     // Parse colors from hex if possible, fallback to theme colors
-    final primaryColor = _parseColor(branding.primaryColor, ArtbeatColors.primaryPurple);
+    final primaryColor = _parseColor(
+      branding.primaryColor,
+      ArtbeatColors.primaryPurple,
+    );
 
     return Scaffold(
       backgroundColor: ArtbeatColors.backgroundDark,
@@ -96,7 +102,9 @@ class _ChapterLandingScreenState extends State<ChapterLandingScreen> {
             if (branding.bannerImageUrl.isNotEmpty)
               Image.network(branding.bannerImageUrl, fit: BoxFit.cover)
             else
-              Container(color: ArtbeatColors.primaryPurple.withValues(alpha: 0.3)),
+              Container(
+                color: ArtbeatColors.primaryPurple.withValues(alpha: 0.3),
+              ),
             Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -124,7 +132,9 @@ class _ChapterLandingScreenState extends State<ChapterLandingScreen> {
                   const SizedBox(height: 8),
                   Text(
                     branding.shortDescription,
-                    style: ArtbeatTypography.body.copyWith(color: Colors.white70),
+                    style: ArtbeatTypography.body.copyWith(
+                      color: Colors.white70,
+                    ),
                   ),
                 ],
               ),
@@ -134,7 +144,8 @@ class _ChapterLandingScreenState extends State<ChapterLandingScreen> {
       ),
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
-        onPressed: () => context.read<ChapterPartnerProvider>().switchToRegional(),
+        onPressed: () =>
+            context.read<ChapterPartnerProvider>().switchToRegional(),
       ),
     );
   }
@@ -154,7 +165,10 @@ class _ChapterLandingScreenState extends State<ChapterLandingScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(chapter.name, style: ArtbeatTypography.h2),
-              Text(chapter.partnerType.value.toUpperCase(), style: ArtbeatTypography.badge),
+              Text(
+                chapter.partnerType.value.toUpperCase(),
+                style: ArtbeatTypography.badge,
+              ),
             ],
           ),
         ),
@@ -172,10 +186,7 @@ class _ChapterLandingScreenState extends State<ChapterLandingScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text('Active Quests', style: ArtbeatTypography.h3),
-            TextButton(
-              onPressed: () {},
-              child: const Text('See All'),
-            ),
+            TextButton(onPressed: () {}, child: const Text('See All')),
           ],
         ),
         const SizedBox(height: 8),
@@ -189,7 +200,8 @@ class _ChapterLandingScreenState extends State<ChapterLandingScreen> {
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: _quests.length,
-              itemBuilder: (context, index) => _buildQuestCard(_quests[index], primaryColor),
+              itemBuilder: (context, index) =>
+                  _buildQuestCard(_quests[index], primaryColor),
             ),
           ),
       ],
@@ -218,12 +230,18 @@ class _ChapterLandingScreenState extends State<ChapterLandingScreen> {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: ArtbeatColors.accentYellow.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Text('+${quest.xpReward} XP', style: ArtbeatTypography.badge),
+                  child: Text(
+                    '+${quest.xpReward} XP',
+                    style: ArtbeatTypography.badge,
+                  ),
                 ),
               ],
             ),
@@ -237,10 +255,7 @@ class _ChapterLandingScreenState extends State<ChapterLandingScreen> {
             const Spacer(),
             SizedBox(
               width: double.infinity,
-              child: HudButton(
-                text: 'Start Quest',
-                onPressed: () {},
-              ),
+              child: HudButton(text: 'Start Quest', onPressed: () {}),
             ),
           ],
         ),
@@ -256,10 +271,7 @@ class _ChapterLandingScreenState extends State<ChapterLandingScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(title, style: ArtbeatTypography.h3),
-            TextButton(
-              onPressed: () {},
-              child: const Text('See All'),
-            ),
+            TextButton(onPressed: () {}, child: const Text('See All')),
           ],
         ),
         const SizedBox(height: 8),
@@ -296,10 +308,14 @@ class _ChapterLandingScreenState extends State<ChapterLandingScreen> {
 
   IconData _getQuestIcon(String iconName) {
     switch (iconName) {
-      case 'map': return Icons.map;
-      case 'camera': return Icons.camera_alt;
-      case 'walk': return Icons.directions_walk;
-      default: return Icons.flag;
+      case 'map':
+        return Icons.map;
+      case 'camera':
+        return Icons.camera_alt;
+      case 'walk':
+        return Icons.directions_walk;
+      default:
+        return Icons.flag;
     }
   }
 }

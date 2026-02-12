@@ -8,7 +8,8 @@ class AdminFlaggingQueueScreen extends StatefulWidget {
   const AdminFlaggingQueueScreen({super.key});
 
   @override
-  State<AdminFlaggingQueueScreen> createState() => _AdminFlaggingQueueScreenState();
+  State<AdminFlaggingQueueScreen> createState() =>
+      _AdminFlaggingQueueScreenState();
 }
 
 class _AdminFlaggingQueueScreenState extends State<AdminFlaggingQueueScreen> {
@@ -49,7 +50,8 @@ class _AdminFlaggingQueueScreenState extends State<AdminFlaggingQueueScreen> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Are you sure you want to ${approve ? 'approve' : 'reject'} this ${item.type.name}?'),
+            Text(
+                'Are you sure you want to ${approve ? 'approve' : 'reject'} this ${item.type.name}?'),
             const SizedBox(height: 16),
             TextField(
               controller: notesController,
@@ -81,15 +83,16 @@ class _AdminFlaggingQueueScreenState extends State<AdminFlaggingQueueScreen> {
     if (confirmed == true) {
       setState(() => _isLoading = true);
       try {
-        await _queueService.resolveItem(
-          item, 
-          approve, 
-          notes: notesController.text.trim().isEmpty ? null : notesController.text.trim()
-        );
+        await _queueService.resolveItem(item, approve,
+            notes: notesController.text.trim().isEmpty
+                ? null
+                : notesController.text.trim());
         await _loadQueue();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Item ${approve ? 'approved' : 'rejected'} successfully')),
+            SnackBar(
+                content: Text(
+                    'Item ${approve ? 'approved' : 'rejected'} successfully')),
           );
         }
       } catch (e) {
@@ -131,7 +134,7 @@ class _AdminFlaggingQueueScreenState extends State<AdminFlaggingQueueScreen> {
         ],
       ),
       drawer: const AdminDrawer(),
-      child: _isLoading 
+      child: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _flaggedItems.isEmpty
               ? _buildEmptyState()
@@ -140,7 +143,8 @@ class _AdminFlaggingQueueScreenState extends State<AdminFlaggingQueueScreen> {
                   child: ListView.builder(
                     padding: const EdgeInsets.all(16),
                     itemCount: _flaggedItems.length,
-                    itemBuilder: (context, index) => _buildFlaggedItemCard(_flaggedItems[index]),
+                    itemBuilder: (context, index) =>
+                        _buildFlaggedItemCard(_flaggedItems[index]),
                   ),
                 ),
     );
@@ -198,11 +202,13 @@ class _AdminFlaggingQueueScreenState extends State<AdminFlaggingQueueScreen> {
                 const SizedBox(width: 4),
                 Text(
                   'By: ${item.authorName}',
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 12, fontWeight: FontWeight.bold),
                 ),
                 if (item.reason != null) ...[
                   const SizedBox(width: 16),
-                  const Icon(Icons.warning_amber, size: 16, color: Colors.orange),
+                  const Icon(Icons.warning_amber,
+                      size: 16, color: Colors.orange),
                   const SizedBox(width: 4),
                   Text(
                     item.reason!,
@@ -218,7 +224,8 @@ class _AdminFlaggingQueueScreenState extends State<AdminFlaggingQueueScreen> {
                 TextButton.icon(
                   onPressed: () => _handleResolve(item, false),
                   icon: const Icon(Icons.close, color: Colors.red),
-                  label: const Text('Reject', style: TextStyle(color: Colors.red)),
+                  label:
+                      const Text('Reject', style: TextStyle(color: Colors.red)),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton.icon(
@@ -241,12 +248,24 @@ class _AdminFlaggingQueueScreenState extends State<AdminFlaggingQueueScreen> {
   Widget _getTypeChip(FlaggedItemType type) {
     Color color;
     switch (type) {
-      case FlaggedItemType.post: color = Colors.blue; break;
-      case FlaggedItemType.comment: color = Colors.purple; break;
-      case FlaggedItemType.artwork: color = Colors.teal; break;
-      case FlaggedItemType.capture: color = Colors.indigo; break;
-      case FlaggedItemType.event: color = Colors.deepOrange; break;
-      case FlaggedItemType.report: color = Colors.red; break;
+      case FlaggedItemType.post:
+        color = Colors.blue;
+        break;
+      case FlaggedItemType.comment:
+        color = Colors.purple;
+        break;
+      case FlaggedItemType.artwork:
+        color = Colors.teal;
+        break;
+      case FlaggedItemType.capture:
+        color = Colors.indigo;
+        break;
+      case FlaggedItemType.event:
+        color = Colors.deepOrange;
+        break;
+      case FlaggedItemType.report:
+        color = Colors.red;
+        break;
     }
 
     return Container(

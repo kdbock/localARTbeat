@@ -240,7 +240,8 @@ class _WrittenContentDetailScreenState
 
       // Check ownership and access
       final currentUser = _auth.currentUser;
-      _isOwner = currentUser?.uid == artwork.userId ||
+      _isOwner =
+          currentUser?.uid == artwork.userId ||
           currentUser?.uid == artwork.artistProfileId;
 
       // Check if user is admin - more robust check
@@ -439,17 +440,16 @@ class _WrittenContentDetailScreenState
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child:
-                      _artwork?.imageUrl != null
-                          ? Image.network(_artwork!.imageUrl, fit: BoxFit.cover)
-                          : Container(
-                              color: Colors.grey[800],
-                              child: const Icon(
-                                Icons.book,
-                                size: 64,
-                                color: Colors.white54,
-                              ),
-                            ),
+                  child: _artwork?.imageUrl != null
+                      ? Image.network(_artwork!.imageUrl, fit: BoxFit.cover)
+                      : Container(
+                          color: Colors.grey[800],
+                          child: const Icon(
+                            Icons.book,
+                            size: 64,
+                            color: Colors.white54,
+                          ),
+                        ),
                 ),
               ),
             ),
@@ -590,10 +590,9 @@ class _WrittenContentDetailScreenState
                     Text(
                       _artwork!.description,
                       maxLines: _isDescriptionExpanded ? null : 4,
-                      overflow:
-                          _isDescriptionExpanded
-                              ? TextOverflow.visible
-                              : TextOverflow.ellipsis,
+                      overflow: _isDescriptionExpanded
+                          ? TextOverflow.visible
+                          : TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: Colors.grey[700],
                         height: 1.5,
@@ -618,10 +617,8 @@ class _WrittenContentDetailScreenState
                             ),
                           ),
                           child: TextButton(
-                            onPressed:
-                                () => setState(
-                                  () => _isDescriptionExpanded = true,
-                                ),
+                            onPressed: () =>
+                                setState(() => _isDescriptionExpanded = true),
                             style: TextButton.styleFrom(
                               padding: EdgeInsets.zero,
                               minimumSize: Size.zero,
@@ -635,7 +632,8 @@ class _WrittenContentDetailScreenState
                 ),
                 if (_isDescriptionExpanded)
                   TextButton(
-                    onPressed: () => setState(() => _isDescriptionExpanded = false),
+                    onPressed: () =>
+                        setState(() => _isDescriptionExpanded = false),
                     child: const Text('Show Less'),
                   ),
               ],
@@ -658,9 +656,9 @@ class _WrittenContentDetailScreenState
                 ),
                 Text(
                   '${_chapters.length} Total',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(color: Colors.grey),
                 ),
               ],
             ),
@@ -683,7 +681,6 @@ class _WrittenContentDetailScreenState
       ],
     );
   }
-
 
   Widget _buildChaptersList() {
     if (_chapters.isEmpty) {
@@ -750,8 +747,9 @@ class _WrittenContentDetailScreenState
                       Text(
                         chapter.title,
                         style: TextStyle(
-                          fontWeight:
-                              isSelected ? FontWeight.bold : FontWeight.w500,
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.w500,
                           fontSize: 16,
                           color: isSelected ? Colors.blue : null,
                         ),
@@ -835,24 +833,33 @@ class _WrittenContentDetailScreenState
                                 ],
                               ),
                             ),
-                          
+
                           // Moderation Status (only for owner/admin)
-                          if ((_isOwner || _isAdmin) && chapter.moderationStatus != ChapterModerationStatus.approved)
+                          if ((_isOwner || _isAdmin) &&
+                              chapter.moderationStatus !=
+                                  ChapterModerationStatus.approved)
                             Padding(
                               padding: const EdgeInsets.only(left: 12),
                               child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: chapter.moderationStatus == ChapterModerationStatus.rejected 
-                                      ? Colors.red.withValues(alpha: 0.1) 
+                                  color:
+                                      chapter.moderationStatus ==
+                                          ChapterModerationStatus.rejected
+                                      ? Colors.red.withValues(alpha: 0.1)
                                       : Colors.orange.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(
                                   chapter.moderationStatus.displayName,
                                   style: TextStyle(
-                                    color: chapter.moderationStatus == ChapterModerationStatus.rejected 
-                                        ? Colors.red 
+                                    color:
+                                        chapter.moderationStatus ==
+                                            ChapterModerationStatus.rejected
+                                        ? Colors.red
                                         : Colors.orange,
                                     fontSize: 10,
                                     fontWeight: FontWeight.bold,
@@ -870,16 +877,22 @@ class _WrittenContentDetailScreenState
                 if (!isUnlocked)
                   Icon(Icons.lock_outline, color: Colors.grey[400], size: 20)
                 else if (isSelected)
-                  const Icon(Icons.play_circle_fill, color: Colors.blue, size: 24)
+                  const Icon(
+                    Icons.play_circle_fill,
+                    color: Colors.blue,
+                    size: 24,
+                  )
                 else
-                  Icon(Icons.play_circle_outline, color: Colors.grey[400], size: 24),
+                  Icon(
+                    Icons.play_circle_outline,
+                    color: Colors.grey[400],
+                    size: 24,
+                  ),
               ],
             ),
           ),
         );
-      },
-        childCount: _chapters.length,
-      ),
+      }, childCount: _chapters.length),
     );
   }
 
@@ -929,20 +942,17 @@ class _WrittenContentDetailScreenState
                 width: double.infinity,
                 height: 54,
                 child: ElevatedButton(
-                  onPressed:
-                      isEngagementEligible
-                          ? () {
-                            Navigator.pop(context);
-                            _navigateToChapter(
-                              _chapters.indexWhere(
-                                (c) => c.id == chapter.id,
-                              ),
-                            );
-                          }
-                          : () {
-                            Navigator.pop(context);
-                            _purchaseChapter(chapter);
-                          },
+                  onPressed: isEngagementEligible
+                      ? () {
+                          Navigator.pop(context);
+                          _navigateToChapter(
+                            _chapters.indexWhere((c) => c.id == chapter.id),
+                          );
+                        }
+                      : () {
+                          Navigator.pop(context);
+                          _purchaseChapter(chapter);
+                        },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     foregroundColor: Colors.white,
@@ -1000,7 +1010,8 @@ class _WrittenContentDetailScreenState
   }
 
   Widget _buildReadingView() {
-    if (_currentChapter == null) return const SliverToBoxAdapter(child: SizedBox.shrink());
+    if (_currentChapter == null)
+      return const SliverToBoxAdapter(child: SizedBox.shrink());
 
     if (!_isChapterUnlocked(_currentChapter!)) {
       final chapterNumber =
@@ -1083,10 +1094,11 @@ class _WrittenContentDetailScreenState
                       const SizedBox(height: 8),
                       Text(
                         _currentChapter!.title,
-                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
+                        style: Theme.of(context).textTheme.headlineMedium
+                            ?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
                       ),
                     ],
                   ),
@@ -1236,10 +1248,10 @@ class _WrittenContentDetailScreenState
 
     final isUnlocked = _isChapterUnlocked(_currentChapter!);
     final String label = isUnlocked
-      ? (_currentChapterIndex == 0
-        ? 'START READING'
-        : 'CONTINUE CH. ${_currentChapterIndex + 1}')
-      : 'UNLOCK CH. ${_currentChapterIndex + 1}';
+        ? (_currentChapterIndex == 0
+              ? 'START READING'
+              : 'CONTINUE CH. ${_currentChapterIndex + 1}')
+        : 'UNLOCK CH. ${_currentChapterIndex + 1}';
 
     return Positioned(
       bottom: 24,
@@ -1316,8 +1328,7 @@ class _WrittenContentDetailScreenState
       final intentData = await _paymentService.createPaymentIntent(
         amount: totalAmount,
         currency: 'USD',
-        description:
-            'Unlock chapter $chapterNumber of ${_artwork!.title}',
+        description: 'Unlock chapter $chapterNumber of ${_artwork!.title}',
         metadata: {
           'artworkId': widget.artworkId,
           'artistId': _artwork!.artistProfileId,
@@ -1505,4 +1516,3 @@ class _WrittenContentDetailScreenState
     );
   }
 }
-

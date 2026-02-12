@@ -30,9 +30,7 @@ class UserProfileScreen extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             user.displayName,
-            style: theme.textTheme.headlineSmall?.copyWith(
-              color: Colors.white,
-            ),
+            style: theme.textTheme.headlineSmall?.copyWith(color: Colors.white),
           ),
         ],
       ),

@@ -43,7 +43,8 @@ class DashboardTourOverlay extends StatefulWidget {
   State<DashboardTourOverlay> createState() => _DashboardTourOverlayState();
 }
 
-class _DashboardTourOverlayState extends State<DashboardTourOverlay> with SingleTickerProviderStateMixin {
+class _DashboardTourOverlayState extends State<DashboardTourOverlay>
+    with SingleTickerProviderStateMixin {
   int _currentStepIndex = 0;
   late List<TourStep> _steps;
   late AnimationController _animationController;
@@ -149,40 +150,28 @@ class _DashboardTourOverlayState extends State<DashboardTourOverlay> with Single
         title: 'HOME BASE',
         description: 'Your central starting point for everything.',
         accentColor: ArtbeatColors.secondaryTeal,
-        details: [
-          'Quick return to dashboard',
-          'View latest highlights',
-        ],
+        details: ['Quick return to dashboard', 'View latest highlights'],
       ),
       TourStep(
         targetKey: widget.walkNavKey,
         title: 'ART WALKS',
         description: 'Embark on curated walking tours.',
         accentColor: ArtbeatColors.primaryBlue,
-        details: [
-          'Discover themed routes',
-          'Learn about local history',
-        ],
+        details: ['Discover themed routes', 'Learn about local history'],
       ),
       TourStep(
         targetKey: widget.captureNavKey,
         title: 'QUICK CAPTURE',
         description: 'Launch the camera instantly.',
         accentColor: ArtbeatColors.accentYellow,
-        details: [
-          'Never miss a piece of art',
-          'One-tap camera access',
-        ],
+        details: ['Never miss a piece of art', 'One-tap camera access'],
       ),
       TourStep(
         targetKey: widget.communityNavKey,
         title: 'SOCIAL FEED',
         description: 'The heartbeat of the art community.',
         accentColor: ArtbeatColors.accentOrange,
-        details: [
-          'See what others are finding',
-          'Stay connected on the go',
-        ],
+        details: ['See what others are finding', 'Stay connected on the go'],
       ),
       TourStep(
         targetKey: widget.eventsNavKey,
@@ -205,17 +194,15 @@ class _DashboardTourOverlayState extends State<DashboardTourOverlay> with Single
       curve: Curves.easeIn,
     );
     _animationController.forward();
-    
+
     // Ensure first step is visible
     _ensureStepVisible();
   }
 
   void _ensureStepVisible() {
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      // Shorter delay to allow layout to settle
-      await Future<void>.delayed(const Duration(milliseconds: 100));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      
+
       final context = _steps[_currentStepIndex].targetKey.currentContext;
       if (context != null) {
         final renderBox = context.findRenderObject() as RenderBox?;
@@ -223,20 +210,22 @@ class _DashboardTourOverlayState extends State<DashboardTourOverlay> with Single
           final position = renderBox.localToGlobal(Offset.zero);
           final size = renderBox.size;
           final screenHeight = MediaQuery.of(this.context).size.height;
-          
+
           // Only scroll if the item is not comfortably in view
           // (allowing some margin for the callout box)
-          final bool isInView = position.dy > 100 && (position.dy + size.height) < (screenHeight - 150);
-          
-          if (!isInView) {
-            await Scrollable.ensureVisible(
+          final bool isInView =
+              position.dy > 100 &&
+              (position.dy + size.height) < (screenHeight - 150);
+
+          if (!isInView && mounted) {
+            Scrollable.ensureVisible(
               context,
               duration: const Duration(milliseconds: 400),
               curve: Curves.easeInOut,
               alignment: 0.5,
             );
           }
-          
+
           // Recalculate and rebuild immediately
           if (mounted) setState(() {});
         }
@@ -271,11 +260,12 @@ class _DashboardTourOverlayState extends State<DashboardTourOverlay> with Single
   @override
   Widget build(BuildContext context) {
     final step = _steps[_currentStepIndex];
-    final RenderBox? renderBox = step.targetKey.currentContext?.findRenderObject() as RenderBox?;
-    
+    final RenderBox? renderBox =
+        step.targetKey.currentContext?.findRenderObject() as RenderBox?;
+
     Offset position = Offset.zero;
     Size size = Size.zero;
-    
+
     if (renderBox != null) {
       position = renderBox.localToGlobal(Offset.zero);
       size = renderBox.size;
@@ -283,23 +273,22 @@ class _DashboardTourOverlayState extends State<DashboardTourOverlay> with Single
 
     final double screenHeight = MediaQuery.of(context).size.height;
     final double screenWidth = MediaQuery.of(context).size.width;
-    
+
     // Steps 9-13 (indices 8-12) are bottom navigation
     final bool isBottomNav = _currentStepIndex >= 8;
-    
+
     // Horizontal center of the target for arrow alignment
     final double targetCenterX = position.dx + size.width / 2;
 
     // Margin from the notch/camera area at the top
     final double topSafetyMargin = MediaQuery.of(context).padding.top + 20;
-    
+
     // Position callout based on target position and available space
     double? top;
     double? bottom;
-    
-    final double spaceAbove = position.dy;
+
     final double spaceBelow = screenHeight - (position.dy + size.height);
-    
+
     if (isBottomNav) {
       // Bottom nav items: ALWAYS place callout above them
       bottom = screenHeight - position.dy + 15;
@@ -347,13 +336,15 @@ class _DashboardTourOverlayState extends State<DashboardTourOverlay> with Single
               opacity: _fadeAnimation,
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  maxHeight: bottom != null ? (screenHeight - bottom - topSafetyMargin) : (screenHeight - (top ?? 0) - 40),
+                  maxHeight: bottom != null
+                      ? (screenHeight - bottom - topSafetyMargin)
+                      : (screenHeight - (top ?? 0) - 40),
                 ),
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
                   child: _buildCalloutContent(
-                    step, 
-                    top != null, 
+                    step,
+                    top != null,
                     bottom != null,
                     targetCenterX: targetCenterX,
                     screenWidth: screenWidth,
@@ -368,27 +359,31 @@ class _DashboardTourOverlayState extends State<DashboardTourOverlay> with Single
   }
 
   Widget _buildCalloutContent(
-    TourStep step, 
-    bool isBelowTarget, 
-    bool isAboveTarget,
-    {required double targetCenterX, required double screenWidth}
-  ) {
+    TourStep step,
+    bool isBelowTarget,
+    bool isAboveTarget, {
+    required double targetCenterX,
+    required double screenWidth,
+  }) {
     // Determine which arrow to show and its alignment
     // arrowPadding helps align it directly under/above the target
     // targetCenterX is global, so we need to offset it by the Positioned's left (20)
-    final double arrowHorizontalPos = (targetCenterX - 20).clamp(20.0, screenWidth - 60);
+    final double arrowHorizontalPos = (targetCenterX - 20).clamp(
+      20.0,
+      screenWidth - 60,
+    );
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Arrow pointing up to target (if card is BELOW target)
-        if (isBelowTarget) 
+        if (isBelowTarget)
           Padding(
             padding: EdgeInsets.only(left: arrowHorizontalPos - 20),
             child: _buildArrow(true, step.accentColor),
           ),
-        
+
         GlassCard(
           padding: const EdgeInsets.all(24),
           borderColor: step.accentColor.withValues(alpha: 0.3),
@@ -435,24 +430,30 @@ class _DashboardTourOverlayState extends State<DashboardTourOverlay> with Single
                 ),
               ),
               const SizedBox(height: 20),
-              ...step.details.map((detail) => Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Row(
-                  children: [
-                    Icon(Icons.auto_awesome, size: 14, color: step.accentColor),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        detail,
-                        style: GoogleFonts.spaceGrotesk(
-                          fontSize: 14,
-                          color: Colors.white.withValues(alpha: 0.7),
+              ...step.details.map(
+                (detail) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.auto_awesome,
+                        size: 14,
+                        color: step.accentColor,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          detail,
+                          style: GoogleFonts.spaceGrotesk(
+                            fontSize: 14,
+                            color: Colors.white.withValues(alpha: 0.7),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              )),
+              ),
               const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -474,10 +475,15 @@ class _DashboardTourOverlayState extends State<DashboardTourOverlay> with Single
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
                     ),
                     child: Text(
-                      _currentStepIndex == _steps.length - 1 ? 'GOT IT!' : 'NEXT',
+                      _currentStepIndex == _steps.length - 1
+                          ? 'GOT IT!'
+                          : 'NEXT',
                       style: GoogleFonts.spaceGrotesk(
                         fontWeight: FontWeight.w800,
                         letterSpacing: 0,
@@ -489,7 +495,7 @@ class _DashboardTourOverlayState extends State<DashboardTourOverlay> with Single
             ],
           ),
         ),
-        
+
         // Arrow pointing down to target (if card is ABOVE target)
         if (isAboveTarget)
           Padding(
@@ -528,10 +534,10 @@ class _SpotlightPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size canvasSize) {
     final paint = Paint()..color = color;
-    
+
     // The mask
     final rect = Rect.fromLTWH(0, 0, canvasSize.width, canvasSize.height);
-    
+
     // The spotlight hole (with padding)
     final RRect hole = RRect.fromRectAndRadius(
       Rect.fromLTWH(
@@ -558,20 +564,22 @@ class _SpotlightPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3
       ..maskFilter = const MaskFilter.blur(BlurStyle.outer, 4);
-    
+
     canvas.drawRRect(hole, borderPaint);
-    
+
     final solidBorderPaint = Paint()
       ..color = accentColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
-    
+
     canvas.drawRRect(hole, solidBorderPaint);
   }
 
   @override
-  bool shouldRepaint(_SpotlightPainter oldDelegate) => 
-    position != oldDelegate.position || size != oldDelegate.size || accentColor != oldDelegate.accentColor;
+  bool shouldRepaint(_SpotlightPainter oldDelegate) =>
+      position != oldDelegate.position ||
+      size != oldDelegate.size ||
+      accentColor != oldDelegate.accentColor;
 }
 
 class _ArrowPainter extends CustomPainter {
@@ -640,7 +648,8 @@ class ExploreTourOverlay extends StatefulWidget {
   State<ExploreTourOverlay> createState() => _ExploreTourOverlayState();
 }
 
-class _ExploreTourOverlayState extends State<ExploreTourOverlay> with SingleTickerProviderStateMixin {
+class _ExploreTourOverlayState extends State<ExploreTourOverlay>
+    with SingleTickerProviderStateMixin {
   int _currentStepIndex = 0;
   late List<TourStep> _steps;
   late AnimationController _animationController;
@@ -781,38 +790,38 @@ class _ExploreTourOverlayState extends State<ExploreTourOverlay> with SingleTick
       curve: Curves.easeIn,
     );
     _animationController.forward();
-    
+
     // Ensure first step is visible
     _ensureStepVisible();
   }
 
   void _ensureStepVisible() {
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      // Shorter delay to allow layout to settle
-      await Future<void>.delayed(const Duration(milliseconds: 100));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      
+
       final context = _steps[_currentStepIndex].targetKey.currentContext;
-      if (context != null) {
+      if (context != null && context.mounted) {
         final renderBox = context.findRenderObject() as RenderBox?;
-        if (renderBox != null) {
+        if (renderBox != null && mounted) {
           final position = renderBox.localToGlobal(Offset.zero);
           final size = renderBox.size;
           final screenHeight = MediaQuery.of(this.context).size.height;
-          
+
           // Only scroll if the item is not comfortably in view
           // (allowing some margin for the callout box)
-          final bool isInView = position.dy > 100 && (position.dy + size.height) < (screenHeight - 150);
-          
-          if (!isInView) {
-            await Scrollable.ensureVisible(
+          final bool isInView =
+              position.dy > 100 &&
+              (position.dy + size.height) < (screenHeight - 150);
+
+          if (!isInView && context.mounted && mounted) {
+            Scrollable.ensureVisible(
               context,
               duration: const Duration(milliseconds: 400),
               curve: Curves.easeInOut,
               alignment: 0.5,
             );
           }
-          
+
           // Recalculate and rebuild immediately
           if (mounted) setState(() {});
         }
@@ -847,11 +856,12 @@ class _ExploreTourOverlayState extends State<ExploreTourOverlay> with SingleTick
   @override
   Widget build(BuildContext context) {
     final step = _steps[_currentStepIndex];
-    final RenderBox? renderBox = step.targetKey.currentContext?.findRenderObject() as RenderBox?;
-    
+    final RenderBox? renderBox =
+        step.targetKey.currentContext?.findRenderObject() as RenderBox?;
+
     Offset position = Offset.zero;
     Size size = Size.zero;
-    
+
     if (renderBox != null) {
       position = renderBox.localToGlobal(Offset.zero);
       size = renderBox.size;
@@ -859,20 +869,19 @@ class _ExploreTourOverlayState extends State<ExploreTourOverlay> with SingleTick
 
     final double screenHeight = MediaQuery.of(context).size.height;
     final double screenWidth = MediaQuery.of(context).size.width;
-    
+
     // Horizontal center of the target for arrow alignment
     final double targetCenterX = position.dx + size.width / 2;
 
     // Margin from the notch/camera area at the top
     final double topSafetyMargin = MediaQuery.of(context).padding.top + 20;
-    
+
     // Position callout based on target position and available space
     double? top;
     double? bottom;
-    
-    final double spaceAbove = position.dy;
+
     final double spaceBelow = screenHeight - (position.dy + size.height);
-    
+
     if (position.dy < screenHeight * 0.4) {
       // Target is in top 40% of screen: ALWAYS place below
       top = position.dy + size.height + 15;
@@ -917,13 +926,15 @@ class _ExploreTourOverlayState extends State<ExploreTourOverlay> with SingleTick
               opacity: _fadeAnimation,
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  maxHeight: bottom != null ? (screenHeight - bottom - topSafetyMargin) : (screenHeight - (top ?? 0) - 40),
+                  maxHeight: bottom != null
+                      ? (screenHeight - bottom - topSafetyMargin)
+                      : (screenHeight - (top ?? 0) - 40),
                 ),
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
                   child: _buildCalloutContent(
-                    step, 
-                    top != null, 
+                    step,
+                    top != null,
                     bottom != null,
                     targetCenterX: targetCenterX,
                     screenWidth: screenWidth,
@@ -938,27 +949,31 @@ class _ExploreTourOverlayState extends State<ExploreTourOverlay> with SingleTick
   }
 
   Widget _buildCalloutContent(
-    TourStep step, 
-    bool isBelowTarget, 
-    bool isAboveTarget,
-    {required double targetCenterX, required double screenWidth}
-  ) {
+    TourStep step,
+    bool isBelowTarget,
+    bool isAboveTarget, {
+    required double targetCenterX,
+    required double screenWidth,
+  }) {
     // Determine which arrow to show and its alignment
     // arrowPadding helps align it directly under/above the target
     // targetCenterX is global, so we need to offset it by the Positioned's left (20)
-    final double arrowHorizontalPos = (targetCenterX - 20).clamp(20.0, screenWidth - 60);
+    final double arrowHorizontalPos = (targetCenterX - 20).clamp(
+      20.0,
+      screenWidth - 60,
+    );
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Arrow pointing up to target (if card is BELOW target)
-        if (isBelowTarget) 
+        if (isBelowTarget)
           Padding(
             padding: EdgeInsets.only(left: arrowHorizontalPos - 20),
             child: _buildArrow(true, step.accentColor),
           ),
-        
+
         GlassCard(
           padding: const EdgeInsets.all(24),
           borderColor: step.accentColor.withValues(alpha: 0.3),
@@ -1005,24 +1020,30 @@ class _ExploreTourOverlayState extends State<ExploreTourOverlay> with SingleTick
                 ),
               ),
               const SizedBox(height: 20),
-              ...step.details.map((detail) => Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Row(
-                  children: [
-                    Icon(Icons.auto_awesome, size: 14, color: step.accentColor),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        detail,
-                        style: GoogleFonts.spaceGrotesk(
-                          fontSize: 14,
-                          color: Colors.white.withValues(alpha: 0.7),
+              ...step.details.map(
+                (detail) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.auto_awesome,
+                        size: 14,
+                        color: step.accentColor,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          detail,
+                          style: GoogleFonts.spaceGrotesk(
+                            fontSize: 14,
+                            color: Colors.white.withValues(alpha: 0.7),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              )),
+              ),
               const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1044,10 +1065,15 @@ class _ExploreTourOverlayState extends State<ExploreTourOverlay> with SingleTick
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
                     ),
                     child: Text(
-                      _currentStepIndex == _steps.length - 1 ? 'GOT IT!' : 'NEXT',
+                      _currentStepIndex == _steps.length - 1
+                          ? 'GOT IT!'
+                          : 'NEXT',
                       style: GoogleFonts.spaceGrotesk(
                         fontWeight: FontWeight.w800,
                         letterSpacing: 0,
@@ -1059,7 +1085,7 @@ class _ExploreTourOverlayState extends State<ExploreTourOverlay> with SingleTick
             ],
           ),
         ),
-        
+
         // Arrow pointing down to target (if card is ABOVE target)
         if (isAboveTarget)
           Padding(

@@ -39,13 +39,12 @@ class EventsTourOverlay extends StatefulWidget {
   State<EventsTourOverlay> createState() => _EventsTourOverlayState();
 }
 
-class _EventsTourOverlayState extends State<EventsTourOverlay> with SingleTickerProviderStateMixin {
+class _EventsTourOverlayState extends State<EventsTourOverlay>
+    with SingleTickerProviderStateMixin {
   int _currentStepIndex = 0;
   late List<TourStep> _steps;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
-  
-  get position => null;
 
   @override
   void initState() {
@@ -68,7 +67,8 @@ class _EventsTourOverlayState extends State<EventsTourOverlay> with SingleTicker
       TourStep(
         targetKey: widget.heroKey,
         title: 'EVENTS DASHBOARD',
-        description: 'Your central hub for discovering and managing art events.',
+        description:
+            'Your central hub for discovering and managing art events.',
         accentColor: ArtbeatColors.primaryGreen,
         details: [
           'Personalized greeting',
@@ -230,7 +230,7 @@ class _EventsTourOverlayState extends State<EventsTourOverlay> with SingleTicker
       if (!mounted) return;
 
       final context = _steps[_currentStepIndex].targetKey.currentContext;
-      if (context != null) {
+      if (context != null && context.mounted) {
         final renderObject = context.findRenderObject();
         if (renderObject != null) {
           // Try to scroll the target into view
@@ -244,7 +244,6 @@ class _EventsTourOverlayState extends State<EventsTourOverlay> with SingleTicker
       }
     });
   }
-
 
   @override
   void dispose() {
@@ -274,10 +273,10 @@ class _EventsTourOverlayState extends State<EventsTourOverlay> with SingleTicker
   Widget build(BuildContext context) {
     final step = _steps[_currentStepIndex];
     final renderObject = step.targetKey.currentContext?.findRenderObject();
-    
+
     Offset position = Offset.zero;
     Size size = Size.zero;
-    
+
     if (renderObject != null) {
       if (renderObject is RenderBox) {
         position = renderObject.localToGlobal(Offset.zero);
@@ -303,7 +302,6 @@ class _EventsTourOverlayState extends State<EventsTourOverlay> with SingleTicker
     double? top;
     double? bottom;
 
-    final double spaceAbove = position.dy;
     final double spaceBelow = screenHeight - (position.dy + size.height);
 
     if (position.dy < screenHeight * 0.4) {
@@ -351,7 +349,9 @@ class _EventsTourOverlayState extends State<EventsTourOverlay> with SingleTicker
               opacity: _fadeAnimation,
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  maxHeight: bottom != null ? (screenHeight - bottom - topSafetyMargin) : (screenHeight - (top ?? 0) - 40),
+                  maxHeight: bottom != null
+                      ? (screenHeight - bottom - topSafetyMargin)
+                      : (screenHeight - (top ?? 0) - 40),
                 ),
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
@@ -374,11 +374,15 @@ class _EventsTourOverlayState extends State<EventsTourOverlay> with SingleTicker
   Widget _buildCalloutContent(
     TourStep step,
     bool isBelowTarget,
-    bool isAboveTarget,
-    {required double targetCenterX, required double screenWidth}
-  ) {
+    bool isAboveTarget, {
+    required double targetCenterX,
+    required double screenWidth,
+  }) {
     // Determine which arrow to show and its alignment
-    final double arrowHorizontalPos = (targetCenterX - 20).clamp(20.0, screenWidth - 60);
+    final double arrowHorizontalPos = (targetCenterX - 20).clamp(
+      20.0,
+      screenWidth - 60,
+    );
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -437,24 +441,30 @@ class _EventsTourOverlayState extends State<EventsTourOverlay> with SingleTicker
                 ),
               ),
               const SizedBox(height: 20),
-              ...step.details.map((detail) => Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Row(
-                  children: [
-                    Icon(Icons.auto_awesome, size: 14, color: step.accentColor),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        detail,
-                        style: GoogleFonts.spaceGrotesk(
-                          fontSize: 14,
-                          color: Colors.white.withValues(alpha: 0.7),
+              ...step.details.map(
+                (detail) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.auto_awesome,
+                        size: 14,
+                        color: step.accentColor,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          detail,
+                          style: GoogleFonts.spaceGrotesk(
+                            fontSize: 14,
+                            color: Colors.white.withValues(alpha: 0.7),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              )),
+              ),
               const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -476,10 +486,15 @@ class _EventsTourOverlayState extends State<EventsTourOverlay> with SingleTicker
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
                     ),
                     child: Text(
-                      _currentStepIndex == _steps.length - 1 ? 'GOT IT!' : 'NEXT',
+                      _currentStepIndex == _steps.length - 1
+                          ? 'GOT IT!'
+                          : 'NEXT',
                       style: GoogleFonts.spaceGrotesk(
                         fontWeight: FontWeight.w800,
                         letterSpacing: 0,
@@ -573,7 +588,9 @@ class _SpotlightPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_SpotlightPainter oldDelegate) =>
-    position != oldDelegate.position || size != oldDelegate.size || accentColor != oldDelegate.accentColor;
+      position != oldDelegate.position ||
+      size != oldDelegate.size ||
+      accentColor != oldDelegate.accentColor;
 }
 
 class _ArrowPainter extends CustomPainter {

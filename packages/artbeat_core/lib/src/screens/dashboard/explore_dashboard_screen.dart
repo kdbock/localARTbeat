@@ -279,7 +279,11 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
                       body: TabBarView(
                         controller: _tabController,
                         children: [
-                          _ForYouTab(vm: vm, artistSpotlightKey: _artistSpotlightKey, artworkGalleryKey: _artworkGalleryKey),
+                          _ForYouTab(
+                            vm: vm,
+                            artistSpotlightKey: _artistSpotlightKey,
+                            artworkGalleryKey: _artworkGalleryKey,
+                          ),
                           _ExploreTab(vm: vm, browseKey: _browseKey),
                           _CommunityTab(vm: vm),
                         ],
@@ -346,198 +350,208 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                    Row(
-                      children: [
-                        _glassIconButton(icon: Icons.menu, onTap: _openDrawer, key: _menuKey),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () =>
-                                Navigator.pushNamed(context, '/dashboard'),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Flexible(
-                                  child: Text.rich(
-                                    key: _titleKey,
-                                    TextSpan(
-                                      children: [
-                                        TextSpan(
-                                          text: "Local ",
-                                          style: GoogleFonts.spaceGrotesk(
-                                            color: Colors.white.withValues(
-                                              alpha: 0.90,
-                                            ),
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w900,
-                                            letterSpacing: -0.4,
-                                          ),
-                                        ),
-                                        TextSpan(
-                                          text: "ART",
-                                          style: GoogleFonts.dmSerifDisplay(
-                                            color: const Color(0xFFFFC857),
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w400,
-                                            letterSpacing: -0.2,
-                                          ),
-                                        ),
-                                        TextSpan(
-                                          text: "beat",
-                                          style: GoogleFonts.spaceGrotesk(
-                                            color: Colors.white.withValues(
-                                              alpha: 0.90,
-                                            ),
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w900,
-                                            letterSpacing: -0.4,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        if (!isCompact || !showSearchInput) ...[
+                      Row(
+                        children: [
                           _glassIconButton(
-                            icon: Icons.search,
-                            onTap: () =>
-                                Navigator.pushNamed(context, '/search'),
+                            icon: Icons.menu,
+                            onTap: _openDrawer,
+                            key: _menuKey,
                           ),
-                          const SizedBox(width: 8),
-                        ],
-                        if (!isCompact) ...[
-                          _glassIconButton(
-                            icon: Icons.message,
-                            onTap: () =>
-                                Navigator.pushNamed(context, '/messaging'),
-                          ),
-                          const SizedBox(width: 8),
-                        ],
-                        _notificationButton(vm),
-                        const SizedBox(width: 8),
-                        _glassIconButton(
-                          icon: Icons.account_circle,
-                          onTap: () => _showProfileMenu(context),
-                        ),
-                      ],
-                    ),
-
-                    // Sponsor Banner
-                    if (showSponsor)
-                      const SponsorBanner(
-                        placementKey: SponsorshipPlacements.dashboardTop,
-                        padding: EdgeInsets.only(top: 12),
-                        showPlaceholder: true,
-                      ),
-
-                    if (showSearchInput) ...[
-                      const SizedBox(height: 12),
-                      GestureDetector(
-                        key: _searchKey,
-                        onTap: () => Navigator.pushNamed(context, '/search'),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(16),
-                          child: BackdropFilter(
-                            filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                                vertical: 0,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.06),
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: Colors.white.withValues(alpha: 0.10),
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.25),
-                                    blurRadius: 18,
-                                    offset: const Offset(0, 10),
-                                  ),
-                                ],
-                              ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () =>
+                                  Navigator.pushNamed(context, '/dashboard'),
                               child: Row(
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(
-                                    Icons.search,
-                                    color: Colors.white.withValues(alpha: 0.70),
-                                    size: 18,
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: Text(
-                                      'dashboard_search_placeholder'.tr(),
+                                  Flexible(
+                                    child: Text.rich(
+                                      key: _titleKey,
+                                      TextSpan(
+                                        children: [
+                                          TextSpan(
+                                            text: "Local ",
+                                            style: GoogleFonts.spaceGrotesk(
+                                              color: Colors.white.withValues(
+                                                alpha: 0.90,
+                                              ),
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w900,
+                                              letterSpacing: -0.4,
+                                            ),
+                                          ),
+                                          TextSpan(
+                                            text: "ART",
+                                            style: GoogleFonts.dmSerifDisplay(
+                                              color: const Color(0xFFFFC857),
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w400,
+                                              letterSpacing: -0.2,
+                                            ),
+                                          ),
+                                          TextSpan(
+                                            text: "beat",
+                                            style: GoogleFonts.spaceGrotesk(
+                                              color: Colors.white.withValues(
+                                                alpha: 0.90,
+                                              ),
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w900,
+                                              letterSpacing: -0.4,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: GoogleFonts.spaceGrotesk(
-                                        color: Colors.white.withValues(
-                                          alpha: 0.70,
-                                        ),
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                      ),
                                     ),
-                                  ),
-                                  Icon(
-                                    Icons.tune,
-                                    color: Colors.white.withValues(alpha: 0.70),
-                                    size: 18,
                                   ),
                                 ],
                               ),
                             ),
                           ),
-                        ),
-                      ),
-                    ] else ...[
-                      const SizedBox(height: 8),
-                    ],
-                    if (showLocationPill) ...[
-                      const SizedBox(height: 14),
-                      _LocationPill(
-                        key: _locationKey,
-                        label: locationLabel,
-                        isLoading: vm.isLoadingLocation,
-                        onTap: () =>
-                            Navigator.pushNamed(context, '/art-walk/map'),
-                      ),
-                    ],
-                    if (showQuickStats) ...[
-                      const SizedBox(height: 10),
-                      _QuickStatsRow(
-                        vm: vm,
-                        onAchieveTap: () =>
-                            Navigator.pushNamed(context, '/achievements'),
-                        onArtistsTap: () =>
-                            Navigator.pushNamed(context, '/artist/browse'),
-                        onEventsTap: () =>
-                            Navigator.pushNamed(context, '/events/discover'),
-                        onCapturesTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute<void>(
-                              builder: (_) =>
-                                  const InstantDiscoveryRadarScreen(),
+                          if (!isCompact || !showSearchInput) ...[
+                            _glassIconButton(
+                              icon: Icons.search,
+                              onTap: () =>
+                                  Navigator.pushNamed(context, '/search'),
                             ),
-                          );
-                        },
+                            const SizedBox(width: 8),
+                          ],
+                          if (!isCompact) ...[
+                            _glassIconButton(
+                              icon: Icons.message,
+                              onTap: () =>
+                                  Navigator.pushNamed(context, '/messaging'),
+                            ),
+                            const SizedBox(width: 8),
+                          ],
+                          _notificationButton(vm),
+                          const SizedBox(width: 8),
+                          _glassIconButton(
+                            icon: Icons.account_circle,
+                            onTap: () => _showProfileMenu(context),
+                          ),
+                        ],
                       ),
+
+                      // Sponsor Banner
+                      if (showSponsor)
+                        const SponsorBanner(
+                          placementKey: SponsorshipPlacements.dashboardTop,
+                          padding: EdgeInsets.only(top: 12),
+                          showPlaceholder: true,
+                        ),
+
+                      if (showSearchInput) ...[
+                        const SizedBox(height: 12),
+                        GestureDetector(
+                          key: _searchKey,
+                          onTap: () => Navigator.pushNamed(context, '/search'),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 0,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.06),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: Colors.white.withValues(alpha: 0.10),
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(
+                                        alpha: 0.25,
+                                      ),
+                                      blurRadius: 18,
+                                      offset: const Offset(0, 10),
+                                    ),
+                                  ],
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.search,
+                                      color: Colors.white.withValues(
+                                        alpha: 0.70,
+                                      ),
+                                      size: 18,
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Text(
+                                        'dashboard_search_placeholder'.tr(),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: GoogleFonts.spaceGrotesk(
+                                          color: Colors.white.withValues(
+                                            alpha: 0.70,
+                                          ),
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                    Icon(
+                                      Icons.tune,
+                                      color: Colors.white.withValues(
+                                        alpha: 0.70,
+                                      ),
+                                      size: 18,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ] else ...[
+                        const SizedBox(height: 8),
+                      ],
+                      if (showLocationPill) ...[
+                        const SizedBox(height: 14),
+                        _LocationPill(
+                          key: _locationKey,
+                          label: locationLabel,
+                          isLoading: vm.isLoadingLocation,
+                          onTap: () =>
+                              Navigator.pushNamed(context, '/art-walk/map'),
+                        ),
+                      ],
+                      if (showQuickStats) ...[
+                        const SizedBox(height: 10),
+                        _QuickStatsRow(
+                          vm: vm,
+                          onAchieveTap: () =>
+                              Navigator.pushNamed(context, '/achievements'),
+                          onArtistsTap: () =>
+                              Navigator.pushNamed(context, '/artist/browse'),
+                          onEventsTap: () =>
+                              Navigator.pushNamed(context, '/events/discover'),
+                          onCapturesTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (_) =>
+                                    const InstantDiscoveryRadarScreen(),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                      if (showBooks) ...[
+                        const SizedBox(height: 16),
+                        _buildBooksSection(context, vm),
+                      ],
                     ],
-                    if (showBooks) ...[
-                      const SizedBox(height: 16),
-                      _buildBooksSection(context, vm),
-                    ],
-                  ],
-                ),
-              );
-            },
+                  ),
+                );
+              },
             ),
           ),
         ),
@@ -883,7 +897,8 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
   }
 
   Future<void> _checkOnboarding() async {
-    final isCompleted = await OnboardingService().isExploreOnboardingCompleted();
+    final isCompleted = await OnboardingService()
+        .isExploreOnboardingCompleted();
     if (!isCompleted && mounted) {
       // Small delay to ensure layout is stable
       await Future<void>.delayed(const Duration(milliseconds: 1000));
@@ -952,7 +967,11 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
 }
 
 class _ForYouTab extends StatelessWidget {
-  const _ForYouTab({required this.vm, required this.artistSpotlightKey, required this.artworkGalleryKey});
+  const _ForYouTab({
+    required this.vm,
+    required this.artistSpotlightKey,
+    required this.artworkGalleryKey,
+  });
 
   final DashboardViewModel vm;
   final GlobalKey artistSpotlightKey;

@@ -31,7 +31,10 @@ class ChapterQuest {
       description: FirestoreUtils.safeStringDefault(data['description']),
       xpReward: FirestoreUtils.safeInt(data['xp_reward']),
       badgeIcon: FirestoreUtils.safeStringDefault(data['badge_icon']),
-      locationRequirements: FirestoreUtils.getStringList(data, 'location_requirements'),
+      locationRequirements: FirestoreUtils.getStringList(
+        data,
+        'location_requirements',
+      ),
       sponsorLink: FirestoreUtils.getOptionalString(data, 'sponsor_link'),
     );
   }

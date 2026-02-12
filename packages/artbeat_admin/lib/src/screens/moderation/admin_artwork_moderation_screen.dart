@@ -5,12 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_core/artbeat_core.dart'
     hide ArtworkModel, GlassInputDecoration;
 import 'package:artbeat_core/artbeat_core.dart'
-    show
-        GlassCard,
-        HudTopBar,
-        MainLayout,
-        SecureNetworkImage,
-        WorldBackground;
+    show GlassCard, HudTopBar, MainLayout, SecureNetworkImage, WorldBackground;
 import 'package:artbeat_artwork/artbeat_artwork.dart';
 
 /// Admin screen for moderating artwork content
@@ -22,7 +17,8 @@ class AdminArtworkModerationScreen extends StatefulWidget {
       _AdminArtworkModerationScreenState();
 }
 
-class _AdminArtworkModerationScreenState extends State<AdminArtworkModerationScreen> {
+class _AdminArtworkModerationScreenState
+    extends State<AdminArtworkModerationScreen> {
   final ArtworkService _artworkService = ArtworkService();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -65,9 +61,8 @@ class _AdminArtworkModerationScreenState extends State<AdminArtworkModerationScr
       query = query.orderBy('createdAt', descending: true).limit(50);
 
       final snapshot = await query.get();
-      final artworks = snapshot.docs
-          .map((doc) => ArtworkModel.fromFirestore(doc))
-          .toList();
+      final artworks =
+          snapshot.docs.map((doc) => ArtworkModel.fromFirestore(doc)).toList();
 
       setState(() {
         _artworks = artworks;
@@ -241,9 +236,8 @@ class _AdminArtworkModerationScreenState extends State<AdminArtworkModerationScr
 
   void _showBulkModerationDialog() {
     final notesController = TextEditingController();
-    final selectedCount = _selectedArtworks.values
-        .where((selected) => selected)
-        .length;
+    final selectedCount =
+        _selectedArtworks.values.where((selected) => selected).length;
 
     if (selectedCount == 0) return;
 
@@ -303,9 +297,8 @@ class _AdminArtworkModerationScreenState extends State<AdminArtworkModerationScr
 
   @override
   Widget build(BuildContext context) {
-    final selectedCount = _selectedArtworks.values
-        .where((selected) => selected)
-        .length;
+    final selectedCount =
+        _selectedArtworks.values.where((selected) => selected).length;
 
     return MainLayout(
       currentIndex: 0,
@@ -372,20 +365,20 @@ class _AdminArtworkModerationScreenState extends State<AdminArtworkModerationScr
                           ),
                         )
                       : _artworks.isEmpty
-                      ? _buildEmptyState()
-                      : ListView.builder(
-                          itemCount: _artworks.length,
-                          itemBuilder: (context, index) {
-                            final artwork = _artworks[index];
-                            final isSelected =
-                                _selectedArtworks[artwork.id] ?? false;
-                            return _buildArtworkCard(
-                              artwork,
-                              isSelected,
-                              selectedCount,
-                            );
-                          },
-                        ),
+                          ? _buildEmptyState()
+                          : ListView.builder(
+                              itemCount: _artworks.length,
+                              itemBuilder: (context, index) {
+                                final artwork = _artworks[index];
+                                final isSelected =
+                                    _selectedArtworks[artwork.id] ?? false;
+                                return _buildArtworkCard(
+                                  artwork,
+                                  isSelected,
+                                  selectedCount,
+                                );
+                              },
+                            ),
                 ),
               ),
             ],
@@ -460,15 +453,16 @@ class _AdminArtworkModerationScreenState extends State<AdminArtworkModerationScr
     );
   }
 
-  Widget _buildArtworkCard(ArtworkModel artwork, bool isSelected, int totalSelected) {
+  Widget _buildArtworkCard(
+      ArtworkModel artwork, bool isSelected, int totalSelected) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       color: Colors.white.withValues(alpha: 0.05),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: isSelected 
-              ? const Color(0xFF22D3EE) 
+          color: isSelected
+              ? const Color(0xFF22D3EE)
               : Colors.white.withValues(alpha: 0.1),
           width: isSelected ? 2 : 1,
         ),

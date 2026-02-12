@@ -8,10 +8,12 @@ class AdminCommunityModerationScreen extends StatefulWidget {
   const AdminCommunityModerationScreen({super.key});
 
   @override
-  State<AdminCommunityModerationScreen> createState() => _AdminCommunityModerationScreenState();
+  State<AdminCommunityModerationScreen> createState() =>
+      _AdminCommunityModerationScreenState();
 }
 
-class _AdminCommunityModerationScreenState extends State<AdminCommunityModerationScreen>
+class _AdminCommunityModerationScreenState
+    extends State<AdminCommunityModerationScreen>
     with SingleTickerProviderStateMixin {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final ModerationService _moderationService = ModerationService();
@@ -324,7 +326,9 @@ class _AdminCommunityModerationScreenState extends State<AdminCommunityModeratio
         Expanded(
           child: _StatCard(
             label: 'SLA',
-            value: oldestFlagged == null ? 'Clean' : _formatRelativeTime(oldestFlagged),
+            value: oldestFlagged == null
+                ? 'Clean'
+                : _formatRelativeTime(oldestFlagged),
             icon: Icons.schedule,
           ),
         ),
@@ -377,7 +381,9 @@ class _AdminCommunityModerationScreenState extends State<AdminCommunityModeratio
 
   Widget _buildPostsList() {
     if (_flaggedPosts.isEmpty) {
-      return const Center(child: Text('No flagged posts', style: TextStyle(color: Colors.white70)));
+      return const Center(
+          child: Text('No flagged posts',
+              style: TextStyle(color: Colors.white70)));
     }
     return ListView.builder(
       itemCount: _flaggedPosts.length,
@@ -387,13 +393,21 @@ class _AdminCommunityModerationScreenState extends State<AdminCommunityModeratio
           color: Colors.white.withValues(alpha: 0.1),
           margin: const EdgeInsets.only(bottom: 8),
           child: ListTile(
-            title: Text(post.content, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white)),
-            subtitle: Text('By: ${post.authorName}', style: const TextStyle(color: Colors.white70)),
+            title: Text(post.content,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(color: Colors.white)),
+            subtitle: Text('By: ${post.authorName}',
+                style: const TextStyle(color: Colors.white70)),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                IconButton(icon: const Icon(Icons.check, color: Colors.green), onPressed: () => _approvePost(post)),
-                IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () => _removePost(post)),
+                IconButton(
+                    icon: const Icon(Icons.check, color: Colors.green),
+                    onPressed: () => _approvePost(post)),
+                IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    onPressed: () => _removePost(post)),
               ],
             ),
           ),
@@ -404,7 +418,9 @@ class _AdminCommunityModerationScreenState extends State<AdminCommunityModeratio
 
   Widget _buildCommentsList() {
     if (_flaggedComments.isEmpty) {
-      return const Center(child: Text('No flagged comments', style: TextStyle(color: Colors.white70)));
+      return const Center(
+          child: Text('No flagged comments',
+              style: TextStyle(color: Colors.white70)));
     }
     return ListView.builder(
       itemCount: _flaggedComments.length,
@@ -414,13 +430,21 @@ class _AdminCommunityModerationScreenState extends State<AdminCommunityModeratio
           color: Colors.white.withValues(alpha: 0.1),
           margin: const EdgeInsets.only(bottom: 8),
           child: ListTile(
-            title: Text(comment.content, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white)),
-            subtitle: Text('By: ${comment.userName}', style: const TextStyle(color: Colors.white70)),
+            title: Text(comment.content,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(color: Colors.white)),
+            subtitle: Text('By: ${comment.userName}',
+                style: const TextStyle(color: Colors.white70)),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                IconButton(icon: const Icon(Icons.check, color: Colors.green), onPressed: () => _approveComment(comment)),
-                IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () => _removeComment(comment)),
+                IconButton(
+                    icon: const Icon(Icons.check, color: Colors.green),
+                    onPressed: () => _approveComment(comment)),
+                IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    onPressed: () => _removeComment(comment)),
               ],
             ),
           ),
@@ -435,7 +459,8 @@ class _StatCard extends StatelessWidget {
   final String value;
   final IconData icon;
 
-  const _StatCard({required this.label, required this.value, required this.icon});
+  const _StatCard(
+      {required this.label, required this.value, required this.icon});
 
   @override
   Widget build(BuildContext context) {
@@ -445,9 +470,14 @@ class _StatCard extends StatelessWidget {
         children: [
           Icon(icon, color: Colors.white70, size: 20),
           const SizedBox(height: 8),
-          Text(value, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+          Text(value,
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16)),
           const SizedBox(height: 4),
-          Text(label, style: const TextStyle(color: Colors.white70, fontSize: 10)),
+          Text(label,
+              style: const TextStyle(color: Colors.white70, fontSize: 10)),
         ],
       ),
     );
