@@ -1515,6 +1515,7 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
   Future<void> _processPayout(String payoutId) async {
     try {
       final success = await _payoutService.processPayout(payoutId);
+      if (!mounted) return;
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Payout processed successfully')),
@@ -1525,6 +1526,7 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
         );
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error processing payout: $e')),
       );
@@ -1560,10 +1562,12 @@ class _AdminPaymentScreenState extends State<AdminPaymentScreen>
     if (result != null && result.isNotEmpty) {
       try {
         await _payoutService.rejectPayout(payoutId, result);
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Payout rejected')),
         );
       } catch (e) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error rejecting payout: $e')),
         );

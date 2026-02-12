@@ -3,7 +3,6 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:artbeat_sponsorships/artbeat_sponsorships.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flag/flag.dart';
 import 'package:provider/provider.dart';
@@ -13,12 +12,21 @@ import 'package:artbeat_core/src/services/crash_prevention_service.dart';
 import 'package:artbeat_core/src/utils/logger.dart';
 import 'package:artbeat_core/src/widgets/artbeat_drawer.dart';
 import 'package:artbeat_core/src/widgets/navigation_overlay.dart';
+import 'package:artbeat_core/src/widgets/developer_menu.dart';
 import 'package:artbeat_capture/artbeat_capture.dart';
 import 'package:artbeat_art_walk/artbeat_art_walk.dart' as artWalkLib;
 import '../../viewmodels/dashboard_view_model.dart';
+import '../../widgets/tour/dashboard_tour_overlay.dart';
+import '../../services/onboarding_service.dart';
 
 class AnimatedDashboardScreen extends StatefulWidget {
-  const AnimatedDashboardScreen({super.key});
+  final GlobalKey? bottomNavKey;
+  final List<GlobalKey>? bottomNavItemKeys;
+  const AnimatedDashboardScreen({
+    super.key,
+    this.bottomNavKey,
+    this.bottomNavItemKeys,
+  });
 
   @override
   State<AnimatedDashboardScreen> createState() =>
@@ -31,7 +39,27 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
   late final AnimationController _intro; // entrance
   final artWalkLib.RewardsService _rewardsService = artWalkLib.RewardsService();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  
+  // Tour GlobalKeys
+  final GlobalKey _menuKey = GlobalKey();
+  final GlobalKey _xpKey = GlobalKey();
+  final GlobalKey _profileKey = GlobalKey();
+  final GlobalKey _settingsKey = GlobalKey();
+
+  final GlobalKey _captureKey = GlobalKey();
+  final GlobalKey _discoverKey = GlobalKey();
+  final GlobalKey _exploreKey = GlobalKey();
+  final GlobalKey _communityKey = GlobalKey();
+
+  final GlobalKey _homeNavKey = GlobalKey();
+  final GlobalKey _walkNavKey = GlobalKey();
+  final GlobalKey _captureNavKey = GlobalKey();
+  final GlobalKey _communityNavKey = GlobalKey();
+  final GlobalKey _eventsNavKey = GlobalKey();
+
   bool _hasRequestedData = false;
+  bool _isTourActive = false;
+
   @override
   void initState() {
     super.initState();
@@ -52,8 +80,21 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
       );
       dashboardViewModel.initialize();
       _hasRequestedData = true;
+      
+      _checkOnboarding();
     });
     // No need to listen to locale changes here; rebuilds will be triggered by context.locale changes.
+  }
+
+  Future<void> _checkOnboarding() async {
+    final isCompleted = await OnboardingService().isOnboardingCompleted();
+    if (!isCompleted && mounted) {
+      // Small delay to ensure intro animation finishes and layout is stable
+      await Future<void>.delayed(const Duration(milliseconds: 1000));
+      if (mounted) {
+        setState(() => _isTourActive = true);
+      }
+    }
   }
 
   @override
@@ -73,6 +114,10 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
     _scaffoldKey.currentState?.openDrawer();
   }
 
+  void _openDeveloperMenu() {
+    _scaffoldKey.currentState?.openEndDrawer();
+  }
+
   @override
   Widget build(BuildContext context) {
     final dashboardViewModel = context.watch<DashboardViewModel>();
@@ -88,10 +133,11 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
     const horizontalPadding = 18.0;
     final questButtonWidth = math.max(0.0, w - horizontalPadding * 2);
 
-    return Scaffold(
+    final scaffold = Scaffold(
       key: _scaffoldKey,
       backgroundColor: ArtbeatColors.backgroundDark,
       drawer: const ArtbeatDrawer(),
+      endDrawer: const DeveloperMenu(),
       body: Stack(
         children: [
           // GAME WORLD BACKGROUND
@@ -133,6 +179,10 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                       delay: 0.0,
 
                       child: _GameHUD(
+                        menuKey: _menuKey,
+                        xpKey: _xpKey,
+                        profileKey: _profileKey,
+                        settingsKey: _settingsKey,
                         level: level,
                         xp: xp,
                         xpProgress: xpProgress,
@@ -160,6 +210,16 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
 
                     const SizedBox(height: 14),
 
+                    /*
+                    _StampFadeIn(
+                      intro: _intro,
+                      delay: 0.05,
+                      child: const ChapterSelectionWidget(),
+                    ),
+
+                    const SizedBox(height: 14),
+                    */
+
                     _StampFadeIn(
                       intro: _intro,
 
@@ -173,6 +233,7 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                       ),
                     ),
 
+                    /*
                     const SponsorBanner(
                       placementKey: SponsorshipPlacements.dashboardTop,
                       padding: EdgeInsets.symmetric(vertical: 8),
@@ -180,180 +241,183 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                     ),
 
                     const SizedBox(height: 14),
+                    */
 
                     // The QUEST BUTTONS (focal point)
-                    ListView(
-                      shrinkWrap: true,
-
-                      physics: const NeverScrollableScrollPhysics(),
-
-                      padding: const EdgeInsets.only(bottom: 50.0),
-
+                    Column(
                       children: [
-                        _StampPopIn(
-                          intro: _intro,
+                        Column(
+                          children: [
+                            _StampPopIn(
+                              intro: _intro,
 
-                          index: 0,
+                              index: 0,
 
-                          child: _QuestButton(
-                            loop: _loop,
+                              child: _QuestButton(
+                                key: _captureKey,
+                                loop: _loop,
 
-                            index: 0,
+                                index: 0,
 
-                            width: questButtonWidth,
+                                width: questButtonWidth,
 
-                            title: 'animated_dashboard_capture_title'.tr(),
+                                title: 'animated_dashboard_capture_title'.tr(),
 
-                            subtitle: 'animated_dashboard_capture_subtitle'
-                                .tr(),
+                                subtitle: 'animated_dashboard_capture_subtitle'
+                                    .tr(),
 
-                            tag: 'animated_dashboard_capture_tag'.tr(),
+                                tag: 'animated_dashboard_capture_tag'.tr(),
 
-                            icon: Icons.camera_alt_rounded,
+                                icon: Icons.camera_alt_rounded,
 
-                            palette: const _QuestPalette(
-                              base: ArtbeatColors.primaryPurple,
+                                palette: const _QuestPalette(
+                                  base: ArtbeatColors.primaryPurple,
 
-                              neon: ArtbeatColors.secondaryTeal,
+                                  neon: ArtbeatColors.secondaryTeal,
 
-                              accent: ArtbeatColors.accentYellow,
-                            ),
-
-                            onTap: () {
-                              if (!CrashPreventionService.shouldAllowNavigation())
-                                return;
-                              NavigationOverlay.of(context)?.startNavigation();
-                              Navigator.of(context).push(
-                                MaterialPageRoute<Widget>(
-                                  builder: (context) =>
-                                      const EnhancedCaptureDashboardScreen(),
+                                  accent: ArtbeatColors.accentYellow,
                                 ),
-                              );
-                            },
-                          ),
-                        ),
 
-                        const SizedBox(height: 14),
-
-                        _StampPopIn(
-                          intro: _intro,
-
-                          index: 1,
-
-                          child: _QuestButton(
-                            loop: _loop,
-
-                            index: 1,
-
-                            width: questButtonWidth,
-
-                            title: 'animated_dashboard_discover_title'.tr(),
-
-                            subtitle: 'animated_dashboard_discover_subtitle'
-                                .tr(),
-
-                            tag: 'animated_dashboard_discover_tag'.tr(),
-
-                            icon: Icons.radar_rounded,
-
-                            palette: const _QuestPalette(
-                              base: ArtbeatColors.primaryBlue,
-
-                              neon: ArtbeatColors.primaryGreen,
-
-                              accent: ArtbeatColors.accentOrange,
+                                onTap: () {
+                                  if (!CrashPreventionService.shouldAllowNavigation())
+                                    return;
+                                  NavigationOverlay.of(context)?.startNavigation();
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute<Widget>(
+                                      builder: (context) =>
+                                          const EnhancedCaptureDashboardScreen(),
+                                    ),
+                                  );
+                                },
+                              ),
                             ),
 
-                            onTap: () {
-                              if (!CrashPreventionService.shouldAllowNavigation())
-                                return;
-                              NavigationOverlay.of(context)?.startNavigation();
-                              Navigator.pushNamed(
-                                context,
-                                '/art-walk/dashboard',
-                              );
-                            },
-                          ),
-                        ),
+                            const SizedBox(height: 14),
 
-                        const SizedBox(height: 14),
+                            _StampPopIn(
+                              intro: _intro,
 
-                        _StampPopIn(
-                          intro: _intro,
+                              index: 1,
 
-                          index: 2,
+                              child: _QuestButton(
+                                key: _discoverKey,
+                                loop: _loop,
 
-                          child: _QuestButton(
-                            loop: _loop,
+                                index: 1,
 
-                            index: 2,
+                                width: questButtonWidth,
 
-                            width: questButtonWidth,
+                                title: 'animated_dashboard_discover_title'.tr(),
 
-                            title: 'animated_dashboard_explore_title'.tr(),
+                                subtitle: 'animated_dashboard_discover_subtitle'
+                                    .tr(),
 
-                            subtitle: 'animated_dashboard_explore_subtitle'
-                                .tr(),
+                                tag: 'animated_dashboard_discover_tag'.tr(),
 
-                            tag: 'ART LOVER',
+                                icon: Icons.radar_rounded,
 
-                            icon: Icons.route_rounded,
+                                palette: const _QuestPalette(
+                                  base: ArtbeatColors.primaryBlue,
 
-                            palette: const _QuestPalette(
-                              base: ArtbeatColors.primaryGreen,
+                                  neon: ArtbeatColors.primaryGreen,
 
-                              neon: ArtbeatColors.accentYellow,
+                                  accent: ArtbeatColors.accentOrange,
+                                ),
 
-                              accent: ArtbeatColors.secondaryTeal,
+                                onTap: () {
+                                  if (!CrashPreventionService.shouldAllowNavigation())
+                                    return;
+                                  NavigationOverlay.of(context)?.startNavigation();
+                                  Navigator.pushNamed(
+                                    context,
+                                    '/art-walk/dashboard',
+                                  );
+                                },
+                              ),
                             ),
 
-                            onTap: () {
-                              if (!CrashPreventionService.shouldAllowNavigation())
-                                return;
-                              NavigationOverlay.of(context)?.startNavigation();
-                              Navigator.pushNamed(context, '/old-dashboard');
-                            },
-                          ),
-                        ),
+                            const SizedBox(height: 14),
 
-                        const SizedBox(height: 14),
+                            _StampPopIn(
+                              intro: _intro,
 
-                        _StampPopIn(
-                          intro: _intro,
+                              index: 2,
 
-                          index: 3,
+                              child: _QuestButton(
+                                key: _exploreKey,
+                                loop: _loop,
 
-                          child: _QuestButton(
-                            loop: _loop,
+                                index: 2,
 
-                            index: 3,
+                                width: questButtonWidth,
 
-                            width: questButtonWidth,
+                                title: 'animated_dashboard_explore_title'.tr(),
 
-                            title: 'animated_dashboard_connect_title'.tr(),
+                                subtitle: 'animated_dashboard_explore_subtitle'
+                                    .tr(),
 
-                            subtitle: 'animated_dashboard_connect_subtitle'
-                                .tr(),
+                                tag: 'ART LOVER',
 
-                            tag: 'animated_dashboard_connect_tag'.tr(),
+                                icon: Icons.route_rounded,
 
-                            icon: Icons.people_alt_rounded,
+                                palette: const _QuestPalette(
+                                  base: ArtbeatColors.primaryGreen,
 
-                            palette: const _QuestPalette(
-                              base: ArtbeatColors.accentOrange,
+                                  neon: ArtbeatColors.accentYellow,
 
-                              neon: ArtbeatColors.primaryPurple,
+                                  accent: ArtbeatColors.secondaryTeal,
+                                ),
 
-                              accent: ArtbeatColors.primaryGreen,
+                                onTap: () {
+                                  if (!CrashPreventionService.shouldAllowNavigation())
+                                    return;
+                                  NavigationOverlay.of(context)?.startNavigation();
+                                  Navigator.pushNamed(context, '/old-dashboard');
+                                },
+                              ),
                             ),
 
-                            onTap: () {
-                              if (!CrashPreventionService.shouldAllowNavigation())
-                                return;
-                              NavigationOverlay.of(context)?.startNavigation();
-                              Navigator.pushNamed(context, '/community/hub');
-                            },
-                          ),
+                            const SizedBox(height: 14),
+
+                            _StampPopIn(
+                              intro: _intro,
+
+                              index: 3,
+
+                              child: _QuestButton(
+                                key: _communityKey,
+                                loop: _loop,
+
+                                index: 3,
+
+                                width: questButtonWidth,
+
+                                title: 'animated_dashboard_connect_title'.tr(),
+
+                                subtitle: 'animated_dashboard_connect_subtitle'
+                                    .tr(),
+
+                                tag: 'animated_dashboard_connect_tag'.tr(),
+
+                                icon: Icons.people_alt_rounded,
+
+                                palette: const _QuestPalette(
+                                  base: ArtbeatColors.accentOrange,
+
+                                  neon: ArtbeatColors.primaryPurple,
+
+                                  accent: ArtbeatColors.primaryGreen,
+                                ),
+
+                                onTap: () {
+                                  if (!CrashPreventionService.shouldAllowNavigation())
+                                    return;
+                                  NavigationOverlay.of(context)?.startNavigation();
+                                  Navigator.pushNamed(context, '/community/hub');
+                                },
+                              ),
+                            ),
+                          ],
                         ),
 
                         const SizedBox(height: 18),
@@ -383,15 +447,20 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                           ),
                         ),
 
+                        /*
                         const SponsorBanner(
                           placementKey: SponsorshipPlacements.dashboardFooter,
                           padding: EdgeInsets.symmetric(vertical: 8),
                           showPlaceholder: true,
                         ),
+                        */
 
                         _LeaderboardSection(intro: _intro, index: 5),
 
                         const SizedBox(height: 16),
+                        
+                        // Added bottom spacing that was in the ListView padding
+                        const SizedBox(height: 50),
                       ],
                     ),
                   ],
@@ -402,6 +471,29 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
         ],
       ),
     );
+
+    return Stack(
+      children: [
+        scaffold,
+        if (_isTourActive)
+          DashboardTourOverlay(
+            menuKey: _menuKey,
+            xpKey: _xpKey,
+            profileKey: _profileKey,
+            settingsKey: _settingsKey,
+            captureKey: _captureKey,
+            discoverKey: _discoverKey,
+            exploreKey: _exploreKey,
+            communityKey: _communityKey,
+            homeNavKey: widget.bottomNavItemKeys?[0] ?? _homeNavKey,
+            walkNavKey: widget.bottomNavItemKeys?[1] ?? _walkNavKey,
+            captureNavKey: widget.bottomNavItemKeys?[2] ?? _captureNavKey,
+            communityNavKey: widget.bottomNavItemKeys?[3] ?? _communityNavKey,
+            eventsNavKey: widget.bottomNavItemKeys?[4] ?? _eventsNavKey,
+            onFinish: () => setState(() => _isTourActive = false),
+          ),
+      ],
+    );
   }
 }
 
@@ -410,6 +502,10 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
 /// =======================
 
 class _GameHUD extends StatelessWidget {
+  final GlobalKey menuKey;
+  final GlobalKey xpKey;
+  final GlobalKey profileKey;
+  final GlobalKey settingsKey;
   final int level;
   final int xp;
   final double xpProgress;
@@ -420,6 +516,10 @@ class _GameHUD extends StatelessWidget {
   final VoidCallback onLanguageChanged;
 
   const _GameHUD({
+    required this.menuKey,
+    required this.xpKey,
+    required this.profileKey,
+    required this.settingsKey,
     required this.level,
     required this.xp,
     required this.xpProgress,
@@ -434,27 +534,40 @@ class _GameHUD extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        _IconPill(icon: Icons.menu_rounded, onTap: onMenu),
-        const SizedBox(width: 10),
+        _IconPill(key: menuKey, icon: Icons.menu_rounded, onTap: onMenu),
+        const SizedBox(width: 8),
         _HUDPill(
-          child: Row(
-            children: [
-              _LevelBadge(level: level),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _XPBar(progress: xpProgress, xp: xp, level: level),
-              ),
-              const SizedBox(width: 10),
-              _Streak(streakDays: streakDays),
-              const SizedBox(width: 10),
-              _LanguageSelector(onLanguageChanged: onLanguageChanged),
-            ],
+          key: xpKey,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              // Responsive hiding based on available width
+              final bool showStreak = constraints.maxWidth > 120;
+              final bool showLanguage = constraints.maxWidth > 170;
+              
+              return Row(
+                children: [
+                  _LevelBadge(level: level),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: _XPBar(progress: xpProgress, xp: xp, level: level),
+                  ),
+                  if (showStreak) ...[
+                    const SizedBox(width: 6),
+                    _Streak(streakDays: streakDays),
+                  ],
+                  if (showLanguage) ...[
+                    const SizedBox(width: 6),
+                    _LanguageSelector(onLanguageChanged: onLanguageChanged),
+                  ],
+                ],
+              );
+            },
           ),
         ),
-        const SizedBox(width: 10),
-        _IconPill(icon: Icons.person_rounded, onTap: onProfile),
-        const SizedBox(width: 10),
-        _IconPill(icon: Icons.settings_rounded, onTap: onSettings),
+        const SizedBox(width: 8),
+        _IconPill(key: profileKey, icon: Icons.person_rounded, onTap: onProfile),
+        const SizedBox(width: 8),
+        _IconPill(key: settingsKey, icon: Icons.settings_rounded, onTap: onSettings),
       ],
     );
   }
@@ -603,6 +716,7 @@ class _QuestButton extends StatefulWidget {
   final VoidCallback onTap;
 
   const _QuestButton({
+    super.key,
     required this.loop,
     required this.index,
     required this.width,
@@ -1036,7 +1150,7 @@ class _ChipButtonState extends State<_ChipButton> {
 
 class _HUDPill extends StatelessWidget {
   final Widget child;
-  const _HUDPill({required this.child});
+  const _HUDPill({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -1046,7 +1160,7 @@ class _HUDPill extends StatelessWidget {
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.06),
               borderRadius: BorderRadius.circular(18),
@@ -1063,7 +1177,7 @@ class _HUDPill extends StatelessWidget {
 class _IconPill extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
-  const _IconPill({required this.icon, required this.onTap});
+  const _IconPill({super.key, required this.icon, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -1103,9 +1217,9 @@ class _LevelBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
         gradient: LinearGradient(
           colors: [
             const Color(0xFFFFC857).withValues(alpha: 0.95),
@@ -1120,8 +1234,8 @@ class _LevelBadge extends StatelessWidget {
         style: GoogleFonts.spaceGrotesk(
           color: Colors.black.withValues(alpha: 0.86),
           fontWeight: FontWeight.w900,
-          fontSize: 12,
-          letterSpacing: 0.7,
+          fontSize: 11,
+          letterSpacing: 0.5,
         ),
       ),
     );
@@ -1215,26 +1329,27 @@ class _Streak extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
         color: Colors.white.withValues(alpha: 0.08),
         border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
             Icons.local_fire_department_rounded,
             color: const Color(0xFFFFC857).withValues(alpha: 0.95),
-            size: 18,
+            size: 16,
           ),
-          const SizedBox(width: 6),
+          const SizedBox(width: 4),
           Text(
             '$streakDays${'animated_dashboard_streak_suffix'.tr()}',
             style: GoogleFonts.spaceGrotesk(
               color: Colors.white.withValues(alpha: 0.92),
               fontWeight: FontWeight.w900,
-              fontSize: 12,
+              fontSize: 11,
             ),
           ),
         ],
@@ -1342,15 +1457,19 @@ class _LanguageSelector extends StatelessWidget {
           border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
         ),
         child: Stack(
+          alignment: Alignment.center,
           children: [
-            Flag.fromString(flagCode, height: 24, width: 32),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: Flag.fromString(flagCode, height: 18, width: 24),
+            ),
             Positioned(
-              bottom: 0,
-              right: 0,
+              bottom: -4,
+              right: -6,
               child: Icon(
                 Icons.arrow_drop_down,
-                size: 12,
-                color: Colors.white.withValues(alpha: 0.8),
+                size: 16,
+                color: Colors.white.withValues(alpha: 0.9),
               ),
             ),
           ],

@@ -20,6 +20,8 @@ class EnhancedBottomNav extends StatefulWidget {
   final void Function(int) onTap;
   final bool showLabels;
   final List<BottomNavItem> items;
+  final List<GlobalKey>? itemKeys;
+  final GlobalKey? captureKey;
   final Color? backgroundColor;
   final Color? activeColor;
   final Color? inactiveColor;
@@ -31,6 +33,8 @@ class EnhancedBottomNav extends StatefulWidget {
     required this.onTap,
     this.showLabels = true,
     this.items = const [],
+    this.itemKeys,
+    this.captureKey,
     this.backgroundColor,
     this.activeColor,
     this.inactiveColor,
@@ -238,6 +242,9 @@ class _EnhancedBottomNavState extends State<EnhancedBottomNav>
                         children: items.asMap().entries.map((entry) {
                           final index = entry.key;
                           final item = entry.value;
+                          final key = (widget.itemKeys != null && widget.itemKeys!.length > index) 
+                            ? widget.itemKeys![index] 
+                            : null;
                           return Expanded(
                             child: _buildNavItem(
                               context,
@@ -246,6 +253,7 @@ class _EnhancedBottomNavState extends State<EnhancedBottomNav>
                               activeColor,
                               inactiveColor,
                               t,
+                              key,
                             ),
                           );
                         }).toList(),
@@ -268,6 +276,7 @@ class _EnhancedBottomNavState extends State<EnhancedBottomNav>
     Color activeColor,
     Color inactiveColor,
     double t,
+    Key? key,
   ) {
     final isActive = widget.currentIndex == index;
 
@@ -280,10 +289,12 @@ class _EnhancedBottomNavState extends State<EnhancedBottomNav>
         activeColor,
         inactiveColor,
         t,
+        key,
       );
     }
 
     return GestureDetector(
+      key: key,
       onTap: () => _handleTap(index),
       behavior: HitTestBehavior.opaque,
       child: Semantics(
@@ -390,8 +401,10 @@ class _EnhancedBottomNavState extends State<EnhancedBottomNav>
     Color activeColor,
     Color inactiveColor,
     double t,
+    Key? key,
   ) {
     return GestureDetector(
+      key: widget.captureKey ?? key,
       onTap: () => _handleTap(index),
       behavior: HitTestBehavior.opaque,
       child: Semantics(

@@ -133,6 +133,40 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 margin: const EdgeInsets.symmetric(horizontal: 16),
               ),
               ListTile(
+                leading: const Icon(Icons.restart_alt, color: Colors.orange),
+                title: Text(
+                  'Reset Onboarding',
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+                subtitle: Text(
+                  'Show intro tour on next refresh',
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 12,
+                    color: Colors.white60,
+                  ),
+                ),
+                onTap: () async {
+                  await OnboardingService().resetOnboarding();
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Onboarding reset! Refresh dashboard to see the tour.'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                },
+                minVerticalPadding: 12,
+              ),
+              Container(
+                height: 1,
+                color: Colors.white12,
+                margin: const EdgeInsets.symmetric(horizontal: 16),
+              ),
+              ListTile(
                 leading: const Icon(Icons.delete_forever, color: Colors.red),
                 title: Text(
                   'settings_delete_account'.tr(),

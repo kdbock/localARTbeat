@@ -12,6 +12,8 @@ class MainLayout extends StatefulWidget {
   final Widget? endDrawer;
   final GlobalKey<ScaffoldState>? scaffoldKey;
   final Widget? floatingActionButton;
+  final GlobalKey? bottomNavKey;
+  final List<GlobalKey>? bottomNavItemKeys;
 
   const MainLayout({
     super.key,
@@ -23,6 +25,8 @@ class MainLayout extends StatefulWidget {
     this.endDrawer,
     this.scaffoldKey,
     this.floatingActionButton,
+    this.bottomNavKey,
+    this.bottomNavItemKeys,
   });
 
   @override
@@ -112,6 +116,8 @@ class _MainLayoutState extends State<MainLayout> {
       bottomNavigationBar: widget.currentIndex == -1
           ? null
           : EnhancedBottomNav(
+              key: widget.bottomNavKey,
+              itemKeys: widget.bottomNavItemKeys,
               currentIndex: widget.currentIndex,
               onTap: _handleNavigation,
             ),

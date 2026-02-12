@@ -17,5 +17,9 @@ export 'comment_model.dart';
 // In-app purchase models
 export 'in_app_purchase_models.dart';
 
+// Chapter Partner Framework
+export 'chapter_partner.dart';
+export 'chapter_quest.dart';
+
 // Types
 export 'types/filter_types.dart';

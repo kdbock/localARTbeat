@@ -1,10 +1,4 @@
 {
-  "drawer_guest_user": "Guest User",
-  "drawer_not_signed_in": "Not Signed In",
-  "drawer_platform_curation": "Platform Curation",
-  "drawer_security_center": "Security Center",
-  "drawer_system_health": "System Health",
-  "drawer_payment_management": "Payment Management",
   "Pink": "Pink",
   "Hill": "Hill",
   "Local": "Local",
@@ -6239,5 +6233,19 @@
   "drawer_platform_curation": "Platform Curation",
   "drawer_security_center": "Security Center",
   "drawer_system_health": "System Health",
-  "drawer_payment_management": "Payment Management"
+  "drawer_payment_management": "Payment Management",
+  "artist_cta_title": "Are you an artist?",
+  "artist_cta_subtitle": "Subscription plan for artists",
+  "artist_cta_feature_boosts": "Monthly Boosts",
+  "artist_cta_feature_sponsored": "Sponsored Content",
+  "artist_cta_feature_commissions": "Take Commissions",
+  "artist_cta_feature_earnings": "Direct Earnings",
+  "artist_cta_button": "Unlock Artist Features for {price}/month",
+  "artist_cta_footer": "Start sharing your work today!",
+  "artist_cta_compact_subtitle": "Become an ARTbeat Artist",
+  "artist_cta_compact_button": "Upgrade",
+  "drawer_mode_user": "USER MODE",
+  "drawer_mode_artist": "ARTIST MODE",
+  "drawer_mode_gallery": "GALLERY MODE",
+  "drawer_mode_moderator": "MODERATOR MODE"
 }

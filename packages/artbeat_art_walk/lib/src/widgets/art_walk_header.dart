@@ -18,6 +18,10 @@ class ArtWalkHeader extends StatefulWidget implements PreferredSizeWidget {
   final VoidCallback? onChatPressed;
   final VoidCallback? onDeveloperPressed;
   final List<Widget>? actions;
+  final GlobalKey? menuKey;
+  final GlobalKey? searchKey;
+  final GlobalKey? chatKey;
+  final GlobalKey? notificationsKey;
 
   const ArtWalkHeader({
     super.key,
@@ -32,6 +36,10 @@ class ArtWalkHeader extends StatefulWidget implements PreferredSizeWidget {
     this.onChatPressed,
     this.onDeveloperPressed,
     this.actions,
+    this.menuKey,
+    this.searchKey,
+    this.chatKey,
+    this.notificationsKey,
   });
 
   @override
@@ -78,6 +86,7 @@ class _ArtWalkHeaderState extends State<ArtWalkHeader> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       _HudIconButton(
+                        key: widget.menuKey,
                         icon: widget.showBackButton
                             ? Icons.arrow_back_ios_new_rounded
                             : Icons.menu_rounded,
@@ -110,6 +119,7 @@ class _ArtWalkHeaderState extends State<ArtWalkHeader> {
     if (widget.showSearch) {
       buttons.add(
         _HudIconButton(
+          key: widget.searchKey,
           icon: Icons.search_rounded,
           tooltip: 'art_walk_header_tooltip_search'.tr(),
           onTap: widget.onSearchPressed ?? _navigateToSearch,
@@ -120,6 +130,7 @@ class _ArtWalkHeaderState extends State<ArtWalkHeader> {
     if (widget.showChat) {
       buttons.add(
         _HudIconButton(
+          key: widget.chatKey,
           icon: Icons.chat_bubble_outline_rounded,
           tooltip: 'art_walk_header_tooltip_chat'.tr(),
           onTap: widget.onChatPressed ?? _openMessaging,
@@ -329,6 +340,7 @@ class _HudIconButton extends StatelessWidget {
   final VoidCallback onTap;
 
   const _HudIconButton({
+    super.key,
     required this.icon,
     required this.tooltip,
     required this.onTap,

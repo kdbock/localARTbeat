@@ -84,4 +84,12 @@ class ArtbeatTypography {
       color: ArtbeatColors.textPrimary,
     ),
   );
+
+  static TextStyle get h1 => textTheme.displayLarge!;
+  static TextStyle get h2 => textTheme.displayMedium!;
+  static TextStyle get h3 => textTheme.displaySmall!;
+  static TextStyle get h4 => textTheme.headlineMedium!;
+  static TextStyle get body => textTheme.bodyLarge!;
+  static TextStyle get helper => textTheme.bodySmall!;
+  static TextStyle get badge => textTheme.labelLarge!;
 }

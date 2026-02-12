@@ -18,6 +18,7 @@ class Sponsorship {
     this.radiusMiles,
     this.bannerUrl,
     this.relatedEntityId,
+    this.chapterId,
   });
 
   factory Sponsorship.fromSnapshot(DocumentSnapshot snapshot) =>
@@ -43,6 +44,7 @@ class Sponsorship {
         bannerUrl: data['bannerUrl'] as String?,
         linkUrl: data['linkUrl'] as String,
         relatedEntityId: data['relatedEntityId'] as String?,
+        chapterId: data['chapterId'] as String?,
         createdAt: (data['createdAt'] as Timestamp).toDate(),
       );
   final String id;
@@ -61,6 +63,7 @@ class Sponsorship {
   final String linkUrl;
 
   final String? relatedEntityId; // eventId, artWalkId, etc
+  final String? chapterId;
   final DateTime createdAt;
 
   Map<String, dynamic> toMap() => {
@@ -75,6 +78,7 @@ class Sponsorship {
     'bannerUrl': bannerUrl,
     'linkUrl': linkUrl,
     'relatedEntityId': relatedEntityId,
+    'chapterId': chapterId,
     'createdAt': Timestamp.fromDate(createdAt),
   };
 

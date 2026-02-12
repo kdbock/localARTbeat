@@ -25,6 +25,7 @@ class ArtWalkModel {
   completionCount; // Number of times this art walk has been completed
   final int reportCount; // Number of reports/flags on this art walk
   final bool isFlagged; // Whether this art walk has been flagged for review
+  final String? chapterId;
 
   ArtWalkModel({
     required this.id,
@@ -48,6 +49,7 @@ class ArtWalkModel {
     this.completionCount,
     this.reportCount = 0,
     this.isFlagged = false,
+    this.chapterId,
   });
 
   factory ArtWalkModel.fromFirestore(DocumentSnapshot doc) {
@@ -92,6 +94,7 @@ class ArtWalkModel {
           : null,
       reportCount: FirestoreUtils.safeInt(data['reportCount']),
       isFlagged: FirestoreUtils.safeBool(data['isFlagged'], false),
+      chapterId: FirestoreUtils.safeString(data['chapterId']),
     );
   }
 
@@ -117,6 +120,7 @@ class ArtWalkModel {
       'completionCount': completionCount,
       'reportCount': reportCount,
       'isFlagged': isFlagged,
+      if (chapterId != null) 'chapterId': chapterId,
     };
   }
 
@@ -142,6 +146,7 @@ class ArtWalkModel {
     int? completionCount,
     int? reportCount,
     bool? isFlagged,
+    String? chapterId,
   }) {
     return ArtWalkModel(
       id: id ?? this.id,
@@ -165,6 +170,7 @@ class ArtWalkModel {
       completionCount: completionCount ?? this.completionCount,
       reportCount: reportCount ?? this.reportCount,
       isFlagged: isFlagged ?? this.isFlagged,
+      chapterId: chapterId ?? this.chapterId,
     );
   }
 

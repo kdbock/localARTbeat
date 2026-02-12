@@ -5,3 +5,8 @@
 export 'subscription_purchase_widget.dart';
 export 'ad_purchase_widget.dart';
 export 'artist_boost_widget.dart';
+
+// Tour overlays
+export 'tour/tour_step.dart';
+export 'tour/dashboard_tour_overlay.dart';
+export 'tour/events_tour_overlay.dart';

@@ -16,3 +16,5 @@ export 'chapter_model.dart';
 export 'reading_analytics_model.dart';
 export 'artist_feature_model.dart';
 export 'writing_metadata.dart';
+export 'chapter_partner.dart';
+export 'chapter_quest.dart';

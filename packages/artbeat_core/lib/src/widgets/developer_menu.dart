@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:artbeat_admin/artbeat_admin.dart';
 import 'feedback_form.dart';
+import '../services/onboarding_service.dart';
 
 /// Developer menu with admin upload screens only
 /// Refactored to use unified admin tools from artbeat_admin
@@ -77,6 +78,24 @@ class DeveloperMenu extends StatelessWidget {
                 context,
                 const ModernUnifiedAdminDashboard(),
               ),
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.restart_alt, color: Colors.orange),
+              title: const Text('Reset Onboarding'),
+              subtitle: const Text('Show dashboard tour on next refresh'),
+              onTap: () async {
+                await OnboardingService().resetOnboarding();
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Onboarding reset! Refresh dashboard to see the tour.'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                  Navigator.of(context).pop();
+                }
+              },
             ),
           ],
         ),

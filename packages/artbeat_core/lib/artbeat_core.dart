@@ -63,6 +63,7 @@ export 'src/services/notification_service.dart'
 export 'src/services/feedback_service.dart' show FeedbackService;
 export 'src/services/maps_diagnostic_service.dart' show MapsDiagnosticService;
 export 'src/services/image_management_service.dart' show ImageManagementService;
+export 'src/services/onboarding_service.dart' show OnboardingService;
 export 'src/services/leaderboard_service.dart'
     show LeaderboardService, LeaderboardCategory, LeaderboardEntry;
 export 'src/services/enhanced_storage_service.dart' show EnhancedStorageService;
@@ -86,6 +87,7 @@ export 'src/services/ai_features_service.dart'
 export 'src/services/usage_tracking_service.dart' show UsageTrackingService;
 export 'src/services/subscription_migration_service.dart'
     show SubscriptionMigrationService;
+export 'src/services/chapter_partner_service.dart' show ChapterPartnerService;
 export 'src/services/artist_feature_testing_service.dart'
     show ArtistFeatureTestingService, TestResult;
 
@@ -160,6 +162,8 @@ export 'src/widgets/loading_screen.dart';
 
 export 'src/widgets/content_engagement_bar.dart' show ContentEngagementBar;
 export 'src/widgets/universal_content_card.dart' show UniversalContentCard;
+export 'src/widgets/chapters/chapter_selection_widget.dart'
+    show ChapterSelectionWidget;
 export 'src/widgets/profile_tab_interface.dart';
 export 'src/widgets/featured_content_row_widget.dart';
 export 'src/widgets/network_error_widget.dart';
@@ -220,6 +224,8 @@ export 'src/screens/subscription_purchase_screen.dart'
     show SubscriptionPurchaseScreen;
 export 'src/screens/coupon_management_screen.dart' show CouponManagementScreen;
 export 'src/screens/full_browse_screen.dart' show FullBrowseScreen;
+export 'src/screens/chapters/chapter_landing_screen.dart'
+    show ChapterLandingScreen;
 export 'src/screens/terms_of_service_screen.dart' show TermsOfServiceScreen;
 export 'src/screens/privacy_policy_screen.dart' show PrivacyPolicyScreen;
 
@@ -236,6 +242,8 @@ export 'src/models/artist_onboarding/artist_onboarding_data.dart';
 // Export Providers
 export 'src/providers/messaging_provider.dart' show MessagingProvider;
 export 'src/providers/community_provider.dart' show CommunityProvider;
+export 'src/providers/chapter_partner_provider.dart'
+    show ChapterPartnerProvider;
 
 // Export Dashboard Widgets
 export 'src/widgets/dashboard/index.dart';

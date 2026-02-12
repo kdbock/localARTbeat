@@ -46,6 +46,7 @@ import 'feed/group_feed_screen.dart';
 import 'posts/user_posts_screen.dart';
 import '../models/direct_commission_model.dart';
 import '../services/direct_commission_service.dart';
+import '../widgets/tour/art_community_tour_overlay.dart';
 
 /// ------------------------------------------------------------
 /// Local ARTbeat visual tokens (do not depend on old theme)
@@ -237,7 +238,8 @@ mixin PostLoadingMixin<T extends StatefulWidget> on State<T> {
 /// CommissionsTab – themed
 /// ------------------------------------------------------------
 class CommissionsTab extends StatefulWidget {
-  const CommissionsTab({super.key});
+  final GlobalKey? tabBarKey;
+  const CommissionsTab({super.key, this.tabBarKey});
 
   @override
   State<CommissionsTab> createState() => _CommissionsTabState();
@@ -307,6 +309,7 @@ class _CommissionsTabState extends State<CommissionsTab>
             blur: 14,
             padding: const EdgeInsets.symmetric(horizontal: 10),
             child: TabBar(
+              key: widget.tabBarKey,
               controller: _tabController,
               indicator: BoxDecoration(
                 color: _LAB.glassFill(0.18),
@@ -851,12 +854,29 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
+  // GlobalKeys for onboarding tour
+  final GlobalKey _menuKey = GlobalKey();
+  final GlobalKey _titleKey = GlobalKey();
+  final GlobalKey _searchKey = GlobalKey();
+  final GlobalKey _feedTabKey = GlobalKey();
+  final GlobalKey _artistsTabKey = GlobalKey();
+  final GlobalKey _artworkTabKey = GlobalKey();
+  final GlobalKey _commissionsTabKey = GlobalKey();
+  final GlobalKey _fabKey = GlobalKey();
+  final GlobalKey _feedContentKey = GlobalKey();
+  final GlobalKey _artistSpotlightKey = GlobalKey();
+  final GlobalKey _artworkGalleryKey = GlobalKey();
+  final GlobalKey _commissionArtistsKey = GlobalKey();
+
+  bool _showOnboarding = false;
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
     _communityService = ArtCommunityService();
     _checkAuthStatus();
+    _checkOnboarding();
   }
 
   @override
@@ -872,6 +892,15 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
       AppLogger.info('🔐 User is authenticated: ${user.uid} (${user.email})');
     } else {
       AppLogger.error('🔐 User is NOT authenticated');
+    }
+  }
+
+  Future<void> _checkOnboarding() async {
+    final isCompleted = await OnboardingService().isArtCommunityOnboardingCompleted();
+    if (!isCompleted && mounted) {
+      setState(() {
+        _showOnboarding = true;
+      });
     }
   }
 
@@ -1052,9 +1081,14 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
                   child: Row(
                     children: [
                       Builder(
-                        builder: (context) => IconButton(
-                          onPressed: () => Scaffold.of(context).openDrawer(),
-                          icon: const Icon(Icons.menu, color: _LAB.textPrimary),
+                        builder: (context) => SizedBox(
+                          key: _menuKey,
+                          width: 46,
+                          height: 46,
+                          child: IconButton(
+                            onPressed: () => Scaffold.of(context).openDrawer(),
+                            icon: const Icon(Icons.menu, color: _LAB.textPrimary),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 6),
@@ -1065,6 +1099,7 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
+                              key: _titleKey,
                               'community_hub_title'.tr(),
                               style: const TextStyle(
                                 color: _LAB.textPrimary,
@@ -1085,6 +1120,7 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
                         ),
                       ),
                       IconButton(
+                        key: _searchKey,
                         onPressed: _showSearchDialog,
                         icon: const Icon(Icons.search, color: _LAB.textPrimary),
                       ),
@@ -1121,18 +1157,22 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
                       ),
                       tabs: [
                         Tab(
+                          key: _feedTabKey,
                           text: 'community_hub_tab_feed'.tr(),
                           icon: const Icon(Icons.feed, size: 16),
                         ),
                         Tab(
+                          key: _artistsTabKey,
                           text: 'community_hub_tab_artists'.tr(),
                           icon: const Icon(Icons.palette, size: 16),
                         ),
                         Tab(
+                          key: _artworkTabKey,
                           text: 'community_hub_tab_artwork'.tr(),
                           icon: const Icon(Icons.explore, size: 16),
                         ),
                         Tab(
+                          key: _commissionsTabKey,
                           text: 'community_hub_tab_commissions'.tr(),
                           icon: const Icon(Icons.work, size: 16),
                         ),
@@ -1164,6 +1204,7 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
         ],
       ),
       child: FloatingActionButton(
+        key: _fabKey,
         onPressed: () {
           Navigator.push(
             context,
@@ -1188,33 +1229,66 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
 
     return Theme(
       data: hubTheme,
-      child: Scaffold(
-        backgroundColor: _LAB.world0,
-        appBar: _buildHudAppBar(),
-        drawer: CommunityHudDrawer(
-          selectedTabIndex: _tabController.index,
-          onTabSelected: (index) => _tabController.animateTo(index),
-          onNavigate: _handleHudNavigation,
-          closeDrawerAnd: _closeDrawerAnd,
-        ),
-        body: HudWorldBackground(
-          child: TabBarView(
-            controller: _tabController,
-            children: [
-              CommunityFeedTab(
-                communityService: _communityService,
-                searchQuery: _searchQuery,
+      child: Stack(
+        children: [
+          Scaffold(
+            backgroundColor: _LAB.world0,
+            appBar: _buildHudAppBar(),
+            drawer: CommunityHudDrawer(
+              selectedTabIndex: _tabController.index,
+              onTabSelected: (index) => _tabController.animateTo(index),
+              onNavigate: _handleHudNavigation,
+              closeDrawerAnd: _closeDrawerAnd,
+            ),
+            body: HudWorldBackground(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  Container(
+                    key: _feedContentKey,
+                    child: CommunityFeedTab(
+                      communityService: _communityService,
+                      searchQuery: _searchQuery,
+                    ),
+                  ),
+                  Container(
+                    key: _artistSpotlightKey,
+                    child: ArtistsGalleryTab(
+                      communityService: _communityService,
+                      searchQuery: _searchQuery,
+                    ),
+                  ),
+                  Container(
+                    key: _artworkGalleryKey,
+                    child: DiscoveryTab(searchQuery: _searchQuery),
+                  ),
+                  CommissionsTab(tabBarKey: _commissionArtistsKey),
+                ],
               ),
-              ArtistsGalleryTab(
-                communityService: _communityService,
-                searchQuery: _searchQuery,
-              ),
-              DiscoveryTab(searchQuery: _searchQuery),
-              const CommissionsTab(),
-            ],
+            ),
+            floatingActionButton: _buildFab(),
           ),
-        ),
-        floatingActionButton: _buildFab(),
+          if (_showOnboarding)
+            ArtCommunityTourOverlay(
+              menuKey: _menuKey,
+              titleKey: _titleKey,
+              searchKey: _searchKey,
+              feedTabKey: _feedTabKey,
+              artistsTabKey: _artistsTabKey,
+              artworkTabKey: _artworkTabKey,
+              commissionsTabKey: _commissionsTabKey,
+              fabKey: _fabKey,
+              feedContentKey: _feedContentKey,
+              artistSpotlightKey: _artistSpotlightKey,
+              artworkGalleryKey: _artworkGalleryKey,
+              commissionArtistsKey: _commissionArtistsKey,
+              onFinish: () {
+                setState(() {
+                  _showOnboarding = false;
+                });
+              },
+            ),
+        ],
       ),
     );
   }

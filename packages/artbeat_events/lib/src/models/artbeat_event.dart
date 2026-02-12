@@ -32,6 +32,7 @@ class ArtbeatEvent {
   final DateTime createdAt;
   final DateTime updatedAt;
   final String category; // Added category field
+  final String? chapterId;
   final String
   moderationStatus; // pending, approved, rejected, flagged, under_review
   final DateTime? lastModerated;
@@ -75,6 +76,7 @@ class ArtbeatEvent {
     required this.createdAt,
     required this.updatedAt,
     required this.category,
+    this.chapterId,
     this.moderationStatus = 'pending',
     this.lastModerated,
     this.isRecurring = false,
@@ -111,6 +113,7 @@ class ArtbeatEvent {
     String? contactPhone,
     Map<String, dynamic>? metadata,
     String category = 'Other', // Default category
+    String? chapterId,
     bool isRecurring = false,
     String? recurrencePattern,
     int? recurrenceInterval,
@@ -144,6 +147,7 @@ class ArtbeatEvent {
       createdAt: now,
       updatedAt: now,
       category: category, // Default category
+      chapterId: chapterId,
       isRecurring: isRecurring,
       recurrencePattern: recurrencePattern,
       recurrenceInterval: recurrenceInterval,
@@ -186,6 +190,7 @@ class ArtbeatEvent {
       createdAt: FirestoreUtils.getDateTime(data, 'createdAt'),
       updatedAt: FirestoreUtils.getDateTime(data, 'updatedAt'),
       category: FirestoreUtils.getString(data, 'category', 'Other'),
+      chapterId: FirestoreUtils.getOptionalString(data, 'chapterId'),
       moderationStatus: FirestoreUtils.getString(
         data,
         'moderationStatus',
@@ -242,6 +247,7 @@ class ArtbeatEvent {
       createdAt: FirestoreUtils.getDateTime(data, 'createdAt'),
       updatedAt: FirestoreUtils.getDateTime(data, 'updatedAt'),
       category: FirestoreUtils.getString(data, 'category', 'Other'),
+      chapterId: FirestoreUtils.getOptionalString(data, 'chapterId'),
       moderationStatus: FirestoreUtils.getString(
         data,
         'moderationStatus',
@@ -294,6 +300,7 @@ class ArtbeatEvent {
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
       'category': category, // Added category field
+      'chapterId': chapterId,
       'moderationStatus': moderationStatus,
       'lastModerated': lastModerated != null
           ? Timestamp.fromDate(lastModerated!)
@@ -342,6 +349,7 @@ class ArtbeatEvent {
     DateTime? createdAt,
     DateTime? updatedAt,
     String? category,
+    String? chapterId,
     String? moderationStatus,
     DateTime? lastModerated,
     bool? isRecurring,
@@ -380,6 +388,7 @@ class ArtbeatEvent {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? DateTime.now(),
       category: category ?? this.category, // Added category field
+      chapterId: chapterId ?? this.chapterId,
       moderationStatus: moderationStatus ?? this.moderationStatus,
       lastModerated: lastModerated ?? this.lastModerated,
       isRecurring: isRecurring ?? this.isRecurring,

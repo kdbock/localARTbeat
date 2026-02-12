@@ -24,6 +24,7 @@ class ArtworkModel {
   final int? releasedChapters;
   final Map<String, dynamic>? readingMetadata;
   final Map<String, dynamic>? serializationConfig;
+  final String? chapterId;
 
   ArtworkModel({
     required this.id,
@@ -47,6 +48,7 @@ class ArtworkModel {
     this.releasedChapters,
     this.readingMetadata,
     this.serializationConfig,
+    this.chapterId,
   });
 
   factory ArtworkModel.fromFirestore(DocumentSnapshot doc) {
@@ -86,6 +88,7 @@ class ArtworkModel {
       releasedChapters: FirestoreUtils.safeInt(data['releasedChapters']),
       readingMetadata: data['readingMetadata'] as Map<String, dynamic>?,
       serializationConfig: data['serializationConfig'] as Map<String, dynamic>?,
+      chapterId: FirestoreUtils.safeString(data['chapterId']),
     );
   }
 
@@ -112,6 +115,7 @@ class ArtworkModel {
       if (readingMetadata != null) 'readingMetadata': readingMetadata,
       if (serializationConfig != null)
         'serializationConfig': serializationConfig,
+      if (chapterId != null) 'chapterId': chapterId,
     };
   }
 

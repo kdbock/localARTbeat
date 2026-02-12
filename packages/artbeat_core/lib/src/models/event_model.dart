@@ -18,6 +18,7 @@ class EventModel {
   final DateTime updatedAt;
   final String? contactEmail;
   final double? price; // Event ticket price
+  final String? chapterId;
 
   // Computed property for attendees count
   int get attendeesCount => attendeeIds.length;
@@ -38,6 +39,7 @@ class EventModel {
     required this.updatedAt,
     this.contactEmail,
     this.price,
+    this.chapterId,
   });
 
   /// Create an EventModel from a Firestore document
@@ -92,6 +94,7 @@ class EventModel {
       updatedAt: FirestoreUtils.safeDateTime(data['updatedAt']),
       contactEmail: FirestoreUtils.safeString(data['contactEmail']),
       price: FirestoreUtils.safeDouble(data['price']),
+      chapterId: FirestoreUtils.safeString(data['chapterId']),
     );
   }
 
@@ -112,6 +115,7 @@ class EventModel {
       'updatedAt': updatedAt,
       'contactEmail': contactEmail,
       'price': price,
+      'chapterId': chapterId,
     };
     // Remove null values to prevent iOS crash in cloud_firestore plugin
     map.removeWhere((key, value) => value == null);
@@ -134,6 +138,7 @@ class EventModel {
     DateTime? updatedAt,
     String? contactEmail,
     double? price,
+    String? chapterId,
   }) {
     return EventModel(
       id: id,
@@ -152,6 +157,7 @@ class EventModel {
       updatedAt: updatedAt ?? this.updatedAt,
       contactEmail: contactEmail ?? this.contactEmail,
       price: price ?? this.price,
+      chapterId: chapterId ?? this.chapterId,
     );
   }
 }

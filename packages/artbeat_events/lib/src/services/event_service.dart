@@ -126,13 +126,19 @@ class EventService {
   }
 
   /// Get upcoming public events for community feed
-  Future<List<ArtbeatEvent>> getUpcomingPublicEvents({int? limit}) async {
+  Future<List<ArtbeatEvent>> getUpcomingPublicEvents({int? limit, String? chapterId}) async {
     try {
       Query query = _firestore
           .collection(_eventsCollection)
           .where('isPublic', isEqualTo: true)
-          .where('dateTime', isGreaterThan: Timestamp.now())
-          .orderBy('dateTime', descending: false);
+          .where('dateTime', isGreaterThan: Timestamp.now());
+      
+      if (chapterId != null) {
+        query = query.where('chapterId', isEqualTo: chapterId);
+      }
+      // If chapterId is null, we show all public events (Local ARTbeat)
+
+      query = query.orderBy('dateTime', descending: false);
 
       if (limit != null) {
         query = query.limit(limit);

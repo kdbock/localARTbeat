@@ -533,6 +533,9 @@ class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
           ),
           ElevatedButton(
             onPressed: () async {
+              final scaffoldMessenger = ScaffoldMessenger.of(context);
+              final navigator = Navigator.of(context);
+              
               // Audit Trail
               await _auditService.logAdminAction(
                 action: 'resolve_threat',
@@ -542,8 +545,8 @@ class _AdminSecurityCenterScreenState extends State<AdminSecurityCenterScreen> {
               );
 
               if (mounted) {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
+                navigator.pop();
+                scaffoldMessenger.showSnackBar(
                   SnackBar(
                       content: Text(
                           'admin_admin_security_center_text_threat_marked_as'

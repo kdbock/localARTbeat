@@ -240,6 +240,7 @@ class AppRoutes {
   static const String rewards = '/rewards';
   static const String leaderboard = '/leaderboard';
   static const String notifications = '/notifications';
+  static const String chapterLanding = '/chapter/landing';
   static const String dev = '/dev';
   static const String developerFeedbackAdmin = '/developer-feedback-admin';
   static const String systemInfo = '/system/info';

@@ -45,6 +45,22 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
 
+  // Onboarding GlobalKeys
+  final GlobalKey _menuKey = GlobalKey();
+  final GlobalKey _heroKey = GlobalKey();
+  final GlobalKey _searchKey = GlobalKey();
+  final GlobalKey _statsKey = GlobalKey();
+  final GlobalKey _categoryKey = GlobalKey();
+  final GlobalKey _featuredKey = GlobalKey();
+  final GlobalKey _quickActionsKey = GlobalKey();
+  final GlobalKey _nearMeKey = GlobalKey();
+  final GlobalKey _trendingKey = GlobalKey();
+  final GlobalKey _weekendKey = GlobalKey();
+  final GlobalKey _ticketsKey = GlobalKey();
+  final GlobalKey _createKey = GlobalKey();
+
+  bool _showOnboarding = false;
+
   @override
   void initState() {
     super.initState();
@@ -71,6 +87,27 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
     );
 
     _loadEvents();
+    _checkOnboarding();
+  }
+
+  Future<void> _checkOnboarding() async {
+    final onboardingService = OnboardingService();
+    final hasCompleted = await onboardingService.isEventsOnboardingCompleted();
+    if (!hasCompleted && mounted) {
+      // Delay to ensure widgets are built
+      await Future.delayed(const Duration(milliseconds: 500));
+      if (mounted) {
+        setState(() {
+          _showOnboarding = true;
+        });
+      }
+    }
+  }
+
+  void _onOnboardingFinish() {
+    setState(() {
+      _showOnboarding = false;
+    });
   }
 
   @override
@@ -156,7 +193,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
   Widget build(BuildContext context) {
     final currentUser = FirebaseAuth.instance.currentUser;
 
-    return Scaffold(
+    final scaffold = Scaffold(
       backgroundColor: const Color(0xFF070A12),
       drawer: const EventsDrawer(),
       body: Container(
@@ -200,6 +237,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
       ),
       floatingActionButton: currentUser != null
           ? Container(
+              key: _createKey,
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   colors: [
@@ -228,6 +266,31 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
             )
           : null,
     );
+
+    if (_showOnboarding) {
+      return Stack(
+        children: [
+          scaffold,
+          EventsTourOverlay(
+            menuKey: _menuKey,
+            heroKey: _heroKey,
+            searchKey: _searchKey,
+            statsKey: _statsKey,
+            categoryKey: _categoryKey,
+            featuredKey: _featuredKey,
+            quickActionsKey: _quickActionsKey,
+            nearMeKey: _nearMeKey,
+            trendingKey: _trendingKey,
+            weekendKey: _weekendKey,
+            ticketsKey: _ticketsKey,
+            createKey: _createKey,
+            onFinish: _onOnboardingFinish,
+          ),
+        ],
+      );
+    }
+
+    return scaffold;
   }
 
   // ==================== HERO HEADER ====================
@@ -237,6 +300,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
     final greeting = _getDynamicGreeting();
 
     return SliverToBoxAdapter(
+      key: _heroKey,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(14, 14, 14, 10),
         child: _Glass(
@@ -265,6 +329,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
                     Row(
                       children: [
                         Builder(
+                          key: _menuKey,
                           builder: (context) => _IconPillButton(
                             icon: Icons.menu,
                             onTap: () => Scaffold.of(context).openDrawer(),
@@ -308,6 +373,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
 
                     // Search pill
                     GestureDetector(
+                      key: _searchKey,
                       onTap: () => _showSearchModal(context),
                       child: _Glass(
                         radius: 18,
@@ -382,6 +448,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
     }).length;
 
     return Padding(
+      key: _statsKey,
       padding: const EdgeInsets.fromLTRB(14, 4, 14, 6),
       child: Row(
         children: [
@@ -420,6 +487,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
 
   Widget _buildCategoryFilter() {
     return Padding(
+      key: _categoryKey,
       padding: const EdgeInsets.fromLTRB(14, 8, 14, 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -494,6 +562,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
     final featured = _filteredEvents.take(3).toList();
 
     return Padding(
+      key: _featuredKey,
       padding: const EdgeInsets.only(top: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -775,6 +844,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
 
   Widget _buildQuickActionsGrid(User? currentUser) {
     return Padding(
+      key: _quickActionsKey,
       padding: const EdgeInsets.fromLTRB(14, 14, 14, 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -791,38 +861,44 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
           Row(
             children: [
               Expanded(
-                child: _QuickActionGlass(
-                  icon: Icons.location_on,
-                  title: 'events_quick_near_me'.tr(),
-                  gradient: const [Color(0xFF34D399), Color(0xFF22D3EE)],
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const EventsListScreen(
-                          title: 'Events Near You',
-                          tags: ['nearby'],
+                child: Container(
+                  key: _nearMeKey,
+                  child: _QuickActionGlass(
+                    icon: Icons.location_on,
+                    title: 'events_quick_near_me'.tr(),
+                    gradient: const [Color(0xFF34D399), Color(0xFF22D3EE)],
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const EventsListScreen(
+                            title: 'Events Near You',
+                            tags: ['nearby'],
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: _QuickActionGlass(
-                  icon: Icons.trending_up,
-                  title: 'events_quick_trending'.tr(),
-                  gradient: const [Color(0xFFFFC857), Color(0xFFFF3D8D)],
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const EventsListScreen(
-                          title: 'Trending Events',
-                          tags: ['popular', 'trending'],
+                child: Container(
+                  key: _trendingKey,
+                  child: _QuickActionGlass(
+                    icon: Icons.trending_up,
+                    title: 'events_quick_trending'.tr(),
+                    gradient: const [Color(0xFFFFC857), Color(0xFFFF3D8D)],
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const EventsListScreen(
+                            title: 'Trending Events',
+                            tags: ['popular', 'trending'],
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
               ),
             ],
@@ -831,44 +907,50 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
           Row(
             children: [
               Expanded(
-                child: _QuickActionGlass(
-                  icon: Icons.calendar_today,
-                  title: 'events_quick_this_weekend'.tr(),
-                  gradient: const [Color(0xFF7C4DFF), Color(0xFF22D3EE)],
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const EventsListScreen(
-                          title: 'This Weekend',
-                          tags: ['weekend'],
+                child: Container(
+                  key: _weekendKey,
+                  child: _QuickActionGlass(
+                    icon: Icons.calendar_today,
+                    title: 'events_quick_this_weekend'.tr(),
+                    gradient: const [Color(0xFF7C4DFF), Color(0xFF22D3EE)],
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const EventsListScreen(
+                            title: 'This Weekend',
+                            tags: ['weekend'],
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: _QuickActionGlass(
-                  icon: Icons.confirmation_number,
-                  title: 'events_quick_my_tickets'.tr(),
-                  gradient: const [Color(0xFF22D3EE), Color(0xFF34D399)],
-                  onTap: () {
-                    final u = FirebaseAuth.instance.currentUser;
-                    if (u != null) {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => MyTicketsScreen(userId: u.uid),
-                        ),
-                      );
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('events_sign_in_to_view_tickets'.tr()),
-                        ),
-                      );
-                    }
-                  },
+                child: Container(
+                  key: _ticketsKey,
+                  child: _QuickActionGlass(
+                    icon: Icons.confirmation_number,
+                    title: 'events_quick_my_tickets'.tr(),
+                    gradient: const [Color(0xFF22D3EE), Color(0xFF34D399)],
+                    onTap: () {
+                      final u = FirebaseAuth.instance.currentUser;
+                      if (u != null) {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => MyTicketsScreen(userId: u.uid),
+                          ),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('events_sign_in_to_view_tickets'.tr()),
+                          ),
+                        );
+                      }
+                    },
+                  ),
                 ),
               ),
             ],

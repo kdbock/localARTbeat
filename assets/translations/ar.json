@@ -6190,5 +6190,19 @@
   "progress_card_streak": "سلسلة",
   "progress_card_discoveries": "الاكتشافات",
   "progress_card_weekly_goal": "الهدف الأسبوعي",
-  "progress_card_complete": "إكمال"
+  "progress_card_complete": "إكمال",
+  "artist_cta_title": "هل أنت فنان؟",
+  "artist_cta_subtitle": "خطة اشتراك للفنانين",
+  "artist_cta_feature_boosts": "تعزيزات شهرية",
+  "artist_cta_feature_sponsored": "محتوى ممول",
+  "artist_cta_feature_commissions": "استلام طلبات فنية",
+  "artist_cta_feature_earnings": "أرباح مباشرة",
+  "artist_cta_button": "فتح ميزات الفنان مقابل {price}/شهر",
+  "artist_cta_footer": "ابدأ مشاركة عملك اليوم!",
+  "artist_cta_compact_subtitle": "كن فنانًا في ARTbeat",
+  "artist_cta_compact_button": "ترقية",
+  "drawer_mode_user": "وضع المستخدم",
+  "drawer_mode_artist": "وضع الفنان",
+  "drawer_mode_gallery": "وضع المعرض",
+  "drawer_mode_moderator": "وضع المشرف"
 }

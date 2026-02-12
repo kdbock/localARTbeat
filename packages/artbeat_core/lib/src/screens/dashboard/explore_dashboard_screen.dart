@@ -42,6 +42,21 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
   bool _showCelebration = false;
   String? _celebrationMessage;
 
+  // Tour GlobalKeys
+  final GlobalKey _menuKey = GlobalKey();
+  final GlobalKey _titleKey = GlobalKey();
+  final GlobalKey _searchKey = GlobalKey();
+  final GlobalKey _locationKey = GlobalKey();
+  final GlobalKey _forYouTabKey = GlobalKey();
+  final GlobalKey _exploreTabKey = GlobalKey();
+  final GlobalKey _communityTabKey = GlobalKey();
+  final GlobalKey _artistSpotlightKey = GlobalKey();
+  final GlobalKey _artworkGalleryKey = GlobalKey();
+  final GlobalKey _browseKey = GlobalKey();
+
+  // Onboarding state
+  bool _isTourActive = false;
+
   // UI state
   int _scrollDepth = 0;
 
@@ -155,6 +170,7 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
         final vm = Provider.of<DashboardViewModel>(context, listen: false);
         await vm.initialize();
         _checkForCelebrations(vm);
+        _checkOnboarding();
       } catch (e, stack) {
         AppLogger.error('❌ Dashboard init error: $e');
         AppLogger.error('❌ Stack trace: $stack');
@@ -263,8 +279,8 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
                       body: TabBarView(
                         controller: _tabController,
                         children: [
-                          _ForYouTab(vm: vm),
-                          _ExploreTab(vm: vm),
+                          _ForYouTab(vm: vm, artistSpotlightKey: _artistSpotlightKey, artworkGalleryKey: _artworkGalleryKey),
+                          _ExploreTab(vm: vm, browseKey: _browseKey),
                           _CommunityTab(vm: vm),
                         ],
                       ),
@@ -272,6 +288,23 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
                   ),
                 ),
                 if (_showCelebration) _buildCelebrationOverlay(),
+                if (_isTourActive)
+                  ExploreTourOverlay(
+                    menuKey: _menuKey,
+                    titleKey: _titleKey,
+                    searchKey: _searchKey,
+                    locationKey: _locationKey,
+                    forYouTabKey: _forYouTabKey,
+                    exploreTabKey: _exploreTabKey,
+                    communityTabKey: _communityTabKey,
+                    artistSpotlightKey: _artistSpotlightKey,
+                    artworkGalleryKey: _artworkGalleryKey,
+                    browseSectionKey: _browseKey,
+                    onFinish: () {
+                      setState(() => _isTourActive = false);
+                      OnboardingService().markExploreOnboardingCompleted();
+                    },
+                  ),
               ],
             ),
     );
@@ -315,7 +348,7 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
                     children: [
                     Row(
                       children: [
-                        _glassIconButton(icon: Icons.menu, onTap: _openDrawer),
+                        _glassIconButton(icon: Icons.menu, onTap: _openDrawer, key: _menuKey),
                         const SizedBox(width: 10),
                         Expanded(
                           child: GestureDetector(
@@ -326,6 +359,7 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
                               children: [
                                 Flexible(
                                   child: Text.rich(
+                                    key: _titleKey,
                                     TextSpan(
                                       children: [
                                         TextSpan(
@@ -405,6 +439,7 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
                     if (showSearchInput) ...[
                       const SizedBox(height: 12),
                       GestureDetector(
+                        key: _searchKey,
                         onTap: () => Navigator.pushNamed(context, '/search'),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(16),
@@ -468,6 +503,7 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
                     if (showLocationPill) ...[
                       const SizedBox(height: 14),
                       _LocationPill(
+                        key: _locationKey,
                         label: locationLabel,
                         isLoading: vm.isLoadingLocation,
                         onTap: () =>
@@ -681,18 +717,21 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
                   ),
                   tabs: [
                     Tab(
+                      key: _forYouTabKey,
                       child: tabPill(
                         Icons.auto_awesome,
                         'dashboard_tab_for_you'.tr(),
                       ),
                     ),
                     Tab(
+                      key: _exploreTabKey,
                       child: tabPill(
                         Icons.explore,
                         'dashboard_tab_explore'.tr(),
                       ),
                     ),
                     Tab(
+                      key: _communityTabKey,
                       child: tabPill(
                         Icons.people,
                         'dashboard_tab_community'.tr(),
@@ -712,8 +751,10 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
   Widget _glassIconButton({
     required IconData icon,
     required VoidCallback onTap,
+    Key? key,
   }) {
     return Container(
+      key: key,
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.18),
         borderRadius: BorderRadius.circular(14),
@@ -841,6 +882,17 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
     });
   }
 
+  Future<void> _checkOnboarding() async {
+    final isCompleted = await OnboardingService().isExploreOnboardingCompleted();
+    if (!isCompleted && mounted) {
+      // Small delay to ensure layout is stable
+      await Future<void>.delayed(const Duration(milliseconds: 1000));
+      if (mounted) {
+        setState(() => _isTourActive = true);
+      }
+    }
+  }
+
   Widget _buildCelebrationOverlay() {
     return AnimatedBuilder(
       animation: _celebrationController,
@@ -900,9 +952,11 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
 }
 
 class _ForYouTab extends StatelessWidget {
-  const _ForYouTab({required this.vm});
+  const _ForYouTab({required this.vm, required this.artistSpotlightKey, required this.artworkGalleryKey});
 
   final DashboardViewModel vm;
+  final GlobalKey artistSpotlightKey;
+  final GlobalKey artworkGalleryKey;
 
   @override
   Widget build(BuildContext context) {
@@ -945,6 +999,7 @@ class _ForYouTab extends StatelessWidget {
         if (spotlightArtist != null || heroArtwork != null)
           SliverToBoxAdapter(
             child: _ArtistSpotlightHero(
+              key: artistSpotlightKey,
               artist: spotlightArtist,
               artwork: heroArtwork,
               event: heroEvent,
@@ -956,7 +1011,10 @@ class _ForYouTab extends StatelessWidget {
           ),
         if (featuredArtworks.isNotEmpty)
           SliverToBoxAdapter(
-            child: _ArtworkSpotlightRail(artworks: featuredArtworks),
+            child: _ArtworkSpotlightRail(
+              key: artworkGalleryKey,
+              artworks: featuredArtworks,
+            ),
           ),
         if (vm.artwork.length > 4)
           SliverToBoxAdapter(child: DashboardArtworkSection(viewModel: vm)),
@@ -1055,6 +1113,7 @@ class _ArtistSpotlightHero extends StatelessWidget {
     required this.artist,
     required this.artwork,
     required this.event,
+    super.key,
   });
 
   final ArtistProfileModel? artist;
@@ -1465,7 +1524,7 @@ class _ArtistFeatureCard extends StatelessWidget {
 }
 
 class _ArtworkSpotlightRail extends StatelessWidget {
-  const _ArtworkSpotlightRail({required this.artworks});
+  const _ArtworkSpotlightRail({required this.artworks, super.key});
 
   final List<ArtworkModel> artworks;
 
@@ -1963,8 +2022,9 @@ class _ArtistAdSpace extends StatelessWidget {
 // TAB 2: Explore (artists + artwork + browse)
 // -----------------------------------------------------------------------------
 class _ExploreTab extends StatelessWidget {
-  const _ExploreTab({required this.vm});
+  const _ExploreTab({required this.vm, required this.browseKey});
   final DashboardViewModel vm;
+  final GlobalKey browseKey;
 
   @override
   Widget build(BuildContext context) {
@@ -1991,6 +2051,7 @@ class _ExploreTab extends StatelessWidget {
         // Always include browse gateway
         SliverToBoxAdapter(
           child: Padding(
+            key: browseKey,
             padding: const EdgeInsets.only(top: 8),
             child: DashboardBrowseSection(viewModel: vm),
           ),
@@ -2040,6 +2101,7 @@ class _LocationPill extends StatelessWidget {
     required this.label,
     required this.isLoading,
     required this.onTap,
+    super.key,
   });
 
   final String label;

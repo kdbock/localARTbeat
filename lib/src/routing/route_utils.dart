@@ -31,11 +31,15 @@ class RouteUtils {
     required Widget child,
     int currentIndex = -1,
     PreferredSizeWidget? appBar,
+    GlobalKey? bottomNavKey,
+    List<GlobalKey>? bottomNavItemKeys,
   }) => MaterialPageRoute<T>(
     builder: (_) => core.MainLayout(
       currentIndex: currentIndex,
       appBar: appBar,
       drawer: const core.ArtbeatDrawer(),
+      bottomNavKey: bottomNavKey,
+      bottomNavItemKeys: bottomNavItemKeys,
       child: child,
     ),
   );
@@ -68,10 +72,12 @@ class RouteUtils {
     String title, {
     bool showBackButton = true,
     bool showLogo = false,
+    bool showDeveloperTools = false,
   }) => core.EnhancedUniversalHeader(
     title: title,
     showLogo: showLogo,
     showBackButton: showBackButton,
+    showDeveloperTools: showDeveloperTools,
   );
 
   /// Extracts arguments safely from route settings

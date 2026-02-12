@@ -9,6 +9,7 @@ import 'package:artbeat_core/artbeat_core.dart'
     hide GlassCard, HudTopBar, WorldBackground, GradientCTAButton;
 import 'package:artbeat_capture/artbeat_capture.dart' hide GlassCard, HudTopBar;
 import 'package:artbeat_art_walk/artbeat_art_walk.dart';
+import 'package:artbeat_art_walk/src/widgets/tour/discover_tour_overlay.dart';
 import 'dart:async';
 
 /// 🎨 ARTbeat ArtWalk Dashboard Screen
@@ -34,6 +35,24 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
   bool _isDisposed = false;
   bool _hasDiscoveriesMade = false; // Track if discoveries were made
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  bool _isTourActive = false;
+
+  // Tour GlobalKeys
+  final GlobalKey _menuKey = GlobalKey();
+  final GlobalKey _searchKey = GlobalKey();
+  final GlobalKey _chatKey = GlobalKey();
+  final GlobalKey _notificationsKey = GlobalKey();
+  final GlobalKey _heroKey = GlobalKey();
+  final GlobalKey _radarKey = GlobalKey();
+  final GlobalKey _kioskKey = GlobalKey();
+  final GlobalKey _statsKey = GlobalKey();
+  final GlobalKey _goalsKey = GlobalKey();
+  final GlobalKey _socialKey = GlobalKey();
+  final GlobalKey _quickActionsKey = GlobalKey();
+  final GlobalKey _achievementsKey = GlobalKey();
+  final GlobalKey _hotspotsKey = GlobalKey();
+  final GlobalKey _radarTitleKey = GlobalKey();
 
   // Gamification state
   int _currentStreak = 0;
@@ -71,6 +90,21 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
     _initializeAnimations();
     _loadAllData();
     _startNotificationMonitoring();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkOnboarding();
+    });
+  }
+
+  Future<void> _checkOnboarding() async {
+    final isCompleted = await OnboardingService().isDiscoverOnboardingCompleted();
+    if (!isCompleted && mounted) {
+      // Small delay to ensure data is loaded and layout is stable
+      await Future<void>.delayed(const Duration(milliseconds: 1500));
+      if (mounted) {
+        setState(() => _isTourActive = true);
+      }
+    }
   }
 
   void _initializeAnimations() {
@@ -125,19 +159,19 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
   @override
   Widget build(BuildContext context) {
     final slivers = <Widget>[
-      SliverToBoxAdapter(child: _buildHeroSection()),
+      SliverToBoxAdapter(child: _buildHeroSection(key: _heroKey)),
       const SliverToBoxAdapter(
         child: SizedBox(height: ArtWalkDesignSystem.paddingL),
       ),
-      SliverToBoxAdapter(child: _buildInstantDiscoveryRadar()),
+      SliverToBoxAdapter(child: _buildInstantDiscoveryRadar(key: _radarKey)),
       const SliverToBoxAdapter(
         child: SizedBox(height: ArtWalkDesignSystem.paddingL),
       ),
-      SliverToBoxAdapter(child: _buildKioskLaneSection()),
+      SliverToBoxAdapter(child: _buildKioskLaneSection(key: _kioskKey)),
       const SliverToBoxAdapter(
         child: SizedBox(height: ArtWalkDesignSystem.paddingL),
       ),
-      SliverToBoxAdapter(child: _buildStatsSection()),
+      SliverToBoxAdapter(child: _buildStatsSection(key: _statsKey)),
       const SliverToBoxAdapter(
         child: SizedBox(height: ArtWalkDesignSystem.paddingL),
       ),
@@ -166,7 +200,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
       const SliverToBoxAdapter(
         child: SizedBox(height: ArtWalkDesignSystem.paddingL),
       ),
-      SliverToBoxAdapter(child: _buildLiveSocialFeed()),
+      SliverToBoxAdapter(child: _buildLiveSocialFeed(key: _socialKey)),
       const SliverToBoxAdapter(
         child: SizedBox(height: ArtWalkDesignSystem.paddingL),
       ),
@@ -191,46 +225,77 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
           Navigator.pop(context, _hasDiscoveriesMade);
         }
       },
-      child: ArtWalkWorldScaffold(
-        scaffoldKey: _scaffoldKey,
-        drawer: const ArtWalkDrawer(),
-        title: 'art_walk_art_walk_dashboard_text_local_scene',
-        translateTitle: true,
-        showBackButton: false,
-        appBar: ArtWalkHeader(
-          title: 'art_walk_art_walk_dashboard_text_local_scene'.tr(),
-          showBackButton: false,
-          showSearch: true,
-          showChat: true,
-          onSearchPressed: () => Navigator.pushNamed(context, '/search'),
-          onChatPressed: () => Navigator.pushNamed(context, '/messaging/inbox'),
-          actions: [
-            IconButton(
-              icon: const Icon(
-                Icons.notifications_outlined,
-                color: Colors.white,
-              ),
-              onPressed: () => Navigator.pushNamed(context, '/notifications'),
-              tooltip: 'Notifications',
+      child: Stack(
+        children: [
+          ArtWalkWorldScaffold(
+            scaffoldKey: _scaffoldKey,
+            drawer: const ArtWalkDrawer(),
+            title: 'art_walk_art_walk_dashboard_text_local_scene',
+            translateTitle: true,
+            showBackButton: false,
+            appBar: ArtWalkHeader(
+              menuKey: _menuKey,
+              searchKey: _searchKey,
+              chatKey: _chatKey,
+              notificationsKey: _notificationsKey,
+              title: 'art_walk_art_walk_dashboard_text_local_scene'.tr(),
+              showBackButton: false,
+              showSearch: true,
+              showChat: true,
+              onSearchPressed: () => Navigator.pushNamed(context, '/search'),
+              onChatPressed: () =>
+                  Navigator.pushNamed(context, '/messaging/inbox'),
+              actions: [
+                IconButton(
+                  key: _notificationsKey,
+                  icon: const Icon(
+                    Icons.notifications_outlined,
+                    color: Colors.white,
+                  ),
+                  onPressed: () =>
+                      Navigator.pushNamed(context, '/notifications'),
+                  tooltip: 'Notifications',
+                ),
+              ],
             ),
-          ],
-        ),
-        body: Stack(
-          children: [
-            Positioned.fill(child: _buildAuroraBackdrop()),
-            SafeArea(
-              bottom: false,
-              child: CustomScrollView(
-                physics: const BouncingScrollPhysics(),
-                slivers: slivers,
-              ),
+            body: Stack(
+              children: [
+                Positioned.fill(child: _buildAuroraBackdrop()),
+                SafeArea(
+                  bottom: false,
+                  child: CustomScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    slivers: slivers,
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-        bottomNavigationBar: EnhancedBottomNav(
-          currentIndex: 1,
-          onTap: _handleNavigation,
-        ),
+            bottomNavigationBar: EnhancedBottomNav(
+              currentIndex: 1,
+              onTap: _handleNavigation,
+            ),
+          ),
+          if (_isTourActive)
+            DiscoverTourOverlay(
+              menuKey: _menuKey,
+              searchKey: _searchKey,
+              chatKey: _chatKey,
+              notificationsKey: _notificationsKey,
+              heroKey: _heroKey,
+              radarKey: _radarKey,
+              kioskKey: _kioskKey,
+              statsKey: _statsKey,
+              goalsKey: _goalsKey,
+              socialKey: _socialKey,
+              quickActionsKey: _quickActionsKey,
+              achievementsKey: _achievementsKey,
+              hotspotsKey: _hotspotsKey,
+              radarTitleKey: _radarTitleKey,
+              onFinish: () {
+                setState(() => _isTourActive = false);
+              },
+            ),
+        ],
       ),
     );
   }
@@ -287,11 +352,12 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
     );
   }
 
-  Widget _buildHeroSection() {
+  Widget _buildHeroSection({Key? key}) {
     final greeting = _getDynamicGreeting();
     final userName = _getExplorerName();
 
     return _glassCard(
+      key: key,
       margin: const EdgeInsets.fromLTRB(
         ArtWalkDesignSystem.paddingL,
         ArtWalkDesignSystem.paddingL,
@@ -627,8 +693,9 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
   }
 
   // Stats Section - Clean white cards
-  Widget _buildStatsSection() {
+  Widget _buildStatsSection({Key? key}) {
     return Padding(
+      key: key,
       padding: const EdgeInsets.symmetric(
         horizontal: ArtWalkDesignSystem.paddingL,
       ),
@@ -745,9 +812,11 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
   }
 
   // Weekly Goals Section
-  Widget _buildWeeklyGoals() {
+  Widget _buildWeeklyGoals({Key? key}) {
     return WeeklyGoalsCard(
+      key: key,
       goals: _weeklyGoals,
+      titleKey: _goalsKey,
       onTap: () {
         Navigator.push(
           context,
@@ -760,8 +829,9 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
   }
 
   // Instant Discovery Radar - Clean featured section with map background
-  Widget _buildInstantDiscoveryRadar() {
+  Widget _buildInstantDiscoveryRadar({Key? key}) {
     return _glassCard(
+      key: key,
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: EdgeInsets.zero,
       radius: 30,
@@ -843,6 +913,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
                             children: [
                               Text(
                                 'art_walk_dashboard_discovery_title'.tr(),
+                                key: _radarTitleKey,
                                 style: AppTypography.body().copyWith(
                                   fontSize: 20,
                                   fontWeight: FontWeight.w800,
@@ -952,8 +1023,9 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
     );
   }
 
-  Widget _buildKioskLaneSection() {
+  Widget _buildKioskLaneSection({Key? key}) {
     return Padding(
+      key: key,
       padding: const EdgeInsets.symmetric(
         horizontal: ArtWalkDesignSystem.paddingL,
       ),
@@ -1079,8 +1151,9 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
   }
 
   // Social Feed - Clean community section
-  Widget _buildLiveSocialFeed() {
+  Widget _buildLiveSocialFeed({Key? key}) {
     return _glassCard(
+      key: key,
       margin: const EdgeInsets.symmetric(
         horizontal: ArtWalkDesignSystem.paddingL,
       ),
@@ -1188,6 +1261,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
                   children: [
                     Text(
                       'art_walk_dashboard_quick_actions_title'.tr(),
+                      key: _quickActionsKey,
                       style: AppTypography.body().copyWith(
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
@@ -1269,7 +1343,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
               ),
               child: Icon(icon, color: color, size: 28),
             ),
-            const SizedBox(height: ArtWalkDesignSystem.paddingM),
+            const SizedBox(height: ArtWalkDesignSystem.paddingS),
             Text(
               title,
               style: AppTypography.body().copyWith(
@@ -1317,6 +1391,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
                   children: [
                     Text(
                       'art_walk_dashboard_achievements_title'.tr(),
+                      key: _achievementsKey,
                       style: AppTypography.body().copyWith(
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
@@ -1376,6 +1451,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
                   children: [
                     Text(
                       'art_walk_dashboard_nearby_title'.tr(),
+                      key: _hotspotsKey,
                       style: AppTypography.body().copyWith(
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
@@ -1404,6 +1480,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
   }
 
   Widget _glassCard({
+    Key? key,
     required Widget child,
     EdgeInsets margin = EdgeInsets.zero,
     EdgeInsets padding = const EdgeInsets.all(ArtWalkDesignSystem.paddingL),
@@ -1425,6 +1502,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
         : child;
 
     return Container(
+      key: key,
       margin: margin,
       child: GlassCard(
         padding: padding,

@@ -7,8 +7,9 @@ import 'package:artbeat_core/shared_widgets.dart';
 class WeeklyGoalsCard extends StatefulWidget {
   final List<WeeklyGoalModel> goals;
   final VoidCallback? onTap;
+  final Key? titleKey;
 
-  const WeeklyGoalsCard({required this.goals, this.onTap, super.key});
+  const WeeklyGoalsCard({required this.goals, this.onTap, this.titleKey, super.key});
 
   @override
   State<WeeklyGoalsCard> createState() => _WeeklyGoalsCardState();
@@ -66,6 +67,7 @@ class _WeeklyGoalsCardState extends State<WeeklyGoalsCard> {
                 children: [
                   Text(
                     'weekly_goals_title'.tr(),
+                    key: widget.titleKey,
                     style: GoogleFonts.spaceGrotesk(
                       color: Colors.white,
                       fontSize: 20,

@@ -6211,5 +6211,19 @@
   "progress_card_streak": "连续",
   "progress_card_discoveries": "发现",
   "progress_card_weekly_goal": "每周目标",
-  "progress_card_complete": "完成"
+  "progress_card_complete": "完成",
+  "artist_cta_title": "你是艺术家吗？",
+  "artist_cta_subtitle": "艺术家的订阅计划",
+  "artist_cta_feature_boosts": "每月提升",
+  "artist_cta_feature_sponsored": "赞助内容",
+  "artist_cta_feature_commissions": "接受委托",
+  "artist_cta_feature_earnings": "直接收益",
+  "artist_cta_button": "以每月 {price} 的价格解锁艺术家功能",
+  "artist_cta_footer": "今天就开始分享你的作品吧！",
+  "artist_cta_compact_subtitle": "成为 ARTbeat 艺术家",
+  "artist_cta_compact_button": "升级",
+  "drawer_mode_user": "用户模式",
+  "drawer_mode_artist": "艺术家模式",
+  "drawer_mode_gallery": "画廊模式",
+  "drawer_mode_moderator": "版主模式"
 }

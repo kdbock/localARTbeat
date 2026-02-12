@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:artbeat_capture/artbeat_capture.dart';
+import 'package:artbeat_capture/src/widgets/tour/capture_tour_overlay.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -23,6 +24,19 @@ class _EnhancedCaptureDashboardScreenState
   final ScrollController _scrollController = ScrollController();
 
   bool _isLoading = true;
+  bool _isTourActive = false;
+
+  // Tour GlobalKeys
+  final GlobalKey _menuKey = GlobalKey();
+  final GlobalKey _searchKey = GlobalKey();
+  final GlobalKey _chatKey = GlobalKey();
+  final GlobalKey _notificationsKey = GlobalKey();
+  final GlobalKey _profileKey = GlobalKey();
+  final GlobalKey _questTrackerKey = GlobalKey();
+  final GlobalKey _communityPulseKey = GlobalKey();
+  final GlobalKey _recentLootKey = GlobalKey();
+  final GlobalKey _communityInspirationKey = GlobalKey();
+  final GlobalKey _quickCaptureKey = GlobalKey();
 
   // Data
   List<CaptureModel> _recentCaptures = [];
@@ -108,6 +122,25 @@ class _EnhancedCaptureDashboardScreenState
     )..forward();
 
     _loadData();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkOnboarding();
+    });
+  }
+
+  Future<void> _checkOnboarding() async {
+    final isCompleted = await OnboardingService().isCaptureOnboardingCompleted();
+    if (!isCompleted && mounted) {
+      // Small delay to ensure data is loaded and layout is stable
+      await Future<void>.delayed(const Duration(milliseconds: 1500));
+      if (mounted && !_isLoading) {
+        setState(() => _isTourActive = true);
+      } else if (mounted && _isLoading) {
+        // If still loading, wait a bit more and retry
+        await Future<void>.delayed(const Duration(milliseconds: 1000));
+        _checkOnboarding();
+      }
+    }
   }
 
   @override
@@ -414,220 +447,261 @@ class _EnhancedCaptureDashboardScreenState
   Widget build(BuildContext context) {
     final missionData = _buildMissionData(context);
 
-    return Scaffold(
-      backgroundColor: const Color(0xFF07060F),
-      drawer: const CaptureDrawer(),
-      body: Stack(
-        children: [
-          // Ambient animated background (no heavy overlay blocks)
-          Positioned.fill(
-            child: AnimatedBuilder(
-              animation: _loop,
-              builder: (_, __) => CustomPaint(
-                painter: _QuestAmbientPainter(t: _loop.value),
-                size: Size.infinite,
+    return Stack(
+      children: [
+        Scaffold(
+          backgroundColor: const Color(0xFF07060F),
+          drawer: const CaptureDrawer(),
+          body: Stack(
+            children: [
+              // Ambient animated background (no heavy overlay blocks)
+              Positioned.fill(
+                child: AnimatedBuilder(
+                  animation: _loop,
+                  builder: (_, __) => CustomPaint(
+                    painter: _QuestAmbientPainter(t: _loop.value),
+                    size: Size.infinite,
+                  ),
+                ),
               ),
-            ),
-          ),
-          SafeArea(
-            child: _isLoading
-                ? const Center(
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        Color(0xFF22D3EE),
-                      ),
-                    ),
-                  )
-                : RefreshIndicator(
-                    onRefresh: _refreshData,
-                    color: const Color(0xFF22D3EE),
-                    backgroundColor: const Color(0xFF0C0A16),
-                    child: CustomScrollView(
-                      controller: _scrollController,
-                      physics: const BouncingScrollPhysics(),
-                      slivers: [
-                        // Wrap _TopHudBar in a Builder to provide context under Scaffold
-                        SliverToBoxAdapter(
-                          child: Builder(
-                            builder: (context) => _TopHudBar(
-                              title: 'capture_dashboard_title'.tr(),
-                              subtitle: 'capture_dashboard_subtitle'.tr(),
-                              onMenu: () => Scaffold.of(context).openDrawer(),
-                              onSearch: () => _showSearchModal(context),
-                              onChat: () => Navigator.pushNamed(
-                                context,
-                                AppRoutes.messaging,
-                              ),
-                              onNotifications: () => Navigator.pushNamed(
-                                context,
-                                AppRoutes.notifications,
-                              ),
-                              onProfile: () => _showProfileMenu(context),
-                            ),
+              SafeArea(
+                child: _isLoading
+                    ? const Center(
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Color(0xFF22D3EE),
                           ),
                         ),
-                        // Quest tracker section
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(14, 18, 14, 10),
-                            child: _StampFadeIn(
-                              intro: _intro,
-                              delay: 0.2,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _SectionHeader(
-                                    title:
-                                        'capture_dashboard_section_quest_tracker_title'
-                                            .tr(),
-                                    subtitle:
-                                        'capture_dashboard_section_quest_tracker_subtitle'
-                                            .tr(),
-                                    accent: const Color(0xFF34D399),
-                                  ),
-                                  const SizedBox(height: 12),
-                                  _CaptureMissionList(missions: missionData),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        if (_communityCaptures.isNotEmpty)
-                          SliverToBoxAdapter(
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(14, 10, 14, 0),
-                              child: _StampFadeIn(
-                                intro: _intro,
-                                delay: 0.22,
-                                child: _CommunityPulse(
-                                  activeHunters: _communityArtistCount,
-                                  newDrops: _communityCaptures.length,
-                                  xpPulse: _communityEngagementScore,
-                                  trendingLocation: _trendingCommunityLocation,
-                                  onExplore: () => Navigator.pushNamed(
+                      )
+                    : RefreshIndicator(
+                        onRefresh: _refreshData,
+                        color: const Color(0xFF22D3EE),
+                        backgroundColor: const Color(0xFF0C0A16),
+                        child: CustomScrollView(
+                          controller: _scrollController,
+                          physics: const BouncingScrollPhysics(),
+                          slivers: [
+                            // Wrap _TopHudBar in a Builder to provide context under Scaffold
+                            SliverToBoxAdapter(
+                              child: Builder(
+                                builder: (context) => _TopHudBar(
+                                  menuKey: _menuKey,
+                                  searchKey: _searchKey,
+                                  chatKey: _chatKey,
+                                  notificationsKey: _notificationsKey,
+                                  profileKey: _profileKey,
+                                  title: 'capture_dashboard_title'.tr(),
+                                  subtitle: 'capture_dashboard_subtitle'.tr(),
+                                  onMenu: () => Scaffold.of(context).openDrawer(),
+                                  onSearch: () => _showSearchModal(context),
+                                  onChat: () => Navigator.pushNamed(
                                     context,
-                                    AppRoutes.capturePopular,
+                                    AppRoutes.messaging,
+                                  ),
+                                  onNotifications: () => Navigator.pushNamed(
+                                    context,
+                                    AppRoutes.notifications,
+                                  ),
+                                  onProfile: () => _showProfileMenu(context),
+                                ),
+                              ),
+                            ),
+                            // Quest tracker section
+                            SliverToBoxAdapter(
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.fromLTRB(14, 18, 14, 10),
+                                child: _StampFadeIn(
+                                  intro: _intro,
+                                  delay: 0.2,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      _SectionHeader(
+                                        key: _questTrackerKey,
+                                        title:
+                                            'capture_dashboard_section_quest_tracker_title'
+                                                .tr(),
+                                        subtitle:
+                                            'capture_dashboard_section_quest_tracker_subtitle'
+                                                .tr(),
+                                        accent: const Color(0xFF34D399),
+                                      ),
+                                      const SizedBox(height: 12),
+                                      _CaptureMissionList(
+                                        missions: missionData,
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                        // Recent (loot grid)
-                        if (_recentCaptures.isNotEmpty)
-                          SliverToBoxAdapter(
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(
-                                14,
-                                18,
-                                14,
-                                10,
+                            if (_communityCaptures.isNotEmpty)
+                              SliverToBoxAdapter(
+                                child: Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(14, 10, 14, 0),
+                                  child: _StampFadeIn(
+                                    intro: _intro,
+                                    delay: 0.22,
+                                    child: _CommunityPulse(
+                                      key: _communityPulseKey,
+                                      activeHunters: _communityArtistCount,
+                                      newDrops: _communityCaptures.length,
+                                      xpPulse: _communityEngagementScore,
+                                      trendingLocation:
+                                          _trendingCommunityLocation,
+                                      onExplore: () => Navigator.pushNamed(
+                                        context,
+                                        AppRoutes.capturePopular,
+                                      ),
+                                    ),
+                                  ),
+                                ),
                               ),
-                              child: _SectionHeader(
-                                title:
-                                    'capture_dashboard_section_recent_loot_title'
-                                        .tr(),
-                                subtitle:
-                                    'capture_dashboard_section_recent_loot_subtitle'
-                                        .tr(),
-                                accent: const Color(0xFF7C4DFF),
+                            // Recent (loot grid)
+                            if (_recentCaptures.isNotEmpty)
+                              SliverToBoxAdapter(
+                                child: Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    14,
+                                    18,
+                                    14,
+                                    10,
+                                  ),
+                                  child: _SectionHeader(
+                                    key: _recentLootKey,
+                                    title:
+                                        'capture_dashboard_section_recent_loot_title'
+                                            .tr(),
+                                    subtitle:
+                                        'capture_dashboard_section_recent_loot_subtitle'
+                                            .tr(),
+                                    accent: const Color(0xFF7C4DFF),
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                        if (_recentCaptures.isNotEmpty)
-                          SliverPadding(
-                            padding: const EdgeInsets.symmetric(horizontal: 14),
-                            sliver: SliverGrid(
-                              gridDelegate:
-                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                            if (_recentCaptures.isNotEmpty)
+                              SliverPadding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 14),
+                                sliver: SliverGrid(
+                                  gridDelegate:
+                                      const SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: 2,
                                     crossAxisSpacing: 12,
                                     mainAxisSpacing: 12,
                                     childAspectRatio: 1,
                                   ),
-                              delegate: SliverChildBuilderDelegate((
-                                context,
-                                index,
-                              ) {
-                                final capture = _recentCaptures[index];
-                                return _QuestCaptureTile(
-                                  capture: capture,
-                                  onTap: () =>
-                                      _navigateToCaptureDetail(capture.id),
-                                );
-                              }, childCount: _recentCaptures.length),
-                            ),
-                          ),
-                        // Community inspiration
-                        if (_communityCaptures.isNotEmpty)
-                          SliverToBoxAdapter(
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(
-                                14,
-                                20,
-                                14,
-                                10,
+                                  delegate: SliverChildBuilderDelegate((
+                                    context,
+                                    index,
+                                  ) {
+                                    final capture = _recentCaptures[index];
+                                    return _QuestCaptureTile(
+                                      capture: capture,
+                                      onTap: () => _navigateToCaptureDetail(
+                                        capture.id,
+                                      ),
+                                    );
+                                  }, childCount: _recentCaptures.length),
+                                ),
                               ),
-                              child: _SectionHeader(
-                                title:
-                                    'capture_dashboard_section_inspiration_title'
-                                        .tr(),
-                                subtitle:
-                                    'capture_dashboard_section_inspiration_subtitle'
-                                        .tr(),
-                                accent: const Color(0xFF22D3EE),
+                            // Community inspiration
+                            if (_communityCaptures.isNotEmpty)
+                              SliverToBoxAdapter(
+                                child: Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    14,
+                                    20,
+                                    14,
+                                    10,
+                                  ),
+                                  child: _SectionHeader(
+                                    key: _communityInspirationKey,
+                                    title:
+                                        'capture_dashboard_section_inspiration_title'
+                                            .tr(),
+                                    subtitle:
+                                        'capture_dashboard_section_inspiration_subtitle'
+                                            .tr(),
+                                    accent: const Color(0xFF22D3EE),
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                        if (_communityCaptures.isNotEmpty)
-                          SliverToBoxAdapter(
-                            child: SizedBox(
-                              height: 220,
-                              child: ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                physics: const BouncingScrollPhysics(),
-                                padding: const EdgeInsets.only(left: 14),
-                                itemCount: _communityCaptures.length + 1,
-                                itemBuilder: (context, index) {
-                                  if (index == _communityCaptures.length) {
-                                    return const SizedBox(
-                                      width: 14,
-                                    ); // right spacer
-                                  }
-                                  final capture = _communityCaptures[index];
-                                  return _QuestCommunityCard(
-                                    capture: capture,
-                                    onTap: () =>
-                                        _navigateToCaptureDetail(capture.id),
-                                  );
-                                },
+                            if (_communityCaptures.isNotEmpty)
+                              SliverToBoxAdapter(
+                                child: SizedBox(
+                                  height: 220,
+                                  child: ListView.builder(
+                                    scrollDirection: Axis.horizontal,
+                                    physics: const BouncingScrollPhysics(),
+                                    padding: const EdgeInsets.only(left: 14),
+                                    itemCount: _communityCaptures.length + 1,
+                                    itemBuilder: (context, index) {
+                                      if (index == _communityCaptures.length) {
+                                        return const SizedBox(
+                                          width: 14,
+                                        ); // right spacer
+                                      }
+                                      final capture = _communityCaptures[index];
+                                      return _QuestCommunityCard(
+                                        capture: capture,
+                                        onTap: () => _navigateToCaptureDetail(
+                                          capture.id,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                        // Keep your existing artist CTA
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(8, 18, 8, 0),
-                            child: Builder(
-                              builder: (context) => CompactArtistCTAWidget(
-                                onTap: () => Navigator.pushNamed(
-                                  context,
-                                  '/2025_modern_onboarding',
+                            // Keep your existing artist CTA
+                            SliverToBoxAdapter(
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(8, 18, 8, 0),
+                                child: Builder(
+                                  builder: (context) => CompactArtistCTAWidget(
+                                    onTap: () => Navigator.pushNamed(
+                                      context,
+                                      '/2025_modern_onboarding',
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
+                            const SliverToBoxAdapter(
+                              child: SizedBox(height: 110),
+                            ),
+                          ],
                         ),
-                        const SliverToBoxAdapter(child: SizedBox(height: 110)),
-                      ],
-                    ),
-                  ),
+                      ),
+              ),
+            ],
           ),
-        ],
-      ),
-      bottomNavigationBar: EnhancedBottomNav(
-        currentIndex: 2,
-        onTap: _handleNavigation,
-      ),
+          bottomNavigationBar: EnhancedBottomNav(
+            captureKey: _quickCaptureKey,
+            currentIndex: 2,
+            onTap: _handleNavigation,
+          ),
+        ),
+        if (_isTourActive)
+          CaptureTourOverlay(
+            menuKey: _menuKey,
+            searchKey: _searchKey,
+            chatKey: _chatKey,
+            notificationsKey: _notificationsKey,
+            profileKey: _profileKey,
+            questTrackerKey: _questTrackerKey,
+            communityPulseKey: _communityPulseKey,
+            recentLootKey: _recentLootKey,
+            communityInspirationKey: _communityInspirationKey,
+            quickCaptureKey: _quickCaptureKey,
+            onFinish: () {
+              setState(() => _isTourActive = false);
+            },
+          ),
+      ],
     );
   }
 }
@@ -699,6 +773,11 @@ class _QuestAmbientPainter extends CustomPainter {
 /// =======================
 
 class _TopHudBar extends StatelessWidget {
+  final GlobalKey? menuKey;
+  final GlobalKey? searchKey;
+  final GlobalKey? chatKey;
+  final GlobalKey? notificationsKey;
+  final GlobalKey? profileKey;
   final String title;
   final String subtitle;
   final VoidCallback onMenu;
@@ -708,6 +787,11 @@ class _TopHudBar extends StatelessWidget {
   final VoidCallback onProfile;
 
   const _TopHudBar({
+    this.menuKey,
+    this.searchKey,
+    this.chatKey,
+    this.notificationsKey,
+    this.profileKey,
     required this.title,
     required this.subtitle,
     required this.onMenu,
@@ -725,6 +809,7 @@ class _TopHudBar extends StatelessWidget {
       child: Row(
         children: [
           IconButton(
+            key: menuKey,
             onPressed: onMenu,
             icon: const Icon(Icons.menu_rounded, color: Colors.white),
           ),
@@ -755,10 +840,12 @@ class _TopHudBar extends StatelessWidget {
             ),
           ),
           IconButton(
+            key: searchKey,
             onPressed: onSearch,
             icon: const Icon(Icons.search_rounded, color: Colors.white),
           ),
           IconButton(
+            key: chatKey,
             onPressed: onChat,
             icon: const Icon(
               Icons.chat_bubble_outline_rounded,
@@ -766,10 +853,12 @@ class _TopHudBar extends StatelessWidget {
             ),
           ),
           IconButton(
+            key: notificationsKey,
             onPressed: onNotifications,
             icon: const Icon(Icons.notifications_outlined, color: Colors.white),
           ),
           IconButton(
+            key: profileKey,
             onPressed: onProfile,
             icon: const Icon(Icons.person_rounded, color: Colors.white),
           ),
@@ -793,6 +882,7 @@ class _SectionHeader extends StatelessWidget {
   final Color accent;
 
   const _SectionHeader({
+    super.key,
     required this.title,
     required this.subtitle,
     required this.accent,
@@ -1300,6 +1390,7 @@ class _CommunityPulse extends StatelessWidget {
   final VoidCallback onExplore;
 
   const _CommunityPulse({
+    super.key,
     required this.activeHunters,
     required this.newDrops,
     required this.xpPulse,

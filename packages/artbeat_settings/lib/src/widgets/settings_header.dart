@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:artbeat_core/artbeat_core.dart';
 
 /// Settings Package Specific Header
 ///
@@ -109,6 +110,17 @@ class _SettingsHeaderState extends State<SettingsHeader> {
   List<Widget> _buildActionButtons() {
     final actions = <Widget>[];
 
+    // Developer Icon - leftmost
+    if (widget.showDeveloper) {
+      actions.add(
+        IconButton(
+          icon: const Icon(Icons.developer_mode, color: _iconTextColor),
+          onPressed: widget.onDeveloperPressed ?? () => _showDeveloperMenu(),
+          tooltip: 'Developer Tools',
+        ),
+      );
+    }
+
     // Search Icon
     if (widget.showSearch) {
       actions.add(
@@ -141,17 +153,6 @@ class _SettingsHeaderState extends State<SettingsHeader> {
           ),
           onPressed: widget.onChatPressed ?? () => _openMessaging(),
           tooltip: 'Messages',
-        ),
-      );
-    }
-
-    // Developer Icon
-    if (widget.showDeveloper) {
-      actions.add(
-        IconButton(
-          icon: const Icon(Icons.developer_mode, color: _iconTextColor),
-          onPressed: widget.onDeveloperPressed ?? () => _showDeveloperMenu(),
-          tooltip: 'Developer Tools',
         ),
       );
     }
@@ -260,6 +261,24 @@ class _SettingsHeaderState extends State<SettingsHeader> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
+              leading: const Icon(Icons.restart_alt),
+              title: const Text('Reset Onboarding'),
+              subtitle: const Text('Show all tours on next refresh'),
+              onTap: () async {
+                Navigator.pop(context);
+                await OnboardingService().resetOnboarding();
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Onboarding reset! Refresh to see tours.'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                }
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.settings_backup_restore),
               title: Text('artbeat_settings_reset_all_settings'.tr()),
               onTap: () {
                 Navigator.pop(context);
@@ -267,6 +286,7 @@ class _SettingsHeaderState extends State<SettingsHeader> {
               },
             ),
             ListTile(
+              leading: const Icon(Icons.upload),
               title: Text('artbeat_settings_export_settings'.tr()),
               onTap: () {
                 Navigator.pop(context);

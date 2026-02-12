@@ -85,6 +85,10 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<core.UserService>.value(
           value: core.UserService(),
         ),
+        ChangeNotifierProvider<core.ChapterPartnerProvider>(
+          create: (_) => core.ChapterPartnerProvider()..initialize(),
+          lazy: false,
+        ),
         Provider<AuthService>(create: (_) => AuthService(), lazy: true),
         ChangeNotifierProvider<core.ConnectivityService>(
           create: (_) => core.ConnectivityService(),
@@ -221,6 +225,11 @@ class MyApp extends StatelessWidget {
                     userService: userService,
                     captureService: captureService,
                   ),
+        ),
+        ChangeNotifierProxyProvider<core.ChapterPartnerProvider, core.DashboardViewModel>(
+          create: (context) => context.read<core.DashboardViewModel>(),
+          update: (context, chapterProvider, dashboardViewModel) =>
+              dashboardViewModel!..updateChapter(chapterProvider.activeChapterId),
         ),
       ],
       child: NavigationOverlay(

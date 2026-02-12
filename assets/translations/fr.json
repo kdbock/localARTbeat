@@ -6212,5 +6212,19 @@
   "progress_card_streak": "Série",
   "progress_card_discoveries": "Découvertes",
   "progress_card_weekly_goal": "Objectif hebdomadaire",
-  "progress_card_complete": "Terminé"
+  "progress_card_complete": "Terminé",
+  "artist_cta_title": "Êtes-vous un artiste ?",
+  "artist_cta_subtitle": "Plan d'abonnement pour les artistes",
+  "artist_cta_feature_boosts": "Boosts mensuels",
+  "artist_cta_feature_sponsored": "Contenu sponsorisé",
+  "artist_cta_feature_commissions": "Prendre des commissions",
+  "artist_cta_feature_earnings": "Revenus directs",
+  "artist_cta_button": "Débloquez les fonctionnalités d'artiste pour {price}/mois",
+  "artist_cta_footer": "Commencez à partager votre travail dès aujourd'hui !",
+  "artist_cta_compact_subtitle": "Devenez un artiste ARTbeat",
+  "artist_cta_compact_button": "Mettre à niveau",
+  "drawer_mode_user": "MODE UTILISATEUR",
+  "drawer_mode_artist": "MODE ARTISTE",
+  "drawer_mode_gallery": "MODE GALERIE",
+  "drawer_mode_moderator": "MODE MODÉRATEUR"
 }

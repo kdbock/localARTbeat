@@ -11,6 +11,7 @@ import 'package:artbeat_sponsorships/artbeat_sponsorships.dart';
 
 import '../utils/user_sync_helper.dart';
 import '../utils/performance_monitor.dart';
+import '../routing/app_routes.dart';
 
 /// Splash screen that matches the "Quest / Glass / Neon" theme.
 /// - Keeps your existing auth + navigation logic
@@ -125,8 +126,9 @@ class _SplashScreenState extends State<SplashScreen>
 
       FocusScope.of(context).unfocus();
 
-      const String route = '/dashboard';
-      PerformanceMonitor.startTimer('dashboard_navigation');
+      const route = AppRoutes.dashboard;
+      
+      PerformanceMonitor.startTimer('navigation_from_splash');
 
       if (!mounted || _hasNavigated) return;
       _hasNavigated = true;

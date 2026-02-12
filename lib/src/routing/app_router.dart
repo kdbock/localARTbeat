@@ -85,10 +85,30 @@ class AppRouter {
       case core.AppRoutes.splash:
         return RouteUtils.createSimpleRoute(child: const core.SplashScreen());
 
-      case core.AppRoutes.dashboard:
+      case core.AppRoutes.chapterLanding:
+        final args = settings.arguments as Map<String, dynamic>?;
+        final chapterId = args?['chapterId'] as String?;
+        
+        if (chapterId == null) {
+          return RouteUtils.createNotFoundRoute('Chapter ID required');
+        }
+        
         return RouteUtils.createMainNavRoute(
           currentIndex: 0,
-          child: const core.AnimatedDashboardScreen(),
+          child: core.ChapterLandingScreen(chapterId: chapterId),
+        );
+
+      case core.AppRoutes.dashboard:
+        final bottomNavKey = GlobalKey();
+        final bottomNavItemKeys = List.generate(5, (_) => GlobalKey());
+        return RouteUtils.createMainNavRoute(
+          currentIndex: 0,
+          bottomNavKey: bottomNavKey,
+          bottomNavItemKeys: bottomNavItemKeys,
+          child: core.AnimatedDashboardScreen(
+            bottomNavKey: bottomNavKey,
+            bottomNavItemKeys: bottomNavItemKeys,
+          ),
         );
 
       case core.AppRoutes.artDiscovery:
@@ -251,6 +271,7 @@ class AppRouter {
       routeName != core.AppRoutes.artworkTrending &&
       routeName != core.AppRoutes.artworkSearch &&
       routeName != core.AppRoutes.allEvents &&
+      routeName != core.AppRoutes.chapterLanding &&
       routeName != core.AppRoutes.search &&
       // Bottom navigation routes - allow anonymous browsing
       routeName != '/art-walk/map' &&
@@ -1283,7 +1304,7 @@ class AppRouter {
     switch (settings.name) {
       case core.AppRoutes.settings:
         return RouteUtils.createMainLayoutRoute(
-          appBar: RouteUtils.createAppBar('Settings'),
+          appBar: RouteUtils.createAppBar('Settings', showDeveloperTools: true),
           child: const settings_pkg.SettingsScreen(),
         );
 

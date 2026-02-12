@@ -23,10 +23,12 @@ class DashboardViewModel extends ChangeNotifier {
   final community.ArtCommunityService _communityService;
   final artist_profile.CommunityService _artistCommunityService;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  String? chapterId;
 
   UserModel? _currentUser;
   bool _isInitializing = false;
   bool _isInitialized = false;
+  bool _isDisposed = false;
   bool _isLoadingEvents = true;
   bool _isLoadingUpcomingEvents = true;
   bool _isLoadingArtwork = true;
@@ -88,6 +90,7 @@ class DashboardViewModel extends ChangeNotifier {
     ContentEngagementService? engagementService,
     community.ArtCommunityService? communityService,
     artist_profile.CommunityService? artistCommunityService,
+    this.chapterId,
   }) : _eventService = eventService,
        _artworkService = artworkService,
        _artWalkService = artWalkService,
@@ -176,6 +179,10 @@ class DashboardViewModel extends ChangeNotifier {
 
   /// Safely notify listeners, catching disposal errors
   void _safeNotifyListeners() {
+    if (_isDisposed) {
+      debugPrint('⚠️ Attempted to notify listeners on disposed ViewModel');
+      return;
+    }
     try {
       notifyListeners();
     } catch (e) {
@@ -203,7 +210,7 @@ class DashboardViewModel extends ChangeNotifier {
   /// Refreshes the current user data from the server
   Future<void> refreshUserData() async {
     await _loadCurrentUser();
-    notifyListeners();
+    _safeNotifyListeners();
   }
 
   // Getters
@@ -230,11 +237,23 @@ class DashboardViewModel extends ChangeNotifier {
   String? get localCapturesError => _localCapturesError;
   String? get postsError => _postsError;
 
-  List<EventModel> get events => List.unmodifiable(_events);
+  /// Update active chapter and reload data
+  void updateChapter(String? newChapterId) {
+    if (chapterId == newChapterId) return;
+    
+    chapterId = newChapterId;
+    
+    // If already initialized, trigger a refresh
+    if (_isInitialized) {
+      refresh();
+    }
+  }
+
+  List<EventModel> get events => _isDisposed ? [] : List.unmodifiable(_events);
   List<EventModel> get upcomingEvents => List.unmodifiable(_upcomingEvents);
-  List<ArtworkModel> get artwork => List.unmodifiable(_artwork);
-  List<ArtworkModel> get books => List.unmodifiable(_books);
-  List<ArtistProfileModel> get artists => List.unmodifiable(_artists);
+  List<ArtworkModel> get artwork => _isDisposed ? [] : List.unmodifiable(_artwork);
+  List<ArtworkModel> get books => _isDisposed ? [] : List.unmodifiable(_books);
+  List<ArtistProfileModel> get artists => _isDisposed ? [] : List.unmodifiable(_artists);
   Set<Marker> get markers => Set.unmodifiable(_markers);
   Position? get currentLocation => _currentLocation;
   List<artWalkLib.AchievementModel> get achievements =>
@@ -244,7 +263,7 @@ class DashboardViewModel extends ChangeNotifier {
   List<artWalkLib.SocialActivity> get activities =>
       List.unmodifiable(_activities);
   LatLng? get mapLocation => _mapLocation;
-  UserModel? get currentUser => _currentUser;
+  UserModel? get currentUser => _isDisposed ? null : _currentUser;
   artWalkLib.ChallengeModel? get todaysChallenge => _todaysChallenge;
 
   // User progress getters
@@ -254,6 +273,7 @@ class DashboardViewModel extends ChangeNotifier {
   int get loginStreak => _loginStreak;
   bool get isLoadingUserProgress => _isLoadingUserProgress;
   bool get isLoadingActivities => _isLoadingActivities;
+  bool get isDisposed => _isDisposed;
 
   // Methods
   /// Reload just the activities feed
@@ -323,7 +343,7 @@ class DashboardViewModel extends ChangeNotifier {
       _isLoadingEvents = true;
       if (notify) _safeNotifyListeners();
 
-      final events = await _eventService.getUpcomingPublicEvents();
+      final events = await _eventService.getUpcomingPublicEvents(chapterId: chapterId);
       _events = events.map((e) {
         final coverImage = _selectBestEventImage(e);
         final artistImage = _normalizeImageUrl(e.artistHeadshotUrl);
@@ -361,11 +381,12 @@ class DashboardViewModel extends ChangeNotifier {
       if (notify) _safeNotifyListeners();
 
       // Try featured artwork first, fallback to public artwork
-      var artworkServiceModels = await _artworkService.getFeaturedArtwork();
+      var artworkServiceModels = await _artworkService.getFeaturedArtwork(chapterId: chapterId);
       if (artworkServiceModels.isEmpty) {
         AppLogger.info('No featured artwork found, loading public artwork...');
         artworkServiceModels = await _artworkService.getAllPublicArtwork(
           limit: 10,
+          chapterId: chapterId,
         );
       }
 
@@ -810,6 +831,7 @@ class DashboardViewModel extends ChangeNotifier {
 
   @override
   void dispose() {
+    _isDisposed = true;
     _markerRefreshTimer?.cancel();
     super.dispose();
   }

@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../theme/artbeat_colors.dart';
 import '../providers/messaging_provider.dart';
+import '../services/onboarding_service.dart';
 // import 'enhanced_profile_menu.dart';
 
 import 'package:artbeat_profile/src/screens/profile_menu_screen.dart';
@@ -224,6 +225,20 @@ class _EnhancedUniversalHeaderState extends State<EnhancedUniversalHeader>
   List<Widget> _buildActionButtons() {
     final List<Widget> actions = <Widget>[];
 
+    // Developer tools (if enabled) - placed first (leftmost)
+    if (widget.showDeveloperTools) {
+      actions.add(
+        IconButton(
+          icon: Icon(
+            Icons.developer_mode,
+            color: widget.foregroundColor ?? ArtbeatColors.headerText,
+          ),
+          onPressed: widget.onDeveloperPressed ?? () => _showDeveloperTools(),
+          tooltip: 'header_tooltip_developer_tools'.tr(),
+        ),
+      );
+    }
+
     // Search button
     if (widget.showSearch) {
       actions.add(
@@ -243,20 +258,6 @@ class _EnhancedUniversalHeaderState extends State<EnhancedUniversalHeader>
 
     // Profile icon
     actions.add(_buildProfileIcon());
-
-    // Developer tools (if enabled)
-    if (widget.showDeveloperTools) {
-      actions.add(
-        IconButton(
-          icon: Icon(
-            Icons.developer_mode,
-            color: widget.foregroundColor ?? ArtbeatColors.headerText,
-          ),
-          onPressed: widget.onDeveloperPressed ?? () => _showDeveloperTools(),
-          tooltip: 'header_tooltip_developer_tools'.tr(),
-        ),
-      );
-    }
 
     // Additional custom actions
     if (widget.actions != null) {
@@ -469,6 +470,25 @@ class _EnhancedUniversalHeaderState extends State<EnhancedUniversalHeader>
             ),
 
             const SizedBox(height: 20),
+
+            _buildDeveloperTile(
+              icon: Icons.restart_alt,
+              title: 'Reset Onboarding',
+              subtitle: 'Show all onboarding tours on next refresh',
+              onTap: () async {
+                Navigator.pop(context);
+                await OnboardingService().resetOnboarding();
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Onboarding reset! Refresh to see tours.'),
+                      backgroundColor: Colors.green,
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                }
+              },
+            ),
 
             _buildDeveloperTile(
               icon: Icons.feedback,

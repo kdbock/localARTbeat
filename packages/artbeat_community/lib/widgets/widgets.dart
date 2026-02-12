@@ -38,3 +38,4 @@ export 'group_post_card.dart';
 export 'mini_artist_card.dart';
 export 'post_card.dart';
 export 'post_detail_modal.dart';
+export 'tour/art_community_tour_overlay.dart';
