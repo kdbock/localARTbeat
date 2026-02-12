@@ -1157,9 +1157,10 @@ packages:
   flutter_sound:
     dependency: "direct main"
     description:
-      path: "local_packages/flutter_sound"
-      relative: true
-    source: path
+      name: flutter_sound
+      sha256: "77f0252a2f08449d621f68b8fd617c3b391e7f862eaa94bb32f53cc2dc3bbe85"
+      url: "https://pub.dev"
+    source: hosted
     version: "9.30.0"
   flutter_sound_platform_interface:
     dependency: transitive

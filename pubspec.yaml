@@ -138,6 +138,4 @@ dev_dependencies:
 
 dependency_overrides:
   archive: ^4.0.0
-  flutter_sound:
-    path: local_packages/flutter_sound
   screenshot: ^3.0.0
