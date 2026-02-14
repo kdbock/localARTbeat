@@ -294,6 +294,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
               radarTitleKey: _radarTitleKey,
               onFinish: () {
                 setState(() => _isTourActive = false);
+                OnboardingService().markDiscoverOnboardingCompleted();
               },
             ),
         ],

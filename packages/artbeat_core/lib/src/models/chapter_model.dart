@@ -127,6 +127,7 @@ class ChapterModel {
 
   Map<String, dynamic> toFirestore() {
     return {
+      'id': id,
       'artworkId': artworkId,
       'chapterNumber': chapterNumber,
       if (episodeNumber != null) 'episodeNumber': episodeNumber,

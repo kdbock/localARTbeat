@@ -143,10 +143,9 @@ class AudioNavigationService {
 
   /// Generate approach message for art piece
   String generateApproachMessage(PublicArtModel art, double distance) {
-    final distanceText =
-        distance < 100
-            ? '${distance.round()} meters'
-            : '${(distance / 1000).toStringAsFixed(1)} kilometers';
+    final distanceText = distance < 100
+        ? '${distance.round()} meters'
+        : '${(distance / 1000).toStringAsFixed(1)} kilometers';
 
     return 'Approaching "${art.title}" in $distanceText.';
   }
@@ -169,10 +168,9 @@ class AudioNavigationService {
     final instruction = step.instruction;
 
     if (step.distanceMeters > 0) {
-      final distanceText =
-          step.distanceMeters < 1000
-              ? '${step.distanceMeters.round()} meters'
-              : '${(step.distanceMeters / 1000).toStringAsFixed(1)} kilometers';
+      final distanceText = step.distanceMeters < 1000
+          ? '${step.distanceMeters.round()} meters'
+          : '${(step.distanceMeters / 1000).toStringAsFixed(1)} kilometers';
 
       return '$instruction in $distanceText.';
     }
@@ -214,6 +212,5 @@ class AudioNavigationService {
   }
 
   /// Dispose of resources
-  void dispose() {
-  }
+  void dispose() {}
 }

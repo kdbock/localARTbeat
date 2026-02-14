@@ -418,19 +418,8 @@ service cloud.firestore {
 
     // Artist Commission Settings - artist-specific commission configuration
     match /artist_commission_settings/{artistId} {
-      allow read: if isAuthenticated() && (
-        request.auth.uid == artistId ||
-        isAdmin(request.auth.uid)
-      );
-      allow list: if isAuthenticated() && (
-        request.auth.uid == artistId ||
-        isAdmin(request.auth.uid)
-      );
-      allow create: if isAuthenticated() && (
-        request.auth.uid == artistId ||
-        isAdmin(request.auth.uid)
-      );
-      allow update: if isAuthenticated() && (
+      allow read, list: if isAuthenticated();
+      allow create, update: if isAuthenticated() && (
         request.auth.uid == artistId ||
         isAdmin(request.auth.uid)
       );
@@ -697,6 +686,11 @@ service cloud.firestore {
       allow read, list: if isAdmin(request.auth.uid) || 
         (resource.data.isReleased == true && resource.data.moderationStatus == 'approved') ||
         (isAuthenticated() && resource.data.authorId == request.auth.uid);
+    }
+
+    // Allow collectionGroup queries for likes
+    match /{path=**}/likes/{userId} {
+      allow read: if isAuthenticated();
     }
 
     // Subscriptions
@@ -1472,6 +1466,54 @@ service cloud.firestore {
       allow create: if isAuthenticated() && request.auth.uid == userId;
       allow update: if isAuthenticated() && request.auth.uid == userId;
       allow delete: if isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Sponsorships - for business partners and app sponsors
+    match /sponsorships/{sponsorshipId} {
+      allow read, list: if true;
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && (
+        resource.data.businessId == request.auth.uid ||
+        isAdmin(request.auth.uid) ||
+        // Allow updating view/click counts from any authenticated user
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount', 'clickCount']))
+      );
+      allow delete: if isAdmin(request.auth.uid);
+    }
+
+    // Chapters - root level collection for chapter partners
+    match /chapters/{chapterId} {
+      allow read, list: if true;
+      allow write: if isAdmin(request.auth.uid);
+    }
+
+    // Quests - quests associated with chapters or regions
+    match /quests/{questId} {
+      allow read, list: if true;
+      allow write: if isAdmin(request.auth.uid);
+    }
+
+    // Chapter Analytics - tracking for chapter partner engagement
+    match /chapter_analytics/{chapterId} {
+      allow read: if isAdmin(request.auth.uid);
+      
+      match /monthly_stats/{monthKey} {
+        allow read: if isAdmin(request.auth.uid);
+        allow write: if isAuthenticated();
+      }
+    }
+
+    // Gifts - for supporting artists
+    match /gifts/{giftId} {
+      allow read, list: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update, delete: if isAdmin(request.auth.uid);
+    }
+
+    // Broadcasts - admin messages to users
+    match /broadcasts/{broadcastId} {
+      allow read, list: if isAuthenticated();
+      allow write: if isAdmin(request.auth.uid);
     }
 
     // Admin collections

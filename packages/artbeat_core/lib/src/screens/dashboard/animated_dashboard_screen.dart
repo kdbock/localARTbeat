@@ -37,7 +37,7 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
     with TickerProviderStateMixin {
   // Temporary kill switch: disable dashboard tour overlay while debugging
   // black-screen-on-launch regressions.
-  static const bool _disableDashboardTourOverlay = true;
+  static const bool _disableDashboardTourOverlay = false;
 
   late final AnimationController _loop; // world animation
   late final AnimationController _intro; // entrance
@@ -511,7 +511,10 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
             captureNavKey: widget.bottomNavItemKeys?[2] ?? _captureNavKey,
             communityNavKey: widget.bottomNavItemKeys?[3] ?? _communityNavKey,
             eventsNavKey: widget.bottomNavItemKeys?[4] ?? _eventsNavKey,
-            onFinish: () => setState(() => _isTourActive = false),
+            onFinish: () {
+              setState(() => _isTourActive = false);
+              OnboardingService().markOnboardingCompleted();
+            },
           ),
       ],
     );

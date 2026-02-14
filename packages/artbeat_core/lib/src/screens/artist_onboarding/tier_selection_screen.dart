@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
+import '../../models/subscription_tier.dart';
 import '../../theme/design_system.dart';
 import '../../viewmodels/artist_onboarding/artist_onboarding_view_model.dart';
+import '../subscription_purchase_screen.dart';
 import 'artist_onboarding_navigator.dart';
 import 'onboarding_widgets.dart';
 
@@ -11,7 +13,7 @@ import 'onboarding_widgets.dart';
 ///
 /// Features:
 /// - Tier cards (FREE pre-selected)
-/// - IAP integration (placeholder)
+/// - IAP integration for paid tiers
 /// - Celebration animation on completion
 class TierSelectionScreen extends StatefulWidget {
   const TierSelectionScreen({super.key});
@@ -81,16 +83,60 @@ class _TierSelectionScreenState extends State<TierSelectionScreen> {
   }
 
   Future<void> _selectTier(String tier, String? sku) async {
+    final previousTier = _selectedTier;
     setState(() => _selectedTier = tier);
 
     final viewModel = context.read<ArtistOnboardingViewModel>();
-    viewModel.selectTier(tier);
+    if (sku == null) {
+      viewModel.selectTier(tier);
+      return;
+    }
 
-    // If paid tier, would trigger IAP here
-    if (sku != null) {
-      // TODO: Integrate IAP
-      // For now, just simulate selection
-      await Future<void>.delayed(const Duration(milliseconds: 500));
+    final subscriptionTier = _toSubscriptionTier(tier);
+    if (subscriptionTier == null) {
+      setState(() => _selectedTier = previousTier);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Unsupported tier selected: $tier'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return;
+    }
+
+    final purchaseCompleted =
+        await Navigator.of(context).push<bool>(
+          MaterialPageRoute<bool>(
+            builder: (_) => SubscriptionPurchaseScreen(tier: subscriptionTier),
+          ),
+        ) ??
+        false;
+
+    if (!mounted) return;
+
+    if (purchaseCompleted) {
+      viewModel.selectTier(tier);
+    } else {
+      setState(() => _selectedTier = previousTier);
+    }
+  }
+
+  SubscriptionTier? _toSubscriptionTier(String tier) {
+    switch (tier.toUpperCase()) {
+      case 'FREE':
+        return SubscriptionTier.free;
+      case 'STARTER':
+        return SubscriptionTier.starter;
+      case 'CREATOR':
+        return SubscriptionTier.creator;
+      case 'BUSINESS':
+        return SubscriptionTier.business;
+      case 'ENTERPRISE':
+        return SubscriptionTier.enterprise;
+      default:
+        return null;
     }
   }
 

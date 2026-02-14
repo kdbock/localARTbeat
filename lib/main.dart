@@ -32,6 +32,7 @@ const bool _forceMinimalRenderApp =
 const Duration _slowFrameThreshold = Duration(milliseconds: 32);
 const Duration _slowTapThreshold = Duration(milliseconds: 120);
 Timer? _imageCacheStatsTimer;
+bool _firebaseCoreReady = false;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -105,7 +106,7 @@ Future<void> main() async {
       );
     } on TimeoutException {
       AppLogger.warning('⚠️ Localization init timed out');
-    } catch (e) {
+    } on Exception catch (e) {
       AppLogger.error('❌ Localization init failed: $e');
     }
 
@@ -302,6 +303,8 @@ Future<void> _initializeCoreServices() async {
     throw Exception('Missing required environment variables');
   }
 
+  await _initializeFirebaseCore();
+
   await Future.wait([
     _guardedInit(ConfigService.instance.initialize, 'ConfigService'),
     _guardedInit(
@@ -310,50 +313,84 @@ Future<void> _initializeCoreServices() async {
     ),
     _guardedInit(MapsConfig.initialize, 'MapsConfig'),
     _guardedInit(
-      () async {
-        debugPrint('🛡️ ========================================');
-        debugPrint('🛡️ STARTING FIREBASE & APP CHECK INIT');
-        debugPrint('🛡️ ========================================');
-        if (Firebase.apps.isEmpty) {
-          debugPrint('🛡️ Initializing Firebase Core...');
-          try {
-            await Firebase.initializeApp(
-              options: DefaultFirebaseOptions.currentPlatform,
-            ).timeout(const Duration(seconds: 8));
-            debugPrint('🛡️ ✅ Firebase Core initialized successfully');
-          } catch (e) {
-            if (e.toString().contains('duplicate-app')) {
-              debugPrint(
-                '🛡️ Firebase Core already initialized (duplicate-app)',
-              );
-            } else {
-              debugPrint('⚠️ Firebase Core initialization error: $e');
-              rethrow;
-            }
-          }
-        } else {
-          debugPrint('🛡️ Firebase Core already initialized');
-        }
-
-        // ALWAYS Initialize App Check, even if Firebase was already initialized
-        // This prevents permission denied errors during initial data fetching
-        // In debug mode: uses debug provider (requires debug token in Firebase Console)
-        // In release mode: uses AppAttest with DeviceCheck fallback
-        debugPrint('🛡️ About to call configureAppCheck...');
-        try {
-          await SecureFirebaseConfig.configureAppCheck(
-            teamId: 'H49R32NPY6',
-          ).timeout(const Duration(seconds: 8));
-          debugPrint('🛡️ ✅ configureAppCheck completed successfully');
-        } on Exception catch (e) {
-          debugPrint('⚠️ configureAppCheck error: $e');
-          // Don't rethrow - allow app to continue without App Check
-        }
-      },
-      'Firebase & App Check',
+      _initializeAppCheck,
+      'App Check',
       timeout: const Duration(seconds: 20),
     ),
   ]);
+}
+
+Future<void> _initializeFirebaseCore() async {
+  debugPrint('🛡️ ========================================');
+  debugPrint('🛡️ STARTING FIREBASE CORE INIT');
+  debugPrint('🛡️ ========================================');
+
+  try {
+    if (Firebase.apps.isNotEmpty) {
+      Firebase.app();
+      _firebaseCoreReady = true;
+      debugPrint('🛡️ Firebase Core already initialized');
+      return;
+    }
+  } on Object catch (e) {
+    debugPrint('⚠️ Existing Firebase app check failed: $e');
+  }
+
+  try {
+    debugPrint('🛡️ Initializing Firebase Core (attempt 1, 8s timeout)...');
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    ).timeout(const Duration(seconds: 8));
+    _firebaseCoreReady = true;
+    debugPrint('🛡️ ✅ Firebase Core initialized successfully');
+    return;
+  } on TimeoutException catch (e) {
+    debugPrint('⚠️ Firebase Core initialization timed out: $e');
+  } on Object catch (e) {
+    if (!e.toString().contains('duplicate-app')) {
+      debugPrint('⚠️ Firebase Core initialization error: $e');
+    }
+  }
+
+  try {
+    debugPrint('🛡️ Retrying Firebase Core init (attempt 2, 20s timeout)...');
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    ).timeout(const Duration(seconds: 20));
+  } on Object catch (e) {
+    if (!e.toString().contains('duplicate-app')) {
+      debugPrint('⚠️ Firebase Core retry failed: $e');
+    }
+  }
+
+  try {
+    Firebase.app();
+    _firebaseCoreReady = true;
+    debugPrint('🛡️ ✅ Firebase Core is available after retry');
+  } on Object catch (e) {
+    _firebaseCoreReady = false;
+    throw StateError(
+      'Firebase initialization failed; default app unavailable after retry: $e',
+    );
+  }
+}
+
+Future<void> _initializeAppCheck() async {
+  if (!_firebaseCoreReady) {
+    AppLogger.warning('⚠️ Skipping App Check: Firebase Core not ready');
+    return;
+  }
+
+  debugPrint('🛡️ About to call configureAppCheck...');
+  try {
+    await SecureFirebaseConfig.configureAppCheck(
+      teamId: 'H49R32NPY6',
+    ).timeout(const Duration(seconds: 8));
+    debugPrint('🛡️ ✅ configureAppCheck completed successfully');
+  } on Exception catch (e) {
+    debugPrint('⚠️ configureAppCheck error: $e');
+    // Don't rethrow - allow app to continue without App Check
+  }
 }
 
 Future<void> _kickOffDeferredInits() async {
@@ -364,7 +401,7 @@ Future<void> _kickOffDeferredInits() async {
 
 Future<void> _runDeferredInits() async {
   // Parallelize critical but deferred services
-  await Future.wait([
+  final deferredInits = <Future<void>>[
     _guardedInit(AuthSafetyService.initialize, 'Auth Safety'),
     _guardedInit(() async {
       final env = EnvLoader();
@@ -376,10 +413,12 @@ Future<void> _runDeferredInits() async {
       }
     }, 'Stripe Safety'),
     _guardedInit(() => InAppPurchaseSetup().initialize(), 'IAP'),
-  ]);
+  ];
+
+  await Future.wait(deferredInits);
 
   // Existing non-critical background tasks
-  _initializeNonCriticalServices();
+  _initializeNonCriticalServices(firebaseReady: _firebaseCoreReady);
   _initializeAppPermissions();
 }
 
@@ -399,16 +438,22 @@ Future<void> _guardedInit(
 }
 
 /// Background services
-void _initializeNonCriticalServices() {
+void _initializeNonCriticalServices({required bool firebaseReady}) {
   Future.delayed(const Duration(milliseconds: 100), () async {
-    try {
-      await messaging.NotificationService(
-        onNavigateToRoute: (route) {
-          navigatorKey.currentState?.pushNamed(route);
-        },
-      ).initialize();
-      AppLogger.info('✅ Notifications ready');
-    } on Object catch (_) {}
+    if (firebaseReady) {
+      try {
+        await messaging.NotificationService(
+          onNavigateToRoute: (route) {
+            navigatorKey.currentState?.pushNamed(route);
+          },
+        ).initialize();
+        AppLogger.info('✅ Notifications ready');
+      } on Object catch (_) {}
+    } else {
+      AppLogger.warning(
+        '⚠️ Skipping notification startup: Firebase Core unavailable',
+      );
+    }
 
     try {
       final stepTrackingService = StepTrackingService();

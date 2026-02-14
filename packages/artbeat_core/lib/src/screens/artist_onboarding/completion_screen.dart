@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -43,13 +44,36 @@ class _OnboardingCompletionScreenState
   }
 
   Future<void> _shareProfile() async {
-    // TODO: Get actual profile URL
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    var profileIdentifier = user.uid;
+
+    try {
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      final userData = userDoc.data();
+      final username = (userData?['username'] as String?)?.trim();
+      if (username != null && username.isNotEmpty) {
+        profileIdentifier = _sanitizeProfilePathSegment(username);
+      } else {
+        profileIdentifier = _sanitizeProfilePathSegment(user.uid);
+      }
+    } catch (_) {
+      profileIdentifier = _sanitizeProfilePathSegment(user.uid);
+    }
+
+    final profileUrl = 'https://artbeat.com/artist/$profileIdentifier';
+
     await SharePlus.instance.share(
-      ShareParams(
-        text:
-            'Check out my artist profile on ArtBeat! artbeat.com/artist/username',
-      ),
+      ShareParams(text: 'Check out my artist profile on ArtBeat! $profileUrl'),
     );
+  }
+
+  String _sanitizeProfilePathSegment(String value) {
+    return value.toLowerCase().replaceAll(RegExp(r'[^a-z0-9_-]'), '-');
   }
 
   void _navigateToDashboard() {

@@ -214,9 +214,10 @@ class UnifiedAdminService {
       }
 
       // Check for chapters if not found in top-level collections
+      // Use 'id' field to avoid IllegalArgumentException with collectionGroup
       final chapterQuery = await _firestore
           .collectionGroup('chapters')
-          .where(FieldPath.documentId, isEqualTo: contentId)
+          .where('id', isEqualTo: contentId)
           .get();
 
       if (chapterQuery.docs.isNotEmpty) {
@@ -326,9 +327,10 @@ class UnifiedAdminService {
       }
 
       // Check for chapters if not found in top-level collections
+      // Use 'id' field to avoid IllegalArgumentException with collectionGroup
       final chapterQuery = await _firestore
           .collectionGroup('chapters')
-          .where(FieldPath.documentId, isEqualTo: contentId)
+          .where('id', isEqualTo: contentId)
           .get();
 
       if (chapterQuery.docs.isNotEmpty) {

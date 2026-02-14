@@ -5,7 +5,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_sponsorships/artbeat_sponsorships.dart';
 
@@ -134,9 +133,7 @@ class _SplashScreenState extends State<SplashScreen>
       if (!mounted || _hasNavigated) return;
       _hasNavigated = true;
 
-      Navigator.of(
-        context,
-      ).pushNamedAndRemoveUntil(
+      Navigator.of(context).pushNamedAndRemoveUntil(
         AppRoutes.dashboard,
         (Route<dynamic> route) => false,
       );
@@ -144,9 +141,7 @@ class _SplashScreenState extends State<SplashScreen>
       if (!mounted || _hasNavigated) return;
       _hasNavigated = true;
       FocusScope.of(context).unfocus();
-      Navigator.of(
-        context,
-      ).pushNamedAndRemoveUntil(
+      Navigator.of(context).pushNamedAndRemoveUntil(
         AppRoutes.dashboard,
         (Route<dynamic> route) => false,
       );
@@ -186,10 +181,7 @@ class _SplashScreenState extends State<SplashScreen>
             children: [
               CircularProgressIndicator(color: Colors.white),
               SizedBox(height: 16),
-              Text(
-                'Loading ARTbeat...',
-                style: TextStyle(color: Colors.white),
-              ),
+              Text('Loading ARTbeat...', style: TextStyle(color: Colors.white)),
             ],
           ),
         ),

@@ -690,12 +690,12 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                               _buildDateHeader(messageModel.timestamp),
 
                             InteractiveMessageBubble(
-                                message: messageModel,
-                                chat: widget.chat,
-                                currentUserId: chatService.currentUserId,
-                                chatService: chatService,
-                                onReply: () => _onReplyToMessage(messageModel),
-                              ),
+                              message: messageModel,
+                              chat: widget.chat,
+                              currentUserId: chatService.currentUserId,
+                              chatService: chatService,
+                              onReply: () => _onReplyToMessage(messageModel),
+                            ),
                           ],
                         );
                       },

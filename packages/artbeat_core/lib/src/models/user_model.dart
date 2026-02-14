@@ -6,6 +6,7 @@ import 'user_type.dart';
 import 'capture_model.dart';
 import 'engagement_model.dart';
 import '../utils/firestore_utils.dart';
+import '../utils/image_url_validator.dart';
 import '../utils/logger.dart';
 
 class UserModel {
@@ -75,9 +76,11 @@ class UserModel {
       ),
       bio: FirestoreUtils.safeStringDefault(data['bio']),
       location: FirestoreUtils.safeStringDefault(data['location']),
-      profileImageUrl: FirestoreUtils.safeStringDefault(
-        data['profileImageUrl'],
-      ),
+      profileImageUrl:
+          ImageUrlValidator.normalizeImageUrl(
+            FirestoreUtils.safeString(data['profileImageUrl']),
+          ) ??
+          '',
       engagementStats: EngagementStats.fromFirestore(
         data['engagementStats'] as Map<String, dynamic>? ?? {},
       ),
@@ -127,7 +130,10 @@ class UserModel {
     // Debug logging for profile image URL resolution
     final profileImageUrl = FirestoreUtils.safeString(json['profileImageUrl']);
     final photoUrl = FirestoreUtils.safeString(json['photoUrl']);
-    final finalImageUrl = profileImageUrl ?? photoUrl ?? '';
+    final finalImageUrl =
+        ImageUrlValidator.normalizeImageUrl(profileImageUrl) ??
+        ImageUrlValidator.normalizeImageUrl(photoUrl) ??
+        '';
 
     // Only log in debug mode and when there are issues
     if (kDebugMode && (profileImageUrl == null && photoUrl == null)) {

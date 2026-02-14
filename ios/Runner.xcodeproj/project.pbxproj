@@ -13,10 +13,11 @@
 		5B3CCFE1F9E896C80A3586C4 /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7B981963F32D486856C55A56 /* Pods_RunnerTests.framework */; };
 		6EB527D76649C68A880A70C8 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 080503BCAC7AA5BE2AB9E731 /* MapViewController.swift */; };
 		7373680B2EF1F27800CC8AF4 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7373680A2EF1F27800CC8AF4 /* StoreKit.framework */; };
-		739386632E246D2C000A71B9 /* .env in Resources */ = {isa = PBXBuildFile; fileRef = 739386622E246D2C000A71B9 /* .env */; };
-		73E3A9C62E033BCE00CFE672 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 73E3A9C52E033BCE00CFE672 /* GoogleService-Info.plist */; };
-		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
-		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
+			739386632E246D2C000A71B9 /* .env in Resources */ = {isa = PBXBuildFile; fileRef = 739386622E246D2C000A71B9 /* .env */; };
+			73E3A9C62E033BCE00CFE672 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 73E3A9C52E033BCE00CFE672 /* GoogleService-Info.plist */; };
+			74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
+			A1B2C3D42F1A2B3C4D5E6F70 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D32F1A2B3C4D5E6F70 /* SceneDelegate.swift */; };
+			97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
 		E6A15EA1D47DEBC20EC2DCE2 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75BAC91D4D6F0C9F34C30379 /* Pods_Runner.framework */; };
@@ -60,9 +61,10 @@
 		737964CD2E0DD127009C0462 /* Runner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Runner.entitlements; sourceTree = "<group>"; };
 		739386622E246D2C000A71B9 /* .env */ = {isa = PBXFileReference; lastKnownFileType = text; name = .env; path = ../.env; sourceTree = "<group>"; };
 		73E3A9C52E033BCE00CFE672 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
-		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
-		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		75BAC91D4D6F0C9F34C30379 /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+			74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
+			74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+			A1B2C3D32F1A2B3C4D5E6F70 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+			75BAC91D4D6F0C9F34C30379 /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
 		7AFA3C8F1D35360C0083082F /* Profile.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Profile.xcconfig; path = Flutter/Profile.xcconfig; sourceTree = "<group>"; };
 		7B981963F32D486856C55A56 /* Pods_RunnerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RunnerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -167,11 +169,12 @@
 				97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */,
 				97C147021CF9000F007C117D /* Info.plist */,
 				1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */,
-				1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */,
-				74858FAE1ED2DC5600515810 /* AppDelegate.swift */,
-				97C146F21CF9000F007C117D /* MapViewController.swift */,
-				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
-			);
+					1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */,
+					74858FAE1ED2DC5600515810 /* AppDelegate.swift */,
+					A1B2C3D32F1A2B3C4D5E6F70 /* SceneDelegate.swift */,
+					97C146F21CF9000F007C117D /* MapViewController.swift */,
+					74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
+				);
 			path = Runner;
 			sourceTree = "<group>";
 		};
@@ -435,11 +438,12 @@
 		97C146EA1CF9000F007C117D /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
-			files = (
-				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
-				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
-				6EB527D76649C68A880A70C8 /* MapViewController.swift in Sources */,
-			);
+				files = (
+					74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
+					A1B2C3D42F1A2B3C4D5E6F70 /* SceneDelegate.swift in Sources */,
+					1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
+					6EB527D76649C68A880A70C8 /* MapViewController.swift in Sources */,
+				);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */

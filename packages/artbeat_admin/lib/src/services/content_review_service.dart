@@ -826,9 +826,10 @@ class ContentReviewService {
             case ContentType.chapters:
               // For chapters, we need special handling as they are subcollections
               // Using collectionGroup to find the specific document
+              // Use 'id' field to avoid IllegalArgumentException with collectionGroup
               final chaptersQuery = await _firestore
                   .collectionGroup('chapters')
-                  .where(FieldPath.documentId, isEqualTo: review.contentId)
+                  .where('id', isEqualTo: review.contentId)
                   .get();
               if (chaptersQuery.docs.isNotEmpty) {
                 batch.delete(chaptersQuery.docs.first.reference);

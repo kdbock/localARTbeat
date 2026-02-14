@@ -58,22 +58,16 @@ class ChapterPartnerProvider with ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     final savedId = prefs.getString('selected_chapter_id');
 
-    if (savedId != null) {
-      _currentChapter = _availableChapters.firstWhere(
-        (c) => c.id == savedId,
-        orElse: () => _availableChapters.isNotEmpty
-            ? _availableChapters.first
-            : _availableChapters[0], // fallback or null handling needed if list empty
-      );
-      // Re-validate if savedId exists in current available chapters
-      final exists = _availableChapters.any((c) => c.id == savedId);
-      if (!exists) {
-        _currentChapter = null;
-        await prefs.remove('selected_chapter_id');
-      } else {
-        _currentChapter = _availableChapters.firstWhere((c) => c.id == savedId);
-      }
+    if (savedId == null) return;
+
+    final exists = _availableChapters.any((c) => c.id == savedId);
+    if (!exists) {
+      _currentChapter = null;
+      await prefs.remove('selected_chapter_id');
+      return;
     }
+
+    _currentChapter = _availableChapters.firstWhere((c) => c.id == savedId);
   }
 
   /// Auto-detect nearby chapter based on GPS
@@ -101,7 +95,33 @@ class ChapterPartnerProvider with ChangeNotifier {
           'Auto-detecting chapter at: ${position.latitude}, ${position.longitude}',
         );
 
-        // TODO: Implement actual proximity check once chapter locations are added to the model
+        final chaptersWithLocation = _availableChapters
+            .where(
+              (chapter) =>
+                  chapter.latitude != null && chapter.longitude != null,
+            )
+            .toList();
+
+        if (chaptersWithLocation.isEmpty) {
+          AppLogger.info(
+            'No chapter coordinates are configured for auto-detect.',
+          );
+          return;
+        }
+
+        chaptersWithLocation.sort((a, b) {
+          final aDistance = _distanceMeters(position, a);
+          final bDistance = _distanceMeters(position, b);
+          return aDistance.compareTo(bDistance);
+        });
+
+        final nearestChapter = chaptersWithLocation.first;
+        final nearestDistanceMeters = _distanceMeters(position, nearestChapter);
+        AppLogger.info(
+          'Nearest chapter: ${nearestChapter.name} (${nearestDistanceMeters.toStringAsFixed(0)}m away)',
+        );
+
+        await selectChapter(nearestChapter);
       }
     } catch (e) {
       AppLogger.error('Error auto-detecting chapter: $e');
@@ -109,5 +129,14 @@ class ChapterPartnerProvider with ChangeNotifier {
       _isAutoDetecting = false;
       notifyListeners();
     }
+  }
+
+  double _distanceMeters(Position userPosition, ChapterPartner chapter) {
+    return Geolocator.distanceBetween(
+      userPosition.latitude,
+      userPosition.longitude,
+      chapter.latitude!,
+      chapter.longitude!,
+    );
   }
 }

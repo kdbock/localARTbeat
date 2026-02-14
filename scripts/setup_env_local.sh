@@ -22,7 +22,9 @@ cat > .env.local << 'ENVLOCAL'
 export ENVIRONMENT=development
 
 # Google Maps API Key
-# TODO: Get from https://console.cloud.google.com/apis/credentials
+# Create one in Google Cloud Console:
+# APIs & Services -> Credentials -> Create credentials -> API key
+# Recommended: restrict by application and Maps APIs before using in production.
 export GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
 
 # Stripe Publishable Key (Rotated October 3, 2025)

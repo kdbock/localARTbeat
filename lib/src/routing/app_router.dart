@@ -1934,9 +1934,8 @@ class AppRouter {
         );
 
       case core.AppRoutes.captureSettings:
-        // TODO(kristybock): Implement capture settings screen
-        return RouteUtils.createErrorRoute(
-          'Capture settings not yet implemented',
+        return RouteUtils.createMainLayoutRoute(
+          child: const capture.CaptureSettingsScreen(),
         );
 
       case core.AppRoutes.captureReview:

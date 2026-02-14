@@ -709,6 +709,7 @@ class _EnhancedCaptureDashboardScreenState
             quickCaptureKey: _quickCaptureKey,
             onFinish: () {
               setState(() => _isTourActive = false);
+              OnboardingService().markCaptureOnboardingCompleted();
             },
           ),
       ],

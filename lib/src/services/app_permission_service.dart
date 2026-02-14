@@ -113,9 +113,8 @@ class AppPermissionService {
   }
 
   /// Check if all essential permissions are granted
-  bool get hasEssentialPermissions {
-    return true; // Return true as essential permissions are handled individually
-  }
+  bool get hasEssentialPermissions =>
+      true; // Return true as essential permissions are handled individually
 
   /// Get a user-friendly message for permission status
   String getPermissionMessage(Permission permission) {

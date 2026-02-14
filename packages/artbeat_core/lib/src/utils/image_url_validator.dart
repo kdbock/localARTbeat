@@ -2,6 +2,35 @@ import 'package:flutter/material.dart';
 
 /// Utility class for validating image URLs before using with NetworkImage
 class ImageUrlValidator {
+  /// Normalizes common malformed image URLs seen in Firestore/user profiles.
+  ///
+  /// Returns null when the URL is empty or effectively unusable.
+  static String? normalizeImageUrl(String? url) {
+    if (url == null) return null;
+    var normalized = url.trim();
+    if (normalized.isEmpty ||
+        normalized == 'null' ||
+        normalized == 'undefined' ||
+        normalized == 'file:///') {
+      return null;
+    }
+
+    // Common typo seen in Firebase Storage URLs.
+    normalized = normalized.replaceAll(
+      'firebsaestorage.googleapis.com',
+      'firebasestorage.googleapis.com',
+    );
+
+    // Clean up malformed query spacing such as "? alt=media&token=...".
+    normalized = normalized
+        .replaceAll('? ', '?')
+        .replaceAll('& ', '&')
+        .replaceAll(' =', '=')
+        .replaceAll('= ', '=');
+
+    return normalized;
+  }
+
   /// Validates if an image URL is safe to use with NetworkImage
   ///
   /// Returns true if the URL is valid and can be used with NetworkImage,
@@ -10,9 +39,8 @@ class ImageUrlValidator {
   /// This prevents the common error:
   /// "Invalid argument(s): No host specified in URI file:///"
   static bool isValidImageUrl(String? url) {
-    if (url == null || url.trim().isEmpty) return false;
-
-    final trimmedUrl = url.trim();
+    final trimmedUrl = normalizeImageUrl(url);
+    if (trimmedUrl == null) return false;
 
     // Check for common invalid patterns that cause NetworkImage errors
     if (trimmedUrl == 'file:///' ||
@@ -42,8 +70,8 @@ class ImageUrlValidator {
   /// Returns a NetworkImage if the URL is valid, or null if invalid.
   /// Use this when you need to conditionally create a NetworkImage.
   static NetworkImage? safeNetworkImage(String? url) {
-    if (url == null || url.trim().isEmpty) return null;
-    final trimmedUrl = url.trim();
+    final trimmedUrl = normalizeImageUrl(url);
+    if (trimmedUrl == null) return null;
     return isValidImageUrl(trimmedUrl) ? NetworkImage(trimmedUrl) : null;
   }
 
@@ -52,8 +80,8 @@ class ImageUrlValidator {
   /// Automatically corrects 'artwork/' paths to 'artwork_images/' paths
   /// to handle legacy Firebase Storage URLs.
   static NetworkImage? safeCorrectedNetworkImage(String? url) {
-    if (url == null || url.trim().isEmpty) return null;
-    final trimmedUrl = url.trim();
+    final trimmedUrl = normalizeImageUrl(url);
+    if (trimmedUrl == null) return null;
     if (!isValidImageUrl(trimmedUrl)) {
       return null;
     }

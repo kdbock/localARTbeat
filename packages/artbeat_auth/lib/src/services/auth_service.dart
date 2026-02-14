@@ -15,6 +15,7 @@ import './fresh_apple_signin.dart';
 class AuthService {
   late FirebaseAuth _auth;
   late FirebaseFirestore _firestore;
+  static Future<void>? _googleSignInInitialization;
 
   /// Initialize Google Sign-In with proper error handling
   /// Now uses the singleton instance in 7.x
@@ -180,13 +181,25 @@ class AuthService {
 
   /// Constructor with dependencies - ensures Google Sign-In is properly initialized
   Future<void> _initializeGoogleSignIn() async {
-    try {
-      // Scopes are now requested during authorization, not initialization in 7.x
-      await _googleSignIn.initialize();
-      AppLogger.info('✅ Google Sign-In initialized');
-    } catch (e) {
-      AppLogger.error('⚠️ Error initializing Google Sign-In: $e');
+    final existingInitialization = _googleSignInInitialization;
+    if (existingInitialization != null) {
+      return existingInitialization;
     }
+
+    final initialization = _googleSignIn
+        .initialize()
+        .then((_) {
+          AppLogger.info('✅ Google Sign-In initialized');
+        })
+        .catchError((Object e, StackTrace st) {
+          // Reset so a future attempt can re-try initialization.
+          _googleSignInInitialization = null;
+          AppLogger.error('⚠️ Error initializing Google Sign-In: $e', error: e);
+          throw e;
+        });
+
+    _googleSignInInitialization = initialization;
+    return initialization;
   }
 
   /// Sign in with Google
@@ -279,6 +292,17 @@ class AuthService {
       await _createSocialUserDocument(userCredential.user!);
 
       return userCredential;
+    } on gsi.GoogleSignInException catch (e) {
+      final description = e.description ?? '';
+      if (description.contains('No credential available')) {
+        throw Exception(
+          'Google Sign-In could not find a usable credential on this device. '
+          'On emulator, add a Google account and verify Firebase OAuth SHA-1 '
+          'for this debug keystore.',
+        );
+      }
+      AppLogger.error('❌ Google Sign-In failed: $e', error: e);
+      rethrow;
     } catch (e) {
       AppLogger.error('❌ Google Sign-In failed: $e', error: e);
       rethrow;

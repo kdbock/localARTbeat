@@ -5,6 +5,7 @@ import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import '../utils/logger.dart';
+import '../utils/image_url_validator.dart';
 import '../services/image_management_service.dart';
 
 /// A secure network image widget that handles Firebase Storage authentication
@@ -49,7 +50,8 @@ class _SecureNetworkImageState extends State<SecureNetworkImage> {
   @override
   void initState() {
     super.initState();
-    _authenticatedUrl = widget.imageUrl;
+    _authenticatedUrl =
+        ImageUrlValidator.normalizeImageUrl(widget.imageUrl) ?? widget.imageUrl;
   }
 
   /// Generate thumbnail URL from main artwork URL
@@ -371,7 +373,11 @@ class _SecureNetworkImageState extends State<SecureNetworkImage> {
   @override
   Widget build(BuildContext context) {
     // Early validation to prevent empty or invalid URLs from reaching NetworkImage
-    final urlToCheck = _authenticatedUrl ?? widget.imageUrl;
+    final urlToCheck =
+        ImageUrlValidator.normalizeImageUrl(
+          _authenticatedUrl ?? widget.imageUrl,
+        ) ??
+        '';
 
     // Check for empty or whitespace-only URLs
     if (urlToCheck.trim().isEmpty) {

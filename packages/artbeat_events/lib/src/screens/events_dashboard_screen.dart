@@ -108,6 +108,7 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
     setState(() {
       _showOnboarding = false;
     });
+    OnboardingService().markEventsOnboardingCompleted();
   }
 
   @override

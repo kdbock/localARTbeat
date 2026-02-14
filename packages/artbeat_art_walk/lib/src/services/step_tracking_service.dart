@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:flutter/services.dart';
 import 'package:pedometer/pedometer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:logging/logging.dart';
@@ -104,9 +105,19 @@ class StepTrackingService {
 
       _isTracking = true;
       _logger.info('Step tracking started');
+    } on PlatformException catch (e) {
+      _logger.warning('Step tracking platform error: ${e.message}');
+      _isSupported = false;
+      _isTracking = false;
+      if (e.message?.contains('StepDetection not available') == true) {
+        _logger.warning(
+          'Step detection hardware not found (common on emulators)',
+        );
+      }
     } catch (e) {
       _logger.severe('Failed to start step tracking: $e');
-      rethrow;
+      _isSupported = false;
+      _isTracking = false;
     }
   }
 

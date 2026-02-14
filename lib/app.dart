@@ -59,200 +59,209 @@ class MyApp extends StatelessWidget {
     debugPrint('🧭 MyApp.build() entered');
     try {
       return ErrorBoundary(
-    onError: (error, stackTrace) {
-      // Filter out expected 404 errors for missing artwork images
-      final errorString = error.toString();
-      final isExpected404 =
-          errorString.contains('statusCode: 404') &&
-          (errorString.contains('firebasestorage.googleapis.com') ||
-              errorString.contains('firebase') ||
-              errorString.contains('artwork') ||
-              errorString.contains('HttpException'));
+        onError: (error, stackTrace) {
+          // Filter out expected 404 errors for missing artwork images
+          final errorString = error.toString();
+          final isExpected404 =
+              errorString.contains('statusCode: 404') &&
+              (errorString.contains('firebasestorage.googleapis.com') ||
+                  errorString.contains('firebase') ||
+                  errorString.contains('artwork') ||
+                  errorString.contains('HttpException'));
 
-      if (isExpected404) {
-        // Log 404 errors at debug level only
-        if (kDebugMode) {
-          debugPrint(
-            '🖼️ Missing image (404): ${errorString.split(',').first}',
-          );
-        }
-      } else {
-        // Log other errors normally
-        AppLogger.error('❌ App-level error caught: $error');
-        AppLogger.error('❌ Stack trace: $stackTrace');
-      }
-    },
-    child: MultiProvider(
-      providers: [
-        // Core providers
-        ChangeNotifierProvider<core.UserService>.value(
-          value: core.UserService(),
-        ),
-        ChangeNotifierProvider<core.ChapterPartnerProvider>(
-          create: (_) => core.ChapterPartnerProvider()..initialize(),
-          lazy: true,
-        ),
-        Provider<AuthService>(create: (_) => AuthService(), lazy: true),
-        ChangeNotifierProvider<core.ConnectivityService>(
-          create: (_) => core.ConnectivityService(),
-          lazy: true,
-        ),
-        Provider<ThemeData>(
-          create: (_) => core.ArtbeatTheme.lightTheme,
-          lazy: false,
-        ),
-        // Content Engagement Service
-        ChangeNotifierProvider<core.ContentEngagementService>(
-          create: (_) => core.ContentEngagementService(),
-          lazy: true,
-        ),
-        ChangeNotifierProvider<messaging.ChatService>(
-          create: (_) => messaging.ChatService(),
-          lazy: true, // Changed to lazy to prevent early Firebase access
-        ),
-        // Message Reaction Service for emoji reactions
-        ChangeNotifierProvider<messaging.MessageReactionService>(
-          create: (_) => messaging.MessageReactionService(),
-          lazy: true,
-        ),
-        ChangeNotifierProvider<core.MessagingProvider>(
-          create: (context) =>
-              core.MessagingProvider(context.read<messaging.ChatService>()),
-          lazy: true,
-        ),
-        // Presence Service for online status
-        Provider<messaging.PresenceService>(
-          create: (_) => messaging.PresenceService(),
-          lazy: false, // Start immediately to track presence
-        ),
-        // Presence Provider for UI components
-        ChangeNotifierProvider<messaging.PresenceProvider>(
-          create: (context) => messaging.PresenceProvider(
-            context.read<messaging.PresenceService>(),
+          if (isExpected404) {
+            // Log 404 errors at debug level only
+            if (kDebugMode) {
+              debugPrint(
+                '🖼️ Missing image (404): ${errorString.split(',').first}',
+              );
+            }
+          } else {
+            // Log other errors normally
+            AppLogger.error('❌ App-level error caught: $error');
+            AppLogger.error('❌ Stack trace: $stackTrace');
+          }
+        },
+        child: MultiProvider(
+          providers: [
+            // Core providers
+            ChangeNotifierProvider<core.UserService>.value(
+              value: core.UserService(),
+            ),
+            ChangeNotifierProvider<core.ChapterPartnerProvider>(
+              create: (_) => core.ChapterPartnerProvider()..initialize(),
+              lazy: true,
+            ),
+            Provider<AuthService>(create: (_) => AuthService(), lazy: true),
+            ChangeNotifierProvider<core.ConnectivityService>(
+              create: (_) => core.ConnectivityService(),
+              lazy: true,
+            ),
+            Provider<ThemeData>(
+              create: (_) => core.ArtbeatTheme.lightTheme,
+              lazy: false,
+            ),
+            // Content Engagement Service
+            ChangeNotifierProvider<core.ContentEngagementService>(
+              create: (_) => core.ContentEngagementService(),
+              lazy: true,
+            ),
+            ChangeNotifierProvider<messaging.ChatService>(
+              create: (_) => messaging.ChatService(),
+              lazy: true, // Changed to lazy to prevent early Firebase access
+            ),
+            // Message Reaction Service for emoji reactions
+            ChangeNotifierProvider<messaging.MessageReactionService>(
+              create: (_) => messaging.MessageReactionService(),
+              lazy: true,
+            ),
+            ChangeNotifierProvider<core.MessagingProvider>(
+              create: (context) =>
+                  core.MessagingProvider(context.read<messaging.ChatService>()),
+              lazy: true,
+            ),
+            // Presence Service for online status
+            Provider<messaging.PresenceService>(
+              create: (_) => messaging.PresenceService(),
+              lazy: false, // Start immediately to track presence
+            ),
+            // Presence Provider for UI components
+            ChangeNotifierProvider<messaging.PresenceProvider>(
+              create: (context) => messaging.PresenceProvider(
+                context.read<messaging.PresenceService>(),
+              ),
+              lazy: false,
+            ),
+            // Community providers
+            ChangeNotifierProvider<CommunityService>(
+              create: (_) => CommunityService(),
+              lazy: true, // Changed to lazy to prevent early Firebase access
+            ),
+            ChangeNotifierProvider<core.CommunityProvider>(
+              create: (_) => core.CommunityProvider(),
+              lazy: true,
+            ),
+            // Search controller
+            ChangeNotifierProvider<core.SearchController>(
+              create: (_) => core.SearchController(),
+              lazy: true,
+            ),
+            // Additional service providers for DashboardViewModel
+            Provider<events.EventService>(
+              create: (_) => events.EventService(),
+              lazy: true,
+            ),
+            Provider<ArtworkService>(
+              create: (_) => ArtworkService(),
+              lazy: true,
+            ),
+            Provider<ArtWalkService>(
+              create: (_) => ArtWalkService(),
+              lazy: true,
+            ),
+            Provider<ArtWalkProgressService>(
+              create: (_) => ArtWalkProgressService(),
+              lazy: true,
+            ),
+            Provider<ArtWalkNavigationService>(
+              create: (_) => ArtWalkNavigationService(),
+              lazy: true,
+            ),
+            Provider<AchievementService>(
+              create: (_) => AchievementService(),
+              lazy: true,
+            ),
+            Provider<AudioNavigationService>(
+              create: (_) => AudioNavigationService(),
+              lazy: true,
+            ),
+            Provider<SocialService>(create: (_) => SocialService(), lazy: true),
+            Provider<InstantDiscoveryService>(
+              create: (_) => InstantDiscoveryService(),
+              lazy: true,
+            ),
+            Provider<ChallengeService>(
+              create: (_) => ChallengeService(),
+              lazy: true,
+            ),
+            Provider<WeeklyGoalsService>(
+              create: (_) => WeeklyGoalsService(),
+              lazy: true,
+            ),
+            Provider<RewardsService>(
+              create: (_) => RewardsService(),
+              lazy: true,
+            ),
+            Provider<capture.CaptureService>(
+              create: (_) => capture.CaptureService(),
+              lazy: true,
+            ),
+            ChangeNotifierProvider<core.SubscriptionService>.value(
+              value: core.SubscriptionService(),
+            ),
+            // Dashboard ViewModel - Create after required services
+            ChangeNotifierProxyProvider6<
+              events.EventService,
+              ArtworkService,
+              ArtWalkService,
+              core.SubscriptionService,
+              core.UserService,
+              capture.CaptureService,
+              core.DashboardViewModel
+            >(
+              create: (_) => core.DashboardViewModel(
+                eventService: events.EventService(),
+                artworkService: ArtworkService(),
+                artWalkService: ArtWalkService(),
+                subscriptionService: core.SubscriptionService(),
+                userService: core.UserService(),
+                captureService: capture.CaptureService(),
+              ),
+              update:
+                  (
+                    _,
+                    events.EventService eventService,
+                    ArtworkService artworkService,
+                    ArtWalkService artWalkService,
+                    core.SubscriptionService subscriptionService,
+                    core.UserService userService,
+                    capture.CaptureService captureService,
+                    previous,
+                  ) =>
+                      previous ??
+                      core.DashboardViewModel(
+                        eventService: eventService,
+                        artworkService: artworkService,
+                        artWalkService: artWalkService,
+                        subscriptionService: subscriptionService,
+                        userService: userService,
+                        captureService: captureService,
+                      ),
+            ),
+            ChangeNotifierProxyProvider<
+              core.ChapterPartnerProvider,
+              core.DashboardViewModel
+            >(
+              create: (context) => context.read<core.DashboardViewModel>(),
+              update: (context, chapterProvider, dashboardViewModel) =>
+                  dashboardViewModel!
+                    ..updateChapter(chapterProvider.activeChapterId),
+            ),
+          ],
+          child: MaterialApp(
+            navigatorKey: navigatorKey,
+            title: 'ARTbeat',
+            theme: ThemeData.light(),
+            initialRoute: core.AppRoutes.splash,
+            onGenerateRoute: _appRouter.onGenerateRoute,
+            debugShowCheckedModeBanner: false,
+            localizationsDelegates: context.localizationDelegates,
+            supportedLocales: context.supportedLocales,
+            locale: context.locale,
+            // navigatorObservers: [NavigationOverlay.createObserver(context)],
           ),
-          lazy: false,
         ),
-        // Community providers
-        ChangeNotifierProvider<CommunityService>(
-          create: (_) => CommunityService(),
-          lazy: true, // Changed to lazy to prevent early Firebase access
-        ),
-        ChangeNotifierProvider<core.CommunityProvider>(
-          create: (_) => core.CommunityProvider(),
-          lazy: true,
-        ),
-        // Search controller
-        ChangeNotifierProvider<core.SearchController>(
-          create: (_) => core.SearchController(),
-          lazy: true,
-        ),
-        // Additional service providers for DashboardViewModel
-        Provider<events.EventService>(
-          create: (_) => events.EventService(),
-          lazy: true,
-        ),
-        Provider<ArtworkService>(create: (_) => ArtworkService(), lazy: true),
-        Provider<ArtWalkService>(create: (_) => ArtWalkService(), lazy: true),
-        Provider<ArtWalkProgressService>(
-          create: (_) => ArtWalkProgressService(),
-          lazy: true,
-        ),
-        Provider<ArtWalkNavigationService>(
-          create: (_) => ArtWalkNavigationService(),
-          lazy: true,
-        ),
-        Provider<AchievementService>(
-          create: (_) => AchievementService(),
-          lazy: true,
-        ),
-        Provider<AudioNavigationService>(
-          create: (_) => AudioNavigationService(),
-          lazy: true,
-        ),
-        Provider<SocialService>(create: (_) => SocialService(), lazy: true),
-        Provider<InstantDiscoveryService>(
-          create: (_) => InstantDiscoveryService(),
-          lazy: true,
-        ),
-        Provider<ChallengeService>(
-          create: (_) => ChallengeService(),
-          lazy: true,
-        ),
-        Provider<WeeklyGoalsService>(
-          create: (_) => WeeklyGoalsService(),
-          lazy: true,
-        ),
-        Provider<RewardsService>(create: (_) => RewardsService(), lazy: true),
-        Provider<capture.CaptureService>(
-          create: (_) => capture.CaptureService(),
-          lazy: true,
-        ),
-        ChangeNotifierProvider<core.SubscriptionService>.value(
-          value: core.SubscriptionService(),
-        ),
-        // Dashboard ViewModel - Create after required services
-        ChangeNotifierProxyProvider6<
-          events.EventService,
-          ArtworkService,
-          ArtWalkService,
-          core.SubscriptionService,
-          core.UserService,
-          capture.CaptureService,
-          core.DashboardViewModel
-        >(
-          create: (_) => core.DashboardViewModel(
-            eventService: events.EventService(),
-            artworkService: ArtworkService(),
-            artWalkService: ArtWalkService(),
-            subscriptionService: core.SubscriptionService(),
-            userService: core.UserService(),
-            captureService: capture.CaptureService(),
-          ),
-          update:
-              (
-                _,
-                events.EventService eventService,
-                ArtworkService artworkService,
-                ArtWalkService artWalkService,
-                core.SubscriptionService subscriptionService,
-                core.UserService userService,
-                capture.CaptureService captureService,
-                previous,
-              ) =>
-                  previous ??
-                  core.DashboardViewModel(
-                    eventService: eventService,
-                    artworkService: artworkService,
-                    artWalkService: artWalkService,
-                    subscriptionService: subscriptionService,
-                    userService: userService,
-                    captureService: captureService,
-                  ),
-        ),
-        ChangeNotifierProxyProvider<
-          core.ChapterPartnerProvider,
-          core.DashboardViewModel
-        >(
-          create: (context) => context.read<core.DashboardViewModel>(),
-          update: (context, chapterProvider, dashboardViewModel) =>
-              dashboardViewModel!
-                ..updateChapter(chapterProvider.activeChapterId),
-        ),
-      ],
-      child: MaterialApp(
-        navigatorKey: navigatorKey,
-        title: 'ARTbeat',
-        theme: ThemeData.light(),
-        initialRoute: core.AppRoutes.splash,
-        onGenerateRoute: _appRouter.onGenerateRoute,
-        debugShowCheckedModeBanner: false,
-        localizationsDelegates: context.localizationDelegates,
-        supportedLocales: context.supportedLocales,
-        locale: context.locale,
-        // navigatorObservers: [NavigationOverlay.createObserver(context)],
-      ),
-    ),
-  );
+      );
     } on Exception catch (e, s) {
       AppLogger.error('Error in MyApp build: $e');
       AppLogger.error('Stack: $s');

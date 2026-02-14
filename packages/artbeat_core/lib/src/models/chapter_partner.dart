@@ -89,6 +89,8 @@ class ChapterPartner {
   final DateTime startDate;
   final DateTime? renewalDate;
   final bool analyticsEnabled;
+  final double? latitude;
+  final double? longitude;
 
   ChapterPartner({
     required this.id,
@@ -101,6 +103,8 @@ class ChapterPartner {
     required this.startDate,
     this.renewalDate,
     this.analyticsEnabled = false,
+    this.latitude,
+    this.longitude,
   });
 
   factory ChapterPartner.fromFirestore(DocumentSnapshot doc) {
@@ -126,6 +130,8 @@ class ChapterPartner {
         data['analytics_enabled'],
         false,
       ),
+      latitude: _extractLatitude(data),
+      longitude: _extractLongitude(data),
     );
   }
 
@@ -140,6 +146,39 @@ class ChapterPartner {
       'start_date': Timestamp.fromDate(startDate),
       if (renewalDate != null) 'renewal_date': Timestamp.fromDate(renewalDate!),
       'analytics_enabled': analyticsEnabled,
+      if (latitude != null) 'latitude': latitude,
+      if (longitude != null) 'longitude': longitude,
     };
+  }
+
+  static double? _extractLatitude(Map<String, dynamic> data) {
+    final topLevel = (data['latitude'] as num?)?.toDouble();
+    if (topLevel != null) return topLevel;
+
+    final location = data['location'];
+    if (location is GeoPoint) return location.latitude;
+
+    final coordinates = data['coordinates'];
+    if (coordinates is Map<String, dynamic>) {
+      return (coordinates['latitude'] as num?)?.toDouble() ??
+          (coordinates['lat'] as num?)?.toDouble();
+    }
+    return null;
+  }
+
+  static double? _extractLongitude(Map<String, dynamic> data) {
+    final topLevel = (data['longitude'] as num?)?.toDouble();
+    if (topLevel != null) return topLevel;
+
+    final location = data['location'];
+    if (location is GeoPoint) return location.longitude;
+
+    final coordinates = data['coordinates'];
+    if (coordinates is Map<String, dynamic>) {
+      return (coordinates['longitude'] as num?)?.toDouble() ??
+          (coordinates['lng'] as num?)?.toDouble() ??
+          (coordinates['lon'] as num?)?.toDouble();
+    }
+    return null;
   }
 }

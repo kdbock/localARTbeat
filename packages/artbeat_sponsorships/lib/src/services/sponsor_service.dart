@@ -63,7 +63,7 @@ class SponsorService {
 
       if (userLocation == null) return false;
 
-      return _isWithinRadius(userLocation, sponsor.radiusMiles!);
+      return _isWithinRadius(userLocation, sponsor);
     }).toList();
 
     if (filteredByRadius.isEmpty) return null;
@@ -106,10 +106,42 @@ class SponsorService {
 
   /// ---- Internal helpers ----
 
-  /// NOTE:
-  /// This is a placeholder distance check.
-  /// Replace with geodesic calculation if/when needed.
-  bool _isWithinRadius(LatLng userLocation, double radiusMiles) =>
-      // TODO(artbeat): Replace with proper Haversine calculation if required; radius logic validated server-side.
-      true;
+  bool _isWithinRadius(LatLng userLocation, Sponsorship sponsor) {
+    final radiusMiles = sponsor.radiusMiles;
+    if (radiusMiles == null) return true;
+
+    final targetLat = sponsor.latitude;
+    final targetLng = sponsor.longitude;
+    if (targetLat == null || targetLng == null) {
+      // Preserve backward compatibility for legacy docs that have a radius but
+      // no center coordinate. Server-side validation still gates eligibility.
+      return true;
+    }
+
+    final distance = _distanceMiles(
+      userLocation.latitude,
+      userLocation.longitude,
+      targetLat,
+      targetLng,
+    );
+    return distance <= radiusMiles;
+  }
+
+  double _distanceMiles(double lat1, double lon1, double lat2, double lon2) {
+    const earthRadiusMiles = 3958.8;
+
+    final dLat = _degreesToRadians(lat2 - lat1);
+    final dLon = _degreesToRadians(lon2 - lon1);
+
+    final a =
+        pow(sin(dLat / 2), 2) +
+        cos(_degreesToRadians(lat1)) *
+            cos(_degreesToRadians(lat2)) *
+            pow(sin(dLon / 2), 2);
+
+    final c = 2 * atan2(sqrt(a), sqrt(1 - a));
+    return earthRadiusMiles * c;
+  }
+
+  double _degreesToRadians(double degrees) => degrees * pi / 180.0;
 }

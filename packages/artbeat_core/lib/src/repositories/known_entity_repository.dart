@@ -61,29 +61,74 @@ class KnownEntityRepository {
   /// Search for artists/users
   Future<List<KnownEntity>> _searchArtists(String lowerQuery) async {
     final results = <KnownEntity>[];
+    final seenIds = <String>{};
 
     try {
-      // Search users collection - increased limit to search more users
-      // TODO: Implement searchTokens field for better performance
-      final usersQuery = await _firestore.collection('users').limit(200).get();
+      final queryTokens = _tokenizeQuery(lowerQuery);
 
-      for (final doc in usersQuery.docs) {
-        final data = doc.data();
-        if (_matchesArtistData(data, lowerQuery)) {
-          results.add(KnownEntity.fromArtist(id: doc.id, data: data));
+      // Fast path for docs that already have precomputed search tokens.
+      if (queryTokens.isNotEmpty) {
+        final usersTokenQuery = await _firestore
+            .collection('users')
+            .where(
+              'searchTokens',
+              arrayContainsAny: queryTokens.take(10).toList(),
+            )
+            .limit(100)
+            .get();
+
+        for (final doc in usersTokenQuery.docs) {
+          final data = doc.data();
+          if (_matchesArtistData(data, lowerQuery) &&
+              seenIds.add('users:${doc.id}')) {
+            results.add(KnownEntity.fromArtist(id: doc.id, data: data));
+          }
+        }
+
+        final artistProfilesTokenQuery = await _firestore
+            .collection('artist_profiles')
+            .where(
+              'searchTokens',
+              arrayContainsAny: queryTokens.take(10).toList(),
+            )
+            .limit(100)
+            .get();
+
+        for (final doc in artistProfilesTokenQuery.docs) {
+          final data = doc.data();
+          if (_matchesArtistProfileData(data, lowerQuery) &&
+              seenIds.add('artist_profiles:${doc.id}')) {
+            results.add(KnownEntity.fromArtist(id: doc.id, data: data));
+          }
         }
       }
 
-      // Search artist profiles collection
-      final artistProfilesQuery = await _firestore
-          .collection('artist_profiles')
-          .limit(200)
-          .get();
+      // Fallback for legacy docs without searchTokens.
+      if (results.length < 20) {
+        final usersQuery = await _firestore
+            .collection('users')
+            .limit(200)
+            .get();
 
-      for (final doc in artistProfilesQuery.docs) {
-        final data = doc.data();
-        if (_matchesArtistProfileData(data, lowerQuery)) {
-          results.add(KnownEntity.fromArtist(id: doc.id, data: data));
+        for (final doc in usersQuery.docs) {
+          final data = doc.data();
+          if (_matchesArtistData(data, lowerQuery) &&
+              seenIds.add('users:${doc.id}')) {
+            results.add(KnownEntity.fromArtist(id: doc.id, data: data));
+          }
+        }
+
+        final artistProfilesQuery = await _firestore
+            .collection('artist_profiles')
+            .limit(200)
+            .get();
+
+        for (final doc in artistProfilesQuery.docs) {
+          final data = doc.data();
+          if (_matchesArtistProfileData(data, lowerQuery) &&
+              seenIds.add('artist_profiles:${doc.id}')) {
+            results.add(KnownEntity.fromArtist(id: doc.id, data: data));
+          }
         }
       }
     } catch (error) {
@@ -311,7 +356,8 @@ class KnownEntityRepository {
     final fullName = (data['fullName'] as String? ?? '').toLowerCase();
     final username = (data['username'] as String? ?? '').toLowerCase();
 
-    return fullName.contains(lowerQuery) ||
+    return _matchesSearchTokens(data, lowerQuery) ||
+        fullName.contains(lowerQuery) ||
         username.contains(lowerQuery) ||
         _matchesWords(fullName, lowerQuery) ||
         _matchesWords(username, lowerQuery);
@@ -325,7 +371,8 @@ class KnownEntityRepository {
         .map((tag) => tag.toString().toLowerCase())
         .toList();
 
-    return artistName.contains(lowerQuery) ||
+    return _matchesSearchTokens(data, lowerQuery) ||
+        artistName.contains(lowerQuery) ||
         bio.contains(lowerQuery) ||
         tags.any((tag) => tag.contains(lowerQuery)) ||
         _matchesWords(artistName, lowerQuery) ||
@@ -392,7 +439,8 @@ class KnownEntityRepository {
         .map((tag) => tag.toString().toLowerCase())
         .toList();
 
-    return title.contains(lowerQuery) ||
+    return _matchesSearchTokens(data, lowerQuery) ||
+        title.contains(lowerQuery) ||
         artistName.contains(lowerQuery) ||
         description.contains(lowerQuery) ||
         tags.any((tag) => tag.contains(lowerQuery)) ||
@@ -410,7 +458,8 @@ class KnownEntityRepository {
         .map((tag) => tag.toString().toLowerCase())
         .toList();
 
-    return title.contains(lowerQuery) ||
+    return _matchesSearchTokens(data, lowerQuery) ||
+        title.contains(lowerQuery) ||
         description.contains(lowerQuery) ||
         zipCode.contains(lowerQuery) ||
         tags.any((tag) => tag.contains(lowerQuery)) ||
@@ -427,7 +476,8 @@ class KnownEntityRepository {
         .map((tag) => tag.toString().toLowerCase())
         .toList();
 
-    return title.contains(lowerQuery) ||
+    return _matchesSearchTokens(data, lowerQuery) ||
+        title.contains(lowerQuery) ||
         description.contains(lowerQuery) ||
         location.contains(lowerQuery) ||
         tags.any((tag) => tag.contains(lowerQuery)) ||
@@ -446,7 +496,8 @@ class KnownEntityRepository {
         .map((tag) => tag.toString().toLowerCase())
         .toList();
 
-    return title.contains(lowerQuery) ||
+    return _matchesSearchTokens(data, lowerQuery) ||
+        title.contains(lowerQuery) ||
         content.contains(lowerQuery) ||
         description.contains(lowerQuery) ||
         authorName.contains(lowerQuery) ||
@@ -469,7 +520,8 @@ class KnownEntityRepository {
         .map((tag) => tag.toString().toLowerCase())
         .toList();
 
-    return artistName.contains(lowerQuery) ||
+    return _matchesSearchTokens(data, lowerQuery) ||
+        artistName.contains(lowerQuery) ||
         bio.contains(lowerQuery) ||
         style.contains(lowerQuery) ||
         tags.any((tag) => tag.contains(lowerQuery)) ||
@@ -488,7 +540,8 @@ class KnownEntityRepository {
         .map((tag) => tag.toString().toLowerCase())
         .toList();
 
-    return name.contains(lowerQuery) ||
+    return _matchesSearchTokens(data, lowerQuery) ||
+        name.contains(lowerQuery) ||
         description.contains(lowerQuery) ||
         address.contains(lowerQuery) ||
         city.contains(lowerQuery) ||
@@ -517,6 +570,32 @@ class KnownEntityRepository {
     }
 
     return false;
+  }
+
+  bool _matchesSearchTokens(Map<String, dynamic> data, String lowerQuery) {
+    final rawTokens = data['searchTokens'];
+    if (rawTokens is! List) return false;
+
+    final tokens = rawTokens
+        .map((token) => token.toString().toLowerCase())
+        .where((token) => token.isNotEmpty)
+        .toSet();
+
+    if (tokens.isEmpty) return false;
+    if (tokens.contains(lowerQuery)) return true;
+
+    final queryTokens = _tokenizeQuery(lowerQuery);
+    return queryTokens.any(tokens.contains);
+  }
+
+  List<String> _tokenizeQuery(String query) {
+    return query
+        .toLowerCase()
+        .split(RegExp(r'\s+'))
+        .map((part) => part.trim())
+        .where((part) => part.length >= 2)
+        .toSet()
+        .toList();
   }
 
   /// Calculate relevance score for sorting results

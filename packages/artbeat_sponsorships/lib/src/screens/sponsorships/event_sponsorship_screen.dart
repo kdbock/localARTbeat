@@ -255,7 +255,6 @@ class _EventSponsorshipScreenState extends State<EventSponsorshipScreen>
                 );
                 return;
               }
-              // TODO(developer): Navigate to review screen with selectedEvent and notes
               Navigator.push(
                 context,
                 MaterialPageRoute<SponsorshipReviewScreen>(

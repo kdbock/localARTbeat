@@ -810,7 +810,7 @@ class ArtCommunityService extends ChangeNotifier {
     try {
       final snapshot = await _firestore
           .collectionGroup('likes')
-          .where(FieldPath.documentId, isEqualTo: userId)
+          .where('userId', isEqualTo: userId)
           .get();
 
       final likedPostIds = <String>{};

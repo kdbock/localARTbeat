@@ -11,3 +11,4 @@ export 'my_captures_pending_screen.dart';
 export 'my_captures_approved_screen.dart';
 export 'capture_screen.dart';
 export 'capture_review_screen.dart';
+export 'capture_settings_screen.dart';

@@ -1,9 +1,12 @@
+import '../models/artist_feature_model.dart';
 import '../services/artist_feature_service.dart';
+import '../services/notification_service.dart';
 import '../utils/logger.dart';
 
 /// Utility for managing scheduled tasks related to artist features
 class FeatureMaintenanceService {
   final ArtistFeatureService _featureService = ArtistFeatureService();
+  final NotificationService _notificationService = NotificationService();
 
   /// Run daily maintenance tasks for artist features
   Future<Map<String, int>> runDailyMaintenance() async {
@@ -22,19 +25,52 @@ class FeatureMaintenanceService {
       );
       results['featuresExpiringSoon'] = expiringSoon.length;
 
+      final notificationsSent = await _sendExpiringFeatureNotifications(
+        expiringSoon,
+      );
+      results['notificationsSent'] = notificationsSent;
+
       // Log summary
       AppLogger.info(
-        '✅ Daily maintenance completed: $expiredCount features expired, ${expiringSoon.length} expiring soon',
+        '✅ Daily maintenance completed: $expiredCount features expired, ${expiringSoon.length} expiring soon, $notificationsSent notifications sent',
       );
-
-      // TODO: Send notifications for expiring features
-      // This would integrate with a notification service
     } catch (e) {
       AppLogger.error('❌ Error during daily maintenance: $e');
       results['errors'] = 1;
     }
 
     return results;
+  }
+
+  Future<int> _sendExpiringFeatureNotifications(
+    List<ArtistFeature> expiringSoon,
+  ) async {
+    const notificationDays = {7, 3, 1};
+    var sent = 0;
+
+    for (final feature in expiringSoon) {
+      final daysRemaining = feature.daysRemaining;
+      if (!notificationDays.contains(daysRemaining)) continue;
+
+      final featureType = feature.type.toString().split('.').last;
+      await _notificationService.sendNotification(
+        userId: feature.artistId,
+        title:
+            'Feature expires in $daysRemaining day${daysRemaining == 1 ? '' : 's'}',
+        message:
+            'Your $featureType boost feature will expire soon. Renew to keep your visibility.',
+        type: NotificationType.subscriptionExpiration,
+        data: {
+          'featureId': feature.id,
+          'featureType': featureType,
+          'daysRemaining': daysRemaining,
+          'endDate': feature.endDate.toIso8601String(),
+        },
+      );
+      sent++;
+    }
+
+    return sent;
   }
 
   /// Get maintenance statistics

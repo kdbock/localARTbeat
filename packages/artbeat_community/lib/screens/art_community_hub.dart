@@ -1290,6 +1290,7 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
                 setState(() {
                   _showOnboarding = false;
                 });
+                OnboardingService().markArtCommunityOnboardingCompleted();
               },
             ),
         ],

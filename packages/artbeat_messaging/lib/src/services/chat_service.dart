@@ -12,7 +12,6 @@ import 'notification_service.dart' as messaging_notifications;
 import 'package:artbeat_core/artbeat_core.dart' as core;
 
 class ChatService extends ChangeNotifier {
-
   FirebaseFirestore? _firestoreInstance;
   FirebaseAuth? _authInstance;
   FirebaseStorage? _storageInstance;

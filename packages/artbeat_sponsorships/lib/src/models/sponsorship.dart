@@ -16,6 +16,8 @@ class Sponsorship {
     required this.linkUrl,
     required this.createdAt,
     this.radiusMiles,
+    this.latitude,
+    this.longitude,
     this.bannerUrl,
     this.relatedEntityId,
     this.chapterId,
@@ -37,6 +39,8 @@ class Sponsorship {
         startDate: (data['startDate'] as Timestamp).toDate(),
         endDate: (data['endDate'] as Timestamp).toDate(),
         radiusMiles: (data['radiusMiles'] as num?)?.toDouble(),
+        latitude: _extractLatitude(data),
+        longitude: _extractLongitude(data),
         placementKeys: (data['placementKeys'] as List<dynamic>? ?? [])
             .map((e) => e as String)
             .toList(),
@@ -56,6 +60,8 @@ class Sponsorship {
   final DateTime endDate;
 
   final double? radiusMiles; // null = global
+  final double? latitude; // null = no geo targeting center
+  final double? longitude; // null = no geo targeting center
   final List<String> placementKeys;
 
   final String logoUrl;
@@ -73,6 +79,8 @@ class Sponsorship {
     'startDate': Timestamp.fromDate(startDate),
     'endDate': Timestamp.fromDate(endDate),
     'radiusMiles': radiusMiles,
+    'latitude': latitude,
+    'longitude': longitude,
     'placementKeys': placementKeys,
     'logoUrl': logoUrl,
     'bannerUrl': bannerUrl,
@@ -92,4 +100,35 @@ class Sponsorship {
   bool get isExpired => DateTime.now().isAfter(endDate);
 
   bool get isGlobal => radiusMiles == null;
+
+  static double? _extractLatitude(Map<String, dynamic> data) {
+    final topLevel = (data['latitude'] as num?)?.toDouble();
+    if (topLevel != null) return topLevel;
+
+    final location = data['location'];
+    if (location is GeoPoint) return location.latitude;
+
+    final coordinates = data['coordinates'];
+    if (coordinates is Map<String, dynamic>) {
+      return (coordinates['latitude'] as num?)?.toDouble() ??
+          (coordinates['lat'] as num?)?.toDouble();
+    }
+    return null;
+  }
+
+  static double? _extractLongitude(Map<String, dynamic> data) {
+    final topLevel = (data['longitude'] as num?)?.toDouble();
+    if (topLevel != null) return topLevel;
+
+    final location = data['location'];
+    if (location is GeoPoint) return location.longitude;
+
+    final coordinates = data['coordinates'];
+    if (coordinates is Map<String, dynamic>) {
+      return (coordinates['longitude'] as num?)?.toDouble() ??
+          (coordinates['lng'] as num?)?.toDouble() ??
+          (coordinates['lon'] as num?)?.toDouble();
+    }
+    return null;
+  }
 }
