@@ -35,6 +35,10 @@ class AnimatedDashboardScreen extends StatefulWidget {
 
 class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
     with TickerProviderStateMixin {
+  // Temporary kill switch: disable dashboard tour overlay while debugging
+  // black-screen-on-launch regressions.
+  static const bool _disableDashboardTourOverlay = true;
+
   late final AnimationController _loop; // world animation
   late final AnimationController _intro; // entrance
   final artWalkLib.RewardsService _rewardsService = artWalkLib.RewardsService();
@@ -87,6 +91,15 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
   }
 
   Future<void> _checkOnboarding() async {
+    if (_disableDashboardTourOverlay) {
+      // Persist completion so the overlay stays off across launches.
+      await OnboardingService().markOnboardingCompleted();
+      if (mounted && _isTourActive) {
+        setState(() => _isTourActive = false);
+      }
+      return;
+    }
+
     final isCompleted = await OnboardingService().isOnboardingCompleted();
     if (!isCompleted && mounted) {
       // Small delay to ensure intro animation finishes and layout is stable

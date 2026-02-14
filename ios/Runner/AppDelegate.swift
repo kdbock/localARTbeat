@@ -5,6 +5,11 @@ import UIKit
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
+  override var window: UIWindow? {
+    get { super.window }
+    set { super.window = newValue }
+  }
+
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
@@ -22,26 +27,15 @@ import UIKit
       GMSServices.provideAPIKey("AIzaSyBvmSCvenoo9u-eXNzKm_oDJJJjC0MbqHA")
     }
 
-    GeneratedPluginRegistrant.register(with: self)
+    // Explicitly create a Flutter root controller to avoid storyboard/scene
+    // startup inconsistencies that can lead to a blank screen.
+    let flutterController = FlutterViewController(project: nil, nibName: nil, bundle: nil)
+    window = UIWindow(frame: UIScreen.main.bounds)
+    window?.rootViewController = flutterController
+    window?.makeKeyAndVisible()
+
+    GeneratedPluginRegistrant.register(with: flutterController)
 
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
-  }
-
-  // MARK: UISceneSession Lifecycle
-
-  override func application(
-    _ application: UIApplication,
-    configurationForConnecting connectingSceneSession: UISceneSession,
-    options: UIScene.ConnectionOptions
-  ) -> UISceneConfiguration {
-    return UISceneConfiguration(
-      name: "Default Configuration", sessionRole: connectingSceneSession.role)
-  }
-
-  override func application(
-    _ application: UIApplication,
-    didDiscardSceneSessions sceneSessions: Set<UISceneSession>
-  ) {
-    // Called when the user discards a scene session.
   }
 }

@@ -88,7 +88,6 @@ class AudioNavigationService {
   // final FlutterTts _tts = FlutterTts();
   final Logger _logger = Logger();
 
-  bool _isInitialized = false;
   // bool _isEnabled = false; // Default to disabled
   // final String _language = 'en-US';
   // final double _speechRate = 0.5;
@@ -104,7 +103,6 @@ class AudioNavigationService {
 
   /// Initialize the TTS engine
   Future<void> initialize() async {
-    _isInitialized = true;
     _logger.i('Audio navigation service initialized (NO-OP mode)');
     return;
   }
@@ -217,6 +215,5 @@ class AudioNavigationService {
 
   /// Dispose of resources
   void dispose() {
-    _isInitialized = false;
   }
 }

@@ -675,8 +675,6 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                       itemCount: messages.length,
                       itemBuilder: (context, index) {
                         final messageModel = messages[index];
-                        final isCurrentUser =
-                            messageModel.senderId == chatService.currentUserId;
 
                         // Check if we should show the date header
                         final showDateHeader =

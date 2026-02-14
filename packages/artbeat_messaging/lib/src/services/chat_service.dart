@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
-import 'package:logging/logging.dart';
 import '../models/chat_model.dart';
 import '../models/message_model.dart';
 import '../models/message_thread_model.dart';
@@ -13,7 +12,6 @@ import 'notification_service.dart' as messaging_notifications;
 import 'package:artbeat_core/artbeat_core.dart' as core;
 
 class ChatService extends ChangeNotifier {
-  static final Logger _logger = Logger('ChatService');
 
   FirebaseFirestore? _firestoreInstance;
   FirebaseAuth? _authInstance;

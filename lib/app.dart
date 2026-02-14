@@ -55,7 +55,10 @@ class MyApp extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) => ErrorBoundary(
+  Widget build(BuildContext context) {
+    debugPrint('🧭 MyApp.build() entered');
+    try {
+      return ErrorBoundary(
     onError: (error, stackTrace) {
       // Filter out expected 404 errors for missing artwork images
       final errorString = error.toString();
@@ -240,15 +243,22 @@ class MyApp extends StatelessWidget {
         navigatorKey: navigatorKey,
         title: 'ARTbeat',
         theme: ThemeData.light(),
-        home: Scaffold(body: Center(child: Text('Test - App is working'))),
-        // initialRoute: '/login',
+        initialRoute: core.AppRoutes.splash,
         onGenerateRoute: _appRouter.onGenerateRoute,
         debugShowCheckedModeBanner: false,
-        // localizationsDelegates: context.localizationDelegates,
-        // supportedLocales: context.supportedLocales,
-        // locale: context.locale,
+        localizationsDelegates: context.localizationDelegates,
+        supportedLocales: context.supportedLocales,
+        locale: context.locale,
         // navigatorObservers: [NavigationOverlay.createObserver(context)],
       ),
     ),
   );
+    } on Exception catch (e, s) {
+      AppLogger.error('Error in MyApp build: $e');
+      AppLogger.error('Stack: $s');
+      return MaterialApp(
+        home: Scaffold(body: Center(child: Text('Error: $e'))),
+      );
+    }
+  }
 }

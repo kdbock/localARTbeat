@@ -26,12 +26,37 @@ final List<_PendingTapTrace> _pendingTapTraces = [];
 const bool _enableVerboseRebuildLogging =
     // ignore: do_not_use_environment
     bool.fromEnvironment('VERBOSE_REBUILDS');
+const bool _forceMinimalRenderApp =
+    // ignore: do_not_use_environment
+    bool.fromEnvironment('FORCE_MINIMAL_APP');
 const Duration _slowFrameThreshold = Duration(milliseconds: 32);
 const Duration _slowTapThreshold = Duration(milliseconds: 120);
 Timer? _imageCacheStatsTimer;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  if (_forceMinimalRenderApp) {
+    runApp(
+      const MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+          backgroundColor: Color(0xFF00AAFF),
+          body: Center(
+            child: Text(
+              'FORCE_MINIMAL_APP',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    return;
+  }
 
   // Initialize logging system first
   AppLogger.initialize();
@@ -52,6 +77,9 @@ Future<void> main() async {
       error: details.exception,
       stackTrace: details.stack,
     );
+
+    // Do not swallow framework errors in debug; surface them visibly.
+    FlutterError.presentError(details);
   };
 
   // Platform-level error handling
@@ -63,7 +91,8 @@ Future<void> main() async {
     );
 
     AppLogger.error('Platform error: $error', error: error, stackTrace: stack);
-    return true;
+    // In debug, allow default handling so the error is visible.
+    return !kDebugMode;
   };
 
   PerformanceMonitor.startTimer('app_startup');

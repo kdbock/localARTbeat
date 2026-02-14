@@ -37,6 +37,8 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
   static const bool _isFlutterTest = bool.fromEnvironment('FLUTTER_TEST');
+  // Keep full branded splash experience enabled.
+  static const bool _useMinimalSafeSplash = false;
   late final AnimationController _heartbeatController;
   late final AnimationController _loopController;
   late final Animation<double> _scaleAnimation;
@@ -117,24 +119,12 @@ class _SplashScreenState extends State<SplashScreen>
 
   void _performNavigation() {
     if (_hasNavigated) return;
+    debugPrint('🧭 Splash _performNavigation() start');
 
     try {
-      if (Firebase.apps.isEmpty) {
-        if (!mounted || _hasNavigated) return;
-        _hasNavigated = true;
-        Navigator.of(
-          context,
-        ).pushNamedAndRemoveUntil('/login', (Route<dynamic> route) => false);
-        return;
-      }
-
       final user = FirebaseAuth.instance.currentUser;
-      late final String route;
       if (user != null) {
         _syncUserInBackground();
-        route = AppRoutes.dashboard;
-      } else {
-        route = '/login';
       }
 
       FocusScope.of(context).unfocus();
@@ -146,14 +136,20 @@ class _SplashScreenState extends State<SplashScreen>
 
       Navigator.of(
         context,
-      ).pushNamedAndRemoveUntil(route, (Route<dynamic> route) => false);
+      ).pushNamedAndRemoveUntil(
+        AppRoutes.dashboard,
+        (Route<dynamic> route) => false,
+      );
     } catch (_) {
       if (!mounted || _hasNavigated) return;
       _hasNavigated = true;
       FocusScope.of(context).unfocus();
       Navigator.of(
         context,
-      ).pushNamedAndRemoveUntil('/login', (Route<dynamic> route) => false);
+      ).pushNamedAndRemoveUntil(
+        AppRoutes.dashboard,
+        (Route<dynamic> route) => false,
+      );
     }
   }
 
@@ -180,6 +176,26 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('🧭 SplashScreen.build() entered');
+    if (_useMinimalSafeSplash) {
+      return const Scaffold(
+        backgroundColor: Color(0xFF07060F),
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(color: Colors.white),
+              SizedBox(height: 16),
+              Text(
+                'Loading ARTbeat...',
+                style: TextStyle(color: Colors.white),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
