@@ -40,10 +40,6 @@
 	<string>ARTbeat needs your location to show nearby public art and provide turn-by-turn navigation during art walks.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>ARTbeat needs continuous location access to provide accurate art walk navigation, track your progress, and show real-time updates even when the app is in the background.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>ARTbeat uses your microphone to record voice messages and audio notes about public art. This helps you capture and share your thoughts about artwork with the community.</string>
-	<key>NSMicrophoneAndSpeechRecognitionUsageDescription</key>
-	<string>ARTbeat needs access to your microphone for voice recording features. Your recordings are used to enhance your art discovery experience.</string>
 	<key>NSUserNotificationsUsageDescription</key>
 	<string>ARTbeat sends notifications for art walk updates, event reminders, and community features.</string>
 	<key>NSMotionUsageDescription</key>

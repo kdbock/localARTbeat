@@ -146,47 +146,6 @@ class ChatService extends ChangeNotifier {
     return _sendMessage(chatId, message);
   }
 
-  Future<void> sendVoiceMessage(
-    String chatId,
-    String voiceFilePath,
-    Duration duration,
-  ) async {
-    final file = File(voiceFilePath);
-    final ref = _storage
-        .ref()
-        .child('voice_messages')
-        .child(chatId)
-        .child('${DateTime.now().millisecondsSinceEpoch}.aac');
-
-    await ref.putFile(file);
-    final voiceUrl = await ref.getDownloadURL();
-
-    // Get file size for metadata
-    final fileSize = await file.length();
-
-    final message = MessageModel(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      senderId: currentUserId,
-      content: voiceUrl,
-      timestamp: DateTime.now(),
-      type: MessageType.voice,
-      metadata: {
-        'voiceUrl': voiceUrl,
-        'duration': duration.inMilliseconds,
-        'fileSize': fileSize,
-      },
-    );
-
-    // Clean up temporary file
-    try {
-      await file.delete();
-    } catch (e) {
-      _logger.warning('Failed to delete temporary voice file: $e');
-    }
-
-    return _sendMessage(chatId, message);
-  }
-
   Future<void> _sendMessage(String chatId, MessageModel message) async {
     await _firestore
         .collection('chats')

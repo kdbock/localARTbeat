@@ -14,5 +14,3 @@ export 'messaging_header.dart';
 export 'quick_reaction_picker.dart';
 export 'smart_replies_widget.dart';
 export 'typing_indicator.dart';
-export 'voice_message_bubble.dart';
-export 'voice_recorder_widget.dart';

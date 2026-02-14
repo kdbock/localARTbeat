@@ -87,12 +87,12 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider<core.ChapterPartnerProvider>(
           create: (_) => core.ChapterPartnerProvider()..initialize(),
-          lazy: false,
+          lazy: true,
         ),
         Provider<AuthService>(create: (_) => AuthService(), lazy: true),
         ChangeNotifierProvider<core.ConnectivityService>(
           create: (_) => core.ConnectivityService(),
-          lazy: false,
+          lazy: true,
         ),
         Provider<ThemeData>(
           create: (_) => core.ArtbeatTheme.lightTheme,
@@ -236,21 +236,18 @@ class MyApp extends StatelessWidget {
                 ..updateChapter(chapterProvider.activeChapterId),
         ),
       ],
-      child: NavigationOverlay(
-        child: Builder(
-          builder: (context) => MaterialApp(
-            navigatorKey: navigatorKey,
-            title: 'ARTbeat',
-            theme: core.ArtbeatTheme.lightTheme,
-            initialRoute: '/splash',
-            onGenerateRoute: _appRouter.onGenerateRoute,
-            debugShowCheckedModeBanner: false,
-            localizationsDelegates: context.localizationDelegates,
-            supportedLocales: context.supportedLocales,
-            locale: context.locale,
-            navigatorObservers: [NavigationOverlay.createObserver(context)],
-          ),
-        ),
+      child: MaterialApp(
+        navigatorKey: navigatorKey,
+        title: 'ARTbeat',
+        theme: ThemeData.light(),
+        home: Scaffold(body: Center(child: Text('Test - App is working'))),
+        // initialRoute: '/login',
+        onGenerateRoute: _appRouter.onGenerateRoute,
+        debugShowCheckedModeBanner: false,
+        // localizationsDelegates: context.localizationDelegates,
+        // supportedLocales: context.supportedLocales,
+        // locale: context.locale,
+        // navigatorObservers: [NavigationOverlay.createObserver(context)],
       ),
     ),
   );

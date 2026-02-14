@@ -9,7 +9,6 @@ import 'package:artbeat_core/artbeat_core.dart'
         HudTopBar,
         MainLayout,
         WorldBackground;
-import 'audio_content_upload_screen.dart';
 import 'video_content_upload_screen.dart';
 
 class UploadChoiceScreen extends StatelessWidget {
@@ -115,20 +114,6 @@ class UploadChoiceScreen extends StatelessWidget {
                   color: const Color(0xFF7C4DFF),
                   onTap: () {
                     Navigator.of(context).pushNamed('/artwork/upload/written');
-                  },
-                ),
-                const SizedBox(height: 16),
-                UploadOptionCard(
-                  icon: Icons.mic_outlined,
-                  title: 'upload_choice_audio_title'.tr(),
-                  description: 'upload_choice_audio_desc'.tr(),
-                  color: const Color(0xFF22D3EE),
-                  onTap: () {
-                    Navigator.of(context).push<AudioContentUploadScreen>(
-                      MaterialPageRoute(
-                        builder: (context) => const AudioContentUploadScreen(),
-                      ),
-                    );
                   },
                 ),
                 const SizedBox(height: 16),

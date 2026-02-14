@@ -1,4 +1,3 @@
-import 'package:flutter_tts/flutter_tts.dart';
 import 'package:logger/logger.dart';
 import 'package:artbeat_art_walk/src/models/models.dart';
 
@@ -86,74 +85,39 @@ class AudioNavigationService {
   factory AudioNavigationService() => _instance;
   AudioNavigationService._internal();
 
-  final FlutterTts _tts = FlutterTts();
+  // final FlutterTts _tts = FlutterTts();
   final Logger _logger = Logger();
 
   bool _isInitialized = false;
-  bool _isEnabled = true;
-  final String _language = 'en-US';
-  final double _speechRate = 0.5;
-  final double _volume = 0.8;
-  final double _pitch = 1.0;
+  // bool _isEnabled = false; // Default to disabled
+  // final String _language = 'en-US';
+  // final double _speechRate = 0.5;
+  // final double _volume = 0.8;
+  // final double _pitch = 1.0;
 
   // Audio settings
-  AudioNavigationSettings _settings = const AudioNavigationSettings();
+  // AudioNavigationSettings _settings = const AudioNavigationSettings(
+  //   enableVoiceDirections: false,
+  //   enableArtAnnouncements: false,
+  //   enableProgressUpdates: false,
+  // );
 
   /// Initialize the TTS engine
   Future<void> initialize() async {
-    if (_isInitialized) return;
-
-    try {
-      // Configure TTS settings
-      await _tts.setLanguage(_language);
-      await _tts.setSpeechRate(_speechRate);
-      await _tts.setVolume(_volume);
-      await _tts.setPitch(_pitch);
-
-      // Set up callbacks
-      _tts.setStartHandler(() {
-        _logger.d('TTS started speaking');
-      });
-
-      _tts.setCompletionHandler(() {
-        _logger.d('TTS completed speaking');
-      });
-
-      _tts.setErrorHandler((msg) {
-        _logger.e('TTS error: $msg');
-      });
-
-      _isInitialized = true;
-      _logger.i('Audio navigation service initialized');
-    } catch (e) {
-      _logger.e('Failed to initialize TTS: $e');
-      _isInitialized = false;
-    }
+    _isInitialized = true;
+    _logger.i('Audio navigation service initialized (NO-OP mode)');
+    return;
   }
 
   /// Update audio settings
   Future<void> updateSettings(AudioNavigationSettings settings) async {
-    _settings = settings;
-    _isEnabled = settings.enableVoiceDirections;
-
-    if (_isInitialized) {
-      await _tts.setLanguage(settings.voiceLanguage);
-      await _tts.setSpeechRate(settings.speechRate);
-    }
+    // _settings = settings;
+    // _isEnabled = false; // Always disabled
   }
 
   /// Speak a navigation direction
   Future<void> speakDirection(String instruction) async {
-    if (!_settings.enableVoiceDirections || !_isEnabled) return;
-
-    await _ensureInitialized();
-
-    try {
-      await _tts.speak(instruction);
-      _logger.d('Speaking direction: $instruction');
-    } catch (e) {
-      _logger.e('Error speaking direction: $e');
-    }
+    return;
   }
 
   /// Announce approaching art piece
@@ -161,76 +125,30 @@ class AudioNavigationService {
     PublicArtModel art,
     double distance,
   ) async {
-    if (!_settings.enableArtAnnouncements || !_isEnabled) return;
-
-    await _ensureInitialized();
-
-    final message = generateApproachMessage(art, distance);
-
-    try {
-      await _tts.speak(message);
-      _logger.d('Announcing art approach: $message');
-    } catch (e) {
-      _logger.e('Error announcing art approach: $e');
-    }
+    return;
   }
 
   /// Celebrate art visit with audio feedback
   Future<void> celebrateArtVisit(PublicArtModel art, int points) async {
-    if (!_settings.enableArtAnnouncements || !_isEnabled) return;
-
-    await _ensureInitialized();
-
-    final message = generateArrivalMessage(art, points);
-
-    try {
-      await _tts.speak(message);
-      _logger.d('Celebrating art visit: $message');
-    } catch (e) {
-      _logger.e('Error celebrating art visit: $e');
-    }
+    return;
   }
 
   /// Announce walk progress
   Future<void> announceWalkProgress(int visited, int total) async {
-    if (!_settings.enableProgressUpdates || !_isEnabled) return;
-
-    await _ensureInitialized();
-
-    final percentage = ((visited / total) * 100).round();
-    final message =
-        'Walk progress: $visited of $total art pieces visited. $percentage percent complete.';
-
-    try {
-      await _tts.speak(message);
-      _logger.d('Announcing progress: $message');
-    } catch (e) {
-      _logger.e('Error announcing progress: $e');
-    }
+    return;
   }
 
   /// Announce milestone achievement
   Future<void> announceMilestone(String milestone, int points) async {
-    if (!_settings.enableProgressUpdates || !_isEnabled) return;
-
-    await _ensureInitialized();
-
-    final message =
-        'Milestone achieved: $milestone! You earned $points points.';
-
-    try {
-      await _tts.speak(message);
-      _logger.d('Announcing milestone: $message');
-    } catch (e) {
-      _logger.e('Error announcing milestone: $e');
-    }
+    return;
   }
 
   /// Generate approach message for art piece
   String generateApproachMessage(PublicArtModel art, double distance) {
-    final distanceText = distance < 100
-        ? '${distance.round()} meters'
-        : '${(distance / 1000).toStringAsFixed(1)} kilometers';
+    final distanceText =
+        distance < 100
+            ? '${distance.round()} meters'
+            : '${(distance / 1000).toStringAsFixed(1)} kilometers';
 
     return 'Approaching "${art.title}" in $distanceText.';
   }
@@ -253,9 +171,10 @@ class AudioNavigationService {
     final instruction = step.instruction;
 
     if (step.distanceMeters > 0) {
-      final distanceText = step.distanceMeters < 1000
-          ? '${step.distanceMeters.round()} meters'
-          : '${(step.distanceMeters / 1000).toStringAsFixed(1)} kilometers';
+      final distanceText =
+          step.distanceMeters < 1000
+              ? '${step.distanceMeters.round()} meters'
+              : '${(step.distanceMeters / 1000).toStringAsFixed(1)} kilometers';
 
       return '$instruction in $distanceText.';
     }
@@ -265,76 +184,39 @@ class AudioNavigationService {
 
   /// Stop current speech
   Future<void> stop() async {
-    if (_isInitialized) {
-      await _tts.stop();
-    }
+    return;
   }
 
   /// Pause current speech
   Future<void> pause() async {
-    if (_isInitialized) {
-      await _tts.pause();
-    }
+    return;
   }
 
   /// Enable/disable audio navigation
   void setEnabled(bool enabled) {
-    _isEnabled = enabled;
+    // _isEnabled = false; // Always false
   }
 
   /// Check if audio is currently enabled
-  bool get isEnabled => _isEnabled && _settings.enableVoiceDirections;
+  bool get isEnabled => false; // Always false
 
   /// Get available languages
   Future<List<String>> getAvailableLanguages() async {
-    await _ensureInitialized();
-
-    try {
-      final languages = await _tts.getLanguages;
-      return List<String>.from(languages as List? ?? []);
-    } catch (e) {
-      _logger.e('Error getting available languages: $e');
-      return ['en-US']; // Fallback
-    }
+    return ['en-US'];
   }
 
   /// Get available voices for current language
   Future<List<Map<String, String>>> getAvailableVoices() async {
-    await _ensureInitialized();
-
-    try {
-      final voices = await _tts.getVoices;
-      return List<Map<String, String>>.from(voices as List? ?? []);
-    } catch (e) {
-      _logger.e('Error getting available voices: $e');
-      return []; // Fallback
-    }
-  }
-
-  /// Ensure TTS is initialized
-  Future<void> _ensureInitialized() async {
-    if (!_isInitialized) {
-      await initialize();
-    }
+    return [];
   }
 
   /// Generic speak method for custom messages
   Future<void> speak(String message) async {
-    if (!_isEnabled) return;
-
-    await _ensureInitialized();
-
-    try {
-      await _tts.speak(message);
-      _logger.d('Speaking message: $message');
-    } catch (e) {
-      _logger.e('Error speaking message: $e');
-    }
+    return;
   }
 
   /// Dispose of resources
   void dispose() {
-    _tts.stop();
     _isInitialized = false;
   }
 }

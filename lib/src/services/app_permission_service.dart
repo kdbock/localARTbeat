@@ -37,11 +37,8 @@ class AppPermissionService {
   }
 
   /// Request essential permissions that the app needs to function properly
-  /// Note: Microphone permission is NOT requested here - it's requested when
-  /// the user tries to use voice recording for better UX
   Future<void> _requestEssentialPermissions() async {
     final List<Permission> essentialPermissions = [
-      // Microphone permission is requested on-demand when user tries to record
       if (Platform.isIOS) Permission.photos, // For iOS photo access
       if (Platform.isAndroid) Permission.storage, // For Android file access
     ];
@@ -56,11 +53,6 @@ class AppPermissionService {
       _permissionStatus[permission] = status;
       AppLogger.info('${permission.toString()}: $status');
     }
-
-    // Also check microphone status but don't request it yet
-    final micStatus = await Permission.microphone.status;
-    _permissionStatus[Permission.microphone] = micStatus;
-    AppLogger.info('Permission.microphone (not requesting): $micStatus');
 
     // Request permissions that are denied but not permanently denied
     final List<Permission> permissionsToRequest = [];
@@ -97,58 +89,6 @@ class AppPermissionService {
     }
   }
 
-  /// Request microphone permission specifically (for voice messaging)
-  Future<bool> requestMicrophonePermission() async {
-    try {
-      final status = await Permission.microphone.status;
-
-      if (status.isGranted) {
-        AppLogger.info('✅ Microphone permission already granted');
-        return true;
-      }
-
-      if (status.isPermanentlyDenied) {
-        AppLogger.warning(
-          '⚠️ Microphone permission permanently denied - opening settings',
-        );
-        await openAppSettings();
-        return false;
-      }
-
-      AppLogger.info('Requesting microphone permission...');
-      final result = await Permission.microphone.request();
-
-      if (result.isGranted) {
-        AppLogger.info('✅ Microphone permission granted');
-        _permissionStatus[Permission.microphone] = result;
-        return true;
-      } else if (result.isPermanentlyDenied) {
-        AppLogger.warning('⚠️ Microphone permission permanently denied');
-        _permissionStatus[Permission.microphone] = result;
-        return false;
-      } else {
-        AppLogger.warning('❌ Microphone permission denied: $result');
-        _permissionStatus[Permission.microphone] = result;
-        return false;
-      }
-    } on Exception catch (e) {
-      AppLogger.error('❌ Error requesting microphone permission: $e');
-      return false;
-    }
-  }
-
-  /// Check if microphone permission is granted
-  Future<bool> hasMicrophonePermission() async {
-    try {
-      final status = await Permission.microphone.status;
-      _permissionStatus[Permission.microphone] = status;
-      return status.isGranted;
-    } on Exception catch (e) {
-      AppLogger.error('❌ Error checking microphone permission: $e');
-      return false;
-    }
-  }
-
   /// Get status of a specific permission
   Future<PermissionStatus> getPermissionStatus(Permission permission) async {
     try {
@@ -174,25 +114,12 @@ class AppPermissionService {
 
   /// Check if all essential permissions are granted
   bool get hasEssentialPermissions {
-    final microphone = _permissionStatus[Permission.microphone];
-    return microphone?.isGranted ?? false;
+    return true; // Return true as essential permissions are handled individually
   }
 
   /// Get a user-friendly message for permission status
   String getPermissionMessage(Permission permission) {
     final status = _permissionStatus[permission];
-
-    switch (permission) {
-      case Permission.microphone:
-        if (status?.isGranted ?? false) {
-          return 'Microphone access granted - you can send voice messages!';
-        } else if (status?.isPermanentlyDenied ?? false) {
-          return 'Microphone access denied. Please enable it in Settings to send voice messages.';
-        } else {
-          return 'Microphone access needed for voice messages.';
-        }
-      default:
-        return 'Permission status: ${status?.toString() ?? 'Unknown'}';
-    }
+    return 'Permission status: ${status?.toString() ?? 'Unknown'}';
   }
 }

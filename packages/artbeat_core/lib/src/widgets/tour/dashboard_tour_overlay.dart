@@ -269,6 +269,10 @@ class _DashboardTourOverlayState extends State<DashboardTourOverlay>
     if (renderBox != null) {
       position = renderBox.localToGlobal(Offset.zero);
       size = renderBox.size;
+    } else {
+      // If renderBox is not yet available, return empty to avoid black screen
+      // This can happen on the first frame before keys are attached
+      return const SizedBox.shrink();
     }
 
     final double screenHeight = MediaQuery.of(context).size.height;
@@ -865,6 +869,10 @@ class _ExploreTourOverlayState extends State<ExploreTourOverlay>
     if (renderBox != null) {
       position = renderBox.localToGlobal(Offset.zero);
       size = renderBox.size;
+    } else {
+      // If renderBox is not yet available, return empty to avoid black screen
+      // This can happen on the first frame before keys are attached
+      return const SizedBox.shrink();
     }
 
     final double screenHeight = MediaQuery.of(context).size.height;

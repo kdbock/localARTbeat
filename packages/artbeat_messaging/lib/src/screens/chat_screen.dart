@@ -12,9 +12,6 @@ import 'package:geolocator/geolocator.dart';
 import '../models/chat_model.dart';
 import '../models/message_model.dart';
 import '../services/chat_service.dart';
-import '../services/voice_recording_service.dart';
-import '../widgets/voice_recorder_widget.dart';
-import '../widgets/voice_message_bubble.dart';
 import '../widgets/smart_replies_widget.dart';
 import '../widgets/message_interactions.dart';
 
@@ -278,128 +275,6 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('messaging_chat_error_failed_to_send_2'.tr()),
-            backgroundColor: ArtbeatColors.error,
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _startAudioRecording() async {
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => FutureBuilder<VoiceRecordingService>(
-        future: _initializeVoiceService(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Container(
-              padding: const EdgeInsets.all(32),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20),
-                ),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const CircularProgressIndicator(),
-                  const SizedBox(height: 16),
-                  Text('messaging_chat_text_initializing_voice_recorder'.tr()),
-                ],
-              ),
-            );
-          }
-
-          if (snapshot.hasError) {
-            return Container(
-              padding: const EdgeInsets.all(32),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20),
-                ),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.error, color: Colors.red, size: 48),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Failed to initialize voice recorder: ${snapshot.error}',
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text('artwork_close_button'.tr()),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          return ChangeNotifierProvider.value(
-            value: snapshot.data!,
-            child: Container(
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom,
-              ),
-              child: VoiceRecorderWidget(
-                onVoiceRecorded: (voiceFilePath, duration) {
-                  Navigator.pop(context);
-                  _handleVoiceMessage(voiceFilePath, duration);
-                },
-                onCancel: () {
-                  Navigator.pop(context);
-                },
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Future<VoiceRecordingService> _initializeVoiceService() async {
-    final service = VoiceRecordingService();
-    await service.initialize();
-    return service;
-  }
-
-  Future<void> _handleVoiceMessage(
-    String voiceFilePath,
-    Duration duration,
-  ) async {
-    final chatService = Provider.of<ChatService>(context, listen: false);
-    try {
-      // Show sending indicator
-      _showSendingMediaIndicator();
-
-      await chatService.sendVoiceMessage(
-        widget.chat.id,
-        voiceFilePath,
-        duration,
-      );
-
-      // Hide attachment menu if open
-      if (_isAttachmentMenuOpen) {
-        setState(() {
-          _isAttachmentMenuOpen = false;
-        });
-        _animationController.reverse();
-      }
-
-      // Scroll to bottom after sending
-      _scrollToBottom();
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('messaging_chat_error_failed_to_send_7'.tr()),
             backgroundColor: ArtbeatColors.error,
           ),
         );
@@ -816,14 +691,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                             if (showDateHeader)
                               _buildDateHeader(messageModel.timestamp),
 
-                            // Show voice message bubble for voice messages
-                            if (messageModel.type == MessageType.voice)
-                              VoiceMessageBubble(
-                                message: messageModel,
-                                isCurrentUser: isCurrentUser,
-                              )
-                            else
-                              InteractiveMessageBubble(
+                            InteractiveMessageBubble(
                                 message: messageModel,
                                 chat: widget.chat,
                                 currentUserId: chatService.currentUserId,
@@ -930,21 +798,6 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                                 label: 'Camera',
                                 color: ArtbeatColors.primaryGreen,
                                 onTap: _handleCameraPick,
-                              ),
-                              _buildAttachmentOption(
-                                icon: Icons.mic,
-                                label: 'Audio',
-                                color: ArtbeatColors.secondaryTeal,
-                                onTap: () async {
-                                  // Close attachment menu first
-                                  setState(() {
-                                    _isAttachmentMenuOpen = false;
-                                  });
-                                  _animationController.reverse();
-
-                                  // Then start audio recording
-                                  await _startAudioRecording();
-                                },
                               ),
                               _buildAttachmentOption(
                                 icon: Icons.location_on,

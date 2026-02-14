@@ -218,8 +218,6 @@ class _StarredMessageTile extends StatelessWidget {
         return 'Text Message';
       case MessageType.image:
         return 'Image';
-      case MessageType.voice:
-        return 'Voice Message';
       case MessageType.video:
         return 'Video';
       case MessageType.file:

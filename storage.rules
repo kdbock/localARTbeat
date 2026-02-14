@@ -440,13 +440,6 @@ service firebase.storage {
       allow delete: if isAuthenticated();
     }
 
-    // Voice messages - for messaging system voice message uploads
-    match /voice_messages/{chatId}/{fileName} {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated(); // Chat participants can upload voice messages
-      allow delete: if isAuthenticated();
-    }
-
     // Chat media - generic path for chat-related media
     match /chat_media/{chatId}/{fileName} {
       allow read: if isAuthenticated();

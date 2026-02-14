@@ -107,19 +107,6 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
         artwork = updatedArtwork;
       }
 
-      // Check content type and route to appropriate detail screen
-      if (artwork.contentType == ArtworkContentType.audio) {
-        if (mounted) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute<dynamic>(
-              builder: (context) =>
-                  AudioContentDetailScreen(artworkId: widget.artworkId),
-            ),
-          );
-        }
-        return;
-      }
-
       // Load auction data if this is an auction
       double? currentHighestBid;
       List<AuctionBidModel> bidHistory = [];

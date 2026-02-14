@@ -36,7 +36,6 @@ dependencies:
   intl: ^0.20.2
   confetti: ^0.8.0
   lottie: ^3.3.2
-  flutter_tts: ^4.2.0
   cached_network_image: ^3.3.1
   geoflutterfire_plus: ^0.0.3
   pedometer: ^4.0.2

@@ -109,6 +109,15 @@ class _SplashScreenState extends State<SplashScreen>
     await Future<void>.delayed(const Duration(milliseconds: 300));
     if (!mounted || _hasNavigated) return;
 
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _hasNavigated) return;
+      _performNavigation();
+    });
+  }
+
+  void _performNavigation() {
+    if (_hasNavigated) return;
+
     try {
       if (Firebase.apps.isEmpty) {
         if (!mounted || _hasNavigated) return;
@@ -120,13 +129,15 @@ class _SplashScreenState extends State<SplashScreen>
       }
 
       final user = FirebaseAuth.instance.currentUser;
+      late final String route;
       if (user != null) {
         _syncUserInBackground();
+        route = AppRoutes.dashboard;
+      } else {
+        route = '/login';
       }
 
       FocusScope.of(context).unfocus();
-
-      const route = AppRoutes.dashboard;
 
       PerformanceMonitor.startTimer('navigation_from_splash');
 

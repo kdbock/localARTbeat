@@ -70,7 +70,15 @@ Future<void> main() async {
 
   try {
     // Localization FIRST
-    await EasyLocalization.ensureInitialized();
+    try {
+      await EasyLocalization.ensureInitialized().timeout(
+        const Duration(seconds: 5),
+      );
+    } on TimeoutException {
+      AppLogger.warning('⚠️ Localization init timed out');
+    } catch (e) {
+      AppLogger.error('❌ Localization init failed: $e');
+    }
 
     // Lifecycle manager (non-blocking)
     AppLifecycleManager().initialize();

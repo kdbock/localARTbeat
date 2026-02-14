@@ -227,6 +227,9 @@ class _CaptureTourOverlayState extends State<CaptureTourOverlay>
         position = globalPos;
       }
       size = renderBox.size;
+    } else {
+      // If renderBox is not yet available, return empty to avoid black screen
+      return const SizedBox.shrink();
     }
 
     final double screenHeight = MediaQuery.of(context).size.height;
