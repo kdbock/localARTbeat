@@ -7,7 +7,8 @@ class AdminDataRequestsScreen extends StatefulWidget {
   const AdminDataRequestsScreen({super.key});
 
   @override
-  State<AdminDataRequestsScreen> createState() => _AdminDataRequestsScreenState();
+  State<AdminDataRequestsScreen> createState() =>
+      _AdminDataRequestsScreenState();
 }
 
 class _AdminDataRequestsScreenState extends State<AdminDataRequestsScreen> {
@@ -38,13 +39,13 @@ class _AdminDataRequestsScreenState extends State<AdminDataRequestsScreen> {
     }
     if (newStatus == 'fulfilled') {
       updates['fulfilledAt'] = FieldValue.serverTimestamp();
-      updates['acknowledgedAt'] = updates['acknowledgedAt'] ??
-          FieldValue.serverTimestamp();
+      updates['acknowledgedAt'] =
+          updates['acknowledgedAt'] ?? FieldValue.serverTimestamp();
     }
     if (newStatus == 'denied') {
       updates['deniedAt'] = FieldValue.serverTimestamp();
-      updates['acknowledgedAt'] = updates['acknowledgedAt'] ??
-          FieldValue.serverTimestamp();
+      updates['acknowledgedAt'] =
+          updates['acknowledgedAt'] ?? FieldValue.serverTimestamp();
     }
 
     final requestType =
@@ -228,7 +229,8 @@ class _AdminDataRequestsScreenState extends State<AdminDataRequestsScreen> {
           }).toList();
 
           if (docs.isEmpty) {
-            return const Center(child: Text('No matching data-rights requests.'));
+            return const Center(
+                child: Text('No matching data-rights requests.'));
           }
 
           return ListView.builder(

@@ -58,19 +58,19 @@ class _CaptureUploadScreenState extends State<CaptureUploadScreen> {
       return;
     }
 
-    final hasAcceptedCaptureTerms = await CaptureTermsService.hasAcceptedTerms();
+    final hasAcceptedCaptureTerms =
+        await CaptureTermsService.hasAcceptedTerms();
     if (!hasAcceptedCaptureTerms && mounted) {
       final accepted = await Navigator.of(context).push<bool>(
         MaterialPageRoute<bool>(
-          builder: (_) => const TermsAndConditionsScreen(showAcceptButton: true),
+          builder: (_) =>
+              const TermsAndConditionsScreen(showAcceptButton: true),
         ),
       );
       if (accepted != true) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text(
-              'You must accept capture terms before submitting.',
-            ),
+            content: Text('You must accept capture terms before submitting.'),
           ),
         );
         return;

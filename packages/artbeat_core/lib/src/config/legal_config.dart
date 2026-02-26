@@ -17,4 +17,3 @@ class LegalConfig {
   static const int backupPurgeDays = 60;
   static const int financialRetentionYears = 7;
 }
-

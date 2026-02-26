@@ -1,0 +1,216 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+2 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+3 0 obj
+<< /Length 3865 >>
+stream
+BT
+/F2 18 Tf
+1 0 0 1 54.00 738.00 Tm
+(ARTbeat App Summary \(Repo-Evidenced\)) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 54.00 714.00 Tm
+(Evidence basis: README.md, pubspec.yaml, lib/main.dart, lib/app.dart, lib/src/routing/app_router.dart, firebase.json, functions/src/index.js) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 54.00 696.00 Tm
+(What It Is) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 54.00 682.00 Tm
+(ARTbeat is a modular Flutter app for artists, galleries, and art lovers. It combines) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 54.00 669.00 Tm
+(discovery, social/community tools, capture, messaging, events, art walks, and admin) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 54.00 656.00 Tm
+(workflows in one cross-platform app backed by Firebase services.) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 54.00 637.00 Tm
+(Who It Is For) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 54.00 623.00 Tm
+(Primary persona: artists \(with adjacent personas: galleries/institutions and art) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 54.00 610.00 Tm
+(enthusiasts\).) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 54.00 591.00 Tm
+(What It Does) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 54.00 577.00 Tm
+(- Authentication and profile setup, with package-scoped user/profile flows.) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 54.00 565.00 Tm
+(- Artwork discovery, browsing, and community feed/post interactions.) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 54.00 553.00 Tm
+(- Art capture/media workflows and location-based art walk experiences.) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 54.00 541.00 Tm
+(- Events creation/discovery and route-driven feature navigation.) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 54.00 529.00 Tm
+(- Real-time messaging and presence-aware chat services.) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 54.00 517.00 Tm
+(- Monetization features \(ads, sponsorships, subscriptions, in-app purchases, Stripe-backed) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 54.00 505.00 Tm
+(  payment paths\).) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 54.00 493.00 Tm
+(- Admin dashboards for moderation, platform curation, settings, and analytics.) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 54.00 475.00 Tm
+(How It Works \(Architecture\)) Tj
+ET
+BT
+/F1 9.5 Tf
+1 0 0 1 54.00 461.00 Tm
+(- Client: Flutter app entrypoint initializes localization, env/config, Firebase core, App Check,) Tj
+ET
+BT
+/F1 9.5 Tf
+1 0 0 1 54.00 449.50 Tm
+(  then launches MyApp.) Tj
+ET
+BT
+/F1 9.5 Tf
+1 0 0 1 54.00 438.00 Tm
+(- Composition: MultiProvider wires core/auth/community/messaging/artwork/event/art-walk/capture) Tj
+ET
+BT
+/F1 9.5 Tf
+1 0 0 1 54.00 426.50 Tm
+(  services; AppRouter dispatches routes across domain packages.) Tj
+ET
+BT
+/F1 9.5 Tf
+1 0 0 1 54.00 415.00 Tm
+(- Data/services: App uses Firebase SDKs directly \(Auth, Firestore, Storage, Messaging,) Tj
+ET
+BT
+/F1 9.5 Tf
+1 0 0 1 54.00 403.50 Tm
+(  Analytics, App Check\) plus Google Maps/location services and local state/providers.) Tj
+ET
+BT
+/F1 9.5 Tf
+1 0 0 1 54.00 392.00 Tm
+(- Backend: Firebase project config, Firestore/Storage security rules, and Cloud Functions) Tj
+ET
+BT
+/F1 9.5 Tf
+1 0 0 1 54.00 380.50 Tm
+(  \(Node.js 22\) for server-side jobs and HTTP/callable endpoints \(including Stripe-related) Tj
+ET
+BT
+/F1 9.5 Tf
+1 0 0 1 54.00 369.00 Tm
+(  logic\).) Tj
+ET
+BT
+/F1 9.5 Tf
+1 0 0 1 54.00 357.50 Tm
+(- Data Connect: configuration exists, but active production schema usage is Not found in repo) Tj
+ET
+BT
+/F1 9.5 Tf
+1 0 0 1 54.00 346.00 Tm
+(  \(schema file is commented sample content\).) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 54.00 328.50 Tm
+(How To Run \(Minimal\)) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 54.00 314.50 Tm
+(- Prereq: Flutter 3.38.7+ and Dart 3.10.7+ \(see README.md and pubspec.yaml\).) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 54.00 302.50 Tm
+(- Install dependencies: flutter pub get) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 54.00 290.50 Tm
+(- Set env file: cp .env.example .env.local and provide Firebase/Stripe/Maps keys.) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 54.00 278.50 Tm
+(- Start app: flutter run) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 54.00 266.50 Tm
+(- Platform-specific setup details \(Pods/signing/etc.\): see README.md sections if needed.) Tj
+ET
+endstream
+endobj
+4 0 obj
+<< /Type /Page /Parent 5 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 3 0 R >>
+endobj
+5 0 obj
+<< /Type /Pages /Kids [4 0 R] /Count 1 >>
+endobj
+6 0 obj
+<< /Type /Catalog /Pages 5 0 R >>
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000015 00000 n 
+0000000085 00000 n 
+0000000160 00000 n 
+0000004077 00000 n 
+0000004213 00000 n 
+0000004270 00000 n 
+trailer
+<< /Size 7 /Root 6 0 R >>
+startxref
+4319
+%%EOF

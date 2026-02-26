@@ -267,12 +267,19 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
                               ),
                               const Divider(height: 1),
                               Padding(
-                                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                                padding: const EdgeInsets.fromLTRB(
+                                  16,
+                                  12,
+                                  16,
+                                  8,
+                                ),
                                 child: Align(
                                   alignment: Alignment.centerLeft,
                                   child: Text(
                                     'Recent Requests',
-                                    style: Theme.of(context).textTheme.titleSmall
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleSmall
                                         ?.copyWith(
                                           color: Colors.white,
                                           fontWeight: FontWeight.w700,
@@ -299,9 +306,7 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
   Widget _buildRecentDataRequests() {
     final userId = _auth.currentUser?.uid;
     if (userId == null) {
-      return const ListTile(
-        title: Text('Sign in to view request status'),
-      );
+      return const ListTile(title: Text('Sign in to view request status'));
     }
 
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
@@ -352,7 +357,9 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
                 color: Colors.white70,
               ),
               title: Text(
-                type == 'download' ? 'Data Export Request' : 'Data Deletion Request',
+                type == 'download'
+                    ? 'Data Export Request'
+                    : 'Data Deletion Request',
                 style: const TextStyle(color: Colors.white),
               ),
               subtitle: Text(

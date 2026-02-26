@@ -279,7 +279,10 @@ class _ProfileMenuContent extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.verified_user_outlined, color: Colors.white),
+              leading: const Icon(
+                Icons.verified_user_outlined,
+                color: Colors.white,
+              ),
               title: const Text(
                 'Legal Center',
                 style: TextStyle(color: Colors.white),

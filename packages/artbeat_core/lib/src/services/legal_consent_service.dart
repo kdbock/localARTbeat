@@ -9,11 +9,9 @@ class LegalConsentService {
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
 
-  LegalConsentService({
-    FirebaseAuth? auth,
-    FirebaseFirestore? firestore,
-  }) : _auth = auth ?? FirebaseAuth.instance,
-       _firestore = firestore ?? FirebaseFirestore.instance;
+  LegalConsentService({FirebaseAuth? auth, FirebaseFirestore? firestore})
+    : _auth = auth ?? FirebaseAuth.instance,
+      _firestore = firestore ?? FirebaseFirestore.instance;
 
   Future<void> recordRegistrationConsent({
     required String userId,

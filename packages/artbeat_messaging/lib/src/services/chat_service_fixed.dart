@@ -105,7 +105,9 @@ class ChatService {
   String? _extractStoragePathFromDownloadUrl(String url) {
     try {
       final uri = Uri.parse(url);
-      final objectPart = uri.pathSegments.isNotEmpty ? uri.pathSegments.last : '';
+      final objectPart = uri.pathSegments.isNotEmpty
+          ? uri.pathSegments.last
+          : '';
       if (objectPart.isEmpty) return null;
       return Uri.decodeComponent(objectPart);
     } catch (_) {
@@ -130,10 +132,7 @@ class ChatService {
       imageFile,
       SettableMetadata(
         contentType: 'image/jpeg',
-        customMetadata: {
-          'uploaderId': userId,
-          'chatId': chatId,
-        },
+        customMetadata: {'uploaderId': userId, 'chatId': chatId},
       ),
     );
     final snapshot = await uploadTask;

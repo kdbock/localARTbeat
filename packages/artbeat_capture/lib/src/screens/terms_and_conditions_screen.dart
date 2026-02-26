@@ -9,7 +9,8 @@ class TermsAndConditionsScreen extends StatefulWidget {
   final bool showAcceptButton;
 
   @override
-  State<TermsAndConditionsScreen> createState() => _TermsAndConditionsScreenState();
+  State<TermsAndConditionsScreen> createState() =>
+      _TermsAndConditionsScreenState();
 }
 
 class _TermsAndConditionsScreenState extends State<TermsAndConditionsScreen> {
@@ -92,9 +93,7 @@ class _TermsAndConditionsScreenState extends State<TermsAndConditionsScreen> {
                     child: SizedBox(
                       width: double.infinity,
                       child: HudButton(
-                        label: _isSaving
-                            ? 'Saving...'
-                            : 'I Agree - Continue',
+                        label: _isSaving ? 'Saving...' : 'I Agree - Continue',
                         icon: Icons.check_circle_outline,
                         onTap: _isSaving ? () {} : _acceptAndContinue,
                       ),

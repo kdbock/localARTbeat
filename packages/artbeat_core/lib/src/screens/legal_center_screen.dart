@@ -18,13 +18,17 @@ class LegalCenterScreen extends StatelessWidget {
       body: uid == null
           ? const Center(child: Text('Sign in to view consent records.'))
           : FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-              future: FirebaseFirestore.instance.collection('users').doc(uid).get(),
+              future: FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(uid)
+                  .get(),
               builder: (context, snapshot) {
                 final data = snapshot.data?.data();
                 final legalConsents =
                     (data?['legalConsents'] as Map<String, dynamic>?) ?? {};
                 final tos =
-                    (legalConsents['termsOfService'] as Map<String, dynamic>?) ??
+                    (legalConsents['termsOfService']
+                        as Map<String, dynamic>?) ??
                     {};
                 final privacy =
                     (legalConsents['privacyPolicy'] as Map<String, dynamic>?) ??
@@ -35,7 +39,10 @@ class LegalCenterScreen extends StatelessWidget {
                   children: [
                     const Text(
                       'Local ARTbeat, LLC Legal Information',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     const Text('Contact: ${LegalConfig.supportEmail}'),

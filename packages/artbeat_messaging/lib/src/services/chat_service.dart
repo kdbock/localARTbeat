@@ -128,18 +128,13 @@ class ChatService extends ChangeNotifier {
     final fileName =
         '${DateTime.now().millisecondsSinceEpoch}_${sanitizedName.replaceAll(' ', '_')}';
     final storagePath = 'chat_images/$chatId/$fileName';
-    final ref = _storage
-        .ref()
-        .child(storagePath);
+    final ref = _storage.ref().child(storagePath);
 
     await ref.putFile(
       file,
       SettableMetadata(
         contentType: 'image/jpeg',
-        customMetadata: {
-          'uploaderId': currentUserId,
-          'chatId': chatId,
-        },
+        customMetadata: {'uploaderId': currentUserId, 'chatId': chatId},
       ),
     );
     final imageUrl = await ref.getDownloadURL();
