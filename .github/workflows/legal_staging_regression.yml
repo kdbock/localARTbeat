@@ -34,6 +34,14 @@ jobs:
       - name: Flutter pub get
         run: flutter pub get
 
+      - name: Create CI .env asset
+        run: |
+          cat > .env <<EOF
+          FIREBASE_API_KEY=${API_KEY}
+          FIREBASE_PROJECT_ID=${PROJECT_ID}
+          FIREBASE_STORAGE_BUCKET=${BUCKET}
+          EOF
+
       - name: Validate required configuration
         run: |
           test -x scripts/legal_staging_regression.sh
