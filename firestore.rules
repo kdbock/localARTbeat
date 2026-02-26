@@ -49,18 +49,22 @@ service cloud.firestore {
     match /users/{userId} {
       // Allow public read for leaderboard and user discovery
       allow read: if true;
-      allow create: if isAuthenticated() && request.auth.uid == userId;
+      allow create: if isAuthenticated() &&
+        request.auth.uid == userId &&
+        (!('userType' in request.resource.data) ||
+         request.resource.data.userType in ['user', 'artist', 'gallery']);
       allow update: if isAuthenticated() && (
-        request.auth.uid == userId ||
         isAdmin(request.auth.uid) ||
+        // User can update own profile fields, but cannot self-assign privileged roles.
+        (request.auth.uid == userId &&
+         (!('userType' in request.resource.data) ||
+          request.resource.data.userType in ['user', 'artist', 'gallery'])) ||
         // Allow updating engagement stats from any authenticated user
         (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['engagementStats'])) ||
         // Allow updating presence/online status fields
         (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isOnline', 'lastSeen', 'lastActive'])) ||
         // Allow updating notification preferences by the user themselves
         (request.auth.uid == userId && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['notificationPreferences', 'updatedAt'])) ||
-        // Allow users to update their own userType (e.g., becoming an artist)
-        (request.auth.uid == userId && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['userType', 'updatedAt'])) ||
         // Allow updating presence fields along with other allowed fields
         (request.resource.data.diff(resource.data).affectedKeys().hasAny(['isOnline', 'lastSeen', 'lastActive']) &&
          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isOnline', 'lastSeen', 'lastActive', 'engagementStats']))
@@ -427,12 +431,23 @@ service cloud.firestore {
     }
 
     // Direct Commissions - direct commission requests and transactions
-    match /direct_commissions/{document=**} {
-      allow read: if isAuthenticated();
-      allow list: if isAuthenticated();
-      allow create: if isAuthenticated();
-      allow update: if isAuthenticated();
-      allow delete: if isAuthenticated();
+    match /direct_commissions/{commissionId} {
+      allow read, list: if isAuthenticated() && (
+        resource.data.clientId == request.auth.uid ||
+        resource.data.artistId == request.auth.uid ||
+        isAdmin(request.auth.uid)
+      );
+      allow create: if isAuthenticated() && (
+        request.resource.data.clientId == request.auth.uid ||
+        request.resource.data.artistId == request.auth.uid ||
+        isAdmin(request.auth.uid)
+      );
+      allow update: if isAuthenticated() && (
+        resource.data.clientId == request.auth.uid ||
+        resource.data.artistId == request.auth.uid ||
+        isAdmin(request.auth.uid)
+      );
+      allow delete: if isAuthenticated() && isAdmin(request.auth.uid);
     }
 
     // Artwork Sales - sales transactions for artworks
@@ -453,7 +468,14 @@ service cloud.firestore {
         resource.data.sellerId == request.auth.uid ||
         isAdmin(request.auth.uid)
       );
-      allow create: if isAuthenticated();
+      allow create: if isAuthenticated() && (
+        request.resource.data.artistId == request.auth.uid ||
+        request.resource.data.artistID == request.auth.uid ||
+        request.resource.data.buyerId == request.auth.uid ||
+        request.resource.data.buyerID == request.auth.uid ||
+        request.resource.data.sellerId == request.auth.uid ||
+        isAdmin(request.auth.uid)
+      );
       allow update: if isAuthenticated() && (
         resource.data.artistId == request.auth.uid ||
         resource.data.artistID == request.auth.uid ||
@@ -484,7 +506,11 @@ service cloud.firestore {
         resource.data.requesterId == request.auth.uid ||
         isAdmin(request.auth.uid)
       );
-      allow create: if isAuthenticated();
+      allow create: if isAuthenticated() && (
+        request.resource.data.artistId == request.auth.uid ||
+        request.resource.data.requesterId == request.auth.uid ||
+        isAdmin(request.auth.uid)
+      );
       allow update: if isAuthenticated() && (
         resource.data.artistId == request.auth.uid ||
         resource.data.requesterId == request.auth.uid ||
@@ -509,7 +535,10 @@ service cloud.firestore {
         resource.data.senderId == request.auth.uid ||
         isAdmin(request.auth.uid)
       );
-      allow create: if isAuthenticated();
+      allow create: if isAuthenticated() && (
+        request.resource.data.senderId == request.auth.uid ||
+        isAdmin(request.auth.uid)
+      );
       allow update: if isAuthenticated() && (
         resource.data.recipientId == request.auth.uid ||
         resource.data.senderId == request.auth.uid ||
@@ -540,13 +569,37 @@ service cloud.firestore {
 
     // Chat rules
     match /chats/{chatId} {
+      function isChatParticipant() {
+        return isAuthenticated() && request.auth.uid in resource.data.participantIds;
+      }
+
+      function isChatParticipantByDoc() {
+        return isAuthenticated() &&
+          request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participantIds;
+      }
+
+      function hasValidMediaEnvelope() {
+        return
+          // Plain text/non-media messages remain allowed.
+          (!request.resource.data.keys().hasAny(['imageUrl', 'fileUrl']) &&
+           !request.resource.data.keys().hasAny(['storagePath', 'uploaderId', 'chatId'])) ||
+          // Media messages must include verifiable ownership metadata.
+          ((request.resource.data.keys().hasAny(['imageUrl', 'fileUrl']) ||
+            request.resource.data.type in ['MessageType.image', 'image', 'MessageType.video', 'video', 'MessageType.file', 'file']) &&
+            request.resource.data.keys().hasAll(['storagePath', 'uploaderId', 'chatId']) &&
+            request.resource.data.uploaderId == request.auth.uid &&
+            request.resource.data.chatId == chatId &&
+            request.resource.data.storagePath is string &&
+            request.resource.data.storagePath.matches('^chat_(images|media)/' + chatId + '/.*$'));
+      }
+
       allow read: if isAuthenticated() && (
-        request.auth.uid in resource.data.participantIds ||
+        isChatParticipant() ||
         isAdmin(request.auth.uid)
       );
       allow create: if isAuthenticated();
       allow update: if isAuthenticated() && (
-        request.auth.uid in resource.data.participantIds ||
+        isChatParticipant() ||
         isAdmin(request.auth.uid)
       );
       allow delete: if isAuthenticated() && (
@@ -557,11 +610,13 @@ service cloud.firestore {
       // Chat messages subcollection
       match /messages/{messageId} {
         allow read: if isAuthenticated() && (
-          request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participantIds ||
+          isChatParticipantByDoc() ||
           isAdmin(request.auth.uid)
         );
         allow create: if isAuthenticated() && (
-          request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participantIds ||
+          isChatParticipantByDoc() &&
+          request.resource.data.senderId == request.auth.uid &&
+          hasValidMediaEnvelope() ||
           isAdmin(request.auth.uid)
         );
         allow update: if isAuthenticated() && (
@@ -577,11 +632,11 @@ service cloud.firestore {
       // Typing status subcollection
       match /typing/{document=**} {
         allow read: if isAuthenticated() && (
-          request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participantIds ||
+          isChatParticipantByDoc() ||
           isAdmin(request.auth.uid)
         );
         allow write: if isAuthenticated() && (
-          request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participantIds ||
+          isChatParticipantByDoc() ||
           isAdmin(request.auth.uid)
         );
       }
@@ -1441,8 +1496,12 @@ service cloud.firestore {
     // Art Location Clusters - groups nearby art submissions to prevent duplicates
     match /artLocationClusters/{clusterId} {
       allow read: if true; // Public read access for clustering queries
-      allow create: if isAuthenticated(); // Any authenticated user can create clusters
-      allow update: if isAuthenticated(); // Allow updates for cluster management
+      allow create: if isAuthenticated() &&
+        request.resource.data.createdBy == request.auth.uid;
+      allow update: if isAuthenticated() && (
+        resource.data.createdBy == request.auth.uid ||
+        isAdmin(request.auth.uid)
+      );
       allow delete: if isAdmin(request.auth.uid); // Only admins can delete clusters
     }
 
@@ -1471,7 +1530,8 @@ service cloud.firestore {
     // Sponsorships - for business partners and app sponsors
     match /sponsorships/{sponsorshipId} {
       allow read, list: if true;
-      allow create: if isAuthenticated();
+      allow create: if isAuthenticated() &&
+        request.resource.data.businessId == request.auth.uid;
       allow update: if isAuthenticated() && (
         resource.data.businessId == request.auth.uid ||
         isAdmin(request.auth.uid) ||
@@ -1499,7 +1559,7 @@ service cloud.firestore {
       
       match /monthly_stats/{monthKey} {
         allow read: if isAdmin(request.auth.uid);
-        allow write: if isAuthenticated();
+        allow write: if isAuthenticated() && isAdmin(request.auth.uid);
       }
     }
 
@@ -1514,6 +1574,50 @@ service cloud.firestore {
     match /broadcasts/{broadcastId} {
       allow read, list: if isAuthenticated();
       allow write: if isAdmin(request.auth.uid);
+    }
+
+    // Canonical user data-rights requests (access/export/deletion)
+    match /dataRequests/{requestId} {
+      allow create: if isAuthenticated() &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.status == 'pending' &&
+        request.resource.data.requestType in ['download', 'deletion'];
+      allow read, list: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        isAdmin(request.auth.uid)
+      );
+      allow update: if isAuthenticated() &&
+        isAdmin(request.auth.uid) &&
+        request.resource.data.status in ['pending', 'in_review', 'fulfilled', 'denied'];
+      allow delete: if isAuthenticated() && isAdmin(request.auth.uid);
+    }
+
+    // Legacy collections retained for backward compatibility
+    match /dataExportRequests/{requestId} {
+      allow create: if isAuthenticated() &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.status == 'pending';
+      allow read, list: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        isAdmin(request.auth.uid)
+      );
+      allow update, delete: if isAuthenticated() && isAdmin(request.auth.uid);
+    }
+
+    match /dataDeletionRequests/{requestId} {
+      allow create: if isAuthenticated() &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.status == 'pending';
+      allow read, list: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        isAdmin(request.auth.uid)
+      );
+      allow update, delete: if isAuthenticated() && isAdmin(request.auth.uid);
+    }
+
+    match /dataRequestAudit/{auditId} {
+      allow read, list: if isAuthenticated() && isAdmin(request.auth.uid);
+      allow create, update, delete: if isAuthenticated() && isAdmin(request.auth.uid);
     }
 
     // Admin collections

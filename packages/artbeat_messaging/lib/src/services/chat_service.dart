@@ -124,13 +124,24 @@ class ChatService extends ChangeNotifier {
 
   Future<void> sendImage(String chatId, String imagePath) async {
     final file = File(imagePath);
+    final sanitizedName = imagePath.split(Platform.pathSeparator).last;
+    final fileName =
+        '${DateTime.now().millisecondsSinceEpoch}_${sanitizedName.replaceAll(' ', '_')}';
+    final storagePath = 'chat_images/$chatId/$fileName';
     final ref = _storage
         .ref()
-        .child('chat_images')
-        .child(chatId)
-        .child('${DateTime.now().millisecondsSinceEpoch}.jpg');
+        .child(storagePath);
 
-    await ref.putFile(file);
+    await ref.putFile(
+      file,
+      SettableMetadata(
+        contentType: 'image/jpeg',
+        customMetadata: {
+          'uploaderId': currentUserId,
+          'chatId': chatId,
+        },
+      ),
+    );
     final imageUrl = await ref.getDownloadURL();
 
     final message = MessageModel(
@@ -139,6 +150,14 @@ class ChatService extends ChangeNotifier {
       content: imageUrl,
       timestamp: DateTime.now(),
       type: MessageType.image,
+      storagePath: storagePath,
+      uploaderId: currentUserId,
+      chatId: chatId,
+      metadata: {
+        'storagePath': storagePath,
+        'uploaderId': currentUserId,
+        'chatId': chatId,
+      },
     );
     return _sendMessage(chatId, message);
   }
@@ -1396,6 +1415,15 @@ class ChatService extends ChangeNotifier {
       if (sourceMessageData['fileUrl'] != null) {
         forwardedMessage['fileUrl'] = sourceMessageData['fileUrl'];
         forwardedMessage['fileName'] = sourceMessageData['fileName'];
+      }
+      if (sourceMessageData['storagePath'] != null) {
+        forwardedMessage['storagePath'] = sourceMessageData['storagePath'];
+      }
+      if (sourceMessageData['uploaderId'] != null) {
+        forwardedMessage['uploaderId'] = sourceMessageData['uploaderId'];
+      }
+      if (sourceMessageData['chatId'] != null) {
+        forwardedMessage['chatId'] = sourceMessageData['chatId'];
       }
 
       await targetMessagesRef.add(forwardedMessage);

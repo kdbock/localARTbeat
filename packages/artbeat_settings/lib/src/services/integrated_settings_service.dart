@@ -599,40 +599,61 @@ class IntegratedSettingsService extends ChangeNotifier {
 
   /// Request data download (GDPR compliance)
   Future<void> requestDataDownload() async {
-    try {
-      final userId = _auth.currentUser?.uid;
-      if (userId == null) {
-        throw Exception('User not authenticated');
-      }
-
-      await _firestore.collection('dataRequests').add({
-        'userId': userId,
-        'requestType': 'download',
-        'requestedAt': FieldValue.serverTimestamp(),
-        'status': 'pending',
-      });
-    } catch (e) {
-      AppLogger.error('Error requesting data download: $e');
-      rethrow;
-    }
+    await _createDataRequest('download');
   }
 
   /// Request data deletion (GDPR compliance)
   Future<void> requestDataDeletion() async {
+    await _createDataRequest('deletion');
+  }
+
+  Future<void> _createDataRequest(String requestType) async {
     try {
       final userId = _auth.currentUser?.uid;
       if (userId == null) {
         throw Exception('User not authenticated');
       }
+      final now = DateTime.now().toUtc();
+      final acknowledgementDueAt = Timestamp.fromDate(
+        now.add(const Duration(hours: 72)),
+      );
+      final completionDueAt = Timestamp.fromDate(
+        now.add(const Duration(days: 30)),
+      );
+
+      final existingPending = await _firestore
+          .collection('dataRequests')
+          .where('userId', isEqualTo: userId)
+          .where('requestType', isEqualTo: requestType)
+          .where('status', isEqualTo: 'pending')
+          .limit(1)
+          .get();
+      if (existingPending.docs.isNotEmpty) {
+        throw Exception(
+          'You already have a pending $requestType request. Please wait for processing.',
+        );
+      }
 
       await _firestore.collection('dataRequests').add({
         'userId': userId,
-        'requestType': 'deletion',
+        'requestType': requestType,
+        'type': requestType,
         'requestedAt': FieldValue.serverTimestamp(),
         'status': 'pending',
+        'submittedVia': 'privacy_settings',
+        'slaAcknowledgementHours': 72,
+        'slaAcknowledgementDueAt': acknowledgementDueAt,
+        'slaCompletionDays': 30,
+        'slaCompletionDueAt': completionDueAt,
+        'acknowledgedAt': null,
+        'fulfilledAt': null,
+        'deniedAt': null,
+        'reviewedBy': null,
+        'reviewNotes': null,
+        'updatedAt': FieldValue.serverTimestamp(),
       });
     } catch (e) {
-      AppLogger.error('Error requesting data deletion: $e');
+      AppLogger.error('Error requesting data $requestType request: $e');
       rethrow;
     }
   }

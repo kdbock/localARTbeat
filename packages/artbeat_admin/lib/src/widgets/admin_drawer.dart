@@ -140,6 +140,13 @@ class AdminDrawer extends StatelessWidget {
                       route: '/admin/payments',
                       subtitle: 'admin_drawer_menu_payments_subtitle'.tr(),
                     ),
+                    _buildDrawerItem(
+                      context,
+                      icon: Icons.privacy_tip_outlined,
+                      title: 'Data Rights Requests',
+                      route: '/admin/data-requests',
+                      subtitle: 'Review export/deletion request queue',
+                    ),
 
                     const Divider(height: 16),
 

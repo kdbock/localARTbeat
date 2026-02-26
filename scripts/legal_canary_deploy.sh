@@ -20,4 +20,4 @@ firebase deploy \
   --non-interactive
 
 echo "Canary deploy completed."
-echo "Next: run the verification section in docs/LEGAL_PRODUCTION_CANARY_ROLLOUT_RUNBOOK.md"
+echo "Next: run the verification section in docs/security/LEGAL_PRODUCTION_CANARY_ROLLOUT_RUNBOOK.md"

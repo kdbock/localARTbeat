@@ -8,6 +8,7 @@ import '../screens/admin_settings_screen.dart';
 import '../screens/admin_security_center_screen.dart';
 import '../screens/admin_system_health_screen.dart';
 import '../screens/admin_payment_screen.dart';
+import '../screens/admin_data_requests_screen.dart';
 import '../screens/modern_unified_admin_upload_tools_screen.dart';
 import '../screens/events_coming_soon_screen.dart';
 import '../screens/moderation/event_moderation_dashboard_screen.dart';
@@ -74,6 +75,7 @@ class AdminRoutes {
   static const String systemMonitoring = '/admin/monitoring';
   static const String auditLogs = '/admin/audit-logs';
   static const String paymentManagement = '/admin/payments';
+  static const String dataRequests = '/admin/data-requests';
   static const String dataUpload = '/admin/upload-tools';
   static const String login = '/admin/login';
 
@@ -164,6 +166,11 @@ class AdminRoutes {
       case paymentManagement:
         return MaterialPageRoute<void>(
           builder: (_) => const AdminPaymentScreen(),
+          settings: settings,
+        );
+      case dataRequests:
+        return MaterialPageRoute<void>(
+          builder: (_) => const AdminDataRequestsScreen(),
           settings: settings,
         );
       case dataUpload:

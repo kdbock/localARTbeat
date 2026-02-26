@@ -1,11 +1,6 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-    // TEMPORARY: Allow all authenticated users to read and write anywhere (for development/testing only)
-    match /{allPaths=**} {
-      allow read, write: if request.auth != null;
-    }
-
     // Helper functions for access control
     function isDebugMode() {
       // Set to true only if you want to completely bypass App Check
@@ -33,8 +28,25 @@ service firebase.storage {
     }
 
     function isAdmin(userId) {
-      return (exists(/databases/$(database)/documents/users/$(userId)) 
-        && get(/databases/$(database)/documents/users/$(userId)).data.userType == 'admin');
+      return (firestore.exists(/databases/(default)/documents/users/$(userId)) 
+        && firestore.get(/databases/(default)/documents/users/$(userId)).data.userType == 'admin');
+    }
+
+    function isChatParticipant(chatId) {
+      return isAuthenticated() &&
+        firestore.exists(/databases/(default)/documents/chats/$(chatId)) &&
+        request.auth.uid in firestore.get(/databases/(default)/documents/chats/$(chatId)).data.participantIds;
+    }
+
+    function hasValidChatUploadMetadata(chatId) {
+      let uploader = request.resource.metadata.uploaderId;
+      let uploaderLower = request.resource.metadata.uploaderid;
+      let chatMeta = request.resource.metadata.chatId;
+      let chatMetaLower = request.resource.metadata.chatid;
+      return request.resource != null &&
+        request.resource.metadata != null &&
+        (uploader == request.auth.uid || uploaderLower == request.auth.uid) &&
+        (chatMeta == chatId || chatMetaLower == chatId);
     }
 
     // Base rules that apply to all paths
@@ -43,45 +55,39 @@ service firebase.storage {
       allow write: if false; // Specific paths must explicitly allow write
     }
 
-    // Temporary very permissive rule for debugging artist profile uploads
+    // Legacy debug path; keep admin-only in production
     match /profile/{allPaths=**} {
-      allow read, write: if isAuthenticated();
+      allow read, write: if isAuthenticated() && isAdmin(request.auth.uid);
     }
 
-    // Temporary very permissive rule for debugging artwork uploads
+    // Legacy debug path; keep admin-only in production
     match /artwork/{allPaths=**} {
-      allow read, write: if isAuthenticated();
+      allow read, write: if isAuthenticated() && isAdmin(request.auth.uid);
     }
 
-    // Temporary very permissive rule for debugging post uploads
+    // Legacy debug path; keep admin-only in production
     match /post_images/{allPaths=**} {
-      allow read: if true; // Public read access for debugging
-      allow write: if isAuthenticated();
+      allow read, write: if isAuthenticated() && isAdmin(request.auth.uid);
     }
 
-    // Root level files - for simple uploads during development
+    // Root level writes are admin-only in production
     match /{fileName} {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated();
-      allow delete: if isAuthenticated();
+      allow read, write, delete: if isAuthenticated() && isAdmin(request.auth.uid);
     }
 
-    // Debug uploads path - optimized for reliable ad uploads
-    // This path has proven most reliable for avoiding "cannot parse response" errors
+    // Debug uploads path - admin only
     match /debug_uploads/{fileName} {
-      allow read, write: if isAuthenticated();
-      // Additional permissive rules for better reliability
-      allow read, write: if request.auth != null;
+      allow read, write: if isAuthenticated() && isAdmin(request.auth.uid);
     }
     
     // Debug uploads with subdirectories for better organization
     match /debug_uploads/{category}/{fileName} {
-      allow read, write: if isAuthenticated();
+      allow read, write: if isAuthenticated() && isAdmin(request.auth.uid);
     }
 
     // Debug uploads with deeper subdirectories (e.g., events/userId/eventId/file.jpg)
     match /debug_uploads/{allPaths=**} {
-      allow read, write: if isAuthenticated();
+      allow read, write: if isAuthenticated() && isAdmin(request.auth.uid);
     }
 
     // Artwork images - artists can upload their own artwork
@@ -105,10 +111,9 @@ service firebase.storage {
       allow delete: if isAuthenticated() && (isDebugMode() || request.auth.uid == userId);
     }
 
-    // Very permissive artwork path for development
+    // Broad development path disabled for production safety
     match /artwork_images/{allPaths=**} {
-      allow read: if true; // Public read access for artwork images
-      allow write: if isAuthenticated(); // More permissive for development
+      allow read, write: if isAuthenticated() && isAdmin(request.auth.uid);
     }
 
     // Artwork path without 'images' suffix (legacy support)
@@ -118,10 +123,9 @@ service firebase.storage {
       allow delete: if isAuthenticated() && (isDebugMode() || request.auth.uid == userId);
     }
 
-    // Artwork path with subdirectories (legacy support)
+    // Broad development path disabled for production safety
     match /artwork/{allPaths=**} {
-      allow read: if true; // Public read access for all artwork
-      allow write: if isAuthenticated(); // More permissive for development
+      allow read, write: if isAuthenticated() && isAdmin(request.auth.uid);
     }
 
     // Artwork videos - artists can upload their own artwork videos
@@ -146,14 +150,9 @@ service firebase.storage {
       allow delete: if isAuthenticated() && (isDebugMode() || request.auth.uid == userId);
     }
 
-    // Very permissive artwork video path for development
+    // Broad development path disabled for production safety
     match /artwork_videos/{allPaths=**} {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated() &&
-        // Basic video validation even in development
-        (resource.contentType == null ||
-         resource.contentType.matches('video/*') ||
-         resource.contentType.matches('application/octet-stream'));
+      allow read, write: if isAuthenticated() && isAdmin(request.auth.uid);
     }
 
     // Artwork audio - artists can upload their own artwork audio files
@@ -178,14 +177,9 @@ service firebase.storage {
       allow delete: if isAuthenticated() && (isDebugMode() || request.auth.uid == userId);
     }
 
-    // Very permissive artwork audio path for development
+    // Broad development path disabled for production safety
     match /artwork_audio/{allPaths=**} {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated() &&
-        // Basic audio validation even in development
-        (resource.contentType == null ||
-         resource.contentType.matches('audio/*') ||
-         resource.contentType.matches('application/octet-stream'));
+      allow read, write: if isAuthenticated() && isAdmin(request.auth.uid);
     }
 
     // Written content files - for uploaded manuscripts and documents
@@ -242,37 +236,54 @@ service firebase.storage {
 
     // Legacy captures path - for backward compatibility
     match /captures/{fileName} {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated();
-      allow delete: if isAuthenticated();
+      allow read, write, delete: if isAuthenticated() && isAdmin(request.auth.uid);
     }
     
     // Post images for community feed
     match /post_images/{userId}/{fileName} {
       allow read: if isAuthenticated();
-      allow write: if isAuthenticated(); // More permissive for development
-      allow delete: if isAuthenticated() && (isDebugMode() || request.auth.uid == userId);
+      allow write: if isAuthenticated() && (
+        request.auth.uid == userId ||
+        isAdmin(request.auth.uid)
+      );
+      allow delete: if isAuthenticated() && (
+        isDebugMode() ||
+        request.auth.uid == userId ||
+        isAdmin(request.auth.uid)
+      );
     }
     
     // Post videos for community feed
     match /posts/{userId}/videos/{fileName} {
       allow read: if isAuthenticated();
-      allow write: if isAuthenticated(); // More permissive for development
-      allow delete: if isAuthenticated() && (isDebugMode() || request.auth.uid == userId);
+      allow write: if isAuthenticated() && (
+        request.auth.uid == userId ||
+        isAdmin(request.auth.uid)
+      );
+      allow delete: if isAuthenticated() && (
+        isDebugMode() ||
+        request.auth.uid == userId ||
+        isAdmin(request.auth.uid)
+      );
     }
     
     // Post audio for community feed
     match /posts/{userId}/audio/{fileName} {
       allow read: if isAuthenticated();
-      allow write: if isAuthenticated(); // More permissive for development
-      allow delete: if isAuthenticated() && (isDebugMode() || request.auth.uid == userId);
+      allow write: if isAuthenticated() && (
+        request.auth.uid == userId ||
+        isAdmin(request.auth.uid)
+      );
+      allow delete: if isAuthenticated() && (
+        isDebugMode() ||
+        request.auth.uid == userId ||
+        isAdmin(request.auth.uid)
+      );
     }
     
-    // More permissive posts path for development (videos and audio)
+    // Broad development path disabled for production safety
     match /posts/{allPaths=**} {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated(); // More permissive for development
-      allow delete: if isAuthenticated();
+      allow read, write, delete: if isAuthenticated() && isAdmin(request.auth.uid);
     }
     
     // Profile images
@@ -282,32 +293,24 @@ service firebase.storage {
       allow delete: if isAuthenticated() && (isDebugMode() || request.auth.uid == userId);
     }
 
-    // Enhanced Storage Service paths for profile images (very permissive for development)
+    // Legacy Enhanced Storage root path - admin only
     match /profile/{fileName} {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated(); // More permissive for development
-      allow delete: if isAuthenticated();
+      allow read, write, delete: if isAuthenticated() && isAdmin(request.auth.uid);
     }
 
     // Enhanced Storage Service paths for profile thumbnails
     match /profile/thumbnails/{fileName} {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated(); // More permissive for development
-      allow delete: if isAuthenticated();
+      allow read, write, delete: if isAuthenticated() && isAdmin(request.auth.uid);
     }
 
     // Enhanced Storage Service paths for artwork images (used for cover images)
     match /artwork/{fileName} {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated(); // More permissive for development
-      allow delete: if isAuthenticated();
+      allow read, write, delete: if isAuthenticated() && isAdmin(request.auth.uid);
     }
 
     // Enhanced Storage Service paths for artwork thumbnails
     match /artwork/thumbnails/{fileName} {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated(); // More permissive for development
-      allow delete: if isAuthenticated();
+      allow read, write, delete: if isAuthenticated() && isAdmin(request.auth.uid);
     }
 
     // Feedback images - for developer feedback system
@@ -364,18 +367,14 @@ service firebase.storage {
       allow read, write: if isAuthenticated() && isDebugMode();
     }
 
-    // Enhanced storage paths for simplified uploads
+    // Simplified dev upload paths are admin-only in production
     match /temp_uploads/{fileName} {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated();
-      allow delete: if isAuthenticated();
+      allow read, write, delete: if isAuthenticated() && isAdmin(request.auth.uid);
     }
 
-    // Simple uploads path for development and testing
+    // Simplified dev upload paths are admin-only in production
     match /uploads/{fileName} {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated();
-      allow delete: if isAuthenticated();
+      allow read, write, delete: if isAuthenticated() && isAdmin(request.auth.uid);
     }
 
     // Ad images - for advertisement uploads
@@ -421,30 +420,36 @@ service firebase.storage {
 
     // Artist approved ads - special category for artist-approved advertisements
     match /artist_approved_ads/{subpath=**} {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated();
-      allow delete: if isAuthenticated();
+      allow read, write, delete: if isAuthenticated() && isAdmin(request.auth.uid);
     }
 
-    // More permissive ad uploads path for development
+    // Broad development path disabled for production safety
     match /ads/{allPaths=**} {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated(); // More permissive for development
-      allow delete: if isAuthenticated();
+      allow read, write, delete: if isAuthenticated() && isAdmin(request.auth.uid);
     }
 
     // Chat images - for messaging system image uploads
     match /chat_images/{chatId}/{fileName} {
       allow read: if isAuthenticated();
-      allow write: if isAuthenticated(); // Chat participants can upload images
-      allow delete: if isAuthenticated();
+      allow write: if isAuthenticated();
+      allow delete: if isAuthenticated() && (
+        isAdmin(request.auth.uid) ||
+        resource.metadata == null ||
+        resource.metadata.uploaderId == request.auth.uid ||
+        resource.metadata.uploaderid == request.auth.uid
+      );
     }
 
     // Chat media - generic path for chat-related media
     match /chat_media/{chatId}/{fileName} {
       allow read: if isAuthenticated();
       allow write: if isAuthenticated();
-      allow delete: if isAuthenticated();
+      allow delete: if isAuthenticated() && (
+        isAdmin(request.auth.uid) ||
+        resource.metadata == null ||
+        resource.metadata.uploaderId == request.auth.uid ||
+        resource.metadata.uploaderid == request.auth.uid
+      );
     }
 
     // Debug mode bypass for testing

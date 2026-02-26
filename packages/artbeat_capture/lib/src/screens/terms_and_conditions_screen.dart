@@ -3,8 +3,33 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_capture/artbeat_capture.dart';
 
-class TermsAndConditionsScreen extends StatelessWidget {
-  const TermsAndConditionsScreen({super.key});
+class TermsAndConditionsScreen extends StatefulWidget {
+  const TermsAndConditionsScreen({super.key, this.showAcceptButton = false});
+
+  final bool showAcceptButton;
+
+  @override
+  State<TermsAndConditionsScreen> createState() => _TermsAndConditionsScreenState();
+}
+
+class _TermsAndConditionsScreenState extends State<TermsAndConditionsScreen> {
+  bool _isSaving = false;
+
+  Future<void> _acceptAndContinue() async {
+    if (_isSaving) return;
+
+    setState(() => _isSaving = true);
+    try {
+      await CaptureTermsService.markTermsAccepted();
+      if (mounted) {
+        Navigator.of(context).pop(true);
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,6 +86,20 @@ class TermsAndConditionsScreen extends StatelessWidget {
                     ),
                   ),
                 ),
+                if (widget.showAcceptButton)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(18, 0, 18, 18),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: HudButton(
+                        label: _isSaving
+                            ? 'Saving...'
+                            : 'I Agree - Continue',
+                        icon: Icons.check_circle_outline,
+                        onTap: _isSaving ? () {} : _acceptAndContinue,
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
@@ -70,18 +109,26 @@ class TermsAndConditionsScreen extends StatelessWidget {
   }
 }
 
-// Replace this with your real terms text or load from Markdown/HTML
 const String _termsText = '''
-Welcome to Artbeat!
+Capture & Community Rules
 
-By using this app, you agree to abide by the following terms and conditions.
+Before submitting a capture, confirm all of the following:
 
-1. All submitted captures must follow community guidelines.
-2. Offensive or harmful content will be removed and may result in suspension.
-3. Your submissions may be featured in public feeds.
-4. Do not upload content you do not own or have rights to.
+1. Safety First
+- Do not enter restricted, dangerous, or private areas.
+- Follow local laws and posted signage.
 
-...
+2. Rights & Permissions
+- Only upload content you own or have permission to share.
+- Respect artist copyrights, trademarks, and property rights.
 
-Thank you for being part of the Artbeat community.
+3. Content Standards
+- No harassment, hateful content, threats, or illegal activity.
+- No explicit sexual content or exploitative imagery.
+- Submissions can be removed for policy violations.
+
+4. Public Visibility
+- Approved captures may appear in public feeds and discovery surfaces.
+
+By continuing, you confirm you understand and agree to these rules.
 ''';

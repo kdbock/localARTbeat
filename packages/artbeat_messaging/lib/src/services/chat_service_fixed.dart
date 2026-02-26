@@ -102,14 +102,40 @@ class ChatService {
         });
   }
 
+  String? _extractStoragePathFromDownloadUrl(String url) {
+    try {
+      final uri = Uri.parse(url);
+      final objectPart = uri.pathSegments.isNotEmpty ? uri.pathSegments.last : '';
+      if (objectPart.isEmpty) return null;
+      return Uri.decodeComponent(objectPart);
+    } catch (_) {
+      return null;
+    }
+  }
+
   Future<String> uploadChatImage(File imageFile, String chatId) async {
+    final userId = auth.currentUser?.uid;
+    if (userId == null) {
+      throw Exception('User not authenticated');
+    }
+    final fileName =
+        '${DateTime.now().millisecondsSinceEpoch}_${imageFile.path.split(Platform.pathSeparator).last.replaceAll(' ', '_')}';
     final ref = storage
         .ref()
         .child('chat_images')
         .child(chatId)
-        .child('${DateTime.now().millisecondsSinceEpoch}.jpg');
+        .child(fileName);
 
-    final uploadTask = ref.putFile(imageFile);
+    final uploadTask = ref.putFile(
+      imageFile,
+      SettableMetadata(
+        contentType: 'image/jpeg',
+        customMetadata: {
+          'uploaderId': userId,
+          'chatId': chatId,
+        },
+      ),
+    );
     final snapshot = await uploadTask;
     return snapshot.ref.getDownloadURL();
   }
@@ -121,10 +147,16 @@ class ChatService {
     String? imageUrl,
     String? replyToMessageId,
   }) async {
+    final mediaStoragePath = imageUrl != null
+        ? _extractStoragePathFromDownloadUrl(imageUrl)
+        : null;
     await firestore.collection('chats').doc(chatId).collection('messages').add({
       'senderId': senderId,
       'content': content,
       'imageUrl': imageUrl,
+      if (mediaStoragePath != null) 'storagePath': mediaStoragePath,
+      if (mediaStoragePath != null) 'uploaderId': senderId,
+      if (mediaStoragePath != null) 'chatId': chatId,
       'timestamp': FieldValue.serverTimestamp(),
       'replyToMessageId': replyToMessageId,
       'isRead': false,

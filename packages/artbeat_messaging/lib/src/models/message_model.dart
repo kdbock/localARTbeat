@@ -17,6 +17,9 @@ class MessageModel {
   final String? originalMessage;
   final bool isForwarded;
   final String? forwardedFromId;
+  final String? storagePath;
+  final String? uploaderId;
+  final String? chatId;
 
   MessageModel({
     required this.id,
@@ -33,6 +36,9 @@ class MessageModel {
     this.originalMessage,
     this.isForwarded = false,
     this.forwardedFromId,
+    this.storagePath,
+    this.uploaderId,
+    this.chatId,
   });
 
   factory MessageModel.fromMap(Map<String, dynamic> map) {
@@ -58,6 +64,9 @@ class MessageModel {
       originalMessage: map['originalMessage'] as String?,
       isForwarded: (map['isForwarded'] as bool?) ?? false,
       forwardedFromId: map['forwardedFromId'] as String?,
+      storagePath: map['storagePath'] as String?,
+      uploaderId: map['uploaderId'] as String?,
+      chatId: map['chatId'] as String?,
     );
   }
 
@@ -87,11 +96,14 @@ class MessageModel {
       originalMessage: data['originalMessage'] as String?,
       isForwarded: (data['isForwarded'] as bool?) ?? false,
       forwardedFromId: data['forwardedFromId'] as String?,
+      storagePath: data['storagePath'] as String?,
+      uploaderId: data['uploaderId'] as String?,
+      chatId: data['chatId'] as String?,
     );
   }
 
   Map<String, dynamic> toMap() {
-    return {
+    final data = <String, dynamic>{
       'id': id,
       'senderId': senderId,
       'content': content,
@@ -107,5 +119,11 @@ class MessageModel {
       'isForwarded': isForwarded,
       'forwardedFromId': forwardedFromId,
     };
+
+    if (storagePath != null) data['storagePath'] = storagePath;
+    if (uploaderId != null) data['uploaderId'] = uploaderId;
+    if (chatId != null) data['chatId'] = chatId;
+
+    return data;
   }
 }

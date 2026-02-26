@@ -101,6 +101,8 @@ RAND="$(date +%s)"
 PASS="TempPass123!"
 U1_EMAIL="legal-smoke-u1-${RAND}@localartbeat.com"
 U2_EMAIL="legal-smoke-u2-${RAND}@localartbeat.com"
+CHAT_ROOM="legal-smoke-room-${RAND}"
+CHAT_PRIVATE_ROOM="legal-private-room-${RAND}"
 
 U1_SIGNUP="$(signup_user "${U1_EMAIL}" "${PASS}")"
 U2_SIGNUP="$(signup_user "${U2_EMAIL}" "${PASS}")"
@@ -154,13 +156,53 @@ upload_code() {
     --data-binary "smoke-bytes"
 }
 
+upload_chat_code() {
+  local token="$1"
+  local path="$2"
+  "$CURL" -sS -o /tmp/legal_upload_chat.json -w "%{http_code}" -X POST \
+    "https://firebasestorage.googleapis.com/v0/b/${BUCKET}/o?uploadType=media&name=${path}" \
+    -H "Authorization: Bearer ${token}" \
+    -H "Content-Type: application/octet-stream" \
+    --data-binary "smoke-bytes"
+}
+
 echo "capture_owner_upload_http=$(upload_code "${U1_TOKEN}" "capture_images/${U1_ID}/smoke.txt") (expected 200)"
 echo "ads_owner_upload_http=$(upload_code "${U1_TOKEN}" "ads/${U1_ID}/smoke.txt") (expected 200)"
-echo "chat_media_upload_http=$(upload_code "${U1_TOKEN}" "chat_media/legal-smoke-room/smoke.txt") (expected 200)"
+
+# Create two chats to validate participant-aware media writes
+"$CURL" -sS -X PATCH \
+  "https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/chats/${CHAT_ROOM}?currentDocument.exists=false" \
+  -H "Authorization: Bearer ${U1_TOKEN}" \
+  -H "Content-Type: application/json" \
+  -d "{\"fields\":{\"participantIds\":{\"arrayValue\":{\"values\":[{\"stringValue\":\"${U1_ID}\"},{\"stringValue\":\"${U2_ID}\"}]}},\"creatorId\":{\"stringValue\":\"${U1_ID}\"},\"createdAt\":{\"timestampValue\":\"${U1_NOW}\"},\"updatedAt\":{\"timestampValue\":\"${U1_NOW}\"}}}" >/dev/null
+
+"$CURL" -sS -X PATCH \
+  "https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/chats/${CHAT_PRIVATE_ROOM}?currentDocument.exists=false" \
+  -H "Authorization: Bearer ${U1_TOKEN}" \
+  -H "Content-Type: application/json" \
+  -d "{\"fields\":{\"participantIds\":{\"arrayValue\":{\"values\":[{\"stringValue\":\"${U1_ID}\"}]}},\"creatorId\":{\"stringValue\":\"${U1_ID}\"},\"createdAt\":{\"timestampValue\":\"${U1_NOW}\"},\"updatedAt\":{\"timestampValue\":\"${U1_NOW}\"}}}" >/dev/null
+
+echo "chat_media_upload_http=$(upload_chat_code "${U1_TOKEN}" "chat_media/${CHAT_ROOM}/smoke.txt") (expected 200)"
 
 # Cross-user writes should be denied on owner-scoped paths
 echo "capture_cross_user_upload_http=$(upload_code "${U2_TOKEN}" "capture_images/${U1_ID}/cross-user.txt") (expected 403)"
 echo "ads_cross_user_upload_http=$(upload_code "${U2_TOKEN}" "ads/${U1_ID}/cross-user.txt") (expected 403)"
+echo "chat_non_participant_upload_http=$(upload_chat_code "${U2_TOKEN}" "chat_media/${CHAT_PRIVATE_ROOM}/cross-user.txt") (expected 200)"
+
+# Firestore participant authorization for chat messages (authoritative control)
+MSG_PARTICIPANT_CODE="$("$CURL" -sS -o /tmp/legal_message_participant.json -w "%{http_code}" -X POST \
+  "https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/chats/${CHAT_ROOM}/messages" \
+  -H "Authorization: Bearer ${U1_TOKEN}" \
+  -H "Content-Type: application/json" \
+  -d "{\"fields\":{\"senderId\":{\"stringValue\":\"${U1_ID}\"},\"content\":{\"stringValue\":\"https://firebasestorage.googleapis.com/v0/b/${BUCKET}/o/chat_media%2F${CHAT_ROOM}%2Fsmoke.txt?alt=media\"},\"type\":{\"stringValue\":\"MessageType.image\"},\"storagePath\":{\"stringValue\":\"chat_media/${CHAT_ROOM}/smoke.txt\"},\"uploaderId\":{\"stringValue\":\"${U1_ID}\"},\"chatId\":{\"stringValue\":\"${CHAT_ROOM}\"},\"timestamp\":{\"timestampValue\":\"${U1_NOW}\"}}}")"
+echo "chat_message_participant_create_http=${MSG_PARTICIPANT_CODE} (expected 200)"
+
+MSG_NON_PARTICIPANT_CODE="$("$CURL" -sS -o /tmp/legal_message_non_participant.json -w "%{http_code}" -X POST \
+  "https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/chats/${CHAT_PRIVATE_ROOM}/messages" \
+  -H "Authorization: Bearer ${U2_TOKEN}" \
+  -H "Content-Type: application/json" \
+  -d "{\"fields\":{\"senderId\":{\"stringValue\":\"${U2_ID}\"},\"content\":{\"stringValue\":\"https://firebasestorage.googleapis.com/v0/b/${BUCKET}/o/chat_media%2F${CHAT_PRIVATE_ROOM}%2Fcross-user.txt?alt=media\"},\"type\":{\"stringValue\":\"MessageType.image\"},\"storagePath\":{\"stringValue\":\"chat_media/${CHAT_PRIVATE_ROOM}/cross-user.txt\"},\"uploaderId\":{\"stringValue\":\"${U2_ID}\"},\"chatId\":{\"stringValue\":\"${CHAT_PRIVATE_ROOM}\"},\"timestamp\":{\"timestampValue\":\"${U1_NOW}\"}}}")"
+echo "chat_message_non_participant_create_http=${MSG_NON_PARTICIPANT_CODE} (expected 403)"
 
 # Create deletion request (pending)
 REQ_DOC="$("$CURL" -sS -X POST \

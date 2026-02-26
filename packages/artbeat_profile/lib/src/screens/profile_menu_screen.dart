@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:artbeat_auth/artbeat_auth.dart'; // Assuming for logout/auth state
 import 'package:provider/provider.dart';
-import 'package:artbeat_capture/src/screens/terms_and_conditions_screen.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import '../widgets/section_header.dart';
 import '../widgets/user_avatar_badge.dart';
@@ -168,13 +167,7 @@ class _ProfileMenuContent extends StatelessWidget {
             context,
             icon: Icons.policy_outlined,
             label: 'Privacy & Terms',
-            onTap: () {
-              Navigator.of(context).push<void>(
-                MaterialPageRoute<void>(
-                  builder: (_) => const TermsAndConditionsScreen(),
-                ),
-              );
-            },
+            onTap: () => _openLegalCenter(context),
           ),
           const SizedBox(height: 16),
           Divider(color: Colors.white.withValues(alpha: 0.12)),
@@ -245,6 +238,81 @@ class _ProfileMenuContent extends StatelessWidget {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  void _openLegalCenter(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: const Color(0xFF101522),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 10),
+            Container(
+              width: 42,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.white24,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.gavel_rounded, color: Colors.white),
+              title: const Text(
+                'Terms of Service',
+                style: TextStyle(color: Colors.white),
+              ),
+              onTap: () {
+                Navigator.of(sheetContext).pop();
+                Navigator.of(context).push<void>(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const TermsOfServiceScreen(),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.verified_user_outlined, color: Colors.white),
+              title: const Text(
+                'Legal Center',
+                style: TextStyle(color: Colors.white),
+              ),
+              onTap: () {
+                Navigator.of(sheetContext).pop();
+                Navigator.of(context).push<void>(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const LegalCenterScreen(),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(
+                Icons.privacy_tip_outlined,
+                color: Colors.white,
+              ),
+              title: const Text(
+                'Privacy Policy',
+                style: TextStyle(color: Colors.white),
+              ),
+              onTap: () {
+                Navigator.of(sheetContext).pop();
+                Navigator.of(context).push<void>(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const PrivacyPolicyScreen(),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 8),
+          ],
         ),
       ),
     );

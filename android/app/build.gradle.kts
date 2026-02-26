@@ -63,8 +63,8 @@ android {
         applicationId = "com.wordnerd.artbeat"
         minSdk = 24  // Android 7.0 (2016) - Explicit minimum for Firebase compatibility
         targetSdk = 36  // Updated to match compileSdk
-        versionCode = 105
-        versionName = "2.6.5"
+        versionCode = 107
+        versionName = "2.6.7"
         
         // Enable multidex for large app
         multiDexEnabled = true

@@ -3,6 +3,7 @@ const {
   onCall,
   HttpsError,
 } = require("firebase-functions/v2/https");
+const functions = require("firebase-functions");
 const {logger} = require("firebase-functions");
 const {
   onDocumentCreated,
@@ -5090,3 +5091,349 @@ exports.getAdminFinancialAnalytics = functions.https.onRequest((request, respons
     }
   });
 });
+
+async function isAdminUser(uid) {
+  if (!uid) return false;
+  const userDoc = await admin.firestore().collection("users").doc(uid).get();
+  if (!userDoc.exists) return false;
+  const data = userDoc.data() || {};
+  return data.userType === "admin";
+}
+
+async function deleteWhereFieldEquals(
+  collectionName,
+  fieldName,
+  value,
+  summary
+) {
+  let deleted = 0;
+
+  while (true) {
+    const snapshot = await admin
+      .firestore()
+      .collection(collectionName)
+      .where(fieldName, "==", value)
+      .limit(200)
+      .get();
+
+    if (snapshot.empty) break;
+
+    const batch = admin.firestore().batch();
+    snapshot.docs.forEach((doc) => {
+      batch.delete(doc.ref);
+      deleted += 1;
+    });
+    await batch.commit();
+  }
+
+  if (deleted > 0) {
+    summary.deletedCollections[collectionName] =
+      (summary.deletedCollections[collectionName] || 0) + deleted;
+  }
+}
+
+async function deleteDocAndSubcollections(path, summary) {
+  const docRef = admin.firestore().doc(path);
+  const snapshot = await docRef.get();
+  if (!snapshot.exists) return;
+
+  await admin.firestore().recursiveDelete(docRef);
+  summary.deletedDocuments.push(path);
+}
+
+async function deleteStoragePrefix(prefix, summary) {
+  try {
+    await admin.storage().bucket().deleteFiles({prefix});
+    summary.deletedStoragePrefixes.push(prefix);
+  } catch (error) {
+    logger.warn("Storage deletion skipped/failed", {prefix, error});
+    summary.storageErrors.push({prefix, error: String(error)});
+  }
+}
+
+function extractStoragePathFromDownloadUrl(url) {
+  try {
+    const parsed = new URL(String(url));
+    const parts = parsed.pathname.split("/");
+    const objectToken = parts[parts.length - 1] || "";
+    if (!objectToken) return null;
+    const decoded = decodeURIComponent(objectToken);
+    return decoded || null;
+  } catch (_error) {
+    return null;
+  }
+}
+
+async function cleanupUserOwnedChatMedia(userId, summary) {
+  const messagesSnap = await admin.firestore()
+      .collectionGroup("messages")
+      .where("senderId", "==", userId)
+      .get();
+
+  let updatedMessages = 0;
+  let deletedChatObjects = 0;
+
+  for (const messageDoc of messagesSnap.docs) {
+    const data = messageDoc.data() || {};
+    const candidatePaths = new Set();
+
+    const storagePath = data.storagePath || data?.metadata?.storagePath;
+    if (typeof storagePath === "string") {
+      candidatePaths.add(storagePath);
+    }
+
+    for (const urlField of ["imageUrl", "fileUrl", "content"]) {
+      const value = data[urlField];
+      if (typeof value === "string" &&
+          value.includes("firebasestorage.googleapis.com")) {
+        const parsedPath = extractStoragePathFromDownloadUrl(value);
+        if (parsedPath) candidatePaths.add(parsedPath);
+      }
+    }
+
+    for (const objectPath of candidatePaths) {
+      if (!objectPath.startsWith("chat_images/") &&
+          !objectPath.startsWith("chat_media/")) {
+        continue;
+      }
+      try {
+        await admin.storage().bucket().file(objectPath).delete();
+        deletedChatObjects += 1;
+      } catch (error) {
+        logger.warn("Chat media deletion skipped/failed", {objectPath, error});
+        summary.storageErrors.push({prefix: objectPath, error: String(error)});
+      }
+    }
+
+    const updatePayload = {
+      content: "[media removed - account deleted]",
+      redactedByDeletionPipeline: true,
+      redactedAt: admin.firestore.FieldValue.serverTimestamp(),
+      senderDeleted: true,
+      senderDeletedAt: admin.firestore.FieldValue.serverTimestamp(),
+      senderDeletedUserId: userId,
+      senderId: userId,
+      storagePath: admin.firestore.FieldValue.delete(),
+      uploaderId: admin.firestore.FieldValue.delete(),
+      imageUrl: admin.firestore.FieldValue.delete(),
+      fileUrl: admin.firestore.FieldValue.delete(),
+    };
+
+    if (data.metadata && typeof data.metadata === "object") {
+      updatePayload.metadata = {
+        ...data.metadata,
+        storagePath: null,
+        uploaderId: null,
+        redactedByDeletionPipeline: true,
+      };
+    }
+
+    await messageDoc.ref.set(updatePayload, {merge: true});
+    updatedMessages += 1;
+  }
+
+  summary.deletedCollections.chatMessagesRedacted = updatedMessages;
+  summary.deletedStorageObjects = (summary.deletedStorageObjects || 0) + deletedChatObjects;
+}
+
+async function executeUserDeletionPipeline(userId, requestId) {
+  const summary = {
+    userId,
+    requestId,
+    deletedDocuments: [],
+    deletedCollections: {},
+    deletedStoragePrefixes: [],
+    retainedCollections: [
+      "payments",
+      "subscriptions",
+      "payouts",
+      "earnings_transactions",
+      "refundRequests",
+      "gift_purchases",
+      "artwork_sales",
+      "commission_requests",
+      "directCommissions",
+      "direct_commissions",
+    ],
+    storageErrors: [],
+  };
+
+  const rootDocs = [
+    `users/${userId}`,
+    `userSettings/${userId}`,
+    `notificationSettings/${userId}`,
+    `privacySettings/${userId}`,
+    `securitySettings/${userId}`,
+    `accountSettings/${userId}`,
+    `followers/${userId}`,
+    `following/${userId}`,
+  ];
+
+  for (const path of rootDocs) {
+    await deleteDocAndSubcollections(path, summary);
+  }
+
+  const userIdDeletions = [
+    ["captures", "userId"],
+    ["posts", "userId"],
+    ["comments", "userId"],
+    ["likes", "userId"],
+    ["notifications", "userId"],
+    ["socialActivities", "userId"],
+    ["artWalkProgress", "userId"],
+    ["dataRequests", "userId"],
+    ["boosts", "senderId"],
+    ["boosts", "recipientId"],
+    ["artistProfileViews", "viewerId"],
+    ["artistProfileViews", "artistId"],
+    ["localAds", "userId"],
+  ];
+
+  for (const [collectionName, fieldName] of userIdDeletions) {
+    await deleteWhereFieldEquals(collectionName, fieldName, userId, summary);
+  }
+
+  // Cross-parent follow edge cleanup is best-effort because legacy edge docs
+  // are not guaranteed to have a queryable shared schema.
+  // Primary follower/following roots are still deleted above.
+
+  const storagePrefixes = [
+    `users/${userId}/`,
+    `profile_images/${userId}/`,
+    `capture_images/${userId}/`,
+    `artwork_images/${userId}/`,
+    `artwork_videos/${userId}/`,
+    `artwork_audio/${userId}/`,
+    `written_content/${userId}/`,
+    `artist_images/${userId}/`,
+    `post_images/${userId}/`,
+    `posts/${userId}/`,
+    `events/${userId}/`,
+    `public_art_images/${userId}/`,
+    `art_walk_images/${userId}/`,
+    `ads/${userId}/`,
+    `artist_ads/${userId}/`,
+    `gallery_ads/${userId}/`,
+    `user_ads/${userId}/`,
+    `feedback_images/${userId}/`,
+  ];
+
+  for (const prefix of storagePrefixes) {
+    await deleteStoragePrefix(prefix, summary);
+  }
+
+  await cleanupUserOwnedChatMedia(userId, summary);
+
+  try {
+    await admin.auth().deleteUser(userId);
+    summary.authDeleted = true;
+  } catch (error) {
+    if (String(error).includes("user-not-found")) {
+      summary.authDeleted = false;
+      summary.authAlreadyMissing = true;
+    } else {
+      throw error;
+    }
+  }
+
+  return summary;
+}
+
+exports.processDataDeletionRequest = onCall(
+  {maxInstances: 2, timeoutSeconds: 540, memory: "512MiB"},
+  async (request) => {
+    if (!request.auth?.uid) {
+      throw new HttpsError("unauthenticated", "Authentication required.");
+    }
+    const callerUid = request.auth.uid;
+    if (!(await isAdminUser(callerUid))) {
+      throw new HttpsError("permission-denied", "Admin access required.");
+    }
+
+    const requestId = String(request.data?.requestId || "").trim();
+    const userIdArg = String(request.data?.userId || "").trim();
+    const reviewNotes = String(request.data?.reviewNotes || "").trim();
+
+    if (!requestId && !userIdArg) {
+      throw new HttpsError(
+        "invalid-argument",
+        "requestId or userId is required."
+      );
+    }
+
+    let requestRef = null;
+    let requestSnap = null;
+    let requestData = {};
+
+    if (requestId) {
+      requestRef = admin.firestore().collection("dataRequests").doc(requestId);
+      requestSnap = await requestRef.get();
+      if (!requestSnap.exists) {
+        throw new HttpsError("not-found", "Data request not found.");
+      }
+      requestData = requestSnap.data() || {};
+      const requestType = String(requestData.requestType || requestData.type || "");
+      if (requestType !== "deletion") {
+        throw new HttpsError(
+          "failed-precondition",
+          "Only deletion requests can run this pipeline."
+        );
+      }
+    }
+
+    const userId = String(requestData.userId || userIdArg).trim();
+    if (!userId) {
+      throw new HttpsError("invalid-argument", "Missing userId.");
+    }
+
+    if (requestRef) {
+      await requestRef.set(
+        {
+          status: "in_review",
+          acknowledgedAt:
+            requestData.acknowledgedAt ||
+            admin.firestore.FieldValue.serverTimestamp(),
+          reviewedBy: callerUid,
+          reviewNotes: reviewNotes || requestData.reviewNotes || null,
+          processingStartedAt: admin.firestore.FieldValue.serverTimestamp(),
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        },
+        {merge: true}
+      );
+    }
+
+    const summary = await executeUserDeletionPipeline(userId, requestId || null);
+
+    if (requestRef) {
+      await requestRef.set(
+        {
+          status: "fulfilled",
+          fulfilledAt: admin.firestore.FieldValue.serverTimestamp(),
+          processingCompletedAt: admin.firestore.FieldValue.serverTimestamp(),
+          reviewedBy: callerUid,
+          reviewNotes: reviewNotes || null,
+          deletionSummary: summary,
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        },
+        {merge: true}
+      );
+    }
+
+    await admin.firestore().collection("dataRequestAudit").add({
+      requestId: requestId || null,
+      userId,
+      action: "deletion_pipeline_executed",
+      performedBy: callerUid,
+      reviewNotes: reviewNotes || null,
+      summary,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    return {
+      ok: true,
+      requestId: requestId || null,
+      userId,
+      summary,
+    };
+  }
+);

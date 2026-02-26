@@ -535,7 +535,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
   }
 
   Future<void> _contactSupport() async {
-    const email = 'support@artbeat.com';
+    const email = 'support@localartbeat.com';
     const subject = 'ARTbeat Support Request';
     final uri = Uri(scheme: 'mailto', path: email, query: 'subject=$subject');
 

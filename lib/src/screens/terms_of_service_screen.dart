@@ -1,3 +1,4 @@
+import 'package:artbeat_core/artbeat_core.dart' show LegalConfig;
 import 'package:flutter/material.dart';
 
 /// Terms of Service Screen
@@ -23,11 +24,11 @@ class TermsOfServiceScreen extends StatelessWidget {
           ),
           SizedBox(height: 8),
           Text(
-            'Effective Date: September 1, 2025',
+            'Effective Date: ${LegalConfig.effectiveDate}',
             style: TextStyle(fontStyle: FontStyle.italic),
           ),
           Text(
-            'Last Updated: September 1, 2025',
+            'Last Updated: ${LegalConfig.lastUpdatedDate}',
             style: TextStyle(fontStyle: FontStyle.italic),
           ),
           SizedBox(height: 24),
@@ -65,7 +66,7 @@ class TermsOfServiceScreen extends StatelessWidget {
           _TermsSection(
             title: '6. Payments & Subscriptions',
             content:
-                'Payments are processed via Stripe.\n\nSubscription tiers, ads, events, and in-app purchases are billed in local currency where supported.\n\nRefunds are governed by event- or ad-specific refund policies.\n\nUsers must provide accurate billing information; fraudulent activity may result in termination.',
+                'Payments are processed via Stripe.\n\nSubscription tiers, ads, events, and in-app purchases are billed in local currency where supported.\n\nAll purchases are final and non-refundable, except where refunds are required by law or platform store policy.\n\nUsers must provide accurate billing information; fraudulent activity may result in termination.',
           ),
 
           _TermsSection(
@@ -101,7 +102,7 @@ class TermsOfServiceScreen extends StatelessWidget {
           _TermsSection(
             title: '12. Moderation & Enforcement',
             content:
-                'ARTbeat reserves the right to remove content, suspend accounts, or ban users at its discretion.\n\nUsers may appeal moderation actions by contacting support@localartbeat.app.\n\nRepeated violations may result in permanent account termination.',
+                'ARTbeat reserves the right to remove content, suspend accounts, or ban users at its discretion.\n\nUsers may appeal moderation actions by contacting ${LegalConfig.supportEmail}.\n\nRepeated violations may result in permanent account termination.',
           ),
 
           _TermsSection(
@@ -137,7 +138,7 @@ class TermsOfServiceScreen extends StatelessWidget {
           _TermsSection(
             title: '18. Governing Law & Dispute Resolution',
             content:
-                'For US users: governed by the laws of North Carolina, United States.\n\nFor international users: governed by applicable mandatory local law, otherwise North Carolina law applies.\n\nDisputes shall be resolved through binding arbitration in the United States, unless prohibited by law.',
+                'For US users: governed by the laws of ${LegalConfig.governingState}, ${LegalConfig.governingCountry}.\n\nFor international users: governed by applicable mandatory local law, otherwise ${LegalConfig.governingState} law applies.\n\nDisputes shall be resolved through binding arbitration in the United States, unless prohibited by law.\n\nTO THE MAXIMUM EXTENT PERMITTED BY LAW, YOU AND ARTbeat AGREE TO BRING CLAIMS ONLY IN AN INDIVIDUAL CAPACITY AND NOT AS A PLAINTIFF OR CLASS MEMBER IN ANY PURPORTED CLASS OR REPRESENTATIVE ACTION.',
           ),
 
           _TermsSection(
@@ -149,7 +150,7 @@ class TermsOfServiceScreen extends StatelessWidget {
           _TermsSection(
             title: '20. Contact',
             content:
-                'Questions or complaints may be directed to:\nARTbeat Support\nPO BOX 232 Kinston NC 28502\nsupport@localartbeat.app',
+                'Questions or complaints may be directed to:\n${LegalConfig.companyName}\n${LegalConfig.mailingAddress}\n${LegalConfig.supportEmail}',
           ),
 
           SizedBox(height: 32),

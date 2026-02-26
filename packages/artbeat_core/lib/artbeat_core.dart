@@ -34,6 +34,7 @@ export 'shared_widgets.dart';
 
 // Export Core Services
 export 'src/services/config_service.dart' show ConfigService;
+export 'src/config/legal_config.dart' show LegalConfig;
 export 'src/services/user_service.dart' show UserService;
 export 'src/services/connectivity_service.dart' show ConnectivityService;
 export 'src/services/subscription_service.dart' show SubscriptionService;
@@ -61,6 +62,7 @@ export 'src/services/in_app_ad_service.dart' show InAppAdService;
 export 'src/services/notification_service.dart'
     show NotificationService, NotificationType;
 export 'src/services/feedback_service.dart' show FeedbackService;
+export 'src/services/legal_consent_service.dart' show LegalConsentService;
 export 'src/services/maps_diagnostic_service.dart' show MapsDiagnosticService;
 export 'src/services/image_management_service.dart' show ImageManagementService;
 export 'src/services/onboarding_service.dart' show OnboardingService;
@@ -228,6 +230,7 @@ export 'src/screens/chapters/chapter_landing_screen.dart'
     show ChapterLandingScreen;
 export 'src/screens/terms_of_service_screen.dart' show TermsOfServiceScreen;
 export 'src/screens/privacy_policy_screen.dart' show PrivacyPolicyScreen;
+export 'src/screens/legal_center_screen.dart' show LegalCenterScreen;
 
 // Export Artist Onboarding Screens
 export 'src/screens/artist_onboarding/artist_onboarding_screens.dart';

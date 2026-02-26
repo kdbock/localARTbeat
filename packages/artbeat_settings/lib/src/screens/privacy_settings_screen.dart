@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:artbeat_core/artbeat_core.dart' show UserService;
+import '../services/integrated_settings_service.dart';
 import '../widgets/settings_category_header.dart';
 import '../widgets/settings_section_card.dart';
 import '../widgets/settings_toggle_row.dart';
@@ -17,11 +19,20 @@ class PrivacySettingsScreen extends StatefulWidget {
 class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
   final _userService = UserService();
   final _auth = FirebaseAuth.instance;
+  final _settingsService = IntegratedSettingsService();
 
   bool isProfilePrivate = false;
   bool allowDataUsage = true;
   bool personalizedContent = true;
   bool _isDeleting = false;
+  bool _isRequestingDownload = false;
+  bool _isRequestingDeletion = false;
+
+  @override
+  void dispose() {
+    _settingsService.dispose();
+    super.dispose();
+  }
 
   Future<void> _showDeleteAccountDialog() async {
     final shouldDelete = await showDialog<bool>(
@@ -109,6 +120,40 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
     );
   }
 
+  Future<void> _requestDataDownload() async {
+    if (_isRequestingDownload) return;
+    setState(() => _isRequestingDownload = true);
+    try {
+      await _settingsService.requestDataDownload();
+      if (!mounted) return;
+      _showMessage(
+        'Data export request submitted. We will acknowledge within 72 hours.',
+      );
+    } catch (e) {
+      if (!mounted) return;
+      _showMessage('Unable to submit data export request: $e', isError: true);
+    } finally {
+      if (mounted) setState(() => _isRequestingDownload = false);
+    }
+  }
+
+  Future<void> _requestDataDeletion() async {
+    if (_isRequestingDeletion) return;
+    setState(() => _isRequestingDeletion = true);
+    try {
+      await _settingsService.requestDataDeletion();
+      if (!mounted) return;
+      _showMessage(
+        'Data deletion request submitted. We will acknowledge within 72 hours.',
+      );
+    } catch (e) {
+      if (!mounted) return;
+      _showMessage('Unable to submit data deletion request: $e', isError: true);
+    } finally {
+      if (mounted) setState(() => _isRequestingDeletion = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -191,6 +236,54 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
                                 : _showDeleteAccountDialog,
                           ),
                         ),
+
+                        const SettingsCategoryHeader(title: 'Data Rights'),
+
+                        SettingsSectionCard(
+                          child: Column(
+                            children: [
+                              SettingsListItem(
+                                icon: Icons.download_rounded,
+                                title: _isRequestingDownload
+                                    ? 'Submitting Data Export...'
+                                    : 'Request Data Export',
+                                subtitle:
+                                    'Receive a copy of your account data.',
+                                onTap: _isRequestingDownload
+                                    ? null
+                                    : _requestDataDownload,
+                              ),
+                              SettingsListItem(
+                                icon: Icons.delete_outline_rounded,
+                                title: _isRequestingDeletion
+                                    ? 'Submitting Data Deletion...'
+                                    : 'Request Data Deletion',
+                                subtitle:
+                                    'Submit a legal request to delete retained personal data.',
+                                destructive: true,
+                                onTap: _isRequestingDeletion
+                                    ? null
+                                    : _requestDataDeletion,
+                              ),
+                              const Divider(height: 1),
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    'Recent Requests',
+                                    style: Theme.of(context).textTheme.titleSmall
+                                        ?.copyWith(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                  ),
+                                ),
+                              ),
+                              _buildRecentDataRequests(),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -200,6 +293,76 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildRecentDataRequests() {
+    final userId = _auth.currentUser?.uid;
+    if (userId == null) {
+      return const ListTile(
+        title: Text('Sign in to view request status'),
+      );
+    }
+
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collection('dataRequests')
+          .where('userId', isEqualTo: userId)
+          .limit(25)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Padding(
+            padding: EdgeInsets.all(12),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        final docs = (snapshot.data?.docs ?? []).toList()
+          ..sort((a, b) {
+            final aTs = a.data()['requestedAt'];
+            final bTs = b.data()['requestedAt'];
+            final aMs = aTs is Timestamp ? aTs.millisecondsSinceEpoch : 0;
+            final bMs = bTs is Timestamp ? bTs.millisecondsSinceEpoch : 0;
+            return bMs.compareTo(aMs);
+          });
+        if (docs.isEmpty) {
+          return const ListTile(
+            title: Text('No requests submitted yet'),
+            subtitle: Text('Requests appear here once submitted.'),
+          );
+        }
+
+        return Column(
+          children: docs.take(5).map((doc) {
+            final data = doc.data();
+            final type = (data['requestType'] ?? data['type'] ?? 'request')
+                .toString();
+            final status = (data['status'] ?? 'pending').toString();
+            final requestedAt = data['requestedAt'];
+            final requestedAtLabel = requestedAt is Timestamp
+                ? requestedAt.toDate().toLocal().toString()
+                : 'Processing timestamp pending';
+
+            return ListTile(
+              leading: Icon(
+                type == 'download'
+                    ? Icons.download_rounded
+                    : Icons.delete_outline_rounded,
+                color: Colors.white70,
+              ),
+              title: Text(
+                type == 'download' ? 'Data Export Request' : 'Data Deletion Request',
+                style: const TextStyle(color: Colors.white),
+              ),
+              subtitle: Text(
+                'Status: $status\nRequested: $requestedAtLabel',
+                style: const TextStyle(color: Colors.white70),
+              ),
+            );
+          }).toList(),
+        );
+      },
     );
   }
 }

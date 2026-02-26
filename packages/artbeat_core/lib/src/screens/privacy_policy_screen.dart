@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../config/legal_config.dart';
 
 /// Privacy Policy Screen
 class PrivacyPolicyScreen extends StatelessWidget {
@@ -23,11 +24,11 @@ class PrivacyPolicyScreen extends StatelessWidget {
           ),
           SizedBox(height: 8),
           Text(
-            'Effective Date: September 1, 2025',
+            'Effective Date: ${LegalConfig.effectiveDate}',
             style: TextStyle(fontStyle: FontStyle.italic),
           ),
           Text(
-            'Last Updated: September 1, 2025',
+            'Last Updated: ${LegalConfig.lastUpdatedDate}',
             style: TextStyle(fontStyle: FontStyle.italic),
           ),
           SizedBox(height: 24),
@@ -59,7 +60,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
           _TermsSection(
             title: '5. Data Retention',
             content:
-                '• Content remains until deleted by you or moderated.\n• Account data is retained while your account is active.\n• You may request deletion of your account and associated data at any time.\n• We may retain minimal information as required by law (e.g., payment records).',
+                '• Content remains until deleted by you or moderated.\n• Account data is retained while your account is active.\n• You may request deletion of your account and associated data at any time.\n• Account deletion: primary user data is removed within ${LegalConfig.accountDeletionPrimaryDays} days, and backup systems are purged within ${LegalConfig.backupPurgeDays} days.\n• We retain financial/tax/legal records for up to ${LegalConfig.financialRetentionYears} years where required by law.',
           ),
 
           _TermsSection(
@@ -77,13 +78,13 @@ class PrivacyPolicyScreen extends StatelessWidget {
           _TermsSection(
             title: '8. Security',
             content:
-                '• End-to-end encryption for authentication and payments.\n• Two-factor authentication available for accounts.\n• Secure logging and XSS prevention built into services.\n• Despite protections, no system is 100% secure—users transmit data at their own risk.',
+                '• We use administrative, technical, and organizational safeguards to protect personal data.\n• Authentication, payments, and data transmission use encrypted channels supported by our service providers.\n• Access to sensitive systems is restricted based on role and operational need.\n• Despite these safeguards, no system is 100% secure—users transmit data at their own risk.',
           ),
 
           _TermsSection(
             title: '9. Children\'s Privacy',
             content:
-                '• ARTbeat is not directed to children under 13.\n• If you are under 13, do not register.\n• Parents who believe their child has registered may request deletion via support@localartbeat.app.',
+                '• ARTbeat is not directed to children under 13.\n• If you are under 13, do not register.\n• Parents who believe their child has registered may request deletion via ${LegalConfig.supportEmail}.',
           ),
 
           _TermsSection(
@@ -95,7 +96,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
           _TermsSection(
             title: '11. Contact Us',
             content:
-                'For questions or data requests:\nLocal ARTbeat, LLC\nPO BOX 232 Kinston, NC 28502\nEmail: support@localartbeat.app',
+                'For questions or data requests:\n${LegalConfig.companyName}\n${LegalConfig.mailingAddress}\nEmail: ${LegalConfig.supportEmail}\n\nData rights request SLA:\n• Acknowledgment within ${LegalConfig.dataRequestAckHours} hours\n• Fulfillment target within ${LegalConfig.dataRequestFulfillmentDays} days',
           ),
 
           SizedBox(height: 32),

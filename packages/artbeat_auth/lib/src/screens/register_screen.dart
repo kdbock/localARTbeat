@@ -11,6 +11,7 @@ import '../services/auth_service.dart';
 import '../constants/routes.dart';
 import 'package:artbeat_core/artbeat_core.dart' show ArtbeatInput;
 import 'package:artbeat_core/artbeat_core.dart' show UserService;
+import 'package:artbeat_core/artbeat_core.dart' show LegalConsentService;
 import 'package:artbeat_core/src/screens/terms_of_service_screen.dart';
 import 'package:artbeat_core/src/screens/privacy_policy_screen.dart';
 
@@ -140,6 +141,13 @@ class _RegisterScreenState extends State<RegisterScreen>
             displayName: fullName,
           );
         }
+
+        await LegalConsentService().recordRegistrationConsent(
+          userId: user.uid,
+          locale: context.locale.countryCode == null
+              ? context.locale.languageCode
+              : '${context.locale.languageCode}-${context.locale.countryCode}',
+        );
       }
 
       if (mounted) {
