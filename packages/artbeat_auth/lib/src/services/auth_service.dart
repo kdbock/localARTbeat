@@ -27,7 +27,15 @@ class AuthService {
     _firestore = firestore ?? FirebaseFirestore.instance;
     // Note: initialize is now async, so we trigger it here
     // but individual methods will also ensure it's ready
-    _initializeGoogleSignIn();
+    unawaited(
+      _initializeGoogleSignIn().catchError((Object e, StackTrace st) {
+        AppLogger.warning(
+          'Google Sign-In pre-initialization skipped: $e',
+          error: e,
+          stackTrace: st,
+        );
+      }),
+    );
   }
 
   /// For dependency injection in tests (deprecated - use constructor)
