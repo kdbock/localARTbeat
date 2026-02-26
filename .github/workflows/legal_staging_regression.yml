@@ -1,0 +1,52 @@
+name: Legal Staging Regression
+
+on:
+  workflow_dispatch:
+    inputs:
+      deploy_first:
+        description: "Deploy rules/function before tests (1=yes, 0=no)"
+        required: false
+        default: "0"
+  schedule:
+    - cron: "0 10 * * 1"
+
+jobs:
+  legal-staging-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      PROJECT_ID: wordnerd-artbeat
+      DEPLOY: ${{ github.event.inputs.deploy_first || '0' }}
+      ADMIN_EMAIL: ${{ secrets.STAGING_ADMIN_EMAIL }}
+      ADMIN_PASSWORD: ${{ secrets.STAGING_ADMIN_PASSWORD }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Validate required files
+        run: |
+          test -f android/app/google-services.json
+          test -x scripts/legal_staging_regression.sh
+
+      - name: Run legal staging regression
+        run: ./scripts/legal_staging_regression.sh
+
+      - name: Upload regression artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: legal-staging-regression-artifacts
+          path: |
+            /tmp/legal_*.json
+            /tmp/up_*.json
+            /tmp/*escalation*.json
+          if-no-files-found: ignore
