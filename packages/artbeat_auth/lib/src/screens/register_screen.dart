@@ -122,6 +122,9 @@ class _RegisterScreenState extends State<RegisterScreen>
           "${_firstNameController.text.trim()} ${_lastNameController.text.trim()}";
       final email = _emailController.text.trim();
       final password = _passwordController.text;
+      final localeCode = context.locale.countryCode == null
+          ? context.locale.languageCode
+          : '${context.locale.languageCode}-${context.locale.countryCode}';
 
       final userCredential = await _authService.registerWithEmailAndPassword(
         email,
@@ -144,9 +147,7 @@ class _RegisterScreenState extends State<RegisterScreen>
 
         await LegalConsentService().recordRegistrationConsent(
           userId: user.uid,
-          locale: context.locale.countryCode == null
-              ? context.locale.languageCode
-              : '${context.locale.languageCode}-${context.locale.countryCode}',
+          locale: localeCode,
         );
       }
 

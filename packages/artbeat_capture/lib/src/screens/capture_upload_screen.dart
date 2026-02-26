@@ -36,6 +36,10 @@ class _CaptureUploadScreenState extends State<CaptureUploadScreen> {
       ),
     );
 
+    if (!mounted) {
+      return;
+    }
+
     if (result != null) {
       setState(() {
         _selectedImage = result;
@@ -60,13 +64,21 @@ class _CaptureUploadScreenState extends State<CaptureUploadScreen> {
 
     final hasAcceptedCaptureTerms =
         await CaptureTermsService.hasAcceptedTerms();
-    if (!hasAcceptedCaptureTerms && mounted) {
+    if (!mounted) {
+      return;
+    }
+
+    if (!hasAcceptedCaptureTerms) {
       final accepted = await Navigator.of(context).push<bool>(
         MaterialPageRoute<bool>(
           builder: (_) =>
               const TermsAndConditionsScreen(showAcceptButton: true),
         ),
       );
+      if (!mounted) {
+        return;
+      }
+
       if (accepted != true) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
