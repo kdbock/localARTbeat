@@ -3,8 +3,20 @@
 set -euo pipefail
 
 PROJECT_ID="${PROJECT_ID:-wordnerd-artbeat}"
-API_KEY="${API_KEY:-$(jq -r '.client[0].api_key[0].current_key' android/app/google-services.json)}"
-BUCKET="${BUCKET:-$(jq -r '.project_info.storage_bucket' android/app/google-services.json)}"
+GOOGLE_SERVICES_PATH="${GOOGLE_SERVICES_PATH:-android/app/google-services.json}"
+
+read_google_services_value() {
+  local jq_expr="$1"
+  if [[ -f "${GOOGLE_SERVICES_PATH}" ]]; then
+    jq -r "${jq_expr} // empty" "${GOOGLE_SERVICES_PATH}"
+  else
+    echo ""
+  fi
+}
+
+API_KEY="${API_KEY:-$(read_google_services_value '.client[0].api_key[0].current_key')}"
+BUCKET="${BUCKET:-$(read_google_services_value '.project_info.storage_bucket')}"
+BUCKET="${BUCKET:-${PROJECT_ID}.firebasestorage.app}"
 ADMIN_ID_TOKEN="${ADMIN_ID_TOKEN:-}"
 ADMIN_EMAIL="${ADMIN_EMAIL:-}"
 ADMIN_PASSWORD="${ADMIN_PASSWORD:-}"
@@ -50,6 +62,12 @@ json_field() {
 
 echo "== Legal Staging Regression =="
 echo "project: ${PROJECT_ID}"
+
+if [[ -z "${API_KEY}" ]]; then
+  echo "Missing API_KEY."
+  echo "Set API_KEY explicitly or provide ${GOOGLE_SERVICES_PATH}."
+  exit 1
+fi
 
 if [[ "${DEPLOY}" == "1" ]]; then
   firebase deploy \

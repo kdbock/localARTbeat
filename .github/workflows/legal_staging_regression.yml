@@ -19,6 +19,8 @@ jobs:
       DEPLOY: ${{ github.event.inputs.deploy_first || '0' }}
       ADMIN_EMAIL: ${{ secrets.STAGING_ADMIN_EMAIL }}
       ADMIN_PASSWORD: ${{ secrets.STAGING_ADMIN_PASSWORD }}
+      API_KEY: ${{ secrets.STAGING_FIREBASE_API_KEY }}
+      BUCKET: ${{ secrets.STAGING_FIREBASE_STORAGE_BUCKET }}
 
     steps:
       - name: Checkout
@@ -32,10 +34,12 @@ jobs:
       - name: Flutter pub get
         run: flutter pub get
 
-      - name: Validate required files
+      - name: Validate required configuration
         run: |
-          test -f android/app/google-services.json
           test -x scripts/legal_staging_regression.sh
+          test -n "${ADMIN_EMAIL}"
+          test -n "${ADMIN_PASSWORD}"
+          test -n "${API_KEY}"
 
       - name: Run legal staging regression
         run: ./scripts/legal_staging_regression.sh
