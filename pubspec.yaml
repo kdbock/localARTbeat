@@ -92,7 +92,6 @@ flutter:
 
   # Assets
   assets:
-    - .env
     - .env.production
     - .env.example
     - assets/
