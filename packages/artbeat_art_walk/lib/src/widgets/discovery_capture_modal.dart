@@ -14,7 +14,6 @@ import 'package:artbeat_art_walk/src/models/public_art_model.dart';
 import 'package:artbeat_art_walk/src/services/instant_discovery_service.dart';
 import 'package:artbeat_art_walk/src/services/social_service.dart';
 import 'package:artbeat_art_walk/src/widgets/typography.dart';
-import 'package:artbeat_core/shared_widgets.dart';
 
 class DiscoveryCaptureModal extends StatefulWidget {
   final PublicArtModel art;
@@ -208,7 +207,8 @@ class _DiscoveryCaptureModalState extends State<DiscoveryCaptureModal> {
                   CircleAvatar(
                     radius: 10,
                     backgroundColor: Colors.white.withValues(alpha: 0.1),
-                    backgroundImage: (_enrichedArt?.userProfileUrl ??
+                    backgroundImage:
+                        (_enrichedArt?.userProfileUrl ??
                                 widget.art.userProfileUrl) !=
                             null
                         ? CachedNetworkImageProvider(
@@ -216,7 +216,8 @@ class _DiscoveryCaptureModalState extends State<DiscoveryCaptureModal> {
                                 widget.art.userProfileUrl!,
                           )
                         : null,
-                    child: (_enrichedArt?.userProfileUrl ??
+                    child:
+                        (_enrichedArt?.userProfileUrl ??
                                 widget.art.userProfileUrl) ==
                             null
                         ? const Icon(
@@ -232,19 +233,18 @@ class _DiscoveryCaptureModalState extends State<DiscoveryCaptureModal> {
                       _enrichedArt?.userName ??
                           widget.art.userName ??
                           'Art Enthusiast',
-                      style: AppTypography.body(Colors.white70).copyWith(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: AppTypography.body(
+                        Colors.white70,
+                      ).copyWith(fontSize: 12, fontWeight: FontWeight.w600),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   Text(
                     timeago.format(widget.art.createdAt),
-                    style: AppTypography.body(Colors.white38).copyWith(
-                      fontSize: 11,
-                    ),
+                    style: AppTypography.body(
+                      Colors.white38,
+                    ).copyWith(fontSize: 11),
                   ),
                 ],
               ),

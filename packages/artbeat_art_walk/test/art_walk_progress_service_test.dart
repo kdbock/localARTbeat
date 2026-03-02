@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:artbeat_art_walk/artbeat_art_walk.dart';
 
@@ -43,7 +42,9 @@ void main() {
       rewards: mockRewards,
     );
 
-    when(mockFirestore.collection('artWalkProgress')).thenReturn(mockCollection);
+    when(
+      mockFirestore.collection('artWalkProgress'),
+    ).thenReturn(mockCollection);
     when(mockCollection.doc(any)).thenReturn(mockDocRef);
   });
 
@@ -51,7 +52,7 @@ void main() {
     test('startWalk creates new progress if none exists', () async {
       const uid = 'test_user';
       const artWalkId = 'test_walk';
-      
+
       when(mockDocRef.get()).thenAnswer((_) async {
         final doc = MockDocumentSnapshot<Map<String, dynamic>>();
         when(doc.exists).thenReturn(false);
@@ -78,7 +79,7 @@ void main() {
       const artId = 'art1';
       final userPos = createPosition(10.0001, 20.0001);
       final artPos = createPosition(10.0, 20.0);
-      
+
       // Start a walk first
       when(mockDocRef.get()).thenAnswer((_) async {
         final doc = MockDocumentSnapshot<Map<String, dynamic>>();
@@ -94,8 +95,9 @@ void main() {
       );
 
       // Now record a visit
-      when(mockRewards.awardXP(any, customAmount: anyNamed('customAmount')))
-          .thenAnswer((_) async => {});
+      when(
+        mockRewards.awardXP(any, customAmount: anyNamed('customAmount')),
+      ).thenAnswer((_) async => {});
 
       final progress = await progressService.recordArtVisit(
         artId: artId,
@@ -106,14 +108,16 @@ void main() {
       expect(progress.visitedArt.length, 1);
       expect(progress.visitedArt.first.artId, artId);
       expect(progress.visitedArt.first.wasNearArt, isTrue);
-      verify(mockRewards.awardXP(any, customAmount: anyNamed('customAmount'))).called(1);
+      verify(
+        mockRewards.awardXP(any, customAmount: anyNamed('customAmount')),
+      ).called(1);
       verify(mockDocRef.set(any)).called(2);
     });
 
     test('completeWalk marks progress as completed and awards bonus', () async {
       const uid = 'test_user';
       const artWalkId = 'test_walk';
-      
+
       // Start a walk first
       when(mockDocRef.get()).thenAnswer((_) async {
         final doc = MockDocumentSnapshot<Map<String, dynamic>>();
@@ -129,14 +133,20 @@ void main() {
       );
 
       // Complete the walk
-      when(mockRewards.awardXP(any, customAmount: anyNamed('customAmount')))
-          .thenAnswer((_) async => {});
+      when(
+        mockRewards.awardXP(any, customAmount: anyNamed('customAmount')),
+      ).thenAnswer((_) async => {});
 
       final progress = await progressService.completeWalk();
 
       expect(progress.status, WalkStatus.completed);
       expect(progress.completedAt, isNotNull);
-      verify(mockRewards.awardXP('art_walk_completion', customAmount: anyNamed('customAmount'))).called(1);
+      verify(
+        mockRewards.awardXP(
+          'art_walk_completion',
+          customAmount: anyNamed('customAmount'),
+        ),
+      ).called(1);
       verify(mockDocRef.set(any)).called(2);
     });
   });

@@ -81,9 +81,7 @@ class _CaptureUploadScreenState extends State<CaptureUploadScreen> {
 
       if (accepted != true) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('capture_upload_error_terms_required'.tr()),
-          ),
+          SnackBar(content: Text('capture_upload_error_terms_required'.tr())),
         );
         return;
       }

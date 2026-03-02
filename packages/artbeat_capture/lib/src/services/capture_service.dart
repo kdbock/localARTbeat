@@ -712,11 +712,11 @@ class CaptureService implements CaptureServiceInterface {
     // Reuse the logic from getPublicCaptures since it now fetches from both collections
     // and handles deduplication and sorting.
     final captures = await getPublicCaptures(limit: limit);
-    
+
     // Update cache
     _cachedAllCaptures = captures;
     _allCapturesCacheTime = DateTime.now();
-    
+
     return captures;
   }
 
@@ -800,7 +800,9 @@ class CaptureService implements CaptureServiceInterface {
 
     try {
       // 1. Try to fetch from the publicArt collection first (primary source for map)
-      AppLogger.info('🔍 Fetching primary public art from publicArt collection...');
+      AppLogger.info(
+        '🔍 Fetching primary public art from publicArt collection...',
+      );
       final publicArtSnapshot = await _publicArtRef
           .orderBy('createdAt', descending: true)
           .limit(limit)
@@ -840,7 +842,9 @@ class CaptureService implements CaptureServiceInterface {
     try {
       // 2. Also fetch from the captures collection to get public art that may not be in publicArt collection yet
       // This directly addresses the user request to show the captures collection
-      AppLogger.info('🔍 Fetching additional public captures from captures collection...');
+      AppLogger.info(
+        '🔍 Fetching additional public captures from captures collection...',
+      );
       final capturesSnapshot = await _capturesRef
           .where('isPublic', isEqualTo: true)
           .orderBy('createdAt', descending: true)
@@ -863,9 +867,13 @@ class CaptureService implements CaptureServiceInterface {
           }
         }
       }
-      AppLogger.info('✅ Added $addedCount unique captures from captures collection');
+      AppLogger.info(
+        '✅ Added $addedCount unique captures from captures collection',
+      );
     } catch (e) {
-      AppLogger.warning('⚠️ Error fetching public captures from captures collection: $e');
+      AppLogger.warning(
+        '⚠️ Error fetching public captures from captures collection: $e',
+      );
       // Fallback without orderBy if index is missing
       try {
         final fallbackSnapshot = await _capturesRef
@@ -889,11 +897,15 @@ class CaptureService implements CaptureServiceInterface {
 
     // Sort combined results by createdAt descending
     results.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    
+
     // Respect the limit
-    final finalResults = results.length > limit ? results.sublist(0, limit) : results;
-    AppLogger.info('🗺️ getPublicCaptures returning ${finalResults.length} total captures for the map');
-    
+    final finalResults = results.length > limit
+        ? results.sublist(0, limit)
+        : results;
+    AppLogger.info(
+      '🗺️ getPublicCaptures returning ${finalResults.length} total captures for the map',
+    );
+
     return finalResults;
   }
 

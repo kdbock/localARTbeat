@@ -9,7 +9,14 @@ import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 // Generate mocks
-@GenerateMocks([FirebaseFirestore, CollectionReference, DocumentReference, QuerySnapshot, QueryDocumentSnapshot, Connectivity])
+@GenerateMocks([
+  FirebaseFirestore,
+  CollectionReference,
+  DocumentReference,
+  QuerySnapshot,
+  QueryDocumentSnapshot,
+  Connectivity,
+])
 class MockCameraPlatform extends Mock
     with MockPlatformInterfaceMixin
     implements CameraPlatform {}

@@ -93,7 +93,9 @@ class _TermsAndConditionsScreenState extends State<TermsAndConditionsScreen> {
                     child: SizedBox(
                       width: double.infinity,
                       child: HudButton(
-                        label: _isSaving ? 'terms_saving'.tr() : 'terms_agree_continue'.tr(),
+                        label: _isSaving
+                            ? 'terms_saving'.tr()
+                            : 'terms_agree_continue'.tr(),
                         icon: Icons.check_circle_outline,
                         onTap: _isSaving ? () {} : _acceptAndContinue,
                       ),

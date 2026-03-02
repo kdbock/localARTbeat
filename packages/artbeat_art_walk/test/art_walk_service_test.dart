@@ -43,14 +43,17 @@ void main() {
     mockPublicArtCollection = MockCollectionReference<Map<String, dynamic>>();
     mockSnapshot = MockQuerySnapshot<Map<String, dynamic>>();
 
-    artWalkService = ArtWalkService(
-      firestore: mockFirestore,
-      auth: mockAuth,
-    );
+    artWalkService = ArtWalkService(firestore: mockFirestore, auth: mockAuth);
 
-    when(mockFirestore.collection('artWalks')).thenReturn(mockArtWalksCollection);
-    when(mockFirestore.collection('publicArt')).thenReturn(mockPublicArtCollection);
-    when(mockFirestore.collection('captures')).thenReturn(MockCollectionReference<Map<String, dynamic>>());
+    when(
+      mockFirestore.collection('artWalks'),
+    ).thenReturn(mockArtWalksCollection);
+    when(
+      mockFirestore.collection('publicArt'),
+    ).thenReturn(mockPublicArtCollection);
+    when(
+      mockFirestore.collection('captures'),
+    ).thenReturn(MockCollectionReference<Map<String, dynamic>>());
   });
 
   group('ArtWalkService Tests', () {
@@ -80,7 +83,7 @@ void main() {
       });
 
       final result = await artWalkService.getArtWalkById(walkId);
-      
+
       expect(result, isNotNull);
       expect(result!.id, walkId);
       expect(result.title, 'Test Walk');
@@ -109,8 +112,9 @@ void main() {
       final mockArtSnapshot = MockQuerySnapshot<Map<String, dynamic>>();
       final mockArtDoc = MockQueryDocumentSnapshot<Map<String, dynamic>>();
 
-      when(mockPublicArtCollection.where(FieldPath.documentId, whereIn: ['art1']))
-          .thenReturn(mockArtQuery);
+      when(
+        mockPublicArtCollection.where(FieldPath.documentId, whereIn: ['art1']),
+      ).thenReturn(mockArtQuery);
       when(mockArtQuery.get()).thenAnswer((_) async => mockArtSnapshot);
       when(mockArtSnapshot.docs).thenReturn([mockArtDoc]);
       when(mockArtDoc.id).thenReturn('art1');
@@ -124,7 +128,7 @@ void main() {
       });
 
       final result = await artWalkService.getArtInWalk(walkId);
-      
+
       expect(result, isNotEmpty);
       expect(result.first.id, 'art1');
       expect(result.first.title, 'Test Art');
@@ -135,17 +139,22 @@ void main() {
       const content = 'Nice walk!';
       final mockUser = MockUser();
       final mockDocRef = MockDocumentReference<Map<String, dynamic>>();
-      final mockCommentsCollection = MockCollectionReference<Map<String, dynamic>>();
+      final mockCommentsCollection =
+          MockCollectionReference<Map<String, dynamic>>();
       final mockNewCommentRef = MockDocumentReference<Map<String, dynamic>>();
 
       when(mockAuth.currentUser).thenReturn(mockUser);
       when(mockUser.uid).thenReturn('user1');
       when(mockUser.displayName).thenReturn('User One');
       when(mockUser.photoURL).thenReturn('http://example.com/photo.jpg');
-      
+
       when(mockArtWalksCollection.doc(walkId)).thenReturn(mockDocRef);
-      when(mockDocRef.collection('comments')).thenReturn(mockCommentsCollection);
-      when(mockCommentsCollection.add(any)).thenAnswer((_) async => mockNewCommentRef);
+      when(
+        mockDocRef.collection('comments'),
+      ).thenReturn(mockCommentsCollection);
+      when(
+        mockCommentsCollection.add(any),
+      ).thenAnswer((_) async => mockNewCommentRef);
       when(mockNewCommentRef.id).thenReturn('new_comment_id');
 
       final result = await artWalkService.addCommentToArtWalk(
@@ -154,7 +163,9 @@ void main() {
       );
 
       expect(result, 'new_comment_id');
-      verify(mockCommentsCollection.add(argThat(containsPair('content', content)))).called(1);
+      verify(
+        mockCommentsCollection.add(argThat(containsPair('content', content))),
+      ).called(1);
     });
   });
 }

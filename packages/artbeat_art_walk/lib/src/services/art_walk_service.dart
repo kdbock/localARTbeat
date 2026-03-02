@@ -1480,11 +1480,9 @@ class ArtWalkService {
 
       // Check achievements
       if (completionCount >= 1) {
-        await _achievement.awardAchievement(
-          userId,
-          AchievementType.firstWalk,
-          {'walkCount': completionCount},
-        );
+        await _achievement.awardAchievement(userId, AchievementType.firstWalk, {
+          'walkCount': completionCount,
+        });
       }
 
       if (completionCount >= 5) {
@@ -1549,11 +1547,9 @@ class ArtWalkService {
       }
 
       if (captureCount >= 50) {
-        await _achievement.awardAchievement(
-          userId,
-          AchievementType.artExpert,
-          {'captureCount': captureCount},
-        );
+        await _achievement.awardAchievement(userId, AchievementType.artExpert, {
+          'captureCount': captureCount,
+        });
       }
 
       // Photographer achievements (adding public art)

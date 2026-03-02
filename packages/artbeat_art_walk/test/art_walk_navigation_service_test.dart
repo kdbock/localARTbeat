@@ -12,7 +12,9 @@ void main() {
 
   setUp(() {
     mockDirectionsService = MockDirectionsService();
-    navigationService = ArtWalkNavigationService(directionsService: mockDirectionsService);
+    navigationService = ArtWalkNavigationService(
+      directionsService: mockDirectionsService,
+    );
   });
 
   group('ArtWalkNavigationService Tests', () {
@@ -42,36 +44,53 @@ void main() {
         headingAccuracy: 0,
       );
 
-      when(mockDirectionsService.getDirections(any, any, waypoints: anyNamed('waypoints')))
-          .thenAnswer((_) async => {
-                'routes': [
-                  {
-                    'legs': [
-                      {
-                        'steps': [
-                          {
-                            'html_instructions': 'Head north',
-                            'distance': {'value': 100},
-                            'duration': {'value': 60},
-                            'start_location': {'lat': 34.9, 'lng': -81.9},
-                            'end_location': {'lat': 35.0, 'lng': -82.0},
-                            'polyline': {'points': 'abc'}
-                          }
-                        ],
-                        'distance': {'value': 100},
-                        'duration': {'value': 60}
-                      }
-                    ],
-                    'overview_polyline': {'points': 'abc'}
-                  }
-                ]
-              });
+      when(
+        mockDirectionsService.getDirections(
+          any,
+          any,
+          waypoints: anyNamed('waypoints'),
+        ),
+      ).thenAnswer(
+        (_) async => {
+          'routes': [
+            {
+              'legs': [
+                {
+                  'steps': [
+                    {
+                      'html_instructions': 'Head north',
+                      'distance': {'value': 100},
+                      'duration': {'value': 60},
+                      'start_location': {'lat': 34.9, 'lng': -81.9},
+                      'end_location': {'lat': 35.0, 'lng': -82.0},
+                      'polyline': {'points': 'abc'},
+                    },
+                  ],
+                  'distance': {'value': 100},
+                  'duration': {'value': 60},
+                },
+              ],
+              'overview_polyline': {'points': 'abc'},
+            },
+          ],
+        },
+      );
 
-      final route = await navigationService.generateRoute('walk1', artPieces, startPosition);
+      final route = await navigationService.generateRoute(
+        'walk1',
+        artPieces,
+        startPosition,
+      );
 
       expect(route.artWalkId, 'walk1');
       expect(route.segments.length, 1);
-      verify(mockDirectionsService.getDirections(any, any, waypoints: anyNamed('waypoints'))).called(1);
+      verify(
+        mockDirectionsService.getDirections(
+          any,
+          any,
+          waypoints: anyNamed('waypoints'),
+        ),
+      ).called(1);
     });
   });
 }

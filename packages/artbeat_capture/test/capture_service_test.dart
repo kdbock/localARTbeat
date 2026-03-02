@@ -55,9 +55,13 @@ void main() {
     test('getCapturesForUser returns list of captures', () async {
       const userId = 'test_user';
       final now = DateTime.now();
-      
-      when(mockCollection.where('userId', isEqualTo: userId)).thenReturn(mockQuery);
-      when(mockQuery.orderBy('createdAt', descending: true)).thenReturn(mockQuery);
+
+      when(
+        mockCollection.where('userId', isEqualTo: userId),
+      ).thenReturn(mockQuery);
+      when(
+        mockQuery.orderBy('createdAt', descending: true),
+      ).thenReturn(mockQuery);
       when(mockQuery.get()).thenAnswer((_) async => mockSnapshot);
       when(mockSnapshot.docs).thenReturn([mockDocSnapshot]);
       when(mockDocSnapshot.id).thenReturn('doc_123');
@@ -85,12 +89,16 @@ void main() {
         title: 'Online Capture',
       );
 
-      when(mockConnectivity.checkConnectivity()).thenAnswer((_) async => [ConnectivityResult.wifi]);
-      
+      when(
+        mockConnectivity.checkConnectivity(),
+      ).thenAnswer((_) async => [ConnectivityResult.wifi]);
+
       final mockDocRef = MockDocumentReference<Map<String, dynamic>>();
       when(mockCollection.add(any)).thenAnswer((_) async => mockDocRef);
       when(mockDocRef.id).thenReturn('new_doc_id');
-      when(mockUserService.incrementUserCaptureCount(any)).thenAnswer((_) async => true);
+      when(
+        mockUserService.incrementUserCaptureCount(any),
+      ).thenAnswer((_) async => true);
 
       final result = await captureService.saveCaptureWithOfflineSupport(
         capture: capture,
@@ -101,10 +109,13 @@ void main() {
       verify(mockCollection.add(any)).called(1);
     });
 
-    test('saveCaptureWithOfflineSupport uses offline queue when offline', () async {
-      // Since OfflineQueueService is also a singleton and not injected, 
-      // this test might be tricky without refactoring it too.
-      // For now, let's focus on what we can easily test.
-    });
+    test(
+      'saveCaptureWithOfflineSupport uses offline queue when offline',
+      () async {
+        // Since OfflineQueueService is also a singleton and not injected,
+        // this test might be tricky without refactoring it too.
+        // For now, let's focus on what we can easily test.
+      },
+    );
   });
 }

@@ -277,7 +277,10 @@ class InstantDiscoveryService {
               existing.location.longitude,
             );
 
-            final bool titlesMatch = _areTitlesSimilar(art.title, existing.title);
+            final bool titlesMatch = _areTitlesSimilar(
+              art.title,
+              existing.title,
+            );
 
             // Group if very close OR moderately close with matching titles
             if (distance <= strictThresholdMeters ||
@@ -865,7 +868,8 @@ class InstantDiscoveryService {
     if (t1 == 'untitled' ||
         t2 == 'untitled' ||
         t1 == 'untitled capture' ||
-        t2 == 'untitled capture') return false;
+        t2 == 'untitled capture')
+      return false;
 
     // Direct match
     if (t1 == t2) return true;

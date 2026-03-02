@@ -32,18 +32,20 @@ class _CaptureScreenState extends State<CaptureScreen> {
       final success = await _cameraService.initialize();
       if (!success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'capture_camera_error_init'.tr(),
-            ),
-          ),
+          SnackBar(content: Text('capture_camera_error_init'.tr())),
         );
       }
     } catch (e) {
       if (mounted) {
         AppLogger.error('Camera initialization failed: $e');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('capture_camera_error_generic'.tr(namedArgs: {'error': e.toString()}))),
+          SnackBar(
+            content: Text(
+              'capture_camera_error_generic'.tr(
+                namedArgs: {'error': e.toString()},
+              ),
+            ),
+          ),
         );
       }
     } finally {
@@ -78,9 +80,7 @@ class _CaptureScreenState extends State<CaptureScreen> {
       if (mounted) {
         AppLogger.error('Camera capture failed: $e');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('capture_camera_error_take_picture'.tr()),
-          ),
+          SnackBar(content: Text('capture_camera_error_take_picture'.tr())),
         );
       }
     } finally {

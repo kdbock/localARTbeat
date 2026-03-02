@@ -72,7 +72,8 @@ class EnhancedStorageService {
       }
 
       // Upload compressed image
-      final uploadTimestamp = timestamp ?? DateTime.now().millisecondsSinceEpoch;
+      final uploadTimestamp =
+          timestamp ?? DateTime.now().millisecondsSinceEpoch;
       final fileName =
           '${category.replaceAll('/', '_')}_${uploadTimestamp}_${user.uid}';
       final storagePath = _getStoragePathForCategory(category);
