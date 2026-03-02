@@ -59,6 +59,7 @@ class StorageService {
   Future<String> uploadCaptureImage(File file, String userId) async {
     int retryCount = 0;
     const maxRetries = 3;
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
 
     while (retryCount < maxRetries) {
       try {
@@ -67,15 +68,17 @@ class StorageService {
         );
 
         // Use the optimized upload method and return just the main image URL
+        // Pass timestamp to maintain consistent filename across retries
         final result = await _enhancedStorageInstance
             .uploadImageWithOptimization(
               imageFile: file,
               category: 'capture',
               generateThumbnail: true,
+              timestamp: timestamp,
             );
 
         AppLogger.info('✅ StorageService: Capture image upload successful');
-        return result['main'] ?? result.values.first;
+        return result['imageUrl'] ?? result.values.first;
       } catch (e) {
         retryCount++;
         AppLogger.error(

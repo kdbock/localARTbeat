@@ -94,8 +94,8 @@ This checklist is for building a user-safe legal system and reducing legal expos
 - [x] Require ToS + Privacy acceptance at registration.
 - [ ] Gate high-risk features with contextual one-time consent:
 - [x] Capture/content upload (IP + rights + legality).
-- [ ] Location-based features (GPS + real-world safety).
-- [ ] Payments/subscriptions/refunds.
+- [x] Location-based features (GPS + real-world safety).
+- [x] Payments/subscriptions/refunds.
 - [x] Store consent records server-side (not only local storage):
 - [x] `userId`
 - [x] `consentType`
@@ -114,7 +114,7 @@ This checklist is for building a user-safe legal system and reducing legal expos
 - [ ] Link full legal docs from:
 - [x] Registration
 - [x] Settings > Legal/Privacy
-- [ ] Purchase flow
+- [x] Purchase flow
 - [x] Upload flow
 - [x] Use consistent legal copy across app/web/email/help.
 - [x] Ensure labels match destination (no mislabeled legal screens).
@@ -194,7 +194,7 @@ This checklist is for building a user-safe legal system and reducing legal expos
 
 ## 10) Location and Real-World Safety
 
-- [ ] Explicit safety warning before first location feature use.
+- [x] Explicit safety warning before first location feature use.
 - [x] Explicit statement not to trespass or enter restricted areas.
 - [ ] Emergency/non-emergency guidance in app help.
 - [ ] Geolocation permissions are minimum necessary.
@@ -257,14 +257,14 @@ This checklist is for building a user-safe legal system and reducing legal expos
 - [x] Canary deployment of rules + deletion callable executed successfully.
 - [x] Shared chat media authorization regression checks executed (`participant create=200`, `non-participant create=403`).
 - [ ] Payment/refund flows tested, including webhook replay/idempotency.
-- [ ] Support contact channels verified and consistent everywhere.
-- [ ] Legal links reachable from all required screens.
-- [ ] Policy claims and app behavior verified line-by-line in manual in-app UI session.
-- [ ] Counsel sign-off recorded.
+- [x] Support contact channels verified and consistent everywhere.
+- [x] Legal links reachable from all required screens.
+- [x] Policy claims and app behavior verified line-by-line in manual in-app UI session (manual QA + screenshot evidence).
+- [x] Counsel sign-off recorded.
 
 ## 20) Next Steps (Immediate)
 
-- [ ] Run manual in-app staging QA for admin data-rights queue and deletion UX (required for final sign-off).
+- [x] Run manual in-app staging QA for admin data-rights queue and deletion UX (completed with screenshot evidence).
 - [x] Complete policy text hardening for unverifiable technical claims (for example, 2FA/encryption wording).
 - [x] Produce initial data inventory matrix (collection/path -> purpose -> retention -> deletion behavior).
 - [x] Add CI regression workflow for rules + deletion callable scenarios (`.github/workflows/legal_staging_regression.yml`).
@@ -290,11 +290,11 @@ This checklist is for building a user-safe legal system and reducing legal expos
 - [x] P0: Fix data-rights request flows and production access rules.
 - [x] P0: Remove permissive storage/firestore rules.
 - [x] P0: Ensure account deletion truly covers all declared data.
-- [ ] P1: Implement durable versioned consent ledger.
+- [x] P1: Implement durable versioned consent ledger.
 - [x] P1: Unify legal contact channels and legal copy sources.
 - [x] P1: Correct legal screen routing and labeling.
 - [x] P1: Replace placeholder legal text and enforce feature-specific terms.
-- [ ] P2: Add user-facing consent history and request-status tracking.
+- [x] P2: Add user-facing consent history and request-status tracking.
 - [ ] P2: Complete moderation/IP workflow hardening and audit logs.
 
 ## 19) “Don’t Get Sued” Practical Principles

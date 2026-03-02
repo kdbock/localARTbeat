@@ -76,7 +76,7 @@ class AdvancedCameraService extends ChangeNotifier {
     _controller = CameraController(
       camera,
       _resolutionPreset,
-      enableAudio: true,
+      enableAudio: false,
       imageFormatGroup: ImageFormatGroup.jpeg,
     );
 

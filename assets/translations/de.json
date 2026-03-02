@@ -7171,5 +7171,12 @@
   "progress_card_streak": "Serie",
   "progress_card_discoveries": "Entdeckungen",
   "progress_card_weekly_goal": "Wöchentliches Ziel",
-  "progress_card_complete": "Abgeschlossen"
+  "progress_card_complete": "Abgeschlossen",
+  "auth_google_signin_failed": "Google-Anmeldung fehlgeschlagen",
+  "drawer_guest_user": "Gastbenutzer",
+  "drawer_not_signed_in": "Nicht angemeldet",
+  "drawer_platform_curation": "Plattform-Kuratierung",
+  "drawer_security_center": "Sicherheitscenter",
+  "drawer_system_health": "Systemstatus",
+  "drawer_payment_management": "Zahlungsverwaltung"
 }

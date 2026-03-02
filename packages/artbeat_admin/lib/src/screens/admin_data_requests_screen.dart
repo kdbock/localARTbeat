@@ -52,6 +52,9 @@ class _AdminDataRequestsScreenState extends State<AdminDataRequestsScreen> {
         (currentData['requestType'] ?? currentData['type'] ?? '').toString();
     final userId = (currentData['userId'] ?? '').toString();
     if (newStatus == 'fulfilled' && requestType == 'deletion') {
+      if (userId.trim().isEmpty) {
+        throw StateError('Cannot fulfill deletion request: missing userId.');
+      }
       final callable = _functions.httpsCallable('processDataDeletionRequest');
       await callable.call<Map<String, dynamic>>({
         'requestId': ref.id,
@@ -160,6 +163,22 @@ class _AdminDataRequestsScreenState extends State<AdminDataRequestsScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Request set to $status.')),
+      );
+    } on FirebaseFunctionsException catch (e) {
+      if (!mounted) return;
+      final message = (e.message ?? '').trim();
+      final details = e.details?.toString().trim() ?? '';
+      final errorText = [
+        'Failed to update request',
+        '[${e.code}]',
+        if (message.isNotEmpty) message,
+        if (details.isNotEmpty) details,
+      ].join(' ');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(errorText),
+          backgroundColor: Colors.red,
+        ),
       );
     } catch (e) {
       if (!mounted) return;

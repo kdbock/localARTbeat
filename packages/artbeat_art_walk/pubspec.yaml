@@ -10,6 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  meta: ^1.11.0
   artbeat_core:
     path: ../artbeat_core
   firebase_core: ^4.4.0
@@ -38,6 +39,7 @@ dependencies:
   lottie: ^3.3.2
   cached_network_image: ^3.3.1
   geoflutterfire_plus: ^0.0.3
+  async: ^2.13.0
   pedometer: ^4.0.2
   logging: ^1.2.0
   easy_localization: ^3.0.7

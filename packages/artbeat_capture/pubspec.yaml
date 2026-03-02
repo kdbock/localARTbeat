@@ -56,3 +56,4 @@ dev_dependencies:
   build_runner: ^2.4.12
   camera_platform_interface: any
   image_picker_platform_interface: any
+  plugin_platform_interface: ^2.1.8

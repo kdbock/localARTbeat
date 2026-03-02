@@ -6180,5 +6180,12 @@
   "progress_card_streak": "Série",
   "progress_card_discoveries": "Découvertes",
   "progress_card_weekly_goal": "Objectif hebdomadaire",
-  "progress_card_complete": "Terminé"
+  "progress_card_complete": "Terminé",
+  "auth_google_signin_failed": "Échec de la connexion avec Google",
+  "drawer_guest_user": "Utilisateur invité",
+  "drawer_not_signed_in": "Non connecté",
+  "drawer_platform_curation": "Curation de la plateforme",
+  "drawer_security_center": "Centre de sécurité",
+  "drawer_system_health": "État du système",
+  "drawer_payment_management": "Gestion des paiements"
 }

@@ -1833,6 +1833,17 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
       }
 
       // Then try to get current location
+      if (!mounted) return;
+      final allowed = await PermissionUtils.requestLocationPermissionWithSafety(
+        context,
+      );
+      if (!allowed) {
+        if (!_isDisposed && mounted) {
+          _updateMapPosition(35.5951, -82.5515);
+        }
+        return;
+      }
+
       final position = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.medium,

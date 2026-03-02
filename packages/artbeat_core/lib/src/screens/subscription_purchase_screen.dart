@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../config/legal_config.dart';
 import '../models/subscription_tier.dart';
 import '../services/in_app_subscription_service.dart';
 
@@ -395,6 +396,26 @@ class _SubscriptionPurchaseScreenState
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 14),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              color: Colors.white.withValues(alpha: 0.05),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+            ),
+            child: Text(
+              'By continuing, you agree to recurring billing for the selected '
+              'plan until canceled. ${LegalConfig.refundPolicySummary}',
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white.withValues(alpha: 0.86),
+                fontSize: 12.5,
+                height: 1.45,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           ),
           const SizedBox(height: 18),
           Row(

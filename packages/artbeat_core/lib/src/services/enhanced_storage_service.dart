@@ -30,6 +30,7 @@ class EnhancedStorageService {
     bool generateThumbnail = true,
     int? customWidth,
     int? customHeight,
+    int? timestamp, // Optional timestamp to maintain consistency across retries
   }) async {
     try {
       final user = FirebaseAuth.instance.currentUser;
@@ -71,9 +72,9 @@ class EnhancedStorageService {
       }
 
       // Upload compressed image
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final uploadTimestamp = timestamp ?? DateTime.now().millisecondsSinceEpoch;
       final fileName =
-          '${category.replaceAll('/', '_')}_${timestamp}_${user.uid}';
+          '${category.replaceAll('/', '_')}_${uploadTimestamp}_${user.uid}';
       final storagePath = _getStoragePathForCategory(category);
 
       // For custom paths that already include user structure, use as-is

@@ -9,6 +9,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:timeago/timeago.dart' as timeago;
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_capture/artbeat_capture.dart';
 import 'package:artbeat_art_walk/src/widgets/art_walk_drawer.dart';
@@ -34,6 +35,8 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
 
   // Map controller and state
   GoogleMapController? _mapController;
+  final Completer<GoogleMapController> _mapControllerCompleter =
+      Completer<GoogleMapController>();
   LatLng? _currentMapCenter; // Track current map center for filtering
   String _currentZipCode = '';
   bool _hasMovedToUserLocation = false;
@@ -332,14 +335,15 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
     double zoom, {
     bool forceMove = false,
   }) async {
-    if (_mapController != null &&
-        mounted &&
-        (!_hasMovedToUserLocation || forceMove)) {
+    // Wait for map controller to be ready
+    final GoogleMapController controller = await _mapControllerCompleter.future;
+
+    if (mounted && (!_hasMovedToUserLocation || forceMove)) {
       try {
         AppLogger.info(
           '📍 Moving map to: $latitude, $longitude (zoom: $zoom, force: $forceMove)',
         );
-        await _mapController!
+        await controller
             .animateCamera(
               CameraUpdate.newCameraPosition(
                 CameraPosition(target: LatLng(latitude, longitude), zoom: zoom),
@@ -362,7 +366,7 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
         AppLogger.error('⚠️ Error animating camera: $e');
         // Try a fallback method for simulator
         try {
-          await _mapController!.moveCamera(
+          await controller.moveCamera(
             CameraUpdate.newCameraPosition(
               CameraPosition(target: LatLng(latitude, longitude), zoom: zoom),
             ),
@@ -376,7 +380,7 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
       }
     } else {
       AppLogger.warning(
-        '🚫 Map movement blocked - Controller: ${_mapController != null}, Mounted: $mounted, HasMoved: $_hasMovedToUserLocation, Force: $forceMove',
+        '🚫 Map movement blocked - Controller ready, Mounted: $mounted, HasMoved: $_hasMovedToUserLocation, Force: $forceMove',
       );
     }
   }
@@ -384,8 +388,9 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
   /// Load all captures with locations
   Future<void> _loadNearbyCaptures(double latitude, double longitude) async {
     try {
-      // Load a reasonable number of captures (300 instead of 1000)
-      final allCaptures = await _captureService.getAllCaptures(limit: 300);
+      // Load a reasonable number of public captures from all users
+      // getPublicCaptures queries the publicArt collection which allows reading all users' data
+      final allCaptures = await _captureService.getPublicCaptures(limit: 300);
 
       // Filter captures that have location data and are within 100 miles (160.934 km)
       const double maxDistanceKm = 160.934; // 100 miles in kilometers
@@ -445,36 +450,98 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
 
     setState(() {
       _markers.clear();
+
+      // Group captures by location and title (hybrid clusters)
+      final List<List<CaptureModel>> clusters = [];
+      const double strictThresholdMiles = 0.0062; // ~10 meters (always group)
+      const double fuzzyThresholdMiles =
+          0.031; // ~50 meters (group if titles match)
+
       for (final capture in _nearbyCaptures) {
-        if (capture.location != null) {
-          _markers.add(
-            Marker(
-              markerId: MarkerId(capture.id),
-              position: LatLng(
-                capture.location!.latitude,
-                capture.location!.longitude,
-              ),
-              infoWindow: InfoWindow(
-                title: capture.title ?? 'Untitled',
-                snippet: capture.artistName ?? 'Unknown Artist',
-              ),
-              onTap: () => _onMarkerTapped(capture),
-            ),
+        if (capture.location == null) continue;
+
+        bool addedToCluster = false;
+        for (final cluster in clusters) {
+          final first = cluster.first;
+          final distance = LocationUtils.calculateDistance(
+            capture.location!.latitude,
+            capture.location!.longitude,
+            first.location!.latitude,
+            first.location!.longitude,
           );
+
+          final bool titlesMatch = _areTitlesSimilar(
+            capture.title,
+            first.title,
+          );
+
+          // Group if very close OR moderately close with matching titles
+          if (distance <= strictThresholdMiles ||
+              (distance <= fuzzyThresholdMiles && titlesMatch)) {
+            cluster.add(capture);
+            addedToCluster = true;
+            break;
+          }
+        }
+
+        if (!addedToCluster) {
+          clusters.add([capture]);
         }
       }
-      AppLogger.info('🗺️ Added ${_markers.length} markers to map');
+
+      for (final cluster in clusters) {
+        final representative = cluster.first;
+        final hasGallery = cluster.length > 1;
+
+        _markers.add(
+          Marker(
+            markerId: MarkerId(representative.id),
+            position: LatLng(
+              representative.location!.latitude,
+              representative.location!.longitude,
+            ),
+            infoWindow: InfoWindow(
+              title: representative.title ?? 'Untitled',
+              snippet: hasGallery
+                  ? '${cluster.length} captures in this location'
+                  : (representative.artistName ?? 'Unknown Artist'),
+            ),
+            onTap: () => _onClusterTapped(cluster),
+          ),
+        );
+      }
+      AppLogger.info('🗺️ Added ${_markers.length} clusters (markers) to map');
     });
   }
 
-  /// Handle marker tap
-  void _onMarkerTapped(CaptureModel capture) {
+  /// Check if two titles are similar enough to be the same art piece
+  bool _areTitlesSimilar(String? title1, String? title2) {
+    if (title1 == null || title2 == null) return false;
+
+    final t1 = title1.toLowerCase().trim();
+    final t2 = title2.toLowerCase().trim();
+
+    // Ignore generic "Untitled" matches
+    if (t1 == 'untitled' || t2 == 'untitled') return false;
+
+    // Direct match
+    if (t1 == t2) return true;
+
+    // One contains the other (e.g. "Pink Hill Mural" vs "Pink Hill Mural Church")
+    if (t1.contains(t2) && t2.length > 5) return true;
+    if (t2.contains(t1) && t1.length > 5) return true;
+
+    return false;
+  }
+
+  /// Handle cluster/marker tap
+  void _onClusterTapped(List<CaptureModel> cluster) {
     if (!mounted) return;
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => CaptureDetailBottomSheet(capture: capture),
+      builder: (context) => CaptureDetailBottomSheet(captures: cluster),
     );
   }
 
@@ -641,6 +708,9 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
                       markers: _markers,
                       onMapCreated: (GoogleMapController controller) {
                         _mapController = controller;
+                        if (!_mapControllerCompleter.isCompleted) {
+                          _mapControllerCompleter.complete(controller);
+                        }
                       },
                       myLocationEnabled: true,
                       myLocationButtonEnabled: false,
@@ -940,13 +1010,103 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
 }
 
 /// Bottom sheet for capture details
-class CaptureDetailBottomSheet extends StatelessWidget {
-  final CaptureModel capture;
+class CaptureDetailBottomSheet extends StatefulWidget {
+  final List<CaptureModel> captures;
 
-  const CaptureDetailBottomSheet({super.key, required this.capture});
+  const CaptureDetailBottomSheet({super.key, required this.captures});
+
+  @override
+  State<CaptureDetailBottomSheet> createState() =>
+      _CaptureDetailBottomSheetState();
+}
+
+class _CaptureDetailBottomSheetState extends State<CaptureDetailBottomSheet> {
+  int _currentIndex = 0;
+  late final PageController _pageController;
+  final Map<int, CaptureModel> _enrichedCaptures = {};
+
+  // Simple static cache for user info to avoid redundant fetches
+  static final Map<String, UserModel> _userCache = {};
+
+  String? _resolveCaptureImageUrl(CaptureModel capture) {
+    final primaryUrl = ImageUrlValidator.normalizeImageUrl(capture.imageUrl);
+    final thumbnailUrl = ImageUrlValidator.normalizeImageUrl(
+      capture.thumbnailUrl,
+    );
+
+    if (ImageUrlValidator.isValidImageUrl(primaryUrl)) {
+      return primaryUrl;
+    }
+    if (ImageUrlValidator.isValidImageUrl(thumbnailUrl)) {
+      return thumbnailUrl;
+    }
+    return null;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+    _enrichCurrentCapture();
+  }
+
+  Future<void> _enrichCurrentCapture() async {
+    final index = _currentIndex;
+    final capture = widget.captures[index];
+
+    // If already has user info, no need to fetch
+    if (capture.userName != null && capture.userHandle != null) {
+      return;
+    }
+
+    // Check cache first
+    if (_userCache.containsKey(capture.userId)) {
+      if (mounted) {
+        setState(() {
+          _enrichedCaptures[index] = capture.copyWith(
+            userName: _userCache[capture.userId]!.fullName,
+            userHandle: _userCache[capture.userId]!.username,
+            userProfileUrl: _userCache[capture.userId]!.profileImageUrl,
+          );
+        });
+      }
+      return;
+    }
+
+    try {
+      final userService = UserService();
+      final userModel = await userService.getUserById(capture.userId);
+      if (userModel != null) {
+        _userCache[capture.userId] = userModel;
+        if (mounted) {
+          setState(() {
+            _enrichedCaptures[index] = capture.copyWith(
+              userName: userModel.fullName,
+              userHandle: userModel.username,
+              userProfileUrl: userModel.profileImageUrl,
+            );
+          });
+        }
+      }
+    } catch (e) {
+      AppLogger.error('Error enriching capture with user info: $e');
+    }
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (widget.captures.isEmpty) return const SizedBox.shrink();
+
+    final rawCapture = widget.captures[_currentIndex];
+    final capture = _enrichedCaptures[_currentIndex] ?? rawCapture;
+    final hasMultiple = widget.captures.length > 1;
+
     return Container(
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -973,27 +1133,117 @@ class CaptureDetailBottomSheet extends StatelessWidget {
             ),
           ),
 
-          // Image
-          if (capture.imageUrl.isNotEmpty)
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(24),
-              ),
-              child: Container(
-                color: Colors.black,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 280,
-                  child: OptimizedImage(
-                    imageUrl: capture.imageUrl,
-                    width: double.infinity,
-                    height: 280,
-                    fit: BoxFit.contain,
-                  ),
+          // Image Gallery
+          SizedBox(
+            height: 280,
+            child: Stack(
+              children: [
+                PageView.builder(
+                  controller: _pageController,
+                  itemCount: widget.captures.length,
+                  onPageChanged: (index) {
+                    setState(() {
+                      _currentIndex = index;
+                    });
+                    _enrichCurrentCapture();
+                  },
+                  itemBuilder: (context, index) {
+                    final item = widget.captures[index];
+                    final imageUrl = _resolveCaptureImageUrl(item);
+                    return ClipRRect(
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(24),
+                      ),
+                      child: Container(
+                        color: Colors.black,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        child: imageUrl != null
+                            ? OptimizedImage(
+                                imageUrl: imageUrl,
+                                width: double.infinity,
+                                height: 280,
+                                fit: BoxFit.contain,
+                              )
+                            : const Center(
+                                child: Icon(
+                                  Icons.image_not_supported_outlined,
+                                  color: Colors.white54,
+                                  size: 40,
+                                ),
+                              ),
+                      ),
+                    );
+                  },
                 ),
-              ),
+                if (hasMultiple) ...[
+                  // Navigation Arrows
+                  Positioned(
+                    left: 8,
+                    top: 0,
+                    bottom: 0,
+                    child: Center(
+                      child: IconButton(
+                        icon: const Icon(
+                          Icons.chevron_left,
+                          color: Colors.white70,
+                          size: 32,
+                        ),
+                        onPressed: _currentIndex > 0
+                            ? () => _pageController.previousPage(
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeInOut,
+                              )
+                            : null,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    right: 8,
+                    top: 0,
+                    bottom: 0,
+                    child: Center(
+                      child: IconButton(
+                        icon: const Icon(
+                          Icons.chevron_right,
+                          color: Colors.white70,
+                          size: 32,
+                        ),
+                        onPressed: _currentIndex < widget.captures.length - 1
+                            ? () => _pageController.nextPage(
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeInOut,
+                              )
+                            : null,
+                      ),
+                    ),
+                  ),
+                  // Indicators
+                  Positioned(
+                    bottom: 20,
+                    left: 0,
+                    right: 0,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(
+                        widget.captures.length,
+                        (index) => Container(
+                          width: 8,
+                          height: 8,
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: _currentIndex == index
+                                ? ArtWalkDesignSystem.hudActiveColor
+                                : Colors.white30,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
             ),
+          ),
 
           // Content
           Padding(
@@ -1001,15 +1251,91 @@ class CaptureDetailBottomSheet extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  capture.title ?? 'Untitled',
-                  style: GoogleFonts.spaceGrotesk(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: ArtWalkDesignSystem.hudInactiveColor.withValues(
-                      alpha: 0.92,
+                // User Attribution and Date
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 12,
+                      backgroundColor: ArtWalkDesignSystem.hudActiveColor
+                          .withValues(alpha: 0.1),
+                      backgroundImage: ImageUrlValidator.safeNetworkImage(
+                        capture.userProfileUrl,
+                      ),
+                      child:
+                          ImageUrlValidator.safeNetworkImage(
+                                capture.userProfileUrl,
+                              ) ==
+                              null
+                          ? Icon(
+                              Icons.person,
+                              size: 14,
+                              color: ArtWalkDesignSystem.hudActiveColor
+                                  .withValues(alpha: 0.6),
+                            )
+                          : null,
                     ),
-                  ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        capture.userName ?? 'Art Enthusiast',
+                        style: GoogleFonts.spaceGrotesk(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: ArtWalkDesignSystem.hudInactiveColor
+                              .withValues(alpha: 0.8),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    Text(
+                      timeago.format(capture.createdAt),
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                        color: ArtWalkDesignSystem.hudInactiveColor.withValues(
+                          alpha: 0.5,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        capture.title ?? 'Untitled',
+                        style: GoogleFonts.spaceGrotesk(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: ArtWalkDesignSystem.hudInactiveColor
+                              .withValues(alpha: 0.92),
+                        ),
+                      ),
+                    ),
+                    if (hasMultiple)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: ArtWalkDesignSystem.hudActiveColor.withValues(
+                            alpha: 0.2,
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          '${_currentIndex + 1}/${widget.captures.length}',
+                          style: GoogleFonts.spaceGrotesk(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: ArtWalkDesignSystem.hudActiveColor,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
                 if (capture.artistName != null) ...[
                   const SizedBox(height: 8),

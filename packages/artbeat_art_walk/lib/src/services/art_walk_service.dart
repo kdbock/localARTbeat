@@ -33,13 +33,22 @@ class ArtWalkService {
   FirebaseAuth? _authInstance;
   FirebaseStorage? _storageInstance;
 
+  ArtWalkService({
+    FirebaseFirestore? firestore,
+    FirebaseAuth? auth,
+    FirebaseStorage? storage,
+  }) {
+    _firestoreInstance = firestore;
+    _authInstance = auth;
+    _storageInstance = storage;
+  }
+
   // Lazy initialization getters
   FirebaseFirestore get _firestore =>
       _firestoreInstance ??= FirebaseFirestore.instance;
   FirebaseAuth get _auth => _authInstance ??= FirebaseAuth.instance;
   FirebaseStorage get _storage => _storageInstance ??= FirebaseStorage.instance;
   final Logger _logger = Logger();
-  final ConnectivityService _connectivityService = ConnectivityService();
 
   // Collection references - lazy initialization
   CollectionReference? _artWalksCollectionInstance;
@@ -54,20 +63,44 @@ class ArtWalkService {
   CollectionReference get _capturesCollection =>
       _capturesCollectionInstance ??= _firestore.collection('captures');
 
+  /// Dependency overrides for testing
+  @visibleForTesting
+  void setDependencies({
+    FirebaseFirestore? firestore,
+    FirebaseAuth? auth,
+    FirebaseStorage? storage,
+    ConnectivityService? connectivity,
+    ArtWalkCacheService? cache,
+    RewardsService? rewards,
+    AchievementService? achievement,
+    ArtLocationClusteringService? clustering,
+  }) {
+    if (firestore != null) _firestoreInstance = firestore;
+    if (auth != null) _authInstance = auth;
+    if (storage != null) _storageInstance = storage;
+    if (connectivity != null) _connectivityOverride = connectivity;
+    if (cache != null) _cacheOverride = cache;
+    if (rewards != null) _rewardsOverride = rewards;
+    if (achievement != null) _achievementOverride = achievement;
+    if (clustering != null) _clusteringOverride = clustering;
+  }
+
+  ConnectivityService? _connectivityOverride;
+  ArtWalkCacheService? _cacheOverride;
+  RewardsService? _rewardsOverride;
+  AchievementService? _achievementOverride;
+  ArtLocationClusteringService? _clusteringOverride;
+
+  ConnectivityService get _connectivity =>
+      _connectivityOverride ?? ConnectivityService();
+  ArtWalkCacheService get _cache => _cacheOverride ?? ArtWalkCacheService();
+  RewardsService get _rewards => _rewardsOverride ?? RewardsService();
+  AchievementService get _achievement =>
+      _achievementOverride ?? AchievementService();
+  ArtLocationClusteringService get _clustering =>
+      _clusteringOverride ?? ArtLocationClusteringService();
+
   /// Using secure DirectionsService for getting walking directions with API key protection
-
-  /// Instance of ArtWalkCacheService for offline caching
-  final ArtWalkCacheService _cacheService = ArtWalkCacheService();
-
-  /// Instance of RewardsService for XP and achievements
-  final RewardsService _rewardsService = RewardsService();
-
-  /// Instance of achievement service from art walk package
-  final AchievementService _achievementService = AchievementService();
-
-  /// Instance of ArtLocationClusteringService for handling duplicate art locations
-  final ArtLocationClusteringService _clusteringService =
-      ArtLocationClusteringService();
 
   /// Get current user ID
   String? getCurrentUserId() {
@@ -81,7 +114,7 @@ class ArtWalkService {
   ) async {
     try {
       // Try to get ZIP code using geocoding service
-      final geocodeResult = await _cacheService.getZipCodeFromCoordinates(
+      final geocodeResult = await _cache.getZipCodeFromCoordinates(
         latitude,
         longitude,
       );
@@ -101,7 +134,7 @@ class ArtWalkService {
   /// Get cached public art when network is unavailable
   Future<List<PublicArtModel>> getCachedPublicArt() async {
     try {
-      return await _cacheService.getCachedPublicArt();
+      return await _cache.getCachedPublicArt();
     } catch (e) {
       _logger.e('Error getting cached public art: $e');
       return []; // Empty list on error
@@ -184,7 +217,7 @@ class ArtWalkService {
       );
 
       // Find or create cluster for this art location
-      await _clusteringService.findOrCreateCluster(newArt);
+      await _clustering.findOrCreateCluster(newArt);
 
       return docRef.id;
     } catch (e) {
@@ -220,7 +253,7 @@ class ArtWalkService {
       );
 
       // Get clustered art near the location
-      final clusters = await _clusteringService.getClusteredArtNearLocation(
+      final clusters = await _clustering.getClusteredArtNearLocation(
         latitude: latitude,
         longitude: longitude,
         radiusKm: radiusKm,
@@ -465,7 +498,7 @@ class ArtWalkService {
           // Cache the art walk for offline use
           try {
             final artPieces = await getArtInWalk(id);
-            await _cacheService.cacheArtWalk(artWalk, artPieces);
+            await _cache.cacheArtWalk(artWalk, artPieces);
           } catch (cacheError) {
             _logger.w('Error caching art walk: $cacheError');
             // Continue even if caching fails
@@ -479,7 +512,7 @@ class ArtWalkService {
       }
 
       // If Firestore failed or the document doesn't exist, try to get from cache
-      final cachedWalk = await _cacheService.getCachedArtWalk(id);
+      final cachedWalk = await _cache.getCachedArtWalk(id);
       if (cachedWalk != null) {
         _logger.i('Retrieved art walk from cache: $id');
         return cachedWalk;
@@ -619,7 +652,7 @@ class ArtWalkService {
 
       // If Firestore failed or the document doesn't exist, try to get from cache
       if (walk == null) {
-        walk = await _cacheService.getCachedArtWalk(walkId);
+        walk = await _cache.getCachedArtWalk(walkId);
         if (walk == null) {
           _logger.e('Art walk not found in Firestore or cache: $walkId');
           return []; // Return empty list instead of throwing
@@ -627,7 +660,7 @@ class ArtWalkService {
 
         // If found in cache, return cached art pieces
         try {
-          return await _cacheService.getCachedArtInWalk(walk);
+          return await _cache.getCachedArtInWalk(walk);
         } catch (cacheError) {
           _logger.w('Error getting cached art pieces: $cacheError');
           // Continue to fetch from Firestore
@@ -742,7 +775,7 @@ class ArtWalkService {
           unawaited(() async {
             try {
               final artPieces = await getArtInWalk(walk.id);
-              await _cacheService.cacheArtWalk(walk, artPieces);
+              await _cache.cacheArtWalk(walk, artPieces);
             } catch (cacheError) {
               _logger.w('Error caching art walk: $cacheError');
             }
@@ -758,7 +791,7 @@ class ArtWalkService {
       }
 
       // If Firestore failed, try to get from cache
-      final cachedWalks = await _cacheService.getAllCachedArtWalks();
+      final cachedWalks = await _cache.getAllCachedArtWalks();
       return cachedWalks.where((walk) => walk.userId == userId).toList();
     } catch (e) {
       _logger.e('Error getting user art walks: $e');
@@ -786,7 +819,7 @@ class ArtWalkService {
           unawaited(() async {
             try {
               final artPieces = await getArtInWalk(walk.id);
-              await _cacheService.cacheArtWalk(walk, artPieces);
+              await _cache.cacheArtWalk(walk, artPieces);
             } catch (cacheError) {
               _logger.w('Error caching art walk: $cacheError');
             }
@@ -802,7 +835,7 @@ class ArtWalkService {
       }
 
       // If Firestore failed, try to get from cache
-      final allCachedWalks = await _cacheService.getAllCachedArtWalks();
+      final allCachedWalks = await _cache.getAllCachedArtWalks();
 
       // Filter for public walks, sort by view count, and limit
       final publicWalks = allCachedWalks.where((walk) => walk.isPublic).toList()
@@ -850,7 +883,7 @@ class ArtWalkService {
             // Get the art pieces for each walk
             final artPieces = await getArtInWalk(walk.id);
             // Cache the walk with its art pieces
-            await _cacheService.cacheArtWalk(walk, artPieces);
+            await _cache.cacheArtWalk(walk, artPieces);
           } catch (e) {
             _logger.w('Error background caching walk: $e');
           }
@@ -1142,12 +1175,12 @@ class ArtWalkService {
 
   /// Check and clear expired caches
   Future<void> checkAndClearExpiredCache() async {
-    await _cacheService.clearExpiredCache();
+    await _cache.clearExpiredCache();
   }
 
   /// Get if we have any cached art walks
   Future<bool> hasCachedArtWalks() async {
-    return _cacheService.hasCachedArtWalks();
+    return _cache.hasCachedArtWalks();
   }
 
   /// Validate inputs for public art creation
@@ -1159,7 +1192,7 @@ class ArtWalkService {
     required double longitude,
   }) {
     // Check internet connectivity
-    if (!_connectivityService.isConnected) {
+    if (!_connectivity.isConnected) {
       throw Exception('No internet connection available');
     }
 
@@ -1198,7 +1231,7 @@ class ArtWalkService {
     bool isPublic = true,
   }) async {
     // Check internet connectivity
-    if (!_connectivityService.isConnected) {
+    if (!_connectivity.isConnected) {
       throw Exception('No internet connection available');
     }
 
@@ -1265,7 +1298,7 @@ class ArtWalkService {
 
       // Award XP for creating an art walk
       try {
-        await _rewardsService.awardXP('art_walk_creation');
+        await _rewards.awardXP('art_walk_creation');
         _logger.i('Awarded XP for art walk creation to user: $userId');
       } catch (e) {
         _logger.w('Failed to award XP for art walk creation: $e');
@@ -1339,7 +1372,7 @@ class ArtWalkService {
 
         // Award XP for completion (with timeout)
         try {
-          await _rewardsService
+          await _rewards
               .awardXP('art_walk_completion')
               .timeout(const Duration(seconds: 10));
         } catch (e) {
@@ -1396,7 +1429,7 @@ class ArtWalkService {
           });
 
       // Award XP for visit
-      await _rewardsService.awardXP('art_visit');
+      await _rewards.awardXP('art_visit');
 
       return true;
     } catch (e) {
@@ -1447,7 +1480,7 @@ class ArtWalkService {
 
       // Check achievements
       if (completionCount >= 1) {
-        await _achievementService.awardAchievement(
+        await _achievement.awardAchievement(
           userId,
           AchievementType.firstWalk,
           {'walkCount': completionCount},
@@ -1455,7 +1488,7 @@ class ArtWalkService {
       }
 
       if (completionCount >= 5) {
-        await _achievementService.awardAchievement(
+        await _achievement.awardAchievement(
           userId,
           AchievementType.walkExplorer,
           {'walkCount': completionCount},
@@ -1463,7 +1496,7 @@ class ArtWalkService {
       }
 
       if (completionCount >= 20) {
-        await _achievementService.awardAchievement(
+        await _achievement.awardAchievement(
           userId,
           AchievementType.walkMaster,
           {'walkCount': completionCount},
@@ -1508,7 +1541,7 @@ class ArtWalkService {
 
       // Art Collector achievements (viewing/capturing art)
       if (captureCount >= 10) {
-        await _achievementService.awardAchievement(
+        await _achievement.awardAchievement(
           userId,
           AchievementType.artCollector,
           {'captureCount': captureCount},
@@ -1516,7 +1549,7 @@ class ArtWalkService {
       }
 
       if (captureCount >= 50) {
-        await _achievementService.awardAchievement(
+        await _achievement.awardAchievement(
           userId,
           AchievementType.artExpert,
           {'captureCount': captureCount},
@@ -1525,7 +1558,7 @@ class ArtWalkService {
 
       // Photographer achievements (adding public art)
       if (publicCaptureCount >= 5) {
-        await _achievementService.awardAchievement(
+        await _achievement.awardAchievement(
           userId,
           AchievementType.photographer,
           {'publicCaptureCount': publicCaptureCount},
@@ -1533,7 +1566,7 @@ class ArtWalkService {
       }
 
       if (publicCaptureCount >= 20) {
-        await _achievementService.awardAchievement(
+        await _achievement.awardAchievement(
           userId,
           AchievementType.contributor,
           {'publicCaptureCount': publicCaptureCount},

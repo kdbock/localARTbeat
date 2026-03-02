@@ -34,7 +34,7 @@ Primary legal/support email: support@localartbeat.com
 - [x] Add request acknowledgment/fulfillment timestamps and audit trail.
 - [x] Expand account deletion backend to cover declared user-data domains via admin deletion pipeline.
 - [x] Verify deletion behavior matches published policy text in staging runtime (API-level lifecycle test + audit evidence).
-- [ ] Verify deletion behavior matches published policy text in app UX (manual UI QA pass).
+- [x] Verify deletion behavior matches published policy text in app UX (manual UI QA pass; screenshot evidence captured).
 
 ## P1 - Security Hardening (Staged Rollout)
 
@@ -52,6 +52,14 @@ Primary legal/support email: support@localartbeat.com
 - [x] Added `dataRequestAudit` collection support in Firestore rules (admin-only).
 - [x] Hardened high-risk Firestore rule paths (`direct_commissions`, `artwork_sales`, `commission_requests`, `gift_purchases`, `artLocationClusters`, `sponsorships`, `chapter_analytics`).
 - [x] Hardened Storage rules by removing broad development write/read paths and restricting debug/root paths to admin.
+
+## Newly Implemented In Code (February 26, 2026 - Follow-up)
+
+- [x] Aligned in-app account deletion UX copy with policy timelines and retention carve-outs (30-day primary deletion, 60-day backup purge, 7-year legal/financial retention where required).
+- [x] Hardened chat media Storage rules: participant-only read/write, App Check-gated participant checks, required uploader/chat metadata on uploads, and uploader/admin-only deletes.
+- [x] Continued Storage rules hardening by removing remaining temporary/permissive debug bypass behavior and requiring App Check-gated authorization for owner/admin writes across media paths.
+- [x] Added purchase-flow inline legal disclosure for recurring billing and refund exceptions, with in-flow Terms/Privacy links.
+- [x] Implemented first-use location safety disclosure flow and enforced it before location permission in primary Art Walk entry surfaces.
 
 ## Staging Validation Completed (February 26, 2026)
 
@@ -95,7 +103,7 @@ Primary legal/support email: support@localartbeat.com
 
 ## Next Steps (Execution Order)
 
-- [ ] Perform manual in-app staging QA for admin queue UI and deletion request handling using `docs/LEGAL_STAGING_MANUAL_QA_CHECKLIST.md` (terminal cannot tap through Flutter UI; requires device/emulator session).
+- [x] Perform manual in-app staging QA for admin queue UI and deletion request handling using `docs/LEGAL_STAGING_MANUAL_QA_CHECKLIST.md` (completed with screenshot evidence).
 - [x] Run policy claim review and edit legal text for any unverifiable security claims (2FA/encryption wording).
 - [x] Execute collection/path inventory and map data paths to retention/deletion behavior (`docs/LEGAL_DATA_INVENTORY_MATRIX.md`).
 - [x] Add CI workflow wiring for legal staging regression (`.github/workflows/legal_staging_regression.yml`).
@@ -105,6 +113,8 @@ Primary legal/support email: support@localartbeat.com
 - [x] Configure CI secrets (`STAGING_ADMIN_EMAIL`, `STAGING_ADMIN_PASSWORD`, `STAGING_FIREBASE_API_KEY`, `STAGING_FIREBASE_STORAGE_BUCKET`) and validate manual workflow run in GitHub Actions.
 - [ ] Complete production canary sign-off checklist in runbook (depends on manual in-app QA + CI workflow run evidence).
 - [ ] Complete production canary sign-off checklist in runbook (engineering signed; waiting product/legal owner + support readiness + manual UI evidence).
+- [ ] Run non-technical payment/refund QA checklist:
+  `docs/LEGAL_PAYMENT_REFUND_QA_CHECKLIST.md`.
 
 ## CI Validation Evidence (February 26, 2026)
 
@@ -116,8 +126,8 @@ Primary legal/support email: support@localartbeat.com
 
 ## P1 - Policy-to-Behavior Alignment
 
-- [ ] Add payment flow inline disclosure for refund exceptions.
-- [ ] Add location flow inline safety disclosure before first use.
+- [x] Add payment flow inline disclosure for refund exceptions.
+- [x] Add location flow inline safety disclosure before first use.
 - [ ] Add plain-language legal summaries in key consent surfaces.
 - [ ] Add material-change re-consent trigger system (version bump workflow).
 

@@ -5109,12 +5109,19 @@ async function deleteWhereFieldEquals(
   let deleted = 0;
 
   while (true) {
-    const snapshot = await admin
-      .firestore()
-      .collection(collectionName)
-      .where(fieldName, "==", value)
-      .limit(200)
-      .get();
+    let snapshot;
+    try {
+      snapshot = await admin
+        .firestore()
+        .collection(collectionName)
+        .where(fieldName, "==", value)
+        .limit(200)
+        .get();
+    } catch (error) {
+      throw new Error(
+        `deleteWhereFieldEquals failed for ${collectionName}.${fieldName}: ${error?.message || String(error)}`
+      );
+    }
 
     if (snapshot.empty) break;
 
@@ -5123,7 +5130,13 @@ async function deleteWhereFieldEquals(
       batch.delete(doc.ref);
       deleted += 1;
     });
-    await batch.commit();
+    try {
+      await batch.commit();
+    } catch (error) {
+      throw new Error(
+        `Batch delete commit failed for ${collectionName}.${fieldName}: ${error?.message || String(error)}`
+      );
+    }
   }
 
   if (deleted > 0) {
@@ -5134,10 +5147,23 @@ async function deleteWhereFieldEquals(
 
 async function deleteDocAndSubcollections(path, summary) {
   const docRef = admin.firestore().doc(path);
-  const snapshot = await docRef.get();
+  let snapshot;
+  try {
+    snapshot = await docRef.get();
+  } catch (error) {
+    throw new Error(
+      `Failed reading root doc ${path}: ${error?.message || String(error)}`
+    );
+  }
   if (!snapshot.exists) return;
 
-  await admin.firestore().recursiveDelete(docRef);
+  try {
+    await admin.firestore().recursiveDelete(docRef);
+  } catch (error) {
+    throw new Error(
+      `Failed recursive delete for ${path}: ${error?.message || String(error)}`
+    );
+  }
   summary.deletedDocuments.push(path);
 }
 
@@ -5165,71 +5191,79 @@ function extractStoragePathFromDownloadUrl(url) {
 }
 
 async function cleanupUserOwnedChatMedia(userId, summary) {
-  const messagesSnap = await admin.firestore()
-      .collectionGroup("messages")
-      .where("senderId", "==", userId)
-      .get();
-
   let updatedMessages = 0;
   let deletedChatObjects = 0;
 
-  for (const messageDoc of messagesSnap.docs) {
-    const data = messageDoc.data() || {};
-    const candidatePaths = new Set();
+  try {
+    const messagesSnap = await admin.firestore()
+        .collectionGroup("messages")
+        .where("senderId", "==", userId)
+        .get();
 
-    const storagePath = data.storagePath || data?.metadata?.storagePath;
-    if (typeof storagePath === "string") {
-      candidatePaths.add(storagePath);
-    }
+    for (const messageDoc of messagesSnap.docs) {
+      const data = messageDoc.data() || {};
+      const candidatePaths = new Set();
 
-    for (const urlField of ["imageUrl", "fileUrl", "content"]) {
-      const value = data[urlField];
-      if (typeof value === "string" &&
-          value.includes("firebasestorage.googleapis.com")) {
-        const parsedPath = extractStoragePathFromDownloadUrl(value);
-        if (parsedPath) candidatePaths.add(parsedPath);
+      const storagePath = data.storagePath || data?.metadata?.storagePath;
+      if (typeof storagePath === "string") {
+        candidatePaths.add(storagePath);
       }
-    }
 
-    for (const objectPath of candidatePaths) {
-      if (!objectPath.startsWith("chat_images/") &&
-          !objectPath.startsWith("chat_media/")) {
-        continue;
+      for (const urlField of ["imageUrl", "fileUrl", "content"]) {
+        const value = data[urlField];
+        if (typeof value === "string" &&
+            value.includes("firebasestorage.googleapis.com")) {
+          const parsedPath = extractStoragePathFromDownloadUrl(value);
+          if (parsedPath) candidatePaths.add(parsedPath);
+        }
       }
-      try {
-        await admin.storage().bucket().file(objectPath).delete();
-        deletedChatObjects += 1;
-      } catch (error) {
-        logger.warn("Chat media deletion skipped/failed", {objectPath, error});
-        summary.storageErrors.push({prefix: objectPath, error: String(error)});
+
+      for (const objectPath of candidatePaths) {
+        if (!objectPath.startsWith("chat_images/") &&
+            !objectPath.startsWith("chat_media/")) {
+          continue;
+        }
+        try {
+          await admin.storage().bucket().file(objectPath).delete();
+          deletedChatObjects += 1;
+        } catch (error) {
+          logger.warn("Chat media deletion skipped/failed", {objectPath, error});
+          summary.storageErrors.push({prefix: objectPath, error: String(error)});
+        }
       }
-    }
 
-    const updatePayload = {
-      content: "[media removed - account deleted]",
-      redactedByDeletionPipeline: true,
-      redactedAt: admin.firestore.FieldValue.serverTimestamp(),
-      senderDeleted: true,
-      senderDeletedAt: admin.firestore.FieldValue.serverTimestamp(),
-      senderDeletedUserId: userId,
-      senderId: userId,
-      storagePath: admin.firestore.FieldValue.delete(),
-      uploaderId: admin.firestore.FieldValue.delete(),
-      imageUrl: admin.firestore.FieldValue.delete(),
-      fileUrl: admin.firestore.FieldValue.delete(),
-    };
-
-    if (data.metadata && typeof data.metadata === "object") {
-      updatePayload.metadata = {
-        ...data.metadata,
-        storagePath: null,
-        uploaderId: null,
+      const updatePayload = {
+        content: "[media removed - account deleted]",
         redactedByDeletionPipeline: true,
+        redactedAt: admin.firestore.FieldValue.serverTimestamp(),
+        senderDeleted: true,
+        senderDeletedAt: admin.firestore.FieldValue.serverTimestamp(),
+        senderDeletedUserId: userId,
+        senderId: userId,
+        storagePath: admin.firestore.FieldValue.delete(),
+        uploaderId: admin.firestore.FieldValue.delete(),
+        imageUrl: admin.firestore.FieldValue.delete(),
+        fileUrl: admin.firestore.FieldValue.delete(),
       };
-    }
 
-    await messageDoc.ref.set(updatePayload, {merge: true});
-    updatedMessages += 1;
+      if (data.metadata && typeof data.metadata === "object") {
+        updatePayload.metadata = {
+          ...data.metadata,
+          storagePath: null,
+          uploaderId: null,
+          redactedByDeletionPipeline: true,
+        };
+      }
+
+      await messageDoc.ref.set(updatePayload, {merge: true});
+      updatedMessages += 1;
+    }
+  } catch (error) {
+    logger.warn("Chat media cleanup skipped/failed", {userId, error});
+    summary.storageErrors.push({
+      prefix: "chat_media_cleanup",
+      error: String(error),
+    });
   }
 
   summary.deletedCollections.chatMessagesRedacted = updatedMessages;
@@ -5328,7 +5362,15 @@ async function executeUserDeletionPipeline(userId, requestId) {
     await admin.auth().deleteUser(userId);
     summary.authDeleted = true;
   } catch (error) {
-    if (String(error).includes("user-not-found")) {
+    const message = String(error?.message || error || "").toLowerCase();
+    const code = String(error?.code || "").toLowerCase();
+    const codeInfo = String(error?.errorInfo?.code || "").toLowerCase();
+    const isUserMissing =
+      message.includes("user-not-found") ||
+      message.includes("no user record corresponding to the provided identifier") ||
+      code.includes("user-not-found") ||
+      codeInfo.includes("user-not-found");
+    if (isUserMissing) {
       summary.authDeleted = false;
       summary.authAlreadyMissing = true;
     } else {
@@ -5342,98 +5384,122 @@ async function executeUserDeletionPipeline(userId, requestId) {
 exports.processDataDeletionRequest = onCall(
   {maxInstances: 2, timeoutSeconds: 540, memory: "512MiB"},
   async (request) => {
-    if (!request.auth?.uid) {
-      throw new HttpsError("unauthenticated", "Authentication required.");
-    }
-    const callerUid = request.auth.uid;
-    if (!(await isAdminUser(callerUid))) {
-      throw new HttpsError("permission-denied", "Admin access required.");
-    }
-
-    const requestId = String(request.data?.requestId || "").trim();
-    const userIdArg = String(request.data?.userId || "").trim();
-    const reviewNotes = String(request.data?.reviewNotes || "").trim();
-
-    if (!requestId && !userIdArg) {
-      throw new HttpsError(
-        "invalid-argument",
-        "requestId or userId is required."
-      );
-    }
-
-    let requestRef = null;
-    let requestSnap = null;
-    let requestData = {};
-
-    if (requestId) {
-      requestRef = admin.firestore().collection("dataRequests").doc(requestId);
-      requestSnap = await requestRef.get();
-      if (!requestSnap.exists) {
-        throw new HttpsError("not-found", "Data request not found.");
+    try {
+      if (!request.auth?.uid) {
+        throw new HttpsError("unauthenticated", "Authentication required.");
       }
-      requestData = requestSnap.data() || {};
-      const requestType = String(requestData.requestType || requestData.type || "");
-      if (requestType !== "deletion") {
+      const callerUid = request.auth.uid;
+      if (!(await isAdminUser(callerUid))) {
+        throw new HttpsError("permission-denied", "Admin access required.");
+      }
+
+      const requestId = String(request.data?.requestId || "").trim();
+      const userIdArg = String(request.data?.userId || "").trim();
+      const reviewNotes = String(request.data?.reviewNotes || "").trim();
+
+      if (!requestId && !userIdArg) {
         throw new HttpsError(
-          "failed-precondition",
-          "Only deletion requests can run this pipeline."
+          "invalid-argument",
+          "requestId or userId is required."
         );
       }
-    }
 
-    const userId = String(requestData.userId || userIdArg).trim();
-    if (!userId) {
-      throw new HttpsError("invalid-argument", "Missing userId.");
-    }
+      let requestRef = null;
+      let requestSnap = null;
+      let requestData = {};
 
-    if (requestRef) {
-      await requestRef.set(
-        {
-          status: "in_review",
-          acknowledgedAt:
-            requestData.acknowledgedAt ||
-            admin.firestore.FieldValue.serverTimestamp(),
-          reviewedBy: callerUid,
-          reviewNotes: reviewNotes || requestData.reviewNotes || null,
-          processingStartedAt: admin.firestore.FieldValue.serverTimestamp(),
-          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-        },
-        {merge: true}
+      if (requestId) {
+        requestRef = admin.firestore().collection("dataRequests").doc(requestId);
+        requestSnap = await requestRef.get();
+        if (!requestSnap.exists) {
+          if (!userIdArg) {
+            throw new HttpsError("not-found", "Data request not found.");
+          }
+          logger.warn(
+            "Data request not found; using userId fallback to continue deletion pipeline.",
+            {requestId, userIdArg}
+          );
+          requestData = {
+            requestType: "deletion",
+            userId: userIdArg,
+          };
+        } else {
+          requestData = requestSnap.data() || {};
+          const requestType = String(requestData.requestType || requestData.type || "");
+          if (requestType !== "deletion") {
+            throw new HttpsError(
+              "failed-precondition",
+              "Only deletion requests can run this pipeline."
+            );
+          }
+        }
+      }
+
+      const userId = String(requestData.userId || userIdArg).trim();
+      if (!userId) {
+        throw new HttpsError("invalid-argument", "Missing userId.");
+      }
+
+      if (requestRef) {
+        await requestRef.set(
+          {
+            status: "in_review",
+            acknowledgedAt:
+              requestData.acknowledgedAt ||
+              admin.firestore.FieldValue.serverTimestamp(),
+            reviewedBy: callerUid,
+            reviewNotes: reviewNotes || requestData.reviewNotes || null,
+            processingStartedAt: admin.firestore.FieldValue.serverTimestamp(),
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          },
+          {merge: true}
+        );
+      }
+
+      const summary = await executeUserDeletionPipeline(userId, requestId || null);
+
+      if (requestRef) {
+        await requestRef.set(
+          {
+            status: "fulfilled",
+            fulfilledAt: admin.firestore.FieldValue.serverTimestamp(),
+            processingCompletedAt: admin.firestore.FieldValue.serverTimestamp(),
+            reviewedBy: callerUid,
+            reviewNotes: reviewNotes || null,
+            deletionSummary: summary,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          },
+          {merge: true}
+        );
+      }
+
+      await admin.firestore().collection("dataRequestAudit").add({
+        requestId: requestId || null,
+        userId,
+        action: "deletion_pipeline_executed",
+        performedBy: callerUid,
+        reviewNotes: reviewNotes || null,
+        summary,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+
+      return {
+        ok: true,
+        requestId: requestId || null,
+        userId,
+        summary,
+      };
+    } catch (error) {
+      if (error instanceof HttpsError) {
+        throw error;
+      }
+      logger.error(
+        `processDataDeletionRequest failed: ${error?.stack || error?.message || String(error)}`
+      );
+      throw new HttpsError(
+        "internal",
+        `Deletion pipeline failed: ${error?.message || String(error)}`
       );
     }
-
-    const summary = await executeUserDeletionPipeline(userId, requestId || null);
-
-    if (requestRef) {
-      await requestRef.set(
-        {
-          status: "fulfilled",
-          fulfilledAt: admin.firestore.FieldValue.serverTimestamp(),
-          processingCompletedAt: admin.firestore.FieldValue.serverTimestamp(),
-          reviewedBy: callerUid,
-          reviewNotes: reviewNotes || null,
-          deletionSummary: summary,
-          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-        },
-        {merge: true}
-      );
-    }
-
-    await admin.firestore().collection("dataRequestAudit").add({
-      requestId: requestId || null,
-      userId,
-      action: "deletion_pipeline_executed",
-      performedBy: callerUid,
-      reviewNotes: reviewNotes || null,
-      summary,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-    });
-
-    return {
-      ok: true,
-      requestId: requestId || null,
-      userId,
-      summary,
-    };
   }
 );

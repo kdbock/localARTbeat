@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
+import 'package:async/async.dart' show StreamGroup;
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_art_walk/src/models/public_art_model.dart';
 import 'rewards_service.dart';
@@ -107,7 +108,40 @@ class InstantDiscoveryService {
           .toList();
 
       // Combine both lists
-      final nearbyArt = [...nearbyPublicArt, ...nearbyCaptures];
+      final List<PublicArtModel> allNearbyArt = [
+        ...nearbyPublicArt,
+        ...nearbyCaptures,
+      ];
+
+      // Group by location and title to avoid multiple dots for same art (Hybrid)
+      final List<PublicArtModel> nearbyArt = [];
+      const double strictThresholdMeters = 10.0;
+      const double fuzzyThresholdMeters = 50.0;
+
+      for (final art in allNearbyArt) {
+        bool isDuplicate = false;
+        for (final existing in nearbyArt) {
+          final distance = Geolocator.distanceBetween(
+            art.location.latitude,
+            art.location.longitude,
+            existing.location.latitude,
+            existing.location.longitude,
+          );
+
+          final bool titlesMatch = _areTitlesSimilar(art.title, existing.title);
+
+          // Group if very close OR moderately close with matching titles
+          if (distance <= strictThresholdMeters ||
+              (distance <= fuzzyThresholdMeters && titlesMatch)) {
+            isDuplicate = true;
+            break;
+          }
+        }
+
+        if (!isDuplicate) {
+          nearbyArt.add(art);
+        }
+      }
 
       // Sort by proximity
       nearbyArt.sort((a, b) {
@@ -139,9 +173,6 @@ class InstantDiscoveryService {
     double radiusMeters = 500,
   }) async* {
     try {
-      // Get user's discovered art to filter out
-      final discoveredIds = await _getDiscoveredArtIds();
-
       // Create GeoFirePoint from user position
       final center = GeoFirePoint(
         GeoPoint(userPosition.latitude, userPosition.longitude),
@@ -149,12 +180,10 @@ class InstantDiscoveryService {
 
       // Query publicArt collection within radius
       final publicArtRef = _firestore.collection('publicArt');
-
-      // Use geoflutterfire_plus for geospatial query
       final publicArtGeoStream = GeoCollectionReference(publicArtRef)
           .subscribeWithin(
             center: center,
-            radiusInKm: radiusMeters / 1000, // Convert meters to km
+            radiusInKm: radiusMeters / 1000,
             field: 'geo',
             geopointFrom: (data) =>
                 (data['location'] as GeoPoint?) ?? const GeoPoint(0, 0),
@@ -163,36 +192,38 @@ class InstantDiscoveryService {
 
       // Query captures collection within radius
       final capturesRef = _firestore.collection('captures');
+      final capturesGeoStream = GeoCollectionReference(capturesRef)
+          .subscribeWithin(
+            center: center,
+            radiusInKm: radiusMeters / 1000,
+            field: 'geo',
+            geopointFrom: (data) =>
+                (data['location'] as GeoPoint?) ?? const GeoPoint(0, 0),
+            strictMode: true,
+          );
 
-      // Combine both streams
-      await for (final _ in publicArtGeoStream) {
-        // Get latest results from both collections
-        final publicArtResults = await GeoCollectionReference(publicArtRef)
-            .subscribeWithin(
-              center: center,
-              radiusInKm: radiusMeters / 1000,
-              field: 'geo',
-              geopointFrom: (data) =>
-                  (data['location'] as GeoPoint?) ?? const GeoPoint(0, 0),
-              strictMode: true,
-            )
-            .take(1)
-            .first;
+      // State to track latest results from both streams
+      List<DocumentSnapshot<Map<String, dynamic>>> lastPublicArt = [];
+      List<DocumentSnapshot<Map<String, dynamic>>> lastCaptures = [];
 
-        final capturesResults = await GeoCollectionReference(capturesRef)
-            .subscribeWithin(
-              center: center,
-              radiusInKm: radiusMeters / 1000,
-              field: 'geo',
-              geopointFrom: (data) =>
-                  (data['location'] as GeoPoint?) ?? const GeoPoint(0, 0),
-              strictMode: true,
-            )
-            .take(1)
-            .first;
+      // Combine both streams to trigger updates
+      final combinedStream = StreamGroup.merge([
+        publicArtGeoStream.map((docs) {
+          lastPublicArt = docs;
+          return null;
+        }),
+        capturesGeoStream.map((docs) {
+          lastCaptures = docs;
+          return null;
+        }),
+      ]);
+
+      await for (final _ in combinedStream) {
+        // Refresh discovered art IDs to catch updates while watching
+        final discoveredIds = await _getDiscoveredArtIds();
 
         // Convert publicArt to PublicArtModel and filter out discovered art
-        final nearbyPublicArt = publicArtResults
+        final nearbyPublicArt = lastPublicArt
             .map((doc) {
               try {
                 return PublicArtModel.fromFirestore(doc);
@@ -206,7 +237,7 @@ class InstantDiscoveryService {
             .toList();
 
         // Convert captures to PublicArtModel and filter for public captures only
-        final nearbyCaptures = capturesResults
+        final nearbyCaptures = lastCaptures
             .map((doc) {
               try {
                 final data = doc.data();
@@ -226,7 +257,40 @@ class InstantDiscoveryService {
             .toList();
 
         // Combine both lists
-        final nearbyArt = [...nearbyPublicArt, ...nearbyCaptures];
+        final List<PublicArtModel> allNearbyArt = [
+          ...nearbyPublicArt,
+          ...nearbyCaptures,
+        ];
+
+        // Group by location and title to avoid multiple dots for same art (Hybrid)
+        final List<PublicArtModel> nearbyArt = [];
+        const double strictThresholdMeters = 10.0;
+        const double fuzzyThresholdMeters = 50.0;
+
+        for (final art in allNearbyArt) {
+          bool isDuplicate = false;
+          for (final existing in nearbyArt) {
+            final distance = Geolocator.distanceBetween(
+              art.location.latitude,
+              art.location.longitude,
+              existing.location.latitude,
+              existing.location.longitude,
+            );
+
+            final bool titlesMatch = _areTitlesSimilar(art.title, existing.title);
+
+            // Group if very close OR moderately close with matching titles
+            if (distance <= strictThresholdMeters ||
+                (distance <= fuzzyThresholdMeters && titlesMatch)) {
+              isDuplicate = true;
+              break;
+            }
+          }
+
+          if (!isDuplicate) {
+            nearbyArt.add(art);
+          }
+        }
 
         // Sort by proximity
         nearbyArt.sort((a, b) {
@@ -788,5 +852,28 @@ class InstantDiscoveryService {
       AppLogger.error('Error extracting neighborhood from address: $e');
       return '';
     }
+  }
+
+  /// Check if two titles are similar enough to be the same art piece
+  bool _areTitlesSimilar(String? title1, String? title2) {
+    if (title1 == null || title2 == null) return false;
+
+    final t1 = title1.toLowerCase().trim();
+    final t2 = title2.toLowerCase().trim();
+
+    // Ignore generic "Untitled" matches
+    if (t1 == 'untitled' ||
+        t2 == 'untitled' ||
+        t1 == 'untitled capture' ||
+        t2 == 'untitled capture') return false;
+
+    // Direct match
+    if (t1 == t2) return true;
+
+    // One contains the other (e.g. "Pink Hill Mural" vs "Pink Hill Mural Church")
+    if (t1.contains(t2) && t2.length > 5) return true;
+    if (t2.contains(t1) && t1.length > 5) return true;
+
+    return false;
   }
 }

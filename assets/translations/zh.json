@@ -6179,5 +6179,12 @@
   "progress_card_streak": "连续",
   "progress_card_discoveries": "发现",
   "progress_card_weekly_goal": "每周目标",
-  "progress_card_complete": "完成"
+  "progress_card_complete": "完成",
+  "auth_google_signin_failed": "Google 登录失败",
+  "drawer_guest_user": "访客用户",
+  "drawer_not_signed_in": "未登录",
+  "drawer_platform_curation": "平台策展",
+  "drawer_security_center": "安全中心",
+  "drawer_system_health": "系统状态",
+  "drawer_payment_management": "支付管理"
 }

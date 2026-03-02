@@ -43,6 +43,9 @@ extension CaptureStatusExtension on CaptureStatus {
 class CaptureModel {
   final String id;
   final String userId;
+  final String? userName;
+  final String? userHandle;
+  final String? userProfileUrl;
   final String? title;
   final List<String>? textAnnotations;
   final String imageUrl;
@@ -70,6 +73,9 @@ class CaptureModel {
     required this.userId,
     required this.imageUrl,
     required this.createdAt,
+    this.userName,
+    this.userHandle,
+    this.userProfileUrl,
     this.title,
     this.textAnnotations,
     this.thumbnailUrl,
@@ -111,6 +117,9 @@ class CaptureModel {
     return CaptureModel(
       id: id,
       userId: userId,
+      userName: FirestoreUtils.safeString(json['userName']),
+      userHandle: FirestoreUtils.safeString(json['userHandle']),
+      userProfileUrl: FirestoreUtils.safeString(json['userProfileUrl']),
       imageUrl: imageUrl,
       createdAt: FirestoreUtils.safeDateTime(json['createdAt']),
       title: FirestoreUtils.safeString(json['title']),
@@ -122,7 +131,9 @@ class CaptureModel {
           ? FirestoreUtils.safeDateTime(json['updatedAt'])
           : null,
       location: json['location'] as GeoPoint?,
-      locationName: FirestoreUtils.safeString(json['locationName']),
+      locationName: json['locationName'] != null
+          ? FirestoreUtils.safeString(json['locationName'])
+          : FirestoreUtils.safeString(json['address']),
       description: FirestoreUtils.safeString(json['description']),
       isProcessed: FirestoreUtils.safeBool(json['isProcessed'], false),
       tags: (json['tags'] as List<dynamic>?)
@@ -159,6 +170,9 @@ class CaptureModel {
   Map<String, dynamic> toJson() {
     return {
       'userId': userId,
+      'userName': userName,
+      'userHandle': userHandle,
+      'userProfileUrl': userProfileUrl,
       'title': title,
       'textAnnotations': textAnnotations,
       'imageUrl': imageUrl,
@@ -188,6 +202,9 @@ class CaptureModel {
   CaptureModel copyWith({
     String? id,
     String? userId,
+    String? userName,
+    String? userHandle,
+    String? userProfileUrl,
     String? title,
     List<String>? textAnnotations,
     String? imageUrl,
@@ -213,6 +230,9 @@ class CaptureModel {
     return CaptureModel(
       id: id ?? this.id,
       userId: userId ?? this.userId,
+      userName: userName ?? this.userName,
+      userHandle: userHandle ?? this.userHandle,
+      userProfileUrl: userProfileUrl ?? this.userProfileUrl,
       title: title ?? this.title,
       textAnnotations: textAnnotations ?? this.textAnnotations,
       imageUrl: imageUrl ?? this.imageUrl,
@@ -239,6 +259,6 @@ class CaptureModel {
 
   @override
   String toString() {
-    return 'CaptureModel(id: $id, userId: $userId, title: $title, imageUrl: $imageUrl)';
+    return 'CaptureModel(id: $id, userId: $userId, userName: $userName, title: $title, imageUrl: $imageUrl)';
   }
 }

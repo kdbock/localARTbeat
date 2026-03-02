@@ -187,12 +187,12 @@ class _EnhancedArtWalkExperienceScreenState
       // Show message if location is not available
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text(
-              'Location not available. Please enable location services for navigation.',
+              'art_walk_experience_location_not_available'.tr(),
             ),
             backgroundColor: Colors.orange,
-            duration: Duration(seconds: 3),
+            duration: const Duration(seconds: 3),
           ),
         );
       }
@@ -205,12 +205,12 @@ class _EnhancedArtWalkExperienceScreenState
       if (!serviceEnabled) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Text(
-                'Location services are disabled. Please enable them in settings.',
+                'art_walk_experience_location_disabled'.tr(),
               ),
               backgroundColor: Colors.orange,
-              duration: Duration(seconds: 3),
+              duration: const Duration(seconds: 3),
             ),
           );
         }
@@ -223,12 +223,12 @@ class _EnhancedArtWalkExperienceScreenState
         if (permission == LocationPermission.denied) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
+              SnackBar(
                 content: Text(
-                  'Location permission denied. Navigation features will be limited.',
+                  'art_walk_experience_location_denied'.tr(),
                 ),
                 backgroundColor: Colors.orange,
-                duration: Duration(seconds: 3),
+                duration: const Duration(seconds: 3),
               ),
             );
           }
@@ -239,12 +239,12 @@ class _EnhancedArtWalkExperienceScreenState
       if (permission == LocationPermission.deniedForever) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Text(
-                'Location permission permanently denied. Please enable in app settings.',
+                'art_walk_experience_location_denied_forever'.tr(),
               ),
               backgroundColor: Colors.red,
-              duration: Duration(seconds: 5),
+              duration: const Duration(seconds: 5),
             ),
           );
         }
@@ -362,7 +362,7 @@ class _EnhancedArtWalkExperienceScreenState
             _currentPosition!.longitude,
           ),
           icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
-          infoWindow: const InfoWindow(title: 'Your Location'),
+          infoWindow: InfoWindow(title: 'art_walk_experience_your_location'.tr()),
         ),
       );
       polylinePoints.add(
@@ -389,7 +389,9 @@ class _EnhancedArtWalkExperienceScreenState
           ),
           infoWindow: InfoWindow(
             title: '${i + 1}. ${art.title}',
-            snippet: isVisited ? 'Visited ✓' : 'Tap for details',
+            snippet: isVisited
+                ? 'art_walk_experience_visited'.tr()
+                : 'art_walk_experience_tap_for_details'.tr(),
           ),
           onTap: () => _showArtDetail(art),
         ),
@@ -431,9 +433,9 @@ class _EnhancedArtWalkExperienceScreenState
     if (_currentPosition == null || _artPieces.isEmpty) {
       // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-            'Unable to start navigation. Check your location settings.',
+            'art_walk_experience_nav_start_error'.tr(),
           ),
           backgroundColor: Colors.red,
         ),
@@ -490,9 +492,9 @@ class _EnhancedArtWalkExperienceScreenState
 
       // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-            'Navigation started! Follow the turn-by-turn instructions.',
+            'art_walk_experience_nav_started'.tr(),
           ),
           backgroundColor: Colors.green,
         ),
@@ -785,14 +787,14 @@ class _EnhancedArtWalkExperienceScreenState
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Congratulations! You\'ve completed this art walk.',
-              style: TextStyle(fontSize: 16),
+            Text(
+              'art_walk_experience_congratulations'.tr(),
+              style: const TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Rewards earned:',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+            Text(
+              'art_walk_experience_rewards_earned'.tr(),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
             ),
             const SizedBox(height: 8),
             Text(
@@ -816,15 +818,17 @@ class _EnhancedArtWalkExperienceScreenState
               ),
             const SizedBox(height: 8),
             Text(
-              '• ${_currentProgress?.visitedArt.length ?? 0} art pieces visited',
+              '• ${'art_walk_experience_art_pieces_visited'.tr(namedArgs: {
+                'count': (_currentProgress?.visitedArt.length ?? 0).toString(),
+              })}',
             ),
             Text(
               'art_walk_enhanced_art_walk_experience_text_photoscount_photos_taken'
-                  .tr(),
+                  .tr(namedArgs: {'count': photosCount.toString()}),
             ),
             Text(
               'art_walk_enhanced_art_walk_experience_text_formatdurationtimespent_duration'
-                  .tr(),
+                  .tr(namedArgs: {'duration': timeSpent.inMinutes.toString()}),
             ),
             const SizedBox(height: 8),
             Text(
@@ -971,8 +975,10 @@ class _EnhancedArtWalkExperienceScreenState
             userName: user.displayName ?? 'Anonymous Walker',
             userAvatar: user.photoURL,
             type: SocialActivityType.walkCompleted,
-            message:
-                'Completed "${widget.artWalk.title}" - visited ${completedProgress.visitedArt.length} art pieces!',
+            message: 'art_walk_social_completed'.tr(namedArgs: {
+              'title': widget.artWalk.title,
+              'count': completedProgress.visitedArt.length.toString(),
+            }),
             location: _currentPosition,
             metadata: {
               'walkTitle': widget.artWalk.title,
@@ -1088,13 +1094,13 @@ class _EnhancedArtWalkExperienceScreenState
     final milestones = <String>[];
 
     // Walk count milestones
-    if (totalWalksCompleted == 1) milestones.add('First Walk Completed! 🎉');
-    if (totalWalksCompleted == 5) milestones.add('5 Walks Completed! 🌟');
-    if (totalWalksCompleted == 10) milestones.add('10 Walks Completed! 🏆');
-    if (totalWalksCompleted == 25) milestones.add('25 Walks Completed! 🎨');
-    if (totalWalksCompleted == 50) milestones.add('50 Walks Completed! 👑');
+    if (totalWalksCompleted == 1) milestones.add('art_walk_milestone_first'.tr());
+    if (totalWalksCompleted == 5) milestones.add('art_walk_milestone_5'.tr());
+    if (totalWalksCompleted == 10) milestones.add('art_walk_milestone_10'.tr());
+    if (totalWalksCompleted == 25) milestones.add('art_walk_milestone_25'.tr());
+    if (totalWalksCompleted == 50) milestones.add('art_walk_milestone_50'.tr());
     if (totalWalksCompleted == 100) {
-      milestones.add('100 Walks - Art Legend! 🌈');
+      milestones.add('art_walk_milestone_100'.tr());
     }
 
     // Distance milestones (in km)

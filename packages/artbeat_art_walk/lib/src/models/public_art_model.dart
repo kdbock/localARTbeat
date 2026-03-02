@@ -5,6 +5,9 @@ import 'package:artbeat_core/artbeat_core.dart' show FirestoreUtils;
 class PublicArtModel {
   final String id;
   final String userId; // ID of the user who added this art
+  final String? userName;
+  final String? userHandle;
+  final String? userProfileUrl;
   final String title;
   final String description;
   final String imageUrl;
@@ -23,6 +26,9 @@ class PublicArtModel {
   const PublicArtModel({
     required this.id,
     required this.userId,
+    this.userName,
+    this.userHandle,
+    this.userProfileUrl,
     required this.title,
     required this.description,
     required this.imageUrl,
@@ -45,6 +51,9 @@ class PublicArtModel {
     return PublicArtModel(
       id: doc.id,
       userId: FirestoreUtils.safeStringDefault(data['userId']),
+      userName: FirestoreUtils.safeString(data['userName']),
+      userHandle: FirestoreUtils.safeString(data['userHandle']),
+      userProfileUrl: FirestoreUtils.safeString(data['userProfileUrl']),
       title: FirestoreUtils.safeStringDefault(data['title']),
       description: FirestoreUtils.safeStringDefault(data['description']),
       imageUrl: FirestoreUtils.safeStringDefault(data['imageUrl']),
@@ -77,6 +86,9 @@ class PublicArtModel {
     return PublicArtModel(
       id: FirestoreUtils.safeStringDefault(json['id']),
       userId: FirestoreUtils.safeStringDefault(json['userId']),
+      userName: FirestoreUtils.safeString(json['userName']),
+      userHandle: FirestoreUtils.safeString(json['userHandle']),
+      userProfileUrl: FirestoreUtils.safeString(json['userProfileUrl']),
       title: FirestoreUtils.safeStringDefault(json['title']),
       description: FirestoreUtils.safeStringDefault(json['description']),
       imageUrl: FirestoreUtils.safeStringDefault(json['imageUrl']),
@@ -111,6 +123,9 @@ class PublicArtModel {
     return PublicArtModel(
       id: FirestoreUtils.safeStringDefault(capture.id),
       userId: FirestoreUtils.safeStringDefault(capture.userId),
+      userName: FirestoreUtils.safeString(capture.userName),
+      userHandle: FirestoreUtils.safeString(capture.userHandle),
+      userProfileUrl: FirestoreUtils.safeString(capture.userProfileUrl),
       title: FirestoreUtils.safeStringDefault(
         capture.title,
         'Untitled Artwork',
@@ -139,6 +154,9 @@ class PublicArtModel {
   Map<String, dynamic> toFirestore() {
     return {
       'userId': userId,
+      'userName': userName,
+      'userHandle': userHandle,
+      'userProfileUrl': userProfileUrl,
       'title': title,
       'description': description,
       'imageUrl': imageUrl,
@@ -160,6 +178,9 @@ class PublicArtModel {
   PublicArtModel copyWith({
     String? id,
     String? userId,
+    String? userName,
+    String? userHandle,
+    String? userProfileUrl,
     String? title,
     String? description,
     String? imageUrl,
@@ -178,6 +199,9 @@ class PublicArtModel {
     return PublicArtModel(
       id: id ?? this.id,
       userId: userId ?? this.userId,
+      userName: userName ?? this.userName,
+      userHandle: userHandle ?? this.userHandle,
+      userProfileUrl: userProfileUrl ?? this.userProfileUrl,
       title: title ?? this.title,
       description: description ?? this.description,
       imageUrl: imageUrl ?? this.imageUrl,
@@ -200,6 +224,9 @@ class PublicArtModel {
     return {
       'id': id,
       'userId': userId,
+      'userName': userName,
+      'userHandle': userHandle,
+      'userProfileUrl': userProfileUrl,
       'title': title,
       'description': description,
       'imageUrl': imageUrl,

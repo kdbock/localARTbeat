@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:artbeat_core/artbeat_core.dart' show UserService;
+import 'package:artbeat_core/artbeat_core.dart' show LegalConfig, UserService;
 import '../services/integrated_settings_service.dart';
 import '../widgets/settings_category_header.dart';
 import '../widgets/settings_section_card.dart';
@@ -40,7 +40,11 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
       builder: (context) => AlertDialog(
         title: const Text('Delete Account?'),
         content: const Text(
-          'This will permanently delete your account and associated data. '
+          'This permanently deletes your account access. Most user-facing '
+          'data is removed within ${LegalConfig.accountDeletionPrimaryDays} '
+          'days, backups are purged within ${LegalConfig.backupPurgeDays} '
+          'days, and legal/financial records may be retained up to '
+          '${LegalConfig.financialRetentionYears} years where required by law. '
           'This action cannot be undone.',
         ),
         actions: [
@@ -144,7 +148,9 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
       await _settingsService.requestDataDeletion();
       if (!mounted) return;
       _showMessage(
-        'Data deletion request submitted. We will acknowledge within 72 hours.',
+        'Data deletion request submitted. We will acknowledge within '
+        '${LegalConfig.dataRequestAckHours} hours and complete eligible '
+        'deletion within ${LegalConfig.dataRequestFulfillmentDays} days.',
       );
     } catch (e) {
       if (!mounted) return;

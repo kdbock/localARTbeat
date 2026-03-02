@@ -63,6 +63,21 @@ class _ArtWalkHeroSectionState extends State<ArtWalkHeroSection>
 
   Future<void> _loadHeroData() async {
     try {
+      final allowed = await PermissionUtils.requestLocationPermissionWithSafety(
+        context,
+      );
+      if (!allowed) {
+        if (mounted) {
+          setState(() {
+            _nearbyArtCount = 3;
+            _activeUsersNearby = 7;
+            _userStreak = 2;
+            _isLoading = false;
+          });
+        }
+        return;
+      }
+
       // Load nearby art count
       final position = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(

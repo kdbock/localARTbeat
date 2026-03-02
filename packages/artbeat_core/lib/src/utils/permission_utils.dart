@@ -1,9 +1,68 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'logger.dart';
 
 /// Utility class for handling permissions consistently across the app
 class PermissionUtils {
+  static const String _locationSafetyDisclosureKey =
+      'location_safety_disclosure_ack_v1';
+
+  /// Show a one-time safety notice before first location permission request.
+  static Future<bool> showLocationSafetyDisclosureIfNeeded(
+    BuildContext context,
+  ) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final alreadyAcknowledged =
+          prefs.getBool(_locationSafetyDisclosureKey) ?? false;
+      if (alreadyAcknowledged) return true;
+
+      if (!context.mounted) return false;
+      final acknowledged = await showDialog<bool>(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) => AlertDialog(
+          title: const Text('Location Safety Notice'),
+          content: const Text(
+            'Location features can guide you through real-world spaces. '
+            'Stay aware of your surroundings, follow local laws, do not trespass, '
+            'and use emergency services if you are in immediate danger.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Not Now'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('I Understand'),
+            ),
+          ],
+        ),
+      );
+
+      if (acknowledged == true) {
+        await prefs.setBool(_locationSafetyDisclosureKey, true);
+        return true;
+      }
+      return false;
+    } catch (e) {
+      AppLogger.error('Error showing location safety disclosure: $e');
+      return false;
+    }
+  }
+
+  /// Safety-first location permission flow: disclosure then OS permission.
+  static Future<bool> requestLocationPermissionWithSafety(
+    BuildContext context,
+  ) async {
+    final canProceed = await showLocationSafetyDisclosureIfNeeded(context);
+    if (!canProceed) return false;
+    if (!context.mounted) return false;
+    return requestLocationPermission(context);
+  }
+
   /// Request photo library permission with proper error handling
   static Future<bool> requestPhotoPermission(BuildContext context) async {
     try {

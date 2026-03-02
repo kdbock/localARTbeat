@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:meta/meta.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:logger/logger.dart';
@@ -22,11 +23,25 @@ class ArtWalkProgressService {
   FirebaseAuth get _auth => _authInstance ??= FirebaseAuth.instance;
 
   final Logger _logger = Logger();
-  final RewardsService _rewardsService = RewardsService();
 
   // Auto-save timer
   Timer? _autoSaveTimer;
   ArtWalkProgress? _currentProgress;
+
+  /// Dependency overrides for testing
+  @visibleForTesting
+  void setDependencies({
+    FirebaseFirestore? firestore,
+    FirebaseAuth? auth,
+    RewardsService? rewards,
+  }) {
+    if (firestore != null) _firestoreInstance = firestore;
+    if (auth != null) _authInstance = auth;
+    if (rewards != null) _rewardsOverride = rewards;
+  }
+
+  RewardsService? _rewardsOverride;
+  RewardsService get _rewards => _rewardsOverride ?? RewardsService();
 
   // Collection references
   CollectionReference get _progressCollection =>
@@ -163,7 +178,7 @@ class ArtWalkProgressService {
       await _saveProgress(updatedProgress);
 
       // Award XP through rewards service
-      await _rewardsService.awardXP('art_visit', customAmount: points);
+      await _rewards.awardXP('art_visit', customAmount: points);
 
       // Check for milestone achievements
       await _checkMilestoneAchievements(updatedProgress);
@@ -212,7 +227,7 @@ class ArtWalkProgressService {
 
       // Award completion bonus points
       if (completionBonus > 0) {
-        await _rewardsService.awardXP(
+        await _rewards.awardXP(
           'art_walk_completion',
           customAmount: completionBonus,
         );
@@ -489,17 +504,17 @@ class ArtWalkProgressService {
     // 25% milestone
     if (progress.progressPercentage >= 0.25 &&
         progress.progressPercentage < 0.5) {
-      await _rewardsService.awardXP('art_walk_milestone_25', customAmount: 10);
+      await _rewards.awardXP('art_walk_milestone_25', customAmount: 10);
     }
     // 50% milestone
     else if (progress.progressPercentage >= 0.5 &&
         progress.progressPercentage < 0.75) {
-      await _rewardsService.awardXP('art_walk_milestone_50', customAmount: 15);
+      await _rewards.awardXP('art_walk_milestone_50', customAmount: 15);
     }
     // 75% milestone
     else if (progress.progressPercentage >= 0.75 &&
         progress.progressPercentage < 1.0) {
-      await _rewardsService.awardXP('art_walk_milestone_75', customAmount: 20);
+      await _rewards.awardXP('art_walk_milestone_75', customAmount: 20);
     }
   }
 

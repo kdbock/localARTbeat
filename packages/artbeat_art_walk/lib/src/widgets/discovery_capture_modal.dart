@@ -8,8 +8,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_sponsorships/artbeat_sponsorships.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-
-// import 'package:artbeat_core/artbeat_core.dart';
+import 'package:timeago/timeago.dart' as timeago;
+import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_art_walk/src/models/public_art_model.dart';
 import 'package:artbeat_art_walk/src/services/instant_discovery_service.dart';
 import 'package:artbeat_art_walk/src/services/social_service.dart';
@@ -40,6 +40,10 @@ class _DiscoveryCaptureModalState extends State<DiscoveryCaptureModal> {
   bool _captured = false;
   String? _feedbackMessage;
   Color? _feedbackColor;
+  PublicArtModel? _enrichedArt;
+
+  // Simple static cache for user info
+  static final Map<String, UserModel> _userCache = {};
 
   @override
   void initState() {
@@ -47,6 +51,49 @@ class _DiscoveryCaptureModalState extends State<DiscoveryCaptureModal> {
     _confettiController = ConfettiController(
       duration: const Duration(seconds: 3),
     );
+    _enrichArtWithUserInfo();
+  }
+
+  Future<void> _enrichArtWithUserInfo() async {
+    final art = widget.art;
+
+    // If already has user info, no need to fetch
+    if (art.userName != null && art.userHandle != null) {
+      return;
+    }
+
+    // Check cache first
+    if (_userCache.containsKey(art.userId)) {
+      if (mounted) {
+        setState(() {
+          _enrichedArt = art.copyWith(
+            userName: _userCache[art.userId]!.fullName,
+            userHandle: _userCache[art.userId]!.username,
+            userProfileUrl: _userCache[art.userId]!.profileImageUrl,
+          );
+        });
+      }
+      return;
+    }
+
+    try {
+      final userService = UserService();
+      final userModel = await userService.getUserById(art.userId);
+      if (userModel != null) {
+        _userCache[art.userId] = userModel;
+        if (mounted) {
+          setState(() {
+            _enrichedArt = art.copyWith(
+              userName: userModel.fullName,
+              userHandle: userModel.username,
+              userProfileUrl: userModel.profileImageUrl,
+            );
+          });
+        }
+      }
+    } catch (e) {
+      AppLogger.error('Error enriching art with user info: $e');
+    }
   }
 
   @override
@@ -155,6 +202,53 @@ class _DiscoveryCaptureModalState extends State<DiscoveryCaptureModal> {
                     const Icon(Icons.broken_image),
               ),
               const SizedBox(height: 16),
+              // User Attribution and Date
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 10,
+                    backgroundColor: Colors.white.withValues(alpha: 0.1),
+                    backgroundImage: (_enrichedArt?.userProfileUrl ??
+                                widget.art.userProfileUrl) !=
+                            null
+                        ? CachedNetworkImageProvider(
+                            _enrichedArt?.userProfileUrl ??
+                                widget.art.userProfileUrl!,
+                          )
+                        : null,
+                    child: (_enrichedArt?.userProfileUrl ??
+                                widget.art.userProfileUrl) ==
+                            null
+                        ? const Icon(
+                            Icons.person,
+                            size: 12,
+                            color: Colors.white54,
+                          )
+                        : null,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _enrichedArt?.userName ??
+                          widget.art.userName ??
+                          'Art Enthusiast',
+                      style: AppTypography.body(Colors.white70).copyWith(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Text(
+                    timeago.format(widget.art.createdAt),
+                    style: AppTypography.body(Colors.white38).copyWith(
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
               Text(widget.art.title, style: AppTypography.screenTitle()),
               if (widget.art.artistName != null)
                 Text(

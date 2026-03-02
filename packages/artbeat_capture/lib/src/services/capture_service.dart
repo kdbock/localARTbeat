@@ -15,15 +15,21 @@ import 'offline_queue_service.dart';
 class CaptureService implements CaptureServiceInterface {
   static final CaptureService _instance = CaptureService._internal();
 
-  final Connectivity _connectivity = Connectivity();
-  final UserService _userService = UserService();
-  final art_walk.RewardsService _rewardsService = art_walk.RewardsService();
+  Connectivity? _connectivityOverride;
+  UserService? _userServiceOverride;
+  art_walk.RewardsService? _rewardsOverride;
+
+  Connectivity get _connectivity => _connectivityOverride ?? Connectivity();
+  UserService get _userService => _userServiceOverride ?? UserService();
+  art_walk.RewardsService get _rewardsService =>
+      _rewardsOverride ?? art_walk.RewardsService();
+
+  FirebaseFirestore? _mockFirestore;
 
   // Cache for getAllCaptures
   List<CaptureModel>? _cachedAllCaptures;
   DateTime? _allCapturesCacheTime;
   static const Duration _cacheTimeout = Duration(minutes: 5);
-  bool _isLoadingAllCaptures = false;
 
   factory CaptureService() {
     return _instance;
@@ -31,8 +37,23 @@ class CaptureService implements CaptureServiceInterface {
 
   CaptureService._internal();
 
+  /// Internal constructor for testing
+  @visibleForTesting
+  CaptureService.withDependencies({
+    FirebaseFirestore? firestore,
+    Connectivity? connectivity,
+    UserService? userService,
+    art_walk.RewardsService? rewardsService,
+  }) {
+    _mockFirestore = firestore;
+    _connectivityOverride = connectivity;
+    _userServiceOverride = userService;
+    _rewardsOverride = rewardsService;
+  }
+
   /// Lazy Firebase Firestore instance
   FirebaseFirestore get _firestore {
+    if (_mockFirestore != null) return _mockFirestore!;
     try {
       return FirebaseFirestore.instance;
     } catch (e) {
@@ -209,10 +230,23 @@ class CaptureService implements CaptureServiceInterface {
   /// Save a new capture
   Future<String?> saveCapture(CaptureModel capture) async {
     try {
+      // Populate user info if missing
+      CaptureModel finalCapture = capture;
+      if (capture.userName == null || capture.userHandle == null) {
+        final userModel = await _userService.getUserById(capture.userId);
+        if (userModel != null) {
+          finalCapture = capture.copyWith(
+            userName: userModel.fullName,
+            userHandle: userModel.username,
+            userProfileUrl: userModel.profileImageUrl,
+          );
+        }
+      }
+
       // Create geo field for GeoFlutterFire geospatial queries
       final Map<String, dynamic> geoData = {};
-      if (capture.location != null) {
-        final geoPoint = capture.location!;
+      if (finalCapture.location != null) {
+        final geoPoint = finalCapture.location!;
         geoData['geo'] = {
           'geohash': _generateGeohash(geoPoint.latitude, geoPoint.longitude),
           'geopoint': geoPoint,
@@ -221,33 +255,36 @@ class CaptureService implements CaptureServiceInterface {
 
       // Save to captures collection (for user's personal collection)
       final docRef = await _capturesRef.add({
-        'userId': capture.userId,
-        'title': capture.title,
-        'textAnnotations': capture.textAnnotations,
-        'imageUrl': capture.imageUrl,
-        'thumbnailUrl': capture.thumbnailUrl,
-        'createdAt': capture.createdAt,
-        'updatedAt': capture.updatedAt,
-        'location': capture.location,
-        'locationName': capture.locationName,
-        'description': capture.description,
-        'isProcessed': capture.isProcessed,
-        'tags': capture.tags,
-        'artistId': capture.artistId,
-        'artistName': capture.artistName,
-        'isPublic': capture.isPublic,
-        'artType': capture.artType,
-        'artMedium': capture.artMedium,
-        'status': capture.status.name,
+        'userId': finalCapture.userId,
+        'userName': finalCapture.userName,
+        'userHandle': finalCapture.userHandle,
+        'userProfileUrl': finalCapture.userProfileUrl,
+        'title': finalCapture.title,
+        'textAnnotations': finalCapture.textAnnotations,
+        'imageUrl': finalCapture.imageUrl,
+        'thumbnailUrl': finalCapture.thumbnailUrl,
+        'createdAt': finalCapture.createdAt,
+        'updatedAt': finalCapture.updatedAt,
+        'location': finalCapture.location,
+        'locationName': finalCapture.locationName,
+        'description': finalCapture.description,
+        'isProcessed': finalCapture.isProcessed,
+        'tags': finalCapture.tags,
+        'artistId': finalCapture.artistId,
+        'artistName': finalCapture.artistName,
+        'isPublic': finalCapture.isPublic,
+        'artType': finalCapture.artType,
+        'artMedium': finalCapture.artMedium,
+        'status': finalCapture.status.name,
         ...geoData, // Add geo field for geospatial queries
       });
 
       // Update user's capture count
-      await _userService.incrementUserCaptureCount(capture.userId);
+      await _userService.incrementUserCaptureCount(finalCapture.userId);
 
       // If capture is public and processed, also save to publicArt collection
-      if (capture.isPublic && capture.isProcessed) {
-        await _saveToPublicArt(capture.copyWith(id: docRef.id));
+      if (finalCapture.isPublic && finalCapture.isProcessed) {
+        await _saveToPublicArt(finalCapture.copyWith(id: docRef.id));
       }
 
       return docRef.id;
@@ -272,6 +309,9 @@ class CaptureService implements CaptureServiceInterface {
 
       await _publicArtRef.doc(capture.id).set({
         'userId': capture.userId,
+        'userName': capture.userName,
+        'userHandle': capture.userHandle,
+        'userProfileUrl': capture.userProfileUrl,
         'title': capture.title ?? 'Untitled',
         'description': capture.description ?? '',
         'imageUrl': capture.imageUrl,
@@ -345,10 +385,23 @@ class CaptureService implements CaptureServiceInterface {
   /// Create a new capture
   Future<CaptureModel> createCapture(CaptureModel capture) async {
     try {
+      // Populate user info if missing
+      CaptureModel finalCapture = capture;
+      if (capture.userName == null || capture.userHandle == null) {
+        final userModel = await _userService.getUserById(capture.userId);
+        if (userModel != null) {
+          finalCapture = capture.copyWith(
+            userName: userModel.fullName,
+            userHandle: userModel.username,
+            userProfileUrl: userModel.profileImageUrl,
+          );
+        }
+      }
+
       // Create geo field for GeoFlutterFire geospatial queries
-      final Map<String, dynamic> captureData = capture.toFirestore();
-      if (capture.location != null) {
-        final geoPoint = capture.location!;
+      final Map<String, dynamic> captureData = finalCapture.toFirestore();
+      if (finalCapture.location != null) {
+        final geoPoint = finalCapture.location!;
         captureData['geo'] = {
           'geohash': _generateGeohash(geoPoint.latitude, geoPoint.longitude),
           'geopoint': geoPoint,
@@ -357,7 +410,7 @@ class CaptureService implements CaptureServiceInterface {
 
       // CRITICAL: Save to Firestore first - this is the only blocking operation
       final docRef = await _capturesRef.add(captureData);
-      final newCapture = capture.copyWith(id: docRef.id);
+      final newCapture = finalCapture.copyWith(id: docRef.id);
 
       // Clear caches to ensure new capture appears immediately
       clearAllCapturesCache();
@@ -645,19 +698,7 @@ class CaptureService implements CaptureServiceInterface {
   }
 
   /// Get all captures (for dashboard display)
-  Future<List<CaptureModel>> getAllCaptures({int limit = 50}) async {
-    // Prevent multiple simultaneous calls
-    if (_isLoadingAllCaptures) {
-      debugPrint(
-        '🔄 CaptureService.getAllCaptures() already loading, waiting...',
-      );
-      // Wait for the current load to complete
-      while (_isLoadingAllCaptures) {
-        await Future<void>.delayed(const Duration(milliseconds: 100));
-      }
-      return _cachedAllCaptures ?? [];
-    }
-
+  Future<List<CaptureModel>> getAllCaptures({int limit = 100}) async {
     // Check cache first
     if (_cachedAllCaptures != null &&
         _allCapturesCacheTime != null &&
@@ -668,83 +709,15 @@ class CaptureService implements CaptureServiceInterface {
       return _cachedAllCaptures!;
     }
 
-    _isLoadingAllCaptures = true;
-
-    try {
-      debugPrint(
-        '🚀 CaptureService.getAllCaptures() fetching from Firestore with limit: $limit',
-      );
-
-      // Try with orderBy first - get all captures for public display
-      final querySnapshot = await _capturesRef
-          .orderBy('createdAt', descending: true)
-          .limit(limit)
-          .get();
-
-      final captures = <CaptureModel>[];
-      for (final doc in querySnapshot.docs) {
-        try {
-          final data = doc.data() as Map<String, dynamic>?;
-          if (data != null && data.isNotEmpty) {
-            final capture = CaptureModel.fromJson({...data, 'id': doc.id});
-            captures.add(capture);
-          }
-        } catch (e) {
-          AppLogger.error('❌ Error parsing capture ${doc.id}: $e');
-          // Skip this document and continue with others
-        }
-      }
-
-      // Cache the results
-      _cachedAllCaptures = captures;
-      _allCapturesCacheTime = DateTime.now();
-
-      debugPrint(
-        '✅ CaptureService.getAllCaptures() found ${captures.length} captures',
-      );
-      return captures;
-    } catch (e) {
-      AppLogger.error('❌ Error fetching all captures with orderBy: $e');
-
-      // Fallback: Try without orderBy to avoid index requirement
-      try {
-        AppLogger.info('🔄 Trying fallback query without orderBy...');
-        final fallbackQuery = await _capturesRef.limit(limit).get();
-
-        final captures = <CaptureModel>[];
-        for (final doc in fallbackQuery.docs) {
-          try {
-            final data = doc.data() as Map<String, dynamic>?;
-            if (data != null && data.isNotEmpty) {
-              final capture = CaptureModel.fromJson({...data, 'id': doc.id});
-              captures.add(capture);
-            }
-          } catch (e) {
-            AppLogger.error(
-              '❌ Error parsing capture ${doc.id} in fallback: $e',
-            );
-            // Skip this document and continue with others
-          }
-        }
-
-        // Sort manually by createdAt
-        captures.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-
-        // Cache the results
-        _cachedAllCaptures = captures;
-        _allCapturesCacheTime = DateTime.now();
-
-        AppLogger.info(
-          '✅ Fallback query found ${captures.length} all captures',
-        );
-        return captures;
-      } catch (fallbackError) {
-        AppLogger.error('❌ Fallback query also failed: $fallbackError');
-        return [];
-      }
-    } finally {
-      _isLoadingAllCaptures = false;
-    }
+    // Reuse the logic from getPublicCaptures since it now fetches from both collections
+    // and handles deduplication and sorting.
+    final captures = await getPublicCaptures(limit: limit);
+    
+    // Update cache
+    _cachedAllCaptures = captures;
+    _allCapturesCacheTime = DateTime.now();
+    
+    return captures;
   }
 
   /// Clear the cache for getAllCaptures
@@ -821,54 +794,107 @@ class CaptureService implements CaptureServiceInterface {
   }
 
   /// Get public captures
-  Future<List<CaptureModel>> getPublicCaptures({int limit = 20}) async {
+  Future<List<CaptureModel>> getPublicCaptures({int limit = 50}) async {
+    final List<CaptureModel> results = [];
+    final Set<String> seenIds = {};
+
     try {
-      // Try the indexed query first
-      final querySnapshot = await _capturesRef
+      // 1. Try to fetch from the publicArt collection first (primary source for map)
+      AppLogger.info('🔍 Fetching primary public art from publicArt collection...');
+      final publicArtSnapshot = await _publicArtRef
+          .orderBy('createdAt', descending: true)
+          .limit(limit)
+          .get();
+
+      for (final doc in publicArtSnapshot.docs) {
+        try {
+          final data = doc.data() as Map<String, dynamic>?;
+          if (data != null) {
+            final capture = CaptureModel.fromJson({...data, 'id': doc.id});
+            results.add(capture);
+            seenIds.add(capture.id);
+          }
+        } catch (e) {
+          AppLogger.error('❌ Error parsing public art doc ${doc.id}: $e');
+        }
+      }
+      AppLogger.info('✅ Found ${results.length} pieces in publicArt');
+    } catch (e) {
+      AppLogger.warning('⚠️ Error fetching from publicArt collection: $e');
+      // Fallback: try without orderBy
+      try {
+        final fallbackSnapshot = await _publicArtRef.limit(limit).get();
+        for (final doc in fallbackSnapshot.docs) {
+          try {
+            final data = doc.data() as Map<String, dynamic>?;
+            if (data != null && !seenIds.contains(doc.id)) {
+              final capture = CaptureModel.fromJson({...data, 'id': doc.id});
+              results.add(capture);
+              seenIds.add(capture.id);
+            }
+          } catch (_) {}
+        }
+      } catch (_) {}
+    }
+
+    try {
+      // 2. Also fetch from the captures collection to get public art that may not be in publicArt collection yet
+      // This directly addresses the user request to show the captures collection
+      AppLogger.info('🔍 Fetching additional public captures from captures collection...');
+      final capturesSnapshot = await _capturesRef
           .where('isPublic', isEqualTo: true)
           .orderBy('createdAt', descending: true)
           .limit(limit)
           .get();
 
-      return querySnapshot.docs
-          .map(
-            (doc) => CaptureModel.fromJson({
-              ...doc.data() as Map<String, dynamic>,
-              'id': doc.id,
-            }),
-          )
-          .toList();
+      int addedCount = 0;
+      for (final doc in capturesSnapshot.docs) {
+        if (!seenIds.contains(doc.id)) {
+          try {
+            final data = doc.data() as Map<String, dynamic>?;
+            if (data != null) {
+              final capture = CaptureModel.fromJson({...data, 'id': doc.id});
+              results.add(capture);
+              seenIds.add(capture.id);
+              addedCount++;
+            }
+          } catch (e) {
+            AppLogger.error('❌ Error parsing capture doc ${doc.id}: $e');
+          }
+        }
+      }
+      AppLogger.info('✅ Added $addedCount unique captures from captures collection');
     } catch (e) {
-      AppLogger.error('Error fetching public captures with index: $e');
-
-      // Fallback: Try without orderBy to avoid index requirement
+      AppLogger.warning('⚠️ Error fetching public captures from captures collection: $e');
+      // Fallback without orderBy if index is missing
       try {
-        AppLogger.info('🔄 Trying fallback query without orderBy...');
-        final fallbackQuery = await _capturesRef
+        final fallbackSnapshot = await _capturesRef
             .where('isPublic', isEqualTo: true)
             .limit(limit)
             .get();
-
-        final captures = fallbackQuery.docs
-            .map(
-              (doc) => CaptureModel.fromJson({
-                ...doc.data() as Map<String, dynamic>,
-                'id': doc.id,
-              }),
-            )
-            .toList();
-
-        // Sort manually by createdAt
-        captures.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-        AppLogger.info(
-          '✅ Fallback query found ${captures.length} public captures',
-        );
-        return captures;
-      } catch (fallbackError) {
-        AppLogger.error('❌ Fallback query also failed: $fallbackError');
-        return [];
-      }
+        for (final doc in fallbackSnapshot.docs) {
+          if (!seenIds.contains(doc.id)) {
+            try {
+              final data = doc.data() as Map<String, dynamic>?;
+              if (data != null) {
+                final capture = CaptureModel.fromJson({...data, 'id': doc.id});
+                results.add(capture);
+                seenIds.add(capture.id);
+              }
+            } catch (_) {}
+          }
+        }
+      } catch (_) {}
     }
+
+    // Sort combined results by createdAt descending
+    results.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    
+    // Respect the limit
+    final finalResults = results.length > limit ? results.sublist(0, limit) : results;
+    AppLogger.info('🗺️ getPublicCaptures returning ${finalResults.length} total captures for the map');
+    
+    return finalResults;
   }
 
   /// Get user captures with limit

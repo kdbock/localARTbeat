@@ -32,6 +32,8 @@
 	<false/>
 	<key>NSCameraUsageDescription</key>
 	<string>ARTbeat needs access to your camera to capture photos of public art and share them with the community.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>ARTbeat needs access to your microphone when recording video captures of public art.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>ARTbeat needs access to your photo library to let you upload and share your artwork.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>

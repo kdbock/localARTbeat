@@ -81,8 +81,8 @@ class _CaptureUploadScreenState extends State<CaptureUploadScreen> {
 
       if (accepted != true) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('You must accept capture terms before submitting.'),
+          SnackBar(
+            content: Text('capture_upload_error_terms_required'.tr()),
           ),
         );
         return;

@@ -1,4 +1,5 @@
 import 'dart:developer' as developer;
+import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -44,6 +45,10 @@ class ImageManagementService {
     // Only skip in actual test environments, not debug mode
     return const bool.fromEnvironment('FLUTTER_TEST') ||
         (Zone.current[#test] != null);
+  }
+
+  bool get _shouldBypassCachedNetworkImageOnThisPlatform {
+    return !kIsWeb && Platform.isIOS;
   }
 
   /// Initialize the image management service
@@ -158,6 +163,24 @@ class ImageManagementService {
         height: height,
         color: Colors.grey[200],
         child: errorWidget ?? _buildErrorWidget(width, height),
+      );
+    }
+
+    // iOS native asset loading can fail for objective_c in some simulator/toolchain
+    // combinations. Bypass cache-backed image loaders to keep images visible.
+    if (_shouldBypassCachedNetworkImageOnThisPlatform) {
+      return Image.network(
+        imageUrl,
+        width: width,
+        height: height,
+        fit: fit,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return placeholder ?? _buildPlaceholder(width, height);
+        },
+        errorBuilder: (context, error, stackTrace) {
+          return errorWidget ?? _buildErrorWidget(width, height);
+        },
       );
     }
 

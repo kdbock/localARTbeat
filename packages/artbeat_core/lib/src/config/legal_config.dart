@@ -16,4 +16,7 @@ class LegalConfig {
   static const int accountDeletionPrimaryDays = 30;
   static const int backupPurgeDays = 60;
   static const int financialRetentionYears = 7;
+
+  static const String refundPolicySummary =
+      'All purchases are final and non-refundable, except where required by law or platform policy.';
 }

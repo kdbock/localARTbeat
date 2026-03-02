@@ -93,7 +93,7 @@ class _TermsAndConditionsScreenState extends State<TermsAndConditionsScreen> {
                     child: SizedBox(
                       width: double.infinity,
                       child: HudButton(
-                        label: _isSaving ? 'Saving...' : 'I Agree - Continue',
+                        label: _isSaving ? 'terms_saving'.tr() : 'terms_agree_continue'.tr(),
                         icon: Icons.check_circle_outline,
                         onTap: _isSaving ? () {} : _acceptAndContinue,
                       ),
@@ -108,26 +108,4 @@ class _TermsAndConditionsScreenState extends State<TermsAndConditionsScreen> {
   }
 }
 
-const String _termsText = '''
-Capture & Community Rules
-
-Before submitting a capture, confirm all of the following:
-
-1. Safety First
-- Do not enter restricted, dangerous, or private areas.
-- Follow local laws and posted signage.
-
-2. Rights & Permissions
-- Only upload content you own or have permission to share.
-- Respect artist copyrights, trademarks, and property rights.
-
-3. Content Standards
-- No harassment, hateful content, threats, or illegal activity.
-- No explicit sexual content or exploitative imagery.
-- Submissions can be removed for policy violations.
-
-4. Public Visibility
-- Approved captures may appear in public feeds and discovery surfaces.
-
-By continuing, you confirm you understand and agree to these rules.
-''';
+final String _termsText = 'terms_content'.tr();

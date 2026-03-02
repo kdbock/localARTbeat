@@ -4,22 +4,86 @@ Owner: Kristy Kelly
 Environment: `wordnerd-artbeat` (staging)  
 Goal: manually verify legal/data-rights UX and admin workflow in one session.
 
+## Quick Walkthrough (Non-Technical)
+
+Use this section if you are not a developer. Ignore the detailed sections below until you need them.
+
+What you need:
+- 2 test accounts you can log into:
+- `User A` (normal account)
+- `Admin` (admin account)
+- A phone or emulator with the staging build installed.
+- A place to save screenshots.
+
+### Part 1: User A creates requests
+
+1. Log in as `User A`.
+2. Open: `Settings` -> `Privacy`.
+3. Confirm you can see:
+- `Request Data Export`
+- `Request Data Deletion`
+4. Tap `Request Data Export`.
+5. Tap `Request Data Deletion`.
+6. Take a screenshot showing both requests in the list with status `pending`.
+7. Try to submit the same request type again.
+8. Confirm you get a clear message that duplicate pending requests are blocked.
+
+Pass if:
+- Both request buttons are visible.
+- Both requests appear as `pending`.
+- Duplicate request is blocked.
+
+### Part 2: Admin processes requests
+
+1. Log out.
+2. Log in as `Admin`.
+3. Open the admin data-rights queue screen.
+4. Filter to `pending`.
+5. Open export request and move it:
+- `pending` -> `in_review`
+- then `in_review` -> `fulfilled`
+6. Open deletion request and move it:
+- `pending` -> `in_review`
+- then `in_review` -> `fulfilled`
+7. Take screenshots before and after status changes.
+
+Pass if:
+- Admin can see requests.
+- Status updates work and end at `fulfilled`.
+- No error appears when fulfilling deletion.
+
+### Part 3: Confirm deletion actually happened
+
+1. Log out.
+2. Try to log back in as `User A`.
+3. Confirm login fails.
+4. Capture any available evidence screen/log for the completed deletion request.
+
+Pass if:
+- `User A` cannot log in after deletion fulfillment.
+- You have screenshot/log evidence of the fulfilled deletion.
+
+### Final result
+
+Mark the session `PASS` only if all three parts pass.  
+If anything fails, mark `FAIL`, take a screenshot, and note exactly which step failed.
+
 ## Session Setup (5-10 min)
 
-- [x ] Confirm app build points to staging Firebase project.
-- [ x] Confirm admin account can access admin data-requests screen.
-- [ x] Prepare two test users:
-- [ x] `User A` (normal user) for request submission.
-- [x ] `Admin` (userType=`admin`) for queue processing.
-- [ x] Open a notes doc and record:
-- [ x] date/time
-- [x ] app build/version
-- [x ] tester name
-- [x ] test user IDs/emails
+- [ ] Confirm app build points to staging Firebase project.
+- [ ] Confirm admin account can access admin data-requests screen.
+- [ ] Prepare two test users:
+- [ ] `User A` (normal user) for request submission.
+- [ ] `Admin` (userType=`admin`) for queue processing.
+- [ ] Open a notes doc and record:
+- [ ] date/time
+- [ ] app build/version
+- [ ] tester name
+- [ ] test user IDs/emails
 
 ## Preflight Checks (5 min)
 
-- [x ] Open Privacy Policy screen and verify security wording is current and non-overpromising.
+- [ ] Open Privacy Policy screen and verify security wording is current and non-overpromising.
 Expected:
 - Security section mentions safeguards and encrypted channels.
 - No claim that cannot be directly proven (for example forced 2FA guarantee).

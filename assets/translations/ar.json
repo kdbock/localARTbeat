@@ -6161,5 +6161,12 @@
   "progress_card_streak": "سلسلة",
   "progress_card_discoveries": "الاكتشافات",
   "progress_card_weekly_goal": "الهدف الأسبوعي",
-  "progress_card_complete": "إكمال"
+  "progress_card_complete": "إكمال",
+  "auth_google_signin_failed": "فشل تسجيل الدخول باستخدام Google",
+  "drawer_guest_user": "مستخدم ضيف",
+  "drawer_not_signed_in": "غير مسجل الدخول",
+  "drawer_platform_curation": "تنسيق المنصة",
+  "drawer_security_center": "مركز الأمان",
+  "drawer_system_health": "حالة النظام",
+  "drawer_payment_management": "إدارة المدفوعات"
 }

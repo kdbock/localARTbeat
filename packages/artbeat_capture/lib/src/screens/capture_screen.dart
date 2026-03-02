@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import '../services/advanced_camera_service.dart';
@@ -27,9 +28,28 @@ class _CaptureScreenState extends State<CaptureScreen> {
 
   Future<void> _initializeCamera() async {
     setState(() => _isInitializing = true);
-    await _cameraService.initialize();
-    if (mounted) {
-      setState(() => _isInitializing = false);
+    try {
+      final success = await _cameraService.initialize();
+      if (!success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'capture_camera_error_init'.tr(),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        AppLogger.error('Camera initialization failed: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('capture_camera_error_generic'.tr(namedArgs: {'error': e.toString()}))),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isInitializing = false);
+      }
     }
   }
 
@@ -58,8 +78,8 @@ class _CaptureScreenState extends State<CaptureScreen> {
       if (mounted) {
         AppLogger.error('Camera capture failed: $e');
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to take picture. Please try again.'),
+          SnackBar(
+            content: Text('capture_camera_error_take_picture'.tr()),
           ),
         );
       }
@@ -105,10 +125,10 @@ class _CaptureScreenState extends State<CaptureScreen> {
           else if (_isInitializing)
             const Center(child: CircularProgressIndicator(color: Colors.white))
           else
-            const Center(
+            Center(
               child: Text(
-                'Camera not available',
-                style: TextStyle(color: Colors.white),
+                'capture_camera_not_available'.tr(),
+                style: const TextStyle(color: Colors.white),
               ),
             ),
 
