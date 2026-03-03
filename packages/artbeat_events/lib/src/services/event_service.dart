@@ -24,7 +24,8 @@ class EventService {
   }) : _firestore = firestore ?? FirebaseFirestore.instance,
        _auth = auth ?? FirebaseAuth.instance,
        _logger = logger ?? Logger(),
-       _recurringEventService = recurringEventService ?? RecurringEventService();
+       _recurringEventService =
+           recurringEventService ?? RecurringEventService();
 
   /// Create a new event
   /// If the event is recurring, this will also generate all recurring instances

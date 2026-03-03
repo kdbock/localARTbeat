@@ -93,7 +93,9 @@ class DirectCommissionModel {
               .toList() ??
           [],
       specs: CommissionSpecs.fromMap(
-        Map<String, dynamic>.from(data['specs'] as Map? ?? const <String, dynamic>{}),
+        Map<String, dynamic>.from(
+          data['specs'] as Map? ?? const <String, dynamic>{},
+        ),
       ),
       metadata: Map<String, dynamic>.from(
         data['metadata'] as Map<String, dynamic>? ?? {},

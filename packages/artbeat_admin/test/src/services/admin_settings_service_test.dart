@@ -28,11 +28,15 @@ void main() {
       service = AdminSettingsService(firestore: firestore, auth: auth);
     });
 
-    test('getSettings creates defaults when admin_settings is missing', () async {
+    test('getSettings creates defaults when admin_settings is missing',
+        () async {
       final settings = await service.getSettings();
 
       expect(settings.appName, 'ARTbeat');
-      final doc = await firestore.collection('admin_settings').doc('app_settings').get();
+      final doc = await firestore
+          .collection('admin_settings')
+          .doc('app_settings')
+          .get();
       expect(doc.exists, isTrue);
     });
 
@@ -45,7 +49,8 @@ void main() {
       );
     });
 
-    test('addBannedWord and removeBannedWord persist normalized values', () async {
+    test('addBannedWord and removeBannedWord persist normalized values',
+        () async {
       when(auth.currentUser).thenReturn(_FakeUser('admin-1'));
       await firestore.collection('admin_settings').doc('app_settings').set({
         'bannedWords': ['spam'],

@@ -32,9 +32,9 @@ void main() {
     });
 
     test('isValid fails for unsupported distance unit', () {
-      final invalid = UserSettingsModel.defaultSettings('user-3').copyWith(
-        distanceUnit: 'meters',
-      );
+      final invalid = UserSettingsModel.defaultSettings(
+        'user-3',
+      ).copyWith(distanceUnit: 'meters');
 
       expect(invalid.isValid(), isFalse);
     });

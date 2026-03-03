@@ -191,29 +191,32 @@ void main() {
       ).called(1);
     });
 
-    test('pauseWalk and abandonWalk update status and clear progress', () async {
-      const uid = 'test_user';
-      const artWalkId = 'test_walk';
+    test(
+      'pauseWalk and abandonWalk update status and clear progress',
+      () async {
+        const uid = 'test_user';
+        const artWalkId = 'test_walk';
 
-      when(mockDocRef.get()).thenAnswer((_) async {
-        final doc = MockDocumentSnapshot<Map<String, dynamic>>();
-        when(doc.exists).thenReturn(false);
-        return doc;
-      });
-      when(mockDocRef.set(any)).thenAnswer((_) async => {});
+        when(mockDocRef.get()).thenAnswer((_) async {
+          final doc = MockDocumentSnapshot<Map<String, dynamic>>();
+          when(doc.exists).thenReturn(false);
+          return doc;
+        });
+        when(mockDocRef.set(any)).thenAnswer((_) async => {});
 
-      await progressService.startWalk(
-        artWalkId: artWalkId,
-        totalArtCount: 5,
-        userId: uid,
-      );
+        await progressService.startWalk(
+          artWalkId: artWalkId,
+          totalArtCount: 5,
+          userId: uid,
+        );
 
-      final paused = await progressService.pauseWalk();
-      expect(paused.status, WalkStatus.paused);
-      expect(progressService.currentProgress?.status, WalkStatus.paused);
+        final paused = await progressService.pauseWalk();
+        expect(paused.status, WalkStatus.paused);
+        expect(progressService.currentProgress?.status, WalkStatus.paused);
 
-      await progressService.abandonWalk();
-      expect(progressService.currentProgress, isNull);
-    });
+        await progressService.abandonWalk();
+        expect(progressService.currentProgress, isNull);
+      },
+    );
   });
 }

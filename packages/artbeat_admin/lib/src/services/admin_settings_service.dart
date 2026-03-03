@@ -10,8 +10,8 @@ class AdminSettingsService {
   AdminSettingsService({
     FirebaseFirestore? firestore,
     FirebaseAuth? auth,
-  }) : _firestore = firestore ?? FirebaseFirestore.instance,
-       _auth = auth ?? FirebaseAuth.instance;
+  })  : _firestore = firestore ?? FirebaseFirestore.instance,
+        _auth = auth ?? FirebaseAuth.instance;
 
   static const String _settingsDocId = 'app_settings';
 

@@ -8,7 +8,7 @@ class ModerationService {
   final FirebaseFirestore _firestore;
 
   ModerationService({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+    : _firestore = firestore ?? FirebaseFirestore.instance;
 
   // Profanity filter - basic implementation
   static const List<String> _profanityList = [

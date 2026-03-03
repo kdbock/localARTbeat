@@ -43,53 +43,60 @@ void main() {
       expect(() => service.currentUserId, throwsA(isA<Exception>()));
     });
 
-    test('addReaction persists reaction and updates message reactionCount', () async {
-      final user = _FakeUser(
-        'u1',
-        name: 'User One',
-        avatar: 'https://example.com/u1.png',
-      );
-      when(auth.currentUser).thenReturn(user);
+    test(
+      'addReaction persists reaction and updates message reactionCount',
+      () async {
+        final user = _FakeUser(
+          'u1',
+          name: 'User One',
+          avatar: 'https://example.com/u1.png',
+        );
+        when(auth.currentUser).thenReturn(user);
 
-      await firestore.collection('chats').doc('c1').collection('messages').doc('m1').set({
-        'text': 'hello',
-        'senderId': 'u2',
-      });
+        await firestore
+            .collection('chats')
+            .doc('c1')
+            .collection('messages')
+            .doc('m1')
+            .set({'text': 'hello', 'senderId': 'u2'});
 
-      await service.addReaction(
-        messageId: 'm1',
-        chatId: 'c1',
-        reactionType: ReactionTypes.like,
-      );
+        await service.addReaction(
+          messageId: 'm1',
+          chatId: 'c1',
+          reactionType: ReactionTypes.like,
+        );
 
-      final reactionDoc = await firestore
-          .collection('chats')
-          .doc('c1')
-          .collection('messages')
-          .doc('m1')
-          .collection('reactions')
-          .doc('m1_u1_like')
-          .get();
-      final messageDoc = await firestore
-          .collection('chats')
-          .doc('c1')
-          .collection('messages')
-          .doc('m1')
-          .get();
+        final reactionDoc = await firestore
+            .collection('chats')
+            .doc('c1')
+            .collection('messages')
+            .doc('m1')
+            .collection('reactions')
+            .doc('m1_u1_like')
+            .get();
+        final messageDoc = await firestore
+            .collection('chats')
+            .doc('c1')
+            .collection('messages')
+            .doc('m1')
+            .get();
 
-      expect(reactionDoc.exists, isTrue);
-      expect(reactionDoc.data()!['emoji'], '👍');
-      expect(messageDoc.data()!['reactionCount'], 1);
-    });
+        expect(reactionDoc.exists, isTrue);
+        expect(reactionDoc.data()!['emoji'], '👍');
+        expect(messageDoc.data()!['reactionCount'], 1);
+      },
+    );
 
     test('toggleReaction removes existing reaction on second toggle', () async {
       final user = _FakeUser('u1', name: 'User One');
       when(auth.currentUser).thenReturn(user);
 
-      await firestore.collection('chats').doc('c1').collection('messages').doc('m2').set({
-        'text': 'hi',
-        'senderId': 'u3',
-      });
+      await firestore
+          .collection('chats')
+          .doc('c1')
+          .collection('messages')
+          .doc('m2')
+          .set({'text': 'hi', 'senderId': 'u3'});
 
       await service.toggleReaction(
         messageId: 'm2',

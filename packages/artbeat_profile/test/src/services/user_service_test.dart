@@ -33,18 +33,21 @@ void main() {
       expect(service.currentUser?.uid, 'u1');
     });
 
-    test('getCaptureUserSettings returns defaults when field is missing', () async {
-      await firestore.collection('users').doc('u1').set({
-        'displayName': 'User',
-      });
+    test(
+      'getCaptureUserSettings returns defaults when field is missing',
+      () async {
+        await firestore.collection('users').doc('u1').set({
+          'displayName': 'User',
+        });
 
-      final settings = await service.getCaptureUserSettings('u1');
+        final settings = await service.getCaptureUserSettings('u1');
 
-      expect(settings, isNotNull);
-      expect(settings!['autoSave'], isTrue);
-      expect(settings['quality'], 'high');
-      expect(settings['enableOCR'], isTrue);
-    });
+        expect(settings, isNotNull);
+        expect(settings!['autoSave'], isTrue);
+        expect(settings['quality'], 'high');
+        expect(settings['enableOCR'], isTrue);
+      },
+    );
 
     test('updateUserProfile merges updates and sets updatedAt', () async {
       await firestore.collection('users').doc('u2').set({

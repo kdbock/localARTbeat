@@ -28,7 +28,9 @@ void main() {
 
       expect(result.shouldFlag, isTrue);
       expect(
-        result.violations.any((v) => v.type == ModerationViolationType.shortContent),
+        result.violations.any(
+          (v) => v.type == ModerationViolationType.shortContent,
+        ),
         isTrue,
       );
     });

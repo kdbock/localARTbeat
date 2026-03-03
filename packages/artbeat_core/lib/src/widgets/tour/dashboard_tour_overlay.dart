@@ -338,8 +338,10 @@ class _DashboardTourOverlayState extends State<DashboardTourOverlay>
               onPressed: _finish,
               style: TextButton.styleFrom(
                 foregroundColor: Colors.white.withValues(alpha: 0.6),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
               ),
               child: Text(
                 'SKIP',
@@ -954,8 +956,10 @@ class _ExploreTourOverlayState extends State<ExploreTourOverlay>
               onPressed: _finish,
               style: TextButton.styleFrom(
                 foregroundColor: Colors.white.withValues(alpha: 0.6),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
               ),
               child: Text(
                 'SKIP',

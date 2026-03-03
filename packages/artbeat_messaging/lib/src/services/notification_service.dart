@@ -60,6 +60,108 @@ class NotificationService {
   static const String _usersCollection = 'users';
   static const String _notificationsCollection = 'notifications';
 
+  Future<void> _initializeLocalNotificationsCompat({
+    required InitializationSettings settings,
+    void Function(NotificationResponse)? onDidReceiveNotificationResponse,
+  }) async {
+    final dynamic plugin = _localNotifications;
+    try {
+      await plugin.initialize(
+        settings: settings,
+        onDidReceiveNotificationResponse: onDidReceiveNotificationResponse,
+      );
+    } catch (_) {
+      await plugin.initialize(
+        settings,
+        onDidReceiveNotificationResponse: onDidReceiveNotificationResponse,
+      );
+    }
+  }
+
+  Future<void> _showLocalNotificationCompat({
+    required int id,
+    String? title,
+    String? body,
+    required NotificationDetails notificationDetails,
+    String? payload,
+  }) async {
+    final dynamic plugin = _localNotifications;
+    try {
+      await plugin.show(
+        id: id,
+        title: title,
+        body: body,
+        notificationDetails: notificationDetails,
+        payload: payload,
+      );
+    } catch (_) {
+      await plugin.show(id, title, body, notificationDetails, payload: payload);
+    }
+  }
+
+  Future<void> _zonedScheduleCompat({
+    required int id,
+    String? title,
+    String? body,
+    required tz.TZDateTime scheduledDate,
+    required NotificationDetails notificationDetails,
+    String? payload,
+  }) async {
+    final dynamic plugin = _localNotifications;
+    try {
+      await plugin.zonedSchedule(
+        id: id,
+        title: title,
+        body: body,
+        scheduledDate: scheduledDate,
+        notificationDetails: notificationDetails,
+        payload: payload,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      );
+    } catch (_) {
+      await plugin.zonedSchedule(
+        id,
+        title,
+        body,
+        scheduledDate,
+        notificationDetails,
+        payload: payload,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      );
+    }
+  }
+
+  Future<void> _initializeIOSPluginCompat({
+    required DarwinInitializationSettings settings,
+    void Function(NotificationResponse)? onDidReceiveNotificationResponse,
+  }) async {
+    final dynamic iosPlugin = _localNotifications
+        .resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin
+        >();
+    if (iosPlugin == null) return;
+    try {
+      await iosPlugin.initialize(
+        settings: settings,
+        onDidReceiveNotificationResponse: onDidReceiveNotificationResponse,
+      );
+    } catch (_) {
+      await iosPlugin.initialize(
+        settings,
+        onDidReceiveNotificationResponse: onDidReceiveNotificationResponse,
+      );
+    }
+  }
+
+  Future<void> _cancelLocalNotificationCompat(int notificationId) async {
+    final dynamic plugin = _localNotifications;
+    try {
+      await plugin.cancel(id: notificationId);
+    } catch (_) {
+      await plugin.cancel(notificationId);
+    }
+  }
+
   /// Initialize notification settings and request permissions
   Future<void> initialize() async {
     try {
@@ -75,7 +177,7 @@ class NotificationService {
         android: androidInit,
         iOS: iosInit,
       );
-      await _localNotifications.initialize(
+      await _initializeLocalNotificationsCompat(
         settings: initSettings,
         onDidReceiveNotificationResponse: _onNotificationResponse,
       );
@@ -341,7 +443,7 @@ class NotificationService {
       // Create payload with type and route information for tap handling
       final payload = '${type.value}:${notificationData['route'] ?? ''}';
 
-      await _localNotifications.show(
+      await _showLocalNotificationCompat(
         id: notificationId,
         title: title,
         body: body,
@@ -440,7 +542,7 @@ class NotificationService {
     String? payload,
   }) async {
     try {
-      await _localNotifications.zonedSchedule(
+      await _zonedScheduleCompat(
         id: id ?? DateTime.now().millisecondsSinceEpoch ~/ 1000,
         title: title,
         body: body,
@@ -456,7 +558,6 @@ class NotificationService {
           iOS: DarwinNotificationDetails(),
         ),
         payload: payload,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       );
     } catch (e) {
       AppLogger.error('Error scheduling notification: $e');
@@ -580,16 +681,12 @@ class NotificationService {
             },
           );
 
-      await _localNotifications
-          .resolvePlatformSpecificImplementation<
-            IOSFlutterLocalNotificationsPlugin
-          >()
-          ?.initialize(
-            settings: DarwinInitializationSettings(
-              notificationCategories: [messageCategory],
-            ),
-            onDidReceiveNotificationResponse: _onNotificationResponse,
-          );
+      await _initializeIOSPluginCompat(
+        settings: DarwinInitializationSettings(
+          notificationCategories: [messageCategory],
+        ),
+        onDidReceiveNotificationResponse: _onNotificationResponse,
+      );
     } catch (e) {
       AppLogger.error('Error setting up notification categories: $e');
     }
@@ -656,7 +753,7 @@ class NotificationService {
   /// Cancel a specific scheduled notification
   Future<void> cancelScheduledNotification(int notificationId) async {
     try {
-      await _localNotifications.cancel(id: notificationId);
+      await _cancelLocalNotificationCompat(notificationId);
     } catch (e) {
       AppLogger.error('Error cancelling scheduled notification: $e');
     }

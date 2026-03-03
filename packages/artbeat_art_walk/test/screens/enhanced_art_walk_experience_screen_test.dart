@@ -27,7 +27,8 @@ class FakeArtWalkService extends ArtWalkService {
   String? getCurrentUserId() => currentUserId;
 }
 
-class MockArtWalkProgressService extends Mock implements ArtWalkProgressService {}
+class MockArtWalkProgressService extends Mock
+    implements ArtWalkProgressService {}
 
 class MockSocialService extends Mock implements SocialService {}
 
@@ -107,33 +108,32 @@ void main() {
     },
   );
 
-  testWidgets(
-    'falls back to provider ArtWalkService when override is absent',
-    (tester) async {
-      final walk = buildWalk();
-      final pendingArtPieces = Completer<List<PublicArtModel>>();
-      final providerArtWalkService = FakeArtWalkService(pendingArtPieces.future);
-      final progressService = MockArtWalkProgressService();
-      final audioService = AudioNavigationService();
-      final socialService = MockSocialService();
-      final navigationService = MockArtWalkNavigationService();
+  testWidgets('falls back to provider ArtWalkService when override is absent', (
+    tester,
+  ) async {
+    final walk = buildWalk();
+    final pendingArtPieces = Completer<List<PublicArtModel>>();
+    final providerArtWalkService = FakeArtWalkService(pendingArtPieces.future);
+    final progressService = MockArtWalkProgressService();
+    final audioService = AudioNavigationService();
+    final socialService = MockSocialService();
+    final navigationService = MockArtWalkNavigationService();
 
-      await tester.pumpWidget(
-        buildHarness(
-          walk: walk,
-          providerArtWalkService: providerArtWalkService,
-          progressService: progressService,
-          audioService: audioService,
-          socialService: socialService,
-          navigationService: navigationService,
-        ),
-      );
-      await tester.pump(const Duration(milliseconds: 100));
+    await tester.pumpWidget(
+      buildHarness(
+        walk: walk,
+        providerArtWalkService: providerArtWalkService,
+        progressService: progressService,
+        audioService: audioService,
+        socialService: socialService,
+        navigationService: navigationService,
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 100));
 
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
-      expect(find.byType(GoogleMap), findsNothing);
-    },
-  );
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.byType(GoogleMap), findsNothing);
+  });
 
   testWidgets(
     'throws when neither override nor provider ArtWalkService is supplied',

@@ -20,7 +20,8 @@ class _FakeUser extends Fake implements User {
   String get uid => _uid;
 }
 
-class _MockRecurringEventService extends Mock implements RecurringEventService {}
+class _MockRecurringEventService extends Mock
+    implements RecurringEventService {}
 
 void main() {
   ArtbeatEvent event0({DateTime? dateTime}) {
@@ -82,46 +83,54 @@ void main() {
       expect(result, isNull);
     });
 
-    test('getEvent returns mapped ArtbeatEvent for existing document', () async {
-      final event = event0();
-      final docRef = await firestore.collection('events').add(event.toFirestore());
+    test(
+      'getEvent returns mapped ArtbeatEvent for existing document',
+      () async {
+        final event = event0();
+        final docRef = await firestore
+            .collection('events')
+            .add(event.toFirestore());
 
-      final loaded = await service.getEvent(docRef.id);
+        final loaded = await service.getEvent(docRef.id);
 
-      expect(loaded, isNotNull);
-      expect(loaded!.id, docRef.id);
-      expect(loaded.title, event.title);
-      expect(loaded.location, event.location);
-    });
+        expect(loaded, isNotNull);
+        expect(loaded!.id, docRef.id);
+        expect(loaded.title, event.title);
+        expect(loaded.location, event.location);
+      },
+    );
 
-    test('searchEvents filters by title/description/location and sorts by date', () async {
-      final now = DateTime.now();
-      final e1 = event0(dateTime: now.add(const Duration(days: 3))).copyWith(
-        title: 'Street Art Jam',
-        description: 'Downtown jam session',
-        location: 'Downtown',
-      );
-      final e2 = event0(dateTime: now.add(const Duration(days: 1))).copyWith(
-        title: 'Gallery Night',
-        description: 'Street artists meetup',
-        location: 'Midtown',
-      );
-      final e3 = event0(dateTime: now.add(const Duration(days: 2))).copyWith(
-        title: 'Portrait Basics',
-        description: 'Beginner course',
-        location: 'Uptown',
-      );
+    test(
+      'searchEvents filters by title/description/location and sorts by date',
+      () async {
+        final now = DateTime.now();
+        final e1 = event0(dateTime: now.add(const Duration(days: 3))).copyWith(
+          title: 'Street Art Jam',
+          description: 'Downtown jam session',
+          location: 'Downtown',
+        );
+        final e2 = event0(dateTime: now.add(const Duration(days: 1))).copyWith(
+          title: 'Gallery Night',
+          description: 'Street artists meetup',
+          location: 'Midtown',
+        );
+        final e3 = event0(dateTime: now.add(const Duration(days: 2))).copyWith(
+          title: 'Portrait Basics',
+          description: 'Beginner course',
+          location: 'Uptown',
+        );
 
-      await firestore.collection('events').add(e1.toFirestore());
-      await firestore.collection('events').add(e2.toFirestore());
-      await firestore.collection('events').add(e3.toFirestore());
+        await firestore.collection('events').add(e1.toFirestore());
+        await firestore.collection('events').add(e2.toFirestore());
+        await firestore.collection('events').add(e3.toFirestore());
 
-      final results = await service.searchEvents('street');
+        final results = await service.searchEvents('street');
 
-      expect(results.length, 2);
-      // Title match should rank first.
-      expect(results.first.title, 'Street Art Jam');
-    });
+        expect(results.length, 2);
+        // Title match should rank first.
+        expect(results.first.title, 'Street Art Jam');
+      },
+    );
 
     test('purchaseTickets throws when no authenticated user', () async {
       when(auth.currentUser).thenReturn(null);
@@ -138,58 +147,74 @@ void main() {
       );
     });
 
-    test('purchaseTickets creates purchase and updates attendee/ticket counts', () async {
-      final user = _FakeUser('user-123');
-      when(auth.currentUser).thenReturn(user);
+    test(
+      'purchaseTickets creates purchase and updates attendee/ticket counts',
+      () async {
+        final user = _FakeUser('user-123');
+        when(auth.currentUser).thenReturn(user);
 
-      final event = event0().copyWith(
-        id: 'event-123',
-        ticketTypes: const [
-          TicketType(
-            id: 'general',
-            name: 'General',
-            category: TicketCategory.paid,
-            price: 15,
-            quantity: 5,
-            quantitySold: 1,
-          ),
-        ],
-      );
-      await firestore.collection('events').doc('event-123').set(event.toFirestore());
+        final event = event0().copyWith(
+          id: 'event-123',
+          ticketTypes: const [
+            TicketType(
+              id: 'general',
+              name: 'General',
+              category: TicketCategory.paid,
+              price: 15,
+              quantity: 5,
+              quantitySold: 1,
+            ),
+          ],
+        );
+        await firestore
+            .collection('events')
+            .doc('event-123')
+            .set(event.toFirestore());
 
-      final purchaseId = await service.purchaseTickets(
-        eventId: 'event-123',
-        ticketTypeId: 'general',
-        quantity: 2,
-        userEmail: 'user@example.com',
-        userName: 'Test User',
-      );
+        final purchaseId = await service.purchaseTickets(
+          eventId: 'event-123',
+          ticketTypeId: 'general',
+          quantity: 2,
+          userEmail: 'user@example.com',
+          userName: 'Test User',
+        );
 
-      expect(purchaseId, isNotEmpty);
+        expect(purchaseId, isNotEmpty);
 
-      final purchaseDoc =
-          await firestore.collection('ticket_purchases').doc(purchaseId).get();
-      expect(purchaseDoc.exists, isTrue);
-      expect(purchaseDoc.data()!['userId'], 'user-123');
-      expect(purchaseDoc.data()!['quantity'], 2);
+        final purchaseDoc = await firestore
+            .collection('ticket_purchases')
+            .doc(purchaseId)
+            .get();
+        expect(purchaseDoc.exists, isTrue);
+        expect(purchaseDoc.data()!['userId'], 'user-123');
+        expect(purchaseDoc.data()!['quantity'], 2);
 
-      final eventDoc = await firestore.collection('events').doc('event-123').get();
-      final attendeeIds = (eventDoc.data()!['attendeeIds'] as List<dynamic>).cast<String>();
-      expect(attendeeIds.contains('user-123'), isTrue);
+        final eventDoc = await firestore
+            .collection('events')
+            .doc('event-123')
+            .get();
+        final attendeeIds = (eventDoc.data()!['attendeeIds'] as List<dynamic>)
+            .cast<String>();
+        expect(attendeeIds.contains('user-123'), isTrue);
 
-      final ticketTypes =
-          (eventDoc.data()!['ticketTypes'] as List<dynamic>)
-              .cast<Map<String, dynamic>>();
-      final generalTicket = ticketTypes.firstWhere((t) => t['id'] == 'general');
-      expect(generalTicket['quantitySold'], 3);
-    });
+        final ticketTypes = (eventDoc.data()!['ticketTypes'] as List<dynamic>)
+            .cast<Map<String, dynamic>>();
+        final generalTicket = ticketTypes.firstWhere(
+          (t) => t['id'] == 'general',
+        );
+        expect(generalTicket['quantitySold'], 3);
+      },
+    );
 
     test('purchaseTickets throws when ticket type does not exist', () async {
       final user = _FakeUser('user-123');
       when(auth.currentUser).thenReturn(user);
 
       final event = event0().copyWith(id: 'event-404');
-      await firestore.collection('events').doc('event-404').set(event.toFirestore());
+      await firestore
+          .collection('events')
+          .doc('event-404')
+          .set(event.toFirestore());
 
       await expectLater(
         () => service.purchaseTickets(
@@ -203,85 +228,108 @@ void main() {
       );
     });
 
-    test('getEvents returns only purchased events when onlyMyTickets=true', () async {
-      final user = _FakeUser('user-7');
-      when(auth.currentUser).thenReturn(user);
+    test(
+      'getEvents returns only purchased events when onlyMyTickets=true',
+      () async {
+        final user = _FakeUser('user-7');
+        when(auth.currentUser).thenReturn(user);
 
-      final eventA = event0().copyWith(id: 'event-a');
-      final eventB = event0().copyWith(
-        id: 'event-b',
-        title: 'Another Event',
-        dateTime: DateTime.now().add(const Duration(days: 2)),
-      );
+        final eventA = event0().copyWith(id: 'event-a');
+        final eventB = event0().copyWith(
+          id: 'event-b',
+          title: 'Another Event',
+          dateTime: DateTime.now().add(const Duration(days: 2)),
+        );
 
-      await firestore.collection('events').doc('event-a').set(eventA.toFirestore());
-      await firestore.collection('events').doc('event-b').set(eventB.toFirestore());
+        await firestore
+            .collection('events')
+            .doc('event-a')
+            .set(eventA.toFirestore());
+        await firestore
+            .collection('events')
+            .doc('event-b')
+            .set(eventB.toFirestore());
 
-      await firestore.collection('ticket_purchases').add({
-        'eventId': 'event-b',
-        'userId': 'user-7',
-        'ticketTypeId': 'general',
-        'userEmail': 'user@example.com',
-        'userName': 'User',
-        'quantity': 1,
-        'totalAmount': 15.0,
-        'status': 'confirmed',
-        'purchaseDate': DateTime.now(),
-      });
+        await firestore.collection('ticket_purchases').add({
+          'eventId': 'event-b',
+          'userId': 'user-7',
+          'ticketTypeId': 'general',
+          'userEmail': 'user@example.com',
+          'userName': 'User',
+          'quantity': 1,
+          'totalAmount': 15.0,
+          'status': 'confirmed',
+          'purchaseDate': DateTime.now(),
+        });
 
-      final results = await service.getEvents(onlyMyTickets: true);
+        final results = await service.getEvents(onlyMyTickets: true);
 
-      expect(results.length, 1);
-      expect(results.first.id, 'event-b');
-    });
+        expect(results.length, 1);
+        expect(results.first.id, 'event-b');
+      },
+    );
 
-    test('refundTicketPurchase marks refunded and decreases sold quantity', () async {
-      final event = event0(
-        dateTime: DateTime.now().add(const Duration(days: 7)),
-      ).copyWith(
-        id: 'event-r1',
-        ticketTypes: const [
-          TicketType(
-            id: 'general',
-            name: 'General',
-            category: TicketCategory.paid,
-            price: 15,
-            quantity: 10,
-            quantitySold: 5,
-          ),
-        ],
-      );
-      await firestore.collection('events').doc('event-r1').set(event.toFirestore());
+    test(
+      'refundTicketPurchase marks refunded and decreases sold quantity',
+      () async {
+        final event =
+            event0(
+              dateTime: DateTime.now().add(const Duration(days: 7)),
+            ).copyWith(
+              id: 'event-r1',
+              ticketTypes: const [
+                TicketType(
+                  id: 'general',
+                  name: 'General',
+                  category: TicketCategory.paid,
+                  price: 15,
+                  quantity: 10,
+                  quantitySold: 5,
+                ),
+              ],
+            );
+        await firestore
+            .collection('events')
+            .doc('event-r1')
+            .set(event.toFirestore());
 
-      final purchase = TicketPurchase.create(
-        eventId: 'event-r1',
-        ticketTypeId: 'general',
-        userId: 'user-1',
-        userEmail: 'u@example.com',
-        userName: 'User',
-        quantity: 2,
-        totalAmount: 30,
-      ).copyWith(status: TicketPurchaseStatus.confirmed);
+        final purchase = TicketPurchase.create(
+          eventId: 'event-r1',
+          ticketTypeId: 'general',
+          userId: 'user-1',
+          userEmail: 'u@example.com',
+          userName: 'User',
+          quantity: 2,
+          totalAmount: 30,
+        ).copyWith(status: TicketPurchaseStatus.confirmed);
 
-      final purchaseRef = await firestore
-          .collection('ticket_purchases')
-          .add(purchase.toFirestore());
+        final purchaseRef = await firestore
+            .collection('ticket_purchases')
+            .add(purchase.toFirestore());
 
-      await service.refundTicketPurchase(purchaseRef.id, 'refund-abc');
+        await service.refundTicketPurchase(purchaseRef.id, 'refund-abc');
 
-      final purchaseDoc = await firestore
-          .collection('ticket_purchases')
-          .doc(purchaseRef.id)
-          .get();
-      expect(purchaseDoc.data()!['status'], TicketPurchaseStatus.refunded.name);
-      expect(purchaseDoc.data()!['refundId'], 'refund-abc');
+        final purchaseDoc = await firestore
+            .collection('ticket_purchases')
+            .doc(purchaseRef.id)
+            .get();
+        expect(
+          purchaseDoc.data()!['status'],
+          TicketPurchaseStatus.refunded.name,
+        );
+        expect(purchaseDoc.data()!['refundId'], 'refund-abc');
 
-      final eventDoc = await firestore.collection('events').doc('event-r1').get();
-      final ticketTypes =
-          (eventDoc.data()!['ticketTypes'] as List<dynamic>)
-              .cast<Map<String, dynamic>>();
-      final updatedGeneral = ticketTypes.firstWhere((t) => t['id'] == 'general');
-      expect(updatedGeneral['quantitySold'], 3);
-    });
+        final eventDoc = await firestore
+            .collection('events')
+            .doc('event-r1')
+            .get();
+        final ticketTypes = (eventDoc.data()!['ticketTypes'] as List<dynamic>)
+            .cast<Map<String, dynamic>>();
+        final updatedGeneral = ticketTypes.firstWhere(
+          (t) => t['id'] == 'general',
+        );
+        expect(updatedGeneral['quantitySold'], 3);
+      },
+    );
   });
 }

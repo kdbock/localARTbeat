@@ -6,27 +6,33 @@ import 'package:artbeat_community/models/direct_commission_model.dart';
 
 void main() {
   group('DirectCommissionModel', () {
-    test('fromFirestore defaults to digital/pending on unknown enum values', () async {
-      final firestore = FakeFirebaseFirestore();
-      await firestore.collection('direct_commissions').doc('d1').set({
-        'clientId': 'c1',
-        'clientName': 'Client',
-        'artistId': 'a1',
-        'artistName': 'Artist',
-        'type': 'unknown_type',
-        'title': 'Commission',
-        'description': 'Test',
-        'status': 'unknown_status',
-        'requestedAt': Timestamp.now(),
-        'specs': <String, dynamic>{},
-      });
+    test(
+      'fromFirestore defaults to digital/pending on unknown enum values',
+      () async {
+        final firestore = FakeFirebaseFirestore();
+        await firestore.collection('direct_commissions').doc('d1').set({
+          'clientId': 'c1',
+          'clientName': 'Client',
+          'artistId': 'a1',
+          'artistName': 'Artist',
+          'type': 'unknown_type',
+          'title': 'Commission',
+          'description': 'Test',
+          'status': 'unknown_status',
+          'requestedAt': Timestamp.now(),
+          'specs': <String, dynamic>{},
+        });
 
-      final doc = await firestore.collection('direct_commissions').doc('d1').get();
-      final model = DirectCommissionModel.fromFirestore(doc);
+        final doc = await firestore
+            .collection('direct_commissions')
+            .doc('d1')
+            .get();
+        final model = DirectCommissionModel.fromFirestore(doc);
 
-      expect(model.type, CommissionType.digital);
-      expect(model.status, CommissionStatus.pending);
-    });
+        expect(model.type, CommissionType.digital);
+        expect(model.status, CommissionStatus.pending);
+      },
+    );
 
     test('toFirestore serializes nested milestones/files/messages', () {
       final model = DirectCommissionModel(

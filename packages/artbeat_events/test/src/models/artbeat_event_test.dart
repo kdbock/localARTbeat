@@ -72,7 +72,10 @@ void main() {
 
     test('copyWith preserves id and overrides requested fields', () {
       final event = buildEvent();
-      final updated = event.copyWith(title: 'Updated Title', location: 'Uptown');
+      final updated = event.copyWith(
+        title: 'Updated Title',
+        location: 'Uptown',
+      );
 
       expect(updated.id, event.id);
       expect(updated.title, 'Updated Title');

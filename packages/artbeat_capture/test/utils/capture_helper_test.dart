@@ -12,8 +12,14 @@ void main() {
 
     test('validates file size boundaries', () {
       expect(CaptureHelper.isValidFileSize(0), isTrue);
-      expect(CaptureHelper.isValidFileSize(CaptureHelper.maxFileSizeBytes), isTrue);
-      expect(CaptureHelper.isValidFileSize(CaptureHelper.maxFileSizeBytes + 1), isFalse);
+      expect(
+        CaptureHelper.isValidFileSize(CaptureHelper.maxFileSizeBytes),
+        isTrue,
+      );
+      expect(
+        CaptureHelper.isValidFileSize(CaptureHelper.maxFileSizeBytes + 1),
+        isFalse,
+      );
       expect(CaptureHelper.isValidFileSize(-1), isFalse);
     });
 

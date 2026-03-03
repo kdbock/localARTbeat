@@ -31,10 +31,13 @@ void main() {
         isRead: false,
       );
 
-      final ref = await firestore.collection('profile_activities').add(
-        model.toFirestore(),
-      );
-      final doc = await firestore.collection('profile_activities').doc(ref.id).get();
+      final ref = await firestore
+          .collection('profile_activities')
+          .add(model.toFirestore());
+      final doc = await firestore
+          .collection('profile_activities')
+          .doc(ref.id)
+          .get();
       final restored = ProfileActivityModel.fromFirestore(doc);
 
       expect(restored.id, ref.id);

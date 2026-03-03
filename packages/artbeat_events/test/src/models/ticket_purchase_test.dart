@@ -31,32 +31,41 @@ void main() {
       expect(paidPurchase.formattedAmount, r'$40.00');
     });
 
-    test('toFirestore/fromFirestore round-trip preserves core fields', () async {
-      final firestore = FakeFirebaseFirestore();
-      final purchase = TicketPurchase.create(
-        eventId: 'event-1',
-        ticketTypeId: 'vip',
-        userId: 'user-1',
-        userEmail: 'user@example.com',
-        userName: 'User',
-        quantity: 3,
-        totalAmount: 120,
-        paymentIntentId: 'pi_123',
-      ).copyWith(status: TicketPurchaseStatus.confirmed);
+    test(
+      'toFirestore/fromFirestore round-trip preserves core fields',
+      () async {
+        final firestore = FakeFirebaseFirestore();
+        final purchase = TicketPurchase.create(
+          eventId: 'event-1',
+          ticketTypeId: 'vip',
+          userId: 'user-1',
+          userEmail: 'user@example.com',
+          userName: 'User',
+          quantity: 3,
+          totalAmount: 120,
+          paymentIntentId: 'pi_123',
+        ).copyWith(status: TicketPurchaseStatus.confirmed);
 
-      final ref = await firestore
-          .collection('ticket_purchases')
-          .add(purchase.toFirestore());
-      final doc = await firestore.collection('ticket_purchases').doc(ref.id).get();
+        final ref = await firestore
+            .collection('ticket_purchases')
+            .add(purchase.toFirestore());
+        final doc = await firestore
+            .collection('ticket_purchases')
+            .doc(ref.id)
+            .get();
 
-      final restored = TicketPurchase.fromFirestore(doc);
-      expect(restored.id, ref.id);
-      expect(restored.eventId, 'event-1');
-      expect(restored.ticketTypeId, 'vip');
-      expect(restored.status, TicketPurchaseStatus.confirmed);
-      expect(restored.quantity, 3);
-      expect(restored.paymentIntentId, 'pi_123');
-      expect(restored.qrCodeData, 'artbeat://ticket/${ref.id}/event-1/user-1');
-    });
+        final restored = TicketPurchase.fromFirestore(doc);
+        expect(restored.id, ref.id);
+        expect(restored.eventId, 'event-1');
+        expect(restored.ticketTypeId, 'vip');
+        expect(restored.status, TicketPurchaseStatus.confirmed);
+        expect(restored.quantity, 3);
+        expect(restored.paymentIntentId, 'pi_123');
+        expect(
+          restored.qrCodeData,
+          'artbeat://ticket/${ref.id}/event-1/user-1',
+        );
+      },
+    );
   });
 }

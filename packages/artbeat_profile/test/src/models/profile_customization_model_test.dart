@@ -15,10 +15,7 @@ void main() {
         updatedAt: DateTime.now(),
       );
 
-      final updated = model.copyWith(
-        selectedTheme: 'dark',
-        showBio: false,
-      );
+      final updated = model.copyWith(selectedTheme: 'dark', showBio: false);
 
       expect(updated.userId, 'u1');
       expect(updated.selectedTheme, 'dark');
@@ -26,28 +23,34 @@ void main() {
       expect(updated.primaryColor, '#00fd8a');
     });
 
-    test('toFirestore/fromFirestore round-trip works with document id', () async {
-      final firestore = FakeFirebaseFirestore();
-      final now = DateTime.now();
-      final model = ProfileCustomizationModel(
-        userId: 'u2',
-        selectedTheme: 'default',
-        layoutStyle: 'grid',
-        visibilitySettings: const {'showEmail': false},
-        createdAt: now,
-        updatedAt: now,
-      );
+    test(
+      'toFirestore/fromFirestore round-trip works with document id',
+      () async {
+        final firestore = FakeFirebaseFirestore();
+        final now = DateTime.now();
+        final model = ProfileCustomizationModel(
+          userId: 'u2',
+          selectedTheme: 'default',
+          layoutStyle: 'grid',
+          visibilitySettings: const {'showEmail': false},
+          createdAt: now,
+          updatedAt: now,
+        );
 
-      await firestore
-          .collection('profile_customization')
-          .doc('u2')
-          .set(model.toFirestore());
-      final doc = await firestore.collection('profile_customization').doc('u2').get();
-      final restored = ProfileCustomizationModel.fromFirestore(doc);
+        await firestore
+            .collection('profile_customization')
+            .doc('u2')
+            .set(model.toFirestore());
+        final doc = await firestore
+            .collection('profile_customization')
+            .doc('u2')
+            .get();
+        final restored = ProfileCustomizationModel.fromFirestore(doc);
 
-      expect(restored.userId, 'u2');
-      expect(restored.layoutStyle, 'grid');
-      expect(restored.visibilitySettings['showEmail'], isFalse);
-    });
+        expect(restored.userId, 'u2');
+        expect(restored.layoutStyle, 'grid');
+        expect(restored.visibilitySettings['showEmail'], isFalse);
+      },
+    );
   });
 }

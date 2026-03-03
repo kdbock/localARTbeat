@@ -25,12 +25,11 @@ void main() {
     });
 
     test('shouldNotifyForChat respects global and muted chat flags', () {
-      final prefs = NotificationPreferencesModel.createDefault(
-        userId: 'u1',
-      ).copyWith(
-        globalNotificationsEnabled: true,
-        mutedChats: const ['chat-muted'],
-      );
+      final prefs = NotificationPreferencesModel.createDefault(userId: 'u1')
+          .copyWith(
+            globalNotificationsEnabled: true,
+            mutedChats: const ['chat-muted'],
+          );
 
       expect(prefs.shouldNotifyForChat('chat-muted'), isFalse);
       expect(prefs.shouldNotifyForChat('chat-open'), isTrue);

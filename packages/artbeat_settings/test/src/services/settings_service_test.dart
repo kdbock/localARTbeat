@@ -32,7 +32,10 @@ void main() {
       when(auth.currentUser).thenReturn(_FakeUser('user-1'));
 
       final settings = await service.getUserSettings();
-      final doc = await firestore.collection('userSettings').doc('user-1').get();
+      final doc = await firestore
+          .collection('userSettings')
+          .doc('user-1')
+          .get();
 
       expect(settings['darkMode'], isFalse);
       expect(settings['notificationsEnabled'], isTrue);
@@ -47,7 +50,10 @@ void main() {
 
       await service.updateSetting('darkMode', true);
 
-      final doc = await firestore.collection('userSettings').doc('user-1').get();
+      final doc = await firestore
+          .collection('userSettings')
+          .doc('user-1')
+          .get();
       expect(doc.data()!['darkMode'], isTrue);
     });
 
@@ -63,32 +69,38 @@ void main() {
       expect(blockedUsers, isNot(contains('blocked-a')));
     });
 
-    test('getNotificationSettings returns default model if doc is missing', () async {
-      when(auth.currentUser).thenReturn(_FakeUser('user-1'));
+    test(
+      'getNotificationSettings returns default model if doc is missing',
+      () async {
+        when(auth.currentUser).thenReturn(_FakeUser('user-1'));
 
-      final notificationSettings = await service.getNotificationSettings();
+        final notificationSettings = await service.getNotificationSettings();
 
-      expect(notificationSettings.userId, 'user-1');
-      expect(notificationSettings.email.enabled, isTrue);
-      expect(notificationSettings.push.enabled, isTrue);
-    });
+        expect(notificationSettings.userId, 'user-1');
+        expect(notificationSettings.email.enabled, isTrue);
+        expect(notificationSettings.push.enabled, isTrue);
+      },
+    );
 
-    test('requestDataDownload creates pending request and rejects duplicate', () async {
-      when(auth.currentUser).thenReturn(_FakeUser('user-1'));
+    test(
+      'requestDataDownload creates pending request and rejects duplicate',
+      () async {
+        when(auth.currentUser).thenReturn(_FakeUser('user-1'));
 
-      await service.requestDataDownload();
+        await service.requestDataDownload();
 
-      final firstBatch = await firestore
-          .collection('dataRequests')
-          .where('userId', isEqualTo: 'user-1')
-          .where('requestType', isEqualTo: 'download')
-          .get();
-      expect(firstBatch.docs.length, 1);
+        final firstBatch = await firestore
+            .collection('dataRequests')
+            .where('userId', isEqualTo: 'user-1')
+            .where('requestType', isEqualTo: 'download')
+            .get();
+        expect(firstBatch.docs.length, 1);
 
-      await expectLater(
-        service.requestDataDownload(),
-        throwsA(isA<Exception>()),
-      );
-    });
+        await expectLater(
+          service.requestDataDownload(),
+          throwsA(isA<Exception>()),
+        );
+      },
+    );
   });
 }
