@@ -51,6 +51,9 @@ ios/build/
 # Test related
 coverage/
 **/test/**/*.mocks.dart
+!packages/artbeat_art_walk/test/art_walk_service_test.mocks.dart
+!packages/artbeat_capture/test/capture_service_test.mocks.dart
+!packages/artbeat_capture/test/capture_sequence_test.mocks.dart
 .test_coverage.dart
 coverage_badge.svg
 
