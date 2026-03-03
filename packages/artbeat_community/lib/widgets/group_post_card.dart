@@ -3,8 +3,7 @@ import 'package:intl/intl.dart' as intl;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'widgets.dart';
-import 'package:artbeat_core/artbeat_core.dart'
-    show AppLogger, ImageUrlValidator, ArtbeatColors;
+import 'package:artbeat_core/artbeat_core.dart' hide GradientBadge;
 
 import '../models/group_models.dart';
 
@@ -59,23 +58,10 @@ class GroupPostCard extends StatelessWidget {
     return Row(
       children: [
         // Author avatar
-        CircleAvatar(
+        UserAvatar(
           radius: 20,
-          backgroundImage: post.userPhotoUrl.isNotEmpty
-              ? NetworkImage(post.userPhotoUrl)
-              : null,
-          child: post.userPhotoUrl.isEmpty
-              ? Text(
-                  post.userName.isNotEmpty
-                      ? post.userName[0].toUpperCase()
-                      : '?',
-                  style: GoogleFonts.spaceGrotesk(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
-                )
-              : null,
+          imageUrl: post.userPhotoUrl,
+          displayName: post.userName,
         ),
         const SizedBox(width: 12),
         // Author name and time
@@ -188,48 +174,16 @@ class GroupPostCard extends StatelessWidget {
         itemBuilder: (context, index) {
           final imageUrl = post.imageUrls[index];
 
-          // Debug: Print image URL to see what we're working with
-          AppLogger.info('🖼️ Displaying image URL: $imageUrl');
-
-          // More permissive validation - just check if it's not empty
-          final isValidUrl = imageUrl.isNotEmpty;
-
           return Container(
             width: 160,
             margin: EdgeInsets.only(
               right: index < post.imageUrls.length - 1 ? 8 : 0,
             ),
-            decoration: BoxDecoration(
+            child: SecureNetworkImage(
+              imageUrl: imageUrl,
               borderRadius: BorderRadius.circular(8),
-              image: isValidUrl && ImageUrlValidator.isValidImageUrl(imageUrl)
-                  ? ImageUrlValidator.safeNetworkImage(imageUrl) != null
-                        ? DecorationImage(
-                            image: ImageUrlValidator.safeNetworkImage(
-                              imageUrl,
-                            )!,
-                            fit: BoxFit.cover,
-                          )
-                        : null
-                  : null,
-              color:
-                  !isValidUrl ||
-                      !ImageUrlValidator.isValidImageUrl(imageUrl) ||
-                      ImageUrlValidator.safeNetworkImage(imageUrl) == null
-                  ? Colors.grey[300]
-                  : null,
+              fit: BoxFit.cover,
             ),
-            child:
-                !isValidUrl ||
-                    !ImageUrlValidator.isValidImageUrl(imageUrl) ||
-                    ImageUrlValidator.safeNetworkImage(imageUrl) == null
-                ? const Center(
-                    child: Icon(
-                      Icons.broken_image,
-                      color: Colors.grey,
-                      size: 32,
-                    ),
-                  )
-                : null,
           );
         },
       ),

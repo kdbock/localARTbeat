@@ -508,6 +508,11 @@ class _EnhancedCaptureDashboardScreenState
                                 ),
                               ),
                             ),
+                            SliverToBoxAdapter(
+                              child: _QuickCaptureAction(
+                                onTap: _startCaptureFlow,
+                              ),
+                            ),
                             // Quest tracker section
                             SliverToBoxAdapter(
                               child: Padding(
@@ -1677,6 +1682,89 @@ class _TagChip extends StatelessWidget {
             fontWeight: FontWeight.w900,
             letterSpacing: 1.0,
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _QuickCaptureAction extends StatelessWidget {
+  final VoidCallback onTap;
+  const _QuickCaptureAction({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      child: _Glass(
+        radius: 22,
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                color: const Color(0xFF7C4DFF).withValues(alpha: 0.2),
+                border: Border.all(
+                  color: const Color(0xFF7C4DFF).withValues(alpha: 0.4),
+                ),
+              ),
+              child: const Icon(
+                Icons.camera_enhance_rounded,
+                color: Colors.white,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'capture_dashboard_quick_capture_now_title'.tr(),
+                    style: GoogleFonts.spaceGrotesk(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  Text(
+                    'capture_dashboard_quick_capture_now_subtitle'.tr(),
+                    style: GoogleFonts.spaceGrotesk(
+                      color: Colors.white.withValues(alpha: 0.7),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            ElevatedButton(
+              onPressed: onTap,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF7C4DFF),
+                foregroundColor: Colors.white,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                elevation: 8,
+                shadowColor: const Color(0xFF7C4DFF).withValues(alpha: 0.5),
+              ),
+              child: Text(
+                'capture_dashboard_start_capture'.tr(),
+                style: GoogleFonts.spaceGrotesk(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

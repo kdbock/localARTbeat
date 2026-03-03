@@ -3,7 +3,10 @@ import '../models/recent_activity_model.dart';
 
 /// Service for recent activity operations
 class RecentActivityService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseFirestore _firestore;
+
+  RecentActivityService({FirebaseFirestore? firestore})
+      : _firestore = firestore ?? FirebaseFirestore.instance;
 
   /// Get recent activities
   Future<List<RecentActivityModel>> getRecentActivities({

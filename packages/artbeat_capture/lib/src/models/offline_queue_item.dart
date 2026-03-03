@@ -127,19 +127,25 @@ class OfflineQueueItem {
   }
 
   /// Convert to JSON for SQLite storage
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'localCaptureId': localCaptureId,
-    'remoteCaptureId': remoteCaptureId,
-    'captureData': captureData.toJson(),
-    'localImagePath': localImagePath,
-    'status': status.toString(),
-    'createdAt': createdAt.toIso8601String(),
-    'updatedAt': updatedAt.toIso8601String(),
-    'retryCount': retryCount,
-    'lastError': lastError,
-    'metadata': metadata,
-  };
+  Map<String, dynamic> toJson() {
+    final captureJson = captureData.toJson();
+    // CaptureModel.toJson omits `id`; keep it for OfflineQueueItem.fromJson.
+    captureJson['id'] = captureData.id;
+
+    return {
+      'id': id,
+      'localCaptureId': localCaptureId,
+      'remoteCaptureId': remoteCaptureId,
+      'captureData': captureJson,
+      'localImagePath': localImagePath,
+      'status': status.toString(),
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
+      'retryCount': retryCount,
+      'lastError': lastError,
+      'metadata': metadata,
+    };
+  }
 
   /// Create from JSON stored in SQLite
   factory OfflineQueueItem.fromJson(Map<String, dynamic> json) {

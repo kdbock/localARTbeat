@@ -5,7 +5,10 @@ import '../models/comment_model.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 
 class ModerationService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseFirestore _firestore;
+
+  ModerationService({FirebaseFirestore? firestore})
+      : _firestore = firestore ?? FirebaseFirestore.instance;
 
   // Profanity filter - basic implementation
   static const List<String> _profanityList = [

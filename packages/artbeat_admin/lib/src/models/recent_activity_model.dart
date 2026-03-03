@@ -110,31 +110,44 @@ enum ActivityType {
   }
 
   static ActivityType fromString(String value) {
-    switch (value.toLowerCase()) {
+    switch (value) {
+      case 'userRegistered':
       case 'user_registered':
         return ActivityType.userRegistered;
+      case 'userLogin':
       case 'user_login':
         return ActivityType.userLogin;
+      case 'artworkUploaded':
       case 'artwork_uploaded':
         return ActivityType.artworkUploaded;
+      case 'artworkApproved':
       case 'artwork_approved':
         return ActivityType.artworkApproved;
+      case 'artworkRejected':
       case 'artwork_rejected':
         return ActivityType.artworkRejected;
+      case 'postCreated':
       case 'post_created':
         return ActivityType.postCreated;
+      case 'commentAdded':
       case 'comment_added':
         return ActivityType.commentAdded;
+      case 'eventCreated':
       case 'event_created':
         return ActivityType.eventCreated;
+      case 'userSuspended':
       case 'user_suspended':
         return ActivityType.userSuspended;
+      case 'userVerified':
       case 'user_verified':
         return ActivityType.userVerified;
+      case 'contentReported':
       case 'content_reported':
         return ActivityType.contentReported;
+      case 'systemError':
       case 'system_error':
         return ActivityType.systemError;
+      case 'adminAction':
       case 'admin_action':
         return ActivityType.adminAction;
       default:

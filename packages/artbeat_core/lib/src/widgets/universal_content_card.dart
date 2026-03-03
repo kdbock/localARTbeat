@@ -135,22 +135,13 @@ class UniversalContentCard extends StatelessWidget {
       child: Row(
         children: [
           // Author avatar
-          GestureDetector(
+          UserAvatar(
+            radius: 20,
+            imageUrl: authorImageUrl,
+            displayName: authorName,
             onTap: onAuthorTap,
-            child: CircleAvatar(
-              radius: 20,
-              backgroundColor: ArtbeatColors.lightGray,
-              backgroundImage: ImageUrlValidator.safeNetworkImage(
-                authorImageUrl,
-              ),
-              child: !ImageUrlValidator.isValidImageUrl(authorImageUrl)
-                  ? const Icon(
-                      Icons.person,
-                      color: ArtbeatColors.darkGray,
-                      size: 20,
-                    )
-                  : null,
-            ),
+            backgroundColor: ArtbeatColors.lightGray,
+            textColor: ArtbeatColors.darkGray,
           ),
           const SizedBox(width: 12),
 

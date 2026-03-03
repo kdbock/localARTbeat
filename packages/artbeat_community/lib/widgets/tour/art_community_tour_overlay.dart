@@ -280,10 +280,14 @@ class _ArtCommunityTourOverlayState extends State<ArtCommunityTourOverlay>
       _animationController.reset();
       _animationController.forward();
     } else {
-      // Mark onboarding as completed
-      await OnboardingService().markArtCommunityOnboardingCompleted();
-      widget.onFinish();
+      _finish();
     }
+  }
+
+  void _finish() async {
+    // Mark onboarding as completed
+    await OnboardingService().markArtCommunityOnboardingCompleted();
+    widget.onFinish();
   }
 
   @override
@@ -350,6 +354,28 @@ class _ArtCommunityTourOverlayState extends State<ArtCommunityTourOverlay>
                 accentColor: step.accentColor,
               ),
               size: Size.infinite,
+            ),
+          ),
+
+          // Skip Button
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 10,
+            right: 10,
+            child: TextButton(
+              onPressed: _finish,
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white.withValues(alpha: 0.6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              ),
+              child: Text(
+                'SKIP',
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.2,
+                ),
+              ),
             ),
           ),
 

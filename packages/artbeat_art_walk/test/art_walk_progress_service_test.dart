@@ -149,5 +149,71 @@ void main() {
       ).called(1);
       verify(mockDocRef.set(any)).called(2);
     });
+
+    test('recordArtVisit does not duplicate previously visited art', () async {
+      const uid = 'test_user';
+      const artWalkId = 'test_walk';
+      const artId = 'art1';
+      final userPos = createPosition(10.0001, 20.0001);
+      final artPos = createPosition(10.0, 20.0);
+
+      when(mockDocRef.get()).thenAnswer((_) async {
+        final doc = MockDocumentSnapshot<Map<String, dynamic>>();
+        when(doc.exists).thenReturn(false);
+        return doc;
+      });
+      when(mockDocRef.set(any)).thenAnswer((_) async => {});
+      when(
+        mockRewards.awardXP(any, customAmount: anyNamed('customAmount')),
+      ).thenAnswer((_) async => {});
+
+      await progressService.startWalk(
+        artWalkId: artWalkId,
+        totalArtCount: 5,
+        userId: uid,
+      );
+
+      final firstVisit = await progressService.recordArtVisit(
+        artId: artId,
+        userLocation: userPos,
+        artLocation: artPos,
+      );
+      final secondVisit = await progressService.recordArtVisit(
+        artId: artId,
+        userLocation: userPos,
+        artLocation: artPos,
+      );
+
+      expect(firstVisit.visitedArt.length, 1);
+      expect(secondVisit.visitedArt.length, 1);
+      verify(
+        mockRewards.awardXP(any, customAmount: anyNamed('customAmount')),
+      ).called(1);
+    });
+
+    test('pauseWalk and abandonWalk update status and clear progress', () async {
+      const uid = 'test_user';
+      const artWalkId = 'test_walk';
+
+      when(mockDocRef.get()).thenAnswer((_) async {
+        final doc = MockDocumentSnapshot<Map<String, dynamic>>();
+        when(doc.exists).thenReturn(false);
+        return doc;
+      });
+      when(mockDocRef.set(any)).thenAnswer((_) async => {});
+
+      await progressService.startWalk(
+        artWalkId: artWalkId,
+        totalArtCount: 5,
+        userId: uid,
+      );
+
+      final paused = await progressService.pauseWalk();
+      expect(paused.status, WalkStatus.paused);
+      expect(progressService.currentProgress?.status, WalkStatus.paused);
+
+      await progressService.abandonWalk();
+      expect(progressService.currentProgress, isNull);
+    });
   });
 }

@@ -33,7 +33,6 @@ void main() {
   late MockFirebaseAuth mockAuth;
   late MockCollectionReference<Map<String, dynamic>> mockArtWalksCollection;
   late MockCollectionReference<Map<String, dynamic>> mockPublicArtCollection;
-  late MockQuerySnapshot<Map<String, dynamic>> mockSnapshot;
   late ArtWalkService artWalkService;
 
   setUp(() {
@@ -41,7 +40,6 @@ void main() {
     mockAuth = MockFirebaseAuth();
     mockArtWalksCollection = MockCollectionReference<Map<String, dynamic>>();
     mockPublicArtCollection = MockCollectionReference<Map<String, dynamic>>();
-    mockSnapshot = MockQuerySnapshot<Map<String, dynamic>>();
 
     artWalkService = ArtWalkService(firestore: mockFirestore, auth: mockAuth);
 

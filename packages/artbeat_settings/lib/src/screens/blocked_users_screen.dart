@@ -188,23 +188,12 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
-        leading: CircleAvatar(
+        leading: UserAvatar(
+          radius: 20,
+          imageUrl: user.blockedUserProfileImage,
+          displayName: user.blockedUserName,
           backgroundColor: ArtbeatColors.primaryPurple.withValues(alpha: 0.1),
-          backgroundImage: ImageUrlValidator.safeNetworkImage(
-            user.blockedUserProfileImage,
-          ),
-          child:
-              !ImageUrlValidator.isValidImageUrl(user.blockedUserProfileImage)
-              ? Text(
-                  user.blockedUserName.isNotEmpty
-                      ? user.blockedUserName[0].toUpperCase()
-                      : 'U',
-                  style: const TextStyle(
-                    color: ArtbeatColors.primaryPurple,
-                    fontWeight: FontWeight.bold,
-                  ),
-                )
-              : null,
+          textColor: ArtbeatColors.primaryPurple,
         ),
         title: Text(
           user.blockedUserName.isNotEmpty

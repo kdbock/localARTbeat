@@ -46,7 +46,7 @@ class EventNotificationService {
         android: initializationSettingsAndroid,
         iOS: initializationSettingsIOS,
       );
-      await _localNotifications.initialize(initializationSettings);
+      await _localNotifications.initialize(settings: initializationSettings);
 
       _logger.i('Notification services initialized successfully');
     } on Exception catch (e) {
@@ -215,7 +215,7 @@ class EventNotificationService {
       await AwesomeNotifications().cancel('${eventId}_hour'.hashCode);
 
       // Cancel local notifications
-      await _localNotifications.cancel(eventId.hashCode);
+      await _localNotifications.cancel(id: eventId.hashCode);
 
       _logger.i('Event reminders cancelled for: $eventId');
     } on Exception catch (e) {

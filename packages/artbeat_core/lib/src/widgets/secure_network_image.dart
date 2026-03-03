@@ -187,20 +187,30 @@ class _SecureNetworkImageState extends State<SecureNetworkImage> {
         error.toString().contains('404') ||
         error.toString().contains('HTTP request failed, statusCode: 404');
 
+    final isNetworkError =
+        error.toString().contains('statusCode: 0') ||
+        error.toString().contains('SocketException') ||
+        error.toString().contains('HandshakeException') ||
+        error.toString().contains('NetworkImageLoadException');
+
     if (kDebugMode) {
       _logger.fine(
         '🖼️ SecureNetworkImage _buildErrorWidget called for: ${widget.imageUrl}',
       );
       _logger.fine('🖼️ Error type: $error');
       _logger.fine(
-        '🖼️ Is 404: $is404Error, enableThumbnailFallback: ${widget.enableThumbnailFallback}, usingFallback: $_usingThumbnailFallback',
+        '🖼️ Is 404: $is404Error, Is Network: $isNetworkError, enableThumbnailFallback: ${widget.enableThumbnailFallback}, usingFallback: $_usingThumbnailFallback',
       );
     }
 
     // Only log errors if they're not common 404s (which are expected for missing artwork)
-    if (kDebugMode && !is404Error) {
+    if (kDebugMode && !is404Error && !isNetworkError) {
       _logger.warning(
         '❌ SecureNetworkImage error for ${widget.imageUrl}: $error',
+      );
+    } else if (kDebugMode && isNetworkError) {
+      _logger.info(
+        '🌐 SecureNetworkImage: Network issue (likely statusCode 0 or SocketException) for ${widget.imageUrl}',
       );
     } else if (kDebugMode && is404Error) {
       _logger.info(
@@ -310,8 +320,8 @@ class _SecureNetworkImageState extends State<SecureNetworkImage> {
         ),
       );
     }
-    // If it's an auth error and retry is enabled, show retry button
-    else if (isAuthError &&
+    // If it's an auth or network error and retry is enabled, show retry button
+    else if ((isAuthError || isNetworkError) &&
         widget.enableRetry &&
         _retryCount < widget.maxRetries &&
         !_isRetrying) {
@@ -323,7 +333,7 @@ class _SecureNetworkImageState extends State<SecureNetworkImage> {
             const Icon(Icons.refresh, color: Colors.grey, size: 32),
             const SizedBox(height: 8),
             Text(
-              'Tap to retry',
+              isNetworkError ? 'Network issue. Tap to retry' : 'Tap to retry',
               style: TextStyle(color: Colors.grey[600], fontSize: 12),
             ),
           ],
@@ -333,7 +343,7 @@ class _SecureNetworkImageState extends State<SecureNetworkImage> {
 
     return GestureDetector(
       onTap:
-          isAuthError &&
+          (isAuthError || isNetworkError) &&
               widget.enableRetry &&
               _retryCount < widget.maxRetries &&
               !_isRetrying
@@ -435,12 +445,18 @@ class _SecureNetworkImageState extends State<SecureNetworkImage> {
         }
       },
       errorListener: (error) {
-        // Only log significant errors in debug mode, suppress 404s to reduce noise
+        // Only log significant errors in debug mode, suppress 404s and common network issues
+        final errorStr = error.toString();
         final is404Error =
-            error.toString().contains('404') ||
-            error.toString().contains('HTTP request failed, statusCode: 404');
+            errorStr.contains('404') ||
+            errorStr.contains('HTTP request failed, statusCode: 404');
+        final isNetworkError =
+            errorStr.contains('statusCode: 0') ||
+            errorStr.contains('SocketException') ||
+            errorStr.contains('HandshakeException') ||
+            errorStr.contains('NetworkImageLoadException');
 
-        if (kDebugMode && !is404Error) {
+        if (kDebugMode && !is404Error && !isNetworkError) {
           AppLogger.error('🔇 CachedNetworkImage error suppressed: $error');
           AppLogger.error(
             '🔇 CachedNetworkImage error for $urlToCheck: $error',

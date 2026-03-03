@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import 'drawer_section.dart' as lab_drawer;
 
@@ -34,7 +35,6 @@ class CommunityHudDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final footerTitle = 'community_hub_drawer_footer_title'.tr();
-    final footerVersion = 'community_hub_drawer_version'.tr(args: ['v2.0.5']);
 
     return Drawer(
       backgroundColor: HudPalette.world0,
@@ -246,16 +246,25 @@ class CommunityHudDrawer extends StatelessWidget {
                         ),
                       ),
                       Flexible(
-                        child: Text(
-                          footerVersion,
-                          textAlign: TextAlign.right,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: HudPalette.textTertiary,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 11,
-                          ),
+                        child: FutureBuilder<PackageInfo>(
+                          future: PackageInfo.fromPlatform(),
+                          builder: (context, snapshot) {
+                            final packageInfo = snapshot.data;
+                            final versionText = packageInfo == null
+                                ? 'v...'
+                                : 'v${packageInfo.version}+${packageInfo.buildNumber}';
+                            return Text(
+                              versionText,
+                              textAlign: TextAlign.right,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: HudPalette.textTertiary,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 11,
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ],

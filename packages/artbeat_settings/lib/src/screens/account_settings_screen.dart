@@ -392,17 +392,10 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
       children: [
         Stack(
           children: [
-            CircleAvatar(
+            UserAvatar(
               radius: 50,
-              backgroundImage: ImageUrlValidator.safeNetworkImage(
-                _accountSettings?.profileImageUrl,
-              ),
-              child:
-                  !ImageUrlValidator.isValidImageUrl(
-                    _accountSettings?.profileImageUrl,
-                  )
-                  ? const Icon(Icons.person, size: 50)
-                  : null,
+              imageUrl: _accountSettings?.profileImageUrl,
+              displayName: _accountSettings?.displayName ?? 'User',
             ),
             if (_isUploadingImage)
               Positioned.fill(

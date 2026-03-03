@@ -82,5 +82,6 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   mockito: ^5.4.4
   build_runner: ^2.4.9
+  fake_cloud_firestore: ^4.0.0
   cloud_firestore_platform_interface: any
   firebase_auth_platform_interface: any

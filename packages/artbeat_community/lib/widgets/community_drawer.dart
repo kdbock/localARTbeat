@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:artbeat_artist/artbeat_artist.dart' as artist;
 import 'package:artbeat_artwork/artbeat_artwork.dart' as artwork;
 import 'package:artbeat_core/artbeat_core.dart';
@@ -30,10 +31,12 @@ class CommunityDrawer extends StatefulWidget {
 class _CommunityDrawerState extends State<CommunityDrawer> {
   UserModel? _currentUser;
   bool _isLoading = true;
+  late final Future<PackageInfo> _packageInfoFuture;
 
   @override
   void initState() {
     super.initState();
+    _packageInfoFuture = PackageInfo.fromPlatform();
     _loadCurrentUser();
   }
 
@@ -212,13 +215,22 @@ class _CommunityDrawerState extends State<CommunityDrawer> {
               Container(
                 padding: const EdgeInsets.all(16),
                 color: Colors.white,
-                child: Text(
-                  'community_drawer_version'.tr(),
-                  style: GoogleFonts.spaceGrotesk(
-                    color: ArtbeatColors.textSecondary,
-                    fontSize: 12,
-                  ),
-                  textAlign: TextAlign.center,
+                child: FutureBuilder<PackageInfo>(
+                  future: _packageInfoFuture,
+                  builder: (context, snapshot) {
+                    final packageInfo = snapshot.data;
+                    final versionText = packageInfo == null
+                        ? 'v...'
+                        : 'v${packageInfo.version}+${packageInfo.buildNumber}';
+                    return Text(
+                      versionText,
+                      style: GoogleFonts.spaceGrotesk(
+                        color: ArtbeatColors.textSecondary,
+                        fontSize: 12,
+                      ),
+                      textAlign: TextAlign.center,
+                    );
+                  },
                 ),
               ),
             ],

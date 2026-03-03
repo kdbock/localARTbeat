@@ -4,8 +4,12 @@ import 'package:artbeat_core/artbeat_core.dart';
 
 /// User service for profile-related operations
 class UserService {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth;
+  final FirebaseFirestore _firestore;
+
+  UserService({FirebaseAuth? auth, FirebaseFirestore? firestore})
+    : _auth = auth ?? FirebaseAuth.instance,
+      _firestore = firestore ?? FirebaseFirestore.instance;
 
   /// Get current user
   User? get currentUser => _auth.currentUser;

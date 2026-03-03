@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:artbeat_core/shared_widgets.dart';
+import 'package:artbeat_core/artbeat_core.dart';
 
 import '../models/post_model.dart';
 import '../models/comment_model.dart';
@@ -65,26 +65,11 @@ class PostCard extends StatelessWidget {
     return Row(
       children: [
         // Author avatar
-        GestureDetector(
+        UserAvatar(
+          radius: 20,
+          imageUrl: post.userPhotoUrl,
+          displayName: post.userName,
           onTap: () => onUserTap(post.userId),
-          child: CircleAvatar(
-            radius: 20,
-            backgroundImage: post.userPhotoUrl.isNotEmpty
-                ? NetworkImage(post.userPhotoUrl)
-                : null,
-            child: post.userPhotoUrl.isEmpty
-                ? Text(
-                    post.userName.isNotEmpty
-                        ? post.userName[0].toUpperCase()
-                        : '?',
-                    style: GoogleFonts.spaceGrotesk(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  )
-                : null,
-          ),
         ),
         const SizedBox(width: 12),
         // Author name and time
@@ -133,20 +118,12 @@ class PostCard extends StatelessWidget {
   }
 
   Widget _buildImage() {
-    return ClipRRect(
+    return SecureNetworkImage(
+      imageUrl: post.imageUrls.first,
       borderRadius: BorderRadius.circular(16),
-      child: Image.network(
-        post.imageUrls.first,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => Container(
-          height: 200,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            color: Colors.white.withValues(alpha: 0.1),
-          ),
-          child: const Icon(Icons.broken_image, color: Colors.white, size: 48),
-        ),
-      ),
+      fit: BoxFit.cover,
+      height: 200,
+      width: double.infinity,
     );
   }
 

@@ -117,8 +117,6 @@ class ProfileConnectionModel {
   }
 
   String get connectionReasonText {
-    if (connectionReason == null) return '';
-
     switch (connectionType) {
       case 'mutual_follower':
         return mutualFollowersCount > 0
@@ -129,7 +127,7 @@ class ProfileConnectionModel {
       case 'recent_interaction':
         return 'Recently interacted with your content';
       default:
-        return '';
+        return (connectionReason?['reason'] as String?) ?? '';
     }
   }
 

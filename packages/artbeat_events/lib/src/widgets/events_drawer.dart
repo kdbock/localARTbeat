@@ -13,6 +13,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import '../models/artbeat_event.dart';
 import '../services/event_service.dart';
@@ -27,6 +28,7 @@ class EventsDrawer extends StatefulWidget {
 class _EventsDrawerState extends State<EventsDrawer> {
   UserModel? _currentUser;
   bool _isLoading = true;
+  late final Future<PackageInfo> _packageInfoFuture;
 
   List<ArtbeatEvent> _userEvents = [];
   List<ArtbeatEvent> _upcomingEvents = [];
@@ -36,6 +38,7 @@ class _EventsDrawerState extends State<EventsDrawer> {
   @override
   void initState() {
     super.initState();
+    _packageInfoFuture = PackageInfo.fromPlatform();
     _loadCurrentUser();
     _loadUserEvents();
   }
@@ -282,14 +285,23 @@ class _EventsDrawerState extends State<EventsDrawer> {
               // Footer
               Padding(
                 padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-                child: Text(
-                  'events_drawer_version'.tr(),
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.45),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                  ),
-                  textAlign: TextAlign.center,
+                child: FutureBuilder<PackageInfo>(
+                  future: _packageInfoFuture,
+                  builder: (context, snapshot) {
+                    final packageInfo = snapshot.data;
+                    final versionText = packageInfo == null
+                        ? 'v...'
+                        : 'v${packageInfo.version}+${packageInfo.buildNumber}';
+                    return Text(
+                      versionText,
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.45),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      textAlign: TextAlign.center,
+                    );
+                  },
                 ),
               ),
             ],

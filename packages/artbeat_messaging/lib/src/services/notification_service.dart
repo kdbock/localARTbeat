@@ -76,7 +76,7 @@ class NotificationService {
         iOS: iosInit,
       );
       await _localNotifications.initialize(
-        initSettings,
+        settings: initSettings,
         onDidReceiveNotificationResponse: _onNotificationResponse,
       );
 
@@ -342,10 +342,10 @@ class NotificationService {
       final payload = '${type.value}:${notificationData['route'] ?? ''}';
 
       await _localNotifications.show(
-        notificationId,
-        title,
-        body,
-        NotificationDetails(
+        id: notificationId,
+        title: title,
+        body: body,
+        notificationDetails: NotificationDetails(
           android: _getAndroidNotificationDetails(
             type,
             channel,
@@ -441,11 +441,11 @@ class NotificationService {
   }) async {
     try {
       await _localNotifications.zonedSchedule(
-        id ?? DateTime.now().millisecondsSinceEpoch ~/ 1000,
-        title,
-        body,
-        _convertToTZDateTime(scheduledDate),
-        const NotificationDetails(
+        id: id ?? DateTime.now().millisecondsSinceEpoch ~/ 1000,
+        title: title,
+        body: body,
+        scheduledDate: _convertToTZDateTime(scheduledDate),
+        notificationDetails: const NotificationDetails(
           android: AndroidNotificationDetails(
             'scheduled_messages',
             'Scheduled Messages',
@@ -585,7 +585,7 @@ class NotificationService {
             IOSFlutterLocalNotificationsPlugin
           >()
           ?.initialize(
-            DarwinInitializationSettings(
+            settings: DarwinInitializationSettings(
               notificationCategories: [messageCategory],
             ),
             onDidReceiveNotificationResponse: _onNotificationResponse,
@@ -656,7 +656,7 @@ class NotificationService {
   /// Cancel a specific scheduled notification
   Future<void> cancelScheduledNotification(int notificationId) async {
     try {
-      await _localNotifications.cancel(notificationId);
+      await _localNotifications.cancel(id: notificationId);
     } catch (e) {
       AppLogger.error('Error cancelling scheduled notification: $e');
     }

@@ -26,14 +26,10 @@ class ProfileHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        CircleAvatar(
+        UserAvatar(
           radius: 40,
-          backgroundImage: ImageUrlValidator.safeNetworkImage(avatarUrl),
-          child:
-              (avatarUrl == null ||
-                  !ImageUrlValidator.isValidImageUrl(avatarUrl))
-              ? const Icon(Icons.person)
-              : null,
+          imageUrl: avatarUrl,
+          displayName: displayName ?? 'User',
         ),
         const SizedBox(width: 16),
         Expanded(

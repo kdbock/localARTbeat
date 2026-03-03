@@ -1,288 +1,119 @@
-# ArtBeat Auth
+# artbeat_auth
 
-The authentication package for the ArtBeat application, providing secure user authentication and authorization functionality with Firebase backend integration.
+Authentication package for ARTbeat. It provides auth services, auth routes, and the app's auth-facing screens.
 
-## Features
+## Current package scope
 
-### Authentication Services
+### Exports (`lib/artbeat_auth.dart`)
 
-- **AuthService**: Core authentication operations
+- Services:
+  - `AuthService`
+  - `AuthProfileService`
+- Screens:
+  - `LoginScreen`
+  - `RegisterScreen`
+  - `ForgotPasswordScreen`
+  - `ProfileCreateScreen`
+  - `EmailVerificationScreen`
+- Constants:
+  - `AuthRoutes`
 
-  - Email/password authentication (sign-in and registration)
-  - Google Sign-In integration with credential handling
-  - Apple Sign-In integration with secure nonce generation
-  - Password reset via email
-  - Email verification sending and status checking
-  - User session management and auth state monitoring
-  - Automatic Firestore user document creation
+### Folder layout
 
-- **AuthProfileService**: Profile and authentication status management
-  - Authentication status checking with route determination
-  - User profile data retrieval from Firestore
-  - Email verification requirement handling
-  - Centralized sign-out functionality
+- `lib/src/services/`
+  - `auth_service.dart`
+  - `auth_profile_service.dart`
+  - `fresh_apple_signin.dart`
+- `lib/src/screens/`
+  - `login_screen.dart`
+  - `register_screen.dart`
+  - `forgot_password_screen.dart`
+  - `email_verification_screen.dart`
+  - `profile_create_screen.dart`
+- `lib/src/constants/routes.dart`
+- `lib/src/widgets/auth_header.dart`
 
-### Authentication Screens
+## Core behavior in use
 
-- **LoginScreen**: Complete login interface
+### `AuthService`
 
-  - Email/password authentication
-  - Google Sign-In button
-  - Apple Sign-In button (iOS)
-  - Form validation and error handling
-  - Loading states and user feedback
+- Email/password sign-in and registration via Firebase Auth.
+- Registration writes a base user document to Firestore (`users/{uid}`).
+- Password reset and sign-out.
+- Email verification send/check/reload helpers.
+- Google sign-in via `google_sign_in` v7 API.
+- Apple sign-in via standard OAuth provider flow.
+- Additional fallback path via `FreshAppleSignIn.signInFresh()`.
 
-- **RegisterScreen**: User registration with comprehensive data collection
-
-  - First name and last name collection
-  - Email/password creation with confirmation
-  - Terms of service agreement checkbox
-  - Form validation and error handling
-  - Automatic user document creation in Firestore
-
-- **ForgotPasswordScreen**: Password recovery interface
-
-  - Email-based password reset
-  - Success confirmation messaging
-  - Form validation and error handling
-
-- **EmailVerificationScreen**: Email verification management
-
-  - Automatic verification status checking (3-second intervals)
-  - Resend verification email with cooldown
-  - Auto-navigation upon verification completion
-  - User-friendly progress indicators
-
-- **ProfileCreateScreen**: Profile creation bridge
-  - Delegates to comprehensive artbeat_profile package
-  - Handles authentication flow routing
-  - Post-creation navigation management
-
-### Additional Components
-
-- **AuthHeader**: Custom authentication UI header
-
-  - Branded color scheme (#46a8c3 background, #00bf63 accent)
-  - Configurable navigation elements
-  - Search, chat, and developer mode toggles
-  - Limelight font integration
-
-- **Route Constants**: Centralized route management
-  - Pre-defined authentication routes
-  - Route validation utilities
-  - Post-authentication routing helpers
-
-### Security Features
-
-- **Firebase Integration**: Complete Firebase Auth and Firestore backend
-- **Social Authentication**: Secure Google and Apple sign-in flows
-- **Input Validation**: Built-in form validation for all inputs
-- **Error Handling**: Comprehensive error management with user-friendly messages
-- **Nonce Generation**: Cryptographically secure nonce for Apple Sign-In
-- **Session Management**: Automatic auth state monitoring and management
-
-## Usage
-
-Add to your `pubspec.yaml`:
-
-```yaml
-dependencies:
-  artbeat_auth:
-    path: ../packages/artbeat_auth
-```
-
-Import in your Dart code:
+Constructor supports dependency injection for tests:
 
 ```dart
-import 'package:artbeat_auth/artbeat_auth.dart';
+AuthService({FirebaseAuth? auth, FirebaseFirestore? firestore})
 ```
 
-## Key Components
+### `AuthProfileService`
 
-### AuthService - Core Authentication
+- Returns next route from auth/profile state with `checkAuthStatus(...)`.
+- Route outcomes:
+  - unauthenticated -> `AuthRoutes.login`
+  - requires verification and not verified -> `AuthRoutes.emailVerification`
+  - authenticated but no Firestore profile -> `AuthRoutes.profileCreate`
+  - authenticated with profile -> `AuthRoutes.dashboard`
 
-```dart
-final authService = AuthService();
+### Screens
 
-// Email/password authentication
-await authService.signInWithEmailAndPassword(email, password);
+- `LoginScreen`
+  - Email/password login
+  - Google login
+  - Apple login on iOS
+  - Routes to dashboard/register/forgot-password
+- `RegisterScreen`
+  - Full name + email/password form
+  - Terms/privacy consent UX
+  - Calls `LegalConsentService.recordRegistrationConsent(...)`
+  - Ensures user document exists (via `UserService`) and routes to dashboard
+- `ForgotPasswordScreen`
+  - Sends reset email and displays result state
+- `EmailVerificationScreen`
+  - Polls verification state every 3s
+  - Supports resend with cooldown
+  - Can proceed to dashboard
+- `ProfileCreateScreen`
+  - Bridge into `artbeat_profile` (`CreateProfileScreen`)
+  - Redirects unauthenticated users to login
 
-// Register new user
-await authService.registerWithEmailAndPassword(
-  email,
-  password,
-  fullName,
-);
+## Route contract
 
-// Social authentication
-await authService.signInWithGoogle();
-await authService.signInWithApple(); // iOS only
+Defined in `AuthRoutes`:
 
-// Email verification
-await authService.sendEmailVerification();
-bool isVerified = authService.isEmailVerified;
-await authService.reloadUser(); // Refresh verification status
+- `/login`
+- `/register`
+- `/forgot-password`
+- `/email-verification`
+- `/dashboard`
+- `/profile/create`
 
-// Password reset
-await authService.resetPassword(email);
+Route helper methods are available for auth/default route decisions.
 
-// Auth state management
-Stream<User?> authState = authService.authStateChanges();
-User? currentUser = authService.currentUser;
-await authService.signOut();
-```
+## Important implementation note
 
-### AuthProfileService - Profile Management
+`AuthHeader` currently routes to `/auth/login`, `/auth/register`, and `/auth/forgot-password`, while `AuthRoutes` constants are `/login`, `/register`, `/forgot-password`.
 
-```dart
-final profileService = AuthProfileService();
+If your app route table does not provide both aliases, this can cause navigation mismatches.
 
-// Check authentication status and get appropriate route
-String route = await profileService.checkAuthStatus(
-  requireEmailVerification: true,
-);
+## Testing status
 
-// Get user profile data from Firestore
-Map<String, dynamic>? profile = await profileService.getUserProfile();
+A baseline test suite now exists under `test/` covering:
 
-// Check authentication state
-bool isAuth = profileService.isAuthenticated;
-User? user = profileService.currentUser;
-```
+- `AuthRoutes` helper behavior
+- `AuthService` core contract behavior (mocked Firebase auth + fake Firestore)
+- `AuthHeader` menu navigation behavior
 
-### Authentication Screens
-
-```dart
-// Login screen with social authentication
-LoginScreen()
-
-// Registration with full user data collection
-RegisterScreen()
-
-// Password recovery
-ForgotPasswordScreen()
-
-// Email verification with auto-checking
-EmailVerificationScreen()
-
-// Profile creation bridge
-ProfileCreateScreen()
-```
-
-### Route Management
-
-```dart
-// Use predefined route constants
-Navigator.pushNamed(context, AuthRoutes.login);
-Navigator.pushNamed(context, AuthRoutes.register);
-Navigator.pushNamed(context, AuthRoutes.emailVerification);
-
-// Route validation helpers
-bool isAuthRoute = AuthRoutes.isAuthRoute('/login');
-String defaultRoute = AuthRoutes.getDefaultPostAuthRoute();
-```
-
-## Implementation Details
-
-### Validation and Error Handling
-
-Form validation is handled through Flutter's built-in form validation system:
-
-- **Email Validation**: Standard email format validation using TextFormField validators
-- **Password Confirmation**: Real-time password matching validation
-- **Required Fields**: All registration fields are validated for completeness
-- **Terms Agreement**: Required checkbox for terms of service acceptance
-
-### Firebase Integration
-
-- **Authentication**: Uses Firebase Auth for secure user management
-- **User Documents**: Automatic creation in Firestore with complete user profiles
-- **Social Sign-In**: Integrated Google and Apple authentication with fallback handling
-- **Error Handling**: Comprehensive Firebase error catching with user-friendly messages
-
-### Platform Support
-
-- **iOS**: Full support including Apple Sign-In
-- **Android**: Full support including Google Sign-In
-- **Web**: Firebase Auth compatibility (social sign-in may have limitations)
-
-## Testing
-
-The package is designed for testing with:
+Run:
 
 ```bash
-flutter test packages/artbeat_auth
+flutter test
+flutter analyze
 ```
 
-### Testability Features
-
-- **Dependency Injection**: AuthService accepts Firebase instances for mocking
-- **Optional Parameters**: All screens accept optional AuthService for testing
-- **Comprehensive Logging**: AppLogger integration for debugging and testing
-- **Error Simulation**: Proper error handling allows for error condition testing
-
-## Dependencies
-
-Core dependencies from `pubspec.yaml`:
-
-```yaml
-dependencies:
-  # Firebase
-  firebase_core: ^4.0.0
-  firebase_auth: ^6.0.1
-  cloud_firestore: ^6.0.0
-
-  # Social Authentication
-  google_sign_in: ^6.2.1
-  sign_in_with_apple: ^6.1.2
-  crypto: ^3.0.3
-
-  # ArtBeat Packages
-  artbeat_core: (local)
-  artbeat_profile: (local)
-
-  # Utilities
-  provider: ^6.0.5
-  easy_localization: ^3.0.7
-```
-
-## Architecture
-
-The package follows a feature-based architecture:
-
-```
-lib/
-├── artbeat_auth.dart           # Main export file
-├── src/
-│   ├── services/
-│   │   ├── auth_service.dart           # Core authentication
-│   │   └── auth_profile_service.dart   # Profile management
-│   ├── screens/
-│   │   ├── login_screen.dart           # Login interface
-│   │   ├── register_screen.dart        # Registration
-│   │   ├── forgot_password_screen.dart # Password recovery
-│   │   ├── email_verification_screen.dart # Email verification
-│   │   └── profile_create_screen.dart  # Profile creation bridge
-│   ├── widgets/
-│   │   └── auth_header.dart           # Custom auth header
-│   └── constants/
-│       └── routes.dart                # Route definitions
-```
-
-### Design Principles
-
-- **Separation of Concerns**: Services handle business logic, screens handle UI
-- **Dependency Injection**: Services can be injected for testing
-- **Single Responsibility**: Each screen has a focused purpose
-- **Reusability**: Common components like AuthHeader are extracted
-- **Centralized Configuration**: Routes and constants are centralized
-
-## Security Considerations
-
-- **Firebase Security Rules**: All user data protected by Firestore security rules
-- **Input Validation**: Client-side validation prevents malformed data
-- **Social Auth Security**: Proper nonce generation for Apple Sign-In
-- **Error Message Safety**: Errors don't expose sensitive system information
-- **Session Management**: Firebase handles secure token management
-- **Password Security**: Passwords never stored locally, handled by Firebase Auth
-- **User Document Protection**: User documents created with proper permissions
+from `packages/artbeat_auth`.

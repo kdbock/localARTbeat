@@ -84,6 +84,9 @@ void main() {
       final capture = CaptureModel(
         id: '',
         userId: 'test_user',
+        userName: 'Test User',
+        userHandle: '@test_user',
+        userProfileUrl: 'https://example.com/user.jpg',
         imageUrl: 'https://example.com/image.jpg',
         createdAt: DateTime.now(),
         title: 'Online Capture',

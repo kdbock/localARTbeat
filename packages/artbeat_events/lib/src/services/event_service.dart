@@ -11,10 +11,20 @@ class EventService {
   static const String _eventsCollection = 'events';
   static const String _ticketPurchasesCollection = 'ticket_purchases';
 
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final Logger _logger = Logger();
-  final RecurringEventService _recurringEventService = RecurringEventService();
+  final FirebaseFirestore _firestore;
+  final FirebaseAuth _auth;
+  final Logger _logger;
+  final RecurringEventService _recurringEventService;
+
+  EventService({
+    FirebaseFirestore? firestore,
+    FirebaseAuth? auth,
+    Logger? logger,
+    RecurringEventService? recurringEventService,
+  }) : _firestore = firestore ?? FirebaseFirestore.instance,
+       _auth = auth ?? FirebaseAuth.instance,
+       _logger = logger ?? Logger(),
+       _recurringEventService = recurringEventService ?? RecurringEventService();
 
   /// Create a new event
   /// If the event is recurring, this will also generate all recurring instances

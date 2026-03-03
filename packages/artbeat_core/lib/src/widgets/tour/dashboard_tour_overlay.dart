@@ -330,6 +330,28 @@ class _DashboardTourOverlayState extends State<DashboardTourOverlay>
             ),
           ),
 
+          // Skip Button
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 10,
+            right: 10,
+            child: TextButton(
+              onPressed: _finish,
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white.withValues(alpha: 0.6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              ),
+              child: Text(
+                'SKIP',
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.2,
+                ),
+              ),
+            ),
+          ),
+
           // Callout Content
           Positioned(
             left: 20,
@@ -921,6 +943,28 @@ class _ExploreTourOverlayState extends State<ExploreTourOverlay>
                 accentColor: step.accentColor,
               ),
               size: Size.infinite,
+            ),
+          ),
+
+          // Skip Button
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 10,
+            right: 10,
+            child: TextButton(
+              onPressed: _finish,
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white.withValues(alpha: 0.6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              ),
+              child: Text(
+                'SKIP',
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.2,
+                ),
+              ),
             ),
           ),
 

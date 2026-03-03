@@ -4,8 +4,14 @@ import '../models/admin_settings_model.dart';
 
 /// Service for admin settings operations
 class AdminSettingsService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore;
+  final FirebaseAuth _auth;
+
+  AdminSettingsService({
+    FirebaseFirestore? firestore,
+    FirebaseAuth? auth,
+  }) : _firestore = firestore ?? FirebaseFirestore.instance,
+       _auth = auth ?? FirebaseAuth.instance;
 
   static const String _settingsDocId = 'app_settings';
 
