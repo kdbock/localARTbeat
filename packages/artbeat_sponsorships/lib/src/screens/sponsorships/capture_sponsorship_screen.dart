@@ -1,12 +1,12 @@
+import 'package:artbeat_core/artbeat_core.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 import '../../widgets/glass_input_field.dart';
 import '../../widgets/gradient_cta_button.dart';
-import '../../widgets/hud_top_bar.dart';
 import '../../widgets/sponsorship_form_section.dart';
 import '../../widgets/sponsorship_price_summary.dart';
 import '../../widgets/sponsorship_section.dart';
-import '../../widgets/world_background.dart';
 import 'sponsorship_review_screen.dart';
 
 class CaptureSponsorshipScreen extends StatefulWidget {
@@ -31,33 +31,36 @@ class _CaptureSponsorshipScreenState extends State<CaptureSponsorshipScreen> {
     child: Column(
       children: [
         HudTopBar(
-          title: 'Capture Sponsorship',
-          onBack: () => Navigator.pop(context),
+          title: 'sponsorship_capture_title'.tr(),
+          onBackPressed: () => Navigator.pop(context),
         ),
         Expanded(
           child: ListView(
             padding: const EdgeInsets.only(bottom: 120),
             children: [
-              const SponsorshipSection(
-                title: 'What You Get',
+              SponsorshipSection(
+                title: 'sponsorship_common_what_you_get_title'.tr(),
                 child: Text(
-                  'Your business will appear when users capture nearby art.',
-                ),
-              ),
-              const SponsorshipSection(
-                title: 'Pricing',
-                child: SponsorshipPriceSummary(
-                  price: r'$250',
-                  duration: '30 days',
+                  'sponsorship_capture_what_you_get_body'.tr(),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(color: Colors.white),
                 ),
               ),
               SponsorshipSection(
-                title: 'Target Area',
+                title: 'sponsorship_common_pricing_title'.tr(),
+                child: SponsorshipPriceSummary(
+                  price: 'sponsorship_common_price_capture'.tr(),
+                  duration: 'sponsorship_common_duration_monthly'.tr(),
+                ),
+              ),
+              SponsorshipSection(
+                title: 'sponsorship_common_target_area_title'.tr(),
                 child: SponsorshipFormSection(
-                  label: 'Radius (miles)',
+                  label: 'sponsorship_common_radius_label'.tr(),
                   child: GlassInputField(
                     controller: radiusController,
-                    label: 'e.g. 3',
+                    label: 'sponsorship_capture_radius_hint'.tr(),
                   ),
                 ),
               ),
@@ -67,12 +70,12 @@ class _CaptureSponsorshipScreenState extends State<CaptureSponsorshipScreen> {
         Padding(
           padding: const EdgeInsets.all(16),
           child: GradientCtaButton(
-            label: 'Continue',
+            label: 'sponsorship_common_continue_button'.tr(),
             onPressed: () {
               if (radiusController.text.isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Please enter a radius to continue'),
+                  SnackBar(
+                    content: Text('sponsorship_common_enter_radius_error'.tr()),
                   ),
                 );
                 return;
@@ -82,14 +85,15 @@ class _CaptureSponsorshipScreenState extends State<CaptureSponsorshipScreen> {
                 MaterialPageRoute<void>(
                   builder: (context) => SponsorshipReviewScreen(
                     type: 'capture',
-                    duration: '30 days',
-                    price: r'$250',
-                    notes: 'Radius: ${radiusController.text} miles',
+                    duration: 'sponsorship_common_duration_monthly'.tr(),
+                    price: 'sponsorship_common_price_capture'.tr(),
+                    notes: 'sponsorship_common_radius_notes'.tr(
+                      namedArgs: {'radius': radiusController.text},
+                    ),
                   ),
                 ),
               );
             },
-            onTap: () {},
           ),
         ),
       ],

@@ -2,6 +2,9 @@ import 'dart:io';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:artbeat_sponsorships/artbeat_sponsorships.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geolocator/geolocator.dart';
 import '../services/advanced_camera_service.dart';
 import 'capture_upload_screen.dart';
 import 'package:artbeat_core/artbeat_core.dart';
@@ -17,6 +20,8 @@ class CaptureScreen extends StatefulWidget {
 
 class _CaptureScreenState extends State<CaptureScreen> {
   final AdvancedCameraService _cameraService = AdvancedCameraService();
+  final SponsorService _sponsorService = SponsorService();
+  Sponsorship? _activeSponsorship;
   bool _isInitializing = true;
   bool _isTakingPicture = false;
 
@@ -24,6 +29,22 @@ class _CaptureScreenState extends State<CaptureScreen> {
   void initState() {
     super.initState();
     _initializeCamera();
+    _loadSponsorship();
+  }
+
+  Future<void> _loadSponsorship() async {
+    try {
+      final position = await Geolocator.getCurrentPosition();
+      final sponsorship = await _sponsorService.getSponsorForPlacement(
+        placementKey: SponsorshipPlacements.captureDetailBanner,
+        userLocation: LatLng(position.latitude, position.longitude),
+      );
+      if (mounted) {
+        setState(() => _activeSponsorship = sponsorship);
+      }
+    } catch (e) {
+      AppLogger.error('Failed to load sponsorship: $e');
+    }
   }
 
   Future<void> _initializeCamera() async {
@@ -153,6 +174,17 @@ class _CaptureScreenState extends State<CaptureScreen> {
                         ),
                         onPressed: () => Navigator.of(context).pop(),
                       ),
+                      if (_activeSponsorship != null)
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: SponsorBanner(
+                              placementKey:
+                                  SponsorshipPlacements.captureDetailBanner,
+                              sponsorService: _sponsorService,
+                            ),
+                          ),
+                        ),
                       IconButton(
                         icon: Icon(
                           _getFlashIcon(_cameraService.flashMode),

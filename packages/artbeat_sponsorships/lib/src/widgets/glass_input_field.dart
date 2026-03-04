@@ -17,7 +17,13 @@ class GlassInputField extends StatelessWidget {
     child: TextField(
       controller: controller,
       cursorColor: const Color(0xFF22D3EE),
-      decoration: InputDecoration(border: InputBorder.none, labelText: label),
+      style: const TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        border: InputBorder.none,
+        labelText: label,
+        labelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.9)),
+        floatingLabelStyle: const TextStyle(color: Colors.white),
+      ),
     ),
   );
 }

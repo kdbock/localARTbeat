@@ -1,12 +1,13 @@
+import 'package:artbeat_core/artbeat_core.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 import '../../widgets/glass_input_field.dart';
 import '../../widgets/gradient_cta_button.dart';
-import '../../widgets/hud_top_bar.dart';
+import '../../widgets/sponsor_art_selection_widget.dart';
 import '../../widgets/sponsorship_form_section.dart';
 import '../../widgets/sponsorship_price_summary.dart';
 import '../../widgets/sponsorship_section.dart';
-import '../../widgets/world_background.dart';
 import 'sponsorship_review_screen.dart';
 
 class ArtWalkSponsorshipScreen extends StatefulWidget {
@@ -20,6 +21,7 @@ class ArtWalkSponsorshipScreen extends StatefulWidget {
 class _ArtWalkSponsorshipScreenState extends State<ArtWalkSponsorshipScreen> {
   final TextEditingController titleController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
+  List<String> selectedArtIds = [];
 
   @override
   void dispose() {
@@ -33,47 +35,61 @@ class _ArtWalkSponsorshipScreenState extends State<ArtWalkSponsorshipScreen> {
     child: Column(
       children: [
         HudTopBar(
-          title: 'Art Walk Sponsorship',
-          onBack: () => Navigator.pop(context),
+          title: 'sponsorship_art_walk_title'.tr(),
+          onBackPressed: () => Navigator.pop(context),
         ),
         Expanded(
           child: ListView(
             padding: const EdgeInsets.only(bottom: 120),
             children: [
-              const SponsorshipSection(
-                title: 'What You Get',
+              SponsorshipSection(
+                title: 'sponsorship_common_what_you_get_title'.tr(),
                 child: Text(
-                  'Create a walk featuring local art and your business. '
-                  'Users earn XP for stopping at your location.',
-                ),
-              ),
-              const SponsorshipSection(
-                title: 'Pricing',
-                child: SponsorshipPriceSummary(
-                  price: r'$500',
-                  duration: '30 days',
+                  'sponsorship_art_walk_what_you_get_body'.tr(),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(color: Colors.white),
                 ),
               ),
               SponsorshipSection(
-                title: 'Art Walk Details',
+                title: 'sponsorship_common_pricing_title'.tr(),
+                child: SponsorshipPriceSummary(
+                  price: 'sponsorship_common_price_art_walk'.tr(),
+                  duration: 'sponsorship_common_duration_monthly'.tr(),
+                ),
+              ),
+              SponsorshipSection(
+                title: 'sponsorship_art_walk_details_title'.tr(),
                 child: Column(
                   children: [
                     SponsorshipFormSection(
-                      label: 'Walk Title',
+                      label: 'sponsorship_art_walk_title_label'.tr(),
                       child: GlassInputField(
                         controller: titleController,
-                        label: 'Downtown Art + Coffee',
+                        label: 'sponsorship_art_walk_title_hint'.tr(),
                       ),
                     ),
                     const SizedBox(height: 12),
                     SponsorshipFormSection(
-                      label: 'Description',
+                      label: 'sponsorship_art_walk_description_label'.tr(),
                       child: GlassInputField(
                         controller: descriptionController,
-                        label: 'Short description',
+                        label: 'sponsorship_art_walk_description_hint'.tr(),
                       ),
                     ),
                   ],
+                ),
+              ),
+              SponsorshipSection(
+                title: 'sponsorship_art_walk_select_art_title'.tr(),
+                subtitle: 'sponsorship_art_walk_select_art_subtitle'.tr(),
+                child: SponsorArtSelectionWidget(
+                  selectedArtIds: selectedArtIds,
+                  onSelectionChanged: (newSelection) {
+                    setState(() {
+                      selectedArtIds = newSelection;
+                    });
+                  },
                 ),
               ),
             ],
@@ -82,13 +98,18 @@ class _ArtWalkSponsorshipScreenState extends State<ArtWalkSponsorshipScreen> {
         Padding(
           padding: const EdgeInsets.all(16),
           child: GradientCtaButton(
-            label: 'Continue',
+            label: 'sponsorship_common_continue_button'.tr(),
             onPressed: () {
               if (titleController.text.isEmpty ||
-                  descriptionController.text.isEmpty) {
+                  descriptionController.text.isEmpty ||
+                  selectedArtIds.length < 3) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Please fill in all fields to continue'),
+                  SnackBar(
+                    content: Text(
+                      selectedArtIds.length < 3
+                          ? 'sponsorship_art_walk_min_art_error'.tr()
+                          : 'sponsorship_art_walk_fields_required_error'.tr(),
+                    ),
                   ),
                 );
                 return;
@@ -98,15 +119,19 @@ class _ArtWalkSponsorshipScreenState extends State<ArtWalkSponsorshipScreen> {
                 MaterialPageRoute<void>(
                   builder: (context) => SponsorshipReviewScreen(
                     type: 'art_walk',
-                    duration: '30 days',
-                    price: r'$500',
-                    notes:
-                        'Title: ${titleController.text}\nDescription: ${descriptionController.text}',
+                    duration: 'sponsorship_common_duration_monthly'.tr(),
+                    price: 'sponsorship_common_price_art_walk'.tr(),
+                    notes: 'sponsorship_art_walk_notes_summary'.tr(
+                      namedArgs: {
+                        'title': titleController.text,
+                        'description': descriptionController.text,
+                        'count': selectedArtIds.length.toString(),
+                      },
+                    ),
                   ),
                 ),
               );
             },
-            onTap: () {},
           ),
         ),
       ],

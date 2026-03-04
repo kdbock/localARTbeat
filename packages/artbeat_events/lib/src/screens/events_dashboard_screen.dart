@@ -393,15 +393,19 @@ class _EventsDashboardScreenState extends State<EventsDashboardScreen>
                               size: 22,
                             ),
                             const SizedBox(width: 10),
-                            Text(
-                              'events_search_placeholder'.tr(),
-                              style: const TextStyle(
-                                color: Color(0x73FFFFFF),
-                                fontSize: 14,
-                                fontWeight: FontWeight.w800,
+                            Expanded(
+                              child: Text(
+                                'events_search_placeholder'.tr(),
+                                style: const TextStyle(
+                                  color: Color(0x73FFFFFF),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            const Spacer(),
+                            const SizedBox(width: 8),
                             Icon(
                               Icons.tune,
                               color: Colors.white.withValues(alpha: 0.35),

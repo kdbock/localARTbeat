@@ -23,7 +23,12 @@ class SponsorshipReviewRow extends StatelessWidget {
             ).textTheme.bodySmall?.copyWith(color: Colors.white70),
           ),
         ),
-        Text(value, style: Theme.of(context).textTheme.bodyMedium),
+        Text(
+          value,
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: Colors.white),
+        ),
       ],
     ),
   );

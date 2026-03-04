@@ -5,6 +5,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:artbeat_core/artbeat_core.dart'
     hide GlassCard, HudTopBar, WorldBackground, GradientCTAButton;
 import 'package:artbeat_capture/artbeat_capture.dart' hide GlassCard, HudTopBar;
@@ -23,7 +24,7 @@ class DiscoverDashboardScreen extends StatefulWidget {
 }
 
 class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   static const String _unknownLocationKey = '__unknown_location__';
 
   // Core state
@@ -80,6 +81,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _achievementService = context.read<AchievementService>();
     _userService = context.read<UserService>();
     _captureService = context.read<CaptureService>();
@@ -119,10 +121,19 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
   @override
   void dispose() {
     _isDisposed = true;
+    WidgetsBinding.instance.removeObserver(this);
     _notificationSubscription?.cancel();
     _mapController?.dispose();
     _floatController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Re-check location when user returns to the app (e.g., from settings)
+    if (state == AppLifecycleState.resumed) {
+      _loadUserLocationAndSetMap();
+    }
   }
 
   void _handleNavigation(int index) {
@@ -1839,7 +1850,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
       );
       if (!allowed) {
         if (!_isDisposed && mounted) {
-          _updateMapPosition(35.5951, -82.5515);
+          _updateMapPosition(_fallbackLat, _fallbackLng);
         }
         return;
       }
@@ -1857,7 +1868,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
     } catch (e) {
       // debugPrint('Error getting location: $e');
       // Default to Asheville, NC
-      _updateMapPosition(35.5951, -82.5515);
+      _updateMapPosition(_fallbackLat, _fallbackLng);
     }
   }
 
@@ -1977,16 +1988,46 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
     }
   }
 
+  static const double _fallbackLat = 35.5951;
+  static const double _fallbackLng = -82.5515;
+
   Future<void> _openInstantDiscovery() async {
+    // If we're on fallback position or null, try one more time to get real location
+    final isFallback = _currentPosition == null || 
+        (_currentPosition!.latitude == _fallbackLat && _currentPosition!.longitude == _fallbackLng);
+
+    if (isFallback) {
+      final allowed = await PermissionUtils.requestLocationPermissionWithSafety(context);
+      if (allowed) {
+        await _loadUserLocationAndSetMap();
+      } else {
+        // Still no permission, show error and return
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('art_walk_art_walk_dashboard_text_location_required_to_discover'.tr()),
+              action: SnackBarAction(
+                label: 'Settings',
+                onPressed: () => openAppSettings(),
+              ),
+            ),
+          );
+        }
+        return;
+      }
+    }
+
     if (_currentPosition == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'art_walk_art_walk_dashboard_text_getting_your_location'.tr(),
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'art_walk_art_walk_dashboard_text_getting_your_location'.tr(),
+            ),
+            duration: const Duration(seconds: 2),
           ),
-          duration: const Duration(seconds: 2),
-        ),
-      );
+        );
+      }
       return;
     }
 

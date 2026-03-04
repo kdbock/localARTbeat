@@ -1,10 +1,10 @@
 import 'dart:math' as math;
 
+import 'package:artbeat_core/artbeat_core.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
-import '../widgets/glass_card.dart';
 import '../widgets/gradient_cta_button.dart';
-import '../widgets/hud_top_bar.dart';
 import '../widgets/sponsorship_cta_tile.dart';
 import '../widgets/sponsorship_section.dart';
 
@@ -49,8 +49,8 @@ class _LocalBusinessScreenState extends State<LocalBusinessScreen>
         child: Column(
           children: [
             HudTopBar(
-              title: 'Local Sponsorships',
-              onBack: () => Navigator.pop(context),
+              title: 'sponsorship_hub_title'.tr(),
+              onBackPressed: () => Navigator.pop(context),
             ),
             Expanded(
               child: ListView(
@@ -63,12 +63,12 @@ class _LocalBusinessScreenState extends State<LocalBusinessScreen>
                       padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                       child: _HeroCard(
                         loop: _loop,
-                        onPrimary: () =>
-                            Navigator.pushNamed(context, '/title-sponsorship'),
-                        onSecondary: () => Navigator.pushNamed(
+                        onSponsor: () => Navigator.pushNamed(
                           context,
-                          '/art-walk-sponsorship',
+                          AppRoutes.sponsorshipCreate,
                         ),
+                        onExplore: () =>
+                            Navigator.pushNamed(context, AppRoutes.artWalkList),
                       ),
                     ),
                   ),
@@ -76,7 +76,7 @@ class _LocalBusinessScreenState extends State<LocalBusinessScreen>
                     intro: _intro,
                     delay: 0.15,
                     child: SponsorshipSection(
-                      title: 'Why sponsor with us',
+                      title: 'sponsorship_hub_why_title'.tr(),
                       child: Column(
                         children: [
                           for (var i = 0; i < _quickSignals.length; i++) ...[
@@ -96,9 +96,8 @@ class _LocalBusinessScreenState extends State<LocalBusinessScreen>
                     intro: _intro,
                     delay: 0.30,
                     child: SponsorshipSection(
-                      title: 'Choose your placement',
-                      subtitle:
-                          'Every tier includes manual review and reporting',
+                      title: 'sponsorship_hub_choose_title'.tr(),
+                      subtitle: 'sponsorship_hub_choose_subtitle'.tr(),
                       child: Column(
                         children: [
                           for (
@@ -122,14 +121,14 @@ class _LocalBusinessScreenState extends State<LocalBusinessScreen>
                     intro: _intro,
                     delay: 0.45,
                     child: SponsorshipSection(
-                      title: 'Need support?',
+                      title: 'sponsorship_hub_support_title'.tr(),
                       child: Column(
                         children: [
                           for (var i = 0; i < _supportCtas.length; i++) ...[
                             SponsorshipCtaTile(
                               icon: _supportCtas[i].icon,
-                              title: _supportCtas[i].title,
-                              subtitle: _supportCtas[i].subtitle,
+                              title: _supportCtas[i].titleKey.tr(),
+                              subtitle: _supportCtas[i].subtitleKey.tr(),
                               onTap: () => Navigator.pushNamed(
                                 context,
                                 _supportCtas[i].route,
@@ -140,13 +139,12 @@ class _LocalBusinessScreenState extends State<LocalBusinessScreen>
                           ],
                           const SizedBox(height: 16),
                           GradientCtaButton(
-                            label: 'Submit sponsorship proposal',
+                            label: 'sponsorship_hub_submit_proposal'.tr(),
                             icon: Icons.star_outline,
                             onPressed: () => Navigator.pushNamed(
                               context,
-                              '/sponsorship-dashboard',
+                              AppRoutes.sponsorshipCreate,
                             ),
-                            onTap: () {},
                           ),
                         ],
                       ),
@@ -164,114 +162,83 @@ class _LocalBusinessScreenState extends State<LocalBusinessScreen>
 
 const _quickSignals = [
   _QuickSignal(
-    label: 'Priority placement',
-    detail: 'Appears ahead of ads across splash, dashboards, and maps',
+    labelKey: 'sponsorship_hub_signal_local_impact_title',
+    detailKey: 'sponsorship_hub_signal_local_impact_detail',
     icon: Icons.bolt,
   ),
   _QuickSignal(
-    label: 'Radius targeting',
-    detail: 'Lock sponsorships to the neighborhoods you serve',
+    labelKey: 'sponsorship_hub_signal_active_explorers_title',
+    detailKey: 'sponsorship_hub_signal_active_explorers_detail',
     icon: Icons.podcasts,
   ),
   _QuickSignal(
-    label: 'Manual approval',
-    detail: 'Concierge review keeps the experience premium',
+    labelKey: 'sponsorship_hub_signal_simple_setup_title',
+    detailKey: 'sponsorship_hub_signal_simple_setup_detail',
     icon: Icons.verified_user,
   ),
 ];
 
 const _sponsorshipOptions = [
   _SponsorshipOption(
-    icon: Icons.workspace_premium,
-    title: 'Title Sponsor',
-    price: r'$25,000',
-    duration: '12 months',
-    description:
-        'Own Local ARTbeat for the season with hero placements and story takeovers.',
-    perks: [
-      'Splash + dashboard hero exclusivity',
-      'All modules badge your brand',
-      'Dedicated concierge + creative',
-    ],
-    route: '/title-sponsorship',
-  ),
-  _SponsorshipOption(
-    icon: Icons.event_available,
-    title: 'Event Sponsor',
-    price: r'$1,000',
-    duration: 'Per event',
-    description:
-        'Co-host a Local ARTbeat tour or pop-up with shared branding and content.',
-    perks: [
-      'Equal billing on promos',
-      'On-site signage kit',
-      'Video + recap mentions',
-    ],
-    route: '/event-sponsorship',
-  ),
-  _SponsorshipOption(
     icon: Icons.map,
-    title: 'Art Walk Sponsor',
-    price: r'$500',
-    duration: '30 days',
-    description:
-        'Design a quest that routes explorers past your storefront with XP boosts.',
+    titleKey: 'sponsorship_hub_option_art_walk_title',
+    priceKey: 'sponsorship_hub_option_art_walk_price',
+    durationKey: 'sponsorship_hub_option_duration_monthly',
+    descriptionKey: 'sponsorship_hub_option_art_walk_description',
     perks: [
-      'Custom walk branding',
-      'XP reward callouts',
-      'Stop analytics dashboard',
+      'sponsorship_hub_option_art_walk_perk_route',
+      'sponsorship_hub_option_art_walk_perk_badge',
+      'sponsorship_hub_option_art_walk_perk_report',
     ],
-    route: '/art-walk-sponsorship',
+    route: AppRoutes.sponsorshipArtWalk,
   ),
   _SponsorshipOption(
     icon: Icons.camera_alt,
-    title: 'Capture Sponsor',
-    price: r'$250',
-    duration: '30 days',
-    description:
-        'Brand the capture HUD whenever nearby murals are photographed.',
+    titleKey: 'sponsorship_hub_option_capture_title',
+    priceKey: 'sponsorship_hub_option_capture_price',
+    durationKey: 'sponsorship_hub_option_duration_monthly',
+    descriptionKey: 'sponsorship_hub_option_capture_description',
     perks: [
-      'Radius targeting (1–5 miles)',
-      'Branded capture frames',
-      'Auto follow-up prompts',
+      'sponsorship_hub_option_capture_perk_visibility',
+      'sponsorship_hub_option_capture_perk_message',
+      'sponsorship_hub_option_capture_perk_report',
     ],
-    route: '/capture-sponsorship',
+    route: AppRoutes.sponsorshipCapture,
   ),
   _SponsorshipOption(
     icon: Icons.radar,
-    title: 'Discover Sponsor',
-    price: r'$250',
-    duration: '30 days',
-    description:
-        'Own the discovery radar banner when fans scan for art around you.',
+    titleKey: 'sponsorship_hub_option_discovery_title',
+    priceKey: 'sponsorship_hub_option_discovery_price',
+    durationKey: 'sponsorship_hub_option_duration_monthly',
+    descriptionKey: 'sponsorship_hub_option_discovery_description',
     perks: [
-      'Always-on radar badge',
-      'Tap-through insights',
-      'Featured in instant finds',
+      'sponsorship_hub_option_discovery_perk_pin',
+      'sponsorship_hub_option_discovery_perk_badge',
+      'sponsorship_hub_option_discovery_perk_report',
     ],
-    route: '/discover-sponsorship',
+    route: AppRoutes.sponsorshipDiscover,
   ),
 ];
 
 const _supportCtas = [
   _SupportCta(
-    title: 'Get more information',
-    subtitle: 'Get a guided walkthrough of sponsorship tiers',
+    titleKey: 'sponsorship_hub_support_cta_title',
+    subtitleKey: 'sponsorship_hub_support_cta_subtitle',
     icon: Icons.chat_bubble_outline,
-    route: '/sponsorship-dashboard',
+    route: AppRoutes.sponsorshipCreate,
   ),
 ];
 
 class _HeroCard extends StatelessWidget {
   const _HeroCard({
     required this.loop,
-    required this.onPrimary,
-    required this.onSecondary,
+    required this.onSponsor,
+    required this.onExplore,
   });
 
   final Animation<double> loop;
-  final VoidCallback onPrimary;
-  final VoidCallback onSecondary;
+  final VoidCallback onSponsor;
+  final VoidCallback onExplore;
 
   @override
   Widget build(BuildContext context) => AnimatedBuilder(
@@ -366,7 +333,7 @@ class _HeroCard extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Partner with discovery, not feeds',
+                              'sponsorship_hub_hero_title'.tr(),
                               style: Theme.of(context).textTheme.titleLarge
                                   ?.copyWith(
                                     fontWeight: FontWeight.w900,
@@ -375,7 +342,7 @@ class _HeroCard extends StatelessWidget {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'Local ARTbeat sponsors power quests, captures, and radar moments across the city. No auctions, no bidding wars—just curated placements with concierge review.',
+                              'sponsorship_hub_hero_subtitle'.tr(),
                               style: Theme.of(context).textTheme.bodyMedium
                                   ?.copyWith(color: Colors.white70),
                             ),
@@ -389,46 +356,70 @@ class _HeroCard extends StatelessWidget {
                     spacing: 10,
                     runSpacing: 10,
                     children: [
-                      _HeroBadge(label: 'Manual approval'),
-                      _HeroBadge(label: 'Premium glass UI'),
-                      _HeroBadge(label: 'Radius targeting'),
+                      _HeroBadge(labelKey: 'sponsorship_hub_hero_badge_review'),
+                      _HeroBadge(
+                        labelKey: 'sponsorship_hub_hero_badge_monthly',
+                      ),
+                      _HeroBadge(labelKey: 'sponsorship_hub_hero_badge_cancel'),
                     ],
                   ),
                   const SizedBox(height: 22),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: GradientCtaButton(
-                          label: 'Become a sponsor',
-                          icon: Icons.workspace_premium_outlined,
-                          onPressed: onPrimary,
-                          onTap: () {},
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: onSecondary,
-                          child: Container(
-                            height: 52,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(26),
-                              color: Colors.white.withValues(alpha: 0.05),
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.18),
-                              ),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final isNarrow = constraints.maxWidth < 420;
+
+                      final exploreButton = GestureDetector(
+                        onTap: onExplore,
+                        child: Container(
+                          height: 52,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(26),
+                            color: Colors.white.withValues(alpha: 0.05),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.18),
                             ),
-                            child: Center(
-                              child: Text(
-                                'Explore art walks',
-                                style: Theme.of(context).textTheme.bodyMedium
-                                    ?.copyWith(fontWeight: FontWeight.w800),
-                              ),
+                          ),
+                          child: Center(
+                            child: Text(
+                              'sponsorship_hub_hero_explore_button'.tr(),
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.white,
+                                  ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                      );
+
+                      if (isNarrow) {
+                        return Column(
+                          children: [
+                            GradientCtaButton(
+                              label: 'sponsorship_hub_hero_start_button'.tr(),
+                              icon: Icons.workspace_premium_outlined,
+                              onPressed: onSponsor,
+                            ),
+                            const SizedBox(height: 10),
+                            exploreButton,
+                          ],
+                        );
+                      }
+
+                      return Row(
+                        children: [
+                          Expanded(
+                            child: GradientCtaButton(
+                              label: 'sponsorship_hub_hero_start_button'.tr(),
+                              icon: Icons.workspace_premium_outlined,
+                              onPressed: onSponsor,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(child: exploreButton),
+                        ],
+                      );
+                    },
                   ),
                 ],
               ),
@@ -441,9 +432,9 @@ class _HeroCard extends StatelessWidget {
 }
 
 class _PerkChip extends StatelessWidget {
-  const _PerkChip({required this.label});
+  const _PerkChip({required this.labelKey});
 
-  final String label;
+  final String labelKey;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -454,18 +445,19 @@ class _PerkChip extends StatelessWidget {
       border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
     ),
     child: Text(
-      label,
-      style: Theme.of(
-        context,
-      ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w700),
+      labelKey.tr(),
+      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+        fontWeight: FontWeight.w700,
+        color: Colors.white,
+      ),
     ),
   );
 }
 
 class _HeroBadge extends StatelessWidget {
-  const _HeroBadge({required this.label});
+  const _HeroBadge({required this.labelKey});
 
-  final String label;
+  final String labelKey;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -476,10 +468,11 @@ class _HeroBadge extends StatelessWidget {
       border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
     ),
     child: Text(
-      label,
-      style: Theme.of(
-        context,
-      ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w700),
+      labelKey.tr(),
+      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+        fontWeight: FontWeight.w700,
+        color: Colors.white,
+      ),
     ),
   );
 }
@@ -536,7 +529,7 @@ class _AnimatedWorldBackground extends StatelessWidget {
           decoration: const BoxDecoration(
             gradient: RadialGradient(
               radius: 1.1,
-              colors: [Colors.transparent, Color.fromRGBO(0, 0, 0, 0.55)],
+              colors: [Colors.transparent, Color.fromRGBO(0, 0, 0, 0.30)],
             ),
           ),
         ),
@@ -555,7 +548,7 @@ class _SponsorshipWorldPainter extends CustomPainter {
     // Base dark gradient
     final base = Paint()
       ..shader = const LinearGradient(
-        colors: [Color(0xFF07060F), Color(0xFF0A1330), Color(0xFF071C18)],
+        colors: [Color(0xFF0F1C2E), Color(0xFF153655), Color(0xFF1A4C42)],
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
       ).createShader(Offset.zero & size);
@@ -680,15 +673,19 @@ class _AnimatedSignalCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          signal.label,
+                          signal.labelKey.tr(),
                           style: Theme.of(context).textTheme.titleSmall
-                              ?.copyWith(fontWeight: FontWeight.w800),
+                              ?.copyWith(
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                              ),
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          signal.detail,
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: Colors.white70),
+                          signal.detailKey.tr(),
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodySmall?.copyWith(color: Colors.white),
                         ),
                       ],
                     ),
@@ -782,15 +779,18 @@ class _AnimatedSponsorshipOptionCard extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              option.title,
+                              option.titleKey.tr(),
                               style: Theme.of(context).textTheme.titleMedium
-                                  ?.copyWith(fontWeight: FontWeight.w900),
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w900,
+                                    color: Colors.white,
+                                  ),
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              option.description,
+                              option.descriptionKey.tr(),
                               style: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(color: Colors.white70),
+                                  ?.copyWith(color: Colors.white),
                             ),
                           ],
                         ),
@@ -801,7 +801,7 @@ class _AnimatedSponsorshipOptionCard extends StatelessWidget {
                   Row(
                     children: [
                       Text(
-                        option.price,
+                        option.priceKey.tr(),
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.w900,
 
@@ -810,7 +810,7 @@ class _AnimatedSponsorshipOptionCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        option.duration,
+                        option.durationKey.tr(),
                         style: Theme.of(
                           context,
                         ).textTheme.bodySmall?.copyWith(color: Colors.white60),
@@ -828,14 +828,16 @@ class _AnimatedSponsorshipOptionCard extends StatelessWidget {
                     spacing: 10,
                     runSpacing: 10,
                     children: [
-                      for (final perk in option.perks) _PerkChip(label: perk),
+                      for (final perk in option.perks)
+                        _PerkChip(labelKey: perk),
                     ],
                   ),
                   const SizedBox(height: 18),
                   GradientCtaButton(
-                    label: 'Start ${option.title.toLowerCase()}',
+                    label: 'sponsorship_hub_option_start_button'.tr(
+                      namedArgs: {'plan': option.titleKey.tr()},
+                    ),
                     onPressed: () => Navigator.pushNamed(context, option.route),
-                    onTap: () {},
                   ),
                 ],
               ),
@@ -849,46 +851,46 @@ class _AnimatedSponsorshipOptionCard extends StatelessWidget {
 
 class _QuickSignal {
   const _QuickSignal({
-    required this.label,
-    required this.detail,
+    required this.labelKey,
+    required this.detailKey,
     required this.icon,
   });
 
-  final String label;
-  final String detail;
+  final String labelKey;
+  final String detailKey;
   final IconData icon;
 }
 
 class _SponsorshipOption {
   const _SponsorshipOption({
     required this.icon,
-    required this.title,
-    required this.price,
-    required this.duration,
-    required this.description,
+    required this.titleKey,
+    required this.priceKey,
+    required this.durationKey,
+    required this.descriptionKey,
     required this.perks,
     required this.route,
   });
 
   final IconData icon;
-  final String title;
-  final String price;
-  final String duration;
-  final String description;
+  final String titleKey;
+  final String priceKey;
+  final String durationKey;
+  final String descriptionKey;
   final List<String> perks;
   final String route;
 }
 
 class _SupportCta {
   const _SupportCta({
-    required this.title,
-    required this.subtitle,
+    required this.titleKey,
+    required this.subtitleKey,
     required this.icon,
     required this.route,
   });
 
-  final String title;
-  final String subtitle;
+  final String titleKey;
+  final String subtitleKey;
   final IconData icon;
   final String route;
 }

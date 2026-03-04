@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:artbeat_sponsorships/artbeat_sponsorships.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:share_plus/share_plus.dart' as share_plus;
 import 'package:firebase_auth/firebase_auth.dart';
@@ -119,14 +118,6 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
               child: Column(
                 children: [
                   _buildHeroSection(),
-
-                  SponsorBanner(
-                    placementKey: SponsorshipPlacements.eventHeader,
-                    padding: const EdgeInsets.only(top: 16),
-                    showPlaceholder: true,
-                    onPlaceholderTap: () =>
-                        Navigator.pushNamed(context, '/event-sponsorship'),
-                  ),
 
                   const SizedBox(height: 18),
                   _buildSummaryCard(),

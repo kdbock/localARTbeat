@@ -5,6 +5,7 @@ import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
 import 'package:async/async.dart' show StreamGroup;
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_art_walk/src/models/public_art_model.dart';
+import 'package:artbeat_sponsorships/artbeat_sponsorships.dart';
 import 'rewards_service.dart';
 import 'challenge_service.dart';
 
@@ -21,6 +22,7 @@ class InstantDiscoveryService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final RewardsService _rewardsService = RewardsService();
   final ChallengeService _challengeService = ChallengeService();
+  final SponsorService _sponsorService = SponsorService();
 
   // Cache for discovered art IDs
   Set<String>? _discoveredArtIds;
@@ -50,13 +52,21 @@ class InstantDiscoveryService {
             center: center,
             radiusInKm: radiusMeters / 1000, // Convert meters to km
             field: 'geo',
-            geopointFrom: (data) =>
-                (data['location'] as GeoPoint?) ?? const GeoPoint(0, 0),
+            geopointFrom: _extractGeoPointFromData,
             strictMode: true,
           )
           .take(1); // Take first emission
 
-      final publicArtResults = await publicArtGeoQuery.first;
+      var publicArtResults = await publicArtGeoQuery.first;
+
+      // Backward-compatibility fallback:
+      // older publicArt docs were saved with `location` but without `geo`.
+      if (publicArtResults.isEmpty) {
+        publicArtResults = await _fetchNearbyPublicArtByLocationFallback(
+          userPosition: userPosition,
+          radiusMeters: radiusMeters,
+        );
+      }
 
       // Query captures collection within radius (only public captures)
       final capturesRef = _firestore.collection('captures');
@@ -65,8 +75,7 @@ class InstantDiscoveryService {
             center: center,
             radiusInKm: radiusMeters / 1000, // Convert meters to km
             field: 'geo',
-            geopointFrom: (data) =>
-                (data['location'] as GeoPoint?) ?? const GeoPoint(0, 0),
+            geopointFrom: _extractGeoPointFromData,
             strictMode: true,
           )
           .take(1); // Take first emission
@@ -77,7 +86,7 @@ class InstantDiscoveryService {
       final nearbyPublicArt = publicArtResults
           .map((doc) {
             try {
-              return PublicArtModel.fromFirestore(doc);
+              return _parsePublicArtDocument(doc);
             } catch (e) {
               AppLogger.error('Error parsing public art: $e');
               return null;
@@ -112,6 +121,10 @@ class InstantDiscoveryService {
         ...nearbyPublicArt,
         ...nearbyCaptures,
       ];
+
+      // Inject and prioritize sponsored art pieces
+      final sponsoredArt = await _injectSponsorships(userPosition);
+      allNearbyArt.insertAll(0, sponsoredArt);
 
       // Group by location and title to avoid multiple dots for same art (Hybrid)
       final List<PublicArtModel> nearbyArt = [];
@@ -185,8 +198,7 @@ class InstantDiscoveryService {
             center: center,
             radiusInKm: radiusMeters / 1000,
             field: 'geo',
-            geopointFrom: (data) =>
-                (data['location'] as GeoPoint?) ?? const GeoPoint(0, 0),
+            geopointFrom: _extractGeoPointFromData,
             strictMode: true,
           );
 
@@ -197,8 +209,7 @@ class InstantDiscoveryService {
             center: center,
             radiusInKm: radiusMeters / 1000,
             field: 'geo',
-            geopointFrom: (data) =>
-                (data['location'] as GeoPoint?) ?? const GeoPoint(0, 0),
+            geopointFrom: _extractGeoPointFromData,
             strictMode: true,
           );
 
@@ -226,7 +237,7 @@ class InstantDiscoveryService {
         final nearbyPublicArt = lastPublicArt
             .map((doc) {
               try {
-                return PublicArtModel.fromFirestore(doc);
+                return _parsePublicArtDocument(doc);
               } catch (e) {
                 AppLogger.error('Error parsing public art: $e');
                 return null;
@@ -261,6 +272,10 @@ class InstantDiscoveryService {
           ...nearbyPublicArt,
           ...nearbyCaptures,
         ];
+
+        // Inject and prioritize sponsored art pieces
+        final sponsoredArt = await _injectSponsorships(userPosition);
+        allNearbyArt.insertAll(0, sponsoredArt);
 
         // Group by location and title to avoid multiple dots for same art (Hybrid)
         final List<PublicArtModel> nearbyArt = [];
@@ -604,6 +619,58 @@ class InstantDiscoveryService {
     }
   }
 
+  /// Fetches discovery sponsorships near user location and converts to PublicArtModel
+  Future<List<PublicArtModel>> _injectSponsorships(Position userPosition) async {
+    try {
+      final sponsorships = await _sponsorService.getActiveSponsorsForPlacement(
+        SponsorshipPlacements.discoverRadarBanner,
+      );
+
+      final List<PublicArtModel> sponsoredArt = [];
+      for (final sponsor in sponsorships) {
+        if (!sponsor.isActive) continue;
+
+        // Check radius targeting
+        if (sponsor.radiusMiles != null &&
+            sponsor.latitude != null &&
+            sponsor.longitude != null) {
+          final distance = Geolocator.distanceBetween(
+            userPosition.latitude,
+            userPosition.longitude,
+            sponsor.latitude!,
+            sponsor.longitude!,
+          );
+
+          // Convert miles to meters
+          if (distance > sponsor.radiusMiles! * 1609.34) continue;
+        }
+
+        // Convert sponsorship to a virtual art model for radar display
+        sponsoredArt.add(
+          PublicArtModel(
+            id: 'sponsor_${sponsor.id}',
+            userId: sponsor.businessId,
+            userName: sponsor.businessName,
+            title: sponsor.businessName,
+            description: sponsor.businessDescription ?? 'Sponsored discovery',
+            imageUrl: sponsor.logoUrl,
+            location: GeoPoint(
+              sponsor.latitude ?? userPosition.latitude,
+              sponsor.longitude ?? userPosition.longitude,
+            ),
+            createdAt: sponsor.createdAt,
+            isVerified: true,
+            tags: ['sponsored'],
+          ),
+        );
+      }
+      return sponsoredArt;
+    } catch (e) {
+      AppLogger.error('Error injecting sponsorships: $e');
+      return [];
+    }
+  }
+
   /// Check if user has discovered specific art
   Future<bool> hasUserDiscovered(String artId) async {
     final discoveredIds = await _getDiscoveredArtIds();
@@ -820,6 +887,76 @@ class InstantDiscoveryService {
       createdAt: capture.createdAt,
       updatedAt: capture.updatedAt,
     );
+  }
+
+  GeoPoint _extractGeoPointFromData(Map<String, dynamic> data) {
+    final location = data['location'];
+    if (location is GeoPoint) {
+      return location;
+    }
+
+    final geo = data['geo'];
+    if (geo is Map<String, dynamic>) {
+      final geopoint = geo['geopoint'];
+      if (geopoint is GeoPoint) {
+        return geopoint;
+      }
+    }
+
+    return const GeoPoint(0, 0);
+  }
+
+  PublicArtModel? _parsePublicArtDocument(
+    DocumentSnapshot<Map<String, dynamic>> doc,
+  ) {
+    final parsed = PublicArtModel.fromFirestore(doc);
+    final data = doc.data();
+    if (data == null) return parsed;
+
+    final resolvedPoint = _extractGeoPointFromData(data);
+    if (resolvedPoint.latitude == 0 && resolvedPoint.longitude == 0) {
+      return parsed;
+    }
+
+    if (parsed.location.latitude == 0 && parsed.location.longitude == 0) {
+      return parsed.copyWith(location: resolvedPoint);
+    }
+
+    return parsed;
+  }
+
+  Future<List<DocumentSnapshot<Map<String, dynamic>>>>
+  _fetchNearbyPublicArtByLocationFallback({
+    required Position userPosition,
+    required double radiusMeters,
+  }) async {
+    try {
+      // Keep this bounded: enough to recover production docs missing `geo`
+      // without turning nearby discovery into an unbounded full scan.
+      final snapshot = await _firestore
+          .collection('publicArt')
+          .where('location', isNull: false)
+          .limit(800)
+          .get();
+
+      return snapshot.docs.where((doc) {
+        final point = _extractGeoPointFromData(doc.data());
+        if (point.latitude == 0 && point.longitude == 0) {
+          return false;
+        }
+
+        final distance = Geolocator.distanceBetween(
+          userPosition.latitude,
+          userPosition.longitude,
+          point.latitude,
+          point.longitude,
+        );
+        return distance <= radiusMeters;
+      }).toList();
+    } catch (e) {
+      AppLogger.error('Error in publicArt location fallback query: $e');
+      return const [];
+    }
   }
 
   /// Extract neighborhood name from address string

@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:artbeat_sponsorships/artbeat_sponsorships.dart';
 
 import '../utils/user_sync_helper.dart';
 import '../utils/performance_monitor.dart';
@@ -20,12 +19,10 @@ import '../routing/app_routes.dart';
 class SplashScreen extends StatefulWidget {
   const SplashScreen({
     super.key,
-    this.sponsorService,
     this.enableBackgroundAnimation = true,
     this.autoNavigate = true,
   });
 
-  final SponsorService? sponsorService;
   final bool enableBackgroundAnimation;
   final bool autoNavigate;
 
@@ -386,18 +383,6 @@ class _SplashScreenState extends State<SplashScreen>
                   },
                 ),
               ],
-            ),
-          ),
-
-          // Title Sponsor Placeholder
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 40 + MediaQuery.of(context).padding.bottom,
-            child: SponsorBanner(
-              placementKey: SponsorshipPlacements.splash,
-              showPlaceholder: true,
-              sponsorService: widget.sponsorService,
             ),
           ),
         ],

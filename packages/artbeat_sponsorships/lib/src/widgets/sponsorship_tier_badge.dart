@@ -9,8 +9,6 @@ class SponsorshipTierBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final icon = switch (tier) {
-      SponsorshipTier.title => Icons.star,
-      SponsorshipTier.event => Icons.event,
       SponsorshipTier.artWalk => Icons.map,
       SponsorshipTier.capture => Icons.camera_alt,
       SponsorshipTier.discover => Icons.radar,

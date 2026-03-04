@@ -264,4 +264,8 @@ class AppRoutes {
   // In-app purchase routes
   static const String inAppPurchaseDemo = '/in-app-purchase-demo';
   static const String localBusiness = '/local-business';
+  static const String sponsorshipCreate = '/sponsorship/create';
+  static const String sponsorshipArtWalk = '/sponsorship/art-walk';
+  static const String sponsorshipCapture = '/sponsorship/capture';
+  static const String sponsorshipDiscover = '/sponsorship/discover';
 }

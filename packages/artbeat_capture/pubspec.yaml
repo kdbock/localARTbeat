@@ -22,6 +22,8 @@ dependencies:
   firebase_storage: ^13.0.6
   firebase_core: ^4.4.0
   firebase_auth: ^6.1.4
+  artbeat_sponsorships:
+    path: ../artbeat_sponsorships
   artbeat_core:
     path: ../artbeat_core
   artbeat_ads:
@@ -57,3 +59,5 @@ dev_dependencies:
   camera_platform_interface: any
   image_picker_platform_interface: any
   plugin_platform_interface: ^2.1.8
+  cloud_firestore_platform_interface: any
+  connectivity_plus_platform_interface: any

@@ -209,43 +209,40 @@ class MyApp extends StatelessWidget {
               capture.CaptureService,
               core.DashboardViewModel
             >(
-              create: (_) => core.DashboardViewModel(
-                eventService: events.EventService(),
-                artworkService: ArtworkService(),
-                artWalkService: ArtWalkService(),
-                subscriptionService: core.SubscriptionService(),
-                userService: core.UserService(),
-                captureService: capture.CaptureService(),
+              create: (BuildContext context) => core.DashboardViewModel(
+                eventService: context.read<events.EventService>(),
+                artworkService: context.read<ArtworkService>(),
+                artWalkService: context.read<ArtWalkService>(),
+                subscriptionService: context.read<core.SubscriptionService>(),
+                userService: context.read<core.UserService>(),
+                captureService: context.read<capture.CaptureService>(),
               ),
               update:
                   (
-                    _,
+                    BuildContext context,
                     events.EventService eventService,
                     ArtworkService artworkService,
                     ArtWalkService artWalkService,
                     core.SubscriptionService subscriptionService,
                     core.UserService userService,
                     capture.CaptureService captureService,
-                    previous,
-                  ) =>
-                      previous ??
-                      core.DashboardViewModel(
-                        eventService: eventService,
-                        artworkService: artworkService,
-                        artWalkService: artWalkService,
-                        subscriptionService: subscriptionService,
-                        userService: userService,
-                        captureService: captureService,
-                      ),
-            ),
-            ChangeNotifierProxyProvider<
-              core.ChapterPartnerProvider,
-              core.DashboardViewModel
-            >(
-              create: (context) => context.read<core.DashboardViewModel>(),
-              update: (context, chapterProvider, dashboardViewModel) =>
-                  dashboardViewModel!
-                    ..updateChapter(chapterProvider.activeChapterId),
+                    core.DashboardViewModel? previous,
+                  ) {
+                    final chapterProvider = context
+                        .read<core.ChapterPartnerProvider>();
+                    final viewModel =
+                        previous ??
+                        core.DashboardViewModel(
+                          eventService: eventService,
+                          artworkService: artworkService,
+                          artWalkService: artWalkService,
+                          subscriptionService: subscriptionService,
+                          userService: userService,
+                          captureService: captureService,
+                        );
+                    viewModel.updateChapter(chapterProvider.activeChapterId);
+                    return viewModel;
+                  },
             ),
           ],
           child: MaterialApp(

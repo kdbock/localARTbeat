@@ -8,8 +8,6 @@ class SponsorshipValidator {
       case SponsorshipTier.capture:
       case SponsorshipTier.discover:
         return true;
-      case SponsorshipTier.title:
-      case SponsorshipTier.event:
       case SponsorshipTier.artWalk:
         return false;
     }
@@ -18,10 +16,8 @@ class SponsorshipValidator {
   /// Whether this tier requires a related entity ID
   static bool requiresRelatedEntity(SponsorshipTier tier) {
     switch (tier) {
-      case SponsorshipTier.event:
       case SponsorshipTier.artWalk:
         return true;
-      case SponsorshipTier.title:
       case SponsorshipTier.capture:
       case SponsorshipTier.discover:
         return false;
@@ -31,14 +27,6 @@ class SponsorshipValidator {
   /// Validate that a placement is allowed for a tier
   static bool isPlacementAllowed(SponsorshipTier tier, String placementKey) {
     switch (tier) {
-      case SponsorshipTier.title:
-        return placementKey == SponsorshipPlacements.splash ||
-            placementKey == SponsorshipPlacements.dashboardTop ||
-            placementKey == SponsorshipPlacements.dashboardFooter;
-
-      case SponsorshipTier.event:
-        return placementKey == SponsorshipPlacements.eventHeader;
-
       case SponsorshipTier.artWalk:
         return placementKey == SponsorshipPlacements.artWalkHeader ||
             placementKey == SponsorshipPlacements.artWalkStopCard;

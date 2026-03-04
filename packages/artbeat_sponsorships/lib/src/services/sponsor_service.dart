@@ -5,7 +5,6 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../models/sponsorship.dart';
 import '../models/sponsorship_status.dart';
-import '../models/sponsorship_tier.dart';
 import '../utils/sponsorship_placements.dart';
 
 class SponsorService {
@@ -47,28 +46,19 @@ class SponsorService {
 
     final sponsors = snapshot.docs.map(Sponsorship.fromSnapshot).toList();
 
-    // 1️⃣ Title sponsor override (global, exclusive)
-    final Sponsorship? titleSponsor = sponsors
-        .where((s) => s.tier == SponsorshipTier.title)
-        .cast<Sponsorship?>()
-        .firstOrNull;
+    // 1️⃣ Apply radius filtering where applicable
+    final filteredByRadius =
+        sponsors.where((sponsor) {
+          if (sponsor.radiusMiles == null) return true;
 
-    if (titleSponsor != null) {
-      return titleSponsor;
-    }
+          if (userLocation == null) return false;
 
-    // 2️⃣ Apply radius filtering where applicable
-    final filteredByRadius = sponsors.where((sponsor) {
-      if (sponsor.radiusMiles == null) return true;
-
-      if (userLocation == null) return false;
-
-      return _isWithinRadius(userLocation, sponsor);
-    }).toList();
+          return _isWithinRadius(userLocation, sponsor);
+        }).toList();
 
     if (filteredByRadius.isEmpty) return null;
 
-    // 3️⃣ Rotate remaining sponsors
+    // 2️⃣ Rotate remaining sponsors
     filteredByRadius.shuffle(Random());
 
     return filteredByRadius.first;

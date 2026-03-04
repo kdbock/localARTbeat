@@ -48,11 +48,9 @@ void main() {
   group('🎯 ArtBeat Authentication & Onboarding Tests', () {
     group('1. AUTHENTICATION & ONBOARDING - Core UI Tests', () {
       testWidgets('✅ Splash screen displays on app launch', (tester) async {
-        final mockSponsorService = FirebaseTestSetup.createMockSponsorService();
         await pumpLocalized(
           tester,
-          SplashScreen(
-            sponsorService: mockSponsorService,
+          const SplashScreen(
             enableBackgroundAnimation: false,
             autoNavigate: false,
           ),
@@ -447,12 +445,10 @@ void main() {
 
       group('Screen Layout Tests', () {
         testWidgets('Splash screen has proper layout', (tester) async {
-          final mockSponsorService =
               FirebaseTestSetup.createMockSponsorService();
           await pumpLocalized(
             tester,
-            SplashScreen(
-              sponsorService: mockSponsorService,
+            const SplashScreen(
               enableBackgroundAnimation: false,
               autoNavigate: false,
             ),
@@ -494,7 +490,6 @@ void main() {
       group('Integration Readiness Tests', () {
         testWidgets('Screens handle navigation properly', (tester) async {
           final mockAuthService = FirebaseTestSetup.createMockAuthService();
-          final mockSponsorService =
               FirebaseTestSetup.createMockSponsorService();
 
           await tester.pumpWidget(
@@ -512,8 +507,7 @@ void main() {
                   localizationsDelegates: context.localizationDelegates,
                   initialRoute: '/',
                   routes: {
-                    '/': (context) => SplashScreen(
-                      sponsorService: mockSponsorService,
+                    '/': (context) => const SplashScreen(
                       enableBackgroundAnimation: false,
                       autoNavigate: false,
                     ),

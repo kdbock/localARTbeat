@@ -27,19 +27,24 @@ class SponsorshipCtaTile extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(icon, size: 28),
+          Icon(icon, size: 28, color: Colors.white),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: Theme.of(context).textTheme.titleSmall),
+                Text(
+                  title,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(color: Colors.white),
+                ),
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
                   style: Theme.of(
                     context,
-                  ).textTheme.bodySmall?.copyWith(color: Colors.white70),
+                  ).textTheme.bodySmall?.copyWith(color: Colors.white),
                 ),
               ],
             ),

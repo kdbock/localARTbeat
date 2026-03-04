@@ -241,16 +241,6 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                       ),
                     ),
 
-                    /*
-                    const SponsorBanner(
-                      placementKey: SponsorshipPlacements.dashboardTop,
-                      padding: EdgeInsets.symmetric(vertical: 8),
-                      showPlaceholder: true,
-                    ),
-
-                    const SizedBox(height: 14),
-                    */
-
                     // The QUEST BUTTONS (focal point)
                     Column(
                       children: [
@@ -469,13 +459,6 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                           ),
                         ),
 
-                        /*
-                        const SponsorBanner(
-                          placementKey: SponsorshipPlacements.dashboardFooter,
-                          padding: EdgeInsets.symmetric(vertical: 8),
-                          showPlaceholder: true,
-                        ),
-                        */
                         _LeaderboardSection(intro: _intro, index: 5),
 
                         const SizedBox(height: 16),

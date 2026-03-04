@@ -7,6 +7,8 @@ class Sponsorship {
   Sponsorship({
     required this.id,
     required this.businessId,
+    required this.businessName,
+    this.businessDescription,
     required this.tier,
     required this.status,
     required this.startDate,
@@ -21,6 +23,15 @@ class Sponsorship {
     this.bannerUrl,
     this.relatedEntityId,
     this.chapterId,
+    this.contactEmail,
+    this.phone,
+    this.brandingNotes,
+    this.additionalNotes,
+    this.paymentStatus,
+    this.stripeCustomerId,
+    this.stripeSubscriptionId,
+    this.stripePriceId,
+    this.stripeProductId,
   });
 
   factory Sponsorship.fromSnapshot(DocumentSnapshot snapshot) =>
@@ -30,6 +41,8 @@ class Sponsorship {
       Sponsorship(
         id: id,
         businessId: data['businessId'] as String,
+        businessName: data['businessName'] as String? ?? 'Local Business',
+        businessDescription: data['businessDescription'] as String?,
         tier: SponsorshipTierExtension.fromString(
           data['tier'] as String? ?? '',
         ),
@@ -50,9 +63,20 @@ class Sponsorship {
         relatedEntityId: data['relatedEntityId'] as String?,
         chapterId: data['chapterId'] as String?,
         createdAt: (data['createdAt'] as Timestamp).toDate(),
+        contactEmail: data['contactEmail'] as String?,
+        phone: data['phone'] as String?,
+        brandingNotes: data['brandingNotes'] as String?,
+        additionalNotes: data['additionalNotes'] as String?,
+        paymentStatus: data['paymentStatus'] as String?,
+        stripeCustomerId: data['stripeCustomerId'] as String?,
+        stripeSubscriptionId: data['stripeSubscriptionId'] as String?,
+        stripePriceId: data['stripePriceId'] as String?,
+        stripeProductId: data['stripeProductId'] as String?,
       );
   final String id;
   final String businessId;
+  final String businessName;
+  final String? businessDescription;
   final SponsorshipTier tier;
   final SponsorshipStatus status;
 
@@ -71,9 +95,20 @@ class Sponsorship {
   final String? relatedEntityId; // eventId, artWalkId, etc
   final String? chapterId;
   final DateTime createdAt;
+  final String? contactEmail;
+  final String? phone;
+  final String? brandingNotes;
+  final String? additionalNotes;
+  final String? paymentStatus;
+  final String? stripeCustomerId;
+  final String? stripeSubscriptionId;
+  final String? stripePriceId;
+  final String? stripeProductId;
 
   Map<String, dynamic> toMap() => {
     'businessId': businessId,
+    'businessName': businessName,
+    'businessDescription': businessDescription,
     'tier': tier.value,
     'status': status.value,
     'startDate': Timestamp.fromDate(startDate),
@@ -88,6 +123,15 @@ class Sponsorship {
     'relatedEntityId': relatedEntityId,
     'chapterId': chapterId,
     'createdAt': Timestamp.fromDate(createdAt),
+    'contactEmail': contactEmail,
+    'phone': phone,
+    'brandingNotes': brandingNotes,
+    'additionalNotes': additionalNotes,
+    'paymentStatus': paymentStatus,
+    'stripeCustomerId': stripeCustomerId,
+    'stripeSubscriptionId': stripeSubscriptionId,
+    'stripePriceId': stripePriceId,
+    'stripeProductId': stripeProductId,
   };
 
   /// ----- Pure logic helpers (no UI concerns) -----

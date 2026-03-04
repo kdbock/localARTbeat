@@ -4,26 +4,18 @@ class SponsorshipPricing {
   /// Price in USD
   static double priceFor(SponsorshipTier tier) {
     switch (tier) {
-      case SponsorshipTier.title:
-        return 25000;
-      case SponsorshipTier.event:
-        return 1000;
       case SponsorshipTier.artWalk:
-        return 500;
+        return 249;
       case SponsorshipTier.capture:
-        return 250;
+        return 99;
       case SponsorshipTier.discover:
-        return 250;
+        return 49;
     }
   }
 
   /// Duration in days
   static int durationDaysFor(SponsorshipTier tier) {
     switch (tier) {
-      case SponsorshipTier.title:
-        return 365;
-      case SponsorshipTier.event:
-        return 0; // Event-based; dates supplied externally
       case SponsorshipTier.artWalk:
         return 30;
       case SponsorshipTier.capture:
@@ -36,9 +28,6 @@ class SponsorshipPricing {
   /// Whether duration is user-configurable
   static bool isFixedDuration(SponsorshipTier tier) {
     switch (tier) {
-      case SponsorshipTier.event:
-        return false;
-      case SponsorshipTier.title:
       case SponsorshipTier.artWalk:
       case SponsorshipTier.capture:
       case SponsorshipTier.discover:

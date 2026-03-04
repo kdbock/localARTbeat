@@ -4,6 +4,7 @@ import 'glass_card.dart';
 
 class HudTopBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
+  final String? subtitle;
   final List<Widget> actions;
   final VoidCallback? onBackPressed;
   final bool showBackButton;
@@ -13,12 +14,12 @@ class HudTopBar extends StatelessWidget implements PreferredSizeWidget {
   const HudTopBar({
     super.key,
     required this.title,
+    this.subtitle,
     this.actions = const [],
     this.onBackPressed,
     this.showBackButton = true,
     this.glassBackground = true,
-    this.height = 64,
-    required String subtitle,
+    this.height = 74,
   });
 
   @override
@@ -27,7 +28,7 @@ class HudTopBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final content = Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       child: Row(
         children: [
           if (showBackButton)
@@ -36,17 +37,35 @@ class HudTopBar extends StatelessWidget implements PreferredSizeWidget {
               icon: const Icon(Icons.arrow_back, color: Colors.white),
             ),
           Expanded(
-            child: Text(
-              title,
-              style: GoogleFonts.spaceGrotesk(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
-              textAlign: TextAlign.center,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                    letterSpacing: -0.5,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                if (subtitle != null)
+                  Text(
+                    subtitle!.toUpperCase(),
+                    style: GoogleFonts.spaceGrotesk(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white.withValues(alpha: 0.5),
+                      letterSpacing: 1.5,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+              ],
             ),
           ),
-          ...actions,
+          if (actions.isNotEmpty) ...actions else const SizedBox(width: 48),
         ],
       ),
     );

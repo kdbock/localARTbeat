@@ -24,6 +24,7 @@ class SponsorshipSection extends StatelessWidget {
             fontWeight: FontWeight.w900,
             letterSpacing: 1.2,
             fontSize: 16,
+            color: Colors.white,
           ),
         ),
         if (subtitle != null) ...[
@@ -31,7 +32,7 @@ class SponsorshipSection extends StatelessWidget {
           Text(
             subtitle!,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.white.withValues(alpha: 0.8),
+              color: Colors.white,
               fontSize: 13.5,
             ),
           ),

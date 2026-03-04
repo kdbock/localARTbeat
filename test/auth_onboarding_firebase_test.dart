@@ -57,8 +57,7 @@ void main() {
       testWidgets('✅ Splash screen displays on app launch', (tester) async {
         await tester.pumpWidget(
           wrapWithLocalization(
-            SplashScreen(
-              sponsorService: FirebaseTestSetup.createMockSponsorService(),
+            const SplashScreen(
               enableBackgroundAnimation: false,
               autoNavigate: false,
             ),

@@ -53,27 +53,19 @@ class AppRouter {
 
     // Core routes
     switch (routeName) {
-      case '/title-sponsorship':
-        return RouteUtils.createMainLayoutRoute(
-          child: const sponsorships.TitleSponsorshipScreen(),
-        );
-      case '/art-walk-sponsorship':
+      case core.AppRoutes.sponsorshipArtWalk:
         return RouteUtils.createMainLayoutRoute(
           child: const sponsorships.ArtWalkSponsorshipScreen(),
         );
-      case '/event-sponsorship':
-        return RouteUtils.createMainLayoutRoute(
-          child: const sponsorships.EventSponsorshipScreen(),
-        );
-      case '/capture-sponsorship':
+      case core.AppRoutes.sponsorshipCapture:
         return RouteUtils.createMainLayoutRoute(
           child: const sponsorships.CaptureSponsorshipScreen(),
         );
-      case '/discover-sponsorship':
+      case core.AppRoutes.sponsorshipDiscover:
         return RouteUtils.createMainLayoutRoute(
           child: const sponsorships.DiscoverSponsorshipScreen(),
         );
-      case '/sponsorship-dashboard':
+      case core.AppRoutes.sponsorshipCreate:
         return RouteUtils.createMainLayoutRoute(
           child: const sponsorships.CreateSponsorshipScreen(),
         );

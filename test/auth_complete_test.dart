@@ -39,8 +39,7 @@ void main() {
       testWidgets('✅ Splash screen displays and animates', (tester) async {
         await tester.pumpWidget(
           wrapWithLocalization(
-            SplashScreen(
-              sponsorService: FirebaseTestSetup.createMockSponsorService(),
+            const SplashScreen(
               enableBackgroundAnimation: false,
               autoNavigate: false,
             ),

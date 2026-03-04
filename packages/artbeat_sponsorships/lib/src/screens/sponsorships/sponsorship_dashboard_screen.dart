@@ -1,13 +1,14 @@
+import 'package:artbeat_core/artbeat_core.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 import '../../models/sponsorship.dart';
 import '../../services/sponsorship_repository.dart';
 import '../../widgets/gradient_cta_button.dart';
-import '../../widgets/hud_top_bar.dart';
 import '../../widgets/sponsorship_card.dart';
 import '../../widgets/sponsorship_empty_state.dart';
 import '../../widgets/sponsorship_section.dart';
-import '../../widgets/world_background.dart';
+import 'sponsorship_detail_screen.dart';
 
 class SponsorshipDashboardScreen extends StatefulWidget {
   const SponsorshipDashboardScreen({super.key, required this.businessId});
@@ -35,7 +36,10 @@ class _SponsorshipDashboardScreenState
   Widget build(BuildContext context) => WorldBackground(
     child: Column(
       children: [
-        HudTopBar(title: 'Sponsorships', onBack: () => Navigator.pop(context)),
+        HudTopBar(
+          title: 'sponsorship_dashboard_title'.tr(),
+          onBackPressed: () => Navigator.pop(context),
+        ),
         Expanded(
           child: FutureBuilder<List<Sponsorship>>(
             future: _future,
@@ -48,10 +52,9 @@ class _SponsorshipDashboardScreenState
 
               if (sponsorships.isEmpty) {
                 return SponsorshipEmptyState(
-                  title: 'No Sponsorships Yet',
-                  subtitle:
-                      'Promote your business by sponsoring art, tours, or discoveries.',
-                  ctaLabel: 'Create Sponsorship',
+                  title: 'sponsorship_dashboard_empty_title'.tr(),
+                  subtitle: 'sponsorship_dashboard_empty_subtitle'.tr(),
+                  ctaLabel: 'sponsorship_dashboard_create_button'.tr(),
                   onCta: _goToCreate,
                 );
               }
@@ -60,7 +63,7 @@ class _SponsorshipDashboardScreenState
                 padding: const EdgeInsets.only(bottom: 120),
                 children: [
                   SponsorshipSection(
-                    title: 'Your Sponsorships',
+                    title: 'sponsorship_dashboard_list_title'.tr(),
                     child: Column(
                       children: sponsorships
                           .map(
@@ -83,9 +86,8 @@ class _SponsorshipDashboardScreenState
         Padding(
           padding: const EdgeInsets.all(16),
           child: GradientCtaButton(
-            label: 'Create Sponsorship',
+            label: 'sponsorship_dashboard_create_button'.tr(),
             onPressed: _goToCreate,
-            onTap: () {},
           ),
         ),
       ],
@@ -93,10 +95,15 @@ class _SponsorshipDashboardScreenState
   );
 
   void _goToCreate() {
-    Navigator.pushNamed(context, '/create-sponsorship');
+    Navigator.pushNamed(context, AppRoutes.sponsorshipCreate);
   }
 
   void _openDetails(String id) {
-    Navigator.pushNamed(context, '/sponsorship-detail', arguments: id);
+    Navigator.push(
+      context,
+      MaterialPageRoute<void>(
+        builder: (context) => SponsorshipDetailScreen(sponsorshipId: id),
+      ),
+    );
   }
 }

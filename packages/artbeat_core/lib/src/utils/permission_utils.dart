@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'logger.dart';
 
@@ -203,16 +204,27 @@ class PermissionUtils {
   /// Request location permission with proper error handling
   static Future<bool> requestLocationPermission(BuildContext context) async {
     try {
-      PermissionStatus status = await Permission.locationWhenInUse.status;
+      // Use geolocator for more reliable system-level status
+      LocationPermission permission = await Geolocator.checkPermission();
 
-      if (status.isDenied) {
-        status = await Permission.locationWhenInUse.request();
+      if (permission == LocationPermission.always ||
+          permission == LocationPermission.whileInUse) {
+        return true;
       }
 
-      if (status.isPermanentlyDenied) {
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.always ||
+            permission == LocationPermission.whileInUse) {
+          return true;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
         if (context.mounted) {
           final shouldOpenSettings = await showDialog<bool>(
             context: context,
+            barrierDismissible: false,
             builder: (BuildContext context) => AlertDialog(
               title: const Text('Permission Required'),
               content: const Text(
@@ -233,13 +245,10 @@ class PermissionUtils {
 
           if (shouldOpenSettings == true) {
             await openAppSettings();
+            return false;
           }
         }
         return false;
-      }
-
-      if (status.isGranted) {
-        return true;
       }
 
       if (context.mounted) {
@@ -279,7 +288,8 @@ class PermissionUtils {
 
   /// Check if location permission is granted without requesting
   static Future<bool> hasLocationPermission() async {
-    final status = await Permission.locationWhenInUse.status;
-    return status.isGranted;
+    final permission = await Geolocator.checkPermission();
+    return permission == LocationPermission.always ||
+        permission == LocationPermission.whileInUse;
   }
 }

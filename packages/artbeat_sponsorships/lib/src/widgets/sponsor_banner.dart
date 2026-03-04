@@ -119,12 +119,6 @@ class _SponsorBannerState extends State<SponsorBanner> {
 
   Widget _buildSponsorContent(BuildContext context, Sponsorship sponsor) {
     switch (sponsor.tier) {
-      case SponsorshipTier.title:
-        return _TitleSponsorView(sponsor: sponsor);
-
-      case SponsorshipTier.event:
-        return _LabeledBanner(sponsor: sponsor, label: 'Sponsored by');
-
       case SponsorshipTier.artWalk:
         return _LabeledBanner(
           sponsor: sponsor,
@@ -144,27 +138,6 @@ class _SponsorBannerState extends State<SponsorBanner> {
 /* -------------------------------------------------------------------------- */
 /*                               Render Variants                              */
 /* -------------------------------------------------------------------------- */
-
-class _TitleSponsorView extends StatelessWidget {
-  const _TitleSponsorView({required this.sponsor});
-
-  final Sponsorship sponsor;
-
-  @override
-  Widget build(BuildContext context) => GestureDetector(
-    onTap: () => _openLink(context, sponsor.linkUrl),
-    child: ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: sponsor.bannerUrl != null
-          ? Image.network(
-              sponsor.bannerUrl!,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            )
-          : Image.network(sponsor.logoUrl, height: 96, fit: BoxFit.contain),
-    ),
-  );
-}
 
 class _LabeledBanner extends StatelessWidget {
   const _LabeledBanner({
@@ -216,7 +189,7 @@ class _LabeledBanner extends StatelessWidget {
                   ).textTheme.labelSmall?.copyWith(color: Colors.grey[600]),
                 ),
                 Text(
-                  sponsor.businessId,
+                  sponsor.businessName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.titleSmall,
@@ -245,12 +218,50 @@ class _CompactBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) => GestureDetector(
     onTap: () => _openLink(context, sponsor.linkUrl),
-    child: ClipRRect(
-      borderRadius: BorderRadius.circular(10),
-      child: Image.network(
-        sponsor.bannerUrl ?? sponsor.logoUrl,
-        height: 56,
-        fit: BoxFit.cover,
+    child: Container(
+      height: 56,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: Colors.white.withValues(alpha: 0.1),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        children: [
+          const SizedBox(width: 12),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: Image.network(
+              sponsor.logoUrl,
+              width: 36,
+              height: 36,
+              fit: BoxFit.cover,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  sponsor.businessName,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  'Capture Sponsor',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.labelSmall?.copyWith(color: Colors.white70),
+                ),
+              ],
+            ),
+          ),
+          const Icon(Icons.chevron_right, color: Colors.white38),
+          const SizedBox(width: 12),
+        ],
       ),
     ),
   );
