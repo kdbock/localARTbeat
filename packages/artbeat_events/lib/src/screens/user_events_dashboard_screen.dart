@@ -315,19 +315,34 @@ class _UserEventsDashboardScreenState extends State<UserEventsDashboardScreen> {
           child: Icon(icon, color: color, size: 16),
         ),
         const SizedBox(width: 8),
-        Text(
-          title,
-          style: GoogleFonts.spaceGrotesk(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
+        Expanded(
+          child: Text(
+            title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
-        const Spacer(),
+        const SizedBox(width: 8),
         TextButton(
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            minimumSize: const Size(0, 36),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
           onPressed: () => Navigator.pushNamed(context, '/events/all'),
-          child: Text(
-            'events_view_all'.tr(),
-            style: const TextStyle(color: ArtbeatColors.primaryPurple),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 110),
+            child: Text(
+              'events_view_all'.tr(),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.right,
+              style: const TextStyle(color: ArtbeatColors.primaryPurple),
+            ),
           ),
         ),
       ],

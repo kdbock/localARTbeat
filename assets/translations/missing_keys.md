@@ -9,12 +9,7 @@ pt.json
 zh.json
 
 Missing keys identified:
-- auth_header_menu_title
-- auth_header_menu_login
-- auth_header_menu_register
-- auth_header_menu_forgot_password
-- auth_header_dev_tools_title
+flutter: [🌎 Easy Localization] [WARNING] Localization key [user_events_today_section] not found
+flutter: [🌎 Easy Localization] [WARNING] Localization key [user_events_this_week_section] not found
 
 Notes:
-- Previously listed `notifications_*` keys are already present in all locale files.
-- `auth_header_*` keys above were missing and caused Easy Localization warnings.

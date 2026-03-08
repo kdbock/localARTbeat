@@ -27,7 +27,17 @@ class EnvLoader {
       // 2. Load environment-specific file and merge
       try {
         const primaryEnv = kReleaseMode ? '.env.production' : '.env.example';
-        await dotenv.load(fileName: primaryEnv);
+
+        try {
+          await dotenv.load(fileName: primaryEnv);
+        } catch (_) {
+          // CI and shared environments typically only ship example files.
+          if (kReleaseMode) {
+            await dotenv.load(fileName: '.env.production.example');
+          } else {
+            rethrow;
+          }
+        }
 
         // Merge with care: only use real values, never placeholders.
         // Keep valid baseline values from .env when .env.example is placeholder-only.
