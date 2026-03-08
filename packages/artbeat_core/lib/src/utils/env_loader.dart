@@ -33,7 +33,7 @@ class EnvLoader {
         } catch (_) {
           // CI and shared environments typically only ship example files.
           if (kReleaseMode) {
-            await dotenv.load(fileName: '.env.production.example');
+            await dotenv.load(fileName: '.env.example');
           } else {
             rethrow;
           }
