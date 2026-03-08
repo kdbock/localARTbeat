@@ -265,36 +265,47 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
               right: 16,
               bottom: 16,
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        EventUtils.formatEventDate(event.dateTime),
-                        style: const TextStyle(
-                          color: Color(0xF2FFFFFF),
-                          fontWeight: FontWeight.w900,
-                          fontSize: 18,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          EventUtils.formatEventDate(event.dateTime),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Color(0xF2FFFFFF),
+                            fontWeight: FontWeight.w900,
+                            fontSize: 18,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        EventUtils.formatEventTime(event.dateTime),
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.85),
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
+                        const SizedBox(height: 4),
+                        Text(
+                          EventUtils.formatEventTime(event.dateTime),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.85),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                  Text(
-                    EventUtils.getTimeUntilEvent(event.dateTime),
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.75),
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13,
+                  const SizedBox(width: 12),
+                  Flexible(
+                    child: Text(
+                      EventUtils.getTimeUntilEvent(event.dateTime),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.right,
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.75),
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                 ],

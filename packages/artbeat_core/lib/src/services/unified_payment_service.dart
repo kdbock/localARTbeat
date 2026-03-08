@@ -300,24 +300,42 @@ class UnifiedPaymentService {
       throw Exception('User not authenticated');
     }
 
-    AppLogger.auth('🔐 Getting ID token for user: ${user.uid}');
-    final idToken = await user.getIdToken();
-    if (idToken == null) {
-      throw Exception('Failed to get ID token');
-    }
-
     final url = _functionUrls[functionKey]!;
     AppLogger.network('🌐 Making request to: $url');
     AppLogger.info('📝 Request body: ${json.encode(body)}');
+    final uri = Uri.parse(url);
+    final encodedBody = json.encode(body);
 
-    return _httpClient.post(
-      Uri.parse(url),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $idToken',
-      },
-      body: json.encode(body),
-    );
+    Future<http.Response> sendWithToken(String token) {
+      return _httpClient.post(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: encodedBody,
+      );
+    }
+
+    AppLogger.auth('🔐 Getting ID token for user: ${user.uid}');
+    final idToken = await user.getIdToken();
+    if (idToken == null || idToken.isEmpty) {
+      throw Exception('Failed to get ID token');
+    }
+
+    var response = await sendWithToken(idToken);
+    if (response.statusCode == 401) {
+      AppLogger.warning(
+        '⚠️ Received 401 for $functionKey. Refreshing token and retrying once.',
+      );
+      final refreshedToken = await user.getIdToken(true);
+      if (refreshedToken == null || refreshedToken.isEmpty) {
+        throw Exception('Failed to refresh ID token');
+      }
+      response = await sendWithToken(refreshedToken);
+    }
+
+    return response;
   }
 
   /// Create a payment intent for Stripe
@@ -1438,7 +1456,21 @@ class UnifiedPaymentService {
       );
 
       if (response.statusCode != 200) {
-        throw Exception('Failed to create setup intent');
+        String message =
+            'Failed to create setup intent (${response.statusCode})';
+        try {
+          final data = json.decode(response.body) as Map<String, dynamic>;
+          final error = data['error'] as String?;
+          if (error != null && error.isNotEmpty) {
+            message = '$message: $error';
+          }
+        } catch (_) {
+          final raw = response.body.trim();
+          if (raw.isNotEmpty) {
+            message = '$message: $raw';
+          }
+        }
+        throw Exception(message);
       }
 
       final data = json.decode(response.body) as Map<String, dynamic>;

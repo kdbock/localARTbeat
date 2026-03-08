@@ -29,11 +29,19 @@ class EnvLoader {
         const primaryEnv = kReleaseMode ? '.env.production' : '.env.example';
         await dotenv.load(fileName: primaryEnv);
 
-        // Merge with care: only use real values, never placeholders
+        // Merge with care: only use real values, never placeholders.
+        // Keep valid baseline values from .env when .env.example is placeholder-only.
         dotenv.env.forEach((key, value) {
-          if (!value.contains(r'${')) {
-            _envVars[key] = value;
+          if (_isPlaceholderValue(value)) return;
+
+          final existing = _envVars[key];
+          if (existing != null &&
+              existing.isNotEmpty &&
+              !_isPlaceholderValue(existing)) {
+            return;
           }
+
+          _envVars[key] = value;
         });
 
         AppLogger.info('📝 Loaded $primaryEnv and merged configuration');
@@ -133,5 +141,15 @@ class EnvLoader {
   /// Get all environment variables
   Map<String, String> getAll() {
     return Map.unmodifiable(_envVars);
+  }
+
+  bool _isPlaceholderValue(String value) {
+    final v = value.trim();
+    if (v.isEmpty) return true;
+
+    return v.contains(r'${') ||
+        v.contains('XXXXXXXX') ||
+        v.toLowerCase().contains('your_') ||
+        v.toLowerCase().contains('placeholder');
   }
 }

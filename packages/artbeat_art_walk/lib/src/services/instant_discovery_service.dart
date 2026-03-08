@@ -620,7 +620,9 @@ class InstantDiscoveryService {
   }
 
   /// Fetches discovery sponsorships near user location and converts to PublicArtModel
-  Future<List<PublicArtModel>> _injectSponsorships(Position userPosition) async {
+  Future<List<PublicArtModel>> _injectSponsorships(
+    Position userPosition,
+  ) async {
     try {
       final sponsorships = await _sponsorService.getActiveSponsorsForPlacement(
         SponsorshipPlacements.discoverRadarBanner,

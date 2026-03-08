@@ -16,10 +16,11 @@ dependencies:
   artbeat_core:
     path: ../artbeat_core
   cloud_firestore: ^6.1.2
-  firebase_auth: ^6.1.4
   easy_localization: ^3.0.7
+  firebase_auth: ^6.1.4
   flutter:
     sdk: flutter
+  geocoding: ^4.0.0
   geolocator: ^14.0.1
   google_maps_flutter: any
   intl: ^0.20.2

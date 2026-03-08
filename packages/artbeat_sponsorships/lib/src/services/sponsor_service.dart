@@ -47,14 +47,13 @@ class SponsorService {
     final sponsors = snapshot.docs.map(Sponsorship.fromSnapshot).toList();
 
     // 1️⃣ Apply radius filtering where applicable
-    final filteredByRadius =
-        sponsors.where((sponsor) {
-          if (sponsor.radiusMiles == null) return true;
+    final filteredByRadius = sponsors.where((sponsor) {
+      if (sponsor.radiusMiles == null) return true;
 
-          if (userLocation == null) return false;
+      if (userLocation == null) return false;
 
-          return _isWithinRadius(userLocation, sponsor);
-        }).toList();
+      return _isWithinRadius(userLocation, sponsor);
+    }).toList();
 
     if (filteredByRadius.isEmpty) return null;
 
@@ -103,9 +102,8 @@ class SponsorService {
     final targetLat = sponsor.latitude;
     final targetLng = sponsor.longitude;
     if (targetLat == null || targetLng == null) {
-      // Preserve backward compatibility for legacy docs that have a radius but
-      // no center coordinate. Server-side validation still gates eligibility.
-      return true;
+      // Radius targeting requires a center point.
+      return false;
     }
 
     final distance = _distanceMiles(

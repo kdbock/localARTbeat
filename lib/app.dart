@@ -231,16 +231,16 @@ class MyApp extends StatelessWidget {
                     final chapterProvider = context
                         .read<core.ChapterPartnerProvider>();
                     final viewModel =
-                        previous ??
-                        core.DashboardViewModel(
-                          eventService: eventService,
-                          artworkService: artworkService,
-                          artWalkService: artWalkService,
-                          subscriptionService: subscriptionService,
-                          userService: userService,
-                          captureService: captureService,
-                        );
-                    viewModel.updateChapter(chapterProvider.activeChapterId);
+                        (previous ??
+                              core.DashboardViewModel(
+                                eventService: eventService,
+                                artworkService: artworkService,
+                                artWalkService: artWalkService,
+                                subscriptionService: subscriptionService,
+                                userService: userService,
+                                captureService: captureService,
+                              ))
+                          ..updateChapter(chapterProvider.activeChapterId);
                     return viewModel;
                   },
             ),

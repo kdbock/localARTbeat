@@ -445,7 +445,7 @@ void main() {
 
       group('Screen Layout Tests', () {
         testWidgets('Splash screen has proper layout', (tester) async {
-              FirebaseTestSetup.createMockSponsorService();
+          FirebaseTestSetup.createMockSponsorService();
           await pumpLocalized(
             tester,
             const SplashScreen(
@@ -490,7 +490,7 @@ void main() {
       group('Integration Readiness Tests', () {
         testWidgets('Screens handle navigation properly', (tester) async {
           final mockAuthService = FirebaseTestSetup.createMockAuthService();
-              FirebaseTestSetup.createMockSponsorService();
+          FirebaseTestSetup.createMockSponsorService();
 
           await tester.pumpWidget(
             EasyLocalization(

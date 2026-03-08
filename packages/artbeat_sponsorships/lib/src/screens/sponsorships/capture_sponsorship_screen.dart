@@ -72,7 +72,8 @@ class _CaptureSponsorshipScreenState extends State<CaptureSponsorshipScreen> {
           child: GradientCtaButton(
             label: 'sponsorship_common_continue_button'.tr(),
             onPressed: () {
-              if (radiusController.text.isEmpty) {
+              final radius = double.tryParse(radiusController.text.trim());
+              if (radius == null || radius <= 0) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text('sponsorship_common_enter_radius_error'.tr()),
@@ -87,8 +88,9 @@ class _CaptureSponsorshipScreenState extends State<CaptureSponsorshipScreen> {
                     type: 'capture',
                     duration: 'sponsorship_common_duration_monthly'.tr(),
                     price: 'sponsorship_common_price_capture'.tr(),
+                    radiusMiles: radius,
                     notes: 'sponsorship_common_radius_notes'.tr(
-                      namedArgs: {'radius': radiusController.text},
+                      namedArgs: {'radius': radius.toString()},
                     ),
                   ),
                 ),

@@ -1993,11 +1993,15 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
 
   Future<void> _openInstantDiscovery() async {
     // If we're on fallback position or null, try one more time to get real location
-    final isFallback = _currentPosition == null || 
-        (_currentPosition!.latitude == _fallbackLat && _currentPosition!.longitude == _fallbackLng);
+    final isFallback =
+        _currentPosition == null ||
+        (_currentPosition!.latitude == _fallbackLat &&
+            _currentPosition!.longitude == _fallbackLng);
 
     if (isFallback) {
-      final allowed = await PermissionUtils.requestLocationPermissionWithSafety(context);
+      final allowed = await PermissionUtils.requestLocationPermissionWithSafety(
+        context,
+      );
       if (allowed) {
         await _loadUserLocationAndSetMap();
       } else {
@@ -2005,7 +2009,10 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('art_walk_art_walk_dashboard_text_location_required_to_discover'.tr()),
+              content: Text(
+                'art_walk_art_walk_dashboard_text_location_required_to_discover'
+                    .tr(),
+              ),
               action: SnackBarAction(
                 label: 'Settings',
                 onPressed: () => openAppSettings(),

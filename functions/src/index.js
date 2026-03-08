@@ -3023,7 +3023,7 @@ exports.createSubscription = onRequest(
           return response.status(405).send({error: "Method Not Allowed"});
         }
 
-        const {customerId, priceId, paymentMethodId} = request.body;
+        const {customerId, priceId, paymentMethodId, metadata} = request.body;
 
         if (!customerId || !priceId) {
           return response.status(400).send({
@@ -3035,14 +3035,18 @@ exports.createSubscription = onRequest(
           customer: customerId,
           items: [{price: priceId}],
           default_payment_method: paymentMethodId,
+          metadata: metadata || {},
           expand: ["latest_invoice.payment_intent"],
         });
 
+        const paymentIntent = subscription.latest_invoice?.payment_intent;
         const clientSecret =
-          subscription.latest_invoice.payment_intent?.client_secret ?? "";
+          paymentIntent?.client_secret ?? "";
 
         response.status(200).send({
           subscriptionId: subscription.id,
+          status: subscription.status,
+          paymentIntentStatus: paymentIntent?.status ?? null,
           clientSecret,
           success: true,
         });

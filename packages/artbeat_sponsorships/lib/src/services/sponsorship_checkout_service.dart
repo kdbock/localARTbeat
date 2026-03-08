@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:artbeat_core/artbeat_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 
 import '../models/sponsorship_tier.dart';
 
@@ -18,6 +20,8 @@ class SponsorshipCheckoutResult {
     required this.priceId,
     required this.productId,
     this.status,
+    this.clientSecret,
+    this.paymentIntentStatus,
     this.rawResponse,
   });
 
@@ -26,6 +30,8 @@ class SponsorshipCheckoutResult {
   final String priceId;
   final String productId;
   final String? status;
+  final String? clientSecret;
+  final String? paymentIntentStatus;
   final Map<String, dynamic>? rawResponse;
 }
 
@@ -56,14 +62,15 @@ class SponsorshipCheckoutService {
     required String contactEmail,
   }) async {
     final plan = _resolvePlan(tier);
-    final customerId = await _paymentService.getOrCreateCustomerId();
-    final setupIntentSecret = await _paymentService.createSetupIntent(
-      customerId,
-    );
+    var customerId = await _paymentService.getOrCreateCustomerId();
+    final setupIntentSecret = await _createSetupIntentWithRecovery(customerId);
+    if (setupIntentSecret.customerId != null) {
+      customerId = setupIntentSecret.customerId!;
+    }
 
     await _paymentService.setupPaymentSheet(
       customerId: customerId,
-      setupIntentClientSecret: setupIntentSecret,
+      setupIntentClientSecret: setupIntentSecret.secret,
     );
     await _paymentService.safelyPresentPaymentSheet(
       operationName: 'sponsorship_${tier.value}_setup',
@@ -108,6 +115,24 @@ class SponsorshipCheckoutService {
     }
 
     final data = json.decode(response.body) as Map<String, dynamic>;
+    var status = data['status'] as String?;
+    final clientSecret = data['clientSecret'] as String?;
+    final paymentIntentStatus = data['paymentIntentStatus'] as String?;
+
+    // If the first invoice still needs action, surface Stripe's payment sheet.
+    if (clientSecret != null &&
+        clientSecret.isNotEmpty &&
+        (status == null || status == 'incomplete')) {
+      await _paymentService.initPaymentSheetForPayment(
+        paymentIntentClientSecret: clientSecret,
+        customerId: customerId,
+      );
+      await _paymentService.safelyPresentPaymentSheet(
+        operationName: 'sponsorship_${tier.value}_invoice_confirmation',
+      );
+      status = status ?? 'processing';
+    }
+
     final subscriptionId =
         (data['subscriptionId'] as String?) ??
         (data['id'] as String?) ??
@@ -122,24 +147,64 @@ class SponsorshipCheckoutService {
       subscriptionId: subscriptionId,
       priceId: plan.priceId,
       productId: plan.productId,
-      status: data['status'] as String?,
+      status: status,
+      clientSecret: clientSecret,
+      paymentIntentStatus: paymentIntentStatus,
       rawResponse: data,
     );
+  }
+
+  Future<({String secret, String? customerId})> _createSetupIntentWithRecovery(
+    String customerId,
+  ) async {
+    try {
+      final secret = await _paymentService.createSetupIntent(customerId);
+      return (secret: secret, customerId: null);
+    } on Exception catch (e) {
+      final message = e.toString().toLowerCase();
+      final shouldRecover =
+          message.contains('no such customer') ||
+          message.contains('resource_missing') ||
+          message.contains('customer');
+
+      if (!shouldRecover) rethrow;
+
+      final user = FirebaseAuth.instance.currentUser;
+      final email = user?.email?.trim() ?? '';
+      if (email.isEmpty) rethrow;
+
+      final freshCustomerId = await _paymentService.createCustomer(
+        email: email,
+        name: user?.displayName ?? '',
+      );
+      final secret = await _paymentService.createSetupIntent(freshCustomerId);
+      return (secret: secret, customerId: freshCustomerId);
+    }
   }
 
   SponsorshipStripePlan _resolvePlan(SponsorshipTier tier) {
     final env = EnvLoader();
     final product = env.get(_productEnvKey(tier));
     final price = env.get(_priceEnvKey(tier));
-    if (product.isNotEmpty && price.isNotEmpty) {
+    if (product.isNotEmpty &&
+        price.isNotEmpty &&
+        !_looksLikePlaceholderId(product) &&
+        !_looksLikePlaceholderId(price)) {
       return SponsorshipStripePlan(productId: product, priceId: price);
     }
 
     final fallback = _fallbackPlans[tier];
-    if (fallback == null) {
-      throw Exception('No Stripe plan configured for tier: ${tier.value}');
+    if (!kReleaseMode &&
+        fallback != null &&
+        !_looksLikePlaceholderId(fallback.productId) &&
+        !_looksLikePlaceholderId(fallback.priceId)) {
+      return fallback;
     }
-    return fallback;
+
+    throw Exception(
+      'Stripe sponsorship plan is not configured for ${tier.value}. '
+      'Set ${_productEnvKey(tier)} and ${_priceEnvKey(tier)} with real Stripe IDs.',
+    );
   }
 
   String _productEnvKey(SponsorshipTier tier) {
@@ -162,5 +227,14 @@ class SponsorshipCheckoutService {
       case SponsorshipTier.discover:
         return 'STRIPE_PRICE_SPONSORSHIP_DISCOVERY_MONTHLY';
     }
+  }
+
+  bool _looksLikePlaceholderId(String value) {
+    final v = value.trim();
+    if (v.isEmpty) return true;
+    return v.contains('XXXXXXXX') ||
+        v.startsWith('your_') ||
+        v.startsWith('prod_sponsorship_') ||
+        v.startsWith('price_sponsorship_');
   }
 }

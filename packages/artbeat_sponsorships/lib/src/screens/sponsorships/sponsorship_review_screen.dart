@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
 
 import '../../models/sponsorship.dart';
 import '../../models/sponsorship_status.dart';
@@ -24,6 +25,7 @@ class SponsorshipReviewScreen extends StatefulWidget {
     required this.price,
     this.selectedEvent,
     this.notes,
+    this.radiusMiles,
   });
 
   final String type;
@@ -31,6 +33,7 @@ class SponsorshipReviewScreen extends StatefulWidget {
   final String price;
   final TourEvent? selectedEvent;
   final String? notes;
+  final double? radiusMiles;
 
   @override
   State<SponsorshipReviewScreen> createState() =>
@@ -44,6 +47,7 @@ class _SponsorshipReviewScreenState extends State<SponsorshipReviewScreen> {
   final _formKey = GlobalKey<FormState>();
   final _businessNameController = TextEditingController();
   final _contactEmailController = TextEditingController();
+  final _businessAddressController = TextEditingController();
   final _phoneController = TextEditingController();
   final _brandingNotesController = TextEditingController();
   bool _isSubmitting = false;
@@ -52,6 +56,7 @@ class _SponsorshipReviewScreenState extends State<SponsorshipReviewScreen> {
   void dispose() {
     _businessNameController.dispose();
     _contactEmailController.dispose();
+    _businessAddressController.dispose();
     _phoneController.dispose();
     _brandingNotesController.dispose();
     super.dispose();
@@ -191,6 +196,27 @@ class _SponsorshipReviewScreenState extends State<SponsorshipReviewScreen> {
                           ),
                           const SizedBox(height: 16),
                           TextFormField(
+                            controller: _businessAddressController,
+                            style: const TextStyle(color: Colors.white),
+                            cursorColor: const Color(0xFF22D3EE),
+                            decoration: _buildFieldDecoration(
+                              labelText: 'Business address',
+                              hintText: '123 Main St, City, State ZIP',
+                            ),
+                            textInputAction: TextInputAction.next,
+                            validator: (value) {
+                              final requiresAddress = _resolveTier(
+                                widget.type,
+                              ).isRadiusBased;
+                              if (!requiresAddress) return null;
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Business address is required.';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          TextFormField(
                             controller: _phoneController,
                             style: const TextStyle(color: Colors.white),
                             cursorColor: const Color(0xFF22D3EE),
@@ -255,6 +281,17 @@ class _SponsorshipReviewScreenState extends State<SponsorshipReviewScreen> {
     setState(() => _isSubmitting = true);
     try {
       final tier = _resolveTier(widget.type);
+      final radiusMiles = widget.radiusMiles ?? _radiusFromNotes(widget.notes);
+      if (tier.isRadiusBased && radiusMiles == null) {
+        throw Exception(
+          'A valid radius is required for this sponsorship type.',
+        );
+      }
+      final businessAddress = _businessAddressController.text.trim();
+      final targetLocation = await _resolveTargetLocation(
+        tier: tier,
+        businessAddress: businessAddress,
+      );
       final checkout = await _checkoutService.startRecurringCheckout(
         tier: tier,
         businessName: _businessNameController.text.trim(),
@@ -275,17 +312,20 @@ class _SponsorshipReviewScreenState extends State<SponsorshipReviewScreen> {
             ? null
             : _brandingNotesController.text.trim(),
         tier: tier,
-        status: SponsorshipStatus.pending,
+        status: _resolveSponsorshipStatus(checkout.status),
         startDate: now,
         endDate: now.add(
           Duration(days: SponsorshipPricing.durationDaysFor(tier)),
         ),
         placementKeys: _placementsForTier(tier),
-        radiusMiles: _radiusFromNotes(widget.notes),
+        radiusMiles: radiusMiles,
+        latitude: targetLocation?.latitude,
+        longitude: targetLocation?.longitude,
         logoUrl: '',
         linkUrl: '',
         createdAt: now,
         relatedEntityId: widget.selectedEvent?.name,
+        chapterId: businessAddress.isEmpty ? null : businessAddress,
         contactEmail: _contactEmailController.text.trim(),
         phone: _phoneController.text.trim().isEmpty
             ? null
@@ -294,7 +334,7 @@ class _SponsorshipReviewScreenState extends State<SponsorshipReviewScreen> {
             ? null
             : _brandingNotesController.text.trim(),
         additionalNotes: widget.notes,
-        paymentStatus: checkout.status ?? 'active',
+        paymentStatus: checkout.status ?? 'pending',
         stripeCustomerId: checkout.customerId,
         stripeSubscriptionId: checkout.subscriptionId,
         stripePriceId: checkout.priceId,
@@ -322,6 +362,34 @@ class _SponsorshipReviewScreenState extends State<SponsorshipReviewScreen> {
         setState(() => _isSubmitting = false);
       }
     }
+  }
+
+  SponsorshipStatus _resolveSponsorshipStatus(String? paymentStatus) {
+    switch (paymentStatus) {
+      case 'active':
+      case 'trialing':
+        return SponsorshipStatus.active;
+      default:
+        return SponsorshipStatus.pending;
+    }
+  }
+
+  Future<Location?> _resolveTargetLocation({
+    required SponsorshipTier tier,
+    required String businessAddress,
+  }) async {
+    if (!tier.isRadiusBased) return null;
+    if (businessAddress.isEmpty) {
+      throw Exception('Business address is required for radius targeting.');
+    }
+
+    final matches = await locationFromAddress(businessAddress);
+    if (matches.isEmpty) {
+      throw Exception(
+        'Could not locate that business address. Please enter a full address.',
+      );
+    }
+    return matches.first;
   }
 
   SponsorshipTier _resolveTier(String type) {

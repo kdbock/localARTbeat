@@ -44,6 +44,7 @@ dependencies:
   # The following section is specific to Flutter packages.
   flutter_local_notifications: any
 flutter:
+  uses-material-design: true
 
   # To add assets to your package, add an assets section, like this:
   # assets:
