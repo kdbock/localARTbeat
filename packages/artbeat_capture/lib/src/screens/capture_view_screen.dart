@@ -12,12 +12,14 @@ import 'package:artbeat_core/artbeat_core.dart'
 class CaptureViewScreen extends StatefulWidget {
   final File imageFile;
   final String title;
+  final String artistName;
   final String description;
 
   const CaptureViewScreen({
     super.key,
     required this.imageFile,
     required this.title,
+    required this.artistName,
     required this.description,
   });
 
@@ -72,6 +74,9 @@ class _CaptureViewScreenState extends State<CaptureViewScreen> {
         imageUrl: imageUrl,
         createdAt: DateTime.now(),
         title: widget.title.trim(),
+        artistName: widget.artistName.trim().isNotEmpty
+            ? widget.artistName.trim()
+            : null,
         description: widget.description.trim().isNotEmpty
             ? widget.description.trim()
             : null,
@@ -174,17 +179,32 @@ class _CaptureViewScreenState extends State<CaptureViewScreen> {
 
                               const SizedBox(height: 6),
 
-                              // DESCRIPTION
-                              Text(
-                                widget.description,
-                                style: GoogleFonts.spaceGrotesk(
-                                  fontSize: 13.5,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white.withAlpha(
-                                    (0.7 * 255).toInt(),
+                              if (widget.artistName.trim().isNotEmpty) ...[
+                                Text(
+                                  widget.artistName.trim(),
+                                  style: GoogleFonts.spaceGrotesk(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white.withAlpha(
+                                      (0.82 * 255).toInt(),
+                                    ),
                                   ),
                                 ),
-                              ),
+                                const SizedBox(height: 6),
+                              ],
+
+                              // DESCRIPTION
+                              if (widget.description.trim().isNotEmpty)
+                                Text(
+                                  widget.description,
+                                  style: GoogleFonts.spaceGrotesk(
+                                    fontSize: 13.5,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white.withAlpha(
+                                      (0.7 * 255).toInt(),
+                                    ),
+                                  ),
+                                ),
 
                               const SizedBox(height: 24),
 

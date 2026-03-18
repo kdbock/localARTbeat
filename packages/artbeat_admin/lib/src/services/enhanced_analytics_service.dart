@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/analytics_model.dart';
 import 'financial_service.dart';
+import '../utils/user_activity_utils.dart';
 
 /// Enhanced analytics service with comprehensive metrics
 class EnhancedAnalyticsService {
@@ -197,29 +198,23 @@ class EnhancedAnalyticsService {
 
       for (var doc in users) {
         final data = doc.data();
-        final createdAt = (data['createdAt'] as Timestamp?)?.toDate();
-        final lastActiveAt = (data['lastActiveAt'] as Timestamp?)?.toDate();
+        final createdAt = parseFirestoreDate(data['createdAt']);
+        final lastActiveAt = getEffectiveLastActive(data);
 
         // Count new users
-        if (createdAt != null &&
-            createdAt.isAfter(startDate) &&
-            createdAt.isBefore(endDate)) {
+        if (isWithinRange(createdAt, start: startDate, end: endDate)) {
           newUsers++;
         }
 
         // Count active users
-        if (lastActiveAt != null &&
-            lastActiveAt.isAfter(startDate) &&
-            lastActiveAt.isBefore(endDate)) {
+        if (isWithinRange(lastActiveAt, start: startDate, end: endDate)) {
           activeUsers++;
         }
 
         // Count retained users
         if (createdAt != null &&
             createdAt.isBefore(startDate) &&
-            lastActiveAt != null &&
-            lastActiveAt.isAfter(startDate) &&
-            lastActiveAt.isBefore(endDate)) {
+            isWithinRange(lastActiveAt, start: startDate, end: endDate)) {
           retainedUsers++;
         }
       }
@@ -443,8 +438,7 @@ class EnhancedAnalyticsService {
             int activeUsers = 0;
             for (var doc in cohortUsers.docs) {
               final data = doc.data();
-              final lastActiveAt =
-                  (data['lastActiveAt'] as Timestamp?)?.toDate();
+              final lastActiveAt = getEffectiveLastActive(data);
 
               if (lastActiveAt != null && lastActiveAt.isAfter(checkDate)) {
                 activeUsers++;

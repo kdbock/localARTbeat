@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../utils/user_activity_utils.dart';
 
 /// Consolidated Admin Service
 ///
@@ -60,13 +61,13 @@ class ConsolidatedAdminService {
         statusStats[status] = (statusStats[status] ?? 0) + 1;
 
         // Activity statistics
-        final lastActive = (data['lastActive'] as Timestamp?)?.toDate();
+        final lastActive = getEffectiveLastActive(data);
         if (lastActive != null && lastActive.isAfter(todayStart)) {
           activeToday++;
         }
 
         // New user statistics
-        final createdAt = (data['createdAt'] as Timestamp?)?.toDate();
+        final createdAt = parseFirestoreDate(data['createdAt']);
         if (createdAt != null && createdAt.isAfter(weekAgo)) {
           newThisWeek++;
         }
@@ -756,10 +757,12 @@ class ConsolidatedAdminService {
 
       final activeUsers = await _firestore
           .collection('users')
-          .where('lastActive', isGreaterThan: Timestamp.fromDate(oneHourAgo))
           .get();
 
-      return activeUsers.docs.length;
+      return activeUsers.docs.where((doc) {
+        final lastActive = getEffectiveLastActive(doc.data());
+        return lastActive != null && lastActive.isAfter(oneHourAgo);
+      }).length;
     } catch (e) {
       return 0;
     }

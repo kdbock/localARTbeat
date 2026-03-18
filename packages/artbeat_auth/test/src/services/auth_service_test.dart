@@ -1,4 +1,5 @@
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -173,6 +174,7 @@ void main() {
       expect(data['zipCode'], '10001');
       expect(data['userType'], 'regular');
       expect(data['isVerified'], isFalse);
+      expect(data['lastActive'], isA<Timestamp>());
     });
 
     test('resetPassword delegates to FirebaseAuth', () async {

@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import '../models/admin_stats_model.dart';
 import '../models/user_admin_model.dart';
+import '../utils/user_activity_utils.dart';
 
 /// Service for admin-specific operations
 class AdminService {
@@ -38,8 +39,8 @@ class AdminService {
         final data = doc.data();
         final userType =
             UserType.fromString(data['userType'] as String? ?? 'user');
-        final createdAt = (data['createdAt'] as Timestamp?)?.toDate();
-        final lastActiveAt = (data['lastActiveAt'] as Timestamp?)?.toDate();
+        final createdAt = parseFirestoreDate(data['createdAt']);
+        final lastActiveAt = getEffectiveLastActive(data);
 
         // Count user types
         switch (userType) {

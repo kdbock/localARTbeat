@@ -6222,6 +6222,7 @@
   "capture_upload_description": "Upload a photo of art you found to share it with the ARTbeat community.",
   "capture_upload_select_image": "TAP TO SELECT OR TAKE PHOTO",
   "capture_upload_field_title": "Artwork Title",
+  "capture_upload_field_artist_name": "Artist Name (Optional)",
   "capture_upload_field_description": "Description (Optional)",
   "capture_upload_submitting": "Submitting...",
   "capture_upload_submit": "SUBMIT FOR REVIEW",

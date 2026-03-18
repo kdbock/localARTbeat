@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/analytics_model.dart';
+import '../utils/user_activity_utils.dart';
 
 /// Service for financial analytics operations
 class FinancialAnalyticsService {
@@ -342,28 +343,29 @@ class FinancialAnalyticsService {
       DateTime startDate, DateTime endDate) async {
     try {
       // Get users who were active at the start of the period
-      final startActiveUsers = await _firestore
-          .collection('users')
-          .where('lastActiveAt',
-              isGreaterThanOrEqualTo:
-                  startDate.subtract(const Duration(days: 30)))
-          .where('lastActiveAt', isLessThan: startDate)
-          .get();
+      final usersSnapshot = await _firestore.collection('users').get();
+      final startWindow = startDate.subtract(const Duration(days: 30));
 
-      if (startActiveUsers.docs.isEmpty) return 0.0;
+      final startActiveUsers = usersSnapshot.docs.where((doc) {
+        final lastActiveAt = getEffectiveLastActive(doc.data());
+        return lastActiveAt != null &&
+            !lastActiveAt.isBefore(startWindow) &&
+            lastActiveAt.isBefore(startDate);
+      }).toList();
+
+      if (startActiveUsers.isEmpty) return 0.0;
 
       // Get users who churned during the period (were active before but not during)
       int churnedUsers = 0;
-      for (var doc in startActiveUsers.docs) {
-        final data = doc.data();
-        final lastActiveAt = (data['lastActiveAt'] as Timestamp?)?.toDate();
+      for (var doc in startActiveUsers) {
+        final lastActiveAt = getEffectiveLastActive(doc.data());
 
         if (lastActiveAt != null && lastActiveAt.isBefore(startDate)) {
           churnedUsers++;
         }
       }
 
-      return (churnedUsers / startActiveUsers.docs.length) * 100;
+      return (churnedUsers / startActiveUsers.length) * 100;
     } catch (e) {
       throw Exception('Failed to calculate churn rate: $e');
     }

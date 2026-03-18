@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:artbeat_core/artbeat_core.dart';
+import '../utils/user_activity_utils.dart';
 
 /// Extended user model with admin-specific functionality
 class UserAdminModel extends UserModel {
@@ -87,6 +88,7 @@ class UserAdminModel extends UserModel {
 
   factory UserAdminModel.fromDocumentSnapshot(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>? ?? {};
+    final effectiveLastActive = getEffectiveLastActive(data);
 
     return UserAdminModel(
       id: doc.id,
@@ -101,8 +103,8 @@ class UserAdminModel extends UserModel {
           .map((capture) =>
               CaptureModel.fromJson(capture as Map<String, dynamic>))
           .toList(),
-      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      lastActive: (data['lastActive'] as Timestamp?)?.toDate(),
+      createdAt: parseFirestoreDate(data['createdAt']) ?? DateTime.now(),
+      lastActive: effectiveLastActive,
       userType: data['userType'] as String?,
       preferences: data['preferences'] as Map<String, dynamic>?,
       experiencePoints: data['experiencePoints'] as int? ?? 0,
@@ -119,7 +121,7 @@ class UserAdminModel extends UserModel {
       ),
       isFeatured: data['isFeatured'] as bool? ?? false,
       lastLoginAt: (data['lastLoginAt'] as Timestamp?)?.toDate(),
-      lastActiveAt: (data['lastActiveAt'] as Timestamp?)?.toDate(),
+      lastActiveAt: effectiveLastActive,
       isSuspended: data['isSuspended'] as bool? ?? false,
       isShadowBanned: data['isShadowBanned'] as bool? ?? false,
       isDeleted: data['isDeleted'] as bool? ?? false,
@@ -278,8 +280,9 @@ class UserAdminModel extends UserModel {
 
   /// Check if user is active (logged in within last 30 days)
   bool get isActiveUser {
-    if (lastActiveAt == null) return false;
+    final effectiveLastActive = lastActive ?? lastActiveAt;
+    if (effectiveLastActive == null) return false;
     final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));
-    return lastActiveAt!.isAfter(thirtyDaysAgo);
+    return effectiveLastActive.isAfter(thirtyDaysAgo);
   }
 }

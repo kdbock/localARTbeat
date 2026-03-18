@@ -4,6 +4,7 @@
 *.pyc
 *.swp
 .DS_Store
+.backup
 .atom/
 .build/
 .buildlog/
@@ -25,6 +26,14 @@ service-account-key.json
 !.env.example
 firebase-debug.log
 firebase-debug.*.log
+firestore-debug.log
+flutter_*.log
+flutter_output.log
+appcheck_test.log
+test_results.log
+pglite-debug.log
+build_log.txt
+catlog
 
 # IntelliJ related
 *.iml
@@ -139,6 +148,9 @@ packages/*/.flutter-plugins
 packages/*/.flutter-plugins-dependencies
 packages/*/.packages
 packages/*/pubspec.lock
+packages/*/coverage/
+packages/*/ios/Pods/
+packages/*/ios/build/
 **/build/test_cache/
 **/test_cache/
 *.dill
@@ -153,3 +165,16 @@ packages/*/.flutter-plugins
 packages/*/.flutter-plugins-dependencies
 packages/*/.packages
 packages/*/pubspec.lock
+
+# Root-level local/debug artifacts
+/fields
+/appcheck_test.log
+/build_log.txt
+/catlog
+/firebase-debug.log
+/firestore-debug.log
+/flutter_01.log
+/flutter_02.log
+/flutter_output.log
+/pglite-debug.log
+/test_results.log

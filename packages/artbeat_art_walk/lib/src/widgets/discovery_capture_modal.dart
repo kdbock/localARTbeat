@@ -170,6 +170,11 @@ class _DiscoveryCaptureModalState extends State<DiscoveryCaptureModal> {
       widget.distance,
     );
     final isClose = widget.distance < 50;
+    final artImageUrl = ImageUrlValidator.normalizeImageUrl(widget.art.imageUrl);
+    final hasValidArtImage = ImageUrlValidator.isValidImageUrl(artImageUrl);
+    final profileImageProvider = ImageUrlValidator.safeNetworkImage(
+      _enrichedArt?.userProfileUrl ?? widget.art.userProfileUrl,
+    );
 
     return GlassCard(
       padding: const EdgeInsets.all(24),
@@ -180,26 +185,41 @@ class _DiscoveryCaptureModalState extends State<DiscoveryCaptureModal> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              CachedNetworkImage(
-                imageUrl: widget.art.imageUrl,
-                memCacheHeight: 400,
-                imageBuilder: (context, imageProvider) => Container(
+              if (hasValidArtImage)
+                CachedNetworkImage(
+                  imageUrl: artImageUrl!,
+                  memCacheHeight: 400,
+                  imageBuilder: (context, imageProvider) => Container(
+                    height: 180,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      image: DecorationImage(
+                        image: imageProvider,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                  placeholder: (context, url) => const SizedBox(
+                    height: 180,
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                  errorWidget: (context, url, error) =>
+                      const Icon(Icons.broken_image),
+                )
+              else
+                Container(
                   height: 180,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
-                    image: DecorationImage(
-                      image: imageProvider,
-                      fit: BoxFit.cover,
-                    ),
+                    color: Colors.white.withValues(alpha: 0.06),
+                  ),
+                  alignment: Alignment.center,
+                  child: const Icon(
+                    Icons.image_not_supported_outlined,
+                    color: Colors.white54,
+                    size: 36,
                   ),
                 ),
-                placeholder: (context, url) => const SizedBox(
-                  height: 180,
-                  child: Center(child: CircularProgressIndicator()),
-                ),
-                errorWidget: (context, url, error) =>
-                    const Icon(Icons.broken_image),
-              ),
               const SizedBox(height: 16),
               // User Attribution and Date
               Row(
@@ -207,19 +227,8 @@ class _DiscoveryCaptureModalState extends State<DiscoveryCaptureModal> {
                   CircleAvatar(
                     radius: 10,
                     backgroundColor: Colors.white.withValues(alpha: 0.1),
-                    backgroundImage:
-                        (_enrichedArt?.userProfileUrl ??
-                                widget.art.userProfileUrl) !=
-                            null
-                        ? CachedNetworkImageProvider(
-                            _enrichedArt?.userProfileUrl ??
-                                widget.art.userProfileUrl!,
-                          )
-                        : null,
-                    child:
-                        (_enrichedArt?.userProfileUrl ??
-                                widget.art.userProfileUrl) ==
-                            null
+                    backgroundImage: profileImageProvider,
+                    child: profileImageProvider == null
                         ? const Icon(
                             Icons.person,
                             size: 12,

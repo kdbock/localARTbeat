@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/analytics_model.dart';
+import '../utils/user_activity_utils.dart';
 
 /// Service for cohort analysis and advanced user segmentation
 class CohortAnalyticsService {
@@ -173,7 +174,7 @@ class CohortAnalyticsService {
       int activeUsers = 0;
       for (var doc in cohortUsers) {
         final data = doc.data() as Map<String, dynamic>;
-        final lastActiveAt = (data['lastActiveAt'] as Timestamp?)?.toDate();
+        final lastActiveAt = getEffectiveLastActive(data);
 
         if (lastActiveAt != null &&
             lastActiveAt.isAfter(checkDate) &&
@@ -205,7 +206,7 @@ class CohortAnalyticsService {
       int activeUsers = 0;
       for (var doc in cohortUsers) {
         final data = doc.data() as Map<String, dynamic>;
-        final lastActiveAt = (data['lastActiveAt'] as Timestamp?)?.toDate();
+        final lastActiveAt = getEffectiveLastActive(data);
 
         if (lastActiveAt != null &&
             lastActiveAt.year == checkDate.year &&
@@ -239,7 +240,7 @@ class CohortAnalyticsService {
       int activeUsers = 0;
       for (var doc in cohortUsers) {
         final data = doc.data() as Map<String, dynamic>;
-        final lastActiveAt = (data['lastActiveAt'] as Timestamp?)?.toDate();
+        final lastActiveAt = getEffectiveLastActive(data);
 
         if (lastActiveAt != null &&
             lastActiveAt.isAfter(checkDate) &&
@@ -391,12 +392,10 @@ class CohortAnalyticsService {
   Future<List<Map<String, dynamic>>> _getActiveUsers() async {
     final sevenDaysAgo = DateTime.now().subtract(const Duration(days: 7));
 
-    final snapshot = await _firestore
-        .collection('users')
-        .where('lastActiveAt', isGreaterThan: sevenDaysAgo)
-        .get();
+    final snapshot = await _firestore.collection('users').get();
 
     return snapshot.docs
+        .where((doc) => (getEffectiveLastActive(doc.data())?.isAfter(sevenDaysAgo) ?? false))
         .map((doc) => {
               'id': doc.id,
               ...doc.data(),
@@ -409,13 +408,15 @@ class CohortAnalyticsService {
     final fourteenDaysAgo = DateTime.now().subtract(const Duration(days: 14));
     final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));
 
-    final snapshot = await _firestore
-        .collection('users')
-        .where('lastActiveAt', isLessThan: fourteenDaysAgo)
-        .where('lastActiveAt', isGreaterThan: thirtyDaysAgo)
-        .get();
+    final snapshot = await _firestore.collection('users').get();
 
     return snapshot.docs
+        .where((doc) {
+          final lastActive = getEffectiveLastActive(doc.data());
+          return lastActive != null &&
+              lastActive.isBefore(fourteenDaysAgo) &&
+              lastActive.isAfter(thirtyDaysAgo);
+        })
         .map((doc) => {
               'id': doc.id,
               ...doc.data(),
@@ -461,7 +462,7 @@ class CohortAnalyticsService {
     int retainedUsers = 0;
 
     for (var user in users) {
-      final lastActiveAt = (user['lastActiveAt'] as Timestamp?)?.toDate();
+      final lastActiveAt = getEffectiveLastActive(user);
       if (lastActiveAt != null && lastActiveAt.isAfter(thirtyDaysAgo)) {
         retainedUsers++;
       }

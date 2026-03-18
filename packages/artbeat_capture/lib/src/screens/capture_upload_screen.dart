@@ -17,6 +17,7 @@ class CaptureUploadScreen extends StatefulWidget {
 
 class _CaptureUploadScreenState extends State<CaptureUploadScreen> {
   final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _artistNameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
 
   File? _selectedImage;
@@ -26,6 +27,14 @@ class _CaptureUploadScreenState extends State<CaptureUploadScreen> {
   void initState() {
     super.initState();
     _selectedImage = widget.initialImage;
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _artistNameController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
   }
 
   Future<void> _pickImage() async {
@@ -92,6 +101,7 @@ class _CaptureUploadScreenState extends State<CaptureUploadScreen> {
         builder: (context) => CaptureViewScreen(
           imageFile: _selectedImage!,
           title: _titleController.text.trim(),
+          artistName: _artistNameController.text.trim(),
           description: _descriptionController.text.trim(),
         ),
       ),
@@ -262,6 +272,14 @@ class _CaptureUploadScreenState extends State<CaptureUploadScreen> {
                                 label: 'capture_upload_field_title'.tr(),
                                 controller: _titleController,
                                 icon: Icons.title_rounded,
+                              ),
+
+                              const SizedBox(height: 14),
+
+                              GlassTextField(
+                                label: 'capture_upload_field_artist_name'.tr(),
+                                controller: _artistNameController,
+                                icon: Icons.brush_rounded,
                               ),
 
                               const SizedBox(height: 14),

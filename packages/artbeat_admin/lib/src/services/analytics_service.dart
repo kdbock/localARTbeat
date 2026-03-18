@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/analytics_model.dart';
+import '../utils/user_activity_utils.dart';
 
 /// Service for analytics operations
 class AnalyticsService {
@@ -185,29 +186,23 @@ class AnalyticsService {
 
       for (var doc in users) {
         final data = doc.data();
-        final createdAt = (data['createdAt'] as Timestamp?)?.toDate();
-        final lastActiveAt = (data['lastActiveAt'] as Timestamp?)?.toDate();
+        final createdAt = parseFirestoreDate(data['createdAt']);
+        final lastActiveAt = getEffectiveLastActive(data);
 
         // Count new users
-        if (createdAt != null &&
-            createdAt.isAfter(startDate) &&
-            createdAt.isBefore(endDate)) {
+        if (isWithinRange(createdAt, start: startDate, end: endDate)) {
           newUsers++;
         }
 
         // Count active users
-        if (lastActiveAt != null &&
-            lastActiveAt.isAfter(startDate) &&
-            lastActiveAt.isBefore(endDate)) {
+        if (isWithinRange(lastActiveAt, start: startDate, end: endDate)) {
           activeUsers++;
         }
 
         // Count retained users (created before period, active during period)
         if (createdAt != null &&
             createdAt.isBefore(startDate) &&
-            lastActiveAt != null &&
-            lastActiveAt.isAfter(startDate) &&
-            lastActiveAt.isBefore(endDate)) {
+            isWithinRange(lastActiveAt, start: startDate, end: endDate)) {
           retainedUsers++;
         }
       }

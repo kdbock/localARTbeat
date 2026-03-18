@@ -106,6 +106,7 @@ class AuthService {
           'zipCode': zipCode ?? '',
           'createdAt': FieldValue.serverTimestamp(),
           'updatedAt': FieldValue.serverTimestamp(),
+          'lastActive': FieldValue.serverTimestamp(),
           'userType': 'regular',
           'posts': <String>[],
           'followers': <String>[],
@@ -610,6 +611,7 @@ class AuthService {
           'zipCode': '', // Will be collected later
           'createdAt': FieldValue.serverTimestamp(),
           'updatedAt': FieldValue.serverTimestamp(),
+          'lastActive': FieldValue.serverTimestamp(),
           'userType': 'regular',
           'posts': <String>[],
           'followers': <String>[],

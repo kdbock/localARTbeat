@@ -13,7 +13,6 @@ const {onSchedule} = require("firebase-functions/v2/scheduler");
 const {setGlobalOptions} = require("firebase-functions/v2");
 const admin = require("firebase-admin");
 const {defineSecret} = require("firebase-functions/params");
-const {BetaAnalyticsDataClient} = require("@google-analytics/data");
 const nodemailer = require("nodemailer");
 const https = require("https");
 const crypto = require("crypto");
@@ -31,7 +30,6 @@ const smtpHostSecret = defineSecret("SMTP_HOST");
 const smtpPortSecret = defineSecret("SMTP_PORT");
 const smtpUserSecret = defineSecret("SMTP_USER");
 const smtpPassSecret = defineSecret("SMTP_PASS");
-const ga4PropertyIdSecret = defineSecret("GA4_PROPERTY_ID");
 
 admin.initializeApp();
 
@@ -1221,7 +1219,6 @@ exports.sendDailyAnalyticsReport = onSchedule(
       smtpUserSecret,
       smtpPassSecret,
       stripeSecretKey,
-      ga4PropertyIdSecret,
     ],
   },
   async () => {
@@ -1240,7 +1237,6 @@ exports.sendDailyAnalyticsReportNow = onRequest(
       smtpUserSecret,
       smtpPassSecret,
       stripeSecretKey,
-      ga4PropertyIdSecret,
     ],
   },
   async (request, response) => {
@@ -1248,11 +1244,19 @@ exports.sendDailyAnalyticsReportNow = onRequest(
       const result = await sendDailyAnalyticsReportInternal();
       return response.status(200).json({ok: true, ...result});
     } catch (error) {
-      logger.error("Failed manual analytics report", {error});
       if (response.headersSent) {
+        logger.error(
+          "Manual analytics report failed after response was already sent",
+          serializeError(error)
+        );
         return;
       }
-      return response.status(500).json({ok: false, error: String(error)});
+      logger.error("Failed manual analytics report", serializeError(error));
+      return response.status(500).json({
+        ok: false,
+        error: error?.message || String(error),
+        code: error?.code || null,
+      });
     }
   }
 );
@@ -1282,36 +1286,10 @@ async function sendDailyAnalyticsReportInternal() {
 
   const startTimestamp = admin.firestore.Timestamp.fromDate(startUtc);
   const endTimestamp = admin.firestore.Timestamp.fromDate(endUtc);
-
-  const ga4PropertyId = ga4PropertyIdSecret.value();
-  let dau = null;
-  let wau = null;
-  let mau = null;
-  let newUsers = null;
-
-  if (ga4PropertyId) {
-    try {
-      const analyticsClient = new BetaAnalyticsDataClient();
-      const runMetricReport = async (metricName, startDate, endDate) => {
-        const [response] = await analyticsClient.runReport({
-          property: `properties/${ga4PropertyId}`,
-          dateRanges: [{startDate, endDate}],
-          metrics: [{name: metricName}],
-        });
-        const value = response.rows?.[0]?.metricValues?.[0]?.value;
-        return Number(value || 0);
-      };
-
-      dau = await runMetricReport("activeUsers", "yesterday", "yesterday");
-      wau = await runMetricReport("activeUsers", "7daysAgo", "yesterday");
-      mau = await runMetricReport("activeUsers", "30daysAgo", "yesterday");
-      newUsers = await runMetricReport("newUsers", "yesterday", "yesterday");
-    } catch (error) {
-      logger.error("Failed to fetch GA4 active users", {error});
-    }
-  } else {
-    logger.warn("GA4_PROPERTY_ID not configured. Skipping GA4 metrics.");
-  }
+  const {dau, wau, mau, newUsers} = await getFirestoreUserMetrics({
+    startUtc,
+    endUtc,
+  });
 
   const countCollectionInRange = async (collectionName) => {
     try {
@@ -1333,6 +1311,12 @@ async function sendDailyAnalyticsReportInternal() {
     countCollectionInRange("captures"),
     countCollectionInRange("artwork"),
   ]);
+  const [captureDigest, artworkDigest, artistSubscriptionDigest] =
+    await Promise.all([
+      getRecentCapturesDigest(startTimestamp, endTimestamp),
+      getRecentArtworkDigest(startTimestamp, endTimestamp),
+      getNewArtistSubscriptionsDigest(startTimestamp, endTimestamp),
+    ]);
 
   const stripeMetrics = await getStripeMetrics(startUtc, endUtc);
   const iapMetrics = await getIapMetrics(startTimestamp, endTimestamp);
@@ -1406,6 +1390,13 @@ async function sendDailyAnalyticsReportInternal() {
     },
   });
 
+  try {
+    await transporter.verify();
+  } catch (error) {
+    logger.error("SMTP verification failed", serializeError(error));
+    throw new Error(`SMTP verification failed: ${error?.message || String(error)}`);
+  }
+
   const html = buildDailyReportHtml({
     date: startUtc.toISOString().slice(0, 10),
     dau,
@@ -1423,12 +1414,42 @@ async function sendDailyAnalyticsReportInternal() {
     subscriptionMetrics,
   });
 
-  await transporter.sendMail({
+  await sendReportEmail(transporter, "analytics report", {
     to: toEmail,
     from: fromEmail,
     subject: `ARTbeat Daily Report — ${startUtc.toISOString().slice(0, 10)}`,
     text: reportLines.join("\n"),
     html,
+  });
+
+  await sendReportEmail(transporter, "content digest", {
+    to: toEmail,
+    from: fromEmail,
+    subject: `ARTbeat Daily Content Digest — ${startUtc.toISOString().slice(0, 10)}`,
+    text: buildDailyContentDigestText({
+      date: startUtc.toISOString().slice(0, 10),
+      captures: captureDigest,
+      artworks: artworkDigest,
+    }),
+    html: buildDailyContentDigestHtml({
+      date: startUtc.toISOString().slice(0, 10),
+      captures: captureDigest,
+      artworks: artworkDigest,
+    }),
+  });
+
+  await sendReportEmail(transporter, "artist subscription digest", {
+    to: toEmail,
+    from: fromEmail,
+    subject: `ARTbeat Daily Artist Subscriptions — ${startUtc.toISOString().slice(0, 10)}`,
+    text: buildDailyArtistSubscriptionsText({
+      date: startUtc.toISOString().slice(0, 10),
+      artists: artistSubscriptionDigest,
+    }),
+    html: buildDailyArtistSubscriptionsHtml({
+      date: startUtc.toISOString().slice(0, 10),
+      artists: artistSubscriptionDigest,
+    }),
   });
 
   return {
@@ -1445,7 +1466,240 @@ async function sendDailyAnalyticsReportInternal() {
     totalGross,
     totalNet,
     totalRefunds,
+    contentDigestCounts: {
+      captures: captureDigest.length,
+      artworks: artworkDigest.length,
+    },
+    artistSubscriptionDigestCount: artistSubscriptionDigest.length,
   };
+}
+
+async function getFirestoreUserMetrics({startUtc, endUtc}) {
+  const wauStartUtc = new Date(endUtc);
+  wauStartUtc.setUTCDate(wauStartUtc.getUTCDate() - 7);
+
+  const mauStartUtc = new Date(endUtc);
+  mauStartUtc.setUTCDate(mauStartUtc.getUTCDate() - 30);
+
+  const toDate = (value) => {
+    if (!value) return null;
+    if (typeof value.toDate === "function") return value.toDate();
+    if (value instanceof Date) return value;
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  };
+
+  const isInRange = (value, rangeStart, rangeEnd) =>
+    value != null && value >= rangeStart && value < rangeEnd;
+
+  try {
+    const usersSnapshot = await admin
+      .firestore()
+      .collection("users")
+      .select("createdAt", "lastActive", "lastActiveAt")
+      .get();
+
+    let dau = 0;
+    let wau = 0;
+    let mau = 0;
+    let newUsers = 0;
+
+    for (const doc of usersSnapshot.docs) {
+      const data = doc.data() || {};
+      const createdAt = toDate(data.createdAt);
+      const lastActiveCandidates = [
+        toDate(data.lastActive),
+        toDate(data.lastActiveAt),
+      ].filter(Boolean);
+      const lastActiveAt =
+        lastActiveCandidates.length > 0
+          ? new Date(Math.max(...lastActiveCandidates.map((date) => date.getTime())))
+          : null;
+
+      if (isInRange(createdAt, startUtc, endUtc)) {
+        newUsers += 1;
+      }
+      if (isInRange(lastActiveAt, startUtc, endUtc)) {
+        dau += 1;
+      }
+      if (isInRange(lastActiveAt, wauStartUtc, endUtc)) {
+        wau += 1;
+      }
+      if (isInRange(lastActiveAt, mauStartUtc, endUtc)) {
+        mau += 1;
+      }
+    }
+
+    return {dau, wau, mau, newUsers};
+  } catch (error) {
+    logger.error("Failed to calculate Firestore user metrics", {error});
+    return {
+      dau: null,
+      wau: null,
+      mau: null,
+      newUsers: null,
+    };
+  }
+}
+
+function toJsDate(value) {
+  if (!value) return null;
+  if (typeof value.toDate === "function") return value.toDate();
+  if (value instanceof Date) return value;
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function formatDigestName(data, fallback) {
+  return (
+    data?.displayName ||
+    data?.fullName ||
+    data?.username ||
+    data?.artistName ||
+    data?.userName ||
+    fallback
+  );
+}
+
+async function getUserSummaries(userIds) {
+  const uniqueIds = [...new Set((userIds || []).filter(Boolean))];
+  if (uniqueIds.length === 0) return new Map();
+
+  const refs = uniqueIds.map((userId) =>
+    admin.firestore().collection("users").doc(userId)
+  );
+  const snapshots = await admin.firestore().getAll(...refs);
+  const summaries = new Map();
+
+  for (const doc of snapshots) {
+    if (!doc.exists) continue;
+    const data = doc.data() || {};
+    summaries.set(doc.id, {
+      id: doc.id,
+      displayName: formatDigestName(data, doc.id),
+      fullName: data.fullName || null,
+      username: data.username || null,
+      userType: data.userType || null,
+      profileImageUrl: data.profileImageUrl || data.photoUrl || null,
+    });
+  }
+
+  return summaries;
+}
+
+async function getRecentCapturesDigest(startTimestamp, endTimestamp) {
+  try {
+    const snapshot = await admin
+      .firestore()
+      .collection("captures")
+      .where("createdAt", ">=", startTimestamp)
+      .where("createdAt", "<", endTimestamp)
+      .orderBy("createdAt", "desc")
+      .limit(10)
+      .get();
+
+    const userSummaries = await getUserSummaries(
+      snapshot.docs.map((doc) => doc.data()?.userId)
+    );
+
+    return snapshot.docs.map((doc) => {
+      const data = doc.data() || {};
+      const user = userSummaries.get(data.userId);
+      return {
+        id: doc.id,
+        title: data.title || data.description || "Untitled capture",
+        byline: formatDigestName(
+          {
+            userName: data.userName,
+            artistName: data.artistName,
+            displayName: user?.displayName,
+          },
+          data.userId || "Unknown user"
+        ),
+        imageUrl: data.imageUrl || data.thumbnailUrl || null,
+        createdAt: toJsDate(data.createdAt),
+      };
+    });
+  } catch (error) {
+    logger.error("Failed to build capture digest", {error});
+    return [];
+  }
+}
+
+async function getRecentArtworkDigest(startTimestamp, endTimestamp) {
+  try {
+    const snapshot = await admin
+      .firestore()
+      .collection("artwork")
+      .where("createdAt", ">=", startTimestamp)
+      .where("createdAt", "<", endTimestamp)
+      .orderBy("createdAt", "desc")
+      .limit(10)
+      .get();
+
+    const userSummaries = await getUserSummaries(
+      snapshot.docs.map((doc) => {
+        const data = doc.data() || {};
+        return data.artistId || data.userId;
+      })
+    );
+
+    return snapshot.docs.map((doc) => {
+      const data = doc.data() || {};
+      const artistId = data.artistId || data.userId;
+      const artist = userSummaries.get(artistId);
+      return {
+        id: doc.id,
+        title: data.title || "Untitled artwork",
+        byline: formatDigestName(
+          {
+            artistName: data.artistName,
+            displayName: artist?.displayName,
+          },
+          artistId || "Unknown artist"
+        ),
+        imageUrl: data.imageUrl || null,
+        createdAt: toJsDate(data.createdAt),
+      };
+    });
+  } catch (error) {
+    logger.error("Failed to build artwork digest", {error});
+    return [];
+  }
+}
+
+async function getNewArtistSubscriptionsDigest(startTimestamp, endTimestamp) {
+  try {
+    const snapshot = await admin
+      .firestore()
+      .collection("subscriptions")
+      .where("createdAt", ">=", startTimestamp)
+      .where("createdAt", "<", endTimestamp)
+      .orderBy("createdAt", "desc")
+      .limit(25)
+      .get();
+
+    const userSummaries = await getUserSummaries(
+      snapshot.docs.map((doc) => doc.data()?.userId)
+    );
+
+    return snapshot.docs
+      .map((doc) => {
+        const data = doc.data() || {};
+        const user = userSummaries.get(data.userId);
+        if (!user || user.userType !== "artist") return null;
+        return {
+          id: doc.id,
+          name: user.displayName,
+          tier: data.tier || "unknown",
+          createdAt: toJsDate(data.createdAt),
+        };
+      })
+      .filter(Boolean);
+  } catch (error) {
+    logger.error("Failed to build artist subscription digest", {error});
+    return [];
+  }
 }
 
 function formatCurrency(amount, currency) {
@@ -1459,6 +1713,39 @@ function formatCurrency(amount, currency) {
   } catch (_) {
     return `${(safeAmount || 0).toFixed(2)} ${currency || "USD"}`;
   }
+}
+
+async function sendReportEmail(transporter, label, mailOptions) {
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    logger.info(`Sent ${label}`, {
+      subject: mailOptions.subject,
+      messageId: info?.messageId || null,
+      accepted: info?.accepted || [],
+      rejected: info?.rejected || [],
+    });
+    return info;
+  } catch (error) {
+    logger.error(`Failed to send ${label}`, {
+      subject: mailOptions.subject,
+      ...serializeError(error),
+    });
+    throw new Error(`Failed to send ${label}: ${error?.message || String(error)}`);
+  }
+}
+
+function serializeError(error) {
+  if (!error) {
+    return {message: "Unknown error"};
+  }
+
+  return {
+    message: error.message || String(error),
+    code: error.code || null,
+    responseCode: error.responseCode || null,
+    command: error.command || null,
+    stack: error.stack || null,
+  };
 }
 
 function formatPercent(value) {
@@ -1729,6 +2016,152 @@ function buildDailyReportHtml(payload) {
     </div>
   </div>
   `;
+}
+
+function buildDailyContentDigestText({date, captures, artworks}) {
+  const lines = [
+    "ARTbeat Daily Content Digest",
+    `Date: ${date}`,
+    "",
+    "NEW CAPTURES",
+  ];
+
+  if (!captures.length) {
+    lines.push("No new captures.");
+  } else {
+    for (const item of captures) {
+      lines.push(`- ${item.title} — ${item.byline}`);
+    }
+  }
+
+  lines.push("", "NEW ARTWORK");
+
+  if (!artworks.length) {
+    lines.push("No new artwork.");
+  } else {
+    for (const item of artworks) {
+      lines.push(`- ${item.title} — ${item.byline}`);
+    }
+  }
+
+  return lines.join("\n");
+}
+
+function buildDailyArtistSubscriptionsText({date, artists}) {
+  const lines = [
+    "ARTbeat Daily Artist Subscriptions",
+    `Date: ${date}`,
+    "",
+    "NEWLY SUBSCRIBED ARTISTS",
+  ];
+
+  if (!artists.length) {
+    lines.push("No new artist subscriptions.");
+  } else {
+    for (const artist of artists) {
+      lines.push(`- ${artist.name} — ${artist.tier}`);
+    }
+  }
+
+  return lines.join("\n");
+}
+
+function buildDailyContentDigestHtml({date, captures, artworks}) {
+  return `
+  <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; background: #f6f7fb; padding: 24px;">
+    <div style="max-width: 760px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 6px 16px rgba(0,0,0,0.08);">
+      <div style="background: linear-gradient(135deg, #111827, #374151); color: #fff; padding: 24px;">
+        <div style="font-size: 20px; font-weight: 700;">ARTbeat Daily Content Digest</div>
+        <div style="opacity: 0.9; margin-top: 6px;">UTC Date: ${date}</div>
+      </div>
+      <div style="padding: 24px;">
+        <h3 style="margin: 0 0 12px; color: #111827;">New Captures</h3>
+        ${buildDigestGrid(captures, "No new captures in this window.")}
+        <h3 style="margin: 28px 0 12px; color: #111827;">New Artwork</h3>
+        ${buildDigestGrid(artworks, "No new artwork uploads in this window.")}
+      </div>
+    </div>
+  </div>`;
+}
+
+function buildDailyArtistSubscriptionsHtml({date, artists}) {
+  return `
+  <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; background: #f6f7fb; padding: 24px;">
+    <div style="max-width: 720px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 6px 16px rgba(0,0,0,0.08);">
+      <div style="background: linear-gradient(135deg, #14532d, #15803d); color: #fff; padding: 24px;">
+        <div style="font-size: 20px; font-weight: 700;">ARTbeat Daily Artist Subscriptions</div>
+        <div style="opacity: 0.9; margin-top: 6px;">UTC Date: ${date}</div>
+      </div>
+      <div style="padding: 24px;">
+        ${buildArtistSubscriptionList(artists)}
+      </div>
+    </div>
+  </div>`;
+}
+
+function buildDigestGrid(items, emptyMessage) {
+  if (!items.length) {
+    return `<div style="padding: 16px; background: #f9fafb; border-radius: 10px; color: #6b7280;">${emptyMessage}</div>`;
+  }
+
+  return `
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px;">
+      ${items.map((item) => buildDigestCard(item)).join("")}
+    </div>`;
+}
+
+function buildDigestCard(item) {
+  const safeTitle = escapeHtml(item.title || "Untitled");
+  const safeByline = escapeHtml(item.byline || "Unknown");
+  const safeTime = item.createdAt ? escapeHtml(item.createdAt.toISOString()) : "";
+  const image = item.imageUrl ?
+    `<img src="${escapeHtml(item.imageUrl)}" alt="${safeTitle}" style="width: 100%; height: 180px; object-fit: cover; display: block; background: #e5e7eb;" />` :
+    `<div style="height: 180px; background: #e5e7eb; display:flex; align-items:center; justify-content:center; color:#6b7280;">No image</div>`;
+
+  return `
+    <div style="border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; background: #fff;">
+      ${image}
+      <div style="padding: 12px 14px;">
+        <div style="font-size: 15px; font-weight: 700; color: #111827;">${safeTitle}</div>
+        <div style="font-size: 13px; color: #4b5563; margin-top: 4px;">${safeByline}</div>
+        ${safeTime ? `<div style="font-size: 12px; color: #9ca3af; margin-top: 6px;">${safeTime}</div>` : ""}
+      </div>
+    </div>`;
+}
+
+function buildArtistSubscriptionList(artists) {
+  if (!artists.length) {
+    return `<div style="padding: 16px; background: #f9fafb; border-radius: 10px; color: #6b7280;">No new artist subscriptions in this window.</div>`;
+  }
+
+  return `
+    <table style="width: 100%; border-collapse: collapse;">
+      <thead>
+        <tr>
+          <th style="text-align: left; padding: 10px 12px; border-bottom: 1px solid #e5e7eb; color: #374151;">Artist</th>
+          <th style="text-align: left; padding: 10px 12px; border-bottom: 1px solid #e5e7eb; color: #374151;">Tier</th>
+          <th style="text-align: left; padding: 10px 12px; border-bottom: 1px solid #e5e7eb; color: #374151;">Created</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${artists.map((artist) => `
+          <tr>
+            <td style="padding: 10px 12px; border-bottom: 1px solid #f3f4f6;">${escapeHtml(artist.name)}</td>
+            <td style="padding: 10px 12px; border-bottom: 1px solid #f3f4f6;">${escapeHtml(String(artist.tier || ""))}</td>
+            <td style="padding: 10px 12px; border-bottom: 1px solid #f3f4f6;">${artist.createdAt ? escapeHtml(artist.createdAt.toISOString()) : ""}</td>
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>`;
+}
+
+function escapeHtml(value) {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 function buildMetricCard(label, value) {

@@ -1,151 +1,239 @@
-# TODO - Legal System Implementation Plan
+I  reviewed the repo structure again across the main areas: app code, all package folders, backend/functions, Firebase config, docs, scripts, CI, platform folders, generated/build residue, and root-level operational files. I did not manually read every file in full, but I did re-scan every major folder and enough representative files to make a full-structure recommendation grounded in this repo rather than in theory.
 
-Owner: Kristy Kelly  
-Entity: Local ARTbeat, LLC  
-Primary legal/support email: support@localartbeat.com
+Bottom Line
+You do not need a rewrite. For a first app that is already live on iOS and Android, the right move is controlled consolidation: reduce coupling, reduce repo noise, reduce production risk, and make future work cheaper. The repo’s biggest issue is not that it lacks features. It’s that product code, shared code, platform code, build residue, scripts, docs, and operational artifacts are mixed together in a way that raises the cost of every change.
 
-## Locked Decisions (Approved)
+The main signals behind that conclusion are:
 
-- [x] Arbitration + class action waiver language in ToS (where permitted).
-- [x] 7-year retention for financial/legal records.
-- [x] Account deletion timeline: 30 days primary + 60 days backup purge.
-- [x] Refund baseline: no refunds except where required by law/platform policy.
-- [x] Data-rights SLA: acknowledge in 72 hours, fulfill in 30 days.
-- [x] Age baseline: 13+ globally; not directed to children under 13.
-- [ ] School/student mode policy and consent flow definition (TBD).
+The app boots from lib/main.dart and is wired in lib/app.dart, but most real functionality lives across 14 local packages declared in pubspec.yaml.
+artbeat_core is not truly foundational; it depends on many sibling feature packages in packages/artbeat_core/pubspec.yaml.
+Several feature packages also depend on each other, so boundaries are organizational, not architectural.
+The repo root contains product files plus logs, scripts, JSON extracts, test helpers, credentials-like files, and one-off operational artifacts.
+Some package folders contain committed local/build residue like .dart_tool, build, nested .git, and even a package-local ios/Pods tree under packages/artbeat_profile.
+The operational layer is large and fragmented: functions/, docs/, many translation scripts, legal/security rollout docs, deployment scripts, and Firebase rules all coexist without a single obvious “source of truth” workflow.
+What I’d Recommend
+I’d treat the repo as 8 systems and improve them in this order.
 
-## Completed (This Round)
+Production Safety
+This is first because the app is live.
+Recommendation:
 
-- [x] Added centralized legal config (`LegalConfig`) with company/contact/version/SLA/retention values.
-- [x] Added durable versioned consent recording on registration.
-- [x] Added Legal Center screen (consent versions + acceptance timestamps).
-- [x] Enforced one-time capture terms acceptance before upload submission.
-- [x] Fixed profile legal menu to open proper Terms/Privacy + Legal Center.
-- [x] Updated Terms and Privacy screens with approved legal decisions.
-- [x] Normalized support email in help/legal/deletion surfaces.
-- [x] Added `docs/security/LEGAL_INCIDENT_RESPONSE_PLAN.md`.
-- [x] Added `docs/security/SECURITY_RULES_STAGED_ROLLOUT.md`.
+Freeze architecture rewrites for now.
+Add a “safe change zone” policy: changes should prefer app shell, isolated feature screens, tests, and bug fixes over cross-package moves.
+Define the current production-critical surfaces explicitly:
+startup: lib/main.dart
+app wiring: lib/app.dart
+routing: lib/src/routing/app_router.dart
+payments: docs point to packages/artbeat_core/lib/src/services/unified_payment_service.dart
+Firebase rules: firestore.rules, storage.rules
+functions: functions/src/index.js
+Why:
 
-## P0 - Must Do Next
+Right now, one change can affect many packages. Until boundaries improve, production safety needs to come from process.
+Repo Hygiene
+This is the fastest high-value win.
+Recommendation:
 
-- [x] Make data-rights requests functional end-to-end for non-admin users.
-- [x] Add explicit Firestore rules for `dataRequests` / `dataExportRequests` / `dataDeletionRequests`.
-- [x] Build admin queue UI for privacy requests with statuses and SLA timers.
-- [x] Add request acknowledgment/fulfillment timestamps and audit trail.
-- [x] Expand account deletion backend to cover declared user-data domains via admin deletion pipeline.
-- [x] Verify deletion behavior matches published policy text in staging runtime (API-level lifecycle test + audit evidence).
-- [x] Verify deletion behavior matches published policy text in app UX (manual UI QA pass; screenshot evidence captured).
+Separate “source” from “artifacts”.
+Keep only durable source and docs in git.
+Remove or ignore:
+root logs like firebase-debug.log, flutter_01.log, test_results.log
+local env files
+package-local build output and .dart_tool
+nested platform build trees not intended as source
+accidental nested git repos inside packages if they are not intentional
+Tighten /.gitignore, which already has the right idea but the working tree still contains a lot of local/generated material.
+Create a tools/ or ops/ directory and move one-off root scripts and data extracts there.
+Move ad hoc root text/data files into docs/archive/, tools/, or tmp/ as appropriate.
+Why:
 
-## P1 - Security Hardening (Staged Rollout)
+Your repo root currently behaves like a desk, not a product boundary.
+Package Boundary Repair
+This is the core architecture issue.
+Current state:
 
-- [x] Stage 0 inventory for all Firestore collections and Storage paths.
-- [x] Draft hardened rules for least privilege (remove broad authenticated write/read).
-- [x] Deploy hardened rules to test project and run feature-focused regression checks.
-- [x] Canary deploy to production with rollback plan.
-- [ ] Remove temporary permissive exceptions after validation.
+artbeat_core is acting as both base layer and orchestration layer.
+Feature packages consume each other heavily.
+The app is modular in directory layout, but not in dependency direction.
+Target state:
 
-## Newly Implemented In Code (February 25, 2026)
+artbeat_core: only shared primitives, models, theme, utilities, low-level services, route constants that are truly cross-app.
+Feature packages: auth, profile, artwork, events, community, messaging, capture, art_walk, settings, sponsorships, admin.
+Root app: composition layer that wires providers, routes, and feature integration.
+Practical rule:
 
-- [x] Added SLA fields to `dataRequests` at creation (`slaAcknowledgementDueAt`, `slaCompletionDueAt`, SLA targets).
-- [x] Upgraded admin data-requests queue with status actions, review notes, reviewer stamp, and SLA-overdue visibility.
-- [x] Added callable Cloud Function `processDataDeletionRequest` for admin-run deletion pipeline + audit log.
-- [x] Added `dataRequestAudit` collection support in Firestore rules (admin-only).
-- [x] Hardened high-risk Firestore rule paths (`direct_commissions`, `artwork_sales`, `commission_requests`, `gift_purchases`, `artLocationClusters`, `sponsorships`, `chapter_analytics`).
-- [x] Hardened Storage rules by removing broad development write/read paths and restricting debug/root paths to admin.
+Feature packages may depend on core.
+The app may depend on all features.
+core should not depend on feature packages.
+Feature-to-feature deps should be reduced to explicit shared interfaces or moved upward into the app shell.
+What to move first:
 
-## Newly Implemented In Code (February 26, 2026 - Follow-up)
+Anything in artbeat_core that is feature-specific.
+Anything in core that imports feature screens or feature workflows.
+Cross-feature orchestration logic should move to the top app layer or a dedicated “app shell” package.
+Why:
 
-- [x] Aligned in-app account deletion UX copy with policy timelines and retention carve-outs (30-day primary deletion, 60-day backup purge, 7-year legal/financial retention where required).
-- [x] Hardened chat media Storage rules: participant-only read/write, App Check-gated participant checks, required uploader/chat metadata on uploads, and uploader/admin-only deletes.
-- [x] Continued Storage rules hardening by removing remaining temporary/permissive debug bypass behavior and requiring App Check-gated authorization for owner/admin writes across media paths.
-- [x] Added purchase-flow inline legal disclosure for recurring billing and refund exceptions, with in-flow Terms/Privacy links.
-- [x] Implemented first-use location safety disclosure flow and enforced it before location permission in primary Art Walk entry surfaces.
+This gives you the biggest long-term stability gain without changing UI behavior first.
+App Shell Clarification
+Right now the app shell is split across root lib/ and artbeat_core.
+Recommendation:
 
-## Staging Validation Completed (February 26, 2026)
+Make root lib/ the only app composition layer.
+Keep these responsibilities in the app shell:
+app startup
+provider wiring
+route registration
+feature integration
+environment bootstrap
+Keep feature implementation inside packages.
+Concrete anchors:
 
-- [x] Deployed `firestore.rules`, `storage.rules`, and callable `processDataDeletionRequest` to `wordnerd-artbeat`.
-- [x] Ran regression tests: `flutter test test/artist_features_test.dart test/art_walk_system_test.dart` (pass).
-- [x] Ran live storage upload smoke tests for capture/ads/chat media/posts paths.
-- [x] Ran live negative permission tests (cross-user writes denied on owner-scoped paths).
-- [x] Validated admin deletion lifecycle with disposable accounts:
-  pending -> in_review -> fulfilled.
-- [x] Confirmed deletion evidence:
-  request fulfilled, target user removed, `dataRequestAudit` record created.
-- [x] Fixed and re-deployed privilege escalation risks discovered during validation:
-  blocked self-assignment of privileged roles and restricted callable admin check to `userType == admin`.
-- [x] Updated privacy policy security section to remove unverifiable 2FA/end-to-end encryption claims.
-- [x] Added reusable staging validation script:
-  `scripts/legal_staging_regression.sh`.
-- [x] Final admin-token validation run succeeded end-to-end using a real Firebase ID token:
-  local tests passed, rule checks passed, and callable returned `ok: true` with `fulfilled` deletion summary (`authDeleted: true`, retained collections explicitly listed, storage prefixes processed).
-- [x] Executed production canary deploy helper against `wordnerd-artbeat`:
-  `PROJECT_ID=wordnerd-artbeat ./scripts/legal_canary_deploy.sh` (rules + callable deploy succeeded).
-- [x] Re-ran full live legal regression after canary deploy using admin email/password token resolution:
-  all tests/rule checks passed and callable deletion lifecycle returned `ok: true`.
-- [x] Exact post-deploy evidence run (2026-02-26 UTC):
-  `data_request_created=jzyvWYISmQPIRx9DukPQ`,
-  `self_promote_admin_http=403`,
-  owner uploads `200`,
-  cross-user uploads `403`,
-  callable response `result.ok=true`,
-  deletion summary `authDeleted=true`.
-- [x] Recorded session status and blockers in:
-  `docs/LEGAL_STAGING_UI_QA_SESSION_REPORT_2026-02-26.md`.
-- [x] Implemented shared chat media lifecycle hardening:
-  participant-aware message creation enforcement (`chats/{chatId}/messages`),
-  uploader/chat/storage metadata on media messages,
-  deletion pipeline chat-media cleanup/redaction.
-- [x] Deployed updated `storage.rules`, `firestore.rules`, and `processDataDeletionRequest` after hardening.
-- [x] Re-ran live legal regression with new chat checks:
-  `chat_media_upload_http=200`,
-  `chat_message_participant_create_http=200`,
-  `chat_message_non_participant_create_http=403`.
+lib/main.dart
+lib/app.dart
+lib/src/routing/app_router.dart
+Why:
 
-## Next Steps (Execution Order)
+It becomes clear what is framework/application glue versus reusable domain code.
+Testing Structure
+Testing exists, but it is uneven and scattered between root and packages.
+Recommendation:
 
-- [x] Perform manual in-app staging QA for admin queue UI and deletion request handling using `docs/LEGAL_STAGING_MANUAL_QA_CHECKLIST.md` (completed with screenshot evidence).
-- [x] Run policy claim review and edit legal text for any unverifiable security claims (2FA/encryption wording).
-- [x] Execute collection/path inventory and map data paths to retention/deletion behavior (`docs/LEGAL_DATA_INVENTORY_MATRIX.md`).
-- [x] Add CI workflow wiring for legal staging regression (`.github/workflows/legal_staging_regression.yml`).
-- [x] Prepare production canary rollout artifacts (`docs/security/LEGAL_PRODUCTION_CANARY_ROLLOUT_RUNBOOK.md`, `scripts/legal_canary_deploy.sh`).
-- [x] Add CI helper script for GitHub secret setup + workflow dispatch (`scripts/legal_ci_setup_and_run.sh`).
-- [x] Finalize inventory matrix coverage for all collections/paths and shared media lifecycle guidance.
-- [x] Configure CI secrets (`STAGING_ADMIN_EMAIL`, `STAGING_ADMIN_PASSWORD`, `STAGING_FIREBASE_API_KEY`, `STAGING_FIREBASE_STORAGE_BUCKET`) and validate manual workflow run in GitHub Actions.
-- [ ] Complete production canary sign-off checklist in runbook (depends on manual in-app QA + CI workflow run evidence).
-- [ ] Complete production canary sign-off checklist in runbook (engineering signed; waiting product/legal owner + support readiness + manual UI evidence).
-- [ ] Run non-technical payment/refund QA checklist:
-  `docs/LEGAL_PAYMENT_REFUND_QA_CHECKLIST.md`.
+Keep three clear levels:
+package unit tests
+root app integration/widget tests for app wiring
+backend/rules verification
+Expand tests around the highest-risk coupling points:
+auth/profile routing
+dashboard bootstrap
+payments
+localization key coverage
+Firestore rules and deletion flows
+Use test/README.md and docs/TESTING_GUIDE.md as seeds, then replace ad hoc testing docs with one canonical testing guide.
+Add a dependency-policy check in CI: if artbeat_core imports a feature package, fail the build once you begin boundary cleanup.
+Why:
 
-## CI Validation Evidence (February 26, 2026)
+In a coupled app, tests are your main shock absorbers.
+Localization Workflow
+Localization is functional but operationally messy.
+What I saw:
 
-- [x] Workflow dispatched successfully:
-  `legal_staging_regression.yml` run `22424833231`.
-- [x] GitHub Actions result: `success` (job `legal-staging-regression`, ~2m22s).
-- [x] Steps passed:
-  checkout, Flutter setup, `pub get`, CI `.env` creation, config validation, legal regression script, artifact upload.
+Runtime translations under assets/translations/
+Missing key tracker in assets/translations/missing_keys.md
+Guard test in test/sponsorship_localization_keys_test.dart
+Many translation scripts in scripts/
+Recommendation:
 
-## P1 - Policy-to-Behavior Alignment
+Declare English as the canonical key source.
+Add one script that:
+validates all locale key parity
+reports missing keys
+optionally updates missing_keys.md
+Archive or consolidate the many one-off translation scripts into a smaller workflow:
+extract
+validate
+apply
+Decide whether artbeat_core/assets/translations is authoritative or whether only root assets/translations is.
+Why:
 
-- [x] Add payment flow inline disclosure for refund exceptions.
-- [x] Add location flow inline safety disclosure before first use.
-- [ ] Add plain-language legal summaries in key consent surfaces.
-- [ ] Add material-change re-consent trigger system (version bump workflow).
+Right now localization works, but the maintenance system is fragmented.
+Docs and Ops Consolidation
+The docs folder is large and useful, but not curated.
+What I saw:
 
-## P2 - Minors / School Readiness
+legal/security rollout docs
+deployment and testing docs
+feature implementation notes
+ad hoc progress reports and QA notes
+Recommendation:
 
-- [ ] Define school/student mode legal model (district consent + guardian path).
-- [ ] Define under-18 feature restrictions and moderation standards.
-- [ ] Add age-gate and age-state handling for student experience.
-- [ ] Define COPPA/FERPA review checklist for school deployments.
+Split docs into:
+docs/product/
+docs/engineering/
+docs/operations/
+docs/archive/
+Keep only evergreen docs at the top level.
+Move dated status notes like docs/IMPLEMENTATION_PROGRESS.md and docs/manual_qa_result.md into an archive or docs/reports/.
+Keep one canonical deployment doc and one canonical test doc.
+Why:
 
-## P2 - Ops and Compliance
+Right now the docs are informative, but not navigable.
+Backend and Rules Discipline
+The backend layer is meaningful and deserves to be treated as its own subsystem.
+What I saw:
 
-- [ ] Create legal risk register with severity, owner, due dates.
-- [ ] Create monthly legal/compliance review routine.
-- [ ] Add support response templates for privacy/payment/legal requests.
-- [ ] Run tabletop test for incident response plan.
+functions entry at functions/src/index.js
+Firebase config at firebase.json
+Firestore rules at firestore.rules
+Data Connect config under dataconnect/
+Recommendation:
 
-## Tracking Notes
+Split functions by domain instead of keeping growth centered in one large entry file.
+Add backend ownership structure:
+notifications
+payments
+legal/data rights
+maintenance/backfills
+Add rules tests and function smoke tests as first-class CI steps, not only rollout docs/scripts.
+Clarify whether dataconnect/ is active, experimental, or dormant. If dormant, archive it.
+Why:
 
-- Canonical legal settings live in `packages/artbeat_core/lib/src/config/legal_config.dart`.
-- Legal updates should be edited through centralized config + canonical legal screens, then synced to app-level duplicates if still present.
+Functions and rules are production-critical; they should not feel like adjunct code.
+Scaled Roadmap
+This is the version I’d actually recommend for a live first app.
+
+Phase 0: 1 week, low risk
+
+Clean repo root.
+Tighten .gitignore.
+Remove committed/generated residue from packages where safe.
+Create folder policy for docs/, scripts/, tools/, tmp/.
+Define the current architecture in one short doc.
+Consolidate production-critical entry points and owners.
+Phase 1: 2 to 4 weeks, low to medium risk
+
+Stop adding new feature-specific code to artbeat_core.
+Move orchestration code out of core into app shell where appropriate.
+Standardize translation validation.
+Standardize docs for deploy/test/local setup.
+Add CI checks for package analyze/test consistency.
+Phase 2: 1 to 2 months, medium risk
+
+Reduce feature-to-feature dependencies one package at a time.
+Introduce dependency rules:
+core cannot import features
+features should not import each other except temporarily approved cases
+Create shared interface/service abstractions where needed instead of direct imports.
+Split functions by domain.
+Phase 3: ongoing, higher leverage
+
+Reorganize packages by domain confidence:
+stable reusable packages stay packages
+app-specific glue stays in root app
+experimental or half-shared code moves out of core
+Build architecture docs that reflect reality, not aspiration.
+Add release-train discipline: “safe change”, “needs regression”, “needs canary”.
+Specific Risks I’d Call Out
+These are worth addressing sooner rather than later.
+
+Root contains sensitive/local-looking files such as service-account-key.json, .env, .env.local, key.properties. They may be ignored, but they should not casually coexist in the main product root.
+scripts/setup_env_local.sh contains a live publishable Stripe key. Publishable is not secret, but it still indicates config drift and should be centralized.
+Package folders contain local residue that should not be part of your architectural surface.
+packages/artbeat_profile appears to contain its own iOS project artifacts, which is unusual for a feature package and increases confusion.
+artbeat_core is oversized by role and file count, and that is the best signal for where architecture debt is concentrated.
+What Good Looks Like For This App
+For your app, “good” is not “perfect clean architecture.” Good is:
+
+predictable change impact
+fewer cross-package surprises
+cleaner repo root
+clear app shell versus shared package boundaries
+repeatable translation/testing/deploy workflows
+lower release anxiety
+That is realistic for a live first app. The right bar is not elegance. It is controlled complexity.
+
+If you want, I can do the next step and turn this into a concrete refactor plan with:
+
+exact folders to keep/move/archive,
+a target dependency policy for each package,
+and a step-by-step “do this without breaking production” sequence.
+
