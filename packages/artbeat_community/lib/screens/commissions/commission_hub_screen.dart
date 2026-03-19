@@ -3,14 +3,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart' as intl;
-
-import 'package:artbeat_artist/artbeat_artist.dart'
-    hide HudTopBar, WorldBackground, GlassCard, HudButton, GradientBadge;
+import 'package:artbeat_core/artbeat_core.dart' show AppRoutes;
 
 import '../../models/direct_commission_model.dart';
 import '../../services/direct_commission_service.dart';
 import '../../widgets/widgets.dart';
-import 'package:artbeat_admin/artbeat_admin.dart';
 import 'artist_commission_settings_screen.dart';
 import 'commission_detail_screen.dart';
 import 'commission_dispute_screen.dart';
@@ -988,23 +985,13 @@ class _CommissionHubScreenState extends State<CommissionHubScreen> {
   }
 
   void _browseArtists() {
-    Navigator.push(
-      context,
-      MaterialPageRoute<void>(
-        builder: (context) => const ArtistBrowseScreen(mode: 'commissions'),
-      ),
-    );
+    Navigator.pushNamed(context, AppRoutes.artistBrowse);
   }
 
   void _viewAnalytics() {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
-    Navigator.push(
-      context,
-      MaterialPageRoute<void>(
-        builder: (context) => const ModernUnifiedAdminDashboard(),
-      ),
-    );
+    Navigator.pushNamed(context, AppRoutes.adminDashboard);
   }
 
   void _viewTemplates() {

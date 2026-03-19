@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:artbeat_profile/src/widgets/xp_progress_bar.dart';
-import 'package:artbeat_art_walk/artbeat_art_walk.dart' as walk;
+import 'package:artbeat_profile/src/models/profile_achievement_model.dart';
 
 class AchievementTile extends StatelessWidget {
   final String title;
@@ -25,8 +25,8 @@ class AchievementTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (achievement != null && achievement is walk.AchievementModel) {
-      final ach = achievement as walk.AchievementModel;
+    if (achievement != null && achievement is ProfileAchievementModel) {
+      final ach = achievement as ProfileAchievementModel;
 
       return GlassCard(
         padding: const EdgeInsets.all(12),

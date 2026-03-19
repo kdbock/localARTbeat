@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:timeago/timeago.dart' as timeago;
-import 'package:artbeat_art_walk/artbeat_art_walk.dart' as artWalkLib;
+import 'package:artbeat_core/artbeat_core.dart';
 
 /// Live Activity Feed - Shows social proof of art discoveries nearby
 class LiveActivityFeed extends StatefulWidget {
-  final List<artWalkLib.SocialActivity> activities;
+  final List<SocialActivityModel> activities;
   final int maxItems;
   final VoidCallback? onTap;
 
@@ -259,7 +259,7 @@ class _LiveActivityFeedState extends State<LiveActivityFeed>
     );
   }
 
-  ActivityItem _convertToActivityItem(artWalkLib.SocialActivity activity) {
+  ActivityItem _convertToActivityItem(SocialActivityModel activity) {
     return ActivityItem(
       userName: activity.userName,
       action: _getActionText(activity.type),
@@ -270,24 +270,24 @@ class _LiveActivityFeedState extends State<LiveActivityFeed>
     );
   }
 
-  String _getActionText(artWalkLib.SocialActivityType type) {
+  String _getActionText(SocialActivityType type) {
     switch (type) {
-      case artWalkLib.SocialActivityType.discovery:
+      case SocialActivityType.discovery:
         return 'live_activity_discovered'.tr();
-      case artWalkLib.SocialActivityType.capture:
+      case SocialActivityType.capture:
         return 'live_activity_captured'.tr();
-      case artWalkLib.SocialActivityType.walkCompleted:
+      case SocialActivityType.walkCompleted:
         return 'live_activity_completed'.tr();
-      case artWalkLib.SocialActivityType.achievement:
+      case SocialActivityType.achievement:
         return 'live_activity_achieved'.tr();
-      case artWalkLib.SocialActivityType.friendJoined:
+      case SocialActivityType.friendJoined:
         return 'live_activity_joined'.tr();
-      case artWalkLib.SocialActivityType.milestone:
+      case SocialActivityType.milestone:
         return 'live_activity_reached'.tr();
     }
   }
 
-  String _getArtworkTitle(artWalkLib.SocialActivity activity) {
+  String _getArtworkTitle(SocialActivityModel activity) {
     if (activity.metadata != null && activity.metadata!['artTitle'] != null) {
       return '"${activity.metadata!['artTitle']}"';
     }

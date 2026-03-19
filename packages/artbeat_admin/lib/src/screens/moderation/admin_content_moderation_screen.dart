@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
-import 'package:artbeat_capture/artbeat_capture.dart';
+
+import '../../services/admin_capture_moderation_service.dart';
 
 /// Admin screen for moderating pending captures
 /// Relocated to artbeat_admin for unified administration
@@ -15,7 +16,8 @@ class AdminContentModerationScreen extends StatefulWidget {
 
 class _AdminContentModerationScreenState
     extends State<AdminContentModerationScreen> {
-  final CaptureService _captureService = CaptureService();
+  final AdminCaptureModerationService _captureService =
+      AdminCaptureModerationService();
   List<core.CaptureModel> _pendingCaptures = [];
   bool _loading = true;
   String _selectedTab = 'pending';

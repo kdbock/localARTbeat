@@ -195,11 +195,7 @@ class AuthTestHelpers {
     return TestAuthScreenWrapper(
       mockAuth: auth,
       mockFirestore: firestore,
-      child: ProfileCreateScreen(
-        authService: AuthService(auth: auth, firestore: firestore),
-        enableBackgroundAnimation: false,
-        autoNavigate: false,
-      ),
+      child: const TestProfileCreateScreen(),
     );
   }
 

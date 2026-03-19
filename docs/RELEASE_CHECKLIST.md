@@ -28,6 +28,16 @@ functions.
 - run localization parity checks if translation keys changed
 - run backend checks if `functions/`, rules, or Firebase config changed
 
+Recommended baseline commands:
+
+```bash
+flutter analyze
+flutter test
+flutter test test/localization_key_parity_test.dart
+```
+
+When packages are touched, also run targeted package tests.
+
 ## Manual QA
 
 Always validate the changed user flows, not just compile success.
@@ -41,6 +51,13 @@ High-priority flows:
 - data requests/deletion when legal/settings/rules code is touched
 - messaging if chat, notifications, or presence code changed
 - translation coverage when locale keys changed
+
+Release-critical payment QA when payment code is touched:
+
+- add payment method
+- subscription checkout
+- commission or other payment flow tied to changed code
+- confirm 3DS/Stripe authentication does not crash
 
 ## Firebase / Backend Checks
 
@@ -62,19 +79,37 @@ Checks:
 
 ## Android Release
 
+- optional clean build prep for larger releases:
+  - `flutter clean`
+  - `cd android && ./gradlew clean && cd ..`
+- run `flutter pub get`
 - build release AAB
 - verify release build succeeds cleanly
 - test critical flows on at least one Android device/emulator
 - upload to internal or staged track first unless emergency hotfix
 - monitor Crashlytics and payment/usage metrics after rollout
 
+Recommended commands:
+
+```bash
+flutter build appbundle --release
+flutter build apk --release
+```
+
 ## iOS Release
 
+- run `flutter pub get`
 - build iOS release
 - verify archive/signing flow
 - test critical flows on at least one iOS device/simulator where practical
 - use TestFlight before full rollout unless emergency hotfix
 - monitor Crashlytics and user-reported regressions after rollout
+
+Recommended command:
+
+```bash
+flutter build ios --release --no-codesign
+```
 
 ## Hotfix Rules
 
@@ -98,11 +133,24 @@ Hotfix constraints:
 - record any new issue in `KNOWN_ISSUES.md`
 - update `DECISIONS.md` if the release created a new permanent workflow or rule
 
+Payment-specific monitoring when relevant:
+
+- payment success/failure rate
+- 3DS completion rate
+- new Stripe crash signatures
+- payment abandonment complaints in store reviews/support channels
+
 ## Canonical Supporting Docs
 
 - `docs/TEST_STRATEGY.md`
 - `docs/OPERATIONS.md`
 - `docs/KNOWN_ISSUES.md`
-- legacy references:
-  - `docs/DEPLOYMENT_CHECKLIST.md`
-  - `docs/TESTING_GUIDE.md`
+
+Incident/reference docs:
+
+- `docs/DEPLOYMENT_CHECKLIST.md`
+  - Stripe 3DS deployment incident checklist
+- `docs/TESTING_GUIDE.md`
+  - Stripe 3DS focused manual QA guide
+- `scripts/deploy.sh`
+  - convenience build script, not the source of truth for release policy

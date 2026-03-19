@@ -1,17 +1,16 @@
 import 'package:artbeat_art_walk/artbeat_art_walk.dart';
-import 'package:artbeat_artwork/artbeat_artwork.dart';
 import 'package:artbeat_auth/artbeat_auth.dart';
 import 'package:artbeat_capture/artbeat_capture.dart' as capture;
 import 'package:artbeat_community/artbeat_community.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_events/artbeat_events.dart' as events;
 import 'package:artbeat_messaging/artbeat_messaging.dart' as messaging;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'src/integrations/capture_art_walk_hooks.dart';
 import 'src/routing/app_router.dart';
 import 'src/widgets/error_boundary.dart';
 
@@ -110,6 +109,10 @@ class MyApp extends StatelessWidget {
               create: (_) => messaging.ChatService(),
               lazy: true, // Changed to lazy to prevent early Firebase access
             ),
+            Provider<core.MessagingStatusService>(
+              create: (_) => core.MessagingStatusService(),
+              lazy: true,
+            ),
             // Message Reaction Service for emoji reactions
             ChangeNotifierProvider<messaging.MessageReactionService>(
               create: (_) => messaging.MessageReactionService(),
@@ -117,7 +120,9 @@ class MyApp extends StatelessWidget {
             ),
             ChangeNotifierProvider<core.MessagingProvider>(
               create: (context) =>
-                  core.MessagingProvider(context.read<messaging.ChatService>()),
+                  core.MessagingProvider(
+                    context.read<core.MessagingStatusService>(),
+                  ),
               lazy: true,
             ),
             // Presence Service for online status
@@ -147,12 +152,12 @@ class MyApp extends StatelessWidget {
               lazy: true,
             ),
             // Additional service providers for DashboardViewModel
-            Provider<events.EventService>(
-              create: (_) => events.EventService(),
+            Provider<core.ArtworkReadService>(
+              create: (_) => core.ArtworkReadService(),
               lazy: true,
             ),
-            Provider<ArtworkService>(
-              create: (_) => ArtworkService(),
+            Provider<core.PublicArtReadService>(
+              create: (_) => core.PublicArtReadService(),
               lazy: true,
             ),
             Provider<ArtWalkService>(
@@ -193,52 +198,56 @@ class MyApp extends StatelessWidget {
               lazy: true,
             ),
             Provider<capture.CaptureService>(
-              create: (_) => capture.CaptureService(),
+              create: (_) => capture.CaptureService(
+                postCaptureHooks: CaptureArtWalkHooks(),
+              ),
+              lazy: true,
+            ),
+            Provider<core.CaptureServiceInterface>(
+              create: (_) => capture.CaptureService(
+                postCaptureHooks: CaptureArtWalkHooks(),
+              ),
               lazy: true,
             ),
             ChangeNotifierProvider<core.SubscriptionService>.value(
               value: core.SubscriptionService(),
             ),
             // Dashboard ViewModel - Create after required services
-            ChangeNotifierProxyProvider6<
-              events.EventService,
-              ArtworkService,
-              ArtWalkService,
+            ChangeNotifierProxyProvider5<
+              core.ArtworkReadService,
               core.SubscriptionService,
               core.UserService,
               capture.CaptureService,
+              core.PublicArtReadService,
               core.DashboardViewModel
             >(
               create: (BuildContext context) => core.DashboardViewModel(
-                eventService: context.read<events.EventService>(),
-                artworkService: context.read<ArtworkService>(),
-                artWalkService: context.read<ArtWalkService>(),
+                artworkService: context.read<core.ArtworkReadService>(),
                 subscriptionService: context.read<core.SubscriptionService>(),
                 userService: context.read<core.UserService>(),
                 captureService: context.read<capture.CaptureService>(),
+                publicArtService: context.read<core.PublicArtReadService>(),
               ),
               update:
                   (
                     BuildContext context,
-                    events.EventService eventService,
-                    ArtworkService artworkService,
-                    ArtWalkService artWalkService,
+                    core.ArtworkReadService artworkService,
                     core.SubscriptionService subscriptionService,
                     core.UserService userService,
                     capture.CaptureService captureService,
+                    core.PublicArtReadService publicArtService,
                     core.DashboardViewModel? previous,
                   ) {
                     final chapterProvider = context
                         .read<core.ChapterPartnerProvider>();
-                    final viewModel =
+                        final viewModel =
                         (previous ??
                               core.DashboardViewModel(
-                                eventService: eventService,
                                 artworkService: artworkService,
-                                artWalkService: artWalkService,
                                 subscriptionService: subscriptionService,
                                 userService: userService,
                                 captureService: captureService,
+                                publicArtService: publicArtService,
                               ))
                           ..updateChapter(chapterProvider.activeChapterId);
                     return viewModel;

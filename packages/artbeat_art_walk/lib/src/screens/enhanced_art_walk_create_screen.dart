@@ -11,16 +11,21 @@ import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:artbeat_core/artbeat_core.dart'
-    hide GlassCard, WorldBackground, HudTopBar, GradientCTAButton;
-import 'package:artbeat_capture/artbeat_capture.dart';
+    hide
+        GlassCard,
+        GradientCTAButton,
+        HudTopBar,
+        PublicArtModel,
+        WorldBackground;
 import 'package:artbeat_art_walk/artbeat_art_walk.dart' as walk;
 import 'package:artbeat_art_walk/src/theme/art_walk_design_system.dart';
 import 'package:artbeat_art_walk/src/models/art_walk_model.dart';
 import 'package:artbeat_art_walk/src/models/public_art_model.dart';
+import 'package:artbeat_art_walk/src/services/art_walk_capture_read_service.dart';
+import 'package:artbeat_art_walk/src/services/art_walk_distance_unit_service.dart';
 import 'package:artbeat_art_walk/src/services/art_walk_service.dart';
 import 'package:artbeat_art_walk/src/utils/route_optimization_utils.dart';
-import 'package:artbeat_settings/artbeat_settings.dart';
-import 'package:artbeat_events/artbeat_events.dart' as events;
+import 'package:artbeat_art_walk/src/widgets/gradient_cta_button.dart';
 import 'package:flutter/foundation.dart';
 
 // Enhanced Create Art Walk specific colors (matching Dashboard theme)
@@ -96,11 +101,12 @@ class _EnhancedArtWalkCreateScreenState
   late final ArtWalkService _artWalkService;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  final IntegratedSettingsService _userSettingsService =
-      IntegratedSettingsService();
+  final ArtWalkDistanceUnitService _distanceUnitService =
+      ArtWalkDistanceUnitService();
+  final ArtWalkCaptureReadService _captureReadService =
+      ArtWalkCaptureReadService();
 
-  // User preferences
-  UserSettingsModel? _userSettings;
+  String _distanceUnit = 'miles';
 
   @override
   void initState() {
@@ -156,18 +162,15 @@ class _EnhancedArtWalkCreateScreenState
     try {
       final user = _auth.currentUser;
       if (user != null) {
-        final settings = await _userSettingsService.getUserSettings();
+        final distanceUnit = await _distanceUnitService.getDistanceUnit();
         setState(() {
-          _userSettings = settings;
+          _distanceUnit = distanceUnit;
         });
       }
     } catch (e) {
       debugPrint('Error loading user settings: $e');
-      // Use default settings with miles for American users
       setState(() {
-        _userSettings = UserSettingsModel.defaultSettings(
-          _auth.currentUser?.uid ?? '',
-        );
+        _distanceUnit = 'miles';
       });
     }
   }
@@ -246,8 +249,9 @@ class _EnhancedArtWalkCreateScreenState
       final longitude = _currentPosition?.longitude ?? -78.6382;
 
       // Fetch all captures (captures are public art) - fresh from Firestore, no cache
-      final captureService = context.read<CaptureService>();
-      final captures = await captureService.getAllCapturesFresh(limit: 500);
+      final captures = await _captureReadService.getAllCapturesFresh(
+        limit: 500,
+      );
 
       // Filter captures within 30 mile radius for American audience
       const double radiusInMiles = 30.0;
@@ -409,7 +413,7 @@ class _EnhancedArtWalkCreateScreenState
     }
 
     // Convert to user's preferred unit
-    final String distanceUnit = _userSettings?.distanceUnit ?? 'miles';
+    final String distanceUnit = _distanceUnit;
     final double convertedDistance = distanceUnit == 'miles'
         ? DistanceUtils.metersToMiles(totalDistance)
         : DistanceUtils.metersToKilometers(totalDistance);
@@ -462,7 +466,7 @@ class _EnhancedArtWalkCreateScreenState
 
       // Calculate estimated duration based on distance and number of pieces
       // Assume 3 mph walking speed + 10 minutes per art piece for viewing
-      final String distanceUnit = _userSettings?.distanceUnit ?? 'miles';
+      final String distanceUnit = _distanceUnit;
       final double minutesPerUnit = distanceUnit == 'miles'
           ? 20.0
           : 12.4; // 20 min/mile or 12.4 min/km
@@ -1242,7 +1246,7 @@ class _EnhancedArtWalkCreateScreenState
       art.location.longitude,
     );
 
-    final String distanceUnit = _userSettings?.distanceUnit ?? 'miles';
+    final String distanceUnit = _distanceUnit;
     return DistanceUtils.formatDistance(
       distance,
       unit: distanceUnit,
@@ -1348,8 +1352,8 @@ class _EnhancedArtWalkCreateScreenState
 
   Widget _buildSubmitButton() {
     final progress = _calculateProgress();
-    return events.GradientCTAButton(
-      text: widget.artWalkId == null
+    return GradientCTAButton(
+      label: widget.artWalkId == null
           ? 'art_walk_create_submit'.tr()
           : 'art_walk_edit_submit'.tr(),
       onPressed: progress == 100 ? _submitForm : null,

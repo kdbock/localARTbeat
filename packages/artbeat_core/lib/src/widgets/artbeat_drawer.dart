@@ -8,11 +8,10 @@ import 'package:provider/provider.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:artbeat_art_walk/artbeat_art_walk.dart';
-import 'package:artbeat_messaging/artbeat_messaging.dart';
-
 import '../theme/artbeat_colors.dart';
 import '../services/user_service.dart';
+import '../services/user_progression_service.dart';
+import '../services/messaging_status_service.dart';
 import '../services/crash_prevention_service.dart';
 import '../models/user_model.dart' as core;
 import 'artbeat_drawer_items.dart';
@@ -88,8 +87,7 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer>
 
         // Process daily login for streak tracking
         try {
-          final rewardsService = RewardsService();
-          await rewardsService.processDailyLogin(user.uid);
+          await UserProgressionService().processDailyLogin(user.uid);
         } catch (e) {
           AppLogger.error('❌ Error processing daily login: $e');
         }
@@ -747,8 +745,9 @@ class _ArtbeatDrawerState extends State<ArtbeatDrawer>
 
   Widget _buildIconWithBadge(ArtbeatDrawerItem item, bool isCurrentRoute) {
     if (item.route == '/messaging') {
+      final messagingStatusService = context.read<MessagingStatusService>();
       return StreamBuilder<int>(
-        stream: ChatService().getTotalUnreadCount(),
+        stream: messagingStatusService.getTotalUnreadCount(),
         builder: (context, snapshot) {
           final unreadCount = snapshot.data ?? 0;
 

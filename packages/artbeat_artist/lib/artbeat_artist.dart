@@ -23,7 +23,6 @@ export 'src/screens/events_screen.dart';
 export 'src/screens/gallery_visibility_hub_screen.dart';
 export 'src/screens/gallery_artists_management_screen.dart';
 export 'src/screens/artist_onboard_screen.dart';
-export 'src/screens/my_artwork_screen.dart';
 export 'src/screens/payment_methods_screen.dart';
 export 'src/screens/payment_screen.dart';
 export 'src/screens/refund_request_screen.dart';

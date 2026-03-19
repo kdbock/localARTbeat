@@ -8,7 +8,7 @@ import 'dart:io' as _i15;
 import 'dart:typed_data' as _i10;
 import 'dart:ui' as _i17;
 
-import 'package:artbeat_art_walk/src/models/achievement_model.dart' as _i14;
+import 'package:artbeat_core/src/models/achievement_model.dart' as _i14;
 import 'package:artbeat_art_walk/src/services/rewards_service.dart' as _i18;
 import 'package:artbeat_core/src/models/artist_profile_model.dart' as _i16;
 import 'package:artbeat_core/src/models/user_model.dart' as _i8;
@@ -1167,7 +1167,7 @@ class MockUserService extends _i1.Mock implements _i13.UserService {
           as _i5.Future<_i8.UserModel?>);
 
   @override
-  _i5.Future<List<_i14.AchievementModel>> getUserAchievements(String? userId) =>
+  _i5.Future<List<_i14.AchievementModel>> getUserAchievements(String userId) =>
       (super.noSuchMethod(
             Invocation.method(#getUserAchievements, [userId]),
             returnValue: _i5.Future<List<_i14.AchievementModel>>.value(

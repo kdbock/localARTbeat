@@ -1,12 +1,12 @@
 import 'dart:ui';
 
-import 'package:artbeat_art_walk/artbeat_art_walk.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../services/leaderboard_service.dart';
+import '../services/user_progression_service.dart';
 import '../utils/logger.dart';
 
 class LeaderboardScreen extends StatefulWidget {
@@ -20,7 +20,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final LeaderboardService _leaderboardService = LeaderboardService();
-  final RewardsService _rewardsService = RewardsService();
+  final UserProgressionService _progressionService = UserProgressionService();
 
   Map<LeaderboardCategory, List<LeaderboardEntry>> _leaderboards = {};
   Map<String, dynamic>? _stats;
@@ -501,7 +501,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Level ${entry.level} • ${_rewardsService.getLevelTitle(entry.level)}',
+                    'Level ${entry.level} • ${_progressionService.getLevelTitle(entry.level)}',
                     style: GoogleFonts.spaceGrotesk(
                       color: Colors.white70,
                       fontSize: 12,

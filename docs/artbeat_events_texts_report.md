@@ -13,7 +13,7 @@ This report documents the internationalization (i18n) process completed for the 
 ## Translation File Created
 
 - **File**: `artbeat_events_texts_data.json`
-- **Location**: Root directory (`/workspaces/artbeat-app/`)
+- **Location**: `tools/text-extraction/data/`
 - **Key Prefix**: `events_`
 - **Total Keys Added**: 35
 
@@ -94,6 +94,6 @@ Strings with variables were converted to use placeholders:
 
 ## Files Created/Modified
 
-- **Created**: `artbeat_events_texts_data.json` (35 keys)
+- **Created**: `tools/text-extraction/data/artbeat_events_texts_data.json` (35 keys)
 - **Modified**: 8 Dart files across screens, widgets, and forms
 - **Total Strings Processed**: 35 unique hardcoded strings

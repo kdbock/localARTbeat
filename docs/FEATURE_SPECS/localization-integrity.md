@@ -51,3 +51,12 @@ drift.
 - locale parity test
 - manual smoke on at least one non-English locale
 - update `KNOWN_ISSUES.md` if unresolved warnings remain
+
+## Current Implementation Status
+
+- canonical report script added:
+  `tools/localization/report_missing_keys.py`
+- generated debt report lives at:
+  `assets/translations/missing_keys.md`
+- strict parity enforcement in tests/CI should happen only after current locale
+  gaps are reduced to a manageable level

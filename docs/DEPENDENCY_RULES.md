@@ -81,6 +81,8 @@ If you are unsure where code goes:
 Near-term:
 
 - use this doc as a review rule
+- use `docs/PACKAGE_DEPENDENCY_INVENTORY.md` as the concrete baseline for
+  current violations
 
 Mid-term:
 

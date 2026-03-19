@@ -3,7 +3,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_art_walk/artbeat_art_walk.dart' show ChallengeService;
 import 'package:artbeat_artwork/artbeat_artwork.dart';
-import 'package:artbeat_artist/artbeat_artist.dart' as artist;
 import 'package:artbeat_core/artbeat_core.dart'
     hide ArtworkModel, GlassInputDecoration, WritingMetadata;
 import 'package:artbeat_core/artbeat_core.dart' show WritingMetadata;
@@ -22,10 +21,9 @@ class ArtworkDetailScreen extends StatefulWidget {
 
 class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
   final ArtworkService _artworkService = ArtworkService();
-  final artist.SubscriptionService _subscriptionService =
-      artist.SubscriptionService();
-  final artist.VisibilityService _visibilityService =
-      artist.VisibilityService();
+  final ArtistService _artistService = ArtistService();
+  final ArtworkVisibilityService _visibilityService =
+      ArtworkVisibilityService();
   final AuctionService _auctionService = AuctionService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -73,7 +71,7 @@ class _ArtworkDetailScreenState extends State<ArtworkDetailScreen> {
       }
 
       // Get artist profile
-      final artistProfile = await _subscriptionService.getArtistProfileById(
+      final artistProfile = await _artistService.getArtistProfileById(
         artwork.artistProfileId,
       );
 

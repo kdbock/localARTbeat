@@ -1,11 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_capture/artbeat_capture.dart';
+
+import 'admin_capture_moderation_service.dart';
 
 /// Service for migrating existing data to use standardized moderation status
 class MigrationService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final CaptureService _captureService = CaptureService();
+  final AdminCaptureModerationService _captureService =
+      AdminCaptureModerationService();
 
   /// Migrate all collections to use standardized moderation status
   Future<void> migrateAllCollections() async {

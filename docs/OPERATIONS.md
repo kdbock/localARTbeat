@@ -46,6 +46,14 @@ Working rules:
 - use one maintained workflow for extract/validate/apply instead of many
   one-off scripts over time
 
+Current report command:
+
+- `python3 tools/localization/report_missing_keys.py`
+
+This rewrites:
+
+- `assets/translations/missing_keys.md`
+
 ## Build And Release
 
 Use:
@@ -55,8 +63,15 @@ Use:
 Legacy supporting references:
 
 - `docs/DEPLOYMENT_CHECKLIST.md`
+- `docs/TESTING_GUIDE.md`
 - `scripts/deploy.sh`
 - platform build scripts under `scripts/`
+
+Rule:
+
+- `docs/RELEASE_CHECKLIST.md` is the canonical release process
+- older deployment/testing docs are incident-specific references, not the main
+  operating procedure
 
 ## Firebase / Backend
 

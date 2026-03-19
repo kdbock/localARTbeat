@@ -1,3 +1,27 @@
+import 'package:artbeat_core/artbeat_core.dart' show ArtworkContentType;
+
+class WritingMetadata {
+  final String? genre;
+  final int? wordCount;
+
+  const WritingMetadata({this.genre, this.wordCount});
+
+  factory WritingMetadata.fromMap(Map<String, dynamic> map) {
+    return WritingMetadata(
+      genre: map['genre']?.toString(),
+      wordCount: map['wordCount'] is int
+          ? map['wordCount'] as int
+          : (map['wordCount'] is num
+                ? (map['wordCount'] as num).toInt()
+                : int.tryParse(map['wordCount']?.toString() ?? '')),
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {'genre': genre, 'wordCount': wordCount};
+  }
+}
+
 // Create the missing artwork_model.dart file.
 class ArtworkModel {
   final String id;
@@ -12,6 +36,13 @@ class ArtworkModel {
   final int? yearCreated;
   final String artistProfileId;
   final String userId;
+  final ArtworkContentType contentType;
+  final WritingMetadata? writingMetadata;
+  final bool auctionEnabled;
+  final DateTime? auctionEnd;
+  final double? startingPrice;
+  final double? reservePrice;
+  final double? currentHighestBid;
 
   ArtworkModel({
     required this.id,
@@ -26,6 +57,13 @@ class ArtworkModel {
     this.yearCreated,
     required this.artistProfileId,
     required this.userId,
+    this.contentType = ArtworkContentType.visual,
+    this.writingMetadata,
+    this.auctionEnabled = false,
+    this.auctionEnd,
+    this.startingPrice,
+    this.reservePrice,
+    this.currentHighestBid,
   });
 
   factory ArtworkModel.fromMap(Map<String, dynamic> map) {
@@ -50,6 +88,30 @@ class ArtworkModel {
                 : null),
       artistProfileId: (map['artistProfileId'] ?? '').toString(),
       userId: (map['userId'] ?? '').toString(),
+      contentType: _contentTypeFromRaw(map['contentType']),
+      writingMetadata:
+          map['writingMetadata'] is Map<String, dynamic>
+              ? WritingMetadata.fromMap(map['writingMetadata'] as Map<String, dynamic>)
+              : null,
+      auctionEnabled: map['auctionEnabled'] is bool
+          ? map['auctionEnabled'] as bool
+          : false,
+      auctionEnd: map['auctionEnd'] is DateTime
+          ? map['auctionEnd'] as DateTime
+          : map['auctionEnd'] is String
+              ? DateTime.tryParse(map['auctionEnd'] as String)
+              : map['auctionEnd'] != null
+                  ? (map['auctionEnd'] as dynamic).toDate() as DateTime?
+                  : null,
+      startingPrice: map['startingPrice'] is num
+          ? (map['startingPrice'] as num).toDouble()
+          : null,
+      reservePrice: map['reservePrice'] is num
+          ? (map['reservePrice'] as num).toDouble()
+          : null,
+      currentHighestBid: map['currentHighestBid'] is num
+          ? (map['currentHighestBid'] as num).toDouble()
+          : null,
     );
   }
 
@@ -67,6 +129,13 @@ class ArtworkModel {
       'yearCreated': yearCreated,
       'artistProfileId': artistProfileId,
       'userId': userId,
+      'contentType': contentType.name,
+      'writingMetadata': writingMetadata?.toMap(),
+      'auctionEnabled': auctionEnabled,
+      'auctionEnd': auctionEnd,
+      'startingPrice': startingPrice,
+      'reservePrice': reservePrice,
+      'currentHighestBid': currentHighestBid,
     };
   }
 
@@ -76,4 +145,19 @@ class ArtworkModel {
   double? get getPrice => price;
   String get getTitle => title;
   String get getMedium => medium;
+
+  static ArtworkContentType _contentTypeFromRaw(Object? raw) {
+    final value = raw?.toString().trim().toLowerCase();
+    switch (value) {
+      case 'written':
+        return ArtworkContentType.written;
+      case 'audio':
+        return ArtworkContentType.audio;
+      case 'comic':
+        return ArtworkContentType.comic;
+      case 'visual':
+      default:
+        return ArtworkContentType.visual;
+    }
+  }
 }

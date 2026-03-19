@@ -6,9 +6,7 @@ import 'package:easy_localization/easy_localization.dart';
 import '../theme/artbeat_colors.dart';
 import '../providers/messaging_provider.dart';
 import '../services/onboarding_service.dart';
-// import 'enhanced_profile_menu.dart';
-
-import 'package:artbeat_profile/src/screens/profile_menu_screen.dart';
+import '../routing/app_routes.dart';
 
 /// Enhanced Universal Header with improved visual hierarchy and user experience
 ///
@@ -379,12 +377,7 @@ class _EnhancedUniversalHeaderState extends State<EnhancedUniversalHeader>
   }
 
   void _goToProfileMenuScreen() {
-    Navigator.push(
-      context,
-      MaterialPageRoute<Widget>(
-        builder: (context) => const ProfileMenuScreen(),
-      ),
-    );
+    Navigator.pushNamed(context, AppRoutes.profileMenu);
   }
 
   void _openDrawer() {

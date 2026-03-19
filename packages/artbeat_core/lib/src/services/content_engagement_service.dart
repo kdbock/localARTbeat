@@ -2,15 +2,17 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import '../models/engagement_model.dart';
+import 'daily_challenge_progress_service.dart';
 import 'engagement_config_service.dart';
 import '../utils/logger.dart';
-import 'package:artbeat_art_walk/artbeat_art_walk.dart';
 
 /// Content-specific engagement service for ARTbeat content types
 /// Replaces UniversalEngagementService with content-specific engagement handling
 class ContentEngagementService extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final DailyChallengeProgressService _challengeProgressService =
+      DailyChallengeProgressService();
 
   /// Toggle engagement for any content type
   Future<bool> toggleEngagement({
@@ -656,8 +658,7 @@ class ContentEngagementService extends ChangeNotifier {
 
       // Track comment for challenge progress
       try {
-        final challengeService = ChallengeService();
-        await challengeService.recordComment();
+        await _challengeProgressService.recordComment();
       } catch (e) {
         AppLogger.error('Error recording comment to challenge: $e');
       }
@@ -697,8 +698,7 @@ class ContentEngagementService extends ChangeNotifier {
 
       // Track share for challenge progress
       try {
-        final challengeService = ChallengeService();
-        await challengeService.recordSocialShare();
+        await _challengeProgressService.recordSocialShare();
       } catch (e) {
         AppLogger.error('Error recording share to challenge: $e');
       }

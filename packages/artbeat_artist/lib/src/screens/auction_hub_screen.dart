@@ -1,9 +1,9 @@
 import 'package:artbeat_core/artbeat_core.dart' as core;
-import 'package:artbeat_artwork/artbeat_artwork.dart' as artwork;
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../models/artwork_model.dart' as artist_artwork;
 
 /// Hub screen for managing all auction-related activities
 class AuctionHubScreen extends StatefulWidget {
@@ -18,9 +18,9 @@ class _AuctionHubScreenState extends State<AuctionHubScreen>
   late TabController _tabController;
 
   bool _isLoading = true;
-  List<artwork.ArtworkModel> _activeAuctions = [];
-  List<artwork.ArtworkModel> _endedAuctions = [];
-  List<artwork.ArtworkModel> _scheduledAuctions = [];
+  List<artist_artwork.ArtworkModel> _activeAuctions = [];
+  List<artist_artwork.ArtworkModel> _endedAuctions = [];
+  List<artist_artwork.ArtworkModel> _scheduledAuctions = [];
   final Map<String, double> _totalBids = {};
   final Map<String, int> _bidCounts = {};
 
@@ -63,13 +63,16 @@ class _AuctionHubScreenState extends State<AuctionHubScreen>
       );
 
       final allAuctions = artworksSnapshot.docs
-          .map((doc) => artwork.ArtworkModel.fromFirestore(doc))
+          .map((doc) => artist_artwork.ArtworkModel.fromMap({
+                'id': doc.id,
+                ...doc.data(),
+              }))
           .toList();
 
       // Categorize auctions
-      final active = <artwork.ArtworkModel>[];
-      final ended = <artwork.ArtworkModel>[];
-      final scheduled = <artwork.ArtworkModel>[];
+      final active = <artist_artwork.ArtworkModel>[];
+      final ended = <artist_artwork.ArtworkModel>[];
+      final scheduled = <artist_artwork.ArtworkModel>[];
 
       for (final auction in allAuctions) {
         debugPrint(
@@ -249,7 +252,7 @@ class _AuctionHubScreenState extends State<AuctionHubScreen>
   }
 
   Widget _buildAuctionCard(
-    artwork.ArtworkModel auction, {
+    artist_artwork.ArtworkModel auction, {
     bool isActive = false,
     bool isScheduled = false,
   }) {
@@ -494,7 +497,7 @@ class _AuctionHubScreenState extends State<AuctionHubScreen>
     }
   }
 
-  Future<void> _viewAuctionDetails(artwork.ArtworkModel auction) async {
+  Future<void> _viewAuctionDetails(artist_artwork.ArtworkModel auction) async {
     await Navigator.pushNamed(
       context,
       core.AppRoutes.artworkDetail,
@@ -504,12 +507,11 @@ class _AuctionHubScreenState extends State<AuctionHubScreen>
     _loadAuctionData();
   }
 
-  Future<void> _editAuction(artwork.ArtworkModel auction) async {
-    final result = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => artwork.AuctionManagementModal(artwork: auction),
+  Future<void> _editAuction(artist_artwork.ArtworkModel auction) async {
+    final result = await Navigator.pushNamed<bool>(
+      context,
+      core.AppRoutes.artworkAuctionManage,
+      arguments: {'artworkId': auction.id},
     );
 
     if (result == true) {
@@ -525,13 +527,10 @@ class _AuctionHubScreenState extends State<AuctionHubScreen>
   }
 
   void _showAuctionSettings() {
-    Navigator.push<void>(
+    Navigator.pushNamed(
       context,
-      MaterialPageRoute<void>(
-        builder: (context) => const artwork.AuctionSetupWizardScreen(
-          mode: artwork.AuctionSetupMode.editing,
-        ),
-      ),
+      core.AppRoutes.artworkAuctionSetup,
+      arguments: {'mode': 'editing'},
     ).then((_) => _loadAuctionData());
   }
 }

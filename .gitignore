@@ -149,6 +149,7 @@ packages/*/.flutter-plugins-dependencies
 packages/*/.packages
 packages/*/pubspec.lock
 packages/*/coverage/
+packages/*/.git/
 packages/*/ios/Pods/
 packages/*/ios/build/
 **/build/test_cache/
@@ -165,6 +166,7 @@ packages/*/.flutter-plugins
 packages/*/.flutter-plugins-dependencies
 packages/*/.packages
 packages/*/pubspec.lock
+packages/*/.git/
 
 # Root-level local/debug artifacts
 /fields

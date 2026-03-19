@@ -71,15 +71,15 @@ User option:
 
 - Can continue to dashboard via skip confirmation flow.
 
-### 5. Profile creation bridge
+### 5. Profile creation handoff
 
-Entry: `ProfileCreateScreen`
+Entry: host app route `/profile/create`
 
 System behavior:
 
-- If unauthenticated: routes to login.
-- If authenticated: opens `CreateProfileScreen` from `artbeat_profile`.
-- On profile completion: routes to dashboard.
+- Auth logic can route a user to `/profile/create` when no Firestore profile
+  exists.
+- The host application owns the actual profile creation screen and flow.
 
 ## Auth decision flow (`AuthProfileService`)
 

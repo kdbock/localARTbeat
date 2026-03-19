@@ -22,6 +22,7 @@ import 'package:geolocator/geolocator.dart';
 import '../models/art_models.dart';
 import '../models/post_model.dart';
 import '../services/art_community_service.dart';
+import '../services/community_social_activity_service.dart';
 import '../src/services/moderation_service.dart';
 import '../widgets/enhanced_post_card.dart';
 import '../widgets/activity_card.dart';
@@ -30,16 +31,11 @@ import '../widgets/community_hud_drawer.dart';
 import '../widgets/commission_artists_browser.dart';
 import '../widgets/fullscreen_image_viewer.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_artwork/artbeat_artwork.dart';
-import 'package:artbeat_artist/artbeat_artist.dart' show ArtistOnboardScreen;
 import 'package:google_fonts/google_fonts.dart';
 
 import 'artist_feed_screen.dart';
 import 'feed/comments_screen.dart';
 import 'feed/create_post_screen.dart';
-import 'package:artbeat_artist/src/services/community_service.dart'
-    as artist_community;
-import 'package:artbeat_art_walk/artbeat_art_walk.dart' as art_walk;
 
 import 'feed/trending_content_screen.dart';
 import 'feed/group_feed_screen.dart';
@@ -1039,14 +1035,14 @@ class _ArtCommunityHubState extends State<ArtCommunityHub>
         screen = const CreatePostScreen();
         break;
       case CommunityHudDestination.artworkBrowse:
-        screen = const ArtworkBrowseScreen();
-        break;
+        navigator.pushNamed(AppRoutes.artworkBrowse);
+        return;
       case CommunityHudDestination.artistOnboarding:
-        screen = const ArtistOnboardScreen();
-        break;
+        navigator.pushNamed(AppRoutes.artistOnboarding);
+        return;
       case CommunityHudDestination.leaderboard:
-        screen = const LeaderboardScreen();
-        break;
+        navigator.pushNamed(AppRoutes.leaderboard);
+        return;
       case CommunityHudDestination.userPosts:
         screen = const UserPostsScreen();
         break;
@@ -1320,7 +1316,7 @@ class CommunityFeedTab extends StatefulWidget {
 
 class _CommunityFeedTabState extends State<CommunityFeedTab>
     with PostLoadingMixin {
-  List<art_walk.SocialActivity> _activities = [];
+  List<CommunitySocialActivity> _activities = [];
   bool _showActivities = true;
   List<dynamic> _feedItems = [];
 
@@ -1351,10 +1347,10 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
 
   Future<void> _loadActivities() async {
     try {
-      final socialService = art_walk.SocialService();
+      final socialService = CommunitySocialActivityService();
       final user = FirebaseAuth.instance.currentUser;
 
-      List<art_walk.SocialActivity> activities = [];
+      List<CommunitySocialActivity> activities = [];
       if (user != null) {
         final userActivities = await socialService.getUserActivities(
           userId: user.uid,
@@ -1420,7 +1416,7 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
 
       if (a is PostModel) {
         timeA = a.createdAt;
-      } else if (a is art_walk.SocialActivity) {
+      } else if (a is CommunitySocialActivity) {
         timeA = a.timestamp;
       } else {
         return 0;
@@ -1428,7 +1424,7 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
 
       if (b is PostModel) {
         timeB = b.createdAt;
-      } else if (b is art_walk.SocialActivity) {
+      } else if (b is CommunitySocialActivity) {
         timeB = b.timestamp;
       } else {
         return 0;
@@ -1959,7 +1955,7 @@ class _CommunityFeedTabState extends State<CommunityFeedTab>
                       onDelete: () => _handleDelete(item),
                     ),
                   );
-                } else if (item is art_walk.SocialActivity) {
+                } else if (item is CommunitySocialActivity) {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 16),
                     child: ActivityCard(
@@ -2005,12 +2001,10 @@ class _ArtistsGalleryTabState extends State<ArtistsGalleryTab> {
   List<ArtistProfile> _artists = [];
   List<ArtistProfile> _filteredArtists = [];
   bool _isLoading = true;
-  late artist_community.CommunityService _artistCommunityService;
 
   @override
   void initState() {
     super.initState();
-    _artistCommunityService = artist_community.CommunityService();
     _loadArtists();
   }
 
@@ -2070,8 +2064,8 @@ class _ArtistsGalleryTabState extends State<ArtistsGalleryTab> {
   void _handleFollow(ArtistProfile artist, bool isFollowing) async {
     try {
       final success = isFollowing
-          ? await _artistCommunityService.followArtist(artist.userId)
-          : await _artistCommunityService.unfollowArtist(artist.userId);
+          ? await widget.communityService.followArtist(artist.userId)
+          : await widget.communityService.unfollowArtist(artist.userId);
 
       if (!success) {
         if (!mounted) return;
@@ -2141,12 +2135,7 @@ class _ArtistsGalleryTabState extends State<ArtistsGalleryTab> {
                 const SizedBox(height: 14),
                 HudButton.primary(
                   onPressed: () async {
-                    await Navigator.push<void>(
-                      context,
-                      MaterialPageRoute<void>(
-                        builder: (context) => const ArtistOnboardScreen(),
-                      ),
-                    );
+                    await Navigator.pushNamed(context, AppRoutes.artistOnboarding);
                     if (mounted) _loadArtists();
                   },
                   text: 'community_hub_artists_empty_cta'.tr(),

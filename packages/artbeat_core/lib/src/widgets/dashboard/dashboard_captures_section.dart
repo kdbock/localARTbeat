@@ -1,4 +1,3 @@
-import 'package:artbeat_community/screens/feed/create_post_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -671,15 +670,13 @@ class DashboardCapturesSection extends StatelessWidget {
           'Check out this capture: "${capture.title ?? 'Untitled'}"\n\n'
           '${capture.description?.isNotEmpty == true ? capture.description : ''}';
 
-      // Navigate to the CreatePostScreen
-      Navigator.push(
+      Navigator.pushNamed(
         context,
-        MaterialPageRoute<void>(
-          builder: (context) => CreatePostScreen(
-            prefilledImageUrl: capture.imageUrl,
-            prefilledCaption: caption,
-          ),
-        ),
+        AppRoutes.communityCreate,
+        arguments: {
+          'prefilledImageUrl': capture.imageUrl,
+          'prefilledCaption': caption,
+        },
       );
     } catch (e) {
       // Show error feedback

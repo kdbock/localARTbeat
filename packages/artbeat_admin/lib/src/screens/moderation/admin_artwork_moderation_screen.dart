@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_core/artbeat_core.dart'
-    hide ArtworkModel, GlassInputDecoration;
+    hide GlassInputDecoration;
 import 'package:artbeat_core/artbeat_core.dart'
     show GlassCard, HudTopBar, MainLayout, SecureNetworkImage, WorldBackground;
-import 'package:artbeat_artwork/artbeat_artwork.dart';
+
+import '../../models/admin_artwork_model.dart';
+import '../../services/admin_artwork_service.dart';
 
 /// Admin screen for moderating artwork content
 class AdminArtworkModerationScreen extends StatefulWidget {
@@ -19,12 +20,11 @@ class AdminArtworkModerationScreen extends StatefulWidget {
 
 class _AdminArtworkModerationScreenState
     extends State<AdminArtworkModerationScreen> {
-  final ArtworkService _artworkService = ArtworkService();
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final AdminArtworkService _artworkService = AdminArtworkService();
 
   String _selectedFilter = 'pending';
   bool _isLoading = false;
-  List<ArtworkModel> _artworks = [];
+  List<AdminArtworkModel> _artworks = [];
   final Map<String, bool> _selectedArtworks = {};
 
   @override
@@ -37,32 +37,10 @@ class _AdminArtworkModerationScreenState
     setState(() => _isLoading = true);
 
     try {
-      Query query = _firestore.collection('artworks');
-
-      // Apply filter
-      switch (_selectedFilter) {
-        case 'pending':
-          query = query.where('moderationStatus', isEqualTo: 'pending');
-          break;
-        case 'flagged':
-          query = query.where('flagged', isEqualTo: true);
-          break;
-        case 'approved':
-          query = query.where('moderationStatus', isEqualTo: 'approved');
-          break;
-        case 'rejected':
-          query = query.where('moderationStatus', isEqualTo: 'rejected');
-          break;
-        case 'all':
-          // No filter
-          break;
-      }
-
-      query = query.orderBy('createdAt', descending: true).limit(50);
-
-      final snapshot = await query.get();
-      final artworks =
-          snapshot.docs.map((doc) => ArtworkModel.fromFirestore(doc)).toList();
+      final artworks = await _artworkService.getArtworksForModeration(
+        filter: _selectedFilter,
+        limit: 50,
+      );
 
       setState(() {
         _artworks = artworks;
@@ -83,8 +61,8 @@ class _AdminArtworkModerationScreenState
   }
 
   Future<void> _moderateArtwork(
-    ArtworkModel artwork,
-    ArtworkModerationStatus status, {
+    AdminArtworkModel artwork,
+    AdminArtworkModerationStatus status, {
     String? notes,
   }) async {
     try {
@@ -124,7 +102,7 @@ class _AdminArtworkModerationScreenState
   }
 
   Future<void> _bulkModerate(
-    ArtworkModerationStatus status, {
+    AdminArtworkModerationStatus status, {
     String? notes,
   }) async {
     final selectedIds = _selectedArtworks.entries
@@ -177,7 +155,7 @@ class _AdminArtworkModerationScreenState
     }
   }
 
-  void _showModerationDialog(ArtworkModel artwork) {
+  void _showModerationDialog(AdminArtworkModel artwork) {
     final notesController = TextEditingController();
 
     showDialog<void>(
@@ -211,7 +189,7 @@ class _AdminArtworkModerationScreenState
               Navigator.of(context).pop();
               _moderateArtwork(
                 artwork,
-                ArtworkModerationStatus.approved,
+                AdminArtworkModerationStatus.approved,
                 notes: notesController.text,
               );
             },
@@ -222,7 +200,7 @@ class _AdminArtworkModerationScreenState
               Navigator.of(context).pop();
               _moderateArtwork(
                 artwork,
-                ArtworkModerationStatus.rejected,
+                AdminArtworkModerationStatus.rejected,
                 notes: notesController.text,
               );
             },
@@ -273,7 +251,7 @@ class _AdminArtworkModerationScreenState
             onPressed: () {
               Navigator.of(context).pop();
               _bulkModerate(
-                ArtworkModerationStatus.approved,
+                AdminArtworkModerationStatus.approved,
                 notes: notesController.text,
               );
             },
@@ -283,7 +261,7 @@ class _AdminArtworkModerationScreenState
             onPressed: () {
               Navigator.of(context).pop();
               _bulkModerate(
-                ArtworkModerationStatus.rejected,
+                AdminArtworkModerationStatus.rejected,
                 notes: notesController.text,
               );
             },
@@ -454,7 +432,7 @@ class _AdminArtworkModerationScreenState
   }
 
   Widget _buildArtworkCard(
-      ArtworkModel artwork, bool isSelected, int totalSelected) {
+      AdminArtworkModel artwork, bool isSelected, int totalSelected) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       color: Colors.white.withValues(alpha: 0.05),
@@ -555,22 +533,22 @@ class _AdminArtworkModerationScreenState
     );
   }
 
-  Widget _buildStatusBadge(ArtworkModerationStatus status) {
+  Widget _buildStatusBadge(AdminArtworkModerationStatus status) {
     Color color;
     switch (status) {
-      case ArtworkModerationStatus.approved:
+      case AdminArtworkModerationStatus.approved:
         color = Colors.green;
         break;
-      case ArtworkModerationStatus.rejected:
+      case AdminArtworkModerationStatus.rejected:
         color = Colors.red;
         break;
-      case ArtworkModerationStatus.pending:
+      case AdminArtworkModerationStatus.pending:
         color = Colors.orange;
         break;
-      case ArtworkModerationStatus.flagged:
+      case AdminArtworkModerationStatus.flagged:
         color = Colors.redAccent;
         break;
-      case ArtworkModerationStatus.underReview:
+      case AdminArtworkModerationStatus.underReview:
         color = Colors.blue;
         break;
     }

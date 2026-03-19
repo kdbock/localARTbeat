@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-import 'package:artbeat_events/src/models/artbeat_event.dart';
-import 'package:artbeat_events/src/services/event_moderation_service.dart';
-import 'package:artbeat_events/src/services/event_service.dart';
+import '../../models/admin_event_model.dart';
+import '../../services/admin_event_moderation_service.dart';
 
 /// Admin screen for moderating events
 /// Relocated to artbeat_admin for unified administration
@@ -18,13 +17,13 @@ class EventModerationDashboardScreen extends StatefulWidget {
 class _EventModerationDashboardScreenState
     extends State<EventModerationDashboardScreen>
     with SingleTickerProviderStateMixin {
-  final EventModerationService _moderationService = EventModerationService();
-  final EventService _eventService = EventService();
+  final AdminEventModerationService _moderationService =
+      AdminEventModerationService();
 
   late TabController _tabController;
   List<Map<String, dynamic>> _flaggedEvents = [];
-  List<ArtbeatEvent> _pendingEvents = [];
-  List<ArtbeatEvent> _approvedEvents = [];
+  List<AdminEventModel> _pendingEvents = [];
+  List<AdminEventModel> _approvedEvents = [];
   Map<String, dynamic>? _analytics;
 
   bool _isLoading = true;
@@ -59,8 +58,8 @@ class _EventModerationDashboardScreenState
 
       setState(() {
         _flaggedEvents = futures[0] as List<Map<String, dynamic>>;
-        _pendingEvents = futures[1] as List<ArtbeatEvent>;
-        _approvedEvents = futures[2] as List<ArtbeatEvent>;
+        _pendingEvents = futures[1] as List<AdminEventModel>;
+        _approvedEvents = futures[2] as List<AdminEventModel>;
         _analytics = futures[3] as Map<String, dynamic>;
         _isLoading = false;
       });
@@ -136,7 +135,7 @@ class _EventModerationDashboardScreenState
   }
 
   Widget _buildFlaggedEventCard(Map<String, dynamic> data) {
-    final event = data['event'] as ArtbeatEvent;
+    final event = data['event'] as AdminEventModel;
     final flag = data['flag'] as Map<String, dynamic>;
     final flagId = data['flagId'] as String;
 
@@ -193,7 +192,7 @@ class _EventModerationDashboardScreenState
     );
   }
 
-  Widget _buildPendingEventCard(ArtbeatEvent event) {
+  Widget _buildPendingEventCard(AdminEventModel event) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -249,7 +248,7 @@ class _EventModerationDashboardScreenState
     );
   }
 
-  Widget _buildApprovedEventCard(ArtbeatEvent event) {
+  Widget _buildApprovedEventCard(AdminEventModel event) {
     return ListTile(
       title: Text(event.title, style: const TextStyle(color: Colors.white)),
       subtitle:
@@ -346,7 +345,7 @@ class _EventModerationDashboardScreenState
 
     if (confirmed == true) {
       try {
-        await _eventService.deleteEvent(eventId);
+        await _moderationService.deleteEvent(eventId);
         _loadData();
       } catch (e) {
         if (mounted) {

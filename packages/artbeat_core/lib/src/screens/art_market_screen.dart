@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:artbeat_core/artbeat_core.dart' hide ArtworkModel;
-import 'package:artbeat_artwork/artbeat_artwork.dart';
+import 'package:artbeat_core/artbeat_core.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ArtMarketScreen extends StatefulWidget {
@@ -332,7 +331,7 @@ class _ArtMarketScreenState extends State<ArtMarketScreen> {
                     ),
                   ] else ...[
                     Text(
-                      '\$${(artwork.price ?? 0).toStringAsFixed(0)}',
+                      '\$${artwork.price.toStringAsFixed(0)}',
                       style: GoogleFonts.spaceGrotesk(
                         fontWeight: FontWeight.w800,
                         fontSize: 16,

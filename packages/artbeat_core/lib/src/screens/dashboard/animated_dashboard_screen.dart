@@ -7,14 +7,14 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flag/flag.dart';
 import 'package:provider/provider.dart';
 import 'package:artbeat_core/src/theme/artbeat_colors.dart';
+import 'package:artbeat_core/src/routing/app_routes.dart';
 import 'package:artbeat_core/src/services/leaderboard_service.dart';
 import 'package:artbeat_core/src/services/crash_prevention_service.dart';
+import 'package:artbeat_core/src/services/user_progression_service.dart';
 import 'package:artbeat_core/src/utils/logger.dart';
 import 'package:artbeat_core/src/widgets/artbeat_drawer.dart';
 import 'package:artbeat_core/src/widgets/navigation_overlay.dart';
 import 'package:artbeat_core/src/widgets/developer_menu.dart';
-import 'package:artbeat_capture/artbeat_capture.dart';
-import 'package:artbeat_art_walk/artbeat_art_walk.dart' as artWalkLib;
 import '../../viewmodels/dashboard_view_model.dart';
 import '../../widgets/tour/dashboard_tour_overlay.dart';
 import '../../services/onboarding_service.dart';
@@ -41,7 +41,7 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
 
   late final AnimationController _loop; // world animation
   late final AnimationController _intro; // entrance
-  final artWalkLib.RewardsService _rewardsService = artWalkLib.RewardsService();
+  final UserProgressionService _progressionService = UserProgressionService();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   // Tour GlobalKeys
@@ -133,7 +133,7 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
     final user = dashboardViewModel.currentUser;
     final level = user?.level ?? 1;
     final xp = user?.experiencePoints ?? 0;
-    final xpProgress = _rewardsService.getLevelProgress(xp, level);
+    final xpProgress = _progressionService.getLevelProgress(xp, level);
     final streakDays = math.max(
       dashboardViewModel.loginStreak,
       dashboardViewModel.currentStreak,
@@ -282,12 +282,9 @@ class _AnimatedDashboardScreenState extends State<AnimatedDashboardScreen>
                                   NavigationOverlay.of(
                                     context,
                                   )?.startNavigation();
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute<Widget>(
-                                      builder: (context) =>
-                                          const EnhancedCaptureDashboardScreen(),
-                                    ),
-                                  );
+                                  Navigator.of(
+                                    context,
+                                  ).pushNamed(AppRoutes.captureDashboard);
                                 },
                               ),
                             ),

@@ -14,10 +14,6 @@ dependencies:
     path: ../artbeat_core
   artbeat_ads:
     path: ../artbeat_ads
-  artbeat_admin:
-    path: ../artbeat_admin
-  artbeat_art_walk:
-    path: ../artbeat_art_walk
   firebase_core: ^4.4.0
   firebase_auth: ^6.1.4
   cloud_firestore: ^6.1.2
@@ -30,14 +26,6 @@ dependencies:
   timeago: ^3.6.0
   intl: ^0.20.2
   provider: ^6.1.1
-  artbeat_artist:
-    path: ../artbeat_artist
-  artbeat_artwork:
-    path: ../artbeat_artwork
-  artbeat_events:
-    path: ../artbeat_events
-  artbeat_messaging:
-    path: ../artbeat_messaging
   share_plus: ^11.0.0
   google_maps_flutter: ^2.5.3
   flutter_svg: ^2.0.10+1

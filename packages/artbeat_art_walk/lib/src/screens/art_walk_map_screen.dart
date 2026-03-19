@@ -11,7 +11,7 @@ import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_capture/artbeat_capture.dart';
+import 'package:artbeat_art_walk/src/services/art_walk_capture_read_service.dart';
 import 'package:artbeat_art_walk/src/widgets/art_walk_drawer.dart';
 import 'package:artbeat_sponsorships/artbeat_sponsorships.dart';
 
@@ -27,7 +27,7 @@ class ArtWalkMapScreen extends StatefulWidget {
 
 class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
   // Services
-  late final CaptureService _captureService;
+  late final ArtWalkCaptureReadService _captureService;
   late final UserService _userService;
 
   // Scaffold key for drawer control
@@ -59,7 +59,7 @@ class _ArtWalkMapScreenState extends State<ArtWalkMapScreen> {
   @override
   void initState() {
     super.initState();
-    _captureService = context.read<CaptureService>();
+    _captureService = ArtWalkCaptureReadService();
     _userService = context.read<UserService>();
     _initializeMapsAndLocation();
     _listenToNotificationBadge();

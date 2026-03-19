@@ -58,8 +58,6 @@ dependencies:
   # Local packages
   artbeat_core:
     path: ../artbeat_core
-  artbeat_auth:
-    path: ../artbeat_auth
   artbeat_ads:
     path: ../artbeat_ads
   artbeat_sponsorships:

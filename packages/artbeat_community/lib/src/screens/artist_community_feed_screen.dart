@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
-import 'package:artbeat_artwork/artbeat_artwork.dart' as artwork;
-import 'package:artbeat_events/artbeat_events.dart' as events;
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../services/community_artwork_read_service.dart';
+import '../../services/community_event_read_service.dart';
 
 /// Screen for displaying an artist's community feed
 /// Shows their posts, artwork updates, events, and community interactions
@@ -18,8 +18,9 @@ class ArtistCommunityFeedScreen extends StatefulWidget {
 }
 
 class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
-  final artwork.ArtworkService _artworkService = artwork.ArtworkService();
-  final events.EventService _eventService = events.EventService();
+  final CommunityArtworkReadService _artworkService =
+      CommunityArtworkReadService();
+  final CommunityEventReadService _eventService = CommunityEventReadService();
 
   bool _isLoading = false;
   List<Map<String, dynamic>> _feedItems = [];
@@ -103,9 +104,9 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
           'title': art.title,
           'description': art.description,
           'imageUrl': art.imageUrl,
-          'timestamp': art.createdAt,
-          'likes': art.likeCount,
-          'comments': art.commentCount,
+          'timestamp': art.createdAt.toDate(),
+          'likes': 0,
+          'comments': 0,
           'data': art,
         });
       }
@@ -131,8 +132,8 @@ class _ArtistCommunityFeedScreenState extends State<ArtistCommunityFeedScreen> {
           'id': event.id,
           'title': event.title,
           'description': event.description,
-          'imageUrl': event.imageUrls.isNotEmpty ? event.imageUrls.first : null,
-          'timestamp': event.dateTime,
+          'imageUrl': event.imageUrl,
+          'timestamp': event.startDate,
           'location': event.location,
           'data': event,
         });

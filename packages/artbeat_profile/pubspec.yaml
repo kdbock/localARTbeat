@@ -10,20 +10,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  artbeat_ads:
-    path: ../artbeat_ads
-  artbeat_art_walk:
-    path: ../artbeat_art_walk
-  artbeat_artist:
-    path: ../artbeat_artist
-  artbeat_artwork:
-    path: ../artbeat_artwork
-  artbeat_auth:
-    path: ../artbeat_auth
-  artbeat_capture:
-    path: ../artbeat_capture
-  artbeat_community:
-    path: ../artbeat_community
   artbeat_core:
     path: ../artbeat_core
   cached_network_image: ^3.2.3

@@ -25,7 +25,7 @@ This document tracks the internationalization status of the artbeat_auth package
 
 ## Translation Keys
 
-All hardcoded strings have been extracted to `artbeat_auth_texts_data.json` with keys following the pattern `auth_[component]_text_[description]`.
+All hardcoded strings have been extracted to `tools/text-extraction/data/artbeat_auth_texts_data.json` with keys following the pattern `auth_[component]_text_[description]`.
 
 ## Next Steps
 

@@ -76,6 +76,11 @@ Route constants are exposed in `src/routes.dart` under `SettingsRoutes`, includi
 - `/settings/blocked-users`
 - `/settings/become-artist`
 
+Onboarding handoff:
+
+- `BecomeArtistScreen` routes to the host app's artist onboarding route
+  instead of directly constructing artist package UI.
+
 ## Testing
 
 From repository root:

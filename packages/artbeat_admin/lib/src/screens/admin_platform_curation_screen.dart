@@ -3,8 +3,9 @@ import 'package:artbeat_core/artbeat_core.dart' as core;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../widgets/admin_drawer.dart';
 import '../services/admin_service.dart';
-import 'package:artbeat_artwork/artbeat_artwork.dart' as artwork;
-import 'package:artbeat_messaging/artbeat_messaging.dart';
+import '../services/admin_broadcast_service.dart';
+import '../models/admin_artwork_model.dart';
+import '../services/admin_artwork_service.dart';
 
 /// Admin Platform Curation Screen
 /// Handles Featured content, Artwork of the Day, and Global Announcements
@@ -21,12 +22,12 @@ class _AdminPlatformCurationScreenState
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final AdminService _adminService = AdminService();
-  final artwork.ArtworkService _artworkService = artwork.ArtworkService();
-  final AdminMessagingService _messagingService = AdminMessagingService();
+  final AdminArtworkService _artworkService = AdminArtworkService();
+  final AdminBroadcastService _broadcastService = AdminBroadcastService();
 
   bool _isLoading = false;
   List<core.UserModel> _featuredArtists = [];
-  List<artwork.ArtworkModel> _featuredArtworks = [];
+  List<AdminArtworkModel> _featuredArtworks = [];
   final TextEditingController _announcementController = TextEditingController();
 
   @override
@@ -307,16 +308,10 @@ class _AdminPlatformCurationScreenState
     }
   }
 
-  Future<void> _toggleArtworkFeatured(artwork.ArtworkModel art) async {
+  Future<void> _toggleArtworkFeatured(AdminArtworkModel art) async {
     setState(() => _isLoading = true);
     try {
-      await FirebaseFirestore.instance
-          .collection('artwork')
-          .doc(art.id)
-          .update({
-        'isFeatured': false,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
+      await _artworkService.setArtworkFeatured(art.id, false);
       await _loadCurationData();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -360,7 +355,7 @@ class _AdminPlatformCurationScreenState
     if (confirmed == true) {
       setState(() => _isLoading = true);
       try {
-        await _messagingService
+        await _broadcastService
             .sendBroadcastMessage(_announcementController.text.trim());
         _announcementController.clear();
         if (mounted) {

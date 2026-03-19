@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_artist/artbeat_artist.dart';
 
 class BecomeArtistScreen extends StatelessWidget {
   final UserModel user;
@@ -63,10 +62,8 @@ class BecomeArtistScreen extends StatelessWidget {
                     padding: const EdgeInsets.all(16),
                   ),
                   onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (context) => const ArtistOnboardScreen(),
-                      ),
+                    Navigator.of(context).pushNamed(
+                      AppRoutes.artistOnboarding,
                     );
                   },
                   child: Text('become_artist_get_started_button'.tr()),

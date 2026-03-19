@@ -26,12 +26,6 @@ dependencies:
     path: ../artbeat_sponsorships
   artbeat_core:
     path: ../artbeat_core
-  artbeat_ads:
-    path: ../artbeat_ads
-  artbeat_art_walk:
-    path: ../artbeat_art_walk
-  artbeat_profile:
-    path: ../artbeat_profile
   connectivity_plus: ^7.0.0
   package_info_plus: ^9.0.0
   device_info_plus: ^12.3.0

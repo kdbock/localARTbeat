@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_ads/artbeat_ads.dart';
 import 'package:easy_localization/easy_localization.dart';
+
+import '../models/admin_ad_report_model.dart';
+import '../models/admin_local_ad.dart';
+import '../services/admin_ad_moderation_service.dart';
 
 /// Admin widget for managing advertisements
 class AdminAdManagementWidget extends StatefulWidget {
@@ -14,11 +17,10 @@ class AdminAdManagementWidget extends StatefulWidget {
 }
 
 class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
-  final LocalAdService _adService = LocalAdService();
-  final AdReportService _reportService = AdReportService();
+  final AdminAdModerationService _moderationService = AdminAdModerationService();
 
-  List<LocalAd> _adsForReview = [];
-  List<AdReportModel> _pendingReports = [];
+  List<AdminLocalAd> _adsForReview = [];
+  List<AdminAdReportModel> _pendingReports = [];
   Map<String, int> _adStats = {};
   bool _isLoading = true;
   String _selectedFilter = 'All';
@@ -33,18 +35,18 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
     setState(() => _isLoading = true);
     try {
       final [adsForReview, adStats] = await Future.wait([
-        _adService.getAdsForReview(),
-        _adService.getAdStatistics(),
+        _moderationService.getAdsForReview(),
+        _moderationService.getAdStatistics(),
       ]);
 
       setState(() {
-        _adsForReview = adsForReview as List<LocalAd>;
+        _adsForReview = adsForReview as List<AdminLocalAd>;
         _adStats = adStats as Map<String, int>;
         _isLoading = false;
       });
 
       // Load pending reports separately as it's a stream
-      _reportService.getPendingReports().listen((reports) {
+      _moderationService.getPendingReports().listen((reports) {
         if (mounted) {
           setState(() {
             _pendingReports = reports;
@@ -249,7 +251,7 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
 
   Widget _buildAdsForReview() {
     final pendingAds = _adsForReview
-        .where((ad) => ad.status == LocalAdStatus.pendingReview)
+        .where((ad) => ad.status == AdminLocalAdStatus.pendingReview)
         .toList();
 
     if (pendingAds.isEmpty) {
@@ -271,7 +273,7 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
 
   Widget _buildFlaggedAds() {
     final flaggedAds = _adsForReview
-        .where((ad) => ad.status == LocalAdStatus.flagged)
+        .where((ad) => ad.status == AdminLocalAdStatus.flagged)
         .toList();
 
     if (flaggedAds.isEmpty) {
@@ -318,7 +320,7 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
     );
   }
 
-  Widget _buildAdReviewCard(LocalAd ad) {
+  Widget _buildAdReviewCard(AdminLocalAd ad) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
@@ -432,8 +434,8 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
     );
   }
 
-  Widget _buildReportCard(AdReportModel report) {
-    final reasonData = AdReportReasons.getReasonByValue(report.reason);
+  Widget _buildReportCard(AdminAdReportModel report) {
+    final reasonData = AdminAdReportReasons.getReasonByValue(report.reason);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -487,7 +489,7 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
               Expanded(
                 child: OutlinedButton(
                   onPressed: () =>
-                      _reviewReport(report, AdReportStatus.dismissed),
+                      _reviewReport(report, AdminAdReportStatus.dismissed),
                   child: Text('admin_ad_button_dismiss'.tr()),
                 ),
               ),
@@ -495,7 +497,7 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
               Expanded(
                 child: ElevatedButton(
                   onPressed: () =>
-                      _reviewReport(report, AdReportStatus.actionTaken),
+                      _reviewReport(report, AdminAdReportStatus.actionTaken),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red,
                   ),
@@ -512,25 +514,25 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
     );
   }
 
-  Widget _buildStatusChip(LocalAdStatus status) {
+  Widget _buildStatusChip(AdminLocalAdStatus status) {
     Color color;
     switch (status) {
-      case LocalAdStatus.active:
+      case AdminLocalAdStatus.active:
         color = Colors.green;
         break;
-      case LocalAdStatus.pendingReview:
+      case AdminLocalAdStatus.pendingReview:
         color = Colors.orange;
         break;
-      case LocalAdStatus.flagged:
+      case AdminLocalAdStatus.flagged:
         color = Colors.red;
         break;
-      case LocalAdStatus.rejected:
+      case AdminLocalAdStatus.rejected:
         color = Colors.red.shade700;
         break;
-      case LocalAdStatus.expired:
+      case AdminLocalAdStatus.expired:
         color = Colors.grey;
         break;
-      case LocalAdStatus.deleted:
+      case AdminLocalAdStatus.deleted:
         color = Colors.grey.shade700;
         break;
     }
@@ -568,10 +570,10 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
     }
   }
 
-  Future<void> _approveAd(LocalAd ad) async {
+  Future<void> _approveAd(AdminLocalAd ad) async {
     try {
       final adminId = FirebaseAuth.instance.currentUser?.uid ?? 'system';
-      await _reportService.approveAd(
+      await _moderationService.approveAd(
         adId: ad.id,
         adminId: adminId,
         adminNotes: 'Approved via admin dashboard',
@@ -599,7 +601,7 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
     }
   }
 
-  Future<void> _rejectAd(LocalAd ad) async {
+  Future<void> _rejectAd(AdminLocalAd ad) async {
     final result = await showDialog<String>(
       context: context,
       builder: (context) => _RejectAdDialog(),
@@ -608,7 +610,7 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
     if (result != null && result.isNotEmpty) {
       try {
         final adminId = FirebaseAuth.instance.currentUser?.uid ?? 'system';
-        await _reportService.rejectAd(
+        await _moderationService.rejectAd(
           adId: ad.id,
           adminId: adminId,
           reason: result,
@@ -638,14 +640,14 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
   }
 
   Future<void> _reviewReport(
-      AdReportModel report, AdReportStatus status) async {
+      AdminAdReportModel report, AdminAdReportStatus status) async {
     try {
       final adminId = FirebaseAuth.instance.currentUser?.uid ?? 'system';
-      await _reportService.reviewReport(
+      await _moderationService.reviewReport(
         reportId: report.id,
         newStatus: status,
         adminId: adminId,
-        adminNotes: status == AdReportStatus.actionTaken
+        adminNotes: status == AdminAdReportStatus.actionTaken
             ? 'admin_ad_report_action_taken'.tr()
             : 'admin_ad_report_dismissed'.tr(),
       );
@@ -658,7 +660,9 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
           content: Text('admin_ad_report_reviewed'
               .tr(namedArgs: {'status': status.displayName.toLowerCase()})),
           backgroundColor:
-              status == AdReportStatus.actionTaken ? Colors.red : Colors.green,
+              status == AdminAdReportStatus.actionTaken
+                  ? Colors.red
+                  : Colors.green,
         ),
       );
     } catch (e) {
@@ -673,7 +677,7 @@ class _AdminAdManagementWidgetState extends State<AdminAdManagementWidget> {
     }
   }
 
-  void _viewAdDetails(LocalAd ad) {
+  void _viewAdDetails(AdminLocalAd ad) {
     showDialog<void>(
       context: context,
       builder: (context) => _AdDetailsDialog(ad: ad),
@@ -744,7 +748,7 @@ class _RejectAdDialogState extends State<_RejectAdDialog> {
 }
 
 class _AdDetailsDialog extends StatelessWidget {
-  final LocalAd ad;
+  final AdminLocalAd ad;
 
   const _AdDetailsDialog({required this.ad});
 

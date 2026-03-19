@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_art_walk/artbeat_art_walk.dart' as artWalkLib;
 
 class IntegratedEngagementWidget extends StatefulWidget {
   final UserModel user;
@@ -9,8 +8,8 @@ class IntegratedEngagementWidget extends StatefulWidget {
   final int totalDiscoveries;
   final int weeklyProgress;
   final int weeklyGoal;
-  final List<artWalkLib.AchievementModel> achievements;
-  final List<artWalkLib.SocialActivity> activities;
+  final List<AchievementModel> achievements;
+  final List<SocialActivityModel> activities;
   final VoidCallback? onProfileTap;
   final VoidCallback? onAchievementsTap;
   final VoidCallback? onWeeklyGoalsTap;
@@ -40,11 +39,10 @@ class _IntegratedEngagementWidgetState extends State<IntegratedEngagementWidget>
     with TickerProviderStateMixin {
   late TabController _tabController;
   final LeaderboardService _leaderboardService = LeaderboardService();
-  final artWalkLib.ChallengeService _challengeService =
-      artWalkLib.ChallengeService();
+  final DailyChallengeReadService _challengeService = DailyChallengeReadService();
   List<LeaderboardEntry> _topUsers = [];
   bool _isLoadingLeaderboard = true;
-  artWalkLib.ChallengeModel? _dailyChallenge;
+  DailyChallengeModel? _dailyChallenge;
   bool _isLoadingDailyChallenge = true;
   String? _dailyChallengeError;
 

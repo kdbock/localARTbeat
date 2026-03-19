@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:artbeat_messaging/artbeat_messaging.dart' show ChatService;
 import '../utils/logger.dart';
+import '../services/user_block_service.dart';
 
 /// Mixin to add user blocking and reporting functionality to any widget
 /// Provides common methods for blocking users and reporting content
@@ -12,8 +12,8 @@ mixin UserModerationMixin {
     String userName,
   ) async {
     try {
-      final chatService = ChatService();
-      await chatService.blockUser(userId);
+      final blockService = UserBlockService();
+      await blockService.blockUser(userId);
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -45,8 +45,8 @@ mixin UserModerationMixin {
     String userName,
   ) async {
     try {
-      final chatService = ChatService();
-      await chatService.unblockUser(userId);
+      final blockService = UserBlockService();
+      await blockService.unblockUser(userId);
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

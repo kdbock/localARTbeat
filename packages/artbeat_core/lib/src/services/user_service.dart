@@ -9,7 +9,7 @@ import 'package:flutter/foundation.dart';
 import '../models/user_model.dart';
 import '../models/user_type.dart';
 import '../models/artist_profile_model.dart';
-import 'package:artbeat_art_walk/src/models/achievement_model.dart';
+import '../models/achievement_model.dart';
 import '../storage/enhanced_storage_service.dart';
 import '../utils/logger.dart';
 

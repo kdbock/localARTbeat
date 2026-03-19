@@ -13,20 +13,6 @@ dependencies:
     sdk: flutter
   artbeat_core:
     path: ../artbeat_core
-  artbeat_events:
-    path: ../artbeat_events
-  artbeat_ads:
-    path: ../artbeat_ads
-  artbeat_capture:
-    path: ../artbeat_capture
-  artbeat_artwork:
-    path: ../artbeat_artwork
-  artbeat_community:
-    path: ../artbeat_community
-  artbeat_art_walk:
-    path: ../artbeat_art_walk
-  artbeat_messaging:
-    path: ../artbeat_messaging
   google_fonts: ^7.1.0
   firebase_core: ^4.4.0
   firebase_auth: ^6.1.4

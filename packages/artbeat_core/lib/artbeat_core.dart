@@ -36,9 +36,26 @@ export 'shared_widgets.dart';
 export 'src/services/config_service.dart' show ConfigService;
 export 'src/config/legal_config.dart' show LegalConfig;
 export 'src/services/user_service.dart' show UserService;
+export 'src/services/user_progression_service.dart' show UserProgressionService;
 export 'src/services/connectivity_service.dart' show ConnectivityService;
 export 'src/services/subscription_service.dart' show SubscriptionService;
 export 'src/services/artist_service.dart' show ArtistService;
+export 'src/services/artist_follow_service.dart' show ArtistFollowService;
+export 'src/services/artwork_read_service.dart' show ArtworkReadService;
+export 'src/services/social_activity_read_service.dart'
+    show SocialActivityReadService;
+export 'src/services/daily_challenge_read_service.dart'
+    show DailyChallengeReadService;
+export 'src/services/daily_challenge_progress_service.dart'
+    show DailyChallengeProgressService;
+export 'src/services/public_art_read_service.dart' show PublicArtReadService;
+export 'src/services/discovery_progress_read_service.dart'
+    show DiscoveryProgressReadService;
+export 'src/services/event_read_service.dart' show EventReadService;
+export 'src/services/community_post_read_service.dart'
+    show CommunityPostReadService;
+export 'src/services/commission_artist_preview_service.dart'
+    show CommissionArtistPreviewService;
 export 'src/services/artist_boost_service.dart' show ArtistBoostService;
 export 'src/services/artist_feature_service.dart' show ArtistFeatureService;
 // 2025 Enhanced Services (Consolidated into UnifiedPaymentService)
@@ -61,6 +78,8 @@ export 'src/models/in_app_purchase_models.dart' show CompletedPurchase;
 export 'src/services/in_app_ad_service.dart' show InAppAdService;
 export 'src/services/notification_service.dart'
     show NotificationService, NotificationType;
+export 'src/services/messaging_status_service.dart'
+    show MessagingStatusService;
 export 'src/services/feedback_service.dart' show FeedbackService;
 export 'src/services/legal_consent_service.dart' show LegalConsentService;
 export 'src/services/maps_diagnostic_service.dart' show MapsDiagnosticService;
@@ -72,6 +91,7 @@ export 'src/services/enhanced_storage_service.dart' show EnhancedStorageService;
 export 'src/services/firebase_storage_auth_service.dart'
     show FirebaseStorageAuthService;
 export 'src/services/coupon_service.dart' show CouponService;
+export 'src/services/user_block_service.dart' show UserBlockService;
 export 'src/services/capture_service_interface.dart'
     show CaptureServiceInterface, DefaultCaptureService;
 // CRITICAL: Crash prevention services (2025 stability fixes)
@@ -128,7 +148,10 @@ export 'src/screens/subscriptions/subscriptions_screen.dart'
 export 'src/screens/subscription_plans_screen.dart'
     show SubscriptionPlansScreen;
 export 'src/screens/boosts/artist_boosts_screen.dart' show ArtistBoostsScreen;
-export 'src/screens/ads/ads_screen.dart' show AdsScreen;
+export 'src/widgets/ads_preview_card.dart' show AdsPreviewCard;
+export 'src/widgets/commission_artists_preview.dart'
+    show CommissionArtistsPreview;
+export 'src/widgets/book_preview_card.dart' show BookPreviewCard;
 
 // Export Core Models
 export 'src/models/index.dart'; // This will export all models through the barrel file
@@ -136,6 +159,14 @@ export 'src/models/types/index.dart'; // Export all type definitions
 export 'src/models/known_entity_model.dart'
     show KnownEntity, KnownEntityType, KnownEntityTypeExtension;
 export 'src/models/event_model.dart' show EventModel;
+export 'src/models/community_post_model.dart' show CommunityPostModel;
+export 'src/models/social_activity_model.dart'
+    show SocialActivityModel, SocialActivityType;
+export 'src/models/daily_challenge_model.dart'
+    show DailyChallengeModel, DailyChallengeType;
+export 'src/models/public_art_model.dart' show PublicArtModel;
+export 'src/models/commission_artist_preview_model.dart'
+    show CommissionArtistPreviewModel;
 export 'src/models/capture_model.dart'
     show CaptureModel, CaptureStatus, CaptureStatusExtension;
 export 'src/models/user_type.dart' show UserType;

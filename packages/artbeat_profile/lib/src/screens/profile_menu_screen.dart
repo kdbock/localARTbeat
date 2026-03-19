@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:artbeat_auth/artbeat_auth.dart'; // Assuming for logout/auth state
-import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import '../widgets/section_header.dart';
 import '../widgets/user_avatar_badge.dart';
@@ -178,11 +177,11 @@ class _ProfileMenuContent extends StatelessWidget {
             label: 'Sign Out',
             destructive: true,
             onTap: () async {
-              await context.read<AuthService>().signOut();
+              await FirebaseAuth.instance.signOut();
               if (context.mounted) {
                 Navigator.of(
                   context,
-                ).pushNamedAndRemoveUntil('/auth/login', (route) => false);
+                ).pushNamedAndRemoveUntil(AppRoutes.login, (route) => false);
               }
             },
           ),

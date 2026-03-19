@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:artbeat_artwork/artbeat_artwork.dart' show ChapterService;
 import '../models/content_review_model.dart';
 import '../models/content_model.dart';
+import 'admin_artwork_service.dart';
 import 'content_analysis_service.dart';
 
 /// Service for content review operations
@@ -10,7 +10,7 @@ class ContentReviewService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final ContentAnalysisService _analysisService = ContentAnalysisService();
-  final ChapterService _chapterService = ChapterService();
+  final AdminArtworkService _artworkService = AdminArtworkService();
 
   /// Get pending content reviews with advanced filtering
   Future<List<ContentReviewModel>> getPendingReviews({
@@ -581,7 +581,7 @@ class ContentReviewService {
 
         // Always update chapter counts on the parent artwork
         // This ensures the public 'releasedChapters' count is accurate
-        await _chapterService.updateArtworkCountsForAdmin(artworkId);
+        await _artworkService.updateArtworkCountsForAdmin(artworkId);
         return;
 
       case ContentType.all:

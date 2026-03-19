@@ -1,6 +1,11 @@
 import 'package:artbeat_art_walk/artbeat_art_walk.dart';
 import 'package:artbeat_core/artbeat_core.dart'
-    hide GlassCard, WorldBackground, HudTopBar, GradientCTAButton;
+    hide
+        GlassCard,
+        GradientCTAButton,
+        HudTopBar,
+        PublicArtModel,
+        WorldBackground;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';

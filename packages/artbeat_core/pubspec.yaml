@@ -72,32 +72,8 @@ dependencies:
   flutter_local_notifications: ^20.1.0
 
   # Local modules
-  artbeat_ads:
-    path: ../artbeat_ads
-  artbeat_admin:
-    path: ../artbeat_admin
   artbeat_art_walk:
     path: ../artbeat_art_walk
-  artbeat_artist:
-    path: ../artbeat_artist
-  artbeat_capture:
-    path: ../artbeat_capture
-  artbeat_artwork:
-    path: ../artbeat_artwork
-  artbeat_auth:
-    path: ../artbeat_auth
-  artbeat_community:
-    path: ../artbeat_community
-  artbeat_events:
-    path: ../artbeat_events
-  artbeat_messaging:
-    path: ../artbeat_messaging
-  artbeat_profile:
-    path: ../artbeat_profile
-  artbeat_settings:
-    path: ../artbeat_settings
-  artbeat_sponsorships:
-    path: ../artbeat_sponsorships
 
 dev_dependencies:
   flutter_test:

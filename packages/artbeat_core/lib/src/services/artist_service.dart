@@ -41,6 +41,26 @@ class ArtistService {
     }
   }
 
+  /// Get public artist profiles for dashboard/discovery surfaces.
+  Future<List<ArtistProfileModel>> getAllArtistProfiles({int limit = 20}) async {
+    try {
+      final snapshot = await _firestore
+          .collection('artistProfiles')
+          .where('isPortfolioPublic', isEqualTo: true)
+          .orderBy('likesCount', descending: true)
+          .limit(limit)
+          .get()
+          .timeout(const Duration(seconds: 10));
+
+      return snapshot.docs
+          .map((doc) => ArtistProfileModel.fromFirestore(doc))
+          .toList();
+    } catch (e) {
+      AppLogger.error('Error getting all artist profiles: $e');
+      return [];
+    }
+  }
+
   /// Search artists by name with enhanced filtering
   Future<List<ArtistProfileModel>> searchArtistProfiles(
     String query, {

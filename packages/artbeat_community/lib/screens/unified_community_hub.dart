@@ -3,8 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_messaging/artbeat_messaging.dart' as messaging;
-import 'package:artbeat_artwork/artbeat_artwork.dart' as artwork;
 
 import '../../theme/community_colors.dart';
 import '../../models/post_model.dart';
@@ -204,19 +202,10 @@ class _LegacyCommunityFeedTabState extends State<LegacyCommunityFeedTab> {
 
   void _handleUserTap(String userId) async {
     try {
-      final userService = Provider.of<UserService>(context, listen: false);
-      final coreUserModel = await userService.getUserModel(userId);
-      final messagingUserModel = messaging.UserModel.fromMap(
-        coreUserModel.toMap(),
-      );
-
       if (!mounted) return;
-
-      Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (context) =>
-              messaging.UserProfileScreen(user: messagingUserModel),
-        ),
+      Navigator.of(context).pushNamed(
+        AppRoutes.messagingUser,
+        arguments: {'userId': userId},
       );
     } catch (e) {
       AppLogger.error('Error navigating to user profile: $e');
@@ -764,11 +753,9 @@ class _CommunityArtworksTabState extends State<CommunityArtworksTab> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute<void>(
-              builder: (context) =>
-                  artwork.ArtworkDetailScreen(artworkId: artworkModel.id),
-            ),
+          Navigator.of(context).pushNamed(
+            AppRoutes.artworkDetail,
+            arguments: {'artworkId': artworkModel.id},
           );
         },
         borderRadius: BorderRadius.circular(12),

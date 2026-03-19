@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:artbeat_artwork/artbeat_artwork.dart' show ChapterService;
 import '../models/content_model.dart';
+import 'admin_artwork_service.dart';
 
 /// Unified Admin Service
 ///
@@ -10,7 +10,7 @@ import '../models/content_model.dart';
 class UnifiedAdminService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final ChapterService _chapterService = ChapterService();
+  final AdminArtworkService _artworkService = AdminArtworkService();
 
   /// Get all content for admin dashboard
   Future<List<ContentModel>> getAllContent({
@@ -168,7 +168,7 @@ class UnifiedAdminService {
           'isFlagged': false,
         });
 
-        await _chapterService.updateArtworkCountsForAdmin(artworkId);
+        await _artworkService.updateArtworkCountsForAdmin(artworkId);
 
         await _logModerationAction(
           contentId: contentId,
@@ -233,7 +233,7 @@ class UnifiedAdminService {
         });
 
         if (artworkId != null) {
-          await _chapterService.updateArtworkCountsForAdmin(artworkId);
+          await _artworkService.updateArtworkCountsForAdmin(artworkId);
         }
 
         await _logModerationAction(
@@ -277,7 +277,7 @@ class UnifiedAdminService {
           'isFlagged': false,
         });
 
-        await _chapterService.updateArtworkCountsForAdmin(artworkId);
+        await _artworkService.updateArtworkCountsForAdmin(artworkId);
 
         await _logModerationAction(
           contentId: contentId,
@@ -348,7 +348,7 @@ class UnifiedAdminService {
         });
 
         if (artworkId != null) {
-          await _chapterService.updateArtworkCountsForAdmin(artworkId);
+          await _artworkService.updateArtworkCountsForAdmin(artworkId);
         }
 
         await _logModerationAction(

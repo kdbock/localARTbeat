@@ -1,15 +1,14 @@
 import 'package:artbeat_art_walk/artbeat_art_walk.dart';
-import 'package:artbeat_artwork/artbeat_artwork.dart';
 import 'package:artbeat_auth/artbeat_auth.dart';
 import 'package:artbeat_capture/artbeat_capture.dart' as capture;
 import 'package:artbeat_community/artbeat_community.dart';
 import 'package:artbeat_core/artbeat_core.dart' as core;
-import 'package:artbeat_events/artbeat_events.dart' as events;
 import 'package:artbeat_messaging/artbeat_messaging.dart' as messaging;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
+import 'integrations/capture_art_walk_hooks.dart';
 import 'routing/app_router.dart';
 import 'widgets/error_boundary.dart';
 
@@ -120,9 +119,13 @@ class MyApp extends StatelessWidget {
       create: (_) => messaging.ChatService(),
       lazy: true,
     ),
+    Provider<core.MessagingStatusService>(
+      create: (_) => core.MessagingStatusService(),
+      lazy: true,
+    ),
     ChangeNotifierProvider<core.MessagingProvider>(
       create: (context) =>
-          core.MessagingProvider(context.read<messaging.ChatService>()),
+          core.MessagingProvider(context.read<core.MessagingStatusService>()),
       lazy: true,
     ),
     Provider<messaging.PresenceService>(
@@ -146,15 +149,26 @@ class MyApp extends StatelessWidget {
     ),
 
     // Additional service providers for DashboardViewModel
-    Provider<events.EventService>(
-      create: (_) => events.EventService(),
+    Provider<core.ArtworkReadService>(
+      create: (_) => core.ArtworkReadService(),
       lazy: true,
     ),
-    Provider<ArtworkService>(create: (_) => ArtworkService(), lazy: true),
+    Provider<core.PublicArtReadService>(
+      create: (_) => core.PublicArtReadService(),
+      lazy: true,
+    ),
     Provider<ArtWalkService>(create: (_) => ArtWalkService(), lazy: true),
     Provider<ChallengeService>(create: (_) => ChallengeService(), lazy: true),
     Provider<capture.CaptureService>(
-      create: (_) => capture.CaptureService(),
+      create: (_) => capture.CaptureService(
+        postCaptureHooks: CaptureArtWalkHooks(),
+      ),
+      lazy: true,
+    ),
+    Provider<core.CaptureServiceInterface>(
+      create: (_) => capture.CaptureService(
+        postCaptureHooks: CaptureArtWalkHooks(),
+      ),
       lazy: true,
     ),
     ChangeNotifierProvider<core.SubscriptionService>.value(
@@ -164,12 +178,11 @@ class MyApp extends StatelessWidget {
     // Dashboard ViewModel
     ChangeNotifierProvider<core.DashboardViewModel>(
       create: (context) => core.DashboardViewModel(
-        eventService: context.read<events.EventService>(),
-        artworkService: context.read<ArtworkService>(),
-        artWalkService: context.read<ArtWalkService>(),
+        artworkService: context.read<core.ArtworkReadService>(),
         subscriptionService: context.read<core.SubscriptionService>(),
         userService: context.read<core.UserService>(),
         captureService: context.read<capture.CaptureService>(),
+        publicArtService: context.read<core.PublicArtReadService>(),
       ),
       lazy: true,
     ),

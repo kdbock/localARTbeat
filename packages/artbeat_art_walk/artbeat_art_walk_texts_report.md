@@ -8,7 +8,7 @@ This report documents the English translation internationalization process for t
 
 1. **Analysis**: Thoroughly reviewed all screens and widgets in `src/` to identify hardcoded strings in Text() widgets.
 2. **Extraction**: Identified 58 unique hardcoded strings across multiple files.
-3. **Translation File Creation**: Created `artbeat_art_walk_texts_data.json` with English translations using keys prefixed with `art_walk_`.
+3. **Translation File Creation**: Created `tools/text-extraction/data/artbeat_art_walk_texts_data.json` with English translations using keys prefixed with `art_walk_`.
 4. **Code Updates**: Replaced all hardcoded Text('string') with Text('key'.tr()) calls.
 5. **Dynamic Content Handling**: Used placeholders like `{error}` for dynamic strings and implemented `.replaceAll()` in code.
 

@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:artbeat_artwork/artbeat_artwork.dart' as artwork;
-import 'package:artbeat_core/artbeat_core.dart';
+import 'package:artbeat_core/artbeat_core.dart' show AppLogger;
+import '../models/artwork_model.dart';
+import '../services/community_artwork_read_service.dart';
 
 class FeedController extends ChangeNotifier {
-  final artwork.ArtworkService _artworkService;
+  final CommunityArtworkReadService _artworkService;
 
   FeedController(this._artworkService);
 
-  List<artwork.ArtworkModel> _feedItems = [];
-  List<artwork.ArtworkModel> get feedItems => _feedItems;
+  List<ArtworkModel> _feedItems = [];
+  List<ArtworkModel> get feedItems => _feedItems;
 
   Future<void> fetchFeed(String userId) async {
     try {

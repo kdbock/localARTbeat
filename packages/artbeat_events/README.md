@@ -82,7 +82,7 @@ This package currently depends on:
 - Firebase (`firebase_auth`, `cloud_firestore`, `firebase_storage`)
 - Notifications (`awesome_notifications`, `flutter_local_notifications`)
 - Payments (`flutter_stripe`)
-- Shared ARTbeat packages (`artbeat_core`, `artbeat_auth`, `artbeat_ads`, `artbeat_sponsorships`)
+- Shared ARTbeat packages (`artbeat_core`, `artbeat_ads`, `artbeat_sponsorships`)
 
 ## Testing
 

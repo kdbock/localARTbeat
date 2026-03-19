@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_art_walk/artbeat_art_walk.dart';
+import '../models/profile_challenge_model.dart';
+import '../services/profile_challenge_service.dart';
 
 // Dummy level system for progress calculation
 const Map<int, Map<String, dynamic>> _levelSystem = {
@@ -23,9 +24,9 @@ class ProgressTab extends StatefulWidget {
 }
 
 class _ProgressTabState extends State<ProgressTab> {
-  final ChallengeService _challengeService = ChallengeService();
+  final ProfileChallengeService _challengeService = ProfileChallengeService();
 
-  ChallengeModel? _todaysChallenge;
+  ProfileChallengeModel? _todaysChallenge;
   bool _isLoading = true;
 
   @override
@@ -38,7 +39,9 @@ class _ProgressTabState extends State<ProgressTab> {
     setState(() => _isLoading = true);
 
     try {
-      final challenge = await _challengeService.getTodaysChallenge();
+      final challenge = await _challengeService.getTodaysChallenge(
+        userId: widget.userId,
+      );
 
       if (mounted) {
         setState(() {
@@ -101,7 +104,7 @@ class _ProgressTabState extends State<ProgressTab> {
     );
   }
 
-  Widget _buildTodaysChallenge(ChallengeModel challenge) {
+  Widget _buildTodaysChallenge(ProfileChallengeModel challenge) {
     final progress = challenge.targetCount > 0
         ? challenge.currentCount / challenge.targetCount
         : 0.0;
@@ -238,7 +241,7 @@ class _ProgressTabState extends State<ProgressTab> {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      '${challenge.rewardXP} XP',
+                      '${challenge.rewardXp} XP',
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,

@@ -31,17 +31,11 @@ dependencies:
   # Image handling
   image_picker: ^1.0.7
 
-  # Cross-package dependency
-  artbeat_artwork:
-    path: ../artbeat_artwork
-
   # Local packages
   artbeat_core:
     path: ../artbeat_core
   artbeat_events:
     path: ../artbeat_events
-  artbeat_ads:
-    path: ../artbeat_ads
   artbeat_community:
     path: ../artbeat_community
 

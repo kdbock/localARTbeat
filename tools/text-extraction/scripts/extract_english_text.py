@@ -244,8 +244,16 @@ class EnglishTextExtractor:
 def main():
     parser = argparse.ArgumentParser(description='Extract English text from ArtBeat screen files')
     parser.add_argument('--root', default='.', help='Root directory of the project')
-    parser.add_argument('--output', default='english_texts_report.md', help='Output markdown file')
-    parser.add_argument('--json', default='english_texts_data.json', help='Output JSON file')
+    parser.add_argument(
+        '--output',
+        default='tools/text-extraction/data/english_texts_report.md',
+        help='Output markdown file',
+    )
+    parser.add_argument(
+        '--json',
+        default='tools/text-extraction/data/english_texts_data.json',
+        help='Output JSON file',
+    )
     
     args = parser.parse_args()
     

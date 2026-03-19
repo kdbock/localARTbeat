@@ -24,6 +24,8 @@ import '../../screens/notifications_screen.dart';
 import '../../test_payment_debug.dart';
 import '../guards/auth_guard.dart';
 import '../screens/about_screen.dart';
+import '../screens/ads_route_screen.dart';
+import '../screens/artwork_auction_management_route_screen.dart';
 import '../screens/privacy_policy_screen.dart';
 import '../screens/rewards_screen.dart';
 import '../screens/terms_of_service_screen.dart';
@@ -489,7 +491,7 @@ class AppRouter {
 
       case core.AppRoutes.artistArtwork:
         return RouteUtils.createMainLayoutRoute(
-          child: const artist.MyArtworkScreen(),
+          child: const artwork.ArtistArtworkManagementScreen(),
         );
 
       case core.AppRoutes.artistFeed:
@@ -602,6 +604,24 @@ class AppRouter {
         }
         return RouteUtils.createSimpleRoute(
           child: artwork.ArtworkDetailScreen(artworkId: artworkId),
+        );
+
+      case core.AppRoutes.artworkAuctionSetup:
+        final modeName = RouteUtils.getArgument<String>(settings, 'mode');
+        final mode = modeName == 'editing'
+            ? artwork.AuctionSetupMode.editing
+            : artwork.AuctionSetupMode.firstTime;
+        return RouteUtils.createSimpleRoute(
+          child: artwork.AuctionSetupWizardScreen(mode: mode),
+        );
+
+      case core.AppRoutes.artworkAuctionManage:
+        final artworkId = RouteUtils.getArgument<String>(settings, 'artworkId');
+        if (artworkId == null) {
+          return RouteUtils.createErrorRoute('Artwork not found');
+        }
+        return RouteUtils.createSimpleRoute(
+          child: ArtworkAuctionManagementRouteScreen(artworkId: artworkId),
         );
 
       case '/artwork/written-content':
@@ -1773,7 +1793,12 @@ class AppRouter {
           ),
         );
 
-      // The rest of the cases (camera, dashboard, etc.) remain unchanged or do not require 'captures'.
+      case core.AppRoutes.captureDashboard:
+        return RouteUtils.createMainLayoutRoute(
+          child: const capture.EnhancedCaptureDashboardScreen(),
+        );
+
+      // The rest of the cases (camera, etc.) remain unchanged or do not require 'captures'.
       case core.AppRoutes.captureCamera:
         return RouteUtils.createMainLayoutRoute(
           child: const capture.CaptureScreen(),
@@ -1958,7 +1983,7 @@ class AppRouter {
         );
 
       case core.AppRoutes.ads:
-        return RouteUtils.createMainLayoutRoute(child: const core.AdsScreen());
+        return RouteUtils.createMainLayoutRoute(child: const AdsRouteScreen());
 
       default:
         return RouteUtils.createNotFoundRoute('In-App Purchase feature');

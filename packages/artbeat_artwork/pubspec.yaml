@@ -21,8 +21,6 @@ dependencies:
   # Local Packages
   artbeat_core:
     path: ../artbeat_core
-  artbeat_artist:
-    path: ../artbeat_artist
   artbeat_art_walk:
     path: ../artbeat_art_walk
   artbeat_ads:
@@ -54,10 +52,6 @@ dependencies:
   # Rich text editing
   flutter_markdown_plus: ^1.0.5
 
-  artbeat_profile:
-    path: ../artbeat_profile
-  artbeat_events:
-    path: ../artbeat_events
 flutter:
   uses-material-design: true
 

@@ -13,7 +13,6 @@ Authentication package for ARTbeat. It provides auth services, auth routes, and 
   - `LoginScreen`
   - `RegisterScreen`
   - `ForgotPasswordScreen`
-  - `ProfileCreateScreen`
   - `EmailVerificationScreen`
 - Constants:
   - `AuthRoutes`
@@ -29,7 +28,6 @@ Authentication package for ARTbeat. It provides auth services, auth routes, and 
   - `register_screen.dart`
   - `forgot_password_screen.dart`
   - `email_verification_screen.dart`
-  - `profile_create_screen.dart`
 - `lib/src/constants/routes.dart`
 - `lib/src/widgets/auth_header.dart`
 
@@ -78,9 +76,6 @@ AuthService({FirebaseAuth? auth, FirebaseFirestore? firestore})
   - Polls verification state every 3s
   - Supports resend with cooldown
   - Can proceed to dashboard
-- `ProfileCreateScreen`
-  - Bridge into `artbeat_profile` (`CreateProfileScreen`)
-  - Redirects unauthenticated users to login
 
 ## Route contract
 
@@ -92,6 +87,12 @@ Defined in `AuthRoutes`:
 - `/email-verification`
 - `/dashboard`
 - `/profile/create`
+
+Profile creation ownership:
+
+- `AuthProfileService` may return `/profile/create`
+- the host app is responsible for handling that route and rendering the actual
+  profile creation experience
 
 Route helper methods are available for auth/default route decisions.
 

@@ -6,11 +6,12 @@ import 'package:flutter/foundation.dart';
 import 'package:artbeat_artwork/artbeat_artwork.dart';
 import 'package:artbeat_core/artbeat_core.dart'
     show
+        ArtistProfileModel,
         SubscriptionTier,
+        SubscriptionService,
         EnhancedStorageService,
         AppLogger,
         ArtworkContentType;
-import 'package:artbeat_artist/artbeat_artist.dart' show SubscriptionService;
 import 'package:artbeat_art_walk/artbeat_art_walk.dart'
     show SocialService, SocialActivityType;
 
@@ -108,9 +109,7 @@ class ArtworkService {
       await _checkUploadLimit();
 
       // Get artist profile ID
-      final artistProfile = await _subscriptionService.getArtistProfileByUserId(
-        userId,
-      );
+      final artistProfile = await _getArtistProfileByUserId(userId);
       if (artistProfile == null) {
         throw Exception('Artist profile not found. Please create one first.');
       }
@@ -184,6 +183,25 @@ class ArtworkService {
     } catch (e) {
       AppLogger.error('Error uploading artwork: $e');
       throw Exception('Failed to upload artwork: $e');
+    }
+  }
+
+  Future<ArtistProfileModel?> _getArtistProfileByUserId(String userId) async {
+    try {
+      final query = await FirebaseFirestore.instance
+          .collection('artistProfiles')
+          .where('userId', isEqualTo: userId)
+          .limit(1)
+          .get();
+
+      if (query.docs.isEmpty) {
+        return null;
+      }
+
+      return ArtistProfileModel.fromFirestore(query.docs.first);
+    } catch (e) {
+      AppLogger.error('Error getting artist profile for user $userId: $e');
+      return null;
     }
   }
 

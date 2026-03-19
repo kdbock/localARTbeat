@@ -73,6 +73,16 @@ Initial archival moves completed:
   `docs/archive/IMPLEMENTATION_PROGRESS.md`
 - `docs/2026-02-26_legal_security_recap.md` ->
   `docs/archive/2026-02-26_legal_security_recap.md`
+- extracted text-analysis artifacts moved under:
+  `tools/text-extraction/data/`
+- root text-extraction scripts moved under:
+  `tools/text-extraction/scripts/`
+- legacy standalone root scripts moved under:
+  `tools/legacy-root-scripts/`
+- `legal_system_full_checklist.md` ->
+  `docs/archive/legal_system_full_checklist.md`
+- `finding-forgiveness-STANDARD-PRINT-READY.txt` ->
+  `docs/archive/finding-forgiveness-STANDARD-PRINT-READY.txt`
 
 ### Should Not Be Committed Or Relied On
 
@@ -111,6 +121,10 @@ Observed package-local residue includes:
 Not all of these should be removed blindly. Some may reflect intentional local
 workflows or historical package scaffolding. Cleanup must happen only after
 verifying they are not still referenced.
+
+Audit details:
+
+- see `docs/PACKAGE_RESIDUE_AUDIT.md`
 
 ## Safe Cleanup Order
 

@@ -40,7 +40,7 @@ This document tracks the internationalization status of the artbeat_capture pack
 
 ## Translation Keys
 
-All identified hardcoded strings have been extracted to `artbeat_capture_texts_data.json` with keys following the pattern `capture_[component]_text_[description]`.
+All identified hardcoded strings have been extracted to `tools/text-extraction/data/artbeat_capture_texts_data.json` with keys following the pattern `capture_[component]_text_[description]`.
 
 ## Remaining Work
 

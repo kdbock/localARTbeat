@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_art_walk/artbeat_art_walk.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'achievement_runner.dart';
 import 'achievement_badge.dart';
@@ -36,7 +35,7 @@ class UserExperienceCard extends StatefulWidget {
 
 class _UserExperienceCardState extends State<UserExperienceCard>
     with TickerProviderStateMixin {
-  final RewardsService _rewardsService = RewardsService();
+  final UserProgressionService _progressionService = UserProgressionService();
   late AnimationController _expandController;
   late Animation<double> _expandAnimation;
   bool _isExpanded = false;
@@ -297,8 +296,8 @@ class _UserExperienceCardState extends State<UserExperienceCard>
   }
 
   Widget _buildAchievementRunner() {
-    final levelTitle = _rewardsService.getLevelTitle(widget.user.level);
-    final progress = _rewardsService.getLevelProgress(
+    final levelTitle = _progressionService.getLevelTitle(widget.user.level);
+    final progress = _progressionService.getLevelProgress(
       widget.user.experiencePoints,
       widget.user.level,
     );
@@ -460,8 +459,10 @@ class _UserExperienceCardState extends State<UserExperienceCard>
   }
 
   Widget _buildLevelPerks() {
-    final perks = _rewardsService.getLevelPerks(widget.user.level);
-    final nextLevelPerks = _rewardsService.getLevelPerks(widget.user.level + 1);
+    final perks = _progressionService.getLevelPerks(widget.user.level);
+    final nextLevelPerks = _progressionService.getLevelPerks(
+      widget.user.level + 1,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -634,8 +635,8 @@ class _UserExperienceCardState extends State<UserExperienceCard>
   }
 
   Widget _buildCollapsedView() {
-    final levelTitle = _rewardsService.getLevelTitle(widget.user.level);
-    final progress = _rewardsService.getLevelProgress(
+    final levelTitle = _progressionService.getLevelTitle(widget.user.level);
+    final progress = _progressionService.getLevelProgress(
       widget.user.experiencePoints,
       widget.user.level,
     );

@@ -9,11 +9,12 @@ import 'package:artbeat_core/artbeat_core.dart'
         HudTopBar,
         HudButton,
         GradientBadge;
-import 'package:artbeat_artwork/artbeat_artwork.dart' as artwork;
 import 'package:artbeat_community/artbeat_community.dart'
     show DirectCommissionService, ArtistCommissionSettings;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../models/artwork_model.dart' as artist_artwork;
+import '../services/artwork_service.dart' as artist_artwork_service;
 import '../services/subscription_service.dart' as artist_subscription;
 import '../services/visibility_service.dart';
 import '../widgets/top_followers_widget.dart';
@@ -34,14 +35,15 @@ class ArtistPublicProfileScreen extends StatefulWidget {
 class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
   final artist_subscription.SubscriptionService _subscriptionService =
       artist_subscription.SubscriptionService();
-  final artwork.ArtworkService _artworkService = artwork.ArtworkService();
+  final artist_artwork_service.ArtworkService _artworkService =
+      artist_artwork_service.ArtworkService();
   final VisibilityService _visibilityService = VisibilityService();
   final DirectCommissionService _commissionService = DirectCommissionService();
 
   bool _isLoading = true;
   ArtistProfileModel? _artistProfile;
-  List<artwork.ArtworkModel> _artwork = [];
-  List<artwork.ArtworkModel> _writtenWorks = [];
+  List<artist_artwork.ArtworkModel> _artwork = [];
+  List<artist_artwork.ArtworkModel> _writtenWorks = [];
   String? _currentUserId;
   String? _artistProfileId; // Store the artist profile document ID
   bool _isFollowing = false;
@@ -191,7 +193,7 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
         commissionFuture,
       ]);
 
-      final artworks = results[0] as List<artwork.ArtworkModel>;
+      final artworks = results[0] as List<artist_artwork.ArtworkModel>;
       final isFollowing = results[1] as bool;
       final ArtistCommissionSettings? commissionSettings =
           results[2] as ArtistCommissionSettings?;
@@ -1214,7 +1216,7 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
 
   bool _hasLink(String? value) => value != null && value.trim().isNotEmpty;
 
-  Widget _buildArtworkItem(artwork.ArtworkModel artwork) {
+  Widget _buildArtworkItem(artist_artwork.ArtworkModel artwork) {
     return InkWell(
       onTap: () {
         Navigator.pushNamed(
@@ -1412,7 +1414,7 @@ class _ArtistPublicProfileScreenState extends State<ArtistPublicProfileScreen> {
     );
   }
 
-  Widget _buildWrittenWorkItem(artwork.ArtworkModel work) {
+  Widget _buildWrittenWorkItem(artist_artwork.ArtworkModel work) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
       child: InkWell(

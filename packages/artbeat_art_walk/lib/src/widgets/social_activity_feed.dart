@@ -6,7 +6,7 @@ import 'package:timeago/timeago.dart' as timeago;
 import 'package:geolocator/geolocator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import 'package:artbeat_core/artbeat_core.dart';
+import 'package:artbeat_core/artbeat_core.dart' hide SocialActivityType;
 import 'package:artbeat_art_walk/src/services/social_service.dart';
 import 'package:artbeat_art_walk/src/widgets/typography.dart';
 

@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:artbeat_artwork/artbeat_artwork.dart' as artwork;
 import 'package:artbeat_core/artbeat_core.dart';
 
 import '../models/filter_types.dart';
@@ -83,7 +82,7 @@ class FilterService {
   }
 
   /// Filter artworks based on parameters
-  Future<List<artwork.ArtworkModel>> filterArtwork(
+  Future<List<ArtworkModel>> filterArtwork(
     FilterParameters params,
   ) async {
     try {
@@ -135,33 +134,7 @@ class FilterService {
       }
 
       final snapshot = await query.get();
-      List<artwork.ArtworkModel> artworks = snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
-        return artwork.ArtworkModel(
-          id: doc.id,
-          userId: data['userId'] as String? ?? '',
-          artistProfileId: data['artistProfileId'] as String? ?? '',
-          title: data['title'] as String? ?? '',
-          description: data['description'] as String? ?? '',
-          imageUrl: data['imageUrl'] as String? ?? '',
-          medium: data['medium'] as String? ?? '',
-          styles: List<String>.from(data['styles'] as List<dynamic>? ?? []),
-          dimensions: data['dimensions'] as String?,
-          materials: data['materials'] as String?,
-          location: data['location'] != null
-              ? (data['location'] as GeoPoint).toString()
-              : null,
-          tags: (data['tags'] as List<dynamic>?)?.cast<String>(),
-          price: (data['price'] as num?)?.toDouble(),
-          isForSale: data['isForSale'] as bool? ?? false,
-          isSold: data['isSold'] as bool? ?? false,
-          yearCreated: data['yearCreated'] as int?,
-          createdAt:
-              (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-          updatedAt:
-              (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-        );
-      }).toList();
+      var artworks = snapshot.docs.map(ArtworkModel.fromFirestore).toList();
 
       // Apply text search filter in memory
       if (params.searchQuery?.isNotEmpty ?? false) {
@@ -170,8 +143,7 @@ class FilterService {
           final title = artwork.title.toLowerCase();
           final description = artwork.description.toLowerCase();
           final medium = artwork.medium.toLowerCase();
-          final tags =
-              artwork.tags?.map((tag) => tag.toLowerCase()).toList() ?? [];
+          final tags = artwork.tags.map((tag) => tag.toLowerCase()).toList();
 
           return title.contains(searchLower) ||
               description.contains(searchLower) ||
@@ -183,7 +155,7 @@ class FilterService {
       // Apply tag filters in memory
       if (params.tags?.isNotEmpty ?? false) {
         artworks = artworks.where((artwork) {
-          final artworkTags = artwork.tags ?? [];
+          final artworkTags = artwork.tags;
           return artworkTags.any((tag) => params.tags!.contains(tag));
         }).toList();
       }

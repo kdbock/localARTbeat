@@ -215,6 +215,69 @@ class ArtCommunityService extends ChangeNotifier {
     }
   }
 
+  Future<bool> followArtist(String artistId) async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null || artistId.isEmpty) return false;
+
+    try {
+      await _firestore
+          .collection('follows')
+          .doc('${currentUser.uid}_$artistId')
+          .set({
+            'followerId': currentUser.uid,
+            'followedId': artistId,
+            'createdAt': FieldValue.serverTimestamp(),
+            'type': 'artist',
+          });
+
+      await _updateArtistFollowerCounts(artistId, delta: 1);
+      return true;
+    } catch (e) {
+      AppLogger.error('Error following artist: $e');
+      return false;
+    }
+  }
+
+  Future<bool> unfollowArtist(String artistId) async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null || artistId.isEmpty) return false;
+
+    try {
+      await _firestore
+          .collection('follows')
+          .doc('${currentUser.uid}_$artistId')
+          .delete();
+
+      await _updateArtistFollowerCounts(artistId, delta: -1);
+      return true;
+    } catch (e) {
+      AppLogger.error('Error unfollowing artist: $e');
+      return false;
+    }
+  }
+
+  Future<void> _updateArtistFollowerCounts(
+    String artistId, {
+    required int delta,
+  }) async {
+    final artistProfileQuery = await _firestore
+        .collection('artistProfiles')
+        .where('userId', isEqualTo: artistId)
+        .limit(1)
+        .get();
+
+    final updates = {'followersCount': FieldValue.increment(delta)};
+
+    if (artistProfileQuery.docs.isNotEmpty) {
+      await artistProfileQuery.docs.first.reference.update(updates);
+    }
+
+    await _firestore.collection('users').doc(artistId).set(
+      updates,
+      SetOptions(merge: true),
+    );
+  }
+
   // Cache for performance
   List<ArtPost> _feedCache = [];
   List<ArtistProfile> _artistsCache = [];

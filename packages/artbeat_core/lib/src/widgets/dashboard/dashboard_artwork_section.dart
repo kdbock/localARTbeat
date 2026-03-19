@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_community/screens/feed/create_post_screen.dart';
 
 import 'dashboard_section_button.dart';
 
@@ -421,15 +420,13 @@ class DashboardArtworkSection extends StatelessWidget {
           '${artwork.description}\n\n'
           '#artwork #artbeat';
 
-      // Navigate to CreatePostScreen with pre-filled artwork data
-      Navigator.push(
+      Navigator.pushNamed(
         context,
-        MaterialPageRoute<void>(
-          builder: (context) => CreatePostScreen(
-            prefilledImageUrl: artwork.imageUrl,
-            prefilledCaption: caption,
-          ),
-        ),
+        AppRoutes.communityCreate,
+        arguments: {
+          'prefilledImageUrl': artwork.imageUrl,
+          'prefilledCaption': caption,
+        },
       );
 
       // Track the share as an engagement

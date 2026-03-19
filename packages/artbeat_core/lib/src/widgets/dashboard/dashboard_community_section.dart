@@ -1,9 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_community/artbeat_community.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:provider/provider.dart';
 
 import 'dashboard_section_button.dart';
 
@@ -19,7 +17,9 @@ class DashboardCommunitySection extends StatefulWidget {
 }
 
 class _DashboardCommunitySectionState extends State<DashboardCommunitySection> {
-  List<PostModel> _posts = [];
+  final CommunityPostReadService _communityPostReadService =
+      CommunityPostReadService();
+  List<CommunityPostModel> _posts = [];
   bool _isLoading = true;
   String? _error;
 
@@ -38,8 +38,7 @@ class _DashboardCommunitySectionState extends State<DashboardCommunitySection> {
         });
       }
 
-      final communityService = context.read<CommunityService>();
-      final posts = await communityService.getPosts(limit: 5);
+      final posts = await _communityPostReadService.getFeed(limit: 5);
 
       if (mounted) {
         setState(() {
@@ -284,7 +283,7 @@ class _DashboardCommunitySectionState extends State<DashboardCommunitySection> {
     );
   }
 
-  Widget _buildCommunityCard(BuildContext context, PostModel post) {
+  Widget _buildCommunityCard(BuildContext context, CommunityPostModel post) {
     return Container(
       width: 280,
       decoration: BoxDecoration(

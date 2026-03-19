@@ -2,6 +2,7 @@
 // Generated on Sun  1 13:03:48 EDT 2025
 
 export 'artwork_service.dart';
+export 'artwork_visibility_service.dart';
 export 'artwork_cleanup_service.dart';
 export 'image_moderation_service.dart';
 export 'artwork_analytics_service.dart';

@@ -1,13 +1,13 @@
 import 'package:flutter/foundation.dart';
-import 'package:artbeat_messaging/artbeat_messaging.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:async';
 import '../utils/logger.dart';
+import '../services/messaging_status_service.dart';
 
 /// Provider for managing messaging state across the app
 /// Specifically handles unread message counts for the header
 class MessagingProvider extends ChangeNotifier {
-  final ChatService _chatService;
+  final MessagingStatusService _messagingStatusService;
   int _unreadCount = 0;
   bool _hasUnreadMessages = false;
   StreamSubscription<int>? _unreadCountSubscription;
@@ -16,8 +16,8 @@ class MessagingProvider extends ChangeNotifier {
   bool _hasError = false;
   String? _currentUserId;
 
-  MessagingProvider(this._chatService) {
-    AppLogger.info('MessagingProvider: Initializing with ChatService');
+  MessagingProvider(this._messagingStatusService) {
+    AppLogger.info('MessagingProvider: Initializing with MessagingStatusService');
     // Initialize current user ID to prevent unnecessary reset on first auth state change
     _currentUserId = FirebaseAuth.instance.currentUser?.uid;
     _setupAuthListener();
@@ -68,7 +68,7 @@ class MessagingProvider extends ChangeNotifier {
   void _initializeUnreadCount() {
     AppLogger.info('MessagingProvider: Setting up unread count stream');
     try {
-      _unreadCountSubscription = _chatService.getTotalUnreadCount().listen(
+      _unreadCountSubscription = _messagingStatusService.getTotalUnreadCount().listen(
         (count) {
           AppLogger.info('MessagingProvider: Unread count updated to $count');
           _unreadCount = count;
@@ -100,7 +100,7 @@ class MessagingProvider extends ChangeNotifier {
   Future<void> refreshUnreadCount() async {
     AppLogger.info('MessagingProvider: Manually refreshing unread count');
     try {
-      final count = await _chatService.getTotalUnreadCount().first;
+      final count = await _messagingStatusService.getTotalUnreadCount().first;
       _unreadCount = count;
       _hasUnreadMessages = count > 0;
       _hasError = false;

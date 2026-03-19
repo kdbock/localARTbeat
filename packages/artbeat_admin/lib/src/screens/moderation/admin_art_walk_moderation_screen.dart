@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:provider/provider.dart';
-import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_art_walk/src/models/art_walk_model.dart';
-import 'package:artbeat_art_walk/src/services/art_walk_service.dart';
+
+import '../../models/admin_art_walk_model.dart';
+import '../../services/admin_art_walk_moderation_service.dart';
 
 /// Admin screen for moderating art walks
 /// Relocated to artbeat_admin for unified administration
@@ -17,40 +16,27 @@ class AdminArtWalkModerationScreen extends StatefulWidget {
 
 class _AdminArtWalkModerationScreenState
     extends State<AdminArtWalkModerationScreen> {
-  ArtWalkService? _artWalkService;
-  List<ArtWalkModel> _artWalks = [];
+  final AdminArtWalkModerationService _artWalkService =
+      AdminArtWalkModerationService();
+  List<AdminArtWalkModel> _artWalks = [];
   bool _loading = true;
   String _selectedTab = 'all';
 
   @override
   void initState() {
     super.initState();
-    // Use addPostFrameCallback or obtain service in didChangeDependencies
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (_artWalkService == null) {
-      try {
-        _artWalkService = context.read<ArtWalkService>();
-        _loadArtWalks();
-      } catch (e) {
-        AppLogger.error('Error initializing ArtWalkService: $e');
-      }
-    }
+    _loadArtWalks();
   }
 
   Future<void> _loadArtWalks() async {
-    if (_artWalkService == null) return;
     setState(() => _loading = true);
 
     try {
-      List<ArtWalkModel> walks;
+      List<AdminArtWalkModel> walks;
       if (_selectedTab == 'all') {
-        walks = await _artWalkService!.getAllArtWalks(limit: 100);
+        walks = await _artWalkService.getAllArtWalks(limit: 100);
       } else {
-        walks = await _artWalkService!.getReportedArtWalks(limit: 100);
+        walks = await _artWalkService.getReportedArtWalks(limit: 100);
       }
 
       if (mounted) {
@@ -73,7 +59,7 @@ class _AdminArtWalkModerationScreenState
     }
   }
 
-  Future<void> _deleteArtWalk(ArtWalkModel walk) async {
+  Future<void> _deleteArtWalk(AdminArtWalkModel walk) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
@@ -101,9 +87,9 @@ class _AdminArtWalkModerationScreenState
       },
     );
 
-    if (confirmed == true && _artWalkService != null) {
+    if (confirmed == true) {
       try {
-        await _artWalkService!.adminDeleteArtWalk(walk.id);
+        await _artWalkService.adminDeleteArtWalk(walk.id);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -130,7 +116,7 @@ class _AdminArtWalkModerationScreenState
     }
   }
 
-  Future<void> _clearReports(ArtWalkModel walk) async {
+  Future<void> _clearReports(AdminArtWalkModel walk) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
@@ -157,9 +143,9 @@ class _AdminArtWalkModerationScreenState
       },
     );
 
-    if (confirmed == true && _artWalkService != null) {
+    if (confirmed == true) {
       try {
-        await _artWalkService!.clearArtWalkReports(walk.id);
+        await _artWalkService.clearArtWalkReports(walk.id);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -186,7 +172,7 @@ class _AdminArtWalkModerationScreenState
     }
   }
 
-  void _showArtWalkDetails(ArtWalkModel walk) {
+  void _showArtWalkDetails(AdminArtWalkModel walk) {
     showDialog<void>(
       context: context,
       builder: (BuildContext context) {
@@ -399,7 +385,7 @@ class _AdminArtWalkModerationScreenState
     );
   }
 
-  Widget _buildArtWalkTile(ArtWalkModel walk) {
+  Widget _buildArtWalkTile(AdminArtWalkModel walk) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(

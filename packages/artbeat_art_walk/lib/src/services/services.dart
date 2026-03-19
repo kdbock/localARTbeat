@@ -3,6 +3,7 @@
 
 export 'achievement_service.dart';
 export 'art_walk_cache_service.dart';
+export 'art_walk_capture_read_service.dart';
 export 'art_walk_navigation_service.dart';
 export 'art_walk_security_service.dart';
 export 'art_walk_service.dart';

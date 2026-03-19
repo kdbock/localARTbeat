@@ -33,7 +33,7 @@ This document tracks the internationalization status of the artbeat_ads package.
 
 ## Translation Keys
 
-All hardcoded strings have been extracted to `artbeat_ads_texts_data.json` with keys following the pattern `ads_[component]_text_[description]`.
+All hardcoded strings have been extracted to `tools/text-extraction/data/artbeat_ads_texts_data.json` with keys following the pattern `ads_[component]_text_[description]`.
 
 ## Next Steps
 

@@ -63,6 +63,12 @@ Defined in `src/routes.dart`:
 - `/artist/commissions`
 - `/artist/events`
 
+Route ownership note:
+
+- the host app now resolves `artistArtwork` to
+  `artbeat_artwork`'s `ArtistArtworkManagementScreen`
+- `artbeat_artist` no longer exports a duplicate `MyArtworkScreen`
+
 ## Testing
 
 This package now has baseline tests for:

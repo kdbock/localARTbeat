@@ -3,8 +3,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_capture/artbeat_capture.dart' as capture;
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:artbeat_profile/src/widgets/recent_badges_carousel.dart';
 import 'package:artbeat_profile/src/widgets/dynamic_achievements_tab.dart';
 import 'package:artbeat_profile/src/widgets/progress_tab.dart';
@@ -32,7 +32,6 @@ class _ProfileViewScreenState extends State<ProfileViewScreen>
     with SingleTickerProviderStateMixin {
   final User? currentUser = FirebaseAuth.instance.currentUser;
   final UserService _userService = UserService();
-  final capture.CaptureService _captureService = capture.CaptureService();
   final ProfileConnectionService _connectionService =
       ProfileConnectionService();
   late TabController _tabController;
@@ -172,7 +171,8 @@ class _ProfileViewScreenState extends State<ProfileViewScreen>
         return;
       }
 
-      final captures = await _captureService.getCapturesForUser(widget.userId);
+      final captureService = context.read<CaptureServiceInterface>();
+      final captures = await captureService.getCapturesForUser(widget.userId);
 
       if (mounted) {
         setState(() {

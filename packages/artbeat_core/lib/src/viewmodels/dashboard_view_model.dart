@@ -5,23 +5,21 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:async';
 
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_art_walk/artbeat_art_walk.dart' as artWalkLib;
-import 'package:artbeat_artist/artbeat_artist.dart' as artist_profile;
-import 'package:artbeat_events/artbeat_events.dart' as eventLib;
-import 'package:artbeat_artwork/artbeat_artwork.dart' as artworkLib;
-import 'package:artbeat_community/artbeat_community.dart' as community;
 
 class DashboardViewModel extends ChangeNotifier {
-  final eventLib.EventService _eventService;
-  final artworkLib.ArtworkService _artworkService;
-  final artWalkLib.ArtWalkService _artWalkService;
-  final artWalkLib.SocialService _socialService;
+  final EventReadService _eventService;
+  final ArtworkReadService _artworkService;
+  final PublicArtReadService _publicArtService;
+  final SocialActivityReadService _socialService;
   final SubscriptionService _subscriptionService;
+  final ArtistService _artistService;
+  final ArtistFollowService _artistFollowService;
   final UserService _userService;
+  final UserProgressionService _progressionService;
+  final DiscoveryProgressReadService _discoveryProgressService;
   final CaptureServiceInterface _captureService;
   final ContentEngagementService _engagementService;
-  final community.ArtCommunityService _communityService;
-  final artist_profile.CommunityService _artistCommunityService;
+  final CommunityPostReadService _communityService;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   String? chapterId;
 
@@ -61,11 +59,11 @@ class DashboardViewModel extends ChangeNotifier {
   Set<Marker> _markers = {};
   Position? _currentLocation;
   LatLng? _mapLocation;
-  List<artWalkLib.AchievementModel> _achievements = [];
+  List<AchievementModel> _achievements = [];
   List<CaptureModel> _localCaptures = [];
-  List<community.PostModel> _posts = [];
-  List<artWalkLib.SocialActivity> _activities = [];
-  artWalkLib.ChallengeModel? _todaysChallenge;
+  List<CommunityPostModel> _posts = [];
+  List<SocialActivityModel> _activities = [];
+  DailyChallengeModel? _todaysChallenge;
   final Map<String, Set<Marker>> _markerCache = {};
   LatLng? _lastMarkerLocation;
   LatLng? _pendingMarkerLocation;
@@ -80,28 +78,34 @@ class DashboardViewModel extends ChangeNotifier {
   int _loginStreak = 0;
 
   DashboardViewModel({
-    required eventLib.EventService eventService,
-    required artworkLib.ArtworkService artworkService,
-    required artWalkLib.ArtWalkService artWalkService,
-    artWalkLib.SocialService? socialService,
+    EventReadService? eventService,
+    ArtworkReadService? artworkService,
+    PublicArtReadService? publicArtService,
+    SocialActivityReadService? socialService,
     required SubscriptionService subscriptionService,
+    ArtistService? artistService,
+    ArtistFollowService? artistFollowService,
+    UserProgressionService? progressionService,
+    DiscoveryProgressReadService? discoveryProgressService,
     required UserService userService,
     CaptureServiceInterface? captureService,
     ContentEngagementService? engagementService,
-    community.ArtCommunityService? communityService,
-    artist_profile.CommunityService? artistCommunityService,
+    CommunityPostReadService? communityService,
     this.chapterId,
-  }) : _eventService = eventService,
-       _artworkService = artworkService,
-       _artWalkService = artWalkService,
-       _socialService = socialService ?? artWalkLib.SocialService(),
+  }) : _eventService = eventService ?? EventReadService(),
+       _artworkService = artworkService ?? ArtworkReadService(),
+       _publicArtService = publicArtService ?? PublicArtReadService(),
+       _socialService = socialService ?? SocialActivityReadService(),
        _subscriptionService = subscriptionService,
+       _artistService = artistService ?? ArtistService(),
+       _artistFollowService = artistFollowService ?? ArtistFollowService(),
+       _progressionService = progressionService ?? UserProgressionService(),
+       _discoveryProgressService =
+           discoveryProgressService ?? DiscoveryProgressReadService(),
        _userService = userService,
        _captureService = captureService ?? DefaultCaptureService(),
        _engagementService = engagementService ?? ContentEngagementService(),
-       _communityService = communityService ?? community.ArtCommunityService(),
-       _artistCommunityService =
-           artistCommunityService ?? artist_profile.CommunityService();
+       _communityService = communityService ?? CommunityPostReadService();
 
   /// Initializes dashboard data and state
   Future<void> initialize() async {
@@ -258,15 +262,15 @@ class DashboardViewModel extends ChangeNotifier {
       _isDisposed ? [] : List.unmodifiable(_artists);
   Set<Marker> get markers => Set.unmodifiable(_markers);
   Position? get currentLocation => _currentLocation;
-  List<artWalkLib.AchievementModel> get achievements =>
+  List<AchievementModel> get achievements =>
       List.unmodifiable(_achievements);
   List<CaptureModel> get localCaptures => List.unmodifiable(_localCaptures);
-  List<community.PostModel> get posts => List.unmodifiable(_posts);
-  List<artWalkLib.SocialActivity> get activities =>
+  List<CommunityPostModel> get posts => List.unmodifiable(_posts);
+  List<SocialActivityModel> get activities =>
       List.unmodifiable(_activities);
   LatLng? get mapLocation => _mapLocation;
   UserModel? get currentUser => _isDisposed ? null : _currentUser;
-  artWalkLib.ChallengeModel? get todaysChallenge => _todaysChallenge;
+  DailyChallengeModel? get todaysChallenge => _todaysChallenge;
 
   // User progress getters
   int get totalDiscoveries => _totalDiscoveries;
@@ -348,26 +352,7 @@ class DashboardViewModel extends ChangeNotifier {
       final events = await _eventService.getUpcomingPublicEvents(
         chapterId: chapterId,
       );
-      _events = events.map((e) {
-        final coverImage = _selectBestEventImage(e);
-        final artistImage = _normalizeImageUrl(e.artistHeadshotUrl);
-
-        return EventModel(
-          id: e.id,
-          title: e.title,
-          description: e.description,
-          startDate: e.dateTime,
-          location: e.location,
-          artistId: e.artistId,
-          isPublic: e.isPublic,
-          attendeeIds: e.attendeeIds,
-          createdAt: e.createdAt,
-          updatedAt: e.updatedAt,
-          imageUrl: coverImage,
-          artistProfileImageUrl: artistImage.isNotEmpty ? artistImage : null,
-          price: 0.0,
-        );
-      }).toList();
+      _events = events;
       _eventsError = null;
     } catch (e) {
       AppLogger.error('Error loading events: $e');
@@ -396,26 +381,7 @@ class DashboardViewModel extends ChangeNotifier {
         );
       }
 
-      // Convert artworkLib.ArtworkModel to core ArtworkModel
-      _artwork = artworkServiceModels
-          .map(
-            (a) => ArtworkModel(
-              id: a.id,
-              title: a.title,
-              description: a.description,
-              artistId: a.userId, // Use userId as artistId
-              imageUrl: a.imageUrl,
-              price: a.price ?? 0.0,
-              medium: a.medium,
-              tags: a.tags ?? [],
-              createdAt: a.createdAt,
-              isSold: a.isSold,
-              applauseCount: a.likesCount,
-              viewsCount: a.viewCount,
-              artistName: 'Artist', // Will be loaded separately if needed
-            ),
-          )
-          .toList();
+      _artwork = artworkServiceModels;
 
       _artworkError = null;
       AppLogger.info('✅ Loaded ${_artwork.length} artworks successfully');
@@ -440,31 +406,7 @@ class DashboardViewModel extends ChangeNotifier {
         includeCompleted: true,
       );
 
-      _books = booksServiceModels
-          .map(
-            (a) => ArtworkModel(
-              id: a.id,
-              title: a.title,
-              description: a.description,
-              artistId: a.userId,
-              imageUrl: a.imageUrl,
-              price: a.price ?? 0.0,
-              medium: a.medium,
-              tags: a.tags ?? [],
-              createdAt: a.createdAt,
-              isSold: a.isSold,
-              applauseCount: a.likesCount,
-              viewsCount: a.viewCount,
-              artistName: a.artistName,
-              contentType: a.contentType,
-              isSerializing: a.isSerializing,
-              totalChapters: a.totalChapters,
-              releasedChapters: a.releasedChapters,
-              readingMetadata: a.readingMetadata,
-              serializationConfig: a.serializationConfig,
-            ),
-          )
-          .toList();
+      _books = booksServiceModels;
 
       _booksError = null;
       AppLogger.info('✅ Loaded ${_books.length} books successfully');
@@ -483,15 +425,11 @@ class DashboardViewModel extends ChangeNotifier {
       _isLoadingArtists = true;
       if (notify) _safeNotifyListeners();
 
-      final profileService = artist_profile.ArtistProfileService();
-      final featuredArtists = await profileService.getFeaturedArtists(
-        limit: 20,
-      );
+      final featuredArtists = await _artistService.getFeaturedArtistProfiles();
       if (featuredArtists.isNotEmpty) {
         _artists = featuredArtists;
       } else {
-        // Fallback: load all artists if no featured
-        final allArtists = await profileService.getAllArtists(limit: 20);
+        final allArtists = await _artistService.getAllArtistProfiles(limit: 20);
         _artists = allArtists;
       }
       _artistsError = null;
@@ -566,7 +504,7 @@ class DashboardViewModel extends ChangeNotifier {
 
       debugPrint('🔍 DashboardViewModel: User logged in: ${user.uid}');
 
-      final allActivities = <artWalkLib.SocialActivity>[];
+      final allActivities = <SocialActivityModel>[];
 
       // Try to load nearby activities if location is available
       if (_currentLocation != null) {
@@ -739,18 +677,18 @@ class DashboardViewModel extends ChangeNotifier {
       );
 
       // Get nearby art pieces from ArtWalk service
-      final List<artWalkLib.PublicArtModel> nearbyArt = await _artWalkService
+      final List<PublicArtModel> nearbyArt = await _publicArtService
           .getPublicArtNearLocation(
             latitude: location.latitude,
             longitude: location.longitude,
             radiusKm: 10, // 10km radius
           );
-      final List<artWalkLib.PublicArtModel> limitedNearbyArt = nearbyArt
+      final List<PublicArtModel> limitedNearbyArt = nearbyArt
           .take(300)
           .toList();
 
       // Cluster markers to reduce load when many nearby items exist
-      final Map<String, List<artWalkLib.PublicArtModel>> clusters = {};
+      final Map<String, List<PublicArtModel>> clusters = {};
       const double clusterSize = 0.01; // ~1km grid
 
       for (final art in limitedNearbyArt) {
@@ -762,8 +700,8 @@ class DashboardViewModel extends ChangeNotifier {
       }
 
       for (final entry in clusters.entries) {
-        final List<artWalkLib.PublicArtModel> items = entry.value;
-        final artWalkLib.PublicArtModel first = items.first;
+        final List<PublicArtModel> items = entry.value;
+        final PublicArtModel first = items.first;
         final position = LatLng(
           first.location.latitude,
           first.location.longitude,
@@ -849,12 +787,12 @@ class DashboardViewModel extends ChangeNotifier {
       // _todaysChallenge = await _challengeService.getTodaysChallenge();
 
       // Use a test challenge instead
-      _todaysChallenge = artWalkLib.ChallengeModel(
+      _todaysChallenge = DailyChallengeModel(
         id: 'test_daily_challenge',
         userId: 'test_user',
         title: 'Art Hunter',
         description: 'Discover 3 pieces of public art in your neighborhood',
-        type: artWalkLib.ChallengeType.daily,
+        type: DailyChallengeType.daily,
         targetCount: 3,
         currentCount: 1,
         rewardXP: 150,
@@ -881,47 +819,6 @@ class DashboardViewModel extends ChangeNotifier {
 
   // Intentionally removed duplicate methods that were declared again below
 
-  String _normalizeImageUrl(String? url) {
-    final trimmed = url?.trim() ?? '';
-    if (trimmed.isEmpty) {
-      return '';
-    }
-    if (trimmed.startsWith('gs://')) {
-      final withoutScheme = trimmed.substring(5);
-      final slashIndex = withoutScheme.indexOf('/');
-      if (slashIndex == -1) {
-        return '';
-      }
-      final bucket = withoutScheme.substring(0, slashIndex);
-      final objectPath = withoutScheme.substring(slashIndex + 1);
-      final encodedPath = Uri.encodeComponent(objectPath);
-      return 'https://firebasestorage.googleapis.com/v0/b/$bucket/o/$encodedPath?alt=media';
-    }
-    return trimmed;
-  }
-
-  bool _isValidNetworkUrl(String url) {
-    final normalized = url.trim();
-    return normalized.startsWith('http://') ||
-        normalized.startsWith('https://') ||
-        normalized.contains('firebasestorage');
-  }
-
-  String? _selectBestEventImage(eventLib.ArtbeatEvent event) {
-    final candidates = <String>[
-      _normalizeImageUrl(event.eventBannerUrl),
-      ...event.imageUrls.map(_normalizeImageUrl),
-      _normalizeImageUrl(event.artistHeadshotUrl),
-    ];
-
-    for (final candidate in candidates) {
-      if (candidate.isNotEmpty && _isValidNetworkUrl(candidate)) {
-        return candidate;
-      }
-    }
-    return null;
-  }
-
   Future<void> _loadUserProgress({bool notify = true}) async {
     try {
       if (_currentUser == null) {
@@ -933,13 +830,13 @@ class DashboardViewModel extends ChangeNotifier {
         return;
       }
 
-      // Use RewardsService to get login streak
-      final rewardsService = artWalkLib.RewardsService();
       final userId = _currentUser?.id;
       int loginStreak = 0;
       if (userId != null) {
         try {
-          final loginResult = await rewardsService.processDailyLogin(userId);
+          final loginResult = await _progressionService.processDailyLogin(
+            userId,
+          );
           loginStreak = (loginResult['streak'] as int?) ?? 0;
 
           // If a new login was processed today, refresh the user model to get updated XP/Level
@@ -954,8 +851,7 @@ class DashboardViewModel extends ChangeNotifier {
       _loginStreak = loginStreak;
 
       // Optionally, still get discovery stats for other dashboard data
-      final instantDiscoveryService = artWalkLib.InstantDiscoveryService();
-      final stats = await instantDiscoveryService.getUserProgressStats();
+      final stats = await _discoveryProgressService.getUserProgressStats();
 
       _totalDiscoveries = stats['totalDiscoveries'] ?? 0;
       _currentStreak = stats['currentStreak'] ?? 0;
@@ -990,7 +886,7 @@ class DashboardViewModel extends ChangeNotifier {
 
       final subscription = await _subscriptionService.getUserSubscription();
       if (subscription != null) {
-        final success = await _artistCommunityService.followArtist(artistId);
+        final success = await _artistFollowService.followArtist(artistId);
         if (!success) {
           throw Exception('Failed to follow artist');
         }
@@ -1020,7 +916,7 @@ class DashboardViewModel extends ChangeNotifier {
 
       final subscription = await _subscriptionService.getUserSubscription();
       if (subscription != null) {
-        final success = await _artistCommunityService.unfollowArtist(artistId);
+        final success = await _artistFollowService.unfollowArtist(artistId);
         if (!success) {
           throw Exception('Failed to unfollow artist');
         }

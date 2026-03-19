@@ -87,6 +87,8 @@ class AppRoutes {
   static const String artworkTrending = '/artwork/trending';
   static const String artworkEdit = '/artwork/edit';
   static const String artworkDetail = '/artwork/detail';
+  static const String artworkAuctionManage = '/artwork/auction/manage';
+  static const String artworkAuctionSetup = '/artwork/auction-setup';
   static const String artworkPurchase = '/artwork/purchase';
 
   // Gallery routes
@@ -154,6 +156,7 @@ class AppRoutes {
   static const String artWalkExplore = '/art-walk/explore';
   static const String artWalkStart = '/art-walk/start';
   static const String artWalkNearby = '/art-walk/nearby';
+  static const String instantDiscovery = '/instant-discovery';
 
   // Community routes
   static const String communityDashboard = '/community/dashboard';

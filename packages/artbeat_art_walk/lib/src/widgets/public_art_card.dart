@@ -1,4 +1,4 @@
-import 'package:artbeat_core/artbeat_core.dart' hide GlassCard;
+import 'package:artbeat_core/artbeat_core.dart' hide GlassCard, PublicArtModel;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart' as intl;

@@ -19,6 +19,7 @@ export 'src/screens/capture_view_screen.dart';
 export 'src/screens/capture_review_screen.dart';
 export 'src/screens/capture_settings_screen.dart';
 export 'src/services/capture_service.dart';
+export 'src/services/capture_post_capture_hooks.dart';
 export 'src/services/storage_service.dart';
 export 'src/services/camera_service.dart';
 export 'src/services/advanced_camera_service.dart';

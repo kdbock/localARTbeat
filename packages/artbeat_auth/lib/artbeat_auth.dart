@@ -9,7 +9,6 @@ export 'src/services/auth_profile_service.dart';
 export 'src/screens/login_screen.dart';
 export 'src/screens/register_screen.dart';
 export 'src/screens/forgot_password_screen.dart';
-export 'src/screens/profile_create_screen.dart';
 export 'src/screens/email_verification_screen.dart';
 
 // Export constants

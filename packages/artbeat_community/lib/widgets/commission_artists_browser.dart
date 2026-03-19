@@ -1,9 +1,9 @@
 import 'dart:math' as math;
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:artbeat_artist/artbeat_artist.dart' as artist;
 import 'package:artbeat_core/artbeat_core.dart';
 
 import '../models/direct_commission_model.dart';
@@ -27,8 +27,7 @@ class CommissionArtistsBrowser extends StatefulWidget {
 
 class _CommissionArtistsBrowserState extends State<CommissionArtistsBrowser> {
   final DirectCommissionService _commissionService = DirectCommissionService();
-  final artist.ArtistProfileService _artistProfileService =
-      artist.ArtistProfileService();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final Map<String, String> _artistNames = {};
 
   bool _isLoading = false;
@@ -85,10 +84,15 @@ class _CommissionArtistsBrowserState extends State<CommissionArtistsBrowser> {
     final results = await Future.wait(
       ids.map((id) async {
         try {
-          final profile = await _artistProfileService.getArtistProfileByUserId(
-            id,
-          );
-          if (profile != null) {
+          final profileQuery = await _firestore
+              .collection('artistProfiles')
+              .where('userId', isEqualTo: id)
+              .limit(1)
+              .get();
+          if (profileQuery.docs.isNotEmpty) {
+            final profile = ArtistProfileModel.fromFirestore(
+              profileQuery.docs.first,
+            );
             return MapEntry(id, profile.displayName);
           }
         } catch (_) {}

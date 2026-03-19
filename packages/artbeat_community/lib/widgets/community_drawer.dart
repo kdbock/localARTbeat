@@ -5,10 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:artbeat_artist/artbeat_artist.dart' as artist;
-import 'package:artbeat_artwork/artbeat_artwork.dart' as artwork;
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_admin/artbeat_admin.dart';
 import '../screens/art_community_hub.dart';
 import '../screens/feed/enhanced_community_feed_screen.dart';
 import '../screens/feed/trending_content_screen.dart';
@@ -87,12 +84,12 @@ class _CommunityDrawerState extends State<CommunityDrawer> {
       _DrawerEntry(
         icon: Icons.explore,
         titleBuilder: (_) => 'community_drawer_art_discovery'.tr(),
-        screenBuilder: () => const artwork.ArtworkDiscoveryScreen(),
+        routeName: AppRoutes.artDiscovery,
       ),
       _DrawerEntry(
         icon: Icons.museum,
         titleBuilder: (_) => 'Art Gallery',
-        screenBuilder: () => const artwork.ArtworkBrowseScreen(),
+        routeName: AppRoutes.artworkBrowse,
       ),
     ];
 
@@ -105,7 +102,7 @@ class _CommunityDrawerState extends State<CommunityDrawer> {
       _DrawerEntry(
         icon: Icons.brush,
         titleBuilder: (_) => 'Become an Artist',
-        screenBuilder: () => const artist.ArtistOnboardScreen(),
+        routeName: AppRoutes.artistOnboarding,
       ),
     ];
 
@@ -136,7 +133,7 @@ class _CommunityDrawerState extends State<CommunityDrawer> {
       _DrawerEntry(
         icon: Icons.leaderboard,
         titleBuilder: (_) => 'leaderboard_title'.tr(),
-        screenBuilder: () => const LeaderboardScreen(),
+        routeName: AppRoutes.leaderboard,
       ),
     ];
 
@@ -149,7 +146,7 @@ class _CommunityDrawerState extends State<CommunityDrawer> {
       _DrawerEntry(
         icon: Icons.admin_panel_settings,
         titleBuilder: (_) => 'community_drawer_moderation'.tr(),
-        screenBuilder: () => const AdminCommunityModerationScreen(),
+        routeName: AppRoutes.communityModeration,
       ),
     ];
 
@@ -376,18 +373,22 @@ class _CommunityDrawerState extends State<CommunityDrawer> {
         (entry) => _buildDrawerItem(
           icon: entry.icon,
           title: entry.titleBuilder(context),
-          onTap: () => _navigateToScreen(context, entry.screenBuilder()),
+          onTap: () => _navigateToEntry(context, entry),
         ),
       ),
     );
     return children;
   }
 
-  void _navigateToScreen(BuildContext context, Widget screen) {
+  void _navigateToEntry(BuildContext context, _DrawerEntry entry) {
     Navigator.pop(context); // Close drawer
+    if (entry.routeName != null) {
+      Navigator.pushNamed(context, entry.routeName!);
+      return;
+    }
     Navigator.push<Widget>(
       context,
-      MaterialPageRoute<Widget>(builder: (context) => screen),
+      MaterialPageRoute<Widget>(builder: (context) => entry.screenBuilder!()),
     );
   }
 }
@@ -395,11 +396,16 @@ class _CommunityDrawerState extends State<CommunityDrawer> {
 class _DrawerEntry {
   final IconData icon;
   final String Function(BuildContext) titleBuilder;
-  final Widget Function() screenBuilder;
+  final Widget Function()? screenBuilder;
+  final String? routeName;
 
   const _DrawerEntry({
     required this.icon,
     required this.titleBuilder,
-    required this.screenBuilder,
-  });
+    this.screenBuilder,
+    this.routeName,
+  }) : assert(
+         screenBuilder != null || routeName != null,
+         'Either screenBuilder or routeName must be provided.',
+       );
 }

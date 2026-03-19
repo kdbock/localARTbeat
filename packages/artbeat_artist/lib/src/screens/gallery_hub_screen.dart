@@ -4,7 +4,6 @@ import 'dart:math' as math;
 import 'package:artbeat_core/artbeat_core.dart' as core;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:artbeat_community/artbeat_community.dart' as community;
-import 'package:artbeat_artwork/artbeat_artwork.dart' as artwork;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -1212,13 +1211,8 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute<void>(
-                    builder: (context) =>
-                        const artwork.ArtistArtworkManagementScreen(),
-                  ),
-                ),
+                onTap: () =>
+                    Navigator.pushNamed(context, core.AppRoutes.artistArtwork),
               ),
             ),
             const SizedBox(width: 12),
@@ -1745,14 +1739,7 @@ class _GalleryHubScreenState extends State<GalleryHubScreen> {
   }
 
   void _navigateToAuctionWizard(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute<void>(
-        builder: (context) => const artwork.AuctionSetupWizardScreen(
-          mode: artwork.AuctionSetupMode.firstTime,
-        ),
-      ),
-    );
+    Navigator.pushNamed(context, core.AppRoutes.artworkAuctionSetup);
   }
 
   void _maybeLogGalleryHubImageStats() {

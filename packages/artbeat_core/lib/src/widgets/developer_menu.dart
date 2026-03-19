@@ -1,19 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:artbeat_admin/artbeat_admin.dart';
 import 'feedback_form.dart';
 import '../services/onboarding_service.dart';
+import '../routing/app_routes.dart';
 
 /// Developer menu with admin upload screens only
 /// Refactored to use unified admin tools from artbeat_admin
 class DeveloperMenu extends StatelessWidget {
   const DeveloperMenu({super.key});
-
-  void _navigateToScreen(BuildContext context, Widget screen) {
-    Navigator.of(
-      context,
-      rootNavigator: true,
-    ).push(MaterialPageRoute<dynamic>(builder: (context) => screen));
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,18 +35,18 @@ class DeveloperMenu extends StatelessWidget {
               leading: const Icon(Icons.upload_file),
               title: const Text('Admin Upload Tools'),
               subtitle: const Text('Consolidated data management'),
-              onTap: () => _navigateToScreen(
+              onTap: () => Navigator.of(
                 context,
-                const ModernUnifiedAdminUploadToolsScreen(),
-              ),
+                rootNavigator: true,
+              ).pushNamed('/admin/upload-tools'),
             ),
             ListTile(
               leading: const Icon(Icons.feedback),
               title: const Text('Developer Feedback Admin'),
-              onTap: () => _navigateToScreen(
+              onTap: () => Navigator.of(
                 context,
-                const ModernUnifiedAdminUploadToolsScreen(), // Feedback moderation integrated here
-              ),
+                rootNavigator: true,
+              ).pushNamed('/admin/upload-tools'),
             ),
             ListTile(
               leading: const Icon(Icons.rate_review),
@@ -74,10 +67,10 @@ class DeveloperMenu extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.admin_panel_settings),
               title: const Text('Unified Admin Dashboard'),
-              onTap: () => _navigateToScreen(
+              onTap: () => Navigator.of(
                 context,
-                const ModernUnifiedAdminDashboard(),
-              ),
+                rootNavigator: true,
+              ).pushNamed(AppRoutes.adminDashboard),
             ),
             const Divider(),
             ListTile(

@@ -37,7 +37,8 @@ Handles payments for artists or businesses to promote content within the ArtBeat
 - **Payment Method**: **Stripe only** (Apple forbids IAP for advertising services).
 - **Key Methods**:
   - `processAdPayment()`: Processes ad campaign funding and targeting metadata.
-- **Frontend Integration**: `AdsScreen` (artbeat_core/artbeat_ads).
+- **Frontend Integration**: `AdsRouteScreen` in the app shell, backed by
+  `artbeat_ads`.
 
 ## 4. Direct Commissions
 A multi-step financial process for custom artist commissions involving deposits, milestones, and final payouts.

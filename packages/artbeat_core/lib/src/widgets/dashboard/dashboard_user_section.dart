@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_art_walk/src/models/achievement_model.dart' as art_walk;
 import '../user_experience_card.dart';
 import '../achievement_badge.dart';
 
@@ -30,7 +29,7 @@ class DashboardUserSection extends StatelessWidget {
   }
 
   List<AchievementBadgeData> _convertAchievements(
-    List<art_walk.AchievementModel> achievements,
+    List<AchievementModel> achievements,
   ) {
     return achievements
         .map(

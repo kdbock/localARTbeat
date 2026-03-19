@@ -1,239 +1,200 @@
-I  reviewed the repo structure again across the main areas: app code, all package folders, backend/functions, Firebase config, docs, scripts, CI, platform folders, generated/build residue, and root-level operational files. I did not manually read every file in full, but I did re-scan every major folder and enough representative files to make a full-structure recommendation grounded in this repo rather than in theory.
+# ARTbeat Status And Next Steps
 
-Bottom Line
-You do not need a rewrite. For a first app that is already live on iOS and Android, the right move is controlled consolidation: reduce coupling, reduce repo noise, reduce production risk, and make future work cheaper. The repo’s biggest issue is not that it lacks features. It’s that product code, shared code, platform code, build residue, scripts, docs, and operational artifacts are mixed together in a way that raises the cost of every change.
+This file replaces the original repo review with the current execution status.
+The original conclusion still stands: this app does not need a rewrite. It
+needs controlled consolidation, safer boundaries, cleaner operational
+workflows, and lower release risk.
 
-The main signals behind that conclusion are:
+## Bottom Line
 
-The app boots from lib/main.dart and is wired in lib/app.dart, but most real functionality lives across 14 local packages declared in pubspec.yaml.
-artbeat_core is not truly foundational; it depends on many sibling feature packages in packages/artbeat_core/pubspec.yaml.
-Several feature packages also depend on each other, so boundaries are organizational, not architectural.
-The repo root contains product files plus logs, scripts, JSON extracts, test helpers, credentials-like files, and one-off operational artifacts.
-Some package folders contain committed local/build residue like .dart_tool, build, nested .git, and even a package-local ios/Pods tree under packages/artbeat_profile.
-The operational layer is large and fragmented: functions/, docs/, many translation scripts, legal/security rollout docs, deployment scripts, and Firebase rules all coexist without a single obvious “source of truth” workflow.
-What I’d Recommend
-I’d treat the repo as 8 systems and improve them in this order.
+Major progress has been made on the highest-risk architecture issue:
+cross-package coupling.
 
-Production Safety
-This is first because the app is live.
-Recommendation:
+The repo is now materially safer to change than it was when the review started.
+The biggest win is that `artbeat_core` has been reduced from a broad
+cross-feature hub to a nearly clean base package.
 
-Freeze architecture rewrites for now.
-Add a “safe change zone” policy: changes should prefer app shell, isolated feature screens, tests, and bug fixes over cross-package moves.
-Define the current production-critical surfaces explicitly:
-startup: lib/main.dart
-app wiring: lib/app.dart
-routing: lib/src/routing/app_router.dart
-payments: docs point to packages/artbeat_core/lib/src/services/unified_payment_service.dart
-Firebase rules: firestore.rules, storage.rules
-functions: functions/src/index.js
-Why:
+## What Is Done
 
-Right now, one change can affect many packages. Until boundaries improve, production safety needs to come from process.
-Repo Hygiene
-This is the fastest high-value win.
-Recommendation:
+### Documentation and operating structure
 
-Separate “source” from “artifacts”.
-Keep only durable source and docs in git.
-Remove or ignore:
-root logs like firebase-debug.log, flutter_01.log, test_results.log
-local env files
-package-local build output and .dart_tool
-nested platform build trees not intended as source
-accidental nested git repos inside packages if they are not intentional
-Tighten /.gitignore, which already has the right idea but the working tree still contains a lot of local/generated material.
-Create a tools/ or ops/ directory and move one-off root scripts and data extracts there.
-Move ad hoc root text/data files into docs/archive/, tools/, or tmp/ as appropriate.
-Why:
+- Canonical project-control docs now exist under `docs/`.
+- Active work is tracked in `docs/WORK_QUEUE.md`.
+- Architecture and dependency policy are tracked in:
+  - `docs/ARCHITECTURE.md`
+  - `docs/DEPENDENCY_RULES.md`
+  - `docs/PACKAGE_DEPENDENCY_INVENTORY.md`
+  - `docs/DECISIONS.md`
 
-Your repo root currently behaves like a desk, not a product boundary.
-Package Boundary Repair
-This is the core architecture issue.
-Current state:
+### Localization workflow
 
-artbeat_core is acting as both base layer and orchestration layer.
-Feature packages consume each other heavily.
-The app is modular in directory layout, but not in dependency direction.
-Target state:
+- English is treated as the canonical locale source.
+- Locale parity is now enforced with:
+  - `tools/localization/report_missing_keys.py`
+  - `test/localization_key_parity_test.dart`
+- `assets/translations/missing_keys.md` is now generated from actual locale state instead of hand-maintained notes.
 
-artbeat_core: only shared primitives, models, theme, utilities, low-level services, route constants that are truly cross-app.
-Feature packages: auth, profile, artwork, events, community, messaging, capture, art_walk, settings, sponsorships, admin.
-Root app: composition layer that wires providers, routes, and feature integration.
-Practical rule:
+### Repo hygiene
 
-Feature packages may depend on core.
-The app may depend on all features.
-core should not depend on feature packages.
-Feature-to-feature deps should be reduced to explicit shared interfaces or moved upward into the app shell.
-What to move first:
+- Ignore coverage and cleanup policy were improved.
+- Archived docs and tool destinations were created.
+- Accidental nested git residue under `packages/artbeat_admin/.git` was removed.
+- Root clutter has been reduced in stages.
 
-Anything in artbeat_core that is feature-specific.
-Anything in core that imports feature screens or feature workflows.
-Cross-feature orchestration logic should move to the top app layer or a dedicated “app shell” package.
-Why:
+This work is not finished yet.
 
-This gives you the biggest long-term stability gain without changing UI behavior first.
-App Shell Clarification
-Right now the app shell is split across root lib/ and artbeat_core.
-Recommendation:
+### Package boundary repair
 
-Make root lib/ the only app composition layer.
-Keep these responsibilities in the app shell:
-app startup
-provider wiring
-route registration
-feature integration
-environment bootstrap
-Keep feature implementation inside packages.
-Concrete anchors:
+This has been the main area of progress.
 
-lib/main.dart
-lib/app.dart
-lib/src/routing/app_router.dart
-Why:
+Completed package cleanup highlights:
 
-It becomes clear what is framework/application glue versus reusable domain code.
-Testing Structure
-Testing exists, but it is uneven and scattered between root and packages.
-Recommendation:
+- `artbeat_profile` now depends only on `artbeat_core`
+- `artbeat_admin` now depends only on `artbeat_core`
+- `artbeat_auth` now depends only on `artbeat_core`
+- `artbeat_messaging` now depends only on `artbeat_core`
+- `artbeat_settings` now depends only on `artbeat_core`
+- `artbeat_ads` now depends only on `artbeat_core`
 
-Keep three clear levels:
-package unit tests
-root app integration/widget tests for app wiring
-backend/rules verification
-Expand tests around the highest-risk coupling points:
-auth/profile routing
-dashboard bootstrap
-payments
-localization key coverage
-Firestore rules and deletion flows
-Use test/README.md and docs/TESTING_GUIDE.md as seeds, then replace ad hoc testing docs with one canonical testing guide.
-Add a dependency-policy check in CI: if artbeat_core imports a feature package, fail the build once you begin boundary cleanup.
-Why:
+Major cross-feature cuts completed:
 
-In a coupled app, tests are your main shock absorbers.
-Localization Workflow
-Localization is functional but operationally messy.
-What I saw:
+- `artbeat_auth -> artbeat_profile`
+- `artbeat_events -> artbeat_auth`
+- `artbeat_settings -> artbeat_artist/events`
+- `artbeat_capture -> artbeat_art_walk`
+- `artbeat_artist <-> artbeat_artwork`
+- `artbeat_profile -> artbeat_auth/capture/art_walk`
+- `artbeat_community -> messaging/artist/admin/events/artwork/art_walk`
+- `artbeat_art_walk -> ads/community/profile/events/settings/capture`
+- `artbeat_admin -> messaging/ads/events/community/capture/art_walk/artwork`
 
-Runtime translations under assets/translations/
-Missing key tracker in assets/translations/missing_keys.md
-Guard test in test/sponsorship_localization_keys_test.dart
-Many translation scripts in scripts/
-Recommendation:
+### `artbeat_core` reduction
 
-Declare English as the canonical key source.
-Add one script that:
-validates all locale key parity
-reports missing keys
-optionally updates missing_keys.md
-Archive or consolidate the many one-off translation scripts into a smaller workflow:
-extract
-validate
-apply
-Decide whether artbeat_core/assets/translations is authoritative or whether only root assets/translations is.
-Why:
+This was the original highest-leverage architecture problem.
 
-Right now localization works, but the maintenance system is fragmented.
-Docs and Ops Consolidation
-The docs folder is large and useful, but not curated.
-What I saw:
+`artbeat_core` no longer depends on:
 
-legal/security rollout docs
-deployment and testing docs
-feature implementation notes
-ad hoc progress reports and QA notes
-Recommendation:
+- `artbeat_auth`
+- `artbeat_settings`
+- `artbeat_sponsorships`
+- `artbeat_profile`
+- `artbeat_admin`
+- `artbeat_ads`
+- `artbeat_capture`
+- `artbeat_artist`
+- `artbeat_events`
+- `artbeat_messaging`
+- `artbeat_community`
+- `artbeat_artwork`
 
-Split docs into:
-docs/product/
-docs/engineering/
-docs/operations/
-docs/archive/
-Keep only evergreen docs at the top level.
-Move dated status notes like docs/IMPLEMENTATION_PROGRESS.md and docs/manual_qa_result.md into an archive or docs/reports/.
-Keep one canonical deployment doc and one canonical test doc.
-Why:
+Core now owns most of the read/write surfaces it previously borrowed from other
+feature packages:
 
-Right now the docs are informative, but not navigable.
-Backend and Rules Discipline
-The backend layer is meaningful and deserves to be treated as its own subsystem.
-What I saw:
+- artwork reads
+- event reads
+- artist reads
+- community post reads
+- commission previews
+- unread messaging status
+- user blocking
+- achievement reads
+- progression metadata
+- daily challenge reads
+- social activity reads
+- nearby art reads
+- discovery progress reads
 
-functions entry at functions/src/index.js
-Firebase config at firebase.json
-Firestore rules at firestore.rules
-Data Connect config under dataconnect/
-Recommendation:
+Only one `artbeat_core -> artbeat_art_walk` dependency remains, and it is now
+temporary tooling rather than live app behavior.
 
-Split functions by domain instead of keeping growth centered in one large entry file.
-Add backend ownership structure:
-notifications
-payments
-legal/data rights
-maintenance/backfills
-Add rules tests and function smoke tests as first-class CI steps, not only rollout docs/scripts.
-Clarify whether dataconnect/ is active, experimental, or dormant. If dormant, archive it.
-Why:
+## Current Graph Snapshot
 
-Functions and rules are production-critical; they should not feel like adjunct code.
-Scaled Roadmap
-This is the version I’d actually recommend for a live first app.
+From `docs/PACKAGE_DEPENDENCY_INVENTORY.md`:
 
-Phase 0: 1 week, low risk
+- `artbeat_core` still depends on `artbeat_art_walk`
+- `artbeat_admin`, `artbeat_profile`, `artbeat_auth`, `artbeat_messaging`,
+  `artbeat_settings`, and `artbeat_ads` depend only on `artbeat_core`
+- the remaining higher-coupling feature packages are:
+  - `artbeat_artist`
+  - `artbeat_artwork`
+  - `artbeat_sponsorships`
+  - `artbeat_events`
+  - `artbeat_art_walk`
 
-Clean repo root.
-Tighten .gitignore.
-Remove committed/generated residue from packages where safe.
-Create folder policy for docs/, scripts/, tools/, tmp/.
-Define the current architecture in one short doc.
-Consolidate production-critical entry points and owners.
-Phase 1: 2 to 4 weeks, low to medium risk
+## What Is Still In Progress
 
-Stop adding new feature-specific code to artbeat_core.
-Move orchestration code out of core into app shell where appropriate.
-Standardize translation validation.
-Standardize docs for deploy/test/local setup.
-Add CI checks for package analyze/test consistency.
-Phase 2: 1 to 2 months, medium risk
+### 1. Finish repo hygiene
 
-Reduce feature-to-feature dependencies one package at a time.
-Introduce dependency rules:
-core cannot import features
-features should not import each other except temporarily approved cases
-Create shared interface/service abstractions where needed instead of direct imports.
-Split functions by domain.
-Phase 3: ongoing, higher leverage
+Still open:
 
-Reorganize packages by domain confidence:
-stable reusable packages stay packages
-app-specific glue stays in root app
-experimental or half-shared code moves out of core
-Build architecture docs that reflect reality, not aspiration.
-Add release-train discipline: “safe change”, “needs regression”, “needs canary”.
-Specific Risks I’d Call Out
-These are worth addressing sooner rather than later.
+- remaining tracked root cleanup
+- final decision on `packages/artbeat_profile/ios`
+- continued separation of durable source from local/generated artifacts
 
-Root contains sensitive/local-looking files such as service-account-key.json, .env, .env.local, key.properties. They may be ignored, but they should not casually coexist in the main product root.
-scripts/setup_env_local.sh contains a live publishable Stripe key. Publishable is not secret, but it still indicates config drift and should be centralized.
-Package folders contain local residue that should not be part of your architectural surface.
-packages/artbeat_profile appears to contain its own iOS project artifacts, which is unusual for a feature package and increases confusion.
-artbeat_core is oversized by role and file count, and that is the best signal for where architecture debt is concentrated.
-What Good Looks Like For This App
-For your app, “good” is not “perfect clean architecture.” Good is:
+Primary tracking doc:
 
-predictable change impact
-fewer cross-package surprises
-cleaner repo root
-clear app shell versus shared package boundaries
-repeatable translation/testing/deploy workflows
-lower release anxiety
-That is realistic for a live first app. The right bar is not elegance. It is controlled complexity.
+- `docs/REPO_HYGIENE.md`
 
-If you want, I can do the next step and turn this into a concrete refactor plan with:
+### 2. Finish `artbeat_core` cleanup
 
-exact folders to keep/move/archive,
-a target dependency policy for each package,
-and a step-by-step “do this without breaking production” sequence.
+Only one live manifest edge remains:
 
+- `artbeat_core -> artbeat_art_walk`
+
+Current reason:
+
+- temporary XP repair tool at `packages/artbeat_core/lib/src/widgets/temp_xp_fix.dart`
+
+Next action:
+
+- replace the `RewardsService` usage there with a core-local equivalent, or
+- delete/archive the temporary tool if it is no longer needed
+
+Then:
+
+- remove `artbeat_art_walk` from `packages/artbeat_core/pubspec.yaml`
+
+### 3. Compliance and release follow-up
+
+Still open:
+
+- legal/security follow-up items
+- production canary sign-off completion
+- admin deletion fulfillment reliability
+
+Primary trackers:
+
+- `docs/WORK_QUEUE.md`
+- `docs/KNOWN_ISSUES.md`
+
+### 4. Backend/rules cleanup
+
+Still largely untouched:
+
+- split large function domains under `functions/src/index.js`
+- clarify `dataconnect/`
+- strengthen backend/rules testing discipline
+
+## Recommended Next Phase
+
+Do not continue broad refactors by default.
+
+Recommended order:
+
+1. Finish the last `artbeat_core -> artbeat_art_walk` dependency.
+2. Complete repo hygiene decisions and cleanup.
+3. Address legal/security and release-process follow-up.
+4. Start backend/functions modularization only after the above is stable.
+
+## What Good Looks Like Now
+
+For this app, success is:
+
+- predictable change impact
+- lower release anxiety
+- a clean app-shell boundary
+- fewer cross-package surprises
+- repeatable translation, testing, and release workflows
+- `artbeat_core` acting like a true shared foundation
+
+That is already much closer than it was at the start of this review.

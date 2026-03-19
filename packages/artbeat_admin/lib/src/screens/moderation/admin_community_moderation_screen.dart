@@ -2,7 +2,9 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_community/artbeat_community.dart';
+
+import '../../models/admin_community_moderation_models.dart';
+import '../../services/admin_community_moderation_service.dart';
 
 class AdminCommunityModerationScreen extends StatefulWidget {
   const AdminCommunityModerationScreen({super.key});
@@ -16,11 +18,12 @@ class _AdminCommunityModerationScreenState
     extends State<AdminCommunityModerationScreen>
     with SingleTickerProviderStateMixin {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-  final ModerationService _moderationService = ModerationService();
+  final AdminCommunityModerationService _moderationService =
+      AdminCommunityModerationService();
   late final TabController _tabController;
 
-  List<PostModel> _flaggedPosts = [];
-  List<CommentModel> _flaggedComments = [];
+  List<AdminModeratedPost> _flaggedPosts = [];
+  List<AdminModeratedComment> _flaggedComments = [];
   bool _isLoading = true;
 
   @override
@@ -64,7 +67,7 @@ class _AdminCommunityModerationScreenState
     }
   }
 
-  Future<void> _approvePost(PostModel post) async {
+  Future<void> _approvePost(AdminModeratedPost post) async {
     try {
       await _moderationService.approvePost(post.id);
       if (!mounted) return;
@@ -79,7 +82,7 @@ class _AdminCommunityModerationScreenState
     }
   }
 
-  Future<void> _removePost(PostModel post) async {
+  Future<void> _removePost(AdminModeratedPost post) async {
     try {
       await _moderationService.removePost(post.id);
       if (!mounted) return;
@@ -94,7 +97,7 @@ class _AdminCommunityModerationScreenState
     }
   }
 
-  Future<void> _approveComment(CommentModel comment) async {
+  Future<void> _approveComment(AdminModeratedComment comment) async {
     try {
       await _moderationService.approveComment(comment.id);
       if (!mounted) return;
@@ -109,7 +112,7 @@ class _AdminCommunityModerationScreenState
     }
   }
 
-  Future<void> _removeComment(CommentModel comment) async {
+  Future<void> _removeComment(AdminModeratedComment comment) async {
     try {
       await _moderationService.removeComment(comment.id);
       if (!mounted) return;
@@ -147,7 +150,7 @@ class _AdminCommunityModerationScreenState
       timestamps.add(post.flaggedAt ?? post.createdAt);
     }
     for (final comment in _flaggedComments) {
-      timestamps.add(comment.flaggedAt ?? comment.createdAt.toDate());
+      timestamps.add(comment.flaggedAt ?? comment.createdAt);
     }
     if (timestamps.isEmpty) return null;
     timestamps.sort();

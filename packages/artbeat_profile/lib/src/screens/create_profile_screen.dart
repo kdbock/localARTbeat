@@ -3,7 +3,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_auth/artbeat_auth.dart' show AuthRoutes;
 import 'dart:io';
 
 /// Initial profile creation screen for new users who have authenticated
@@ -132,7 +131,7 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
         widget.onProfileCreated?.call();
 
         // Navigate to dashboard
-        Navigator.of(context).pushReplacementNamed(AuthRoutes.dashboard);
+        Navigator.of(context).pushReplacementNamed(AppRoutes.dashboard);
       }
     } catch (e) {
       setState(() {

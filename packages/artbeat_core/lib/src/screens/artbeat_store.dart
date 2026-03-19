@@ -1,9 +1,6 @@
 import 'dart:ui';
 
-import 'package:artbeat_core/artbeat_core.dart' hide ArtworkModel;
-import 'package:artbeat_artwork/artbeat_artwork.dart';
-import 'package:artbeat_community/artbeat_community.dart'
-    show CommissionArtistsBrowser;
+import 'package:artbeat_core/artbeat_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -515,7 +512,7 @@ class _ArtbeatStoreScreenState extends State<ArtbeatStoreScreen> {
   Widget _buildAdsPreview() {
     return const Padding(
       padding: EdgeInsets.symmetric(horizontal: 24),
-      child: AdsScreen(isPreview: true),
+      child: AdsPreviewCard(),
     );
   }
 
@@ -528,7 +525,7 @@ class _ArtbeatStoreScreenState extends State<ArtbeatStoreScreen> {
           color: Colors.white.withValues(alpha: 0.03),
           border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
         ),
-        child: const CommissionArtistsBrowser(showHeader: false),
+        child: const CommissionArtistsPreview(showHeader: false),
       ),
     );
   }

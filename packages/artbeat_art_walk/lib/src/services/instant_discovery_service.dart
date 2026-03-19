@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
 import 'package:async/async.dart' show StreamGroup;
-import 'package:artbeat_core/artbeat_core.dart';
+import 'package:artbeat_core/artbeat_core.dart' hide PublicArtModel;
 import 'package:artbeat_art_walk/src/models/public_art_model.dart';
 import 'package:artbeat_sponsorships/artbeat_sponsorships.dart';
 import 'rewards_service.dart';

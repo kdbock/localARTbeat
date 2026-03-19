@@ -1,54 +1,171 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:artbeat_core/artbeat_core.dart';
+// ignore_for_file: subtype_of_sealed_class
+
 import 'package:artbeat_capture/artbeat_capture.dart';
-import 'package:artbeat_art_walk/artbeat_art_walk.dart' as art_walk;
+import 'package:artbeat_core/artbeat_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:geolocator/geolocator.dart';
 
-import 'capture_service_test.mocks.dart';
+class StubUserService extends Fake implements UserService {
+  bool incrementResult = true;
 
-@GenerateMocks([
-  FirebaseFirestore,
-  CollectionReference,
-  DocumentReference,
-  QuerySnapshot,
-  QueryDocumentSnapshot,
-  Connectivity,
-  UserService,
-  art_walk.RewardsService,
-  Query,
-])
+  @override
+  Future<bool> incrementUserCaptureCount(String userId) async => incrementResult;
+}
+
+class StubConnectivity extends Fake implements Connectivity {
+  StubConnectivity(this.results);
+
+  List<ConnectivityResult> results;
+
+  @override
+  Future<List<ConnectivityResult>> checkConnectivity() async => results;
+}
+
+class FakeCapturePostCaptureHooks extends Fake
+    implements CapturePostCaptureHooks {
+  @override
+  Future<void> awardCaptureApprovedXp() async {}
+
+  @override
+  Future<void> awardCaptureCreatedXp() async {}
+
+  @override
+  Future<void> checkCaptureAchievements(String userId) async {}
+
+  @override
+  Future<void> postCaptureActivity({
+    required CaptureModel capture,
+    required String userName,
+    String? userAvatar,
+    Position? location,
+  }) async {}
+
+  @override
+  Future<void> recordCaptureChallengeProgress() async {}
+
+  @override
+  Future<void> updateWeeklyPhotographyGoals() async {}
+}
+
+class StubFirebaseFirestore extends Fake implements FirebaseFirestore {
+  StubFirebaseFirestore(this.collections);
+
+  final Map<String, StubCollectionReference<Map<String, dynamic>>> collections;
+
+  @override
+  CollectionReference<Map<String, dynamic>> collection(String path) {
+    final collection = collections[path];
+    if (collection == null) {
+      throw StateError('No stubbed collection for $path');
+    }
+    return collection;
+  }
+}
+
+class StubCollectionReference<T extends Object?> extends Fake
+    implements CollectionReference<T>, Query<T> {
+  StubCollectionReference({
+    required List<QueryDocumentSnapshot<T>> docs,
+    String documentId = 'new_doc_id',
+  }) : _docs = docs,
+       _documentId = documentId;
+
+  final List<QueryDocumentSnapshot<T>> _docs;
+  final String _documentId;
+  final List<T> addedPayloads = <T>[];
+
+  @override
+  Query<T> where(
+    Object field, {
+    Object? isEqualTo,
+    Object? isNotEqualTo,
+    Object? isLessThan,
+    Object? isLessThanOrEqualTo,
+    Object? isGreaterThan,
+    Object? isGreaterThanOrEqualTo,
+    Object? arrayContains,
+    Iterable<Object?>? arrayContainsAny,
+    Iterable<Object?>? whereIn,
+    Iterable<Object?>? whereNotIn,
+    bool? isNull,
+  }) => this;
+
+  @override
+  Query<T> orderBy(Object field, {bool descending = false}) => this;
+
+  @override
+  Future<QuerySnapshot<T>> get([GetOptions? options]) async =>
+      StubQuerySnapshot<T>(_docs);
+
+  @override
+  Future<DocumentReference<T>> add(T data) async {
+    addedPayloads.add(data);
+    return StubDocumentReference<T>(_documentId);
+  }
+}
+
+class StubQuerySnapshot<T extends Object?> extends Fake
+    implements QuerySnapshot<T> {
+  StubQuerySnapshot(this._docs);
+
+  final List<QueryDocumentSnapshot<T>> _docs;
+
+  @override
+  List<QueryDocumentSnapshot<T>> get docs => _docs;
+}
+
+class StubQueryDocumentSnapshot<T extends Object?> extends Fake
+    implements QueryDocumentSnapshot<T> {
+  StubQueryDocumentSnapshot(this._id, this._data);
+
+  final String _id;
+  final T _data;
+
+  @override
+  String get id => _id;
+
+  @override
+  T data() => _data;
+}
+
+class StubDocumentReference<T extends Object?> extends Fake
+    implements DocumentReference<T> {
+  StubDocumentReference(this._id);
+
+  final String _id;
+
+  @override
+  String get id => _id;
+}
+
 void main() {
-  late MockFirebaseFirestore mockFirestore;
-  late MockCollectionReference<Map<String, dynamic>> mockCollection;
-  late MockQuery<Map<String, dynamic>> mockQuery;
-  late MockQuerySnapshot<Map<String, dynamic>> mockSnapshot;
-  late MockQueryDocumentSnapshot<Map<String, dynamic>> mockDocSnapshot;
-  late MockConnectivity mockConnectivity;
-  late MockUserService mockUserService;
-  late MockRewardsService mockRewardsService;
+  late StubCollectionReference<Map<String, dynamic>> capturesCollection;
+  late StubFirebaseFirestore firestore;
+  late StubConnectivity connectivity;
+  late StubUserService userService;
+  late FakeCapturePostCaptureHooks fakePostCaptureHooks;
   late CaptureService captureService;
 
   setUp(() {
-    mockFirestore = MockFirebaseFirestore();
-    mockCollection = MockCollectionReference<Map<String, dynamic>>();
-    mockQuery = MockQuery<Map<String, dynamic>>();
-    mockSnapshot = MockQuerySnapshot<Map<String, dynamic>>();
-    mockDocSnapshot = MockQueryDocumentSnapshot<Map<String, dynamic>>();
-    mockConnectivity = MockConnectivity();
-    mockUserService = MockUserService();
-    mockRewardsService = MockRewardsService();
+    capturesCollection = StubCollectionReference<Map<String, dynamic>>(
+      docs: <QueryDocumentSnapshot<Map<String, dynamic>>>[],
+    );
+    firestore = StubFirebaseFirestore({
+      'captures': capturesCollection,
+      'publicArt': StubCollectionReference<Map<String, dynamic>>(docs: const []),
+    });
+    connectivity = StubConnectivity(const <ConnectivityResult>[]);
+    userService = StubUserService();
+    fakePostCaptureHooks = FakeCapturePostCaptureHooks();
 
     captureService = CaptureService.withDependencies(
-      firestore: mockFirestore,
-      connectivity: mockConnectivity,
-      userService: mockUserService,
-      rewardsService: mockRewardsService,
+      firestore: firestore,
+      connectivity: connectivity,
+      userService: userService,
+      postCaptureHooks: fakePostCaptureHooks,
     );
-
-    when(mockFirestore.collection(any)).thenReturn(mockCollection);
   });
 
   group('CaptureService Tests', () {
@@ -56,22 +173,27 @@ void main() {
       const userId = 'test_user';
       final now = DateTime.now();
 
-      when(
-        mockCollection.where('userId', isEqualTo: userId),
-      ).thenReturn(mockQuery);
-      when(
-        mockQuery.orderBy('createdAt', descending: true),
-      ).thenReturn(mockQuery);
-      when(mockQuery.get()).thenAnswer((_) async => mockSnapshot);
-      when(mockSnapshot.docs).thenReturn([mockDocSnapshot]);
-      when(mockDocSnapshot.id).thenReturn('doc_123');
-      when(mockDocSnapshot.data()).thenReturn({
-        'userId': userId,
-        'title': 'Test Capture',
-        'imageUrl': 'https://example.com/image.jpg',
-        'createdAt': Timestamp.fromDate(now),
-        'status': 'approved',
+      capturesCollection = StubCollectionReference<Map<String, dynamic>>(
+        docs: <QueryDocumentSnapshot<Map<String, dynamic>>>[
+          StubQueryDocumentSnapshot<Map<String, dynamic>>('doc_123', {
+            'userId': userId,
+            'title': 'Test Capture',
+            'imageUrl': 'https://example.com/image.jpg',
+            'createdAt': Timestamp.fromDate(now),
+            'status': 'approved',
+          }),
+        ],
+      );
+      firestore = StubFirebaseFirestore({
+        'captures': capturesCollection,
+        'publicArt': StubCollectionReference<Map<String, dynamic>>(docs: const []),
       });
+      captureService = CaptureService.withDependencies(
+        firestore: firestore,
+        connectivity: connectivity,
+        userService: userService,
+        postCaptureHooks: fakePostCaptureHooks,
+      );
 
       final results = await captureService.getCapturesForUser(userId);
 
@@ -92,16 +214,8 @@ void main() {
         title: 'Online Capture',
       );
 
-      when(
-        mockConnectivity.checkConnectivity(),
-      ).thenAnswer((_) async => [ConnectivityResult.wifi]);
-
-      final mockDocRef = MockDocumentReference<Map<String, dynamic>>();
-      when(mockCollection.add(any)).thenAnswer((_) async => mockDocRef);
-      when(mockDocRef.id).thenReturn('new_doc_id');
-      when(
-        mockUserService.incrementUserCaptureCount(any),
-      ).thenAnswer((_) async => true);
+      connectivity.results = <ConnectivityResult>[ConnectivityResult.wifi];
+      userService.incrementResult = true;
 
       final result = await captureService.saveCaptureWithOfflineSupport(
         capture: capture,
@@ -109,15 +223,14 @@ void main() {
       );
 
       expect(result, 'new_doc_id');
-      verify(mockCollection.add(any)).called(1);
+      expect(capturesCollection.addedPayloads, hasLength(1));
     });
 
     test(
       'saveCaptureWithOfflineSupport uses offline queue when offline',
       () async {
-        // Since OfflineQueueService is also a singleton and not injected,
-        // this test might be tricky without refactoring it too.
-        // For now, let's focus on what we can easily test.
+        // OfflineQueueService is still a singleton with local persistence, so
+        // this remains better covered by integration-style tests.
       },
     );
   });

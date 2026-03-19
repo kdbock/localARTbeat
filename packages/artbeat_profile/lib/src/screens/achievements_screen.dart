@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_art_walk/artbeat_art_walk.dart' as walk;
 import 'package:artbeat_profile/widgets/widgets.dart' as profile_widgets;
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
+import '../models/profile_achievement_model.dart';
+import '../services/profile_achievement_read_service.dart';
+import '../services/profile_rewards_service.dart';
 
 class AchievementsScreen extends StatefulWidget {
   const AchievementsScreen({super.key});
@@ -15,7 +16,10 @@ class AchievementsScreen extends StatefulWidget {
 class _AchievementsScreenState extends State<AchievementsScreen>
     with SingleTickerProviderStateMixin {
   UserModel? _user;
-  List<walk.AchievementModel> _achievements = [];
+  final ProfileAchievementReadService _achievementService =
+      ProfileAchievementReadService();
+  final ProfileRewardsService _rewardsService = ProfileRewardsService();
+  List<ProfileAchievementModel> _achievements = [];
   Map<String, dynamic> _userBadges = {};
   List<String> _unviewedBadges = [];
   bool _isLoading = true;
@@ -41,15 +45,15 @@ class _AchievementsScreenState extends State<AchievementsScreen>
     setState(() => _isLoading = true);
 
     try {
-      final userService = context.read<UserService>();
-      final achievementService = context.read<walk.AchievementService>();
-      final rewardsService = context.read<walk.RewardsService>();
+      final userService = UserService();
 
       _user = await userService.getCurrentUserModel();
       if (_user != null) {
-        _achievements = await achievementService.getUserAchievements();
-        _userBadges = await rewardsService.getUserBadges(_user!.id);
-        _unviewedBadges = await rewardsService.getUnviewedBadges(_user!.id);
+        _achievements = await _achievementService.getUserAchievements(
+          userId: _user!.id,
+        );
+        _userBadges = await _rewardsService.getUserBadges(_user!.id);
+        _unviewedBadges = await _rewardsService.getUnviewedBadges(_user!.id);
       }
     } catch (e) {
       // Handle error
@@ -129,7 +133,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
 
   Widget _buildAchievementsTab(
     UserModel user,
-    List<walk.AchievementModel> achievements,
+    List<ProfileAchievementModel> achievements,
   ) {
     return achievements.isEmpty
         ? const profile_widgets.EmptyState(
@@ -204,9 +208,9 @@ class _AchievementsScreenState extends State<AchievementsScreen>
               mainAxisSpacing: 12,
               childAspectRatio: 0.8,
             ),
-            itemCount: walk.RewardsService.badges.length,
+            itemCount: ProfileRewardsService.badges.length,
             itemBuilder: (context, index) {
-              final badgeEntry = walk.RewardsService.badges.entries.elementAt(
+              final badgeEntry = ProfileRewardsService.badges.entries.elementAt(
                 index,
               );
               final badgeId = badgeEntry.key;

@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:artbeat_art_walk/artbeat_art_walk.dart';
 import 'package:artbeat_core/artbeat_core.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
@@ -40,7 +39,7 @@ class _ArtWalkHeroSectionState extends State<ArtWalkHeroSection>
   int _userStreak = 0;
   bool _isLoading = true;
 
-  final InstantDiscoveryService _discoveryService = InstantDiscoveryService();
+  final PublicArtReadService _publicArtService = PublicArtReadService();
 
   @override
   void initState() {
@@ -86,7 +85,7 @@ class _ArtWalkHeroSectionState extends State<ArtWalkHeroSection>
         ),
       );
 
-      final nearbyArt = await _discoveryService.getNearbyArt(
+      final nearbyArt = await _publicArtService.getNearbyArt(
         position,
         radiusMeters: 500,
       );

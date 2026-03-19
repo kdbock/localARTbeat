@@ -8,8 +8,6 @@ import 'package:intl/intl.dart' as intl;
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_art_walk/artbeat_art_walk.dart';
-import 'package:artbeat_artwork/artbeat_artwork.dart' as artwork;
 
 import '../../widgets/dashboard/dashboard_browse_section.dart';
 import '../../widgets/dashboard/dashboard_section_button.dart';
@@ -524,14 +522,10 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
                               Navigator.pushNamed(context, '/artist/browse'),
                           onEventsTap: () =>
                               Navigator.pushNamed(context, '/events/discover'),
-                          onCapturesTap: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute<void>(
-                                builder: (_) =>
-                                    const InstantDiscoveryRadarScreen(),
-                              ),
-                            );
-                          },
+                          onCapturesTap: () => Navigator.pushNamed(
+                            context,
+                            AppRoutes.instantDiscovery,
+                          ),
                         ),
                       ],
                       if (showBooks) ...[
@@ -604,26 +598,8 @@ class _ArtbeatDashboardScreenState extends State<ArtbeatDashboardScreen>
             itemBuilder: (context, index) {
               final coreArtwork = vm.books[index];
 
-              // Map core ArtworkModel to artwork package ArtworkModel for BookCard
-              // This is necessary due to package boundary and duplicate class names
-              final artworkModel = artwork.ArtworkModel(
-                id: coreArtwork.id,
-                userId: coreArtwork.artistId,
-                artistProfileId: '', // Not strictly needed for the card
-                title: coreArtwork.title,
-                description: coreArtwork.description,
-                imageUrl: coreArtwork.imageUrl,
-                medium: coreArtwork.medium,
-                styles: [],
-                isForSale: false,
-                createdAt: coreArtwork.createdAt,
-                updatedAt: coreArtwork.createdAt,
-                artistName: coreArtwork.artistName,
-                isSerializing: coreArtwork.isSerializing,
-              );
-
-              return artwork.BookCard(
-                artwork: artworkModel,
+              return BookPreviewCard(
+                artwork: coreArtwork,
                 onTap: () {
                   // Navigate to written content detail screen for books
                   Navigator.pushNamed(

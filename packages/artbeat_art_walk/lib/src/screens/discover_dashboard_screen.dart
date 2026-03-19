@@ -7,8 +7,12 @@ import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:artbeat_core/artbeat_core.dart'
-    hide GlassCard, HudTopBar, WorldBackground, GradientCTAButton;
-import 'package:artbeat_capture/artbeat_capture.dart' hide GlassCard, HudTopBar;
+    hide
+        AchievementModel,
+        GlassCard,
+        GradientCTAButton,
+        HudTopBar,
+        WorldBackground;
 import 'package:artbeat_art_walk/artbeat_art_walk.dart';
 import 'package:artbeat_art_walk/src/widgets/tour/discover_tour_overlay.dart';
 import 'dart:async';
@@ -69,7 +73,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
   // Services
   late final AchievementService _achievementService;
   late final UserService _userService;
-  late final CaptureService _captureService;
+  late final ArtWalkCaptureReadService _captureService;
   late final InstantDiscoveryService _discoveryService;
   late final ChallengeService _challengeService;
   late final WeeklyGoalsService _weeklyGoalsService;
@@ -84,7 +88,7 @@ class _DiscoverDashboardScreenState extends State<DiscoverDashboardScreen>
     WidgetsBinding.instance.addObserver(this);
     _achievementService = context.read<AchievementService>();
     _userService = context.read<UserService>();
-    _captureService = context.read<CaptureService>();
+    _captureService = ArtWalkCaptureReadService();
     _discoveryService = context.read<InstantDiscoveryService>();
     _challengeService = context.read<ChallengeService>();
     _weeklyGoalsService = context.read<WeeklyGoalsService>();

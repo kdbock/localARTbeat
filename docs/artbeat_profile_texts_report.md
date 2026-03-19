@@ -31,7 +31,7 @@ This document tracks the internationalization status of the artbeat_profile pack
 
 ## Translation Keys
 
-All hardcoded strings have been extracted to `artbeat_profile_texts_data.json` with keys following the pattern `profile_[component]_text_[description]`.
+All hardcoded strings have been extracted to `tools/text-extraction/data/artbeat_profile_texts_data.json` with keys following the pattern `profile_[component]_text_[description]`.
 
 ## Dynamic Content Handling
 
@@ -57,6 +57,6 @@ For strings with variables, placeholders are used:
 - Added `easy_localization` import to all modified Dart files
 - Replaced hardcoded `Text('string')` with `Text('key'.tr())`
 - For dynamic strings, used `.tr().replaceAll('{placeholder}', variable)`
-- Created comprehensive JSON file with all extracted strings
+- Created comprehensive JSON file under `tools/text-extraction/data/`
 - Maintained consistency with artbeat_ads pattern
 - All major UI components internationalized

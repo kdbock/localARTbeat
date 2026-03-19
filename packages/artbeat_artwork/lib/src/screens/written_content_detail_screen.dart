@@ -4,7 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:artbeat_art_walk/artbeat_art_walk.dart' show WalkStatus;
 import 'package:artbeat_artwork/artbeat_artwork.dart';
-import 'package:artbeat_artist/artbeat_artist.dart' as artist;
 import 'package:artbeat_core/artbeat_core.dart' hide ArtworkModel;
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:share_plus/share_plus.dart';
@@ -29,10 +28,9 @@ class _WrittenContentDetailScreenState
 
   final ArtworkService _artworkService = ArtworkService();
   final ChapterService _chapterService = ChapterService();
-  final artist.SubscriptionService _subscriptionService =
-      artist.SubscriptionService();
-  final artist.VisibilityService _visibilityService =
-      artist.VisibilityService();
+  final ArtistService _artistService = ArtistService();
+  final ArtworkVisibilityService _visibilityService =
+      ArtworkVisibilityService();
   final UnifiedPaymentService _paymentService = UnifiedPaymentService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -270,7 +268,7 @@ class _WrittenContentDetailScreenState
 
       // Load artist info
       try {
-        final artistProfile = await _subscriptionService.getArtistProfileById(
+        final artistProfile = await _artistService.getArtistProfileById(
           artwork.artistProfileId,
         );
         _artist = artistProfile;

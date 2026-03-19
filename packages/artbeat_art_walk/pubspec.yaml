@@ -45,18 +45,6 @@ dependencies:
   logging: ^1.2.0
   easy_localization: ^3.0.7
 
-  artbeat_capture:
-    path: ../artbeat_capture
-  artbeat_ads:
-    path: ../artbeat_ads
-  artbeat_settings:
-    path: ../artbeat_settings
-  artbeat_community:
-    path: ../artbeat_community
-  artbeat_profile:
-    path: ../artbeat_profile
-  artbeat_events:
-    path: ../artbeat_events
   artbeat_sponsorships:
     path: ../artbeat_sponsorships
 

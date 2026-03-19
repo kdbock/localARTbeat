@@ -5,10 +5,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:artbeat_core/artbeat_core.dart'
     show CaptureModel, CaptureServiceInterface, UserService, AppLogger;
 
-// Import ArtWalkService for achievement checking
-import 'package:artbeat_art_walk/artbeat_art_walk.dart' as art_walk;
-
 // Import offline services
+import 'capture_post_capture_hooks.dart';
 import 'offline_queue_service.dart';
 
 /// Service for managing art captures in the ARTbeat app.
@@ -17,12 +15,12 @@ class CaptureService implements CaptureServiceInterface {
 
   Connectivity? _connectivityOverride;
   UserService? _userServiceOverride;
-  art_walk.RewardsService? _rewardsOverride;
+  CapturePostCaptureHooks? _postCaptureHooksOverride;
 
   Connectivity get _connectivity => _connectivityOverride ?? Connectivity();
   UserService get _userService => _userServiceOverride ?? UserService();
-  art_walk.RewardsService get _rewardsService =>
-      _rewardsOverride ?? art_walk.RewardsService();
+  CapturePostCaptureHooks get _postCaptureHooks =>
+      _postCaptureHooksOverride ?? const NoopCapturePostCaptureHooks();
 
   FirebaseFirestore? _mockFirestore;
 
@@ -31,7 +29,10 @@ class CaptureService implements CaptureServiceInterface {
   DateTime? _allCapturesCacheTime;
   static const Duration _cacheTimeout = Duration(minutes: 5);
 
-  factory CaptureService() {
+  factory CaptureService({CapturePostCaptureHooks? postCaptureHooks}) {
+    if (postCaptureHooks != null) {
+      _instance._postCaptureHooksOverride = postCaptureHooks;
+    }
     return _instance;
   }
 
@@ -43,12 +44,12 @@ class CaptureService implements CaptureServiceInterface {
     FirebaseFirestore? firestore,
     Connectivity? connectivity,
     UserService? userService,
-    art_walk.RewardsService? rewardsService,
+    CapturePostCaptureHooks? postCaptureHooks,
   }) {
     _mockFirestore = firestore;
     _connectivityOverride = connectivity;
     _userServiceOverride = userService;
-    _rewardsOverride = rewardsService;
+    _postCaptureHooksOverride = postCaptureHooks;
   }
 
   /// Lazy Firebase Firestore instance
@@ -444,19 +445,21 @@ class CaptureService implements CaptureServiceInterface {
         }),
 
         // Award XP for creating a capture
-        _rewardsService.awardXP('art_capture_created').catchError((Object e) {
+        _postCaptureHooks.awardCaptureCreatedXp().catchError((Object e) {
           AppLogger.error('Error awarding XP: $e');
           return null; // Return null on error
         }),
 
         // Record photo capture for daily challenges
-        _recordChallengeProgress().catchError((Object e) {
+        _postCaptureHooks.recordCaptureChallengeProgress().catchError((
+          Object e,
+        ) {
           AppLogger.error('Error recording challenge progress: $e');
           return null; // Return null on error
         }),
 
         // Update weekly goals for photography
-        _updateWeeklyGoals().catchError((Object e) {
+        _postCaptureHooks.updateWeeklyPhotographyGoals().catchError((Object e) {
           AppLogger.error('Error updating weekly goals: $e');
           return null; // Return null on error
         }),
@@ -482,50 +485,6 @@ class CaptureService implements CaptureServiceInterface {
     } catch (e) {
       AppLogger.error('Error in post-capture operations: $e');
       // Don't rethrow - these are background operations
-    }
-  }
-
-  /// Record challenge progress for photo capture
-  Future<void> _recordChallengeProgress() async {
-    try {
-      final challengeService = art_walk.ChallengeService();
-      await Future.wait([
-        challengeService.recordPhotoCapture(),
-        challengeService.recordTimeBasedDiscovery(),
-      ]);
-      AppLogger.info('✅ Recorded photo capture for daily challenges');
-    } catch (e) {
-      AppLogger.error('Error recording photo capture for challenges: $e');
-      rethrow;
-    }
-  }
-
-  /// Update weekly goals for photography
-  Future<void> _updateWeeklyGoals() async {
-    try {
-      final weeklyGoalsService = art_walk.WeeklyGoalsService();
-      final currentGoals = await weeklyGoalsService.getCurrentWeekGoals();
-
-      // Update photography-related weekly goals in parallel
-      final updates = currentGoals
-          .where(
-            (goal) =>
-                goal.category == art_walk.WeeklyGoalCategory.photography &&
-                !goal.isCompleted,
-          )
-          .map(
-            (goal) => weeklyGoalsService.updateWeeklyGoalProgress(goal.id, 1),
-          )
-          .toList();
-
-      if (updates.isNotEmpty) {
-        await Future.wait(updates);
-      }
-
-      AppLogger.info('✅ Updated weekly goals for photo capture');
-    } catch (e) {
-      AppLogger.error('Error updating weekly goals: $e');
-      rethrow;
     }
   }
 
@@ -575,17 +534,11 @@ class CaptureService implements CaptureServiceInterface {
         );
       }
 
-      await art_walk.SocialService().postActivity(
-        userId: newCapture.userId,
+      await _postCaptureHooks.postCaptureActivity(
+        capture: newCapture,
         userName: user.fullName.isNotEmpty ? user.fullName : user.username,
         userAvatar: user.profileImageUrl,
-        type: art_walk.SocialActivityType.capture,
-        message: 'captured new artwork',
         location: position,
-        metadata: {
-          'captureId': newCapture.id,
-          'artTitle': newCapture.title ?? 'Untitled',
-        },
       );
 
       debugPrint(
@@ -1083,8 +1036,7 @@ class CaptureService implements CaptureServiceInterface {
       // Award XP for approved capture
       if (userId != null) {
         try {
-          final rewardsService = art_walk.RewardsService();
-          await rewardsService.awardXP('art_capture_approved');
+          await _postCaptureHooks.awardCaptureApprovedXp();
           debugPrint(
             '✅ Awarded 50 XP for approved capture $captureId to user $userId',
           );
@@ -1315,9 +1267,7 @@ class CaptureService implements CaptureServiceInterface {
   /// Check capture achievements for a user
   Future<void> _checkCaptureAchievements(String userId) async {
     try {
-      // Use the ArtWalkService to check capture achievements
-      final artWalkService = art_walk.ArtWalkService();
-      await artWalkService.checkCaptureAchievements(userId);
+      await _postCaptureHooks.checkCaptureAchievements(userId);
     } catch (e) {
       AppLogger.error('❌ Error checking capture achievements: $e');
       // Don't rethrow - achievement checking shouldn't break capture creation

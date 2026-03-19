@@ -6,7 +6,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:artbeat_core/artbeat_core.dart';
-import 'package:artbeat_art_walk/artbeat_art_walk.dart' show ArtWalkRoutes;
 
 /// Capture specific drawer with focused navigation for capture features
 /// Updated to match the new "Quest / Glass / Neon" theme.
@@ -127,7 +126,7 @@ class _CaptureDrawerState extends State<CaptureDrawer>
                         context,
                         'capture_drawer_nearby_art'.tr(),
                         Icons.my_location_rounded,
-                        ArtWalkRoutes.instantDiscovery,
+                        AppRoutes.instantDiscovery,
                         const Color(0xFF22D3EE),
                       ),
                       _buildDrawerItem(
